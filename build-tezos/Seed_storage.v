@@ -10,6 +10,7 @@ Unset Positivity Checking.
 Unset Guard Checking.
 
 Require Import Tezos.Environment.
+Import Notations.
 Require Tezos.Constants_storage.
 Require Tezos.Cycle_repr.
 Require Tezos.Level_repr.
@@ -48,36 +49,28 @@ Definition compute_for_cycle
           (Raw_context.t * Seed_repr.seed * list Storage.Seed.unrevealed_nonce)) :=
       let '(c, random_seed, unrevealed) := function_parameter in
       fun level =>
-        Error_monad.op_gtgteqquestion
-          ((|Storage.Seed.Nonce|).(Storage_sigs.Non_iterable_indexed_data_storage.get)
-            c level)
-          (fun function_parameter =>
-            match function_parameter with
-            | Storage.Seed.Revealed __nonce_value =>
-              Error_monad.op_gtgteqquestion
-                ((|Storage.Seed.Nonce|).(Storage_sigs.Non_iterable_indexed_data_storage.delete)
-                  c level)
-                (fun c =>
-                  Error_monad.__return
-                    (c, (Seed_repr.__nonce_value random_seed __nonce_value),
-                      unrevealed))
-            | Storage.Seed.Unrevealed u =>
-              Error_monad.op_gtgteqquestion
-                ((|Storage.Seed.Nonce|).(Storage_sigs.Non_iterable_indexed_data_storage.delete)
-                  c level)
-                (fun c =>
-                  Error_monad.__return (c, random_seed, (cons u unrevealed)))
-            end) in
-    Error_monad.op_gtgteqquestion (Storage.Seed.For_cycle.get c previous_cycle)
-      (fun prev_seed =>
-        let __seed_value := Seed_repr.deterministic_seed prev_seed in
-        Error_monad.op_gtgteqquestion
-          (Error_monad.fold_left_s combine (c, __seed_value, nil) levels)
-          (fun function_parameter =>
-            let '(c, __seed_value, unrevealed) := function_parameter in
-            Error_monad.op_gtgteqquestion
-              (Storage.Seed.For_cycle.init c cycle __seed_value)
-              (fun c => Error_monad.__return (c, unrevealed))))
+        let!? function_parameter :=
+          (|Storage.Seed.Nonce|).(Storage_sigs.Non_iterable_indexed_data_storage.get)
+            c level in
+        match function_parameter with
+        | Storage.Seed.Revealed __nonce_value =>
+          let!? c :=
+            (|Storage.Seed.Nonce|).(Storage_sigs.Non_iterable_indexed_data_storage.delete)
+              c level in
+          Error_monad.__return
+            (c, (Seed_repr.__nonce_value random_seed __nonce_value), unrevealed)
+        | Storage.Seed.Unrevealed u =>
+          let!? c :=
+            (|Storage.Seed.Nonce|).(Storage_sigs.Non_iterable_indexed_data_storage.delete)
+              c level in
+          Error_monad.__return (c, random_seed, (cons u unrevealed))
+        end in
+    let!? prev_seed := Storage.Seed.For_cycle.get c previous_cycle in
+    let __seed_value := Seed_repr.deterministic_seed prev_seed in
+    let!? '(c, __seed_value, unrevealed) :=
+      Error_monad.fold_left_s combine (c, __seed_value, nil) levels in
+    let!? c := Storage.Seed.For_cycle.init c cycle __seed_value in
+    Error_monad.__return (c, unrevealed)
   end.
 
 Definition for_cycle (ctxt : Raw_context.context) (cycle : Cycle_repr.t)
@@ -95,13 +88,11 @@ Definition for_cycle (ctxt : Raw_context.context) (cycle : Cycle_repr.t)
     | None => Cycle_repr.root
     | Some oldest => oldest
     end in
-  Error_monad.op_gtgteqquestion
-    (Error_monad.fail_unless
+  let!? '_ :=
+    Error_monad.fail_unless
       (Pervasives.op_andand (Cycle_repr.op_lteq oldest cycle)
-        (Cycle_repr.op_lteq cycle latest)) extensible_type_value)
-    (fun function_parameter =>
-      let '_ := function_parameter in
-      Storage.Seed.For_cycle.get ctxt cycle).
+        (Cycle_repr.op_lteq cycle latest)) extensible_type_value in
+  Storage.Seed.For_cycle.get ctxt cycle.
 
 Definition clear_cycle (c : Raw_context.t) (cycle : Cycle_repr.t)
   : Lwt.t (Error_monad.tzresult Raw_context.t) :=
@@ -114,10 +105,9 @@ Definition init (ctxt : Raw_context.context)
     (fun ctxt =>
       fun c =>
         fun __seed_value =>
-          Error_monad.op_gtgteqquestion ctxt
-            (fun ctxt =>
-              let cycle := Cycle_repr.of_int32_exn (Int32.of_int c) in
-              Storage.Seed.For_cycle.init ctxt cycle __seed_value))
+          let!? ctxt := ctxt in
+          let cycle := Cycle_repr.of_int32_exn (Int32.of_int c) in
+          Storage.Seed.For_cycle.init ctxt cycle __seed_value)
     (Error_monad.__return ctxt)
     (Misc.op_minusminusgt 0 (Pervasives.op_plus preserved 1))
     (Seed_repr.initial_seeds (Pervasives.op_plus preserved 2)).
@@ -128,16 +118,15 @@ Definition cycle_end
     (Error_monad.tzresult
       (Raw_context.context * list Storage.Seed.unrevealed_nonce)) :=
   let preserved := Constants_storage.preserved_cycles ctxt in
-  Error_monad.op_gtgteqquestion
+  let!? ctxt :=
     match Cycle_repr.sub last_cycle preserved with
     | None => Error_monad.__return ctxt
     | Some cleared_cycle => clear_cycle ctxt cleared_cycle
-    end
-    (fun ctxt =>
-      match Cycle_repr.pred last_cycle with
-      | None => Error_monad.__return (ctxt, nil)
-      | Some revealed =>
-        let inited_seed_cycle :=
-          Cycle_repr.add last_cycle (Pervasives.op_plus preserved 1) in
-        compute_for_cycle ctxt revealed inited_seed_cycle
-      end).
+    end in
+  match Cycle_repr.pred last_cycle with
+  | None => Error_monad.__return (ctxt, nil)
+  | Some revealed =>
+    let inited_seed_cycle :=
+      Cycle_repr.add last_cycle (Pervasives.op_plus preserved 1) in
+    compute_for_cycle ctxt revealed inited_seed_cycle
+  end.

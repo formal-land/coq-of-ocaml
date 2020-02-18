@@ -10,6 +10,7 @@ Unset Positivity Checking.
 Unset Guard Checking.
 
 Require Import Tezos.Environment.
+Import Notations.
 Require Tezos.Block_header_repr.
 Require Tezos.Bootstrap_storage.
 Require Tezos.Commitment_repr.
@@ -292,21 +293,20 @@ Module Big_map.
             ((|Storage.Big_map.Key_type|).(Storage_sigs.Indexed_data_storage.value)
               *
               (|Storage.Big_map.Value_type|).(Storage_sigs.Indexed_data_storage.value)))) :=
-    Error_monad.op_gtgteqquestion
-      (Lwt.__return
-        (Raw_context.consume_gas c (Gas_limit_repr.read_bytes_cost Z.zero)))
-      (fun c =>
-        Error_monad.op_gtgteqquestion
-          ((|Storage.Big_map.Key_type|).(Storage_sigs.Indexed_data_storage.get_option)
-            c id)
-          (fun kt =>
-            match kt with
-            | None => Error_monad.__return (c, None)
-            | Some kt =>
-              Error_monad.op_gtgteqquestion
-                ((|Storage.Big_map.Value_type|).(Storage_sigs.Indexed_data_storage.get)
-                  c id) (fun kv => Error_monad.__return (c, (Some (kt, kv))))
-            end)).
+    let!? c :=
+      Lwt.__return
+        (Raw_context.consume_gas c (Gas_limit_repr.read_bytes_cost Z.zero)) in
+    let!? kt :=
+      (|Storage.Big_map.Key_type|).(Storage_sigs.Indexed_data_storage.get_option)
+        c id in
+    match kt with
+    | None => Error_monad.__return (c, None)
+    | Some kt =>
+      let!? kv :=
+        (|Storage.Big_map.Value_type|).(Storage_sigs.Indexed_data_storage.get) c
+          id in
+      Error_monad.__return (c, (Some (kt, kv)))
+    end.
 End Big_map.
 
 Module Delegate := Delegate_storage.

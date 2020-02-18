@@ -10,6 +10,7 @@ Unset Positivity Checking.
 Unset Guard Checking.
 
 Require Import Tezos.Environment.
+Import Notations.
 
 Definition script_expr_hash : string := "\r,@\027".
 

@@ -10,6 +10,7 @@ Unset Positivity Checking.
 Unset Guard Checking.
 
 Require Import Tezos.Environment.
+Import Notations.
 
 Definition nonce_hash : string := "E\220\169".
 

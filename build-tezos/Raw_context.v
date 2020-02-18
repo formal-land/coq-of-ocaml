@@ -10,6 +10,7 @@ Unset Positivity Checking.
 Unset Guard Checking.
 
 Require Import Tezos.Environment.
+Import Notations.
 Require Tezos.Constants_repr.
 Require Tezos.Contract_repr.
 Require Tezos.Fitness_repr.
@@ -304,15 +305,14 @@ Definition set_current_fitness (ctxt : t) (fitness : Int64.t) : t :=
 
 Definition add_fees (ctxt : t) (fees : Tez_repr.t)
   : Lwt.t (Error_monad.tzresult t) :=
-  Error_monad.op_gtgteqquestion
-    (Lwt.__return (Tez_repr.op_plusquestion ctxt.(t.fees) fees))
-    (fun fees => Error_monad.__return (t.with_fees fees ctxt)).
+  let!? fees := Lwt.__return (Tez_repr.op_plusquestion ctxt.(t.fees) fees) in
+  Error_monad.__return (t.with_fees fees ctxt).
 
 Definition add_rewards (ctxt : t) (rewards : Tez_repr.t)
   : Lwt.t (Error_monad.tzresult t) :=
-  Error_monad.op_gtgteqquestion
-    (Lwt.__return (Tez_repr.op_plusquestion ctxt.(t.rewards) rewards))
-    (fun rewards => Error_monad.__return (t.with_rewards rewards ctxt)).
+  let!? rewards :=
+    Lwt.__return (Tez_repr.op_plusquestion ctxt.(t.rewards) rewards) in
+  Error_monad.__return (t.with_rewards rewards ctxt).
 
 Definition add_deposit
   (ctxt : t)
@@ -326,13 +326,11 @@ Definition add_deposit
     | Some tz => tz
     | None => Tez_repr.zero
     end in
-  Error_monad.op_gtgteqquestion
-    (Lwt.__return (Tez_repr.op_plusquestion previous deposit))
-    (fun deposit =>
-      let deposits :=
-        (|Signature.Public_key_hash|).(S.SPublic_key_hash.Map).(S.INDEXES_Map.add)
-          delegate deposit ctxt.(t.deposits) in
-      Error_monad.__return (t.with_deposits deposits ctxt)).
+  let!? deposit := Lwt.__return (Tez_repr.op_plusquestion previous deposit) in
+  let deposits :=
+    (|Signature.Public_key_hash|).(S.SPublic_key_hash.Map).(S.INDEXES_Map.add)
+      delegate deposit ctxt.(t.deposits) in
+  Error_monad.__return (t.with_deposits deposits ctxt).
 
 Definition get_deposits (ctxt : t)
   : (|Signature.Public_key_hash|).(S.SPublic_key_hash.Map).(S.INDEXES_Map.t)
@@ -722,45 +720,35 @@ Definition prepare
   (level : int32) (predecessor_timestamp : Time.t) (timestamp : Time.t)
   (fitness : list MBytes.t) (ctxt : Context.t)
   : Lwt.t (Error_monad.tzresult t) :=
-  Error_monad.op_gtgteqquestion (Lwt.__return (Raw_level_repr.of_int32 level))
-    (fun level =>
-      Error_monad.op_gtgteqquestion
-        (Lwt.__return (Fitness_repr.to_int64 fitness))
-        (fun fitness =>
-          Error_monad.op_gtgteqquestion (check_inited ctxt)
-            (fun function_parameter =>
-              let '_ := function_parameter in
-              Error_monad.op_gtgteqquestion (get_constants ctxt)
-                (fun constants =>
-                  Error_monad.op_gtgteqquestion (get_first_level ctxt)
-                    (fun first_level =>
-                      let level :=
-                        Level_repr.from_raw_level first_level
-                          constants.(Constants_repr.parametric.blocks_per_cycle)
-                          constants.(Constants_repr.parametric.blocks_per_voting_period)
-                          constants.(Constants_repr.parametric.blocks_per_commitment)
-                          level in
-                      Error_monad.__return
-                        {| t.context := ctxt; t.constants := constants;
-                          t.first_level := first_level; t.level := level;
-                          t.predecessor_timestamp := predecessor_timestamp;
-                          t.timestamp := timestamp; t.fitness := fitness;
-                          t.deposits :=
-                            (|Signature.Public_key_hash|).(S.SPublic_key_hash.Map).(S.INDEXES_Map.empty);
-                          t.included_endorsements := 0;
-                          t.allowed_endorsements :=
-                            (|Signature.Public_key_hash|).(S.SPublic_key_hash.Map).(S.INDEXES_Map.empty);
-                          t.fees := Tez_repr.zero; t.rewards := Tez_repr.zero;
-                          t.block_gas :=
-                            constants.(Constants_repr.parametric.hard_gas_limit_per_block);
-                          t.operation_gas := Gas_limit_repr.Unaccounted;
-                          t.internal_gas := Gas_limit_repr.internal_gas_zero;
-                          t.storage_space_to_pay := None;
-                          t.allocated_contracts := None;
-                          t.origination_nonce := None;
-                          t.temporary_big_map := Z.sub Z.zero Z.one;
-                          t.internal_nonce := 0;
-                          t.internal_nonces_used := (|Int_set|).(S.SET.empty) |}))))).
+  let!? level := Lwt.__return (Raw_level_repr.of_int32 level) in
+  let!? fitness := Lwt.__return (Fitness_repr.to_int64 fitness) in
+  let!? '_ := check_inited ctxt in
+  let!? constants := get_constants ctxt in
+  let!? first_level := get_first_level ctxt in
+  let level :=
+    Level_repr.from_raw_level first_level
+      constants.(Constants_repr.parametric.blocks_per_cycle)
+      constants.(Constants_repr.parametric.blocks_per_voting_period)
+      constants.(Constants_repr.parametric.blocks_per_commitment) level in
+  Error_monad.__return
+    {| t.context := ctxt; t.constants := constants;
+      t.first_level := first_level; t.level := level;
+      t.predecessor_timestamp := predecessor_timestamp;
+      t.timestamp := timestamp; t.fitness := fitness;
+      t.deposits :=
+        (|Signature.Public_key_hash|).(S.SPublic_key_hash.Map).(S.INDEXES_Map.empty);
+      t.included_endorsements := 0;
+      t.allowed_endorsements :=
+        (|Signature.Public_key_hash|).(S.SPublic_key_hash.Map).(S.INDEXES_Map.empty);
+      t.fees := Tez_repr.zero; t.rewards := Tez_repr.zero;
+      t.block_gas :=
+        constants.(Constants_repr.parametric.hard_gas_limit_per_block);
+      t.operation_gas := Gas_limit_repr.Unaccounted;
+      t.internal_gas := Gas_limit_repr.internal_gas_zero;
+      t.storage_space_to_pay := None; t.allocated_contracts := None;
+      t.origination_nonce := None; t.temporary_big_map := Z.sub Z.zero Z.one;
+      t.internal_nonce := 0; t.internal_nonces_used := (|Int_set|).(S.SET.empty)
+      |}.
 
 Inductive previous_protocol : Set :=
 | Genesis : Parameters_repr.t -> previous_protocol
@@ -768,8 +756,8 @@ Inductive previous_protocol : Set :=
 
 Definition check_and_update_protocol_version (ctxt : Context.t)
   : Lwt.t (Error_monad.tzresult (previous_protocol * Context.t)) :=
-  Error_monad.op_gtgteqquestion
-    (Error_monad.op_gtgteq (Context.get ctxt version_key)
+  let!? '(previous_proto, ctxt) :=
+    Error_monad.op_gtgteq (Context.get ctxt version_key)
       (fun function_parameter =>
         match function_parameter with
         | None =>
@@ -782,45 +770,34 @@ Definition check_and_update_protocol_version (ctxt : Context.t)
               "Internal error: previously initialized context."
           else
             if (|Compare.String|).(Compare.S.op_eq) s "genesis" then
-              Error_monad.op_gtgteqquestion (get_proto_param ctxt)
-                (fun function_parameter =>
-                  let '(param, ctxt) := function_parameter in
-                  Error_monad.__return ((Genesis param), ctxt))
+              let!? '(param, ctxt) := get_proto_param ctxt in
+              Error_monad.__return ((Genesis param), ctxt)
             else
               if (|Compare.String|).(Compare.S.op_eq) s "alpha_previous" then
                 Error_monad.__return (Alpha_previous, ctxt)
               else
                 __storage_error_value (Incompatible_protocol_version s)
-        end))
-    (fun function_parameter =>
-      let '(previous_proto, ctxt) := function_parameter in
-      Error_monad.op_gtgteq
-        (Context.set ctxt version_key (MBytes.of_string version_value))
-        (fun ctxt => Error_monad.__return (previous_proto, ctxt))).
+        end) in
+  Error_monad.op_gtgteq
+    (Context.set ctxt version_key (MBytes.of_string version_value))
+    (fun ctxt => Error_monad.__return (previous_proto, ctxt)).
 
 Definition prepare_first_block
   (level : int32) (timestamp : Time.t) (fitness : list MBytes.t)
   (ctxt : Context.t) : Lwt.t (Error_monad.tzresult (previous_protocol * t)) :=
-  Error_monad.op_gtgteqquestion (check_and_update_protocol_version ctxt)
-    (fun function_parameter =>
-      let '(previous_proto, ctxt) := function_parameter in
-      Error_monad.op_gtgteqquestion
-        match previous_proto with
-        | Genesis param =>
-          Error_monad.op_gtgteqquestion
-            (Lwt.__return (Raw_level_repr.of_int32 level))
-            (fun first_level =>
-              Error_monad.op_gtgteqquestion (set_first_level ctxt first_level)
-                (fun ctxt =>
-                  Error_monad.op_gtgteq
-                    (set_constants ctxt param.(Parameters_repr.t.constants))
-                    (fun ctxt => Error_monad.__return ctxt)))
-        | Alpha_previous => Error_monad.__return ctxt
-        end
-        (fun ctxt =>
-          Error_monad.op_gtgteqquestion
-            (prepare level timestamp timestamp fitness ctxt)
-            (fun ctxt => Error_monad.__return (previous_proto, ctxt)))).
+  let!? '(previous_proto, ctxt) := check_and_update_protocol_version ctxt in
+  let!? ctxt :=
+    match previous_proto with
+    | Genesis param =>
+      let!? first_level := Lwt.__return (Raw_level_repr.of_int32 level) in
+      let!? ctxt := set_first_level ctxt first_level in
+      Error_monad.op_gtgteq
+        (set_constants ctxt param.(Parameters_repr.t.constants))
+        (fun ctxt => Error_monad.__return ctxt)
+    | Alpha_previous => Error_monad.__return ctxt
+    end in
+  let!? ctxt := prepare level timestamp timestamp fitness ctxt in
+  Error_monad.__return (previous_proto, ctxt).
 
 Definition activate (function_parameter : t)
   : (|Protocol_hash|).(S.HASH.t) -> Lwt.t t :=

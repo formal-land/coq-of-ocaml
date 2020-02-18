@@ -10,6 +10,7 @@ Unset Positivity Checking.
 Unset Guard Checking.
 
 Require Import Tezos.Environment.
+Import Notations.
 Require Tezos.Gas_limit_repr.
 Require Tezos.Michelson_v1_primitives.
 Require Tezos.Script_repr.
@@ -320,229 +321,134 @@ Definition add_do
   (manager_pkh : (|Signature.Public_key_hash|).(S.SPublic_key_hash.t))
   (script_code : Script_repr.lazy_expr) (script_storage : Script_repr.lazy_expr)
   : Lwt.t (Error_monad.tzresult (Script_repr.lazy_expr * Script_repr.lazy_expr)) :=
-  Error_monad.op_gtgteqquestion
-    (Lwt.__return (Script_repr.force_decode script_code))
+  let!? '(script_code_expr, _gas_cost) :=
+    Lwt.__return (Script_repr.force_decode script_code) in
+  Error_monad.op_gtgtpipequestion
+    (Lwt.__return (Script_repr.force_decode script_storage))
     (fun function_parameter =>
-      let '(script_code_expr, _gas_cost) := function_parameter in
-      Error_monad.op_gtgtpipequestion
-        (Lwt.__return (Script_repr.force_decode script_storage))
-        (fun function_parameter =>
-          let '(script_storage_expr, _gas_cost) := function_parameter in
-          let storage_expr := Micheline.root script_storage_expr in
-          match Micheline.root script_code_expr with
-          | Micheline.Seq _ toplevel =>
-            match
-              ((find_toplevel Michelson_v1_primitives.K_parameter toplevel),
-                (find_toplevel Michelson_v1_primitives.K_storage toplevel),
-                (find_toplevel Michelson_v1_primitives.K_code toplevel)) with
-            |
-              (Some
-                (Micheline.Prim _ Michelson_v1_primitives.K_parameter
-                  (cons
-                    (Micheline.Prim _ parameter_type parameter_expr
-                      parameter_annot) []) prim_param_annot),
-                Some
-                  (Micheline.Prim _ Michelson_v1_primitives.K_storage
-                    (cons
-                      (Micheline.Prim _ code_storage_type code_storage_expr
-                        code_storage_annot) []) k_storage_annot),
-                Some
-                  (Micheline.Prim _ Michelson_v1_primitives.K_code
-                    (cons code_expr []) code_annot)) =>
-              let migrated_code :=
-                Micheline.Seq 0
+      let '(script_storage_expr, _gas_cost) := function_parameter in
+      let storage_expr := Micheline.root script_storage_expr in
+      match Micheline.root script_code_expr with
+      | Micheline.Seq _ toplevel =>
+        match
+          ((find_toplevel Michelson_v1_primitives.K_parameter toplevel),
+            (find_toplevel Michelson_v1_primitives.K_storage toplevel),
+            (find_toplevel Michelson_v1_primitives.K_code toplevel)) with
+        |
+          (Some
+            (Micheline.Prim _ Michelson_v1_primitives.K_parameter
+              (cons
+                (Micheline.Prim _ parameter_type parameter_expr parameter_annot)
+                []) prim_param_annot),
+            Some
+              (Micheline.Prim _ Michelson_v1_primitives.K_storage
+                (cons
+                  (Micheline.Prim _ code_storage_type code_storage_expr
+                    code_storage_annot) []) k_storage_annot),
+            Some
+              (Micheline.Prim _ Michelson_v1_primitives.K_code
+                (cons code_expr []) code_annot)) =>
+          let migrated_code :=
+            Micheline.Seq 0
+              [
+                Micheline.Prim 0 Michelson_v1_primitives.K_parameter
                   [
-                    Micheline.Prim 0 Michelson_v1_primitives.K_parameter
+                    Micheline.Prim 0
+                      Michelson_v1_primitives.T_or
                       [
-                        Micheline.Prim 0
-                          Michelson_v1_primitives.T_or
+                        Micheline.Prim
+                          0
+                          Michelson_v1_primitives.T_lambda
                           [
                             Micheline.Prim
                               0
-                              Michelson_v1_primitives.T_lambda
+                              Michelson_v1_primitives.T_unit
+                              nil
+                              nil;
+                            Micheline.Prim
+                              0
+                              Michelson_v1_primitives.T_list
                               [
                                 Micheline.Prim
                                   0
-                                  Michelson_v1_primitives.T_unit
+                                  Michelson_v1_primitives.T_operation
                                   nil
+                                  nil
+                              ]
+                              nil
+                          ]
+                          [
+                            "%do"
+                          ];
+                        Micheline.Prim
+                          0
+                          parameter_type
+                          parameter_expr
+                          (cons
+                            "%default"
+                            parameter_annot)
+                      ] nil
+                  ] prim_param_annot;
+                Micheline.Prim 0 Michelson_v1_primitives.K_storage
+                  [
+                    Micheline.Prim 0
+                      Michelson_v1_primitives.T_pair
+                      [
+                        Micheline.Prim
+                          0
+                          Michelson_v1_primitives.T_key_hash
+                          nil
+                          nil;
+                        Micheline.Prim
+                          0
+                          code_storage_type
+                          code_storage_expr
+                          code_storage_annot
+                      ] nil
+                  ] k_storage_annot;
+                Micheline.Prim 0 Michelson_v1_primitives.K_code
+                  [
+                    Micheline.Seq 0
+                      [
+                        Micheline.Prim
+                          0
+                          Michelson_v1_primitives.I_DUP
+                          nil
+                          nil;
+                        Micheline.Prim
+                          0
+                          Michelson_v1_primitives.I_CAR
+                          nil
+                          nil;
+                        Micheline.Prim
+                          0
+                          Michelson_v1_primitives.I_IF_LEFT
+                          [
+                            Micheline.Seq
+                              0
+                              [
+                                Micheline.Prim
+                                  0
+                                  Michelson_v1_primitives.I_PUSH
+                                  [
+                                    Micheline.Prim
+                                      0
+                                      Michelson_v1_primitives.T_mutez
+                                      nil
+                                      nil;
+                                    Micheline.Int
+                                      0
+                                      Z.zero
+                                  ]
                                   nil;
                                 Micheline.Prim
                                   0
-                                  Michelson_v1_primitives.T_list
-                                  [
-                                    Micheline.Prim
-                                      0
-                                      Michelson_v1_primitives.T_operation
-                                      nil
-                                      nil
-                                  ]
+                                  Michelson_v1_primitives.I_AMOUNT
                                   nil
-                              ]
-                              [
-                                "%do"
-                              ];
-                            Micheline.Prim
-                              0
-                              parameter_type
-                              parameter_expr
-                              (cons
-                                "%default"
-                                parameter_annot)
-                          ]
-                          nil
-                      ] prim_param_annot;
-                    Micheline.Prim 0 Michelson_v1_primitives.K_storage
-                      [
-                        Micheline.Prim 0
-                          Michelson_v1_primitives.T_pair
-                          [
-                            Micheline.Prim
-                              0
-                              Michelson_v1_primitives.T_key_hash
-                              nil
-                              nil;
-                            Micheline.Prim
-                              0
-                              code_storage_type
-                              code_storage_expr
-                              code_storage_annot
-                          ]
-                          nil
-                      ] k_storage_annot;
-                    Micheline.Prim 0 Michelson_v1_primitives.K_code
-                      [
-                        Micheline.Seq 0
-                          [
-                            Micheline.Prim
-                              0
-                              Michelson_v1_primitives.I_DUP
-                              nil
-                              nil;
-                            Micheline.Prim
-                              0
-                              Michelson_v1_primitives.I_CAR
-                              nil
-                              nil;
-                            Micheline.Prim
-                              0
-                              Michelson_v1_primitives.I_IF_LEFT
-                              [
+                                  nil;
                                 Micheline.Seq
                                   0
                                   [
-                                    Micheline.Prim
-                                      0
-                                      Michelson_v1_primitives.I_PUSH
-                                      [
-                                        Micheline.Prim
-                                          0
-                                          Michelson_v1_primitives.T_mutez
-                                          nil
-                                          nil;
-                                        Micheline.Int
-                                          0
-                                          Z.zero
-                                      ]
-                                      nil;
-                                    Micheline.Prim
-                                      0
-                                      Michelson_v1_primitives.I_AMOUNT
-                                      nil
-                                      nil;
-                                    Micheline.Seq
-                                      0
-                                      [
-                                        Micheline.Seq
-                                          0
-                                          [
-                                            Micheline.Prim
-                                              0
-                                              Michelson_v1_primitives.I_COMPARE
-                                              nil
-                                              nil;
-                                            Micheline.Prim
-                                              0
-                                              Michelson_v1_primitives.I_EQ
-                                              nil
-                                              nil
-                                          ];
-                                        Micheline.Prim
-                                          0
-                                          Michelson_v1_primitives.I_IF
-                                          [
-                                            Micheline.Seq
-                                              0
-                                              nil;
-                                            Micheline.Seq
-                                              0
-                                              [
-                                                Micheline.Seq
-                                                  0
-                                                  [
-                                                    Micheline.Prim
-                                                      0
-                                                      Michelson_v1_primitives.I_UNIT
-                                                      nil
-                                                      nil;
-                                                    Micheline.Prim
-                                                      0
-                                                      Michelson_v1_primitives.I_FAILWITH
-                                                      nil
-                                                      nil
-                                                  ]
-                                              ]
-                                          ]
-                                          nil
-                                      ];
-                                    Micheline.Seq
-                                      0
-                                      [
-                                        Micheline.Prim
-                                          0
-                                          Michelson_v1_primitives.I_DIP
-                                          [
-                                            Micheline.Seq
-                                              0
-                                              [
-                                                Micheline.Prim
-                                                  0
-                                                  Michelson_v1_primitives.I_DUP
-                                                  nil
-                                                  nil
-                                              ]
-                                          ]
-                                          nil;
-                                        Micheline.Prim
-                                          0
-                                          Michelson_v1_primitives.I_SWAP
-                                          nil
-                                          nil
-                                      ];
-                                    Micheline.Prim
-                                      0
-                                      Michelson_v1_primitives.I_CDR
-                                      nil
-                                      nil;
-                                    Micheline.Prim
-                                      0
-                                      Michelson_v1_primitives.I_CAR
-                                      nil
-                                      nil;
-                                    Micheline.Prim
-                                      0
-                                      Michelson_v1_primitives.I_IMPLICIT_ACCOUNT
-                                      nil
-                                      nil;
-                                    Micheline.Prim
-                                      0
-                                      Michelson_v1_primitives.I_ADDRESS
-                                      nil
-                                      nil;
-                                    Micheline.Prim
-                                      0
-                                      Michelson_v1_primitives.I_SENDER
-                                      nil
-                                      nil;
                                     Micheline.Seq
                                       0
                                       [
@@ -553,46 +459,20 @@ Definition add_do
                                           nil;
                                         Micheline.Prim
                                           0
-                                          Michelson_v1_primitives.I_NEQ
+                                          Michelson_v1_primitives.I_EQ
                                           nil
-                                          nil;
-                                        Micheline.Prim
+                                          nil
+                                      ];
+                                    Micheline.Prim
+                                      0
+                                      Michelson_v1_primitives.I_IF
+                                      [
+                                        Micheline.Seq
                                           0
-                                          Michelson_v1_primitives.I_IF
+                                          nil;
+                                        Micheline.Seq
+                                          0
                                           [
-                                            Micheline.Seq
-                                              0
-                                              [
-                                                Micheline.Prim
-                                                  0
-                                                  Michelson_v1_primitives.I_SENDER
-                                                  nil
-                                                  nil;
-                                                Micheline.Prim
-                                                  0
-                                                  Michelson_v1_primitives.I_PUSH
-                                                  [
-                                                    Micheline.Prim
-                                                      0
-                                                      Michelson_v1_primitives.T_string
-                                                      nil
-                                                      nil;
-                                                    Micheline.String
-                                                      0
-                                                      "Only the owner can operate."
-                                                  ]
-                                                  nil;
-                                                Micheline.Prim
-                                                  0
-                                                  Michelson_v1_primitives.I_PAIR
-                                                  nil
-                                                  nil;
-                                                Micheline.Prim
-                                                  0
-                                                  Michelson_v1_primitives.I_FAILWITH
-                                                  nil
-                                                  nil
-                                              ];
                                             Micheline.Seq
                                               0
                                               [
@@ -603,33 +483,13 @@ Definition add_do
                                                   nil;
                                                 Micheline.Prim
                                                   0
-                                                  Michelson_v1_primitives.I_EXEC
-                                                  nil
-                                                  nil;
-                                                Micheline.Prim
-                                                  0
-                                                  Michelson_v1_primitives.I_DIP
-                                                  [
-                                                    Micheline.Seq
-                                                      0
-                                                      [
-                                                        Micheline.Prim
-                                                          0
-                                                          Michelson_v1_primitives.I_CDR
-                                                          nil
-                                                          nil
-                                                      ]
-                                                  ]
-                                                  nil;
-                                                Micheline.Prim
-                                                  0
-                                                  Michelson_v1_primitives.I_PAIR
+                                                  Michelson_v1_primitives.I_FAILWITH
                                                   nil
                                                   nil
                                               ]
                                           ]
-                                          nil
                                       ]
+                                      nil
                                   ];
                                 Micheline.Seq
                                   0
@@ -643,17 +503,7 @@ Definition add_do
                                           [
                                             Micheline.Prim
                                               0
-                                              Michelson_v1_primitives.I_CDR
-                                              nil
-                                              nil;
-                                            Micheline.Prim
-                                              0
                                               Michelson_v1_primitives.I_DUP
-                                              nil
-                                              nil;
-                                            Micheline.Prim
-                                              0
-                                              Michelson_v1_primitives.I_CDR
                                               nil
                                               nil
                                           ]
@@ -661,39 +511,96 @@ Definition add_do
                                       nil;
                                     Micheline.Prim
                                       0
-                                      Michelson_v1_primitives.I_PAIR
-                                      nil
-                                      nil;
-                                    code_expr;
-                                    Micheline.Prim
-                                      0
                                       Michelson_v1_primitives.I_SWAP
                                       nil
-                                      nil;
+                                      nil
+                                  ];
+                                Micheline.Prim
+                                  0
+                                  Michelson_v1_primitives.I_CDR
+                                  nil
+                                  nil;
+                                Micheline.Prim
+                                  0
+                                  Michelson_v1_primitives.I_CAR
+                                  nil
+                                  nil;
+                                Micheline.Prim
+                                  0
+                                  Michelson_v1_primitives.I_IMPLICIT_ACCOUNT
+                                  nil
+                                  nil;
+                                Micheline.Prim
+                                  0
+                                  Michelson_v1_primitives.I_ADDRESS
+                                  nil
+                                  nil;
+                                Micheline.Prim
+                                  0
+                                  Michelson_v1_primitives.I_SENDER
+                                  nil
+                                  nil;
+                                Micheline.Seq
+                                  0
+                                  [
                                     Micheline.Prim
                                       0
-                                      Michelson_v1_primitives.I_CAR
+                                      Michelson_v1_primitives.I_COMPARE
                                       nil
                                       nil;
                                     Micheline.Prim
                                       0
-                                      Michelson_v1_primitives.I_SWAP
+                                      Michelson_v1_primitives.I_NEQ
                                       nil
                                       nil;
-                                    Micheline.Seq
+                                    Micheline.Prim
                                       0
+                                      Michelson_v1_primitives.I_IF
                                       [
                                         Micheline.Seq
                                           0
                                           [
                                             Micheline.Prim
                                               0
-                                              Michelson_v1_primitives.I_DUP
+                                              Michelson_v1_primitives.I_SENDER
                                               nil
                                               nil;
                                             Micheline.Prim
                                               0
-                                              Michelson_v1_primitives.I_CAR
+                                              Michelson_v1_primitives.I_PUSH
+                                              [
+                                                Micheline.Prim
+                                                  0
+                                                  Michelson_v1_primitives.T_string
+                                                  nil
+                                                  nil;
+                                                Micheline.String
+                                                  0
+                                                  "Only the owner can operate."
+                                              ]
+                                              nil;
+                                            Micheline.Prim
+                                              0
+                                              Michelson_v1_primitives.I_PAIR
+                                              nil
+                                              nil;
+                                            Micheline.Prim
+                                              0
+                                              Michelson_v1_primitives.I_FAILWITH
+                                              nil
+                                              nil
+                                          ];
+                                        Micheline.Seq
+                                          0
+                                          [
+                                            Micheline.Prim
+                                              0
+                                              Michelson_v1_primitives.I_UNIT
+                                              nil
+                                              nil;
+                                            Micheline.Prim
+                                              0
+                                              Michelson_v1_primitives.I_EXEC
                                               nil
                                               nil;
                                             Micheline.Prim
@@ -710,20 +617,6 @@ Definition add_do
                                                       nil
                                                   ]
                                               ]
-                                              nil
-                                          ]
-                                      ];
-                                    Micheline.Prim
-                                      0
-                                      Michelson_v1_primitives.I_DIP
-                                      [
-                                        Micheline.Seq
-                                          0
-                                          [
-                                            Micheline.Prim
-                                              0
-                                              Michelson_v1_primitives.I_SWAP
-                                              nil
                                               nil;
                                             Micheline.Prim
                                               0
@@ -732,213 +625,74 @@ Definition add_do
                                               nil
                                           ]
                                       ]
-                                      nil;
-                                    Micheline.Prim
+                                      nil
+                                  ]
+                              ];
+                            Micheline.Seq
+                              0
+                              [
+                                Micheline.Prim
+                                  0
+                                  Michelson_v1_primitives.I_DIP
+                                  [
+                                    Micheline.Seq
                                       0
-                                      Michelson_v1_primitives.I_PAIR
-                                      nil
-                                      nil
+                                      [
+                                        Micheline.Prim
+                                          0
+                                          Michelson_v1_primitives.I_CDR
+                                          nil
+                                          nil;
+                                        Micheline.Prim
+                                          0
+                                          Michelson_v1_primitives.I_DUP
+                                          nil
+                                          nil;
+                                        Micheline.Prim
+                                          0
+                                          Michelson_v1_primitives.I_CDR
+                                          nil
+                                          nil
+                                      ]
                                   ]
-                              ]
-                              nil
-                          ]
-                      ] code_annot
-                  ] in
-              let migrated_storage :=
-                Micheline.Prim 0 Michelson_v1_primitives.D_Pair
-                  [
-                    Micheline.Bytes 0
-                      (Data_encoding.Binary.to_bytes_exn
-                        (|Signature.Public_key_hash|).(S.SPublic_key_hash.encoding)
-                        manager_pkh);
-                    storage_expr
-                  ] nil in
-              ((Script_repr.__lazy_expr_value
-                (Micheline.strip_locations migrated_code)),
-                (Script_repr.__lazy_expr_value
-                  (Micheline.strip_locations migrated_storage)))
-            | _ => (script_code, script_storage)
-            end
-          | _ => (script_code, script_storage)
-          end)).
-
-Definition add_set_delegate
-  (manager_pkh : (|Signature.Public_key_hash|).(S.SPublic_key_hash.t))
-  (script_code : Script_repr.lazy_expr) (script_storage : Script_repr.lazy_expr)
-  : Lwt.t (Error_monad.tzresult (Script_repr.lazy_expr * Script_repr.lazy_expr)) :=
-  Error_monad.op_gtgteqquestion
-    (Lwt.__return (Script_repr.force_decode script_code))
-    (fun function_parameter =>
-      let '(script_code_expr, _gas_cost) := function_parameter in
-      Error_monad.op_gtgtpipequestion
-        (Lwt.__return (Script_repr.force_decode script_storage))
-        (fun function_parameter =>
-          let '(script_storage_expr, _gas_cost) := function_parameter in
-          let storage_expr := Micheline.root script_storage_expr in
-          match Micheline.root script_code_expr with
-          | Micheline.Seq _ toplevel =>
-            match
-              ((find_toplevel Michelson_v1_primitives.K_parameter toplevel),
-                (find_toplevel Michelson_v1_primitives.K_storage toplevel),
-                (find_toplevel Michelson_v1_primitives.K_code toplevel)) with
-            |
-              (Some
-                (Micheline.Prim _ Michelson_v1_primitives.K_parameter
-                  (cons
-                    (Micheline.Prim _ parameter_type parameter_expr
-                      parameter_annot) []) prim_param_annot),
-                Some
-                  (Micheline.Prim _ Michelson_v1_primitives.K_storage
-                    (cons
-                      (Micheline.Prim _ code_storage_type code_storage_expr
-                        code_storage_annot) []) k_storage_annot),
-                Some
-                  (Micheline.Prim _ Michelson_v1_primitives.K_code
-                    (cons code_expr []) code_annot)) =>
-              let migrated_code :=
-                Micheline.Seq 0
-                  [
-                    Micheline.Prim 0 Michelson_v1_primitives.K_parameter
-                      [
-                        Micheline.Prim 0
-                          Michelson_v1_primitives.T_or
-                          [
-                            Micheline.Prim
-                              0
-                              Michelson_v1_primitives.T_or
-                              [
+                                  nil;
                                 Micheline.Prim
                                   0
-                                  Michelson_v1_primitives.T_key_hash
+                                  Michelson_v1_primitives.I_PAIR
                                   nil
-                                  [
-                                    "%set_delegate"
-                                  ];
+                                  nil;
+                                code_expr;
                                 Micheline.Prim
                                   0
-                                  Michelson_v1_primitives.T_unit
+                                  Michelson_v1_primitives.I_SWAP
                                   nil
-                                  [
-                                    "%remove_delegate"
-                                  ]
-                              ]
-                              nil;
-                            Micheline.Prim
-                              0
-                              parameter_type
-                              parameter_expr
-                              (cons
-                                "%default"
-                                parameter_annot)
-                          ]
-                          nil
-                      ] prim_param_annot;
-                    Micheline.Prim 0 Michelson_v1_primitives.K_storage
-                      [
-                        Micheline.Prim 0
-                          Michelson_v1_primitives.T_pair
-                          [
-                            Micheline.Prim
-                              0
-                              Michelson_v1_primitives.T_key_hash
-                              nil
-                              nil;
-                            Micheline.Prim
-                              0
-                              code_storage_type
-                              code_storage_expr
-                              code_storage_annot
-                          ]
-                          nil
-                      ] k_storage_annot;
-                    Micheline.Prim 0 Michelson_v1_primitives.K_code
-                      [
-                        Micheline.Seq 0
-                          [
-                            Micheline.Prim
-                              0
-                              Michelson_v1_primitives.I_DUP
-                              nil
-                              nil;
-                            Micheline.Prim
-                              0
-                              Michelson_v1_primitives.I_CAR
-                              nil
-                              nil;
-                            Micheline.Prim
-                              0
-                              Michelson_v1_primitives.I_IF_LEFT
-                              [
+                                  nil;
+                                Micheline.Prim
+                                  0
+                                  Michelson_v1_primitives.I_CAR
+                                  nil
+                                  nil;
+                                Micheline.Prim
+                                  0
+                                  Michelson_v1_primitives.I_SWAP
+                                  nil
+                                  nil;
                                 Micheline.Seq
                                   0
                                   [
-                                    Micheline.Prim
+                                    Micheline.Seq
                                       0
-                                      Michelson_v1_primitives.I_PUSH
                                       [
                                         Micheline.Prim
                                           0
-                                          Michelson_v1_primitives.T_mutez
+                                          Michelson_v1_primitives.I_DUP
                                           nil
                                           nil;
-                                        Micheline.Int
-                                          0
-                                          Z.zero
-                                      ]
-                                      nil;
-                                    Micheline.Prim
-                                      0
-                                      Michelson_v1_primitives.I_AMOUNT
-                                      nil
-                                      nil;
-                                    Micheline.Seq
-                                      0
-                                      [
-                                        Micheline.Seq
-                                          0
-                                          [
-                                            Micheline.Prim
-                                              0
-                                              Michelson_v1_primitives.I_COMPARE
-                                              nil
-                                              nil;
-                                            Micheline.Prim
-                                              0
-                                              Michelson_v1_primitives.I_EQ
-                                              nil
-                                              nil
-                                          ];
                                         Micheline.Prim
                                           0
-                                          Michelson_v1_primitives.I_IF
-                                          [
-                                            Micheline.Seq
-                                              0
-                                              nil;
-                                            Micheline.Seq
-                                              0
-                                              [
-                                                Micheline.Seq
-                                                  0
-                                                  [
-                                                    Micheline.Prim
-                                                      0
-                                                      Michelson_v1_primitives.I_UNIT
-                                                      nil
-                                                      nil;
-                                                    Micheline.Prim
-                                                      0
-                                                      Michelson_v1_primitives.I_FAILWITH
-                                                      nil
-                                                      nil
-                                                  ]
-                                              ]
-                                          ]
+                                          Michelson_v1_primitives.I_CAR
                                           nil
-                                      ];
-                                    Micheline.Seq
-                                      0
-                                      [
+                                          nil;
                                         Micheline.Prim
                                           0
                                           Michelson_v1_primitives.I_DIP
@@ -948,43 +702,191 @@ Definition add_set_delegate
                                               [
                                                 Micheline.Prim
                                                   0
-                                                  Michelson_v1_primitives.I_DUP
+                                                  Michelson_v1_primitives.I_CDR
                                                   nil
                                                   nil
                                               ]
                                           ]
-                                          nil;
+                                          nil
+                                      ]
+                                  ];
+                                Micheline.Prim
+                                  0
+                                  Michelson_v1_primitives.I_DIP
+                                  [
+                                    Micheline.Seq
+                                      0
+                                      [
                                         Micheline.Prim
                                           0
                                           Michelson_v1_primitives.I_SWAP
                                           nil
+                                          nil;
+                                        Micheline.Prim
+                                          0
+                                          Michelson_v1_primitives.I_PAIR
                                           nil
-                                      ];
+                                          nil
+                                      ]
+                                  ]
+                                  nil;
+                                Micheline.Prim
+                                  0
+                                  Michelson_v1_primitives.I_PAIR
+                                  nil
+                                  nil
+                              ]
+                          ]
+                          nil
+                      ]
+                  ] code_annot
+              ] in
+          let migrated_storage :=
+            Micheline.Prim 0 Michelson_v1_primitives.D_Pair
+              [
+                Micheline.Bytes 0
+                  (Data_encoding.Binary.to_bytes_exn
+                    (|Signature.Public_key_hash|).(S.SPublic_key_hash.encoding)
+                    manager_pkh);
+                storage_expr
+              ] nil in
+          ((Script_repr.__lazy_expr_value
+            (Micheline.strip_locations migrated_code)),
+            (Script_repr.__lazy_expr_value
+              (Micheline.strip_locations migrated_storage)))
+        | _ => (script_code, script_storage)
+        end
+      | _ => (script_code, script_storage)
+      end).
+
+Definition add_set_delegate
+  (manager_pkh : (|Signature.Public_key_hash|).(S.SPublic_key_hash.t))
+  (script_code : Script_repr.lazy_expr) (script_storage : Script_repr.lazy_expr)
+  : Lwt.t (Error_monad.tzresult (Script_repr.lazy_expr * Script_repr.lazy_expr)) :=
+  let!? '(script_code_expr, _gas_cost) :=
+    Lwt.__return (Script_repr.force_decode script_code) in
+  Error_monad.op_gtgtpipequestion
+    (Lwt.__return (Script_repr.force_decode script_storage))
+    (fun function_parameter =>
+      let '(script_storage_expr, _gas_cost) := function_parameter in
+      let storage_expr := Micheline.root script_storage_expr in
+      match Micheline.root script_code_expr with
+      | Micheline.Seq _ toplevel =>
+        match
+          ((find_toplevel Michelson_v1_primitives.K_parameter toplevel),
+            (find_toplevel Michelson_v1_primitives.K_storage toplevel),
+            (find_toplevel Michelson_v1_primitives.K_code toplevel)) with
+        |
+          (Some
+            (Micheline.Prim _ Michelson_v1_primitives.K_parameter
+              (cons
+                (Micheline.Prim _ parameter_type parameter_expr parameter_annot)
+                []) prim_param_annot),
+            Some
+              (Micheline.Prim _ Michelson_v1_primitives.K_storage
+                (cons
+                  (Micheline.Prim _ code_storage_type code_storage_expr
+                    code_storage_annot) []) k_storage_annot),
+            Some
+              (Micheline.Prim _ Michelson_v1_primitives.K_code
+                (cons code_expr []) code_annot)) =>
+          let migrated_code :=
+            Micheline.Seq 0
+              [
+                Micheline.Prim 0 Michelson_v1_primitives.K_parameter
+                  [
+                    Micheline.Prim 0
+                      Michelson_v1_primitives.T_or
+                      [
+                        Micheline.Prim
+                          0
+                          Michelson_v1_primitives.T_or
+                          [
+                            Micheline.Prim
+                              0
+                              Michelson_v1_primitives.T_key_hash
+                              nil
+                              [
+                                "%set_delegate"
+                              ];
+                            Micheline.Prim
+                              0
+                              Michelson_v1_primitives.T_unit
+                              nil
+                              [
+                                "%remove_delegate"
+                              ]
+                          ]
+                          nil;
+                        Micheline.Prim
+                          0
+                          parameter_type
+                          parameter_expr
+                          (cons
+                            "%default"
+                            parameter_annot)
+                      ] nil
+                  ] prim_param_annot;
+                Micheline.Prim 0 Michelson_v1_primitives.K_storage
+                  [
+                    Micheline.Prim 0
+                      Michelson_v1_primitives.T_pair
+                      [
+                        Micheline.Prim
+                          0
+                          Michelson_v1_primitives.T_key_hash
+                          nil
+                          nil;
+                        Micheline.Prim
+                          0
+                          code_storage_type
+                          code_storage_expr
+                          code_storage_annot
+                      ] nil
+                  ] k_storage_annot;
+                Micheline.Prim 0 Michelson_v1_primitives.K_code
+                  [
+                    Micheline.Seq 0
+                      [
+                        Micheline.Prim
+                          0
+                          Michelson_v1_primitives.I_DUP
+                          nil
+                          nil;
+                        Micheline.Prim
+                          0
+                          Michelson_v1_primitives.I_CAR
+                          nil
+                          nil;
+                        Micheline.Prim
+                          0
+                          Michelson_v1_primitives.I_IF_LEFT
+                          [
+                            Micheline.Seq
+                              0
+                              [
+                                Micheline.Prim
+                                  0
+                                  Michelson_v1_primitives.I_PUSH
+                                  [
                                     Micheline.Prim
                                       0
-                                      Michelson_v1_primitives.I_CDR
+                                      Michelson_v1_primitives.T_mutez
                                       nil
                                       nil;
-                                    Micheline.Prim
+                                    Micheline.Int
                                       0
-                                      Michelson_v1_primitives.I_CAR
-                                      nil
-                                      nil;
-                                    Micheline.Prim
-                                      0
-                                      Michelson_v1_primitives.I_IMPLICIT_ACCOUNT
-                                      nil
-                                      nil;
-                                    Micheline.Prim
-                                      0
-                                      Michelson_v1_primitives.I_ADDRESS
-                                      nil
-                                      nil;
-                                    Micheline.Prim
-                                      0
-                                      Michelson_v1_primitives.I_SENDER
-                                      nil
-                                      nil;
+                                      Z.zero
+                                  ]
+                                  nil;
+                                Micheline.Prim
+                                  0
+                                  Michelson_v1_primitives.I_AMOUNT
+                                  nil
+                                  nil;
+                                Micheline.Seq
+                                  0
+                                  [
                                     Micheline.Seq
                                       0
                                       [
@@ -995,38 +897,26 @@ Definition add_set_delegate
                                           nil;
                                         Micheline.Prim
                                           0
-                                          Michelson_v1_primitives.I_NEQ
+                                          Michelson_v1_primitives.I_EQ
                                           nil
-                                          nil;
-                                        Micheline.Prim
+                                          nil
+                                      ];
+                                    Micheline.Prim
+                                      0
+                                      Michelson_v1_primitives.I_IF
+                                      [
+                                        Micheline.Seq
                                           0
-                                          Michelson_v1_primitives.I_IF
+                                          nil;
+                                        Micheline.Seq
+                                          0
                                           [
                                             Micheline.Seq
                                               0
                                               [
                                                 Micheline.Prim
                                                   0
-                                                  Michelson_v1_primitives.I_SENDER
-                                                  nil
-                                                  nil;
-                                                Micheline.Prim
-                                                  0
-                                                  Michelson_v1_primitives.I_PUSH
-                                                  [
-                                                    Micheline.Prim
-                                                      0
-                                                      Michelson_v1_primitives.T_string
-                                                      nil
-                                                      nil;
-                                                    Micheline.String
-                                                      0
-                                                      "Only the owner can operate."
-                                                  ]
-                                                  nil;
-                                                Micheline.Prim
-                                                  0
-                                                  Michelson_v1_primitives.I_PAIR
+                                                  Michelson_v1_primitives.I_UNIT
                                                   nil
                                                   nil;
                                                 Micheline.Prim
@@ -1034,105 +924,10 @@ Definition add_set_delegate
                                                   Michelson_v1_primitives.I_FAILWITH
                                                   nil
                                                   nil
-                                              ];
-                                            Micheline.Seq
-                                              0
-                                              [
-                                                Micheline.Prim
-                                                  0
-                                                  Michelson_v1_primitives.I_DIP
-                                                  [
-                                                    Micheline.Seq
-                                                      0
-                                                      [
-                                                        Micheline.Prim
-                                                          0
-                                                          Michelson_v1_primitives.I_CDR
-                                                          nil
-                                                          nil;
-                                                        Micheline.Prim
-                                                          0
-                                                          Michelson_v1_primitives.I_NIL
-                                                          [
-                                                            Micheline.Prim
-                                                              0
-                                                              Michelson_v1_primitives.T_operation
-                                                              nil
-                                                              nil
-                                                          ]
-                                                          nil
-                                                      ]
-                                                  ]
-                                                  nil;
-                                                Micheline.Prim
-                                                  0
-                                                  Michelson_v1_primitives.I_IF_LEFT
-                                                  [
-                                                    Micheline.Seq
-                                                      0
-                                                      [
-                                                        Micheline.Prim
-                                                          0
-                                                          Michelson_v1_primitives.I_SOME
-                                                          nil
-                                                          nil;
-                                                        Micheline.Prim
-                                                          0
-                                                          Michelson_v1_primitives.I_SET_DELEGATE
-                                                          nil
-                                                          nil;
-                                                        Micheline.Prim
-                                                          0
-                                                          Michelson_v1_primitives.I_CONS
-                                                          nil
-                                                          nil;
-                                                        Micheline.Prim
-                                                          0
-                                                          Michelson_v1_primitives.I_PAIR
-                                                          nil
-                                                          nil
-                                                      ];
-                                                    Micheline.Seq
-                                                      0
-                                                      [
-                                                        Micheline.Prim
-                                                          0
-                                                          Michelson_v1_primitives.I_DROP
-                                                          nil
-                                                          nil;
-                                                        Micheline.Prim
-                                                          0
-                                                          Michelson_v1_primitives.I_NONE
-                                                          [
-                                                            Micheline.Prim
-                                                              0
-                                                              Michelson_v1_primitives.T_key_hash
-                                                              nil
-                                                              nil
-                                                          ]
-                                                          nil;
-                                                        Micheline.Prim
-                                                          0
-                                                          Michelson_v1_primitives.I_SET_DELEGATE
-                                                          nil
-                                                          nil;
-                                                        Micheline.Prim
-                                                          0
-                                                          Michelson_v1_primitives.I_CONS
-                                                          nil
-                                                          nil;
-                                                        Micheline.Prim
-                                                          0
-                                                          Michelson_v1_primitives.I_PAIR
-                                                          nil
-                                                          nil
-                                                      ]
-                                                  ]
-                                                  nil
                                               ]
                                           ]
-                                          nil
                                       ]
+                                      nil
                                   ];
                                 Micheline.Seq
                                   0
@@ -1146,17 +941,7 @@ Definition add_set_delegate
                                           [
                                             Micheline.Prim
                                               0
-                                              Michelson_v1_primitives.I_CDR
-                                              nil
-                                              nil;
-                                            Micheline.Prim
-                                              0
                                               Michelson_v1_primitives.I_DUP
-                                              nil
-                                              nil;
-                                            Micheline.Prim
-                                              0
-                                              Michelson_v1_primitives.I_CDR
                                               nil
                                               nil
                                           ]
@@ -1164,41 +949,88 @@ Definition add_set_delegate
                                       nil;
                                     Micheline.Prim
                                       0
-                                      Michelson_v1_primitives.I_PAIR
-                                      nil
-                                      nil;
-                                    code_expr;
-                                    Micheline.Prim
-                                      0
                                       Michelson_v1_primitives.I_SWAP
                                       nil
-                                      nil;
+                                      nil
+                                  ];
+                                Micheline.Prim
+                                  0
+                                  Michelson_v1_primitives.I_CDR
+                                  nil
+                                  nil;
+                                Micheline.Prim
+                                  0
+                                  Michelson_v1_primitives.I_CAR
+                                  nil
+                                  nil;
+                                Micheline.Prim
+                                  0
+                                  Michelson_v1_primitives.I_IMPLICIT_ACCOUNT
+                                  nil
+                                  nil;
+                                Micheline.Prim
+                                  0
+                                  Michelson_v1_primitives.I_ADDRESS
+                                  nil
+                                  nil;
+                                Micheline.Prim
+                                  0
+                                  Michelson_v1_primitives.I_SENDER
+                                  nil
+                                  nil;
+                                Micheline.Seq
+                                  0
+                                  [
                                     Micheline.Prim
                                       0
-                                      Michelson_v1_primitives.I_CAR
+                                      Michelson_v1_primitives.I_COMPARE
                                       nil
                                       nil;
                                     Micheline.Prim
                                       0
-                                      Michelson_v1_primitives.I_SWAP
+                                      Michelson_v1_primitives.I_NEQ
                                       nil
                                       nil;
-                                    Micheline.Seq
+                                    Micheline.Prim
                                       0
+                                      Michelson_v1_primitives.I_IF
                                       [
                                         Micheline.Seq
                                           0
                                           [
                                             Micheline.Prim
                                               0
-                                              Michelson_v1_primitives.I_DUP
+                                              Michelson_v1_primitives.I_SENDER
                                               nil
                                               nil;
                                             Micheline.Prim
                                               0
-                                              Michelson_v1_primitives.I_CAR
+                                              Michelson_v1_primitives.I_PUSH
+                                              [
+                                                Micheline.Prim
+                                                  0
+                                                  Michelson_v1_primitives.T_string
+                                                  nil
+                                                  nil;
+                                                Micheline.String
+                                                  0
+                                                  "Only the owner can operate."
+                                              ]
+                                              nil;
+                                            Micheline.Prim
+                                              0
+                                              Michelson_v1_primitives.I_PAIR
                                               nil
                                               nil;
+                                            Micheline.Prim
+                                              0
+                                              Michelson_v1_primitives.I_FAILWITH
+                                              nil
+                                              nil
+                                          ];
+                                        Micheline.Seq
+                                          0
+                                          [
                                             Micheline.Prim
                                               0
                                               Michelson_v1_primitives.I_DIP
@@ -1210,60 +1042,221 @@ Definition add_set_delegate
                                                       0
                                                       Michelson_v1_primitives.I_CDR
                                                       nil
+                                                      nil;
+                                                    Micheline.Prim
+                                                      0
+                                                      Michelson_v1_primitives.I_NIL
+                                                      [
+                                                        Micheline.Prim
+                                                          0
+                                                          Michelson_v1_primitives.T_operation
+                                                          nil
+                                                          nil
+                                                      ]
+                                                      nil
+                                                  ]
+                                              ]
+                                              nil;
+                                            Micheline.Prim
+                                              0
+                                              Michelson_v1_primitives.I_IF_LEFT
+                                              [
+                                                Micheline.Seq
+                                                  0
+                                                  [
+                                                    Micheline.Prim
+                                                      0
+                                                      Michelson_v1_primitives.I_SOME
+                                                      nil
+                                                      nil;
+                                                    Micheline.Prim
+                                                      0
+                                                      Michelson_v1_primitives.I_SET_DELEGATE
+                                                      nil
+                                                      nil;
+                                                    Micheline.Prim
+                                                      0
+                                                      Michelson_v1_primitives.I_CONS
+                                                      nil
+                                                      nil;
+                                                    Micheline.Prim
+                                                      0
+                                                      Michelson_v1_primitives.I_PAIR
+                                                      nil
+                                                      nil
+                                                  ];
+                                                Micheline.Seq
+                                                  0
+                                                  [
+                                                    Micheline.Prim
+                                                      0
+                                                      Michelson_v1_primitives.I_DROP
+                                                      nil
+                                                      nil;
+                                                    Micheline.Prim
+                                                      0
+                                                      Michelson_v1_primitives.I_NONE
+                                                      [
+                                                        Micheline.Prim
+                                                          0
+                                                          Michelson_v1_primitives.T_key_hash
+                                                          nil
+                                                          nil
+                                                      ]
+                                                      nil;
+                                                    Micheline.Prim
+                                                      0
+                                                      Michelson_v1_primitives.I_SET_DELEGATE
+                                                      nil
+                                                      nil;
+                                                    Micheline.Prim
+                                                      0
+                                                      Michelson_v1_primitives.I_CONS
+                                                      nil
+                                                      nil;
+                                                    Micheline.Prim
+                                                      0
+                                                      Michelson_v1_primitives.I_PAIR
+                                                      nil
                                                       nil
                                                   ]
                                               ]
                                               nil
                                           ]
-                                      ];
-                                    Micheline.Prim
-                                      0
-                                      Michelson_v1_primitives.I_DIP
-                                      [
-                                        Micheline.Seq
-                                          0
-                                          [
-                                            Micheline.Prim
-                                              0
-                                              Michelson_v1_primitives.I_SWAP
-                                              nil
-                                              nil;
-                                            Micheline.Prim
-                                              0
-                                              Michelson_v1_primitives.I_PAIR
-                                              nil
-                                              nil
-                                          ]
                                       ]
-                                      nil;
-                                    Micheline.Prim
-                                      0
-                                      Michelson_v1_primitives.I_PAIR
-                                      nil
                                       nil
                                   ]
+                              ];
+                            Micheline.Seq
+                              0
+                              [
+                                Micheline.Prim
+                                  0
+                                  Michelson_v1_primitives.I_DIP
+                                  [
+                                    Micheline.Seq
+                                      0
+                                      [
+                                        Micheline.Prim
+                                          0
+                                          Michelson_v1_primitives.I_CDR
+                                          nil
+                                          nil;
+                                        Micheline.Prim
+                                          0
+                                          Michelson_v1_primitives.I_DUP
+                                          nil
+                                          nil;
+                                        Micheline.Prim
+                                          0
+                                          Michelson_v1_primitives.I_CDR
+                                          nil
+                                          nil
+                                      ]
+                                  ]
+                                  nil;
+                                Micheline.Prim
+                                  0
+                                  Michelson_v1_primitives.I_PAIR
+                                  nil
+                                  nil;
+                                code_expr;
+                                Micheline.Prim
+                                  0
+                                  Michelson_v1_primitives.I_SWAP
+                                  nil
+                                  nil;
+                                Micheline.Prim
+                                  0
+                                  Michelson_v1_primitives.I_CAR
+                                  nil
+                                  nil;
+                                Micheline.Prim
+                                  0
+                                  Michelson_v1_primitives.I_SWAP
+                                  nil
+                                  nil;
+                                Micheline.Seq
+                                  0
+                                  [
+                                    Micheline.Seq
+                                      0
+                                      [
+                                        Micheline.Prim
+                                          0
+                                          Michelson_v1_primitives.I_DUP
+                                          nil
+                                          nil;
+                                        Micheline.Prim
+                                          0
+                                          Michelson_v1_primitives.I_CAR
+                                          nil
+                                          nil;
+                                        Micheline.Prim
+                                          0
+                                          Michelson_v1_primitives.I_DIP
+                                          [
+                                            Micheline.Seq
+                                              0
+                                              [
+                                                Micheline.Prim
+                                                  0
+                                                  Michelson_v1_primitives.I_CDR
+                                                  nil
+                                                  nil
+                                              ]
+                                          ]
+                                          nil
+                                      ]
+                                  ];
+                                Micheline.Prim
+                                  0
+                                  Michelson_v1_primitives.I_DIP
+                                  [
+                                    Micheline.Seq
+                                      0
+                                      [
+                                        Micheline.Prim
+                                          0
+                                          Michelson_v1_primitives.I_SWAP
+                                          nil
+                                          nil;
+                                        Micheline.Prim
+                                          0
+                                          Michelson_v1_primitives.I_PAIR
+                                          nil
+                                          nil
+                                      ]
+                                  ]
+                                  nil;
+                                Micheline.Prim
+                                  0
+                                  Michelson_v1_primitives.I_PAIR
+                                  nil
+                                  nil
                               ]
-                              nil
                           ]
-                      ] code_annot
-                  ] in
-              let migrated_storage :=
-                Micheline.Prim 0 Michelson_v1_primitives.D_Pair
-                  [
-                    Micheline.Bytes 0
-                      (Data_encoding.Binary.to_bytes_exn
-                        (|Signature.Public_key_hash|).(S.SPublic_key_hash.encoding)
-                        manager_pkh);
-                    storage_expr
-                  ] nil in
-              ((Script_repr.__lazy_expr_value
-                (Micheline.strip_locations migrated_code)),
-                (Script_repr.__lazy_expr_value
-                  (Micheline.strip_locations migrated_storage)))
-            | _ => (script_code, script_storage)
-            end
-          | _ => (script_code, script_storage)
-          end)).
+                          nil
+                      ]
+                  ] code_annot
+              ] in
+          let migrated_storage :=
+            Micheline.Prim 0 Michelson_v1_primitives.D_Pair
+              [
+                Micheline.Bytes 0
+                  (Data_encoding.Binary.to_bytes_exn
+                    (|Signature.Public_key_hash|).(S.SPublic_key_hash.encoding)
+                    manager_pkh);
+                storage_expr
+              ] nil in
+          ((Script_repr.__lazy_expr_value
+            (Micheline.strip_locations migrated_code)),
+            (Script_repr.__lazy_expr_value
+              (Micheline.strip_locations migrated_storage)))
+        | _ => (script_code, script_storage)
+        end
+      | _ => (script_code, script_storage)
+      end).
 
 Definition has_default_entrypoint (expr : Script_repr.lazy_expr) : bool :=
   match Script_repr.force_decode expr with

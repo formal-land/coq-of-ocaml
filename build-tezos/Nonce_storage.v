@@ -10,6 +10,7 @@ Unset Positivity Checking.
 Unset Guard Checking.
 
 Require Import Tezos.Environment.
+Import Notations.
 Require Tezos.Cycle_repr.
 Require Tezos.Level_repr.
 Require Tezos.Level_storage.
@@ -45,14 +46,13 @@ Definition get_unrevealed (ctxt : Raw_context.t) (level : Level_repr.t)
       if Cycle_repr.op_lt level.(Level_repr.t.cycle) revealed_cycle then
         Error_monad.fail extensible_type_value
       else
-        Error_monad.op_gtgteqquestion
-          ((|Storage.Seed.Nonce|).(Storage_sigs.Non_iterable_indexed_data_storage.get)
-            ctxt level)
-          (fun function_parameter =>
-            match function_parameter with
-            | Storage.Seed.Revealed _ => Error_monad.fail extensible_type_value
-            | Storage.Seed.Unrevealed status => Error_monad.__return status
-            end)
+        let!? function_parameter :=
+          (|Storage.Seed.Nonce|).(Storage_sigs.Non_iterable_indexed_data_storage.get)
+            ctxt level in
+        match function_parameter with
+        | Storage.Seed.Revealed _ => Error_monad.fail extensible_type_value
+        | Storage.Seed.Unrevealed status => Error_monad.__return status
+        end
   end.
 
 Definition record_hash
@@ -66,19 +66,16 @@ Definition reveal
   (ctxt : Raw_context.t) (level : Level_repr.t)
   (__nonce_value : Seed_repr.nonce)
   : Lwt.t (Error_monad.tzresult Raw_context.t) :=
-  Error_monad.op_gtgteqquestion (get_unrevealed ctxt level)
-    (fun unrevealed =>
-      Error_monad.op_gtgteqquestion
-        (Error_monad.fail_unless
-          (Seed_repr.check_hash __nonce_value
-            unrevealed.(Storage.Seed.unrevealed_nonce.nonce_hash))
-          extensible_type_value)
-        (fun function_parameter =>
-          let '_ := function_parameter in
-          Error_monad.op_gtgteqquestion
-            ((|Storage.Seed.Nonce|).(Storage_sigs.Non_iterable_indexed_data_storage.set)
-              ctxt level (Storage.Seed.Revealed __nonce_value))
-            (fun ctxt => Error_monad.__return ctxt))).
+  let!? unrevealed := get_unrevealed ctxt level in
+  let!? '_ :=
+    Error_monad.fail_unless
+      (Seed_repr.check_hash __nonce_value
+        unrevealed.(Storage.Seed.unrevealed_nonce.nonce_hash))
+      extensible_type_value in
+  let!? ctxt :=
+    (|Storage.Seed.Nonce|).(Storage_sigs.Non_iterable_indexed_data_storage.set)
+      ctxt level (Storage.Seed.Revealed __nonce_value) in
+  Error_monad.__return ctxt.
 
 Module unrevealed.
   Record record : Set := Build {

@@ -10,6 +10,7 @@ Unset Positivity Checking.
 Unset Guard Checking.
 
 Require Import Tezos.Environment.
+Import Notations.
 Require Tezos.Constants_repr.
 Require Tezos.Nonce_hash.
 Require Tezos.State_hash.

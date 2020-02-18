@@ -10,6 +10,7 @@ Unset Positivity Checking.
 Unset Guard Checking.
 
 Require Import Tezos.Environment.
+Import Notations.
 Require Tezos.Alpha_context.
 Require Tezos.Misc.
 
@@ -85,24 +86,22 @@ Definition earlier_predecessor_timestamp
       1 then
     Pervasives.failwith "Baking.earlier_block_timestamp: past block."
   else
-    Error_monad.op_gtgteqquestion
-      (Lwt.__return (Alpha_context.Period.mult (Int32.pred gap) step))
-      (fun delay =>
-        Error_monad.op_gtgteqquestion
-          (Lwt.__return
-            (Alpha_context.Timestamp.op_plusquestion current_timestamp delay))
-          (fun __result_value => Error_monad.__return __result_value)).
+    let!? delay :=
+      Lwt.__return (Alpha_context.Period.mult (Int32.pred gap) step) in
+    let!? __result_value :=
+      Lwt.__return
+        (Alpha_context.Timestamp.op_plusquestion current_timestamp delay) in
+    Error_monad.__return __result_value.
 
 Definition check_timestamp
   (c : Alpha_context.context) (priority : Z)
   (pred_timestamp : Alpha_context.Timestamp.time)
   : Lwt.t (Error_monad.tzresult Alpha_context.Period.t) :=
-  Error_monad.op_gtgteqquestion (minimal_time c priority pred_timestamp)
-    (fun minimal_time =>
-      let timestamp := Alpha_context.Timestamp.current c in
-      Lwt.__return
-        (Error_monad.record_trace extensible_type_value
-          (Alpha_context.Timestamp.op_minusquestion timestamp minimal_time))).
+  let!? minimal_time := minimal_time c priority pred_timestamp in
+  let timestamp := Alpha_context.Timestamp.current c in
+  Lwt.__return
+    (Error_monad.record_trace extensible_type_value
+      (Alpha_context.Timestamp.op_minusquestion timestamp minimal_time)).
 
 Definition check_baking_rights
   (c : Alpha_context.context)
@@ -114,12 +113,9 @@ Definition check_baking_rights
     function_parameter in
   fun pred_timestamp =>
     let level := Alpha_context.Level.current c in
-    Error_monad.op_gtgteqquestion
-      (Alpha_context.Roll.baking_rights_owner c level priority)
-      (fun delegate =>
-        Error_monad.op_gtgteqquestion
-          (check_timestamp c priority pred_timestamp)
-          (fun block_delay => Error_monad.__return (delegate, block_delay))).
+    let!? delegate := Alpha_context.Roll.baking_rights_owner c level priority in
+    let!? block_delay := check_timestamp c priority pred_timestamp in
+    Error_monad.__return (delegate, block_delay).
 
 (* ❌ Structure item `typext` not handled. *)
 (* type_extension *)
@@ -137,52 +133,43 @@ Definition baking_reward
   (ctxt : Alpha_context.context) (prio : (|Compare.Int|).(Compare.S.t))
   (num_endo : (|Compare.Int|).(Compare.S.t))
   : Lwt.t (Error_monad.tzresult Alpha_context.Tez.tez) :=
-  Error_monad.op_gtgteqquestion
-    (Error_monad.fail_unless ((|Compare.Int|).(Compare.S.op_gteq) prio 0)
-      extensible_type_value)
-    (fun function_parameter =>
-      let '_ := function_parameter in
-      let max_endorsements := Alpha_context.Constants.endorsers_per_block ctxt
-        in
-      Error_monad.op_gtgteqquestion
-        (Error_monad.fail_unless
-          (Pervasives.op_andand ((|Compare.Int|).(Compare.S.op_gteq) num_endo 0)
-            ((|Compare.Int|).(Compare.S.op_lteq) num_endo max_endorsements))
-          extensible_type_value)
-        (fun function_parameter =>
-          let '_ := function_parameter in
-          let prio_factor_denominator := Int64.succ (Int64.of_int prio) in
-          let endo_factor_numerator :=
-            Int64.of_int
-              (Pervasives.op_plus 8
-                (Pervasives.op_div (Pervasives.op_star 2 num_endo)
-                  max_endorsements)) in
-          let endo_factor_denominator :=
-            (* ❌ Constant of type int64 is converted to int *)
-            10 in
-          Lwt.__return
-            (Error_monad.op_gtgtquestion
-              (Alpha_context.Tez.op_starquestion
-                (Alpha_context.Constants.block_reward ctxt)
-                endo_factor_numerator)
-              (fun val1 =>
-                Error_monad.op_gtgtquestion
-                  (Alpha_context.Tez.op_divquestion val1 endo_factor_denominator)
-                  (fun val2 =>
-                    Alpha_context.Tez.op_divquestion val2
-                      prio_factor_denominator))))).
+  let!? '_ :=
+    Error_monad.fail_unless ((|Compare.Int|).(Compare.S.op_gteq) prio 0)
+      extensible_type_value in
+  let max_endorsements := Alpha_context.Constants.endorsers_per_block ctxt in
+  let!? '_ :=
+    Error_monad.fail_unless
+      (Pervasives.op_andand ((|Compare.Int|).(Compare.S.op_gteq) num_endo 0)
+        ((|Compare.Int|).(Compare.S.op_lteq) num_endo max_endorsements))
+      extensible_type_value in
+  let prio_factor_denominator := Int64.succ (Int64.of_int prio) in
+  let endo_factor_numerator :=
+    Int64.of_int
+      (Pervasives.op_plus 8
+        (Pervasives.op_div (Pervasives.op_star 2 num_endo) max_endorsements)) in
+  let endo_factor_denominator :=
+    (* ❌ Constant of type int64 is converted to int *)
+    10 in
+  Lwt.__return
+    (Error_monad.op_gtgtquestion
+      (Alpha_context.Tez.op_starquestion
+        (Alpha_context.Constants.block_reward ctxt) endo_factor_numerator)
+      (fun val1 =>
+        Error_monad.op_gtgtquestion
+          (Alpha_context.Tez.op_divquestion val1 endo_factor_denominator)
+          (fun val2 =>
+            Alpha_context.Tez.op_divquestion val2 prio_factor_denominator))).
 
 Definition endorsing_reward
   (ctxt : Alpha_context.context) (prio : (|Compare.Int|).(Compare.S.t)) (n : Z)
   : Lwt.t (Error_monad.tzresult Alpha_context.Tez.tez) :=
   if (|Compare.Int|).(Compare.S.op_gteq) prio 0 then
-    Error_monad.op_gtgteqquestion
-      (Lwt.__return
+    let!? tez :=
+      Lwt.__return
         (Alpha_context.Tez.op_divquestion
           (Alpha_context.Constants.endorsement_reward ctxt)
-          (Int64.succ (Int64.of_int prio))))
-      (fun tez =>
-        Lwt.__return (Alpha_context.Tez.op_starquestion tez (Int64.of_int n)))
+          (Int64.succ (Int64.of_int prio))) in
+    Lwt.__return (Alpha_context.Tez.op_starquestion tez (Int64.of_int n))
   else
     Error_monad.fail extensible_type_value.
 
@@ -191,14 +178,12 @@ Definition baking_priorities
   : Lwt.t (Error_monad.tzresult (Misc.lazy_list_t Alpha_context.public_key)) :=
   let fix f (priority : Z) {struct priority}
     : Lwt.t (Error_monad.tzresult (Misc.lazy_list_t Alpha_context.public_key)) :=
-    Error_monad.op_gtgteqquestion
-      (Alpha_context.Roll.baking_rights_owner c level priority)
-      (fun delegate =>
-        Error_monad.__return
-          (Misc.LCons delegate
-            (fun function_parameter =>
-              let '_ := function_parameter in
-              f (Pervasives.succ priority)))) in
+    let!? delegate := Alpha_context.Roll.baking_rights_owner c level priority in
+    Error_monad.__return
+      (Misc.LCons delegate
+        (fun function_parameter =>
+          let '_ := function_parameter in
+          f (Pervasives.succ priority))) in
   f 0.
 
 Definition endorsement_rights
@@ -210,21 +195,18 @@ Definition endorsement_rights
   Error_monad.fold_left_s
     (fun acc =>
       fun slot =>
-        Error_monad.op_gtgteqquestion
-          (Alpha_context.Roll.endorsement_rights_owner c level slot)
-          (fun pk =>
-            let pkh := (|Signature.Public_key|).(S.SPublic_key.__hash_value) pk
-              in
-            let __right :=
-              match
-                (|Signature.Public_key_hash|).(S.SPublic_key_hash.Map).(S.INDEXES_Map.find_opt)
-                  pkh acc with
-              | None => (pk, [ slot ], false)
-              | Some (pk, slots, used) => (pk, (cons slot slots), used)
-              end in
-            Error_monad.__return
-              ((|Signature.Public_key_hash|).(S.SPublic_key_hash.Map).(S.INDEXES_Map.add)
-                pkh __right acc)))
+        let!? pk := Alpha_context.Roll.endorsement_rights_owner c level slot in
+        let pkh := (|Signature.Public_key|).(S.SPublic_key.__hash_value) pk in
+        let __right :=
+          match
+            (|Signature.Public_key_hash|).(S.SPublic_key_hash.Map).(S.INDEXES_Map.find_opt)
+              pkh acc with
+          | None => (pk, [ slot ], false)
+          | Some (pk, slots, used) => (pk, (cons slot slots), used)
+          end in
+        Error_monad.__return
+          ((|Signature.Public_key_hash|).(S.SPublic_key_hash.Map).(S.INDEXES_Map.add)
+            pkh __right acc))
     (|Signature.Public_key_hash|).(S.SPublic_key_hash.Map).(S.INDEXES_Map.empty)
     (Misc.op_minusminusgt 0
       (Pervasives.op_minus (Alpha_context.Constants.endorsers_per_block c) 1)).
@@ -243,29 +225,27 @@ Definition check_endorsement_rights
         Alpha_context.contents.Endorsement.level := level |}) :=
     op.(Alpha_context.operation.protocol_data).(Alpha_context.protocol_data.contents)
     in
-  Error_monad.op_gtgteqquestion
-    (if
+  let!? endorsements :=
+    if
       Alpha_context.Raw_level.op_eq (Alpha_context.Raw_level.succ level)
         current_level.(Alpha_context.Level.t.level) then
       Error_monad.__return (Alpha_context.allowed_endorsements ctxt)
     else
-      endorsement_rights ctxt (Alpha_context.Level.from_raw ctxt None level))
-    (fun endorsements =>
-      match
-        (|Signature.Public_key_hash|).(S.SPublic_key_hash.Map).(S.INDEXES_Map.fold)
-          (fun pkh =>
-            fun function_parameter =>
-              let '(pk, slots, used) := function_parameter in
-              fun acc =>
-                match
-                  Alpha_context.Operation.check_signature_sync pk chain_id op
-                  with
-                | Pervasives.Error _ => acc
-                | Pervasives.Ok _ => Some (pkh, slots, used)
-                end) endorsements None with
-      | None => Error_monad.fail extensible_type_value
-      | Some v => Error_monad.__return v
-      end).
+      endorsement_rights ctxt (Alpha_context.Level.from_raw ctxt None level) in
+  match
+    (|Signature.Public_key_hash|).(S.SPublic_key_hash.Map).(S.INDEXES_Map.fold)
+      (fun pkh =>
+        fun function_parameter =>
+          let '(pk, slots, used) := function_parameter in
+          fun acc =>
+            match Alpha_context.Operation.check_signature_sync pk chain_id op
+              with
+            | Pervasives.Error _ => acc
+            | Pervasives.Ok _ => Some (pkh, slots, used)
+            end) endorsements None with
+  | None => Error_monad.fail extensible_type_value
+  | Some v => Error_monad.__return v
+  end.
 
 Definition select_delegate
   (delegate : (|Signature.Public_key_hash|).(S.SPublic_key_hash.t))
@@ -288,8 +268,8 @@ Definition select_delegate
           cons n acc
         else
           acc in
-      Error_monad.op_gtgteqquestion (__t_value tt)
-        (fun __t_value => loop acc __t_value (Pervasives.succ n)) in
+      let!? __t_value := __t_value tt in
+      loop acc __t_value (Pervasives.succ n) in
   loop nil delegate_list 0.
 
 Definition first_baking_priorities
@@ -305,9 +285,8 @@ Definition first_baking_priorities
     end in
   fun delegate =>
     fun level =>
-      Error_monad.op_gtgteqquestion (baking_priorities ctxt level)
-        (fun delegate_list =>
-          select_delegate delegate delegate_list max_priority).
+      let!? delegate_list := baking_priorities ctxt level in
+      select_delegate delegate delegate_list max_priority.
 
 Definition check_hash
   (__hash_value : (|Block_hash|).(S.HASH.t))
@@ -375,21 +354,20 @@ Definition check_fitness_gap
   (ctxt : Alpha_context.context) (block : Alpha_context.Block_header.t)
   : Lwt.t (Error_monad.tzresult unit) :=
   let current_fitness := Alpha_context.Fitness.current ctxt in
-  Error_monad.op_gtgteqquestion
-    (Lwt.__return
+  let!? announced_fitness :=
+    Lwt.__return
       (Alpha_context.Fitness.to_int64
-        block.(Alpha_context.Block_header.t.shell).(Block_header.shell_header.fitness)))
-    (fun announced_fitness =>
-      let gap := Int64.sub announced_fitness current_fitness in
-      if
-        Pervasives.op_pipepipe
-          ((|Compare.Int64|).(Compare.S.op_lteq) gap
-            (* ❌ Constant of type int64 is converted to int *)
-            0) ((|Compare.Int64|).(Compare.S.op_lt) (max_fitness_gap ctxt) gap)
-        then
-        Error_monad.fail extensible_type_value
-      else
-        Error_monad.return_unit).
+        block.(Alpha_context.Block_header.t.shell).(Block_header.shell_header.fitness))
+    in
+  let gap := Int64.sub announced_fitness current_fitness in
+  if
+    Pervasives.op_pipepipe
+      ((|Compare.Int64|).(Compare.S.op_lteq) gap
+        (* ❌ Constant of type int64 is converted to int *)
+        0) ((|Compare.Int64|).(Compare.S.op_lt) (max_fitness_gap ctxt) gap) then
+    Error_monad.fail extensible_type_value
+  else
+    Error_monad.return_unit.
 
 Definition last_of_a_cycle
   (ctxt : Alpha_context.context) (l : Alpha_context.Level.t) : bool :=
@@ -426,21 +404,19 @@ Definition minimal_valid_time
   (ctxt : Alpha_context.context) (priority : Z) (endorsing_power : Z)
   : Lwt.t (Error_monad.tzresult Time.t) :=
   let predecessor_timestamp := Alpha_context.Timestamp.current ctxt in
-  Error_monad.op_gtgteqquestion
-    (minimal_time ctxt priority predecessor_timestamp)
-    (fun minimal_time =>
-      let minimal_required_endorsements :=
-        Alpha_context.Constants.initial_endorsers ctxt in
-      let delay_per_missing_endorsement :=
-        Alpha_context.Constants.delay_per_missing_endorsement ctxt in
-      let missing_endorsements :=
-        (|Compare.Int|).(Compare.S.max) 0
-          (Pervasives.op_minus minimal_required_endorsements endorsing_power) in
-      match
-        Alpha_context.Period.mult (Int32.of_int missing_endorsements)
-          delay_per_missing_endorsement with
-      | Pervasives.Ok delay =>
-        Error_monad.__return
-          (Time.add minimal_time (Alpha_context.Period.to_seconds delay))
-      | (Pervasives.Error _) as err => Lwt.__return err
-      end).
+  let!? minimal_time := minimal_time ctxt priority predecessor_timestamp in
+  let minimal_required_endorsements :=
+    Alpha_context.Constants.initial_endorsers ctxt in
+  let delay_per_missing_endorsement :=
+    Alpha_context.Constants.delay_per_missing_endorsement ctxt in
+  let missing_endorsements :=
+    (|Compare.Int|).(Compare.S.max) 0
+      (Pervasives.op_minus minimal_required_endorsements endorsing_power) in
+  match
+    Alpha_context.Period.mult (Int32.of_int missing_endorsements)
+      delay_per_missing_endorsement with
+  | Pervasives.Ok delay =>
+    Error_monad.__return
+      (Time.add minimal_time (Alpha_context.Period.to_seconds delay))
+  | (Pervasives.Error _) as err => Lwt.__return err
+  end.

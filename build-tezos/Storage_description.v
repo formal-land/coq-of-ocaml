@@ -10,6 +10,7 @@ Unset Positivity Checking.
 Unset Guard Checking.
 
 Require Import Tezos.Environment.
+Import Notations.
 
 Definition depends_on_me (function_parameter : unit) : unit :=
   let '_ := function_parameter in
@@ -226,19 +227,18 @@ Fixpoint register_indexed_subcontext {a b r : Set}
       let equal_left (x : __0) (y : __0) : bool :=
         (|Compare.Int|).(Compare.S.op_eq) (compare_left x y) 0 in
       let list_left (__r_value : r) : Lwt.t (Error_monad.tzresult (list __0)) :=
-        Error_monad.op_gtgteqquestion (__list_value __r_value)
-          (fun l => Error_monad.__return (destutter equal_left l)) in
+        let!? l := __list_value __r_value in
+        Error_monad.__return (destutter equal_left l) in
       let list_right (__r_value : __Pair_'inter_key)
         : Lwt.t (Error_monad.tzresult (list __1)) :=
         let '(__a_value, k) := unpack __left __r_value in
-        Error_monad.op_gtgteqquestion (__list_value __a_value)
-          (fun l =>
-            Error_monad.__return
-              (List.map Pervasives.snd
-                (List.filter
-                  (fun function_parameter =>
-                    let '(x, _) := function_parameter in
-                    equal_left x k) l))) in
+        let!? l := __list_value __a_value in
+        Error_monad.__return
+          (List.map Pervasives.snd
+            (List.filter
+              (fun function_parameter =>
+                let '(x, _) := function_parameter in
+                equal_left x k) l)) in
       register_indexed_subcontext
         (register_indexed_subcontext dir list_left __left) list_right __right)
   | (One {| args.One.rpc_arg := arg; args.One.encoding := arg_encoding |}, _) =>
@@ -464,12 +464,9 @@ Fixpoint combine_object {A : Set}
         handler.Handler.get :=
           fun k =>
             fun i =>
-              Error_monad.op_gtgteqquestion
-                (__handler_value.(opt_handler.Opt_handler.get) k i)
-                (fun v1 =>
-                  Error_monad.op_gtgteqquestion
-                    (handlers.(handler.Handler.get) k i)
-                    (fun v2 => Error_monad.__return (v1, v2))) |}
+              let!? v1 := __handler_value.(opt_handler.Opt_handler.get) k i in
+              let!? v2 := handlers.(handler.Handler.get) k i in
+              Error_monad.__return (v1, v2) |}
   end.
 
 Module query.
@@ -510,13 +507,12 @@ Definition build_directory {key : Set} (dir : t key) : RPC_directory.t key :=
           fun q =>
             fun function_parameter =>
               let '_ := function_parameter in
-              Error_monad.op_gtgteqquestion
-                (get k (Pervasives.op_plus q.(query.depth) 1))
-                (fun function_parameter =>
-                  match function_parameter with
-                  | None => Pervasives.raise extensible_type_value
-                  | Some x => Error_monad.__return x
-                  end))) in
+              let!? function_parameter :=
+                get k (Pervasives.op_plus q.(query.depth) 1) in
+              match function_parameter with
+              | None => Pervasives.raise extensible_type_value
+              | Some x => Error_monad.__return x
+              end)) in
   let fix build_handler {ikey : Set} (dir : t ikey) (path : RPC_path.t key ikey)
     {struct dir} : opt_handler ikey :=
     match Pervasives.op_exclamation dir with
@@ -575,10 +571,10 @@ Definition build_directory {key : Set} (dir : t key) : RPC_directory.t key :=
                   if (|Compare.Int|).(Compare.S.op_lt) i 0 then
                     Error_monad.return_none
                   else
-                    Error_monad.op_gtgteqquestion
-                      (__handler_value.(handler.Handler.get) k
-                        (Pervasives.op_minus i 1))
-                      (fun v => Error_monad.return_some v) |} in
+                    let!? v :=
+                      __handler_value.(handler.Handler.get) k
+                        (Pervasives.op_minus i 1) in
+                    Error_monad.return_some v |} in
       (* ❌ Sequences of instructions are ignored (operator ";") *)
       (* ❌ instruction_sequence ";" *)
       __handler_value
@@ -639,20 +635,18 @@ Definition build_directory {key : Set} (dir : t key) : RPC_directory.t key :=
           if (|Compare.Int|).(Compare.S.op_eq) i 0 then
             Error_monad.return_some nil
           else
-            Error_monad.op_gtgteqquestion (__list_value k)
-              (fun keys =>
-                Error_monad.op_gtgteqquestion
-                  (Error_monad.map_s
-                    (fun __key_value =>
-                      if (|Compare.Int|).(Compare.S.op_eq) i 1 then
-                        Error_monad.__return (__key_value, None)
-                      else
-                        Error_monad.op_gtgteqquestion
-                          (__handler_value.(opt_handler.Opt_handler.get)
-                            (k, __key_value) (Pervasives.op_minus i 1))
-                          (fun value =>
-                            Error_monad.__return (__key_value, value))) keys)
-                  (fun values => Error_monad.return_some values)) in
+            let!? keys := __list_value k in
+            let!? values :=
+              Error_monad.map_s
+                (fun __key_value =>
+                  if (|Compare.Int|).(Compare.S.op_eq) i 1 then
+                    Error_monad.__return (__key_value, None)
+                  else
+                    let!? value :=
+                      __handler_value.(opt_handler.Opt_handler.get)
+                        (k, __key_value) (Pervasives.op_minus i 1) in
+                    Error_monad.__return (__key_value, value)) keys in
+            Error_monad.return_some values in
       let __handler_value :=
         Opt_handler
           {|

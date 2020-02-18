@@ -3328,3 +3328,13 @@ Module RPC_context.
             * (K * a * b * c * q * i * o)) * L)))) * L * pr -> pr -> a -> b ->
     c -> q -> i -> Lwt.t (Error_monad.shell_tzresult (option o)).
 End RPC_context.
+
+Module Notations.
+  Notation "'let!?' x ':=' X 'in' Y" :=
+    (Error_monad.op_gtgteqquestion X (fun x => Y))
+    (at level 200, x ident, X at level 100, Y at level 200).
+
+  Notation "'let!?' ' x ':=' X 'in' Y" :=
+    (Error_monad.op_gtgteqquestion X (fun x => Y))
+    (at level 200, x pattern, X at level 100, Y at level 200).
+End Notations.

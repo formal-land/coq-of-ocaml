@@ -10,6 +10,7 @@ Unset Positivity Checking.
 Unset Guard Checking.
 
 Require Import Tezos.Environment.
+Import Notations.
 Require Tezos.Alpha_context.
 Require Tezos.Michelson_v1_gas.
 Require Tezos.Script_expr_hash.
@@ -1117,16 +1118,12 @@ Fixpoint unparse_stack {a : Set}
         (fun '[__0, __1] =>
           [(Script_typed_ir.ty __0) ** (Script_typed_ir.stack_ty __1) **
             (option Script_typed_ir.var_annot)]) [_, _] [ty, rest, annot] in
-    Error_monad.op_gtgteqquestion (unparse_ty ctxt ty)
-      (fun function_parameter =>
-        let '(uty, ctxt) := function_parameter in
-        Error_monad.op_gtgteqquestion (unparse_stack ctxt rest)
-          (fun function_parameter =>
-            let '(urest, ctxt) := function_parameter in
-            Error_monad.__return
-              ((cons
-                ((Micheline.strip_locations uty),
-                  (Script_ir_annot.unparse_var_annot annot)) urest), ctxt)))
+    let!? '(uty, ctxt) := unparse_ty ctxt ty in
+    let!? '(urest, ctxt) := unparse_stack ctxt rest in
+    Error_monad.__return
+      ((cons
+        ((Micheline.strip_locations uty),
+          (Script_ir_annot.unparse_var_annot annot)) urest), ctxt)
   end.
 
 Definition serialize_stack_for_error {A : Set}
@@ -1895,26 +1892,19 @@ Definition merge_branches {a b bef : Set}
     let unmatched_branches (function_parameter : unit)
       : Lwt.t (Error_monad.tzresult Error_monad.__error) :=
       let '_ := function_parameter in
-      Error_monad.op_gtgteqquestion (serialize_stack_for_error ctxt aftbt)
+      let!? '(aftbt, ctxt) := serialize_stack_for_error ctxt aftbt in
+      Error_monad.op_gtgtpipequestion (serialize_stack_for_error ctxt aftbf)
         (fun function_parameter =>
-          let '(aftbt, ctxt) := function_parameter in
-          Error_monad.op_gtgtpipequestion (serialize_stack_for_error ctxt aftbf)
-            (fun function_parameter =>
-              let '(aftbf, _ctxt) := function_parameter in
-              extensible_type_value)) in
+          let '(aftbf, _ctxt) := function_parameter in
+          extensible_type_value) in
     Error_monad.trace_eval unmatched_branches
-      (Error_monad.op_gtgteqquestion
-        (Lwt.__return (stack_ty_eq ctxt 1 aftbt aftbf))
-        (fun function_parameter =>
-          let '(Eq, ctxt) := function_parameter in
-          Error_monad.op_gtgteqquestion
-            (Lwt.__return (merge_stacks legacy loc ctxt aftbt aftbf))
-            (fun function_parameter =>
-              let '(merged_stack, ctxt) := function_parameter in
-              Error_monad.__return
-                ((Typed
-                  (branch (Script_typed_ir.descr.with_aft merged_stack dbt)
-                    (Script_typed_ir.descr.with_aft merged_stack dbf))), ctxt))))
+      (let!? '(Eq, ctxt) := Lwt.__return (stack_ty_eq ctxt 1 aftbt aftbf) in
+      let!? '(merged_stack, ctxt) :=
+        Lwt.__return (merge_stacks legacy loc ctxt aftbt aftbf) in
+      Error_monad.__return
+        ((Typed
+          (branch (Script_typed_ir.descr.with_aft merged_stack dbt)
+            (Script_typed_ir.descr.with_aft merged_stack dbf))), ctxt))
   |
     (Failed {| judgement.Failed.descr := descrt |},
       Failed {| judgement.Failed.descr := descrf |}) =>
@@ -2897,860 +2887,718 @@ Fixpoint parse_data {a : Set}
   (legacy : bool) (ty : Script_typed_ir.ty a)
   (script_data : Alpha_context.Script.node) {struct type_logger}
   : Lwt.t (Error_monad.tzresult (a * Alpha_context.context)) :=
-  Error_monad.op_gtgteqquestion
-    (Lwt.__return (Alpha_context.Gas.consume ctxt Typecheck_costs.cycle))
-    (fun ctxt =>
-      let __error_value (function_parameter : unit)
-        : Lwt.t (Error_monad.tzresult Error_monad.__error) :=
-        let '_ := function_parameter in
-        Error_monad.op_gtgtpipequestion
-          (Lwt.__return (serialize_ty_for_error ctxt ty))
+  let!? ctxt :=
+    Lwt.__return (Alpha_context.Gas.consume ctxt Typecheck_costs.cycle) in
+  let __error_value (function_parameter : unit)
+    : Lwt.t (Error_monad.tzresult Error_monad.__error) :=
+    let '_ := function_parameter in
+    Error_monad.op_gtgtpipequestion
+      (Lwt.__return (serialize_ty_for_error ctxt ty))
+      (fun function_parameter =>
+        let '(ty, _ctxt) := function_parameter in
+        extensible_type_value) in
+  let traced {B : Set} (body : Lwt.t (Error_monad.tzresult B))
+    : Lwt.t (Error_monad.tzresult B) :=
+    Error_monad.trace_eval __error_value body in
+  let parse_items {B C D E : Set}
+    (type_logger : option type_logger) (loc : Alpha_context.Script.location)
+    (ctxt : Alpha_context.context)
+    (expr : Micheline.node B Alpha_context.Script.prim)
+    (key_type : Script_typed_ir.comparable_ty C)
+    (value_type : Script_typed_ir.ty D)
+    (items :
+      list
+        (Micheline.node Alpha_context.Script.location Alpha_context.Script.prim))
+    (item_wrapper : D -> E)
+    : Lwt.t
+      (Error_monad.tzresult (Script_typed_ir.map C E * Alpha_context.context)) :=
+    let length := List.length items in
+    Error_monad.op_gtgtpipequestion
+      (traced
+        (Error_monad.fold_left_s
           (fun function_parameter =>
-            let '(ty, _ctxt) := function_parameter in
-            extensible_type_value) in
-      let traced {B : Set} (body : Lwt.t (Error_monad.tzresult B))
-        : Lwt.t (Error_monad.tzresult B) :=
-        Error_monad.trace_eval __error_value body in
-      let parse_items {B C D E : Set}
-        (type_logger : option type_logger) (loc : Alpha_context.Script.location)
-        (ctxt : Alpha_context.context)
-        (expr : Micheline.node B Alpha_context.Script.prim)
-        (key_type : Script_typed_ir.comparable_ty C)
-        (value_type : Script_typed_ir.ty D)
-        (items :
-          list
+            let '(last_value, map, ctxt) := function_parameter in
+            fun item =>
+              let!? ctxt :=
+                Lwt.__return
+                  (Alpha_context.Gas.consume ctxt
+                    (Typecheck_costs.map_element length)) in
+              match item with
+              |
+                Micheline.Prim _ Alpha_context.Script.D_Elt (cons k (cons v []))
+                  _ =>
+                let!? '(k, ctxt) :=
+                  parse_comparable_data type_logger ctxt key_type k in
+                let!? '(v, ctxt) :=
+                  parse_data type_logger ctxt legacy value_type v in
+                let!? '_ :=
+                  match last_value with
+                  | Some value =>
+                    if
+                      (|Compare.Int|).(Compare.S.op_lteq) 0
+                        (compare_comparable key_type value k) then
+                      if
+                        (|Compare.Int|).(Compare.S.op_eq) 0
+                          (compare_comparable key_type value k) then
+                        Error_monad.fail extensible_type_value
+                      else
+                        Error_monad.fail extensible_type_value
+                    else
+                      Error_monad.return_unit
+                  | None => Error_monad.return_unit
+                  end in
+                Error_monad.__return
+                  ((Some k), (map_update k (Some (item_wrapper v)) map), ctxt)
+              | Micheline.Prim loc Alpha_context.Script.D_Elt l _ =>
+                Error_monad.fail extensible_type_value
+              | Micheline.Prim loc name _ _ =>
+                Error_monad.fail extensible_type_value
+              |
+                (Micheline.Int _ _ | Micheline.String _ _ | Micheline.Bytes _ _
+                | Micheline.Seq _ _) =>
+                Error_monad.op_gtgteqquestion (__error_value tt)
+                  Error_monad.fail
+              end) (None, (empty_map key_type), ctxt) items))
+      (fun function_parameter =>
+        let '(_, items, ctxt) := function_parameter in
+        (items, ctxt)) in
+  match (ty, script_data) with
+  |
+    (Script_typed_ir.Unit_t _,
+      Micheline.Prim loc Alpha_context.Script.D_Unit [] annot) =>
+    let!? '_ :=
+      if legacy then
+        Error_monad.__return tt
+      else
+        Script_ir_annot.fail_unexpected_annot loc annot in
+    Error_monad.op_gtgtpipequestion
+      (Lwt.__return
+        (Alpha_context.Gas.consume ctxt Typecheck_costs.__unit_value))
+      (fun ctxt => (tt, ctxt))
+  |
+    (Script_typed_ir.Unit_t _,
+      Micheline.Prim loc Alpha_context.Script.D_Unit l _) =>
+    traced (Error_monad.fail extensible_type_value)
+  | (Script_typed_ir.Unit_t _, expr) =>
+    traced
+      (Error_monad.fail
+        (unexpected expr nil Script_tc_errors.Constant_namespace
+          [ Alpha_context.Script.D_Unit ]))
+  |
+    (Script_typed_ir.Bool_t _,
+      Micheline.Prim loc Alpha_context.Script.D_True [] annot) =>
+    let!? '_ :=
+      if legacy then
+        Error_monad.__return tt
+      else
+        Script_ir_annot.fail_unexpected_annot loc annot in
+    Error_monad.op_gtgtpipequestion
+      (Lwt.__return
+        (Alpha_context.Gas.consume ctxt Typecheck_costs.__bool_value))
+      (fun ctxt => (true, ctxt))
+  |
+    (Script_typed_ir.Bool_t _,
+      Micheline.Prim loc Alpha_context.Script.D_False [] annot) =>
+    let!? '_ :=
+      if legacy then
+        Error_monad.__return tt
+      else
+        Script_ir_annot.fail_unexpected_annot loc annot in
+    Error_monad.op_gtgtpipequestion
+      (Lwt.__return
+        (Alpha_context.Gas.consume ctxt Typecheck_costs.__bool_value))
+      (fun ctxt => (false, ctxt))
+  |
+    (Script_typed_ir.Bool_t _,
+      Micheline.Prim loc
+        ((Alpha_context.Script.D_True | Alpha_context.Script.D_False) as c) l _)
+    => traced (Error_monad.fail extensible_type_value)
+  | (Script_typed_ir.Bool_t _, expr) =>
+    traced
+      (Error_monad.fail
+        (unexpected expr nil Script_tc_errors.Constant_namespace
+          [ Alpha_context.Script.D_True; Alpha_context.Script.D_False ]))
+  | (Script_typed_ir.String_t _, Micheline.String _ v) =>
+    let!? ctxt :=
+      Lwt.__return
+        (Alpha_context.Gas.consume ctxt
+          (Typecheck_costs.__string_value (String.length v))) in
+    let fix check_printable_ascii (i : (|Compare.Int|).(Compare.S.t)) {struct i}
+      : bool :=
+      if (|Compare.Int|).(Compare.S.op_lt) i 0 then
+        true
+      else
+        match String.get v i with
+        |
+          ("010" % char | " " % char | "!" % char | """" % char | "#" % char |
+          "$" % char | "%" % char | "&" % char | "'" % char | "(" % char |
+          ")" % char | "*" % char | "+" % char | "," % char | "-" % char |
+          "." % char | "/" % char | "0" % char | "1" % char | "2" % char |
+          "3" % char | "4" % char | "5" % char | "6" % char | "7" % char |
+          "8" % char | "9" % char | ":" % char | ";" % char | "<" % char |
+          "=" % char | ">" % char | "?" % char | "@" % char | "A" % char |
+          "B" % char | "C" % char | "D" % char | "E" % char | "F" % char |
+          "G" % char | "H" % char | "I" % char | "J" % char | "K" % char |
+          "L" % char | "M" % char | "N" % char | "O" % char | "P" % char |
+          "Q" % char | "R" % char | "S" % char | "T" % char | "U" % char |
+          "V" % char | "W" % char | "X" % char | "Y" % char | "Z" % char |
+          "[" % char | "\" % char | "]" % char | "^" % char | "_" % char |
+          "`" % char | "a" % char | "b" % char | "c" % char | "d" % char |
+          "e" % char | "f" % char | "g" % char | "h" % char | "i" % char |
+          "j" % char | "k" % char | "l" % char | "m" % char | "n" % char |
+          "o" % char | "p" % char | "q" % char | "r" % char | "s" % char |
+          "t" % char | "u" % char | "v" % char | "w" % char | "x" % char |
+          "y" % char | "z" % char | "{" % char | "|" % char | "}" % char |
+          "~" % char) => check_printable_ascii (Pervasives.op_minus i 1)
+        | _ => false
+        end in
+    if check_printable_ascii (Pervasives.op_minus (String.length v) 1) then
+      Error_monad.__return (v, ctxt)
+    else
+      Error_monad.op_gtgteqquestion (__error_value tt) Error_monad.fail
+  | (Script_typed_ir.String_t _, expr) =>
+    traced (Error_monad.fail extensible_type_value)
+  | (Script_typed_ir.Bytes_t _, Micheline.Bytes _ v) =>
+    let!? ctxt :=
+      Lwt.__return
+        (Alpha_context.Gas.consume ctxt
+          (Typecheck_costs.__string_value (MBytes.length v))) in
+    Error_monad.__return (v, ctxt)
+  | (Script_typed_ir.Bytes_t _, expr) =>
+    traced (Error_monad.fail extensible_type_value)
+  | (Script_typed_ir.Int_t _, Micheline.Int _ v) =>
+    let!? ctxt :=
+      Lwt.__return (Alpha_context.Gas.consume ctxt (Typecheck_costs.z v)) in
+    Error_monad.__return ((Alpha_context.Script_int.of_zint v), ctxt)
+  | (Script_typed_ir.Nat_t _, Micheline.Int _ v) =>
+    let!? ctxt :=
+      Lwt.__return (Alpha_context.Gas.consume ctxt (Typecheck_costs.z v)) in
+    let v := Alpha_context.Script_int.of_zint v in
+    if
+      (|Compare.Int|).(Compare.S.op_gteq)
+        (Alpha_context.Script_int.compare v Alpha_context.Script_int.zero) 0
+      then
+      Error_monad.__return ((Alpha_context.Script_int.abs v), ctxt)
+    else
+      Error_monad.op_gtgteqquestion (__error_value tt) Error_monad.fail
+  | (Script_typed_ir.Int_t _, expr) =>
+    traced (Error_monad.fail extensible_type_value)
+  | (Script_typed_ir.Nat_t _, expr) =>
+    traced (Error_monad.fail extensible_type_value)
+  | (Script_typed_ir.Mutez_t _, Micheline.Int _ v) =>
+    let!? ctxt :=
+      Lwt.__return
+        (Error_monad.op_gtgtquestion
+          (Alpha_context.Gas.consume ctxt Typecheck_costs.tez)
+          (fun ctxt =>
+            Alpha_context.Gas.consume ctxt
+              Michelson_v1_gas.Cost_of.Legacy.z_to_int64)) in
+    (* ❌ Try-with are not handled *)
+    try
+      match Alpha_context.Tez.of_mutez (Z.to_int64 v) with
+      | None => Pervasives.raise extensible_type_value
+      | Some tez => Error_monad.__return (tez, ctxt)
+      end
+  | (Script_typed_ir.Mutez_t _, expr) =>
+    traced (Error_monad.fail extensible_type_value)
+  | (Script_typed_ir.Timestamp_t _, Micheline.Int _ v) =>
+    let!? ctxt :=
+      Lwt.__return (Alpha_context.Gas.consume ctxt (Typecheck_costs.z v)) in
+    Error_monad.__return ((Alpha_context.Script_timestamp.of_zint v), ctxt)
+  | (Script_typed_ir.Timestamp_t _, Micheline.String _ s) =>
+    let!? ctxt :=
+      Lwt.__return
+        (Alpha_context.Gas.consume ctxt Typecheck_costs.string_timestamp) in
+    match Alpha_context.Script_timestamp.of_string s with
+    | Some v => Error_monad.__return (v, ctxt)
+    | None => Error_monad.op_gtgteqquestion (__error_value tt) Error_monad.fail
+    end
+  | (Script_typed_ir.Timestamp_t _, expr) =>
+    traced (Error_monad.fail extensible_type_value)
+  | (Script_typed_ir.Key_t _, Micheline.Bytes _ __bytes_value) =>
+    let!? ctxt :=
+      Lwt.__return (Alpha_context.Gas.consume ctxt Typecheck_costs.__key_value)
+      in
+    match
+      Data_encoding.Binary.of_bytes
+        (|Signature.Public_key|).(S.SPublic_key.encoding) __bytes_value with
+    | Some k => Error_monad.__return (k, ctxt)
+    | None => Error_monad.op_gtgteqquestion (__error_value tt) Error_monad.fail
+    end
+  | (Script_typed_ir.Key_t _, Micheline.String _ s) =>
+    let!? ctxt :=
+      Lwt.__return (Alpha_context.Gas.consume ctxt Typecheck_costs.__key_value)
+      in
+    match (|Signature.Public_key|).(S.SPublic_key.of_b58check_opt) s with
+    | Some k => Error_monad.__return (k, ctxt)
+    | None => Error_monad.op_gtgteqquestion (__error_value tt) Error_monad.fail
+    end
+  | (Script_typed_ir.Key_t _, expr) =>
+    traced (Error_monad.fail extensible_type_value)
+  | (Script_typed_ir.Key_hash_t _, Micheline.Bytes _ __bytes_value) =>
+    let!? ctxt :=
+      Lwt.__return (Alpha_context.Gas.consume ctxt Typecheck_costs.key_hash) in
+    match
+      Data_encoding.Binary.of_bytes
+        (|Signature.Public_key_hash|).(S.SPublic_key_hash.encoding)
+        __bytes_value with
+    | Some k => Error_monad.__return (k, ctxt)
+    | None => Error_monad.op_gtgteqquestion (__error_value tt) Error_monad.fail
+    end
+  | (Script_typed_ir.Key_hash_t _, Micheline.String _ s) =>
+    let!? ctxt :=
+      Lwt.__return (Alpha_context.Gas.consume ctxt Typecheck_costs.key_hash) in
+    match (|Signature.Public_key_hash|).(S.SPublic_key_hash.of_b58check_opt) s
+      with
+    | Some k => Error_monad.__return (k, ctxt)
+    | None => Error_monad.op_gtgteqquestion (__error_value tt) Error_monad.fail
+    end
+  | (Script_typed_ir.Key_hash_t _, expr) =>
+    traced (Error_monad.fail extensible_type_value)
+  | (Script_typed_ir.Signature_t _, Micheline.Bytes _ __bytes_value) =>
+    let!? ctxt :=
+      Lwt.__return (Alpha_context.Gas.consume ctxt Typecheck_costs.signature) in
+    match Data_encoding.Binary.of_bytes Signature.encoding __bytes_value with
+    | Some k => Error_monad.__return (k, ctxt)
+    | None => Error_monad.op_gtgteqquestion (__error_value tt) Error_monad.fail
+    end
+  | (Script_typed_ir.Signature_t _, Micheline.String _ s) =>
+    let!? ctxt :=
+      Lwt.__return (Alpha_context.Gas.consume ctxt Typecheck_costs.signature) in
+    match Signature.of_b58check_opt s with
+    | Some s => Error_monad.__return (s, ctxt)
+    | None => Error_monad.op_gtgteqquestion (__error_value tt) Error_monad.fail
+    end
+  | (Script_typed_ir.Signature_t _, expr) =>
+    traced (Error_monad.fail extensible_type_value)
+  | (Script_typed_ir.Operation_t _, _) =>
+    (* ❌ Assert instruction is not handled. *)
+    assert false
+  | (Script_typed_ir.Chain_id_t _, Micheline.Bytes _ __bytes_value) =>
+    let!? ctxt :=
+      Lwt.__return (Alpha_context.Gas.consume ctxt Typecheck_costs.chain_id) in
+    match
+      Data_encoding.Binary.of_bytes (|Chain_id|).(S.HASH.encoding) __bytes_value
+      with
+    | Some k => Error_monad.__return (k, ctxt)
+    | None => Error_monad.op_gtgteqquestion (__error_value tt) Error_monad.fail
+    end
+  | (Script_typed_ir.Chain_id_t _, Micheline.String _ s) =>
+    let!? ctxt :=
+      Lwt.__return (Alpha_context.Gas.consume ctxt Typecheck_costs.chain_id) in
+    match (|Chain_id|).(S.HASH.of_b58check_opt) s with
+    | Some s => Error_monad.__return (s, ctxt)
+    | None => Error_monad.op_gtgteqquestion (__error_value tt) Error_monad.fail
+    end
+  | (Script_typed_ir.Chain_id_t _, expr) =>
+    traced (Error_monad.fail extensible_type_value)
+  | (Script_typed_ir.Address_t _, Micheline.Bytes loc __bytes_value) =>
+    let!? ctxt :=
+      Lwt.__return (Alpha_context.Gas.consume ctxt Typecheck_costs.contract) in
+    match
+      Data_encoding.Binary.of_bytes
+        (Data_encoding.tup2 Alpha_context.Contract.encoding
+          Data_encoding.__Variable.__string_value) __bytes_value with
+    | Some (c, entrypoint) =>
+      if (|Compare.Int|).(Compare.S.op_gt) (String.length entrypoint) 31 then
+        Error_monad.fail extensible_type_value
+      else
+        let!? entrypoint :=
+          match entrypoint with
+          | "" => Error_monad.__return "default"
+          | "default" => Error_monad.fail extensible_type_value
+          | name => Error_monad.__return name
+          end in
+        Error_monad.__return ((c, entrypoint), ctxt)
+    | None => Error_monad.op_gtgteqquestion (__error_value tt) Error_monad.fail
+    end
+  | (Script_typed_ir.Address_t _, Micheline.String loc s) =>
+    let!? ctxt :=
+      Lwt.__return (Alpha_context.Gas.consume ctxt Typecheck_costs.contract) in
+    let!? '(addr, entrypoint) :=
+      match String.index_opt s "%" % char with
+      | None => Error_monad.__return (s, "default")
+      | Some pos =>
+        let len :=
+          Pervasives.op_minus (Pervasives.op_minus (String.length s) pos) 1 in
+        let name := String.sub s (Pervasives.op_plus pos 1) len in
+        if (|Compare.Int|).(Compare.S.op_gt) len 31 then
+          Error_monad.fail extensible_type_value
+        else
+          match ((String.sub s 0 pos), name) with
+          | (_, "default") => traced (Error_monad.fail extensible_type_value)
+          | addr_and_name => Error_monad.__return addr_and_name
+          end
+      end in
+    let!? c := Lwt.__return (Alpha_context.Contract.of_b58check addr) in
+    Error_monad.__return ((c, entrypoint), ctxt)
+  | (Script_typed_ir.Address_t _, expr) =>
+    traced (Error_monad.fail extensible_type_value)
+  | (Script_typed_ir.Contract_t ty _, Micheline.Bytes loc __bytes_value) =>
+    let 'existT _ __0 [ty, loc, __bytes_value] :=
+      existT (A := Set)
+        (fun __0 =>
+          [(Script_typed_ir.ty __0) ** Alpha_context.Script.location **
+            MBytes.t]) _ [ty, loc, __bytes_value] in
+    let!? ctxt :=
+      Lwt.__return (Alpha_context.Gas.consume ctxt Typecheck_costs.contract) in
+    match
+      Data_encoding.Binary.of_bytes
+        (Data_encoding.tup2 Alpha_context.Contract.encoding
+          Data_encoding.__Variable.__string_value) __bytes_value with
+    | Some (c, entrypoint) =>
+      if (|Compare.Int|).(Compare.S.op_gt) (String.length entrypoint) 31 then
+        Error_monad.fail extensible_type_value
+      else
+        let!? entrypoint :=
+          match entrypoint with
+          | "" => Error_monad.__return "default"
+          | "default" => traced (Error_monad.fail extensible_type_value)
+          | name => Error_monad.__return name
+          end in
+        let!? '(ctxt, _) :=
+          traced (parse_contract legacy ctxt loc ty c entrypoint) in
+        Error_monad.__return ((ty, (c, entrypoint)), ctxt)
+    | None => Error_monad.op_gtgteqquestion (__error_value tt) Error_monad.fail
+    end
+  | (Script_typed_ir.Contract_t ty _, Micheline.String loc s) =>
+    let 'existT _ __1 [ty, loc, s] :=
+      existT (A := Set)
+        (fun __1 =>
+          [(Script_typed_ir.ty __1) ** Alpha_context.Script.location ** string])
+        _ [ty, loc, s] in
+    let!? ctxt :=
+      Lwt.__return (Alpha_context.Gas.consume ctxt Typecheck_costs.contract) in
+    let!? '(addr, entrypoint) :=
+      match String.index_opt s "%" % char with
+      | None => Error_monad.__return (s, "default")
+      | Some pos =>
+        let len :=
+          Pervasives.op_minus (Pervasives.op_minus (String.length s) pos) 1 in
+        let name := String.sub s (Pervasives.op_plus pos 1) len in
+        if (|Compare.Int|).(Compare.S.op_gt) len 31 then
+          Error_monad.fail extensible_type_value
+        else
+          match ((String.sub s 0 pos), name) with
+          | (_, "default") => traced (Error_monad.fail extensible_type_value)
+          | addr_and_name => Error_monad.__return addr_and_name
+          end
+      end in
+    let!? c := traced (Lwt.__return (Alpha_context.Contract.of_b58check addr))
+      in
+    let!? '(ctxt, _) := parse_contract legacy ctxt loc ty c entrypoint in
+    Error_monad.__return ((ty, (c, entrypoint)), ctxt)
+  | (Script_typed_ir.Contract_t _ _, expr) =>
+    traced (Error_monad.fail extensible_type_value)
+  |
+    (Script_typed_ir.Pair_t (ta, _, _) (tb, _, _) _ _,
+      Micheline.Prim loc Alpha_context.Script.D_Pair (cons va (cons vb []))
+        annot) =>
+    let 'existT _ [__3, __4] [ta, tb, loc, va, vb, annot] :=
+      existT (A := [Set ** Set])
+        (fun '[__3, __4] =>
+          [(Script_typed_ir.ty __3) ** (Script_typed_ir.ty __4) **
+            Alpha_context.Script.location **
             (Micheline.node Alpha_context.Script.location
-              Alpha_context.Script.prim)) (item_wrapper : D -> E)
-        : Lwt.t
-          (Error_monad.tzresult
-            (Script_typed_ir.map C E * Alpha_context.context)) :=
-        let length := List.length items in
-        Error_monad.op_gtgtpipequestion
-          (traced
-            (Error_monad.fold_left_s
-              (fun function_parameter =>
-                let '(last_value, map, ctxt) := function_parameter in
-                fun item =>
-                  Error_monad.op_gtgteqquestion
-                    (Lwt.__return
-                      (Alpha_context.Gas.consume ctxt
-                        (Typecheck_costs.map_element length)))
-                    (fun ctxt =>
-                      match item with
-                      |
-                        Micheline.Prim _ Alpha_context.Script.D_Elt
-                          (cons k (cons v [])) _ =>
-                        Error_monad.op_gtgteqquestion
-                          (parse_comparable_data type_logger ctxt key_type k)
-                          (fun function_parameter =>
-                            let '(k, ctxt) := function_parameter in
-                            Error_monad.op_gtgteqquestion
-                              (parse_data type_logger ctxt legacy value_type v)
-                              (fun function_parameter =>
-                                let '(v, ctxt) := function_parameter in
-                                Error_monad.op_gtgteqquestion
-                                  match last_value with
-                                  | Some value =>
-                                    if
-                                      (|Compare.Int|).(Compare.S.op_lteq) 0
-                                        (compare_comparable key_type value k)
-                                      then
-                                      if
-                                        (|Compare.Int|).(Compare.S.op_eq) 0
-                                          (compare_comparable key_type value k)
-                                        then
-                                        Error_monad.fail extensible_type_value
-                                      else
-                                        Error_monad.fail extensible_type_value
-                                    else
-                                      Error_monad.return_unit
-                                  | None => Error_monad.return_unit
-                                  end
-                                  (fun function_parameter =>
-                                    let '_ := function_parameter in
-                                    Error_monad.__return
-                                      ((Some k),
-                                        (map_update k (Some (item_wrapper v))
-                                          map), ctxt))))
-                      | Micheline.Prim loc Alpha_context.Script.D_Elt l _ =>
-                        Error_monad.fail extensible_type_value
-                      | Micheline.Prim loc name _ _ =>
-                        Error_monad.fail extensible_type_value
-                      |
-                        (Micheline.Int _ _ | Micheline.String _ _ |
-                        Micheline.Bytes _ _ | Micheline.Seq _ _) =>
-                        Error_monad.op_gtgteqquestion (__error_value tt)
-                          Error_monad.fail
-                      end)) (None, (empty_map key_type), ctxt) items))
-          (fun function_parameter =>
-            let '(_, items, ctxt) := function_parameter in
-            (items, ctxt)) in
-      match (ty, script_data) with
-      |
-        (Script_typed_ir.Unit_t _,
-          Micheline.Prim loc Alpha_context.Script.D_Unit [] annot) =>
-        Error_monad.op_gtgteqquestion
-          (if legacy then
-            Error_monad.__return tt
-          else
-            Script_ir_annot.fail_unexpected_annot loc annot)
-          (fun function_parameter =>
-            let '_ := function_parameter in
-            Error_monad.op_gtgtpipequestion
-              (Lwt.__return
-                (Alpha_context.Gas.consume ctxt Typecheck_costs.__unit_value))
-              (fun ctxt => (tt, ctxt)))
-      |
-        (Script_typed_ir.Unit_t _,
-          Micheline.Prim loc Alpha_context.Script.D_Unit l _) =>
-        traced (Error_monad.fail extensible_type_value)
-      | (Script_typed_ir.Unit_t _, expr) =>
-        traced
-          (Error_monad.fail
-            (unexpected expr nil Script_tc_errors.Constant_namespace
-              [ Alpha_context.Script.D_Unit ]))
-      |
-        (Script_typed_ir.Bool_t _,
-          Micheline.Prim loc Alpha_context.Script.D_True [] annot) =>
-        Error_monad.op_gtgteqquestion
-          (if legacy then
-            Error_monad.__return tt
-          else
-            Script_ir_annot.fail_unexpected_annot loc annot)
-          (fun function_parameter =>
-            let '_ := function_parameter in
-            Error_monad.op_gtgtpipequestion
-              (Lwt.__return
-                (Alpha_context.Gas.consume ctxt Typecheck_costs.__bool_value))
-              (fun ctxt => (true, ctxt)))
-      |
-        (Script_typed_ir.Bool_t _,
-          Micheline.Prim loc Alpha_context.Script.D_False [] annot) =>
-        Error_monad.op_gtgteqquestion
-          (if legacy then
-            Error_monad.__return tt
-          else
-            Script_ir_annot.fail_unexpected_annot loc annot)
-          (fun function_parameter =>
-            let '_ := function_parameter in
-            Error_monad.op_gtgtpipequestion
-              (Lwt.__return
-                (Alpha_context.Gas.consume ctxt Typecheck_costs.__bool_value))
-              (fun ctxt => (false, ctxt)))
-      |
-        (Script_typed_ir.Bool_t _,
-          Micheline.Prim loc
-            ((Alpha_context.Script.D_True | Alpha_context.Script.D_False) as c)
-            l _) => traced (Error_monad.fail extensible_type_value)
-      | (Script_typed_ir.Bool_t _, expr) =>
-        traced
-          (Error_monad.fail
-            (unexpected expr nil Script_tc_errors.Constant_namespace
-              [ Alpha_context.Script.D_True; Alpha_context.Script.D_False ]))
-      | (Script_typed_ir.String_t _, Micheline.String _ v) =>
-        Error_monad.op_gtgteqquestion
-          (Lwt.__return
-            (Alpha_context.Gas.consume ctxt
-              (Typecheck_costs.__string_value (String.length v))))
-          (fun ctxt =>
-            let fix check_printable_ascii (i : (|Compare.Int|).(Compare.S.t))
-              {struct i} : bool :=
-              if (|Compare.Int|).(Compare.S.op_lt) i 0 then
-                true
-              else
-                match String.get v i with
-                |
-                  ("010" % char | " " % char | "!" % char | """" % char |
-                  "#" % char | "$" % char | "%" % char | "&" % char | "'" % char
-                  | "(" % char | ")" % char | "*" % char | "+" % char |
-                  "," % char | "-" % char | "." % char | "/" % char | "0" % char
-                  | "1" % char | "2" % char | "3" % char | "4" % char |
-                  "5" % char | "6" % char | "7" % char | "8" % char | "9" % char
-                  | ":" % char | ";" % char | "<" % char | "=" % char |
-                  ">" % char | "?" % char | "@" % char | "A" % char | "B" % char
-                  | "C" % char | "D" % char | "E" % char | "F" % char |
-                  "G" % char | "H" % char | "I" % char | "J" % char | "K" % char
-                  | "L" % char | "M" % char | "N" % char | "O" % char |
-                  "P" % char | "Q" % char | "R" % char | "S" % char | "T" % char
-                  | "U" % char | "V" % char | "W" % char | "X" % char |
-                  "Y" % char | "Z" % char | "[" % char | "\" % char | "]" % char
-                  | "^" % char | "_" % char | "`" % char | "a" % char |
-                  "b" % char | "c" % char | "d" % char | "e" % char | "f" % char
-                  | "g" % char | "h" % char | "i" % char | "j" % char |
-                  "k" % char | "l" % char | "m" % char | "n" % char | "o" % char
-                  | "p" % char | "q" % char | "r" % char | "s" % char |
-                  "t" % char | "u" % char | "v" % char | "w" % char | "x" % char
-                  | "y" % char | "z" % char | "{" % char | "|" % char |
-                  "}" % char | "~" % char) =>
-                  check_printable_ascii (Pervasives.op_minus i 1)
-                | _ => false
-                end in
-            if check_printable_ascii (Pervasives.op_minus (String.length v) 1)
-              then
-              Error_monad.__return (v, ctxt)
-            else
-              Error_monad.op_gtgteqquestion (__error_value tt) Error_monad.fail)
-      | (Script_typed_ir.String_t _, expr) =>
-        traced (Error_monad.fail extensible_type_value)
-      | (Script_typed_ir.Bytes_t _, Micheline.Bytes _ v) =>
-        Error_monad.op_gtgteqquestion
-          (Lwt.__return
-            (Alpha_context.Gas.consume ctxt
-              (Typecheck_costs.__string_value (MBytes.length v))))
-          (fun ctxt => Error_monad.__return (v, ctxt))
-      | (Script_typed_ir.Bytes_t _, expr) =>
-        traced (Error_monad.fail extensible_type_value)
-      | (Script_typed_ir.Int_t _, Micheline.Int _ v) =>
-        Error_monad.op_gtgteqquestion
-          (Lwt.__return (Alpha_context.Gas.consume ctxt (Typecheck_costs.z v)))
-          (fun ctxt =>
-            Error_monad.__return ((Alpha_context.Script_int.of_zint v), ctxt))
-      | (Script_typed_ir.Nat_t _, Micheline.Int _ v) =>
-        Error_monad.op_gtgteqquestion
-          (Lwt.__return (Alpha_context.Gas.consume ctxt (Typecheck_costs.z v)))
-          (fun ctxt =>
-            let v := Alpha_context.Script_int.of_zint v in
-            if
-              (|Compare.Int|).(Compare.S.op_gteq)
-                (Alpha_context.Script_int.compare v
-                  Alpha_context.Script_int.zero) 0 then
-              Error_monad.__return ((Alpha_context.Script_int.abs v), ctxt)
-            else
-              Error_monad.op_gtgteqquestion (__error_value tt) Error_monad.fail)
-      | (Script_typed_ir.Int_t _, expr) =>
-        traced (Error_monad.fail extensible_type_value)
-      | (Script_typed_ir.Nat_t _, expr) =>
-        traced (Error_monad.fail extensible_type_value)
-      | (Script_typed_ir.Mutez_t _, Micheline.Int _ v) =>
-        Error_monad.op_gtgteqquestion
-          (Lwt.__return
-            (Error_monad.op_gtgtquestion
-              (Alpha_context.Gas.consume ctxt Typecheck_costs.tez)
-              (fun ctxt =>
-                Alpha_context.Gas.consume ctxt
-                  Michelson_v1_gas.Cost_of.Legacy.z_to_int64)))
-          (fun ctxt =>
-            (* ❌ Try-with are not handled *)
-            try
-              match Alpha_context.Tez.of_mutez (Z.to_int64 v) with
-              | None => Pervasives.raise extensible_type_value
-              | Some tez => Error_monad.__return (tez, ctxt)
-              end)
-      | (Script_typed_ir.Mutez_t _, expr) =>
-        traced (Error_monad.fail extensible_type_value)
-      | (Script_typed_ir.Timestamp_t _, Micheline.Int _ v) =>
-        Error_monad.op_gtgteqquestion
-          (Lwt.__return (Alpha_context.Gas.consume ctxt (Typecheck_costs.z v)))
-          (fun ctxt =>
-            Error_monad.__return
-              ((Alpha_context.Script_timestamp.of_zint v), ctxt))
-      | (Script_typed_ir.Timestamp_t _, Micheline.String _ s) =>
-        Error_monad.op_gtgteqquestion
-          (Lwt.__return
-            (Alpha_context.Gas.consume ctxt Typecheck_costs.string_timestamp))
-          (fun ctxt =>
-            match Alpha_context.Script_timestamp.of_string s with
-            | Some v => Error_monad.__return (v, ctxt)
-            | None =>
-              Error_monad.op_gtgteqquestion (__error_value tt) Error_monad.fail
-            end)
-      | (Script_typed_ir.Timestamp_t _, expr) =>
-        traced (Error_monad.fail extensible_type_value)
-      | (Script_typed_ir.Key_t _, Micheline.Bytes _ __bytes_value) =>
-        Error_monad.op_gtgteqquestion
-          (Lwt.__return
-            (Alpha_context.Gas.consume ctxt Typecheck_costs.__key_value))
-          (fun ctxt =>
-            match
-              Data_encoding.Binary.of_bytes
-                (|Signature.Public_key|).(S.SPublic_key.encoding) __bytes_value
-              with
-            | Some k => Error_monad.__return (k, ctxt)
-            | None =>
-              Error_monad.op_gtgteqquestion (__error_value tt) Error_monad.fail
-            end)
-      | (Script_typed_ir.Key_t _, Micheline.String _ s) =>
-        Error_monad.op_gtgteqquestion
-          (Lwt.__return
-            (Alpha_context.Gas.consume ctxt Typecheck_costs.__key_value))
-          (fun ctxt =>
-            match (|Signature.Public_key|).(S.SPublic_key.of_b58check_opt) s
-              with
-            | Some k => Error_monad.__return (k, ctxt)
-            | None =>
-              Error_monad.op_gtgteqquestion (__error_value tt) Error_monad.fail
-            end)
-      | (Script_typed_ir.Key_t _, expr) =>
-        traced (Error_monad.fail extensible_type_value)
-      | (Script_typed_ir.Key_hash_t _, Micheline.Bytes _ __bytes_value) =>
-        Error_monad.op_gtgteqquestion
-          (Lwt.__return
-            (Alpha_context.Gas.consume ctxt Typecheck_costs.key_hash))
-          (fun ctxt =>
-            match
-              Data_encoding.Binary.of_bytes
-                (|Signature.Public_key_hash|).(S.SPublic_key_hash.encoding)
-                __bytes_value with
-            | Some k => Error_monad.__return (k, ctxt)
-            | None =>
-              Error_monad.op_gtgteqquestion (__error_value tt) Error_monad.fail
-            end)
-      | (Script_typed_ir.Key_hash_t _, Micheline.String _ s) =>
-        Error_monad.op_gtgteqquestion
-          (Lwt.__return
-            (Alpha_context.Gas.consume ctxt Typecheck_costs.key_hash))
-          (fun ctxt =>
-            match
-              (|Signature.Public_key_hash|).(S.SPublic_key_hash.of_b58check_opt)
-                s with
-            | Some k => Error_monad.__return (k, ctxt)
-            | None =>
-              Error_monad.op_gtgteqquestion (__error_value tt) Error_monad.fail
-            end)
-      | (Script_typed_ir.Key_hash_t _, expr) =>
-        traced (Error_monad.fail extensible_type_value)
-      | (Script_typed_ir.Signature_t _, Micheline.Bytes _ __bytes_value) =>
-        Error_monad.op_gtgteqquestion
-          (Lwt.__return
-            (Alpha_context.Gas.consume ctxt Typecheck_costs.signature))
-          (fun ctxt =>
-            match Data_encoding.Binary.of_bytes Signature.encoding __bytes_value
-              with
-            | Some k => Error_monad.__return (k, ctxt)
-            | None =>
-              Error_monad.op_gtgteqquestion (__error_value tt) Error_monad.fail
-            end)
-      | (Script_typed_ir.Signature_t _, Micheline.String _ s) =>
-        Error_monad.op_gtgteqquestion
-          (Lwt.__return
-            (Alpha_context.Gas.consume ctxt Typecheck_costs.signature))
-          (fun ctxt =>
-            match Signature.of_b58check_opt s with
-            | Some s => Error_monad.__return (s, ctxt)
-            | None =>
-              Error_monad.op_gtgteqquestion (__error_value tt) Error_monad.fail
-            end)
-      | (Script_typed_ir.Signature_t _, expr) =>
-        traced (Error_monad.fail extensible_type_value)
-      | (Script_typed_ir.Operation_t _, _) =>
-        (* ❌ Assert instruction is not handled. *)
-        assert false
-      | (Script_typed_ir.Chain_id_t _, Micheline.Bytes _ __bytes_value) =>
-        Error_monad.op_gtgteqquestion
-          (Lwt.__return
-            (Alpha_context.Gas.consume ctxt Typecheck_costs.chain_id))
-          (fun ctxt =>
-            match
-              Data_encoding.Binary.of_bytes (|Chain_id|).(S.HASH.encoding)
-                __bytes_value with
-            | Some k => Error_monad.__return (k, ctxt)
-            | None =>
-              Error_monad.op_gtgteqquestion (__error_value tt) Error_monad.fail
-            end)
-      | (Script_typed_ir.Chain_id_t _, Micheline.String _ s) =>
-        Error_monad.op_gtgteqquestion
-          (Lwt.__return
-            (Alpha_context.Gas.consume ctxt Typecheck_costs.chain_id))
-          (fun ctxt =>
-            match (|Chain_id|).(S.HASH.of_b58check_opt) s with
-            | Some s => Error_monad.__return (s, ctxt)
-            | None =>
-              Error_monad.op_gtgteqquestion (__error_value tt) Error_monad.fail
-            end)
-      | (Script_typed_ir.Chain_id_t _, expr) =>
-        traced (Error_monad.fail extensible_type_value)
-      | (Script_typed_ir.Address_t _, Micheline.Bytes loc __bytes_value) =>
-        Error_monad.op_gtgteqquestion
-          (Lwt.__return
-            (Alpha_context.Gas.consume ctxt Typecheck_costs.contract))
-          (fun ctxt =>
-            match
-              Data_encoding.Binary.of_bytes
-                (Data_encoding.tup2 Alpha_context.Contract.encoding
-                  Data_encoding.__Variable.__string_value) __bytes_value with
-            | Some (c, entrypoint) =>
-              if (|Compare.Int|).(Compare.S.op_gt) (String.length entrypoint) 31
-                then
-                Error_monad.fail extensible_type_value
-              else
-                Error_monad.op_gtgteqquestion
-                  match entrypoint with
-                  | "" => Error_monad.__return "default"
-                  | "default" => Error_monad.fail extensible_type_value
-                  | name => Error_monad.__return name
-                  end
-                  (fun entrypoint =>
-                    Error_monad.__return ((c, entrypoint), ctxt))
-            | None =>
-              Error_monad.op_gtgteqquestion (__error_value tt) Error_monad.fail
-            end)
-      | (Script_typed_ir.Address_t _, Micheline.String loc s) =>
-        Error_monad.op_gtgteqquestion
-          (Lwt.__return
-            (Alpha_context.Gas.consume ctxt Typecheck_costs.contract))
-          (fun ctxt =>
-            Error_monad.op_gtgteqquestion
-              match String.index_opt s "%" % char with
-              | None => Error_monad.__return (s, "default")
-              | Some pos =>
-                let len :=
-                  Pervasives.op_minus
-                    (Pervasives.op_minus (String.length s) pos) 1 in
-                let name := String.sub s (Pervasives.op_plus pos 1) len in
-                if (|Compare.Int|).(Compare.S.op_gt) len 31 then
-                  Error_monad.fail extensible_type_value
-                else
-                  match ((String.sub s 0 pos), name) with
-                  | (_, "default") =>
-                    traced (Error_monad.fail extensible_type_value)
-                  | addr_and_name => Error_monad.__return addr_and_name
-                  end
-              end
-              (fun function_parameter =>
-                let '(addr, entrypoint) := function_parameter in
-                Error_monad.op_gtgteqquestion
-                  (Lwt.__return (Alpha_context.Contract.of_b58check addr))
-                  (fun c => Error_monad.__return ((c, entrypoint), ctxt))))
-      | (Script_typed_ir.Address_t _, expr) =>
-        traced (Error_monad.fail extensible_type_value)
-      | (Script_typed_ir.Contract_t ty _, Micheline.Bytes loc __bytes_value) =>
-        let 'existT _ __0 [ty, loc, __bytes_value] :=
-          existT (A := Set)
-            (fun __0 =>
-              [(Script_typed_ir.ty __0) ** Alpha_context.Script.location **
-                MBytes.t]) _ [ty, loc, __bytes_value] in
-        Error_monad.op_gtgteqquestion
-          (Lwt.__return
-            (Alpha_context.Gas.consume ctxt Typecheck_costs.contract))
-          (fun ctxt =>
-            match
-              Data_encoding.Binary.of_bytes
-                (Data_encoding.tup2 Alpha_context.Contract.encoding
-                  Data_encoding.__Variable.__string_value) __bytes_value with
-            | Some (c, entrypoint) =>
-              if (|Compare.Int|).(Compare.S.op_gt) (String.length entrypoint) 31
-                then
-                Error_monad.fail extensible_type_value
-              else
-                Error_monad.op_gtgteqquestion
-                  match entrypoint with
-                  | "" => Error_monad.__return "default"
-                  | "default" => traced (Error_monad.fail extensible_type_value)
-                  | name => Error_monad.__return name
-                  end
-                  (fun entrypoint =>
-                    Error_monad.op_gtgteqquestion
-                      (traced (parse_contract legacy ctxt loc ty c entrypoint))
-                      (fun function_parameter =>
-                        let '(ctxt, _) := function_parameter in
-                        Error_monad.__return ((ty, (c, entrypoint)), ctxt)))
-            | None =>
-              Error_monad.op_gtgteqquestion (__error_value tt) Error_monad.fail
-            end)
-      | (Script_typed_ir.Contract_t ty _, Micheline.String loc s) =>
-        let 'existT _ __1 [ty, loc, s] :=
-          existT (A := Set)
-            (fun __1 =>
-              [(Script_typed_ir.ty __1) ** Alpha_context.Script.location **
-                string]) _ [ty, loc, s] in
-        Error_monad.op_gtgteqquestion
-          (Lwt.__return
-            (Alpha_context.Gas.consume ctxt Typecheck_costs.contract))
-          (fun ctxt =>
-            Error_monad.op_gtgteqquestion
-              match String.index_opt s "%" % char with
-              | None => Error_monad.__return (s, "default")
-              | Some pos =>
-                let len :=
-                  Pervasives.op_minus
-                    (Pervasives.op_minus (String.length s) pos) 1 in
-                let name := String.sub s (Pervasives.op_plus pos 1) len in
-                if (|Compare.Int|).(Compare.S.op_gt) len 31 then
-                  Error_monad.fail extensible_type_value
-                else
-                  match ((String.sub s 0 pos), name) with
-                  | (_, "default") =>
-                    traced (Error_monad.fail extensible_type_value)
-                  | addr_and_name => Error_monad.__return addr_and_name
-                  end
-              end
-              (fun function_parameter =>
-                let '(addr, entrypoint) := function_parameter in
-                Error_monad.op_gtgteqquestion
-                  (traced
-                    (Lwt.__return (Alpha_context.Contract.of_b58check addr)))
-                  (fun c =>
-                    Error_monad.op_gtgteqquestion
-                      (parse_contract legacy ctxt loc ty c entrypoint)
-                      (fun function_parameter =>
-                        let '(ctxt, _) := function_parameter in
-                        Error_monad.__return ((ty, (c, entrypoint)), ctxt)))))
-      | (Script_typed_ir.Contract_t _ _, expr) =>
-        traced (Error_monad.fail extensible_type_value)
-      |
-        (Script_typed_ir.Pair_t (ta, _, _) (tb, _, _) _ _,
-          Micheline.Prim loc Alpha_context.Script.D_Pair (cons va (cons vb []))
-            annot) =>
-        let 'existT _ [__3, __4] [ta, tb, loc, va, vb, annot] :=
-          existT (A := [Set ** Set])
-            (fun '[__3, __4] =>
-              [(Script_typed_ir.ty __3) ** (Script_typed_ir.ty __4) **
-                Alpha_context.Script.location **
-                (Micheline.node Alpha_context.Script.location
-                  Alpha_context.Script.prim) **
-                (Micheline.node Alpha_context.Script.location
-                  Alpha_context.Script.prim) ** Micheline.annot]) [_, _]
-            [ta, tb, loc, va, vb, annot] in
-        Error_monad.op_gtgteqquestion
-          (if legacy then
-            Error_monad.__return tt
-          else
-            Script_ir_annot.fail_unexpected_annot loc annot)
-          (fun function_parameter =>
-            let '_ := function_parameter in
-            Error_monad.op_gtgteqquestion
-              (Lwt.__return
-                (Alpha_context.Gas.consume ctxt Typecheck_costs.pair))
-              (fun ctxt =>
-                Error_monad.op_gtgteqquestion
-                  (traced (parse_data type_logger ctxt legacy ta va))
-                  (fun function_parameter =>
-                    let '(va, ctxt) := function_parameter in
-                    Error_monad.op_gtgteqquestion
-                      (parse_data type_logger ctxt legacy tb vb)
-                      (fun function_parameter =>
-                        let '(vb, ctxt) := function_parameter in
-                        Error_monad.__return ((va, vb), ctxt)))))
-      |
-        (Script_typed_ir.Pair_t _ _ _ _,
-          Micheline.Prim loc Alpha_context.Script.D_Pair l _) =>
-        Error_monad.fail extensible_type_value
-      | (Script_typed_ir.Pair_t _ _ _ _, expr) =>
-        traced
-          (Error_monad.fail
-            (unexpected expr nil Script_tc_errors.Constant_namespace
-              [ Alpha_context.Script.D_Pair ]))
-      |
-        (Script_typed_ir.Union_t (tl, _) _ _ _,
-          Micheline.Prim loc Alpha_context.Script.D_Left (cons v []) annot) =>
-        let 'existT _ __9 [tl, loc, v, annot] :=
-          existT (A := Set)
-            (fun __9 =>
-              [(Script_typed_ir.ty __9) ** Alpha_context.Script.location **
-                (Micheline.node Alpha_context.Script.location
-                  Alpha_context.Script.prim) ** Micheline.annot]) _
-            [tl, loc, v, annot] in
-        Error_monad.op_gtgteqquestion
-          (if legacy then
-            Error_monad.__return tt
-          else
-            Script_ir_annot.fail_unexpected_annot loc annot)
-          (fun function_parameter =>
-            let '_ := function_parameter in
-            Error_monad.op_gtgteqquestion
-              (Lwt.__return
-                (Alpha_context.Gas.consume ctxt Typecheck_costs.union))
-              (fun ctxt =>
-                Error_monad.op_gtgteqquestion
-                  (traced (parse_data type_logger ctxt legacy tl v))
-                  (fun function_parameter =>
-                    let '(v, ctxt) := function_parameter in
-                    Error_monad.__return ((Script_typed_ir.L v), ctxt))))
-      |
-        (Script_typed_ir.Union_t _ _ _ _,
-          Micheline.Prim loc Alpha_context.Script.D_Left l _) =>
-        Error_monad.fail extensible_type_value
-      |
-        (Script_typed_ir.Union_t _ (tr, _) _ _,
-          Micheline.Prim loc Alpha_context.Script.D_Right (cons v []) annot) =>
-        let 'existT _ __14 [tr, loc, v, annot] :=
-          existT (A := Set)
-            (fun __14 =>
-              [(Script_typed_ir.ty __14) ** Alpha_context.Script.location **
-                (Micheline.node Alpha_context.Script.location
-                  Alpha_context.Script.prim) ** Micheline.annot]) _
-            [tr, loc, v, annot] in
-        Error_monad.op_gtgteqquestion
-          (Script_ir_annot.fail_unexpected_annot loc annot)
-          (fun function_parameter =>
-            let '_ := function_parameter in
-            Error_monad.op_gtgteqquestion
-              (Lwt.__return
-                (Alpha_context.Gas.consume ctxt Typecheck_costs.union))
-              (fun ctxt =>
-                Error_monad.op_gtgteqquestion
-                  (traced (parse_data type_logger ctxt legacy tr v))
-                  (fun function_parameter =>
-                    let '(v, ctxt) := function_parameter in
-                    Error_monad.__return ((Script_typed_ir.R v), ctxt))))
-      |
-        (Script_typed_ir.Union_t _ _ _ _,
-          Micheline.Prim loc Alpha_context.Script.D_Right l _) =>
-        Error_monad.fail extensible_type_value
-      | (Script_typed_ir.Union_t _ _ _ _, expr) =>
-        traced
-          (Error_monad.fail
-            (unexpected expr nil Script_tc_errors.Constant_namespace
-              [ Alpha_context.Script.D_Left; Alpha_context.Script.D_Right ]))
-      |
-        (Script_typed_ir.Lambda_t ta tr _ty_name,
-          (Micheline.Seq _loc _) as script_instr) =>
-        let 'existT _ [__19, __20] [ta, tr, _ty_name, _loc, script_instr] :=
-          existT (A := [Set ** Set])
-            (fun '[__19, __20] =>
-              [(Script_typed_ir.ty __19) ** (Script_typed_ir.ty __20) **
-                (option Script_typed_ir.type_annot) **
-                Alpha_context.Script.location **
-                (Micheline.node Alpha_context.Script.location
-                  Alpha_context.Script.prim)]) [_, _]
-            [ta, tr, _ty_name, _loc, script_instr] in
-        Error_monad.op_gtgteqquestion
-          (Lwt.__return (Alpha_context.Gas.consume ctxt Typecheck_costs.lambda))
-          (fun ctxt =>
-            traced
-              (parse_returning type_logger Lambda ctxt legacy
-                (ta, (Some (Script_typed_ir.Var_annot "@arg"))) tr script_instr))
-      | (Script_typed_ir.Lambda_t _ _ _, expr) =>
-        traced (Error_monad.fail extensible_type_value)
-      |
-        (Script_typed_ir.Option_t __t_value _ _,
-          Micheline.Prim loc Alpha_context.Script.D_Some (cons v []) annot) =>
-        let 'existT _ __23 [__t_value, loc, v, annot] :=
-          existT (A := Set)
-            (fun __23 =>
-              [(Script_typed_ir.ty __23) ** Alpha_context.Script.location **
-                (Micheline.node Alpha_context.Script.location
-                  Alpha_context.Script.prim) ** Micheline.annot]) _
-            [__t_value, loc, v, annot] in
-        Error_monad.op_gtgteqquestion
-          (if legacy then
-            Error_monad.__return tt
-          else
-            Script_ir_annot.fail_unexpected_annot loc annot)
-          (fun function_parameter =>
-            let '_ := function_parameter in
-            Error_monad.op_gtgteqquestion
-              (Lwt.__return
-                (Alpha_context.Gas.consume ctxt Typecheck_costs.some))
-              (fun ctxt =>
-                Error_monad.op_gtgteqquestion
-                  (traced (parse_data type_logger ctxt legacy __t_value v))
-                  (fun function_parameter =>
-                    let '(v, ctxt) := function_parameter in
-                    Error_monad.__return ((Some v), ctxt))))
-      |
-        (Script_typed_ir.Option_t _ _ _,
-          Micheline.Prim loc Alpha_context.Script.D_Some l _) =>
-        Error_monad.fail extensible_type_value
-      |
-        (Script_typed_ir.Option_t _ _ _,
-          Micheline.Prim loc Alpha_context.Script.D_None [] annot) =>
-        Error_monad.op_gtgteqquestion
-          (if legacy then
-            Error_monad.__return tt
-          else
-            Script_ir_annot.fail_unexpected_annot loc annot)
-          (fun function_parameter =>
-            let '_ := function_parameter in
-            Error_monad.op_gtgteqquestion
-              (Lwt.__return
-                (Alpha_context.Gas.consume ctxt Typecheck_costs.none))
-              (fun ctxt => Error_monad.__return (None, ctxt)))
-      |
-        (Script_typed_ir.Option_t _ _ _,
-          Micheline.Prim loc Alpha_context.Script.D_None l _) =>
-        Error_monad.fail extensible_type_value
-      | (Script_typed_ir.Option_t _ _ _, expr) =>
-        traced
-          (Error_monad.fail
-            (unexpected expr nil Script_tc_errors.Constant_namespace
-              [ Alpha_context.Script.D_Some; Alpha_context.Script.D_None ]))
-      | (Script_typed_ir.List_t __t_value _ty_name _, Micheline.Seq _loc items)
-        =>
-        let 'existT _ __28 [__t_value, _ty_name, _loc, items] :=
-          existT (A := Set)
-            (fun __28 =>
-              [(Script_typed_ir.ty __28) ** (option Script_typed_ir.type_annot)
-                ** Alpha_context.Script.location **
-                (list
-                  (Micheline.node Alpha_context.Script.location
-                    Alpha_context.Script.prim))]) _
-            [__t_value, _ty_name, _loc, items] in
-        traced
-          (Error_monad.fold_right_s
-            (fun v =>
-              fun function_parameter =>
-                let '(rest, ctxt) := function_parameter in
-                Error_monad.op_gtgteqquestion
-                  (Lwt.__return
-                    (Alpha_context.Gas.consume ctxt Typecheck_costs.list_element))
-                  (fun ctxt =>
-                    Error_monad.op_gtgteqquestion
-                      (parse_data type_logger ctxt legacy __t_value v)
-                      (fun function_parameter =>
-                        let '(v, ctxt) := function_parameter in
-                        Error_monad.__return ((cons v rest), ctxt)))) items
-            (nil, ctxt))
-      | (Script_typed_ir.List_t _ _ _, expr) =>
-        traced (Error_monad.fail extensible_type_value)
-      |
-        (Script_typed_ir.Set_t __t_value _ty_name,
-          (Micheline.Seq loc vs) as expr) =>
-        let 'existT _ __30 [__t_value, _ty_name, loc, vs, expr] :=
-          existT (A := Set)
-            (fun __30 =>
-              [(Script_typed_ir.comparable_ty __30) **
-                (option Script_typed_ir.type_annot) **
-                Alpha_context.Script.location **
-                (list
-                  (Micheline.node Alpha_context.Script.location
-                    Alpha_context.Script.prim)) **
-                (Micheline.node Alpha_context.Script.location
-                  Alpha_context.Script.prim)]) _
-            [__t_value, _ty_name, loc, vs, expr] in
-        let length := List.length vs in
-        Error_monad.op_gtgtpipequestion
-          (traced
-            (Error_monad.fold_left_s
-              (fun function_parameter =>
-                let '(last_value, set, ctxt) := function_parameter in
-                fun v =>
-                  Error_monad.op_gtgteqquestion
-                    (Lwt.__return
-                      (Alpha_context.Gas.consume ctxt
-                        (Typecheck_costs.set_element length)))
-                    (fun ctxt =>
-                      Error_monad.op_gtgteqquestion
-                        (parse_comparable_data type_logger ctxt __t_value v)
-                        (fun function_parameter =>
-                          let '(v, ctxt) := function_parameter in
-                          Error_monad.op_gtgteqquestion
-                            match last_value with
-                            | Some value =>
-                              if
-                                (|Compare.Int|).(Compare.S.op_lteq) 0
-                                  (compare_comparable __t_value value v) then
-                                if
-                                  (|Compare.Int|).(Compare.S.op_eq) 0
-                                    (compare_comparable __t_value value v) then
-                                  Error_monad.fail extensible_type_value
-                                else
-                                  Error_monad.fail extensible_type_value
-                              else
-                                Error_monad.return_unit
-                            | None => Error_monad.return_unit
-                            end
-                            (fun function_parameter =>
-                              let '_ := function_parameter in
-                              Error_monad.op_gtgteqquestion
-                                (Lwt.__return
-                                  (Alpha_context.Gas.consume ctxt
-                                    (Michelson_v1_gas.Cost_of.Legacy.set_update
-                                      v false set)))
-                                (fun ctxt =>
-                                  Error_monad.__return
-                                    ((Some v), (set_update v true set), ctxt))))))
-              (None, (empty_set __t_value), ctxt) vs))
-          (fun function_parameter =>
-            let '(_, set, ctxt) := function_parameter in
-            (set, ctxt))
-      | (Script_typed_ir.Set_t _ _, expr) =>
-        traced (Error_monad.fail extensible_type_value)
-      | (Script_typed_ir.Map_t tk tv _ty_name _, (Micheline.Seq loc vs) as expr)
-        =>
-        let 'existT _ [__32, __33] [tk, tv, _ty_name, loc, vs, expr] :=
-          existT (A := [Set ** Set])
-            (fun '[__32, __33] =>
-              [(Script_typed_ir.comparable_ty __32) ** (Script_typed_ir.ty __33)
-                ** (option Script_typed_ir.type_annot) **
-                Alpha_context.Script.location **
-                (list
-                  (Micheline.node Alpha_context.Script.location
-                    Alpha_context.Script.prim)) **
-                (Micheline.node Alpha_context.Script.location
-                  Alpha_context.Script.prim)]) [_, _]
-            [tk, tv, _ty_name, loc, vs, expr] in
-        parse_items type_logger loc ctxt expr tk tv vs (fun x => x)
-      | (Script_typed_ir.Map_t _ _ _ _, expr) =>
-        traced (Error_monad.fail extensible_type_value)
-      |
-        (Script_typed_ir.Big_map_t tk tv _ty_name,
-          (Micheline.Seq loc vs) as expr) =>
-        let 'existT _ [__36, __37] [tk, tv, _ty_name, loc, vs, expr] :=
-          existT (A := [Set ** Set])
-            (fun '[__36, __37] =>
-              [(Script_typed_ir.comparable_ty __36) ** (Script_typed_ir.ty __37)
-                ** (option Script_typed_ir.type_annot) **
-                Alpha_context.Script.location **
-                (list
-                  (Micheline.node Alpha_context.Script.location
-                    Alpha_context.Script.prim)) **
-                (Micheline.node Alpha_context.Script.location
-                  Alpha_context.Script.prim)]) [_, _]
-            [tk, tv, _ty_name, loc, vs, expr] in
-        Error_monad.op_gtgtpipequestion
-          (parse_items type_logger loc ctxt expr tk tv vs (fun x => Some x))
-          (fun function_parameter =>
-            let '(diff, ctxt) := function_parameter in
-            ({| Script_typed_ir.big_map.id := None;
-              Script_typed_ir.big_map.diff := diff;
-              Script_typed_ir.big_map.key_type := ty_of_comparable_ty tk;
-              Script_typed_ir.big_map.value_type := tv |}, ctxt))
-      | (Script_typed_ir.Big_map_t tk tv _ty_name, Micheline.Int loc id) =>
-        let 'existT _ [__38, __39] [tk, tv, _ty_name, loc, id] :=
-          existT (A := [Set ** Set])
-            (fun '[__38, __39] =>
-              [(Script_typed_ir.comparable_ty __38) ** (Script_typed_ir.ty __39)
-                ** (option Script_typed_ir.type_annot) **
-                Alpha_context.Script.location ** Z.t]) [_, _]
-            [tk, tv, _ty_name, loc, id] in
-        Error_monad.op_gtgteqquestion (Alpha_context.Big_map.__exists ctxt id)
-          (fun function_parameter =>
-            match function_parameter with
-            | (_, None) => traced (Error_monad.fail extensible_type_value)
-            | (ctxt, Some (btk, btv)) =>
+              Alpha_context.Script.prim) **
+            (Micheline.node Alpha_context.Script.location
+              Alpha_context.Script.prim) ** Micheline.annot]) [_, _]
+        [ta, tb, loc, va, vb, annot] in
+    let!? '_ :=
+      if legacy then
+        Error_monad.__return tt
+      else
+        Script_ir_annot.fail_unexpected_annot loc annot in
+    let!? ctxt :=
+      Lwt.__return (Alpha_context.Gas.consume ctxt Typecheck_costs.pair) in
+    let!? '(va, ctxt) := traced (parse_data type_logger ctxt legacy ta va) in
+    let!? '(vb, ctxt) := parse_data type_logger ctxt legacy tb vb in
+    Error_monad.__return ((va, vb), ctxt)
+  |
+    (Script_typed_ir.Pair_t _ _ _ _,
+      Micheline.Prim loc Alpha_context.Script.D_Pair l _) =>
+    Error_monad.fail extensible_type_value
+  | (Script_typed_ir.Pair_t _ _ _ _, expr) =>
+    traced
+      (Error_monad.fail
+        (unexpected expr nil Script_tc_errors.Constant_namespace
+          [ Alpha_context.Script.D_Pair ]))
+  |
+    (Script_typed_ir.Union_t (tl, _) _ _ _,
+      Micheline.Prim loc Alpha_context.Script.D_Left (cons v []) annot) =>
+    let 'existT _ __9 [tl, loc, v, annot] :=
+      existT (A := Set)
+        (fun __9 =>
+          [(Script_typed_ir.ty __9) ** Alpha_context.Script.location **
+            (Micheline.node Alpha_context.Script.location
+              Alpha_context.Script.prim) ** Micheline.annot]) _
+        [tl, loc, v, annot] in
+    let!? '_ :=
+      if legacy then
+        Error_monad.__return tt
+      else
+        Script_ir_annot.fail_unexpected_annot loc annot in
+    let!? ctxt :=
+      Lwt.__return (Alpha_context.Gas.consume ctxt Typecheck_costs.union) in
+    let!? '(v, ctxt) := traced (parse_data type_logger ctxt legacy tl v) in
+    Error_monad.__return ((Script_typed_ir.L v), ctxt)
+  |
+    (Script_typed_ir.Union_t _ _ _ _,
+      Micheline.Prim loc Alpha_context.Script.D_Left l _) =>
+    Error_monad.fail extensible_type_value
+  |
+    (Script_typed_ir.Union_t _ (tr, _) _ _,
+      Micheline.Prim loc Alpha_context.Script.D_Right (cons v []) annot) =>
+    let 'existT _ __14 [tr, loc, v, annot] :=
+      existT (A := Set)
+        (fun __14 =>
+          [(Script_typed_ir.ty __14) ** Alpha_context.Script.location **
+            (Micheline.node Alpha_context.Script.location
+              Alpha_context.Script.prim) ** Micheline.annot]) _
+        [tr, loc, v, annot] in
+    let!? '_ := Script_ir_annot.fail_unexpected_annot loc annot in
+    let!? ctxt :=
+      Lwt.__return (Alpha_context.Gas.consume ctxt Typecheck_costs.union) in
+    let!? '(v, ctxt) := traced (parse_data type_logger ctxt legacy tr v) in
+    Error_monad.__return ((Script_typed_ir.R v), ctxt)
+  |
+    (Script_typed_ir.Union_t _ _ _ _,
+      Micheline.Prim loc Alpha_context.Script.D_Right l _) =>
+    Error_monad.fail extensible_type_value
+  | (Script_typed_ir.Union_t _ _ _ _, expr) =>
+    traced
+      (Error_monad.fail
+        (unexpected expr nil Script_tc_errors.Constant_namespace
+          [ Alpha_context.Script.D_Left; Alpha_context.Script.D_Right ]))
+  |
+    (Script_typed_ir.Lambda_t ta tr _ty_name,
+      (Micheline.Seq _loc _) as script_instr) =>
+    let 'existT _ [__19, __20] [ta, tr, _ty_name, _loc, script_instr] :=
+      existT (A := [Set ** Set])
+        (fun '[__19, __20] =>
+          [(Script_typed_ir.ty __19) ** (Script_typed_ir.ty __20) **
+            (option Script_typed_ir.type_annot) ** Alpha_context.Script.location
+            **
+            (Micheline.node Alpha_context.Script.location
+              Alpha_context.Script.prim)]) [_, _]
+        [ta, tr, _ty_name, _loc, script_instr] in
+    let!? ctxt :=
+      Lwt.__return (Alpha_context.Gas.consume ctxt Typecheck_costs.lambda) in
+    traced
+      (parse_returning type_logger Lambda ctxt legacy
+        (ta, (Some (Script_typed_ir.Var_annot "@arg"))) tr script_instr)
+  | (Script_typed_ir.Lambda_t _ _ _, expr) =>
+    traced (Error_monad.fail extensible_type_value)
+  |
+    (Script_typed_ir.Option_t __t_value _ _,
+      Micheline.Prim loc Alpha_context.Script.D_Some (cons v []) annot) =>
+    let 'existT _ __23 [__t_value, loc, v, annot] :=
+      existT (A := Set)
+        (fun __23 =>
+          [(Script_typed_ir.ty __23) ** Alpha_context.Script.location **
+            (Micheline.node Alpha_context.Script.location
+              Alpha_context.Script.prim) ** Micheline.annot]) _
+        [__t_value, loc, v, annot] in
+    let!? '_ :=
+      if legacy then
+        Error_monad.__return tt
+      else
+        Script_ir_annot.fail_unexpected_annot loc annot in
+    let!? ctxt :=
+      Lwt.__return (Alpha_context.Gas.consume ctxt Typecheck_costs.some) in
+    let!? '(v, ctxt) := traced (parse_data type_logger ctxt legacy __t_value v)
+      in
+    Error_monad.__return ((Some v), ctxt)
+  |
+    (Script_typed_ir.Option_t _ _ _,
+      Micheline.Prim loc Alpha_context.Script.D_Some l _) =>
+    Error_monad.fail extensible_type_value
+  |
+    (Script_typed_ir.Option_t _ _ _,
+      Micheline.Prim loc Alpha_context.Script.D_None [] annot) =>
+    let!? '_ :=
+      if legacy then
+        Error_monad.__return tt
+      else
+        Script_ir_annot.fail_unexpected_annot loc annot in
+    let!? ctxt :=
+      Lwt.__return (Alpha_context.Gas.consume ctxt Typecheck_costs.none) in
+    Error_monad.__return (None, ctxt)
+  |
+    (Script_typed_ir.Option_t _ _ _,
+      Micheline.Prim loc Alpha_context.Script.D_None l _) =>
+    Error_monad.fail extensible_type_value
+  | (Script_typed_ir.Option_t _ _ _, expr) =>
+    traced
+      (Error_monad.fail
+        (unexpected expr nil Script_tc_errors.Constant_namespace
+          [ Alpha_context.Script.D_Some; Alpha_context.Script.D_None ]))
+  | (Script_typed_ir.List_t __t_value _ty_name _, Micheline.Seq _loc items) =>
+    let 'existT _ __28 [__t_value, _ty_name, _loc, items] :=
+      existT (A := Set)
+        (fun __28 =>
+          [(Script_typed_ir.ty __28) ** (option Script_typed_ir.type_annot) **
+            Alpha_context.Script.location **
+            (list
+              (Micheline.node Alpha_context.Script.location
+                Alpha_context.Script.prim))]) _
+        [__t_value, _ty_name, _loc, items] in
+    traced
+      (Error_monad.fold_right_s
+        (fun v =>
+          fun function_parameter =>
+            let '(rest, ctxt) := function_parameter in
+            let!? ctxt :=
               Lwt.__return
-                (Error_monad.op_gtgtquestion
-                  (parse_comparable_ty ctxt (Micheline.root btk))
+                (Alpha_context.Gas.consume ctxt Typecheck_costs.list_element) in
+            let!? '(v, ctxt) := parse_data type_logger ctxt legacy __t_value v
+              in
+            Error_monad.__return ((cons v rest), ctxt)) items (nil, ctxt))
+  | (Script_typed_ir.List_t _ _ _, expr) =>
+    traced (Error_monad.fail extensible_type_value)
+  | (Script_typed_ir.Set_t __t_value _ty_name, (Micheline.Seq loc vs) as expr)
+    =>
+    let 'existT _ __30 [__t_value, _ty_name, loc, vs, expr] :=
+      existT (A := Set)
+        (fun __30 =>
+          [(Script_typed_ir.comparable_ty __30) **
+            (option Script_typed_ir.type_annot) ** Alpha_context.Script.location
+            **
+            (list
+              (Micheline.node Alpha_context.Script.location
+                Alpha_context.Script.prim)) **
+            (Micheline.node Alpha_context.Script.location
+              Alpha_context.Script.prim)]) _
+        [__t_value, _ty_name, loc, vs, expr] in
+    let length := List.length vs in
+    Error_monad.op_gtgtpipequestion
+      (traced
+        (Error_monad.fold_left_s
+          (fun function_parameter =>
+            let '(last_value, set, ctxt) := function_parameter in
+            fun v =>
+              let!? ctxt :=
+                Lwt.__return
+                  (Alpha_context.Gas.consume ctxt
+                    (Typecheck_costs.set_element length)) in
+              let!? '(v, ctxt) :=
+                parse_comparable_data type_logger ctxt __t_value v in
+              let!? '_ :=
+                match last_value with
+                | Some value =>
+                  if
+                    (|Compare.Int|).(Compare.S.op_lteq) 0
+                      (compare_comparable __t_value value v) then
+                    if
+                      (|Compare.Int|).(Compare.S.op_eq) 0
+                        (compare_comparable __t_value value v) then
+                      Error_monad.fail extensible_type_value
+                    else
+                      Error_monad.fail extensible_type_value
+                  else
+                    Error_monad.return_unit
+                | None => Error_monad.return_unit
+                end in
+              let!? ctxt :=
+                Lwt.__return
+                  (Alpha_context.Gas.consume ctxt
+                    (Michelson_v1_gas.Cost_of.Legacy.set_update v false set)) in
+              Error_monad.__return ((Some v), (set_update v true set), ctxt))
+          (None, (empty_set __t_value), ctxt) vs))
+      (fun function_parameter =>
+        let '(_, set, ctxt) := function_parameter in
+        (set, ctxt))
+  | (Script_typed_ir.Set_t _ _, expr) =>
+    traced (Error_monad.fail extensible_type_value)
+  | (Script_typed_ir.Map_t tk tv _ty_name _, (Micheline.Seq loc vs) as expr) =>
+    let 'existT _ [__32, __33] [tk, tv, _ty_name, loc, vs, expr] :=
+      existT (A := [Set ** Set])
+        (fun '[__32, __33] =>
+          [(Script_typed_ir.comparable_ty __32) ** (Script_typed_ir.ty __33) **
+            (option Script_typed_ir.type_annot) ** Alpha_context.Script.location
+            **
+            (list
+              (Micheline.node Alpha_context.Script.location
+                Alpha_context.Script.prim)) **
+            (Micheline.node Alpha_context.Script.location
+              Alpha_context.Script.prim)]) [_, _]
+        [tk, tv, _ty_name, loc, vs, expr] in
+    parse_items type_logger loc ctxt expr tk tv vs (fun x => x)
+  | (Script_typed_ir.Map_t _ _ _ _, expr) =>
+    traced (Error_monad.fail extensible_type_value)
+  | (Script_typed_ir.Big_map_t tk tv _ty_name, (Micheline.Seq loc vs) as expr)
+    =>
+    let 'existT _ [__36, __37] [tk, tv, _ty_name, loc, vs, expr] :=
+      existT (A := [Set ** Set])
+        (fun '[__36, __37] =>
+          [(Script_typed_ir.comparable_ty __36) ** (Script_typed_ir.ty __37) **
+            (option Script_typed_ir.type_annot) ** Alpha_context.Script.location
+            **
+            (list
+              (Micheline.node Alpha_context.Script.location
+                Alpha_context.Script.prim)) **
+            (Micheline.node Alpha_context.Script.location
+              Alpha_context.Script.prim)]) [_, _]
+        [tk, tv, _ty_name, loc, vs, expr] in
+    Error_monad.op_gtgtpipequestion
+      (parse_items type_logger loc ctxt expr tk tv vs (fun x => Some x))
+      (fun function_parameter =>
+        let '(diff, ctxt) := function_parameter in
+        ({| Script_typed_ir.big_map.id := None;
+          Script_typed_ir.big_map.diff := diff;
+          Script_typed_ir.big_map.key_type := ty_of_comparable_ty tk;
+          Script_typed_ir.big_map.value_type := tv |}, ctxt))
+  | (Script_typed_ir.Big_map_t tk tv _ty_name, Micheline.Int loc id) =>
+    let 'existT _ [__38, __39] [tk, tv, _ty_name, loc, id] :=
+      existT (A := [Set ** Set])
+        (fun '[__38, __39] =>
+          [(Script_typed_ir.comparable_ty __38) ** (Script_typed_ir.ty __39) **
+            (option Script_typed_ir.type_annot) ** Alpha_context.Script.location
+            ** Z.t]) [_, _] [tk, tv, _ty_name, loc, id] in
+    let!? function_parameter := Alpha_context.Big_map.__exists ctxt id in
+    match function_parameter with
+    | (_, None) => traced (Error_monad.fail extensible_type_value)
+    | (ctxt, Some (btk, btv)) =>
+      Lwt.__return
+        (Error_monad.op_gtgtquestion
+          (parse_comparable_ty ctxt (Micheline.root btk))
+          (fun function_parameter =>
+            let '(Ex_comparable_ty btk, ctxt) := function_parameter in
+            let 'existT _ __Ex_comparable_ty_'a [btk, ctxt] :=
+              existT (A := Set)
+                (fun __Ex_comparable_ty_'a =>
+                  [(Script_typed_ir.comparable_ty __Ex_comparable_ty_'a) **
+                    Alpha_context.context]) _ [btk, ctxt] in
+            Error_monad.op_gtgtquestion
+              (parse_packable_ty ctxt legacy (Micheline.root btv))
+              (fun function_parameter =>
+                let '(Ex_ty btv, ctxt) := function_parameter in
+                let 'existT _ __Ex_ty_'a [btv, ctxt] :=
+                  existT (A := Set)
+                    (fun __Ex_ty_'a =>
+                      [(Script_typed_ir.ty __Ex_ty_'a) ** Alpha_context.context])
+                    _ [btv, ctxt] in
+                Error_monad.op_gtgtquestion (comparable_ty_eq ctxt tk btk)
                   (fun function_parameter =>
-                    let '(Ex_comparable_ty btk, ctxt) := function_parameter in
-                    let 'existT _ __Ex_comparable_ty_'a [btk, ctxt] :=
-                      existT (A := Set)
-                        (fun __Ex_comparable_ty_'a =>
-                          [(Script_typed_ir.comparable_ty __Ex_comparable_ty_'a)
-                            ** Alpha_context.context]) _ [btk, ctxt] in
-                    Error_monad.op_gtgtquestion
-                      (parse_packable_ty ctxt legacy (Micheline.root btv))
+                    let 'Eq := function_parameter in
+                    Error_monad.op_gtgtquestion (ty_eq ctxt tv btv)
                       (fun function_parameter =>
-                        let '(Ex_ty btv, ctxt) := function_parameter in
-                        let 'existT _ __Ex_ty_'a [btv, ctxt] :=
-                          existT (A := Set)
-                            (fun __Ex_ty_'a =>
-                              [(Script_typed_ir.ty __Ex_ty_'a) **
-                                Alpha_context.context]) _ [btv, ctxt] in
-                        Error_monad.op_gtgtquestion
-                          (comparable_ty_eq ctxt tk btk)
-                          (fun function_parameter =>
-                            let 'Eq := function_parameter in
-                            Error_monad.op_gtgtquestion (ty_eq ctxt tv btv)
-                              (fun function_parameter =>
-                                let '(Eq, ctxt) := function_parameter in
-                                Error_monad.ok
-                                  ({| Script_typed_ir.big_map.id := Some id;
-                                    Script_typed_ir.big_map.diff := empty_map tk;
-                                    Script_typed_ir.big_map.key_type :=
-                                      ty_of_comparable_ty tk;
-                                    Script_typed_ir.big_map.value_type := tv |},
-                                    ctxt))))))
-            end)
-      | (Script_typed_ir.Big_map_t _tk _tv _, expr) =>
-        let 'existT _ [__40, __41] [_tk, _tv, expr] :=
-          existT (A := [Set ** Set])
-            (fun '[__40, __41] =>
-              [(Script_typed_ir.comparable_ty __40) ** (Script_typed_ir.ty __41)
-                ** Alpha_context.Script.node]) [_, _] [_tk, _tv, expr] in
-        traced (Error_monad.fail extensible_type_value)
-      end)
+                        let '(Eq, ctxt) := function_parameter in
+                        Error_monad.ok
+                          ({| Script_typed_ir.big_map.id := Some id;
+                            Script_typed_ir.big_map.diff := empty_map tk;
+                            Script_typed_ir.big_map.key_type :=
+                              ty_of_comparable_ty tk;
+                            Script_typed_ir.big_map.value_type := tv |}, ctxt))))))
+    end
+  | (Script_typed_ir.Big_map_t _tk _tv _, expr) =>
+    let 'existT _ [__40, __41] [_tk, _tv, expr] :=
+      existT (A := [Set ** Set])
+        (fun '[__40, __41] =>
+          [(Script_typed_ir.comparable_ty __40) ** (Script_typed_ir.ty __41) **
+            Alpha_context.Script.node]) [_, _] [_tk, _tv, expr] in
+    traced (Error_monad.fail extensible_type_value)
+  end
 
 with parse_comparable_data {a : Set}
   (type_logger : option type_logger) (ctxt : Alpha_context.context)
@@ -3772,81 +3620,66 @@ with parse_returning {arg ret : Set}
   let '(arg, arg_annot) := function_parameter in
   fun ret =>
     fun script_instr =>
-      Error_monad.op_gtgteqquestion
-        (parse_instr type_logger tc_context ctxt legacy script_instr
-          (Script_typed_ir.Item_t arg Script_typed_ir.Empty_t arg_annot))
-        (fun function_parameter =>
-          match function_parameter with
-          |
-            (Typed
-              ({|
-                Script_typed_ir.descr.loc := loc;
-                  Script_typed_ir.descr.aft :=
-                    (Script_typed_ir.Item_t ty
-                      Script_typed_ir.Empty_t _) as
-                      stack_ty
-                  |} as __descr_value), ctxt) =>
-            let 'existT _ [__42, __Typed_'aft]
-              [loc, ty, stack_ty, __descr_value, ctxt] :=
-              existT (A := [Set ** Set])
-                (fun '[__42, __Typed_'aft] =>
-                  [Alpha_context.Script.location ** (Script_typed_ir.ty __42) **
-                    (Script_typed_ir.stack_ty
-                      (__42 * Script_typed_ir.end_of_stack)) **
-                    (Script_typed_ir.descr (arg * Script_typed_ir.end_of_stack)
-                      __Typed_'aft) ** Alpha_context.context]) [_, _]
-                [loc, ty, stack_ty, __descr_value, ctxt] in
-            Error_monad.trace_eval
+      let!? function_parameter :=
+        parse_instr type_logger tc_context ctxt legacy script_instr
+          (Script_typed_ir.Item_t arg Script_typed_ir.Empty_t arg_annot) in
+      match function_parameter with
+      |
+        (Typed
+          ({|
+            Script_typed_ir.descr.loc := loc;
+              Script_typed_ir.descr.aft :=
+                (Script_typed_ir.Item_t ty Script_typed_ir.Empty_t _)
+                  as stack_ty
+              |} as __descr_value), ctxt) =>
+        let 'existT _ [__42, __Typed_'aft]
+          [loc, ty, stack_ty, __descr_value, ctxt] :=
+          existT (A := [Set ** Set])
+            (fun '[__42, __Typed_'aft] =>
+              [Alpha_context.Script.location ** (Script_typed_ir.ty __42) **
+                (Script_typed_ir.stack_ty (__42 * Script_typed_ir.end_of_stack))
+                **
+                (Script_typed_ir.descr (arg * Script_typed_ir.end_of_stack)
+                  __Typed_'aft) ** Alpha_context.context]) [_, _]
+            [loc, ty, stack_ty, __descr_value, ctxt] in
+        Error_monad.trace_eval
+          (fun function_parameter =>
+            let '_ := function_parameter in
+            let!? '(ret, ctxt) := Lwt.__return (serialize_ty_for_error ctxt ret)
+              in
+            Error_monad.op_gtgtpipequestion
+              (serialize_stack_for_error ctxt stack_ty)
               (fun function_parameter =>
-                let '_ := function_parameter in
-                Error_monad.op_gtgteqquestion
-                  (Lwt.__return (serialize_ty_for_error ctxt ret))
-                  (fun function_parameter =>
-                    let '(ret, ctxt) := function_parameter in
-                    Error_monad.op_gtgtpipequestion
-                      (serialize_stack_for_error ctxt stack_ty)
-                      (fun function_parameter =>
-                        let '(stack_ty, _ctxt) := function_parameter in
-                        extensible_type_value)))
-              (Error_monad.op_gtgteqquestion (Lwt.__return (ty_eq ctxt ty ret))
-                (fun function_parameter =>
-                  let '(Eq, ctxt) := function_parameter in
-                  Error_monad.op_gtgteqquestion
-                    (Lwt.__return (merge_types legacy ctxt loc ty ret))
-                    (fun function_parameter =>
-                      let '(_ret, ctxt) := function_parameter in
-                      Error_monad.__return
-                        ({|
-                          Script_typed_ir.lambda.lam :=
-                            (__descr_value, script_instr) |}, ctxt))))
-          |
-            (Typed {|
-              Script_typed_ir.descr.loc := loc;
-                Script_typed_ir.descr.aft := stack_ty
-                |}, ctxt) =>
-            let 'existT _ __Typed_'aft1 [loc, stack_ty, ctxt] :=
-              existT (A := Set)
-                (fun __Typed_'aft1 =>
-                  [Alpha_context.Script.location **
-                    (Script_typed_ir.stack_ty __Typed_'aft1) **
-                    Alpha_context.context]) _ [loc, stack_ty, ctxt] in
-            Error_monad.op_gtgteqquestion
-              (Lwt.__return (serialize_ty_for_error ctxt ret))
-              (fun function_parameter =>
-                let '(ret, ctxt) := function_parameter in
-                Error_monad.op_gtgteqquestion
-                  (serialize_stack_for_error ctxt stack_ty)
-                  (fun function_parameter =>
-                    let '(stack_ty, _ctxt) := function_parameter in
-                    Error_monad.fail extensible_type_value))
-          | (Failed {| judgement.Failed.descr := __descr_value |}, ctxt) =>
-            Error_monad.__return
-              ({|
-                Script_typed_ir.lambda.lam :=
-                  ((__descr_value
-                    (Script_typed_ir.Item_t ret Script_typed_ir.Empty_t None)),
-                    script_instr) |}, ctxt)
-          end)
+                let '(stack_ty, _ctxt) := function_parameter in
+                extensible_type_value))
+          (let!? '(Eq, ctxt) := Lwt.__return (ty_eq ctxt ty ret) in
+          let!? '(_ret, ctxt) :=
+            Lwt.__return (merge_types legacy ctxt loc ty ret) in
+          Error_monad.__return
+            ({| Script_typed_ir.lambda.lam := (__descr_value, script_instr) |},
+              ctxt))
+      |
+        (Typed {|
+          Script_typed_ir.descr.loc := loc;
+            Script_typed_ir.descr.aft := stack_ty
+            |}, ctxt) =>
+        let 'existT _ __Typed_'aft1 [loc, stack_ty, ctxt] :=
+          existT (A := Set)
+            (fun __Typed_'aft1 =>
+              [Alpha_context.Script.location **
+                (Script_typed_ir.stack_ty __Typed_'aft1) **
+                Alpha_context.context]) _ [loc, stack_ty, ctxt] in
+        let!? '(ret, ctxt) := Lwt.__return (serialize_ty_for_error ctxt ret) in
+        let!? '(stack_ty, _ctxt) := serialize_stack_for_error ctxt stack_ty in
+        Error_monad.fail extensible_type_value
+      | (Failed {| judgement.Failed.descr := __descr_value |}, ctxt) =>
+        Error_monad.__return
+          ({|
+            Script_typed_ir.lambda.lam :=
+              ((__descr_value
+                (Script_typed_ir.Item_t ret Script_typed_ir.Empty_t None)),
+                script_instr) |}, ctxt)
+      end
 
 with parse_int32
   (n : Micheline.node Alpha_context.Script.location Alpha_context.Script.prim)
@@ -3946,15 +3779,11 @@ with parse_instr {bef : Set}
         Micheline.Bytes _ _))) => Error_monad.return_unit
     | (Some log, (Micheline.Prim _ _ _ _ | Micheline.Seq _ _)) =>
       let ctxt := Alpha_context.Gas.set_unlimited ctxt in
-      Error_monad.op_gtgteqquestion (unparse_stack ctxt stack_ty)
-        (fun function_parameter =>
-          let '(stack_ty, _) := function_parameter in
-          Error_monad.op_gtgteqquestion (unparse_stack ctxt aft)
-            (fun function_parameter =>
-              let '(aft, _) := function_parameter in
-              (* ❌ Sequences of instructions are ignored (operator ";") *)
-              (* ❌ instruction_sequence ";" *)
-              Error_monad.return_unit))
+      let!? '(stack_ty, _) := unparse_stack ctxt stack_ty in
+      let!? '(aft, _) := unparse_stack ctxt aft in
+      (* ❌ Sequences of instructions are ignored (operator ";") *)
+      (* ❌ instruction_sequence ";" *)
+      Error_monad.return_unit
     end in
   let outer_return {B : Set} : B -> Lwt.t (Error_monad.tzresult B) :=
     Error_monad.__return in
@@ -3987,4133 +3816,3190 @@ with parse_instr {bef : Set}
     (ctxt : Alpha_context.context) (loc : Z)
     (instr : Script_typed_ir.instr bef B) (aft : Script_typed_ir.stack_ty B)
     : Lwt.t (Error_monad.tzresult (judgement bef * Alpha_context.context)) :=
-    Error_monad.op_gtgteqquestion (log_stack ctxt loc stack_ty aft)
-      (fun function_parameter =>
-        let '_ := function_parameter in
-        Error_monad.op_gtgteqquestion
-          (Lwt.__return
-            (Alpha_context.Gas.consume ctxt (Typecheck_costs.instr instr)))
-          (fun ctxt =>
-            __return ctxt
-              (Typed
-                {| Script_typed_ir.descr.loc := loc;
-                  Script_typed_ir.descr.bef := stack_ty;
-                  Script_typed_ir.descr.aft := aft;
-                  Script_typed_ir.descr.instr := instr |}))) in
-  Error_monad.op_gtgteqquestion
-    (Lwt.__return (Alpha_context.Gas.consume ctxt Typecheck_costs.cycle))
-    (fun ctxt =>
-      match
-        ((script_instr, stack_ty),
-          match (script_instr, stack_ty) with
-          |
-            (Micheline.Prim loc Alpha_context.Script.I_DIP
-              (cons n (cons code [])) result_annot, __stack_value) =>
-            match parse_int32 n with
-            | Pervasives.Ok _ => true
-            | Pervasives.Error _ => false
-            end
-          | _ => false
-          end) with
+    let!? '_ := log_stack ctxt loc stack_ty aft in
+    let!? ctxt :=
+      Lwt.__return
+        (Alpha_context.Gas.consume ctxt (Typecheck_costs.instr instr)) in
+    __return ctxt
+      (Typed
+        {| Script_typed_ir.descr.loc := loc;
+          Script_typed_ir.descr.bef := stack_ty;
+          Script_typed_ir.descr.aft := aft; Script_typed_ir.descr.instr := instr
+          |}) in
+  let!? ctxt :=
+    Lwt.__return (Alpha_context.Gas.consume ctxt Typecheck_costs.cycle) in
+  match
+    ((script_instr, stack_ty),
+      match (script_instr, stack_ty) with
       |
-        ((Micheline.Prim loc Alpha_context.Script.I_DROP [] annot,
-          Script_typed_ir.Item_t _ rest _), _) =>
-        let 'existT _ __45 [loc, annot, rest] :=
-          existT (A := Set)
-            (fun __45 =>
-              [Alpha_context.Script.location ** Micheline.annot **
-                (Script_typed_ir.stack_ty __45)]) _ [loc, annot, rest] in
-        Error_monad.op_gtgteqquestion
-          (Script_ir_annot.fail_unexpected_annot loc annot)
-          (fun function_parameter =>
-            let '_ := function_parameter in
-            typed ctxt loc Script_typed_ir.Drop rest)
-      |
-        ((Micheline.Prim loc Alpha_context.Script.I_DROP (cons n [])
-          result_annot, whole_stack), _) =>
-        Error_monad.op_gtgteqquestion (Lwt.__return (parse_int32 n))
-          (fun whole_n =>
-            let fix make_proof_argument {tstk : Set}
-              (n : Z) (stk : Script_typed_ir.stack_ty tstk) {struct n}
-              : Lwt.t (Error_monad.tzresult (dropn_proof_argument tstk)) :=
-              match (((|Compare.Int|).(Compare.S.op_eq) n 0), stk) with
-              | (true, rest) =>
-                outer_return
-                  (Dropn_proof_argument (Script_typed_ir.Rest, rest, rest))
-              | (false, Script_typed_ir.Item_t v rest annot) =>
-                let 'existT _ [__470, __471] [v, rest, annot] :=
-                  existT (A := [Set ** Set])
-                    (fun '[__470, __471] =>
-                      [(Script_typed_ir.ty __470) **
-                        (Script_typed_ir.stack_ty __471) **
-                        (option Script_typed_ir.var_annot)]) [_, _]
-                    [v, rest, annot] in
-                Error_monad.op_gtgteqquestion
-                  (make_proof_argument (Pervasives.op_minus n 1) rest)
-                  (fun function_parameter =>
-                    let 'Dropn_proof_argument (n', stack_after_drops, aft') :=
-                      function_parameter in
-                    let 'existT _
-                      [__Dropn_proof_argument_'aft,
-                        __Dropn_proof_argument_'rest]
-                      [n', stack_after_drops, aft'] :=
-                      existT (A := [Set ** Set])
-                        (fun
-                          '[__Dropn_proof_argument_'aft,
-                            __Dropn_proof_argument_'rest] =>
-                          [(Script_typed_ir.stack_prefix_preservation_witness
-                            __Dropn_proof_argument_'rest
-                            __Dropn_proof_argument_'rest __471
-                            __Dropn_proof_argument_'aft) **
-                            (Script_typed_ir.stack_ty
-                              __Dropn_proof_argument_'rest) **
-                            (Script_typed_ir.stack_ty
-                              __Dropn_proof_argument_'aft)]) [_, _]
-                        [n', stack_after_drops, aft'] in
-                    outer_return
-                      (Dropn_proof_argument
-                        ((Script_typed_ir.Prefix n'), stack_after_drops,
-                          (Script_typed_ir.Item_t v aft' annot))))
-              | (_, _) =>
-                Error_monad.op_gtgteqquestion
-                  (serialize_stack_for_error ctxt whole_stack)
-                  (fun function_parameter =>
-                    let '(whole_stack, _ctxt) := function_parameter in
-                    Error_monad.fail extensible_type_value)
-              end in
-            Error_monad.op_gtgteqquestion
-              (Script_ir_annot.fail_unexpected_annot loc result_annot)
-              (fun function_parameter =>
-                let '_ := function_parameter in
-                Error_monad.op_gtgteqquestion
-                  (make_proof_argument whole_n whole_stack)
-                  (fun function_parameter =>
-                    let 'Dropn_proof_argument (n', stack_after_drops, _aft) :=
-                      function_parameter in
-                    let 'existT _
-                      [__Dropn_proof_argument_'aft1,
-                        __Dropn_proof_argument_'rest1]
-                      [n', stack_after_drops, _aft] :=
-                      existT (A := [Set ** Set])
-                        (fun
-                          '[__Dropn_proof_argument_'aft1,
-                            __Dropn_proof_argument_'rest1] =>
-                          [(Script_typed_ir.stack_prefix_preservation_witness
-                            __Dropn_proof_argument_'rest1
-                            __Dropn_proof_argument_'rest1 bef
-                            __Dropn_proof_argument_'aft1) **
-                            (Script_typed_ir.stack_ty
-                              __Dropn_proof_argument_'rest1) **
-                            (Script_typed_ir.stack_ty
-                              __Dropn_proof_argument_'aft1)]) [_, _]
-                        [n', stack_after_drops, _aft] in
-                    typed ctxt loc (Script_typed_ir.Dropn whole_n n')
-                      stack_after_drops)))
-      |
-        ((Micheline.Prim loc Alpha_context.Script.I_DROP
-          ((cons _ (cons _ _)) as l) _, _), _) =>
-        Error_monad.fail extensible_type_value
-      |
-        ((Micheline.Prim loc Alpha_context.Script.I_DUP [] annot,
-          Script_typed_ir.Item_t v rest stack_annot), _) =>
-        let 'existT _ [__46, __47] [loc, annot, v, rest, stack_annot] :=
-          existT (A := [Set ** Set])
-            (fun '[__46, __47] =>
-              [Alpha_context.Script.location ** Micheline.annot **
-                (Script_typed_ir.ty __46) ** (Script_typed_ir.stack_ty __47) **
-                (option Script_typed_ir.var_annot)]) [_, _]
-            [loc, annot, v, rest, stack_annot] in
-        Error_monad.op_gtgteqquestion
-          (parse_var_annot loc (Some stack_annot) annot)
-          (fun annot =>
-            typed ctxt loc Script_typed_ir.Dup
-              (Script_typed_ir.Item_t v
-                (Script_typed_ir.Item_t v rest stack_annot) annot))
-      |
-        ((Micheline.Prim loc Alpha_context.Script.I_DIG (cons n []) result_annot,
-          __stack_value), _) =>
-        let fix make_proof_argument {tstk : Set}
-          (n : Z) (stk : Script_typed_ir.stack_ty tstk) {struct n}
-          : Lwt.t (Error_monad.tzresult (dig_proof_argument tstk)) :=
-          match (((|Compare.Int|).(Compare.S.op_eq) n 0), stk) with
-          | (true, Script_typed_ir.Item_t v rest annot) =>
-            let 'existT _ [__472, __473] [v, rest, annot] :=
-              existT (A := [Set ** Set])
-                (fun '[__472, __473] =>
-                  [(Script_typed_ir.ty __472) **
-                    (Script_typed_ir.stack_ty __473) **
-                    (option Script_typed_ir.var_annot)]) [_, _] [v, rest, annot]
-              in
-            outer_return
-              (Dig_proof_argument (Script_typed_ir.Rest, (v, annot), rest))
-          | (false, Script_typed_ir.Item_t v rest annot) =>
-            let 'existT _ [__474, __475] [v, rest, annot] :=
-              existT (A := [Set ** Set])
-                (fun '[__474, __475] =>
-                  [(Script_typed_ir.ty __474) **
-                    (Script_typed_ir.stack_ty __475) **
-                    (option Script_typed_ir.var_annot)]) [_, _] [v, rest, annot]
-              in
-            Error_monad.op_gtgteqquestion
-              (make_proof_argument (Pervasives.op_minus n 1) rest)
-              (fun function_parameter =>
-                let 'Dig_proof_argument (n', (x, xv), aft') :=
-                  function_parameter in
-                let 'existT _
-                  [__Dig_proof_argument_'aft, __Dig_proof_argument_'rest,
-                    __Dig_proof_argument_'x] [n', x, xv, aft'] :=
-                  existT (A := [Set ** Set ** Set])
-                    (fun
-                      '[__Dig_proof_argument_'aft, __Dig_proof_argument_'rest,
-                        __Dig_proof_argument_'x] =>
-                      [(Script_typed_ir.stack_prefix_preservation_witness
-                        (__Dig_proof_argument_'x * __Dig_proof_argument_'rest)
-                        __Dig_proof_argument_'rest __475
-                        __Dig_proof_argument_'aft) **
-                        (Script_typed_ir.ty __Dig_proof_argument_'x) **
-                        (option Script_typed_ir.var_annot) **
-                        (Script_typed_ir.stack_ty __Dig_proof_argument_'aft)])
-                    [_, _, _] [n', x, xv, aft'] in
-                outer_return
-                  (Dig_proof_argument
-                    ((Script_typed_ir.Prefix n'), (x, xv),
-                      (Script_typed_ir.Item_t v aft' annot))))
-          | (_, _) =>
-            Error_monad.op_gtgteqquestion
-              (serialize_stack_for_error ctxt __stack_value)
-              (fun function_parameter =>
-                let '(whole_stack, _ctxt) := function_parameter in
-                Error_monad.fail extensible_type_value)
-          end in
-        Error_monad.op_gtgteqquestion (Lwt.__return (parse_int32 n))
-          (fun n =>
-            Error_monad.op_gtgteqquestion
-              (Script_ir_annot.fail_unexpected_annot loc result_annot)
-              (fun function_parameter =>
-                let '_ := function_parameter in
-                Error_monad.op_gtgteqquestion
-                  (make_proof_argument n __stack_value)
-                  (fun function_parameter =>
-                    let 'Dig_proof_argument (n', (x, stack_annot), aft) :=
-                      function_parameter in
-                    let 'existT _
-                      [__Dig_proof_argument_'aft1, __Dig_proof_argument_'rest1,
-                        __Dig_proof_argument_'x1] [n', x, stack_annot, aft] :=
-                      existT (A := [Set ** Set ** Set])
-                        (fun
-                          '[__Dig_proof_argument_'aft1,
-                            __Dig_proof_argument_'rest1,
-                            __Dig_proof_argument_'x1] =>
-                          [(Script_typed_ir.stack_prefix_preservation_witness
-                            (__Dig_proof_argument_'x1 *
-                              __Dig_proof_argument_'rest1)
-                            __Dig_proof_argument_'rest1 bef
-                            __Dig_proof_argument_'aft1) **
-                            (Script_typed_ir.ty __Dig_proof_argument_'x1) **
-                            (option Script_typed_ir.var_annot) **
-                            (Script_typed_ir.stack_ty __Dig_proof_argument_'aft1)])
-                        [_, _, _] [n', x, stack_annot, aft] in
-                    typed ctxt loc (Script_typed_ir.Dig n n')
-                      (Script_typed_ir.Item_t x aft stack_annot))))
-      |
-        ((Micheline.Prim loc Alpha_context.Script.I_DIG
-          (([] | cons _ (cons _ _)) as l) _, _), _) =>
-        Error_monad.fail extensible_type_value
-      |
-        ((Micheline.Prim loc Alpha_context.Script.I_DUG (cons n []) result_annot,
-          Script_typed_ir.Item_t x whole_stack stack_annot), _) =>
-        let 'existT _ [__48, __49]
-          [loc, n, result_annot, x, whole_stack, stack_annot] :=
-          existT (A := [Set ** Set])
-            (fun '[__48, __49] =>
-              [Alpha_context.Script.location **
-                (Micheline.node Alpha_context.Script.location
-                  Alpha_context.Script.prim) ** Micheline.annot **
-                (Script_typed_ir.ty __48) ** (Script_typed_ir.stack_ty __49) **
-                (option Script_typed_ir.var_annot)]) [_, _]
-            [loc, n, result_annot, x, whole_stack, stack_annot] in
-        Error_monad.op_gtgteqquestion (Lwt.__return (parse_int32 n))
-          (fun whole_n =>
-            let fix make_proof_argument {tstk x : Set}
-              (n : Z) (x : Script_typed_ir.ty x)
-              (stack_annot : option Script_typed_ir.var_annot)
-              (stk : Script_typed_ir.stack_ty tstk) {struct n}
-              : Lwt.t (Error_monad.tzresult (dug_proof_argument tstk x)) :=
-              match (((|Compare.Int|).(Compare.S.op_eq) n 0), stk) with
-              | (true, rest) =>
-                outer_return
-                  (Dug_proof_argument
-                    (Script_typed_ir.Rest, tt,
-                      (Script_typed_ir.Item_t x rest stack_annot)))
-              | (false, Script_typed_ir.Item_t v rest annot) =>
-                let 'existT _ [__476, __477] [v, rest, annot] :=
-                  existT (A := [Set ** Set])
-                    (fun '[__476, __477] =>
-                      [(Script_typed_ir.ty __476) **
-                        (Script_typed_ir.stack_ty __477) **
-                        (option Script_typed_ir.var_annot)]) [_, _]
-                    [v, rest, annot] in
-                Error_monad.op_gtgteqquestion
-                  (make_proof_argument (Pervasives.op_minus n 1) x stack_annot
-                    rest)
-                  (fun function_parameter =>
-                    let 'Dug_proof_argument (n', _, aft') := function_parameter
-                      in
-                    let 'existT _
-                      [__Dug_proof_argument_'aft, __Dug_proof_argument_'rest]
-                      [n', aft'] :=
-                      existT (A := [Set ** Set])
-                        (fun
-                          '[__Dug_proof_argument_'aft,
-                            __Dug_proof_argument_'rest] =>
-                          [(Script_typed_ir.stack_prefix_preservation_witness
-                            __Dug_proof_argument_'rest
-                            (x * __Dug_proof_argument_'rest) __477
-                            __Dug_proof_argument_'aft) **
-                            (Script_typed_ir.stack_ty __Dug_proof_argument_'aft)])
-                        [_, _] [n', aft'] in
-                    outer_return
-                      (Dug_proof_argument
-                        ((Script_typed_ir.Prefix n'), tt,
-                          (Script_typed_ir.Item_t v aft' annot))))
-              | (_, _) =>
-                Error_monad.op_gtgteqquestion
-                  (serialize_stack_for_error ctxt whole_stack)
-                  (fun function_parameter =>
-                    let '(whole_stack, _ctxt) := function_parameter in
-                    Error_monad.fail extensible_type_value)
-              end in
-            Error_monad.op_gtgteqquestion
-              (Script_ir_annot.fail_unexpected_annot loc result_annot)
-              (fun function_parameter =>
-                let '_ := function_parameter in
-                Error_monad.op_gtgteqquestion
-                  (make_proof_argument whole_n x stack_annot whole_stack)
-                  (fun function_parameter =>
-                    let 'Dug_proof_argument (n', _, aft) := function_parameter
-                      in
-                    let 'existT _
-                      [__Dug_proof_argument_'aft1, __Dug_proof_argument_'rest1]
-                      [n', aft] :=
-                      existT (A := [Set ** Set])
-                        (fun
-                          '[__Dug_proof_argument_'aft1,
-                            __Dug_proof_argument_'rest1] =>
-                          [(Script_typed_ir.stack_prefix_preservation_witness
-                            __Dug_proof_argument_'rest1
-                            (__48 * __Dug_proof_argument_'rest1) __49
-                            __Dug_proof_argument_'aft1) **
-                            (Script_typed_ir.stack_ty __Dug_proof_argument_'aft1)])
-                        [_, _] [n', aft] in
-                    typed ctxt loc (Script_typed_ir.Dug whole_n n') aft)))
-      |
-        ((Micheline.Prim loc Alpha_context.Script.I_DUG (cons _ []) result_annot,
-          Script_typed_ir.Empty_t as __stack_value), _) =>
-        Error_monad.op_gtgteqquestion
-          (Script_ir_annot.fail_unexpected_annot loc result_annot)
-          (fun function_parameter =>
-            let '_ := function_parameter in
-            Error_monad.op_gtgteqquestion
-              (serialize_stack_for_error ctxt __stack_value)
-              (fun function_parameter =>
-                let '(__stack_value, _ctxt) := function_parameter in
-                Error_monad.fail extensible_type_value))
-      |
-        ((Micheline.Prim loc Alpha_context.Script.I_DUG
-          (([] | cons _ (cons _ _)) as l) _, _), _) =>
-        Error_monad.fail extensible_type_value
-      |
-        ((Micheline.Prim loc Alpha_context.Script.I_SWAP [] annot,
-          Script_typed_ir.Item_t v (Script_typed_ir.Item_t w rest stack_annot)
-            cur_top_annot), _) =>
-        let 'existT _ [__50, __52, __53]
-          [loc, annot, v, w, rest, stack_annot, cur_top_annot] :=
-          existT (A := [Set ** Set ** Set])
-            (fun '[__50, __52, __53] =>
-              [Alpha_context.Script.location ** Micheline.annot **
-                (Script_typed_ir.ty __50) ** (Script_typed_ir.ty __52) **
-                (Script_typed_ir.stack_ty __53) **
-                (option Script_typed_ir.var_annot) **
-                (option Script_typed_ir.var_annot)]) [_, _, _]
-            [loc, annot, v, w, rest, stack_annot, cur_top_annot] in
-        Error_monad.op_gtgteqquestion
-          (Script_ir_annot.fail_unexpected_annot loc annot)
-          (fun function_parameter =>
-            let '_ := function_parameter in
-            typed ctxt loc Script_typed_ir.Swap
-              (Script_typed_ir.Item_t w
-                (Script_typed_ir.Item_t v rest cur_top_annot) stack_annot))
-      |
-        ((Micheline.Prim loc Alpha_context.Script.I_PUSH
-          (cons __t_value (cons d [])) annot, __stack_value), _) =>
-        Error_monad.op_gtgteqquestion (parse_var_annot loc None annot)
-          (fun annot =>
-            Error_monad.op_gtgteqquestion
-              (Lwt.__return (parse_packable_ty ctxt legacy __t_value))
-              (fun function_parameter =>
-                let '(Ex_ty __t_value, ctxt) := function_parameter in
-                let 'existT _ __Ex_ty_'a1 [__t_value, ctxt] :=
-                  existT (A := Set)
-                    (fun __Ex_ty_'a1 =>
-                      [(Script_typed_ir.ty __Ex_ty_'a1) **
-                        Alpha_context.context]) _ [__t_value, ctxt] in
-                Error_monad.op_gtgteqquestion
-                  (parse_data type_logger ctxt legacy __t_value d)
-                  (fun function_parameter =>
-                    let '(v, ctxt) := function_parameter in
-                    typed ctxt loc (Script_typed_ir.Const v)
-                      (Script_typed_ir.Item_t __t_value __stack_value annot))))
-      |
-        ((Micheline.Prim loc Alpha_context.Script.I_UNIT [] annot, __stack_value),
-          _) =>
-        Error_monad.op_gtgteqquestion (parse_var_type_annot loc annot)
-          (fun function_parameter =>
-            let '(annot, ty_name) := function_parameter in
-            typed ctxt loc (Script_typed_ir.Const tt)
-              (Script_typed_ir.Item_t (Script_typed_ir.Unit_t ty_name)
-                __stack_value annot))
-      |
-        ((Micheline.Prim loc Alpha_context.Script.I_SOME [] annot,
-          Script_typed_ir.Item_t __t_value rest _), _) =>
-        let 'existT _ [__54, __55] [loc, annot, __t_value, rest] :=
-          existT (A := [Set ** Set])
-            (fun '[__54, __55] =>
-              [Alpha_context.Script.location ** Micheline.annot **
-                (Script_typed_ir.ty __54) ** (Script_typed_ir.stack_ty __55)])
-            [_, _] [loc, annot, __t_value, rest] in
-        Error_monad.op_gtgteqquestion (parse_var_type_annot loc annot)
-          (fun function_parameter =>
-            let '(annot, ty_name) := function_parameter in
-            typed ctxt loc Script_typed_ir.Cons_some
-              (Script_typed_ir.Item_t
-                (Script_typed_ir.Option_t __t_value ty_name
-                  (has_big_map __t_value)) rest annot))
-      |
-        ((Micheline.Prim loc Alpha_context.Script.I_NONE (cons __t_value [])
-          annot, __stack_value), _) =>
-        Error_monad.op_gtgteqquestion
-          (Lwt.__return (parse_any_ty ctxt legacy __t_value))
-          (fun function_parameter =>
-            let '(Ex_ty __t_value, ctxt) := function_parameter in
-            let 'existT _ __Ex_ty_'a2 [__t_value, ctxt] :=
-              existT (A := Set)
-                (fun __Ex_ty_'a2 =>
-                  [(Script_typed_ir.ty __Ex_ty_'a2) ** Alpha_context.context]) _
-                [__t_value, ctxt] in
-            Error_monad.op_gtgteqquestion (parse_var_type_annot loc annot)
-              (fun function_parameter =>
-                let '(annot, ty_name) := function_parameter in
-                typed ctxt loc (Script_typed_ir.Cons_none __t_value)
-                  (Script_typed_ir.Item_t
-                    (Script_typed_ir.Option_t __t_value ty_name
-                      (has_big_map __t_value)) __stack_value annot)))
-      |
-        ((Micheline.Prim loc Alpha_context.Script.I_IF_NONE
-          (cons bt (cons bf [])) annot,
-          (Script_typed_ir.Item_t (Script_typed_ir.Option_t __t_value _ _) rest
-            option_annot) as bef), _) =>
-        let 'existT _ [__57, __58]
-          [loc, bt, bf, annot, __t_value, rest, option_annot, bef] :=
-          existT (A := [Set ** Set])
-            (fun '[__57, __58] =>
-              [Alpha_context.Script.location **
-                (Micheline.node Alpha_context.Script.location
-                  Alpha_context.Script.prim) **
-                (Micheline.node Alpha_context.Script.location
-                  Alpha_context.Script.prim) ** Micheline.annot **
-                (Script_typed_ir.ty __58) ** (Script_typed_ir.stack_ty __57) **
-                (option Script_typed_ir.var_annot) **
-                (Script_typed_ir.stack_ty (option __58 * __57))]) [_, _]
-            [loc, bt, bf, annot, __t_value, rest, option_annot, bef] in
-        Error_monad.op_gtgteqquestion
-          (check_kind [ Script_tc_errors.Seq_kind ] bt)
-          (fun function_parameter =>
-            let '_ := function_parameter in
-            Error_monad.op_gtgteqquestion
-              (check_kind [ Script_tc_errors.Seq_kind ] bf)
-              (fun function_parameter =>
-                let '_ := function_parameter in
-                Error_monad.op_gtgteqquestion
-                  (Script_ir_annot.fail_unexpected_annot loc annot)
-                  (fun function_parameter =>
-                    let '_ := function_parameter in
-                    let annot :=
-                      Script_ir_annot.gen_access_annot option_annot None
-                        Script_ir_annot.default_some_annot in
-                    Error_monad.op_gtgteqquestion
-                      (parse_instr type_logger tc_context ctxt legacy bt rest)
-                      (fun function_parameter =>
-                        let '(btr, ctxt) := function_parameter in
-                        Error_monad.op_gtgteqquestion
-                          (parse_instr type_logger tc_context ctxt legacy bf
-                            (Script_typed_ir.Item_t __t_value rest annot))
-                          (fun function_parameter =>
-                            let '(bfr, ctxt) := function_parameter in
-                            let branch {B : Set}
-                              (ibt : Script_typed_ir.descr __57 B)
-                              (ibf : Script_typed_ir.descr (__58 * __57) B)
-                              : Script_typed_ir.descr (option __58 * __57) B :=
-                              {| Script_typed_ir.descr.loc := loc;
-                                Script_typed_ir.descr.bef := bef;
-                                Script_typed_ir.descr.aft :=
-                                  ibt.(Script_typed_ir.descr.aft);
-                                Script_typed_ir.descr.instr :=
-                                  Script_typed_ir.If_none ibt ibf |} in
-                            Error_monad.op_gtgteqquestion
-                              (merge_branches legacy ctxt loc btr bfr
-                                {| branch.branch := branch |})
-                              (fun function_parameter =>
-                                let '(judgement, ctxt) := function_parameter in
-                                __return ctxt judgement))))))
-      |
-        ((Micheline.Prim loc Alpha_context.Script.I_PAIR [] annot,
-          Script_typed_ir.Item_t __a_value
-            (Script_typed_ir.Item_t __b_value rest snd_annot) fst_annot), _) =>
-        let 'existT _ [__59, __61, __62]
-          [loc, annot, __a_value, __b_value, rest, snd_annot, fst_annot] :=
-          existT (A := [Set ** Set ** Set])
-            (fun '[__59, __61, __62] =>
-              [Alpha_context.Script.location ** Micheline.annot **
-                (Script_typed_ir.ty __59) ** (Script_typed_ir.ty __61) **
-                (Script_typed_ir.stack_ty __62) **
-                (option Script_typed_ir.var_annot) **
-                (option Script_typed_ir.var_annot)]) [_, _, _]
-            [loc, annot, __a_value, __b_value, rest, snd_annot, fst_annot] in
-        Error_monad.op_gtgteqquestion
-          (parse_constr_annot loc
-            (Some (Script_ir_annot.var_to_field_annot fst_annot))
-            (Some (Script_ir_annot.var_to_field_annot snd_annot)) annot)
-          (fun function_parameter =>
-            let '(annot, ty_name, l_field, r_field) := function_parameter in
-            typed ctxt loc Script_typed_ir.Cons_pair
-              (Script_typed_ir.Item_t
-                (Script_typed_ir.Pair_t (__a_value, l_field, fst_annot)
-                  (__b_value, r_field, snd_annot) ty_name
-                  (Pervasives.op_pipepipe (has_big_map __a_value)
-                    (has_big_map __b_value))) rest annot))
-      |
-        ((Micheline.Prim loc Alpha_context.Script.I_CAR [] annot,
-          Script_typed_ir.Item_t
-            (Script_typed_ir.Pair_t (__a_value, expected_field_annot, a_annot) _
-              _ _) rest pair_annot), _) =>
-        let 'existT _ [__64, __65]
-          [loc, annot, __a_value, expected_field_annot, a_annot, rest,
-            pair_annot] :=
-          existT (A := [Set ** Set])
-            (fun '[__64, __65] =>
-              [Alpha_context.Script.location ** Micheline.annot **
-                (Script_typed_ir.ty __65) **
-                (option Script_typed_ir.field_annot) **
-                (option Script_typed_ir.var_annot) **
-                (Script_typed_ir.stack_ty __64) **
-                (option Script_typed_ir.var_annot)]) [_, _]
-            [loc, annot, __a_value, expected_field_annot, a_annot, rest,
-              pair_annot] in
-        Error_monad.op_gtgteqquestion
-          (parse_destr_annot loc annot Script_ir_annot.default_car_annot
-            expected_field_annot pair_annot a_annot)
-          (fun function_parameter =>
-            let '(annot, field_annot) := function_parameter in
-            Error_monad.op_gtgteqquestion
-              (Lwt.__return
-                (Script_ir_annot.check_correct_field field_annot
-                  expected_field_annot))
-              (fun function_parameter =>
-                let '_ := function_parameter in
-                typed ctxt loc Script_typed_ir.Car
-                  (Script_typed_ir.Item_t __a_value rest annot)))
-      |
-        ((Micheline.Prim loc Alpha_context.Script.I_CDR [] annot,
-          Script_typed_ir.Item_t
-            (Script_typed_ir.Pair_t _ (__b_value, expected_field_annot, b_annot)
-              _ _) rest pair_annot), _) =>
-        let 'existT _ [__68, __70]
-          [loc, annot, __b_value, expected_field_annot, b_annot, rest,
-            pair_annot] :=
-          existT (A := [Set ** Set])
-            (fun '[__68, __70] =>
-              [Alpha_context.Script.location ** Micheline.annot **
-                (Script_typed_ir.ty __70) **
-                (option Script_typed_ir.field_annot) **
-                (option Script_typed_ir.var_annot) **
-                (Script_typed_ir.stack_ty __68) **
-                (option Script_typed_ir.var_annot)]) [_, _]
-            [loc, annot, __b_value, expected_field_annot, b_annot, rest,
-              pair_annot] in
-        Error_monad.op_gtgteqquestion
-          (parse_destr_annot loc annot Script_ir_annot.default_cdr_annot
-            expected_field_annot pair_annot b_annot)
-          (fun function_parameter =>
-            let '(annot, field_annot) := function_parameter in
-            Error_monad.op_gtgteqquestion
-              (Lwt.__return
-                (Script_ir_annot.check_correct_field field_annot
-                  expected_field_annot))
-              (fun function_parameter =>
-                let '_ := function_parameter in
-                typed ctxt loc Script_typed_ir.Cdr
-                  (Script_typed_ir.Item_t __b_value rest annot)))
-      |
-        ((Micheline.Prim loc Alpha_context.Script.I_LEFT (cons tr []) annot,
-          Script_typed_ir.Item_t tl rest stack_annot), _) =>
-        let 'existT _ [__71, __72] [loc, tr, annot, tl, rest, stack_annot] :=
-          existT (A := [Set ** Set])
-            (fun '[__71, __72] =>
-              [Alpha_context.Script.location **
-                (Micheline.node Alpha_context.Script.location
-                  Alpha_context.Script.prim) ** Micheline.annot **
-                (Script_typed_ir.ty __71) ** (Script_typed_ir.stack_ty __72) **
-                (option Script_typed_ir.var_annot)]) [_, _]
-            [loc, tr, annot, tl, rest, stack_annot] in
-        Error_monad.op_gtgteqquestion
-          (Lwt.__return (parse_any_ty ctxt legacy tr))
-          (fun function_parameter =>
-            let '(Ex_ty tr, ctxt) := function_parameter in
-            let 'existT _ __Ex_ty_'a3 [tr, ctxt] :=
-              existT (A := Set)
-                (fun __Ex_ty_'a3 =>
-                  [(Script_typed_ir.ty __Ex_ty_'a3) ** Alpha_context.context]) _
-                [tr, ctxt] in
-            Error_monad.op_gtgteqquestion
-              (parse_constr_annot loc
-                (Some (Script_ir_annot.var_to_field_annot stack_annot)) None
-                annot)
-              (fun function_parameter =>
-                let '(annot, tname, l_field, r_field) := function_parameter in
-                typed ctxt loc Script_typed_ir.Left
-                  (Script_typed_ir.Item_t
-                    (Script_typed_ir.Union_t (tl, l_field) (tr, r_field) tname
-                      (Pervasives.op_pipepipe (has_big_map tl) (has_big_map tr)))
-                    rest annot)))
-      |
-        ((Micheline.Prim loc Alpha_context.Script.I_RIGHT (cons tl []) annot,
-          Script_typed_ir.Item_t tr rest stack_annot), _) =>
-        let 'existT _ [__73, __74] [loc, tl, annot, tr, rest, stack_annot] :=
-          existT (A := [Set ** Set])
-            (fun '[__73, __74] =>
-              [Alpha_context.Script.location **
-                (Micheline.node Alpha_context.Script.location
-                  Alpha_context.Script.prim) ** Micheline.annot **
-                (Script_typed_ir.ty __73) ** (Script_typed_ir.stack_ty __74) **
-                (option Script_typed_ir.var_annot)]) [_, _]
-            [loc, tl, annot, tr, rest, stack_annot] in
-        Error_monad.op_gtgteqquestion
-          (Lwt.__return (parse_any_ty ctxt legacy tl))
-          (fun function_parameter =>
-            let '(Ex_ty tl, ctxt) := function_parameter in
-            let 'existT _ __Ex_ty_'a4 [tl, ctxt] :=
-              existT (A := Set)
-                (fun __Ex_ty_'a4 =>
-                  [(Script_typed_ir.ty __Ex_ty_'a4) ** Alpha_context.context]) _
-                [tl, ctxt] in
-            Error_monad.op_gtgteqquestion
-              (parse_constr_annot loc None
-                (Some (Script_ir_annot.var_to_field_annot stack_annot)) annot)
-              (fun function_parameter =>
-                let '(annot, tname, l_field, r_field) := function_parameter in
-                typed ctxt loc Script_typed_ir.Right
-                  (Script_typed_ir.Item_t
-                    (Script_typed_ir.Union_t (tl, l_field) (tr, r_field) tname
-                      (Pervasives.op_pipepipe (has_big_map tl) (has_big_map tr)))
-                    rest annot)))
-      |
-        ((Micheline.Prim loc Alpha_context.Script.I_IF_LEFT
-          (cons bt (cons bf [])) annot,
-          (Script_typed_ir.Item_t
-            (Script_typed_ir.Union_t (tl, l_field) (tr, r_field) _ _) rest
-            union_annot) as bef), _) =>
-        let 'existT _ [__76, __77, __78]
-          [loc, bt, bf, annot, tl, l_field, tr, r_field, rest, union_annot, bef]
-          :=
-          existT (A := [Set ** Set ** Set])
-            (fun '[__76, __77, __78] =>
-              [Alpha_context.Script.location **
-                (Micheline.node Alpha_context.Script.location
-                  Alpha_context.Script.prim) **
-                (Micheline.node Alpha_context.Script.location
-                  Alpha_context.Script.prim) ** Micheline.annot **
-                (Script_typed_ir.ty __77) **
-                (option Script_typed_ir.field_annot) **
-                (Script_typed_ir.ty __78) **
-                (option Script_typed_ir.field_annot) **
-                (Script_typed_ir.stack_ty __76) **
-                (option Script_typed_ir.var_annot) **
-                (Script_typed_ir.stack_ty
-                  (Script_typed_ir.union __77 __78 * __76))]) [_, _, _]
-            [loc, bt, bf, annot, tl, l_field, tr, r_field, rest, union_annot,
-              bef] in
-        Error_monad.op_gtgteqquestion
-          (check_kind [ Script_tc_errors.Seq_kind ] bt)
-          (fun function_parameter =>
-            let '_ := function_parameter in
-            Error_monad.op_gtgteqquestion
-              (check_kind [ Script_tc_errors.Seq_kind ] bf)
-              (fun function_parameter =>
-                let '_ := function_parameter in
-                Error_monad.op_gtgteqquestion
-                  (Script_ir_annot.fail_unexpected_annot loc annot)
-                  (fun function_parameter =>
-                    let '_ := function_parameter in
-                    let left_annot :=
-                      Script_ir_annot.gen_access_annot union_annot
-                        (Some Script_ir_annot.default_left_annot) l_field in
-                    let right_annot :=
-                      Script_ir_annot.gen_access_annot union_annot
-                        (Some Script_ir_annot.default_right_annot) r_field in
-                    Error_monad.op_gtgteqquestion
-                      (parse_instr type_logger tc_context ctxt legacy bt
-                        (Script_typed_ir.Item_t tl rest left_annot))
-                      (fun function_parameter =>
-                        let '(btr, ctxt) := function_parameter in
-                        Error_monad.op_gtgteqquestion
-                          (parse_instr type_logger tc_context ctxt legacy bf
-                            (Script_typed_ir.Item_t tr rest right_annot))
-                          (fun function_parameter =>
-                            let '(bfr, ctxt) := function_parameter in
-                            let branch {B : Set}
-                              (ibt : Script_typed_ir.descr (__77 * __76) B)
-                              (ibf : Script_typed_ir.descr (__78 * __76) B)
-                              : Script_typed_ir.descr
-                                (Script_typed_ir.union __77 __78 * __76) B :=
-                              {| Script_typed_ir.descr.loc := loc;
-                                Script_typed_ir.descr.bef := bef;
-                                Script_typed_ir.descr.aft :=
-                                  ibt.(Script_typed_ir.descr.aft);
-                                Script_typed_ir.descr.instr :=
-                                  Script_typed_ir.If_left ibt ibf |} in
-                            Error_monad.op_gtgteqquestion
-                              (merge_branches legacy ctxt loc btr bfr
-                                {| branch.branch := branch |})
-                              (fun function_parameter =>
-                                let '(judgement, ctxt) := function_parameter in
-                                __return ctxt judgement))))))
-      |
-        ((Micheline.Prim loc Alpha_context.Script.I_NIL (cons __t_value [])
-          annot, __stack_value), _) =>
-        Error_monad.op_gtgteqquestion
-          (Lwt.__return (parse_any_ty ctxt legacy __t_value))
-          (fun function_parameter =>
-            let '(Ex_ty __t_value, ctxt) := function_parameter in
-            let 'existT _ __Ex_ty_'a5 [__t_value, ctxt] :=
-              existT (A := Set)
-                (fun __Ex_ty_'a5 =>
-                  [(Script_typed_ir.ty __Ex_ty_'a5) ** Alpha_context.context]) _
-                [__t_value, ctxt] in
-            Error_monad.op_gtgteqquestion (parse_var_type_annot loc annot)
-              (fun function_parameter =>
-                let '(annot, ty_name) := function_parameter in
-                typed ctxt loc Script_typed_ir.Nil
-                  (Script_typed_ir.Item_t
-                    (Script_typed_ir.List_t __t_value ty_name
-                      (has_big_map __t_value)) __stack_value annot)))
-      |
-        ((Micheline.Prim loc Alpha_context.Script.I_CONS [] annot,
-          Script_typed_ir.Item_t tv
-            (Script_typed_ir.Item_t
-              (Script_typed_ir.List_t __t_value ty_name has_big_map) rest _) _),
-          _) =>
-        let 'existT _ [__79, __82, __83]
-          [loc, annot, tv, __t_value, ty_name, has_big_map, rest] :=
-          existT (A := [Set ** Set ** Set])
-            (fun '[__79, __82, __83] =>
-              [Alpha_context.Script.location ** Micheline.annot **
-                (Script_typed_ir.ty __79) ** (Script_typed_ir.ty __83) **
-                (option Script_typed_ir.type_annot) ** bool **
-                (Script_typed_ir.stack_ty __82)]) [_, _, _]
-            [loc, annot, tv, __t_value, ty_name, has_big_map, rest] in
-        Error_monad.op_gtgteqquestion
-          (check_item_ty ctxt tv __t_value loc Alpha_context.Script.I_CONS 1 2)
-          (fun function_parameter =>
-            let '(Eq, __t_value, ctxt) := function_parameter in
-            Error_monad.op_gtgteqquestion (parse_var_annot loc None annot)
-              (fun annot =>
-                typed ctxt loc Script_typed_ir.Cons_list
-                  (Script_typed_ir.Item_t
-                    (Script_typed_ir.List_t __t_value ty_name has_big_map) rest
-                    annot)))
-      |
-        ((Micheline.Prim loc Alpha_context.Script.I_IF_CONS
-          (cons bt (cons bf [])) annot,
-          (Script_typed_ir.Item_t
-            (Script_typed_ir.List_t __t_value ty_name has_big_map) rest
-            list_annot) as bef), _) =>
-        let 'existT _ [__85, __86]
-          [loc, bt, bf, annot, __t_value, ty_name, has_big_map, rest,
-            list_annot, bef] :=
-          existT (A := [Set ** Set])
-            (fun '[__85, __86] =>
-              [Alpha_context.Script.location **
-                (Micheline.node Alpha_context.Script.location
-                  Alpha_context.Script.prim) **
-                (Micheline.node Alpha_context.Script.location
-                  Alpha_context.Script.prim) ** Micheline.annot **
-                (Script_typed_ir.ty __86) ** (option Script_typed_ir.type_annot)
-                ** bool ** (Script_typed_ir.stack_ty __85) **
-                (option Script_typed_ir.var_annot) **
-                (Script_typed_ir.stack_ty (list __86 * __85))]) [_, _]
-            [loc, bt, bf, annot, __t_value, ty_name, has_big_map, rest,
-              list_annot, bef] in
-        Error_monad.op_gtgteqquestion
-          (check_kind [ Script_tc_errors.Seq_kind ] bt)
-          (fun function_parameter =>
-            let '_ := function_parameter in
-            Error_monad.op_gtgteqquestion
-              (check_kind [ Script_tc_errors.Seq_kind ] bf)
-              (fun function_parameter =>
-                let '_ := function_parameter in
-                Error_monad.op_gtgteqquestion
-                  (Script_ir_annot.fail_unexpected_annot loc annot)
-                  (fun function_parameter =>
-                    let '_ := function_parameter in
-                    let hd_annot :=
-                      Script_ir_annot.gen_access_annot list_annot None
-                        Script_ir_annot.default_hd_annot in
-                    let tl_annot :=
-                      Script_ir_annot.gen_access_annot list_annot None
-                        Script_ir_annot.default_tl_annot in
-                    Error_monad.op_gtgteqquestion
-                      (parse_instr type_logger tc_context ctxt legacy bt
-                        (Script_typed_ir.Item_t __t_value
-                          (Script_typed_ir.Item_t
-                            (Script_typed_ir.List_t __t_value ty_name
-                              has_big_map) rest tl_annot) hd_annot))
-                      (fun function_parameter =>
-                        let '(btr, ctxt) := function_parameter in
-                        Error_monad.op_gtgteqquestion
-                          (parse_instr type_logger tc_context ctxt legacy bf
-                            rest)
-                          (fun function_parameter =>
-                            let '(bfr, ctxt) := function_parameter in
-                            let branch {B : Set}
-                              (ibt :
-                                Script_typed_ir.descr
-                                  (__86 * (list __86 * __85)) B)
-                              (ibf : Script_typed_ir.descr __85 B)
-                              : Script_typed_ir.descr (list __86 * __85) B :=
-                              {| Script_typed_ir.descr.loc := loc;
-                                Script_typed_ir.descr.bef := bef;
-                                Script_typed_ir.descr.aft :=
-                                  ibt.(Script_typed_ir.descr.aft);
-                                Script_typed_ir.descr.instr :=
-                                  Script_typed_ir.If_cons ibt ibf |} in
-                            Error_monad.op_gtgteqquestion
-                              (merge_branches legacy ctxt loc btr bfr
-                                {| branch.branch := branch |})
-                              (fun function_parameter =>
-                                let '(judgement, ctxt) := function_parameter in
-                                __return ctxt judgement))))))
-      |
-        ((Micheline.Prim loc Alpha_context.Script.I_SIZE [] annot,
-          Script_typed_ir.Item_t (Script_typed_ir.List_t _ _ _) rest _), _) =>
-        let 'existT _ __88 [loc, annot, rest] :=
-          existT (A := Set)
-            (fun __88 =>
-              [Alpha_context.Script.location ** Micheline.annot **
-                (Script_typed_ir.stack_ty __88)]) _ [loc, annot, rest] in
-        Error_monad.op_gtgteqquestion (parse_var_type_annot loc annot)
-          (fun function_parameter =>
-            let '(annot, tname) := function_parameter in
-            typed ctxt loc Script_typed_ir.List_size
-              (Script_typed_ir.Item_t (Script_typed_ir.Nat_t tname) rest annot))
-      |
-        ((Micheline.Prim loc Alpha_context.Script.I_MAP (cons body []) annot,
-          Script_typed_ir.Item_t (Script_typed_ir.List_t __elt_value _ _)
-            starting_rest list_annot), _) =>
-        let 'existT _ [__91, __92]
-          [loc, body, annot, __elt_value, starting_rest, list_annot] :=
-          existT (A := [Set ** Set])
-            (fun '[__91, __92] =>
-              [Alpha_context.Script.location **
-                (Micheline.node Alpha_context.Script.location
-                  Alpha_context.Script.prim) ** Micheline.annot **
-                (Script_typed_ir.ty __92) ** (Script_typed_ir.stack_ty __91) **
-                (option Script_typed_ir.var_annot)]) [_, _]
-            [loc, body, annot, __elt_value, starting_rest, list_annot] in
-        Error_monad.op_gtgteqquestion
-          (check_kind [ Script_tc_errors.Seq_kind ] body)
-          (fun function_parameter =>
-            let '_ := function_parameter in
-            Error_monad.op_gtgteqquestion (parse_var_type_annot loc annot)
-              (fun function_parameter =>
-                let '(ret_annot, list_ty_name) := function_parameter in
-                let elt_annot :=
-                  Script_ir_annot.gen_access_annot list_annot None
-                    Script_ir_annot.default_elt_annot in
-                Error_monad.op_gtgteqquestion
-                  (parse_instr type_logger tc_context ctxt legacy body
-                    (Script_typed_ir.Item_t __elt_value starting_rest elt_annot))
-                  (fun function_parameter =>
-                    let '(judgement, ctxt) := function_parameter in
-                    match judgement with
-                    |
-                      Typed
-                        ({|
-                          Script_typed_ir.descr.aft := Script_typed_ir.Item_t ret rest _
-                            |} as ibody) =>
-                      let 'existT _ [__478, __479, __Typed_'aft3]
-                        [ret, rest, ibody] :=
-                        existT (A := [Set ** Set ** Set])
-                          (fun '[__478, __479, __Typed_'aft3] =>
-                            [(Script_typed_ir.ty __478) **
-                              (Script_typed_ir.stack_ty __479) **
-                              (Script_typed_ir.descr (__92 * __91) __Typed_'aft3)])
-                          [_, _, _] [ret, rest, ibody] in
-                      let invalid_map_body (function_parameter : unit)
-                        : Lwt.t (Error_monad.tzresult Error_monad.__error) :=
-                        let '_ := function_parameter in
-                        Error_monad.op_gtgtpipequestion
-                          (serialize_stack_for_error ctxt
-                            ibody.(Script_typed_ir.descr.aft))
-                          (fun function_parameter =>
-                            let '(aft, _ctxt) := function_parameter in
-                            extensible_type_value) in
-                      Error_monad.trace_eval invalid_map_body
-                        (Error_monad.op_gtgteqquestion
-                          (Lwt.__return (stack_ty_eq ctxt 1 rest starting_rest))
-                          (fun function_parameter =>
-                            let '(Eq, ctxt) := function_parameter in
-                            Error_monad.op_gtgteqquestion
-                              (Lwt.__return
-                                (merge_stacks legacy loc ctxt rest starting_rest))
-                              (fun function_parameter =>
-                                let '(rest, ctxt) := function_parameter in
-                                typed ctxt loc (Script_typed_ir.List_map ibody)
-                                  (Script_typed_ir.Item_t
-                                    (Script_typed_ir.List_t ret list_ty_name
-                                      (has_big_map ret)) rest ret_annot))))
-                    | Typed {| Script_typed_ir.descr.aft := aft |} =>
-                      let 'existT _ __Typed_'aft4 aft :=
-                        existT (A := Set)
-                          (fun __Typed_'aft4 =>
-                            (Script_typed_ir.stack_ty __Typed_'aft4)) _ aft in
-                      Error_monad.op_gtgteqquestion
-                        (serialize_stack_for_error ctxt aft)
-                        (fun function_parameter =>
-                          let '(aft, _ctxt) := function_parameter in
-                          Error_monad.fail extensible_type_value)
-                    | Failed _ => Error_monad.fail extensible_type_value
-                    end)))
-      |
-        ((Micheline.Prim loc Alpha_context.Script.I_ITER (cons body []) annot,
-          Script_typed_ir.Item_t (Script_typed_ir.List_t __elt_value _ _) rest
-            list_annot), _) =>
-        let 'existT _ [__94, __95]
-          [loc, body, annot, __elt_value, rest, list_annot] :=
-          existT (A := [Set ** Set])
-            (fun '[__94, __95] =>
-              [Alpha_context.Script.location **
-                (Micheline.node Alpha_context.Script.location
-                  Alpha_context.Script.prim) ** Micheline.annot **
-                (Script_typed_ir.ty __95) ** (Script_typed_ir.stack_ty __94) **
-                (option Script_typed_ir.var_annot)]) [_, _]
-            [loc, body, annot, __elt_value, rest, list_annot] in
-        Error_monad.op_gtgteqquestion
-          (check_kind [ Script_tc_errors.Seq_kind ] body)
-          (fun function_parameter =>
-            let '_ := function_parameter in
-            Error_monad.op_gtgteqquestion
-              (Script_ir_annot.fail_unexpected_annot loc annot)
-              (fun function_parameter =>
-                let '_ := function_parameter in
-                let elt_annot :=
-                  Script_ir_annot.gen_access_annot list_annot None
-                    Script_ir_annot.default_elt_annot in
-                Error_monad.op_gtgteqquestion
-                  (parse_instr type_logger tc_context ctxt legacy body
-                    (Script_typed_ir.Item_t __elt_value rest elt_annot))
-                  (fun function_parameter =>
-                    let '(judgement, ctxt) := function_parameter in
-                    match judgement with
-                    | Typed ({| Script_typed_ir.descr.aft := aft |} as ibody) =>
-                      let 'existT _ __Typed_'aft5 [aft, ibody] :=
-                        existT (A := Set)
-                          (fun __Typed_'aft5 =>
-                            [(Script_typed_ir.stack_ty __Typed_'aft5) **
-                              (Script_typed_ir.descr (__95 * __94) __Typed_'aft5)])
-                          _ [aft, ibody] in
-                      let invalid_iter_body (function_parameter : unit)
-                        : Lwt.t (Error_monad.tzresult Error_monad.__error) :=
-                        let '_ := function_parameter in
-                        Error_monad.op_gtgteqquestion
-                          (serialize_stack_for_error ctxt
-                            ibody.(Script_typed_ir.descr.aft))
-                          (fun function_parameter =>
-                            let '(aft, ctxt) := function_parameter in
-                            Error_monad.op_gtgtpipequestion
-                              (serialize_stack_for_error ctxt rest)
-                              (fun function_parameter =>
-                                let '(rest, _ctxt) := function_parameter in
-                                extensible_type_value)) in
-                      Error_monad.trace_eval invalid_iter_body
-                        (Error_monad.op_gtgteqquestion
-                          (Lwt.__return (stack_ty_eq ctxt 1 aft rest))
-                          (fun function_parameter =>
-                            let '(Eq, ctxt) := function_parameter in
-                            Error_monad.op_gtgteqquestion
-                              (Lwt.__return
-                                (merge_stacks legacy loc ctxt aft rest))
-                              (fun function_parameter =>
-                                let '(rest, ctxt) := function_parameter in
-                                typed ctxt loc (Script_typed_ir.List_iter ibody)
-                                  rest)))
-                    | Failed {| judgement.Failed.descr := __descr_value |} =>
-                      typed ctxt loc
-                        (Script_typed_ir.List_iter (__descr_value rest)) rest
-                    end)))
-      |
-        ((Micheline.Prim loc Alpha_context.Script.I_EMPTY_SET
-          (cons __t_value []) annot, rest), _) =>
-        Error_monad.op_gtgteqquestion
-          (Lwt.__return (parse_comparable_ty ctxt __t_value))
-          (fun function_parameter =>
-            let '(Ex_comparable_ty __t_value, ctxt) := function_parameter in
-            let 'existT _ __Ex_comparable_ty_'a1 [__t_value, ctxt] :=
-              existT (A := Set)
-                (fun __Ex_comparable_ty_'a1 =>
-                  [(Script_typed_ir.comparable_ty __Ex_comparable_ty_'a1) **
-                    Alpha_context.context]) _ [__t_value, ctxt] in
-            Error_monad.op_gtgteqquestion (parse_var_type_annot loc annot)
-              (fun function_parameter =>
-                let '(annot, tname) := function_parameter in
-                typed ctxt loc (Script_typed_ir.Empty_set __t_value)
-                  (Script_typed_ir.Item_t
-                    (Script_typed_ir.Set_t __t_value tname) rest annot)))
-      |
-        ((Micheline.Prim loc Alpha_context.Script.I_ITER (cons body []) annot,
-          Script_typed_ir.Item_t (Script_typed_ir.Set_t comp_elt _) rest
-            set_annot), _) =>
-        let 'existT _ [__97, __98] [loc, body, annot, comp_elt, rest, set_annot]
-          :=
-          existT (A := [Set ** Set])
-            (fun '[__97, __98] =>
-              [Alpha_context.Script.location **
-                (Micheline.node Alpha_context.Script.location
-                  Alpha_context.Script.prim) ** Micheline.annot **
-                (Script_typed_ir.comparable_ty __98) **
-                (Script_typed_ir.stack_ty __97) **
-                (option Script_typed_ir.var_annot)]) [_, _]
-            [loc, body, annot, comp_elt, rest, set_annot] in
-        Error_monad.op_gtgteqquestion
-          (check_kind [ Script_tc_errors.Seq_kind ] body)
-          (fun function_parameter =>
-            let '_ := function_parameter in
-            Error_monad.op_gtgteqquestion
-              (Script_ir_annot.fail_unexpected_annot loc annot)
-              (fun function_parameter =>
-                let '_ := function_parameter in
-                let elt_annot :=
-                  Script_ir_annot.gen_access_annot set_annot None
-                    Script_ir_annot.default_elt_annot in
-                let __elt_value := ty_of_comparable_ty comp_elt in
-                Error_monad.op_gtgteqquestion
-                  (parse_instr type_logger tc_context ctxt legacy body
-                    (Script_typed_ir.Item_t __elt_value rest elt_annot))
-                  (fun function_parameter =>
-                    let '(judgement, ctxt) := function_parameter in
-                    match judgement with
-                    | Typed ({| Script_typed_ir.descr.aft := aft |} as ibody) =>
-                      let 'existT _ __Typed_'aft6 [aft, ibody] :=
-                        existT (A := Set)
-                          (fun __Typed_'aft6 =>
-                            [(Script_typed_ir.stack_ty __Typed_'aft6) **
-                              (Script_typed_ir.descr (__98 * __97) __Typed_'aft6)])
-                          _ [aft, ibody] in
-                      let invalid_iter_body (function_parameter : unit)
-                        : Lwt.t (Error_monad.tzresult Error_monad.__error) :=
-                        let '_ := function_parameter in
-                        Error_monad.op_gtgteqquestion
-                          (serialize_stack_for_error ctxt
-                            ibody.(Script_typed_ir.descr.aft))
-                          (fun function_parameter =>
-                            let '(aft, ctxt) := function_parameter in
-                            Error_monad.op_gtgtpipequestion
-                              (serialize_stack_for_error ctxt rest)
-                              (fun function_parameter =>
-                                let '(rest, _ctxt) := function_parameter in
-                                extensible_type_value)) in
-                      Error_monad.trace_eval invalid_iter_body
-                        (Error_monad.op_gtgteqquestion
-                          (Lwt.__return (stack_ty_eq ctxt 1 aft rest))
-                          (fun function_parameter =>
-                            let '(Eq, ctxt) := function_parameter in
-                            Error_monad.op_gtgteqquestion
-                              (Lwt.__return
-                                (merge_stacks legacy loc ctxt aft rest))
-                              (fun function_parameter =>
-                                let '(rest, ctxt) := function_parameter in
-                                typed ctxt loc (Script_typed_ir.Set_iter ibody)
-                                  rest)))
-                    | Failed {| judgement.Failed.descr := __descr_value |} =>
-                      typed ctxt loc
-                        (Script_typed_ir.Set_iter (__descr_value rest)) rest
-                    end)))
-      |
-        ((Micheline.Prim loc Alpha_context.Script.I_MEM [] annot,
-          Script_typed_ir.Item_t v
-            (Script_typed_ir.Item_t (Script_typed_ir.Set_t __elt_value _) rest _)
-            _), _) =>
-        let 'existT _ [__102, __103, __99] [loc, annot, v, __elt_value, rest] :=
-          existT (A := [Set ** Set ** Set])
-            (fun '[__102, __103, __99] =>
-              [Alpha_context.Script.location ** Micheline.annot **
-                (Script_typed_ir.ty __99) **
-                (Script_typed_ir.comparable_ty __103) **
-                (Script_typed_ir.stack_ty __102)]) [_, _, _]
-            [loc, annot, v, __elt_value, rest] in
-        let __elt_value := ty_of_comparable_ty __elt_value in
-        Error_monad.op_gtgteqquestion (parse_var_type_annot loc annot)
-          (fun function_parameter =>
-            let '(annot, tname) := function_parameter in
-            Error_monad.op_gtgteqquestion
-              (check_item_ty ctxt __elt_value v loc Alpha_context.Script.I_MEM 1
-                2)
-              (fun function_parameter =>
-                let '(Eq, _, ctxt) := function_parameter in
-                typed ctxt loc Script_typed_ir.Set_mem
-                  (Script_typed_ir.Item_t (Script_typed_ir.Bool_t tname) rest
-                    annot)))
-      |
-        ((Micheline.Prim loc Alpha_context.Script.I_UPDATE [] annot,
-          Script_typed_ir.Item_t v
-            (Script_typed_ir.Item_t (Script_typed_ir.Bool_t _)
-              (Script_typed_ir.Item_t (Script_typed_ir.Set_t __elt_value tname)
-                rest set_annot) _) _), _) =>
-        let 'existT _ [__104, __109, __110]
-          [loc, annot, v, __elt_value, tname, rest, set_annot] :=
-          existT (A := [Set ** Set ** Set])
-            (fun '[__104, __109, __110] =>
-              [Alpha_context.Script.location ** Micheline.annot **
-                (Script_typed_ir.ty __104) **
-                (Script_typed_ir.comparable_ty __110) **
-                (option Script_typed_ir.type_annot) **
-                (Script_typed_ir.stack_ty __109) **
-                (option Script_typed_ir.var_annot)]) [_, _, _]
-            [loc, annot, v, __elt_value, tname, rest, set_annot] in
-        match comparable_ty_of_ty v with
-        | None =>
-          Error_monad.op_gtgteqquestion (unparse_ty ctxt v)
-            (fun function_parameter =>
-              let '(v, _ctxt) := function_parameter in
-              Error_monad.fail extensible_type_value)
-        | Some v =>
-          Error_monad.op_gtgteqquestion
-            (parse_var_annot loc (Some set_annot) annot)
-            (fun annot =>
-              Error_monad.op_gtgteqquestion
-                (check_item_comparable_ty __elt_value v loc
-                  Alpha_context.Script.I_UPDATE 1 3)
-                (fun function_parameter =>
-                  let '(Eq, __elt_value) := function_parameter in
-                  typed ctxt loc Script_typed_ir.Set_update
-                    (Script_typed_ir.Item_t
-                      (Script_typed_ir.Set_t __elt_value tname) rest annot)))
+        (Micheline.Prim loc Alpha_context.Script.I_DIP (cons n (cons code []))
+          result_annot, __stack_value) =>
+        match parse_int32 n with
+        | Pervasives.Ok _ => true
+        | Pervasives.Error _ => false
         end
-      |
-        ((Micheline.Prim loc Alpha_context.Script.I_SIZE [] annot,
-          Script_typed_ir.Item_t (Script_typed_ir.Set_t _ _) rest _), _) =>
-        let 'existT _ __112 [loc, annot, rest] :=
-          existT (A := Set)
-            (fun __112 =>
-              [Alpha_context.Script.location ** Micheline.annot **
-                (Script_typed_ir.stack_ty __112)]) _ [loc, annot, rest] in
-        Error_monad.op_gtgteqquestion (parse_var_annot loc None annot)
-          (fun annot =>
-            typed ctxt loc Script_typed_ir.Set_size
-              (Script_typed_ir.Item_t (Script_typed_ir.Nat_t None) rest annot))
-      |
-        ((Micheline.Prim loc Alpha_context.Script.I_EMPTY_MAP
-          (cons tk (cons tv [])) annot, __stack_value), _) =>
-        Error_monad.op_gtgteqquestion
-          (Lwt.__return (parse_comparable_ty ctxt tk))
-          (fun function_parameter =>
-            let '(Ex_comparable_ty tk, ctxt) := function_parameter in
-            let 'existT _ __Ex_comparable_ty_'a2 [tk, ctxt] :=
-              existT (A := Set)
-                (fun __Ex_comparable_ty_'a2 =>
-                  [(Script_typed_ir.comparable_ty __Ex_comparable_ty_'a2) **
-                    Alpha_context.context]) _ [tk, ctxt] in
-            Error_monad.op_gtgteqquestion
-              (Lwt.__return (parse_any_ty ctxt legacy tv))
-              (fun function_parameter =>
-                let '(Ex_ty tv, ctxt) := function_parameter in
-                let 'existT _ __Ex_ty_'a6 [tv, ctxt] :=
-                  existT (A := Set)
-                    (fun __Ex_ty_'a6 =>
-                      [(Script_typed_ir.ty __Ex_ty_'a6) **
-                        Alpha_context.context]) _ [tv, ctxt] in
-                Error_monad.op_gtgteqquestion (parse_var_type_annot loc annot)
-                  (fun function_parameter =>
-                    let '(annot, ty_name) := function_parameter in
-                    typed ctxt loc (Script_typed_ir.Empty_map tk tv)
-                      (Script_typed_ir.Item_t
-                        (Script_typed_ir.Map_t tk tv ty_name (has_big_map tv))
-                        __stack_value annot))))
-      |
-        ((Micheline.Prim loc Alpha_context.Script.I_MAP (cons body []) annot,
-          Script_typed_ir.Item_t (Script_typed_ir.Map_t ck __elt_value _ _)
-            starting_rest _map_annot), _) =>
-        let 'existT _ [__115, __116, __117]
-          [loc, body, annot, ck, __elt_value, starting_rest, _map_annot] :=
+      | _ => false
+      end) with
+  |
+    ((Micheline.Prim loc Alpha_context.Script.I_DROP [] annot,
+      Script_typed_ir.Item_t _ rest _), _) =>
+    let 'existT _ __45 [loc, annot, rest] :=
+      existT (A := Set)
+        (fun __45 =>
+          [Alpha_context.Script.location ** Micheline.annot **
+            (Script_typed_ir.stack_ty __45)]) _ [loc, annot, rest] in
+    let!? '_ := Script_ir_annot.fail_unexpected_annot loc annot in
+    typed ctxt loc Script_typed_ir.Drop rest
+  |
+    ((Micheline.Prim loc Alpha_context.Script.I_DROP (cons n []) result_annot,
+      whole_stack), _) =>
+    let!? whole_n := Lwt.__return (parse_int32 n) in
+    let fix make_proof_argument {tstk : Set}
+      (n : Z) (stk : Script_typed_ir.stack_ty tstk) {struct n}
+      : Lwt.t (Error_monad.tzresult (dropn_proof_argument tstk)) :=
+      match (((|Compare.Int|).(Compare.S.op_eq) n 0), stk) with
+      | (true, rest) =>
+        outer_return (Dropn_proof_argument (Script_typed_ir.Rest, rest, rest))
+      | (false, Script_typed_ir.Item_t v rest annot) =>
+        let 'existT _ [__470, __471] [v, rest, annot] :=
+          existT (A := [Set ** Set])
+            (fun '[__470, __471] =>
+              [(Script_typed_ir.ty __470) ** (Script_typed_ir.stack_ty __471) **
+                (option Script_typed_ir.var_annot)]) [_, _] [v, rest, annot] in
+        let!? 'Dropn_proof_argument (n', stack_after_drops, aft') :=
+          make_proof_argument (Pervasives.op_minus n 1) rest in
+        let 'existT _
+          [__Dropn_proof_argument_'aft, __Dropn_proof_argument_'rest]
+          [n', stack_after_drops, aft'] :=
+          existT (A := [Set ** Set])
+            (fun '[__Dropn_proof_argument_'aft, __Dropn_proof_argument_'rest] =>
+              [(Script_typed_ir.stack_prefix_preservation_witness
+                __Dropn_proof_argument_'rest __Dropn_proof_argument_'rest __471
+                __Dropn_proof_argument_'aft) **
+                (Script_typed_ir.stack_ty __Dropn_proof_argument_'rest) **
+                (Script_typed_ir.stack_ty __Dropn_proof_argument_'aft)]) [_, _]
+            [n', stack_after_drops, aft'] in
+        outer_return
+          (Dropn_proof_argument
+            ((Script_typed_ir.Prefix n'), stack_after_drops,
+              (Script_typed_ir.Item_t v aft' annot)))
+      | (_, _) =>
+        let!? '(whole_stack, _ctxt) :=
+          serialize_stack_for_error ctxt whole_stack in
+        Error_monad.fail extensible_type_value
+      end in
+    let!? '_ := Script_ir_annot.fail_unexpected_annot loc result_annot in
+    let!? 'Dropn_proof_argument (n', stack_after_drops, _aft) :=
+      make_proof_argument whole_n whole_stack in
+    let 'existT _ [__Dropn_proof_argument_'aft1, __Dropn_proof_argument_'rest1]
+      [n', stack_after_drops, _aft] :=
+      existT (A := [Set ** Set])
+        (fun '[__Dropn_proof_argument_'aft1, __Dropn_proof_argument_'rest1] =>
+          [(Script_typed_ir.stack_prefix_preservation_witness
+            __Dropn_proof_argument_'rest1 __Dropn_proof_argument_'rest1 bef
+            __Dropn_proof_argument_'aft1) **
+            (Script_typed_ir.stack_ty __Dropn_proof_argument_'rest1) **
+            (Script_typed_ir.stack_ty __Dropn_proof_argument_'aft1)]) [_, _]
+        [n', stack_after_drops, _aft] in
+    typed ctxt loc (Script_typed_ir.Dropn whole_n n') stack_after_drops
+  |
+    ((Micheline.Prim loc Alpha_context.Script.I_DROP ((cons _ (cons _ _)) as l)
+      _, _), _) => Error_monad.fail extensible_type_value
+  |
+    ((Micheline.Prim loc Alpha_context.Script.I_DUP [] annot,
+      Script_typed_ir.Item_t v rest stack_annot), _) =>
+    let 'existT _ [__46, __47] [loc, annot, v, rest, stack_annot] :=
+      existT (A := [Set ** Set])
+        (fun '[__46, __47] =>
+          [Alpha_context.Script.location ** Micheline.annot **
+            (Script_typed_ir.ty __46) ** (Script_typed_ir.stack_ty __47) **
+            (option Script_typed_ir.var_annot)]) [_, _]
+        [loc, annot, v, rest, stack_annot] in
+    let!? annot := parse_var_annot loc (Some stack_annot) annot in
+    typed ctxt loc Script_typed_ir.Dup
+      (Script_typed_ir.Item_t v (Script_typed_ir.Item_t v rest stack_annot)
+        annot)
+  |
+    ((Micheline.Prim loc Alpha_context.Script.I_DIG (cons n []) result_annot,
+      __stack_value), _) =>
+    let fix make_proof_argument {tstk : Set}
+      (n : Z) (stk : Script_typed_ir.stack_ty tstk) {struct n}
+      : Lwt.t (Error_monad.tzresult (dig_proof_argument tstk)) :=
+      match (((|Compare.Int|).(Compare.S.op_eq) n 0), stk) with
+      | (true, Script_typed_ir.Item_t v rest annot) =>
+        let 'existT _ [__472, __473] [v, rest, annot] :=
+          existT (A := [Set ** Set])
+            (fun '[__472, __473] =>
+              [(Script_typed_ir.ty __472) ** (Script_typed_ir.stack_ty __473) **
+                (option Script_typed_ir.var_annot)]) [_, _] [v, rest, annot] in
+        outer_return
+          (Dig_proof_argument (Script_typed_ir.Rest, (v, annot), rest))
+      | (false, Script_typed_ir.Item_t v rest annot) =>
+        let 'existT _ [__474, __475] [v, rest, annot] :=
+          existT (A := [Set ** Set])
+            (fun '[__474, __475] =>
+              [(Script_typed_ir.ty __474) ** (Script_typed_ir.stack_ty __475) **
+                (option Script_typed_ir.var_annot)]) [_, _] [v, rest, annot] in
+        let!? 'Dig_proof_argument (n', (x, xv), aft') :=
+          make_proof_argument (Pervasives.op_minus n 1) rest in
+        let 'existT _
+          [__Dig_proof_argument_'aft, __Dig_proof_argument_'rest,
+            __Dig_proof_argument_'x] [n', x, xv, aft'] :=
           existT (A := [Set ** Set ** Set])
-            (fun '[__115, __116, __117] =>
-              [Alpha_context.Script.location **
-                (Micheline.node Alpha_context.Script.location
-                  Alpha_context.Script.prim) ** Micheline.annot **
-                (Script_typed_ir.comparable_ty __116) **
-                (Script_typed_ir.ty __117) ** (Script_typed_ir.stack_ty __115)
-                ** (option Script_typed_ir.var_annot)]) [_, _, _]
-            [loc, body, annot, ck, __elt_value, starting_rest, _map_annot] in
-        let k := ty_of_comparable_ty ck in
-        Error_monad.op_gtgteqquestion
-          (check_kind [ Script_tc_errors.Seq_kind ] body)
-          (fun function_parameter =>
-            let '_ := function_parameter in
-            Error_monad.op_gtgteqquestion (parse_var_type_annot loc annot)
-              (fun function_parameter =>
-                let '(ret_annot, ty_name) := function_parameter in
-                let k_name :=
-                  Script_ir_annot.field_to_var_annot
-                    Script_ir_annot.default_key_annot in
-                let e_name :=
-                  Script_ir_annot.field_to_var_annot
-                    Script_ir_annot.default_elt_annot in
-                Error_monad.op_gtgteqquestion
-                  (parse_instr type_logger tc_context ctxt legacy body
-                    (Script_typed_ir.Item_t
-                      (Script_typed_ir.Pair_t (k, None, k_name)
-                        (__elt_value, None, e_name) None
-                        (has_big_map __elt_value)) starting_rest None))
-                  (fun function_parameter =>
-                    let '(judgement, ctxt) := function_parameter in
-                    match judgement with
-                    |
-                      Typed
-                        ({|
-                          Script_typed_ir.descr.aft := Script_typed_ir.Item_t ret rest _
-                            |} as ibody) =>
-                      let 'existT _ [__480, __481, __Typed_'aft7]
-                        [ret, rest, ibody] :=
-                        existT (A := [Set ** Set ** Set])
-                          (fun '[__480, __481, __Typed_'aft7] =>
-                            [(Script_typed_ir.ty __480) **
-                              (Script_typed_ir.stack_ty __481) **
-                              (Script_typed_ir.descr
-                                (Script_typed_ir.pair __116 __117 * __115)
-                                __Typed_'aft7)]) [_, _, _] [ret, rest, ibody] in
-                      let invalid_map_body (function_parameter : unit)
-                        : Lwt.t (Error_monad.tzresult Error_monad.__error) :=
-                        let '_ := function_parameter in
-                        Error_monad.op_gtgtpipequestion
-                          (serialize_stack_for_error ctxt
-                            ibody.(Script_typed_ir.descr.aft))
-                          (fun function_parameter =>
-                            let '(aft, _ctxt) := function_parameter in
-                            extensible_type_value) in
-                      Error_monad.trace_eval invalid_map_body
-                        (Error_monad.op_gtgteqquestion
-                          (Lwt.__return (stack_ty_eq ctxt 1 rest starting_rest))
-                          (fun function_parameter =>
-                            let '(Eq, ctxt) := function_parameter in
-                            Error_monad.op_gtgteqquestion
-                              (Lwt.__return
-                                (merge_stacks legacy loc ctxt rest starting_rest))
-                              (fun function_parameter =>
-                                let '(rest, ctxt) := function_parameter in
-                                typed ctxt loc (Script_typed_ir.Map_map ibody)
-                                  (Script_typed_ir.Item_t
-                                    (Script_typed_ir.Map_t ck ret ty_name
-                                      (has_big_map ret)) rest ret_annot))))
-                    | Typed {| Script_typed_ir.descr.aft := aft |} =>
-                      let 'existT _ __Typed_'aft8 aft :=
-                        existT (A := Set)
-                          (fun __Typed_'aft8 =>
-                            (Script_typed_ir.stack_ty __Typed_'aft8)) _ aft in
-                      Error_monad.op_gtgteqquestion
-                        (serialize_stack_for_error ctxt aft)
-                        (fun function_parameter =>
-                          let '(aft, _ctxt) := function_parameter in
-                          Error_monad.fail extensible_type_value)
-                    | Failed _ => Error_monad.fail extensible_type_value
-                    end)))
-      |
-        ((Micheline.Prim loc Alpha_context.Script.I_ITER (cons body []) annot,
-          Script_typed_ir.Item_t (Script_typed_ir.Map_t comp_elt element_ty _ _)
-            rest _map_annot), _) =>
-        let 'existT _ [__119, __120, __121]
-          [loc, body, annot, comp_elt, element_ty, rest, _map_annot] :=
-          existT (A := [Set ** Set ** Set])
-            (fun '[__119, __120, __121] =>
-              [Alpha_context.Script.location **
-                (Micheline.node Alpha_context.Script.location
-                  Alpha_context.Script.prim) ** Micheline.annot **
-                (Script_typed_ir.comparable_ty __120) **
-                (Script_typed_ir.ty __121) ** (Script_typed_ir.stack_ty __119)
-                ** (option Script_typed_ir.var_annot)]) [_, _, _]
-            [loc, body, annot, comp_elt, element_ty, rest, _map_annot] in
-        Error_monad.op_gtgteqquestion
-          (check_kind [ Script_tc_errors.Seq_kind ] body)
-          (fun function_parameter =>
-            let '_ := function_parameter in
-            Error_monad.op_gtgteqquestion
-              (Script_ir_annot.fail_unexpected_annot loc annot)
-              (fun function_parameter =>
-                let '_ := function_parameter in
-                let k_name :=
-                  Script_ir_annot.field_to_var_annot
-                    Script_ir_annot.default_key_annot in
-                let e_name :=
-                  Script_ir_annot.field_to_var_annot
-                    Script_ir_annot.default_elt_annot in
-                let __key_value := ty_of_comparable_ty comp_elt in
-                Error_monad.op_gtgteqquestion
-                  (parse_instr type_logger tc_context ctxt legacy body
-                    (Script_typed_ir.Item_t
-                      (Script_typed_ir.Pair_t (__key_value, None, k_name)
-                        (element_ty, None, e_name) None (has_big_map element_ty))
-                      rest None))
-                  (fun function_parameter =>
-                    let '(judgement, ctxt) := function_parameter in
-                    match judgement with
-                    | Typed ({| Script_typed_ir.descr.aft := aft |} as ibody) =>
-                      let 'existT _ __Typed_'aft9 [aft, ibody] :=
-                        existT (A := Set)
-                          (fun __Typed_'aft9 =>
-                            [(Script_typed_ir.stack_ty __Typed_'aft9) **
-                              (Script_typed_ir.descr
-                                (Script_typed_ir.pair __120 __121 * __119)
-                                __Typed_'aft9)]) _ [aft, ibody] in
-                      let invalid_iter_body (function_parameter : unit)
-                        : Lwt.t (Error_monad.tzresult Error_monad.__error) :=
-                        let '_ := function_parameter in
-                        Error_monad.op_gtgteqquestion
-                          (serialize_stack_for_error ctxt
-                            ibody.(Script_typed_ir.descr.aft))
-                          (fun function_parameter =>
-                            let '(aft, ctxt) := function_parameter in
-                            Error_monad.op_gtgtpipequestion
-                              (serialize_stack_for_error ctxt rest)
-                              (fun function_parameter =>
-                                let '(rest, _ctxt) := function_parameter in
-                                extensible_type_value)) in
-                      Error_monad.trace_eval invalid_iter_body
-                        (Error_monad.op_gtgteqquestion
-                          (Lwt.__return (stack_ty_eq ctxt 1 aft rest))
-                          (fun function_parameter =>
-                            let '(Eq, ctxt) := function_parameter in
-                            Error_monad.op_gtgteqquestion
-                              (Lwt.__return
-                                (merge_stacks legacy loc ctxt aft rest))
-                              (fun function_parameter =>
-                                let '(rest, ctxt) := function_parameter in
-                                typed ctxt loc (Script_typed_ir.Map_iter ibody)
-                                  rest)))
-                    | Failed {| judgement.Failed.descr := __descr_value |} =>
-                      typed ctxt loc
-                        (Script_typed_ir.Map_iter (__descr_value rest)) rest
-                    end)))
-      |
-        ((Micheline.Prim loc Alpha_context.Script.I_MEM [] annot,
-          Script_typed_ir.Item_t vk
-            (Script_typed_ir.Item_t (Script_typed_ir.Map_t ck _ _ _) rest _) _),
-          _) =>
-        let 'existT _ [__122, __125, __126] [loc, annot, vk, ck, rest] :=
-          existT (A := [Set ** Set ** Set])
-            (fun '[__122, __125, __126] =>
-              [Alpha_context.Script.location ** Micheline.annot **
-                (Script_typed_ir.ty __122) **
-                (Script_typed_ir.comparable_ty __126) **
-                (Script_typed_ir.stack_ty __125)]) [_, _, _]
-            [loc, annot, vk, ck, rest] in
-        let k := ty_of_comparable_ty ck in
-        Error_monad.op_gtgteqquestion
-          (check_item_ty ctxt vk k loc Alpha_context.Script.I_MEM 1 2)
-          (fun function_parameter =>
-            let '(Eq, _, ctxt) := function_parameter in
-            Error_monad.op_gtgteqquestion (parse_var_annot loc None annot)
-              (fun annot =>
-                typed ctxt loc Script_typed_ir.Map_mem
-                  (Script_typed_ir.Item_t (Script_typed_ir.Bool_t None) rest
-                    annot)))
-      |
-        ((Micheline.Prim loc Alpha_context.Script.I_GET [] annot,
-          Script_typed_ir.Item_t vk
-            (Script_typed_ir.Item_t
-              (Script_typed_ir.Map_t ck __elt_value _ has_big_map) rest _) _), _)
-        =>
-        let 'existT _ [__128, __131, __132, __133]
-          [loc, annot, vk, ck, __elt_value, has_big_map, rest] :=
-          existT (A := [Set ** Set ** Set ** Set])
-            (fun '[__128, __131, __132, __133] =>
-              [Alpha_context.Script.location ** Micheline.annot **
-                (Script_typed_ir.ty __128) **
-                (Script_typed_ir.comparable_ty __132) **
-                (Script_typed_ir.ty __133) ** bool **
-                (Script_typed_ir.stack_ty __131)]) [_, _, _, _]
-            [loc, annot, vk, ck, __elt_value, has_big_map, rest] in
-        let k := ty_of_comparable_ty ck in
-        Error_monad.op_gtgteqquestion
-          (check_item_ty ctxt vk k loc Alpha_context.Script.I_GET 1 2)
-          (fun function_parameter =>
-            let '(Eq, _, ctxt) := function_parameter in
-            Error_monad.op_gtgteqquestion (parse_var_annot loc None annot)
-              (fun annot =>
-                typed ctxt loc Script_typed_ir.Map_get
-                  (Script_typed_ir.Item_t
-                    (Script_typed_ir.Option_t __elt_value None has_big_map) rest
-                    annot)))
-      |
-        ((Micheline.Prim loc Alpha_context.Script.I_UPDATE [] annot,
-          Script_typed_ir.Item_t vk
-            (Script_typed_ir.Item_t (Script_typed_ir.Option_t vv _ _)
-              (Script_typed_ir.Item_t
-                (Script_typed_ir.Map_t ck v map_name has_big_map) rest map_annot)
-              _) _), _) =>
-        let 'existT _ [__134, __138, __140, __141, __142]
-          [loc, annot, vk, vv, ck, v, map_name, has_big_map, rest, map_annot] :=
-          existT (A := [Set ** Set ** Set ** Set ** Set])
-            (fun '[__134, __138, __140, __141, __142] =>
-              [Alpha_context.Script.location ** Micheline.annot **
-                (Script_typed_ir.ty __134) ** (Script_typed_ir.ty __138) **
-                (Script_typed_ir.comparable_ty __141) **
-                (Script_typed_ir.ty __142) **
-                (option Script_typed_ir.type_annot) ** bool **
-                (Script_typed_ir.stack_ty __140) **
-                (option Script_typed_ir.var_annot)]) [_, _, _, _, _]
-            [loc, annot, vk, vv, ck, v, map_name, has_big_map, rest, map_annot]
-          in
-        let k := ty_of_comparable_ty ck in
-        Error_monad.op_gtgteqquestion
-          (check_item_ty ctxt vk k loc Alpha_context.Script.I_UPDATE 1 3)
-          (fun function_parameter =>
-            let '(Eq, _, ctxt) := function_parameter in
-            Error_monad.op_gtgteqquestion
-              (check_item_ty ctxt vv v loc Alpha_context.Script.I_UPDATE 2 3)
-              (fun function_parameter =>
-                let '(Eq, v, ctxt) := function_parameter in
-                Error_monad.op_gtgteqquestion
-                  (parse_var_annot loc (Some map_annot) annot)
-                  (fun annot =>
-                    typed ctxt loc Script_typed_ir.Map_update
-                      (Script_typed_ir.Item_t
-                        (Script_typed_ir.Map_t ck v map_name has_big_map) rest
-                        annot))))
-      |
-        ((Micheline.Prim loc Alpha_context.Script.I_SIZE [] annot,
-          Script_typed_ir.Item_t (Script_typed_ir.Map_t _ _ _ _) rest _), _) =>
-        let 'existT _ __144 [loc, annot, rest] :=
-          existT (A := Set)
-            (fun __144 =>
-              [Alpha_context.Script.location ** Micheline.annot **
-                (Script_typed_ir.stack_ty __144)]) _ [loc, annot, rest] in
-        Error_monad.op_gtgteqquestion (parse_var_annot loc None annot)
-          (fun annot =>
-            typed ctxt loc Script_typed_ir.Map_size
-              (Script_typed_ir.Item_t (Script_typed_ir.Nat_t None) rest annot))
-      |
-        ((Micheline.Prim loc Alpha_context.Script.I_EMPTY_BIG_MAP
-          (cons tk (cons tv [])) annot, __stack_value), _) =>
-        Error_monad.op_gtgteqquestion
-          (Lwt.__return (parse_comparable_ty ctxt tk))
-          (fun function_parameter =>
-            let '(Ex_comparable_ty tk, ctxt) := function_parameter in
-            let 'existT _ __Ex_comparable_ty_'a3 [tk, ctxt] :=
-              existT (A := Set)
-                (fun __Ex_comparable_ty_'a3 =>
-                  [(Script_typed_ir.comparable_ty __Ex_comparable_ty_'a3) **
-                    Alpha_context.context]) _ [tk, ctxt] in
-            Error_monad.op_gtgteqquestion
-              (Lwt.__return (parse_packable_ty ctxt legacy tv))
-              (fun function_parameter =>
-                let '(Ex_ty tv, ctxt) := function_parameter in
-                let 'existT _ __Ex_ty_'a7 [tv, ctxt] :=
-                  existT (A := Set)
-                    (fun __Ex_ty_'a7 =>
-                      [(Script_typed_ir.ty __Ex_ty_'a7) **
-                        Alpha_context.context]) _ [tv, ctxt] in
-                Error_monad.op_gtgteqquestion (parse_var_type_annot loc annot)
-                  (fun function_parameter =>
-                    let '(annot, ty_name) := function_parameter in
-                    typed ctxt loc (Script_typed_ir.Empty_big_map tk tv)
-                      (Script_typed_ir.Item_t
-                        (Script_typed_ir.Big_map_t tk tv ty_name) __stack_value
-                        annot))))
-      |
-        ((Micheline.Prim loc Alpha_context.Script.I_MEM [] annot,
-          Script_typed_ir.Item_t set_key
-            (Script_typed_ir.Item_t (Script_typed_ir.Big_map_t map_key _ _) rest
-              _) _), _) =>
-        let 'existT _ [__147, __150, __151] [loc, annot, set_key, map_key, rest]
-          :=
-          existT (A := [Set ** Set ** Set])
-            (fun '[__147, __150, __151] =>
-              [Alpha_context.Script.location ** Micheline.annot **
-                (Script_typed_ir.ty __147) **
-                (Script_typed_ir.comparable_ty __151) **
-                (Script_typed_ir.stack_ty __150)]) [_, _, _]
-            [loc, annot, set_key, map_key, rest] in
-        let k := ty_of_comparable_ty map_key in
-        Error_monad.op_gtgteqquestion
-          (check_item_ty ctxt set_key k loc Alpha_context.Script.I_MEM 1 2)
-          (fun function_parameter =>
-            let '(Eq, _, ctxt) := function_parameter in
-            Error_monad.op_gtgteqquestion (parse_var_annot loc None annot)
-              (fun annot =>
-                typed ctxt loc Script_typed_ir.Big_map_mem
-                  (Script_typed_ir.Item_t (Script_typed_ir.Bool_t None) rest
-                    annot)))
-      |
-        ((Micheline.Prim loc Alpha_context.Script.I_GET [] annot,
-          Script_typed_ir.Item_t vk
-            (Script_typed_ir.Item_t (Script_typed_ir.Big_map_t ck __elt_value _)
-              rest _) _), _) =>
-        let 'existT _ [__153, __156, __157, __158]
-          [loc, annot, vk, ck, __elt_value, rest] :=
-          existT (A := [Set ** Set ** Set ** Set])
-            (fun '[__153, __156, __157, __158] =>
-              [Alpha_context.Script.location ** Micheline.annot **
-                (Script_typed_ir.ty __153) **
-                (Script_typed_ir.comparable_ty __157) **
-                (Script_typed_ir.ty __158) ** (Script_typed_ir.stack_ty __156)])
-            [_, _, _, _] [loc, annot, vk, ck, __elt_value, rest] in
-        let k := ty_of_comparable_ty ck in
-        Error_monad.op_gtgteqquestion
-          (check_item_ty ctxt vk k loc Alpha_context.Script.I_GET 1 2)
-          (fun function_parameter =>
-            let '(Eq, _, ctxt) := function_parameter in
-            Error_monad.op_gtgteqquestion (parse_var_annot loc None annot)
-              (fun annot =>
-                typed ctxt loc Script_typed_ir.Big_map_get
-                  (Script_typed_ir.Item_t
-                    (Script_typed_ir.Option_t __elt_value None
-                      (has_big_map __elt_value)) rest annot)))
-      |
-        ((Micheline.Prim loc Alpha_context.Script.I_UPDATE [] annot,
-          Script_typed_ir.Item_t set_key
-            (Script_typed_ir.Item_t (Script_typed_ir.Option_t set_value _ _)
-              (Script_typed_ir.Item_t
-                (Script_typed_ir.Big_map_t map_key map_value map_name) rest
-                map_annot) _) _), _) =>
-        let 'existT _ [__159, __163, __165, __166, __167]
-          [loc, annot, set_key, set_value, map_key, map_value, map_name, rest,
-            map_annot] :=
-          existT (A := [Set ** Set ** Set ** Set ** Set])
-            (fun '[__159, __163, __165, __166, __167] =>
-              [Alpha_context.Script.location ** Micheline.annot **
-                (Script_typed_ir.ty __159) ** (Script_typed_ir.ty __163) **
-                (Script_typed_ir.comparable_ty __166) **
-                (Script_typed_ir.ty __167) **
-                (option Script_typed_ir.type_annot) **
-                (Script_typed_ir.stack_ty __165) **
-                (option Script_typed_ir.var_annot)]) [_, _, _, _, _]
-            [loc, annot, set_key, set_value, map_key, map_value, map_name, rest,
-              map_annot] in
-        let k := ty_of_comparable_ty map_key in
-        Error_monad.op_gtgteqquestion
-          (check_item_ty ctxt set_key k loc Alpha_context.Script.I_UPDATE 1 3)
-          (fun function_parameter =>
-            let '(Eq, _, ctxt) := function_parameter in
-            Error_monad.op_gtgteqquestion
-              (check_item_ty ctxt set_value map_value loc
-                Alpha_context.Script.I_UPDATE 2 3)
-              (fun function_parameter =>
-                let '(Eq, map_value, ctxt) := function_parameter in
-                Error_monad.op_gtgteqquestion
-                  (parse_var_annot loc (Some map_annot) annot)
-                  (fun annot =>
-                    typed ctxt loc Script_typed_ir.Big_map_update
-                      (Script_typed_ir.Item_t
-                        (Script_typed_ir.Big_map_t map_key map_value map_name)
-                        rest annot))))
-      | ((Micheline.Seq loc [], __stack_value), _) =>
-        typed ctxt loc Script_typed_ir.Nop __stack_value
-      | ((Micheline.Seq loc (cons single []), __stack_value), _) =>
-        Error_monad.op_gtgteqquestion
-          (parse_instr type_logger tc_context ctxt legacy single __stack_value)
-          (fun function_parameter =>
-            let '(judgement, ctxt) := function_parameter in
-            match judgement with
-            | Typed ({| Script_typed_ir.descr.aft := aft |} as instr) =>
-              let 'existT _ __Typed_'aft10 [aft, instr] :=
-                existT (A := Set)
-                  (fun __Typed_'aft10 =>
-                    [(Script_typed_ir.stack_ty __Typed_'aft10) **
-                      (Script_typed_ir.descr bef __Typed_'aft10)]) _
-                  [aft, instr] in
-              let nop :=
-                {| Script_typed_ir.descr.loc := loc;
-                  Script_typed_ir.descr.bef := aft;
-                  Script_typed_ir.descr.aft := aft;
-                  Script_typed_ir.descr.instr := Script_typed_ir.Nop |} in
-              typed ctxt loc (Script_typed_ir.Seq instr nop) aft
-            | Failed {| judgement.Failed.descr := __descr_value |} =>
-              let __descr_value {B : Set} (aft : Script_typed_ir.stack_ty B)
-                : Script_typed_ir.descr bef B :=
-                let nop :=
-                  {| Script_typed_ir.descr.loc := loc;
-                    Script_typed_ir.descr.bef := aft;
-                    Script_typed_ir.descr.aft := aft;
-                    Script_typed_ir.descr.instr := Script_typed_ir.Nop |} in
-                let __descr_value := __descr_value aft in
-                Script_typed_ir.descr.with_instr
-                  (Script_typed_ir.Seq __descr_value nop) __descr_value in
-              __return ctxt
-                (Failed {| judgement.Failed.descr := __descr_value |})
-            end)
-      | ((Micheline.Seq loc (cons hd tl), __stack_value), _) =>
-        Error_monad.op_gtgteqquestion
-          (parse_instr type_logger tc_context ctxt legacy hd __stack_value)
-          (fun function_parameter =>
-            let '(judgement, ctxt) := function_parameter in
-            match judgement with
-            | Failed _ => Error_monad.fail extensible_type_value
-            | Typed ({| Script_typed_ir.descr.aft := middle |} as ihd) =>
-              let 'existT _ __Typed_'aft11 [middle, ihd] :=
-                existT (A := Set)
-                  (fun __Typed_'aft11 =>
-                    [(Script_typed_ir.stack_ty __Typed_'aft11) **
-                      (Script_typed_ir.descr bef __Typed_'aft11)]) _
-                  [middle, ihd] in
-              Error_monad.op_gtgteqquestion
-                (parse_instr type_logger tc_context ctxt legacy
-                  (Micheline.Seq (-1) tl) middle)
-                (fun function_parameter =>
-                  let '(judgement, ctxt) := function_parameter in
-                  match judgement with
-                  | Failed {| judgement.Failed.descr := __descr_value |} =>
-                    let __descr_value {B : Set}
-                      (ret : Script_typed_ir.stack_ty B)
-                      : Script_typed_ir.descr bef B :=
-                      {| Script_typed_ir.descr.loc := loc;
-                        Script_typed_ir.descr.bef := __stack_value;
-                        Script_typed_ir.descr.aft := ret;
-                        Script_typed_ir.descr.instr :=
-                          Script_typed_ir.Seq ihd (__descr_value ret) |} in
-                    __return ctxt
-                      (Failed {| judgement.Failed.descr := __descr_value |})
-                  | Typed itl =>
-                    let 'existT _ __Typed_'aft12 itl :=
-                      existT (A := Set)
-                        (fun __Typed_'aft12 =>
-                          (Script_typed_ir.descr __Typed_'aft11 __Typed_'aft12))
-                        _ itl in
-                    typed ctxt loc (Script_typed_ir.Seq ihd itl)
-                      itl.(Script_typed_ir.descr.aft)
-                  end)
-            end)
-      |
-        ((Micheline.Prim loc Alpha_context.Script.I_IF (cons bt (cons bf []))
-          annot,
-          (Script_typed_ir.Item_t (Script_typed_ir.Bool_t _) rest _) as bef), _)
-        =>
-        let 'existT _ __169 [loc, bt, bf, annot, rest, bef] :=
-          existT (A := Set)
-            (fun __169 =>
-              [Alpha_context.Script.location **
-                (Micheline.node Alpha_context.Script.location
-                  Alpha_context.Script.prim) **
-                (Micheline.node Alpha_context.Script.location
-                  Alpha_context.Script.prim) ** Micheline.annot **
-                (Script_typed_ir.stack_ty __169) **
-                (Script_typed_ir.stack_ty (bool * __169))]) _
-            [loc, bt, bf, annot, rest, bef] in
-        Error_monad.op_gtgteqquestion
-          (check_kind [ Script_tc_errors.Seq_kind ] bt)
-          (fun function_parameter =>
-            let '_ := function_parameter in
-            Error_monad.op_gtgteqquestion
-              (check_kind [ Script_tc_errors.Seq_kind ] bf)
-              (fun function_parameter =>
-                let '_ := function_parameter in
-                Error_monad.op_gtgteqquestion
-                  (Script_ir_annot.fail_unexpected_annot loc annot)
-                  (fun function_parameter =>
-                    let '_ := function_parameter in
-                    Error_monad.op_gtgteqquestion
-                      (parse_instr type_logger tc_context ctxt legacy bt rest)
-                      (fun function_parameter =>
-                        let '(btr, ctxt) := function_parameter in
-                        Error_monad.op_gtgteqquestion
-                          (parse_instr type_logger tc_context ctxt legacy bf
-                            rest)
-                          (fun function_parameter =>
-                            let '(bfr, ctxt) := function_parameter in
-                            let branch {B : Set}
-                              (ibt : Script_typed_ir.descr __169 B)
-                              (ibf : Script_typed_ir.descr __169 B)
-                              : Script_typed_ir.descr (bool * __169) B :=
-                              {| Script_typed_ir.descr.loc := loc;
-                                Script_typed_ir.descr.bef := bef;
-                                Script_typed_ir.descr.aft :=
-                                  ibt.(Script_typed_ir.descr.aft);
-                                Script_typed_ir.descr.instr :=
-                                  Script_typed_ir.If ibt ibf |} in
-                            Error_monad.op_gtgteqquestion
-                              (merge_branches legacy ctxt loc btr bfr
-                                {| branch.branch := branch |})
-                              (fun function_parameter =>
-                                let '(judgement, ctxt) := function_parameter in
-                                __return ctxt judgement))))))
-      |
-        ((Micheline.Prim loc Alpha_context.Script.I_LOOP (cons body []) annot,
-          (Script_typed_ir.Item_t (Script_typed_ir.Bool_t _) rest _stack_annot)
-            as __stack_value), _) =>
-        let 'existT _ __171
-          [loc, body, annot, rest, _stack_annot, __stack_value] :=
-          existT (A := Set)
-            (fun __171 =>
-              [Alpha_context.Script.location **
-                (Micheline.node Alpha_context.Script.location
-                  Alpha_context.Script.prim) ** Micheline.annot **
-                (Script_typed_ir.stack_ty __171) **
+            (fun
+              '[__Dig_proof_argument_'aft, __Dig_proof_argument_'rest,
+                __Dig_proof_argument_'x] =>
+              [(Script_typed_ir.stack_prefix_preservation_witness
+                (__Dig_proof_argument_'x * __Dig_proof_argument_'rest)
+                __Dig_proof_argument_'rest __475 __Dig_proof_argument_'aft) **
+                (Script_typed_ir.ty __Dig_proof_argument_'x) **
                 (option Script_typed_ir.var_annot) **
-                (Script_typed_ir.stack_ty (bool * __171))]) _
-            [loc, body, annot, rest, _stack_annot, __stack_value] in
-        Error_monad.op_gtgteqquestion
-          (check_kind [ Script_tc_errors.Seq_kind ] body)
-          (fun function_parameter =>
-            let '_ := function_parameter in
-            Error_monad.op_gtgteqquestion
-              (Script_ir_annot.fail_unexpected_annot loc annot)
-              (fun function_parameter =>
-                let '_ := function_parameter in
-                Error_monad.op_gtgteqquestion
-                  (parse_instr type_logger tc_context ctxt legacy body rest)
-                  (fun function_parameter =>
-                    let '(judgement, ctxt) := function_parameter in
-                    match judgement with
-                    | Typed ibody =>
-                      let 'existT _ __Typed_'aft13 ibody :=
-                        existT (A := Set)
-                          (fun __Typed_'aft13 =>
-                            (Script_typed_ir.descr __171 __Typed_'aft13)) _
-                          ibody in
-                      let unmatched_branches (function_parameter : unit)
-                        : Lwt.t (Error_monad.tzresult Error_monad.__error) :=
-                        let '_ := function_parameter in
-                        Error_monad.op_gtgteqquestion
-                          (serialize_stack_for_error ctxt
-                            ibody.(Script_typed_ir.descr.aft))
-                          (fun function_parameter =>
-                            let '(aft, ctxt) := function_parameter in
-                            Error_monad.op_gtgtpipequestion
-                              (serialize_stack_for_error ctxt __stack_value)
-                              (fun function_parameter =>
-                                let '(__stack_value, _ctxt) :=
-                                  function_parameter in
-                                extensible_type_value)) in
-                      Error_monad.trace_eval unmatched_branches
-                        (Error_monad.op_gtgteqquestion
-                          (Lwt.__return
-                            (stack_ty_eq ctxt 1
-                              ibody.(Script_typed_ir.descr.aft) __stack_value))
-                          (fun function_parameter =>
-                            let '(Eq, ctxt) := function_parameter in
-                            Error_monad.op_gtgteqquestion
-                              (Lwt.__return
-                                (merge_stacks legacy loc ctxt
-                                  ibody.(Script_typed_ir.descr.aft)
-                                  __stack_value))
-                              (fun function_parameter =>
-                                let '(_stack, ctxt) := function_parameter in
-                                typed ctxt loc (Script_typed_ir.Loop ibody) rest)))
-                    | Failed {| judgement.Failed.descr := __descr_value |} =>
-                      let ibody := __descr_value __stack_value in
-                      typed ctxt loc (Script_typed_ir.Loop ibody) rest
-                    end)))
-      |
-        ((Micheline.Prim loc Alpha_context.Script.I_LOOP_LEFT (cons body [])
-          annot,
+                (Script_typed_ir.stack_ty __Dig_proof_argument_'aft)]) [_, _, _]
+            [n', x, xv, aft'] in
+        outer_return
+          (Dig_proof_argument
+            ((Script_typed_ir.Prefix n'), (x, xv),
+              (Script_typed_ir.Item_t v aft' annot)))
+      | (_, _) =>
+        let!? '(whole_stack, _ctxt) :=
+          serialize_stack_for_error ctxt __stack_value in
+        Error_monad.fail extensible_type_value
+      end in
+    let!? n := Lwt.__return (parse_int32 n) in
+    let!? '_ := Script_ir_annot.fail_unexpected_annot loc result_annot in
+    let!? 'Dig_proof_argument (n', (x, stack_annot), aft) :=
+      make_proof_argument n __stack_value in
+    let 'existT _
+      [__Dig_proof_argument_'aft1, __Dig_proof_argument_'rest1,
+        __Dig_proof_argument_'x1] [n', x, stack_annot, aft] :=
+      existT (A := [Set ** Set ** Set])
+        (fun
+          '[__Dig_proof_argument_'aft1, __Dig_proof_argument_'rest1,
+            __Dig_proof_argument_'x1] =>
+          [(Script_typed_ir.stack_prefix_preservation_witness
+            (__Dig_proof_argument_'x1 * __Dig_proof_argument_'rest1)
+            __Dig_proof_argument_'rest1 bef __Dig_proof_argument_'aft1) **
+            (Script_typed_ir.ty __Dig_proof_argument_'x1) **
+            (option Script_typed_ir.var_annot) **
+            (Script_typed_ir.stack_ty __Dig_proof_argument_'aft1)]) [_, _, _]
+        [n', x, stack_annot, aft] in
+    typed ctxt loc (Script_typed_ir.Dig n n')
+      (Script_typed_ir.Item_t x aft stack_annot)
+  |
+    ((Micheline.Prim loc Alpha_context.Script.I_DIG
+      (([] | cons _ (cons _ _)) as l) _, _), _) =>
+    Error_monad.fail extensible_type_value
+  |
+    ((Micheline.Prim loc Alpha_context.Script.I_DUG (cons n []) result_annot,
+      Script_typed_ir.Item_t x whole_stack stack_annot), _) =>
+    let 'existT _ [__48, __49]
+      [loc, n, result_annot, x, whole_stack, stack_annot] :=
+      existT (A := [Set ** Set])
+        (fun '[__48, __49] =>
+          [Alpha_context.Script.location **
+            (Micheline.node Alpha_context.Script.location
+              Alpha_context.Script.prim) ** Micheline.annot **
+            (Script_typed_ir.ty __48) ** (Script_typed_ir.stack_ty __49) **
+            (option Script_typed_ir.var_annot)]) [_, _]
+        [loc, n, result_annot, x, whole_stack, stack_annot] in
+    let!? whole_n := Lwt.__return (parse_int32 n) in
+    let fix make_proof_argument {tstk x : Set}
+      (n : Z) (x : Script_typed_ir.ty x)
+      (stack_annot : option Script_typed_ir.var_annot)
+      (stk : Script_typed_ir.stack_ty tstk) {struct n}
+      : Lwt.t (Error_monad.tzresult (dug_proof_argument tstk x)) :=
+      match (((|Compare.Int|).(Compare.S.op_eq) n 0), stk) with
+      | (true, rest) =>
+        outer_return
+          (Dug_proof_argument
+            (Script_typed_ir.Rest, tt,
+              (Script_typed_ir.Item_t x rest stack_annot)))
+      | (false, Script_typed_ir.Item_t v rest annot) =>
+        let 'existT _ [__476, __477] [v, rest, annot] :=
+          existT (A := [Set ** Set])
+            (fun '[__476, __477] =>
+              [(Script_typed_ir.ty __476) ** (Script_typed_ir.stack_ty __477) **
+                (option Script_typed_ir.var_annot)]) [_, _] [v, rest, annot] in
+        let!? 'Dug_proof_argument (n', _, aft') :=
+          make_proof_argument (Pervasives.op_minus n 1) x stack_annot rest in
+        let 'existT _ [__Dug_proof_argument_'aft, __Dug_proof_argument_'rest]
+          [n', aft'] :=
+          existT (A := [Set ** Set])
+            (fun '[__Dug_proof_argument_'aft, __Dug_proof_argument_'rest] =>
+              [(Script_typed_ir.stack_prefix_preservation_witness
+                __Dug_proof_argument_'rest (x * __Dug_proof_argument_'rest)
+                __477 __Dug_proof_argument_'aft) **
+                (Script_typed_ir.stack_ty __Dug_proof_argument_'aft)]) [_, _]
+            [n', aft'] in
+        outer_return
+          (Dug_proof_argument
+            ((Script_typed_ir.Prefix n'), tt,
+              (Script_typed_ir.Item_t v aft' annot)))
+      | (_, _) =>
+        let!? '(whole_stack, _ctxt) :=
+          serialize_stack_for_error ctxt whole_stack in
+        Error_monad.fail extensible_type_value
+      end in
+    let!? '_ := Script_ir_annot.fail_unexpected_annot loc result_annot in
+    let!? 'Dug_proof_argument (n', _, aft) :=
+      make_proof_argument whole_n x stack_annot whole_stack in
+    let 'existT _ [__Dug_proof_argument_'aft1, __Dug_proof_argument_'rest1]
+      [n', aft] :=
+      existT (A := [Set ** Set])
+        (fun '[__Dug_proof_argument_'aft1, __Dug_proof_argument_'rest1] =>
+          [(Script_typed_ir.stack_prefix_preservation_witness
+            __Dug_proof_argument_'rest1 (__48 * __Dug_proof_argument_'rest1)
+            __49 __Dug_proof_argument_'aft1) **
+            (Script_typed_ir.stack_ty __Dug_proof_argument_'aft1)]) [_, _]
+        [n', aft] in
+    typed ctxt loc (Script_typed_ir.Dug whole_n n') aft
+  |
+    ((Micheline.Prim loc Alpha_context.Script.I_DUG (cons _ []) result_annot,
+      Script_typed_ir.Empty_t as __stack_value), _) =>
+    let!? '_ := Script_ir_annot.fail_unexpected_annot loc result_annot in
+    let!? '(__stack_value, _ctxt) :=
+      serialize_stack_for_error ctxt __stack_value in
+    Error_monad.fail extensible_type_value
+  |
+    ((Micheline.Prim loc Alpha_context.Script.I_DUG
+      (([] | cons _ (cons _ _)) as l) _, _), _) =>
+    Error_monad.fail extensible_type_value
+  |
+    ((Micheline.Prim loc Alpha_context.Script.I_SWAP [] annot,
+      Script_typed_ir.Item_t v (Script_typed_ir.Item_t w rest stack_annot)
+        cur_top_annot), _) =>
+    let 'existT _ [__50, __52, __53]
+      [loc, annot, v, w, rest, stack_annot, cur_top_annot] :=
+      existT (A := [Set ** Set ** Set])
+        (fun '[__50, __52, __53] =>
+          [Alpha_context.Script.location ** Micheline.annot **
+            (Script_typed_ir.ty __50) ** (Script_typed_ir.ty __52) **
+            (Script_typed_ir.stack_ty __53) **
+            (option Script_typed_ir.var_annot) **
+            (option Script_typed_ir.var_annot)]) [_, _, _]
+        [loc, annot, v, w, rest, stack_annot, cur_top_annot] in
+    let!? '_ := Script_ir_annot.fail_unexpected_annot loc annot in
+    typed ctxt loc Script_typed_ir.Swap
+      (Script_typed_ir.Item_t w (Script_typed_ir.Item_t v rest cur_top_annot)
+        stack_annot)
+  |
+    ((Micheline.Prim loc Alpha_context.Script.I_PUSH
+      (cons __t_value (cons d [])) annot, __stack_value), _) =>
+    let!? annot := parse_var_annot loc None annot in
+    let!? '(Ex_ty __t_value, ctxt) :=
+      Lwt.__return (parse_packable_ty ctxt legacy __t_value) in
+    let 'existT _ __Ex_ty_'a1 [__t_value, ctxt] :=
+      existT (A := Set)
+        (fun __Ex_ty_'a1 =>
+          [(Script_typed_ir.ty __Ex_ty_'a1) ** Alpha_context.context]) _
+        [__t_value, ctxt] in
+    let!? '(v, ctxt) := parse_data type_logger ctxt legacy __t_value d in
+    typed ctxt loc (Script_typed_ir.Const v)
+      (Script_typed_ir.Item_t __t_value __stack_value annot)
+  |
+    ((Micheline.Prim loc Alpha_context.Script.I_UNIT [] annot, __stack_value), _)
+    =>
+    let!? '(annot, ty_name) := parse_var_type_annot loc annot in
+    typed ctxt loc (Script_typed_ir.Const tt)
+      (Script_typed_ir.Item_t (Script_typed_ir.Unit_t ty_name) __stack_value
+        annot)
+  |
+    ((Micheline.Prim loc Alpha_context.Script.I_SOME [] annot,
+      Script_typed_ir.Item_t __t_value rest _), _) =>
+    let 'existT _ [__54, __55] [loc, annot, __t_value, rest] :=
+      existT (A := [Set ** Set])
+        (fun '[__54, __55] =>
+          [Alpha_context.Script.location ** Micheline.annot **
+            (Script_typed_ir.ty __54) ** (Script_typed_ir.stack_ty __55)]) [_,
+        _] [loc, annot, __t_value, rest] in
+    let!? '(annot, ty_name) := parse_var_type_annot loc annot in
+    typed ctxt loc Script_typed_ir.Cons_some
+      (Script_typed_ir.Item_t
+        (Script_typed_ir.Option_t __t_value ty_name (has_big_map __t_value))
+        rest annot)
+  |
+    ((Micheline.Prim loc Alpha_context.Script.I_NONE (cons __t_value []) annot,
+      __stack_value), _) =>
+    let!? '(Ex_ty __t_value, ctxt) :=
+      Lwt.__return (parse_any_ty ctxt legacy __t_value) in
+    let 'existT _ __Ex_ty_'a2 [__t_value, ctxt] :=
+      existT (A := Set)
+        (fun __Ex_ty_'a2 =>
+          [(Script_typed_ir.ty __Ex_ty_'a2) ** Alpha_context.context]) _
+        [__t_value, ctxt] in
+    let!? '(annot, ty_name) := parse_var_type_annot loc annot in
+    typed ctxt loc (Script_typed_ir.Cons_none __t_value)
+      (Script_typed_ir.Item_t
+        (Script_typed_ir.Option_t __t_value ty_name (has_big_map __t_value))
+        __stack_value annot)
+  |
+    ((Micheline.Prim loc Alpha_context.Script.I_IF_NONE (cons bt (cons bf []))
+      annot,
+      (Script_typed_ir.Item_t (Script_typed_ir.Option_t __t_value _ _) rest
+        option_annot) as bef), _) =>
+    let 'existT _ [__57, __58]
+      [loc, bt, bf, annot, __t_value, rest, option_annot, bef] :=
+      existT (A := [Set ** Set])
+        (fun '[__57, __58] =>
+          [Alpha_context.Script.location **
+            (Micheline.node Alpha_context.Script.location
+              Alpha_context.Script.prim) **
+            (Micheline.node Alpha_context.Script.location
+              Alpha_context.Script.prim) ** Micheline.annot **
+            (Script_typed_ir.ty __58) ** (Script_typed_ir.stack_ty __57) **
+            (option Script_typed_ir.var_annot) **
+            (Script_typed_ir.stack_ty (option __58 * __57))]) [_, _]
+        [loc, bt, bf, annot, __t_value, rest, option_annot, bef] in
+    let!? '_ := check_kind [ Script_tc_errors.Seq_kind ] bt in
+    let!? '_ := check_kind [ Script_tc_errors.Seq_kind ] bf in
+    let!? '_ := Script_ir_annot.fail_unexpected_annot loc annot in
+    let annot :=
+      Script_ir_annot.gen_access_annot option_annot None
+        Script_ir_annot.default_some_annot in
+    let!? '(btr, ctxt) := parse_instr type_logger tc_context ctxt legacy bt rest
+      in
+    let!? '(bfr, ctxt) :=
+      parse_instr type_logger tc_context ctxt legacy bf
+        (Script_typed_ir.Item_t __t_value rest annot) in
+    let branch {B : Set}
+      (ibt : Script_typed_ir.descr __57 B)
+      (ibf : Script_typed_ir.descr (__58 * __57) B)
+      : Script_typed_ir.descr (option __58 * __57) B :=
+      {| Script_typed_ir.descr.loc := loc; Script_typed_ir.descr.bef := bef;
+        Script_typed_ir.descr.aft := ibt.(Script_typed_ir.descr.aft);
+        Script_typed_ir.descr.instr := Script_typed_ir.If_none ibt ibf |} in
+    let!? '(judgement, ctxt) :=
+      merge_branches legacy ctxt loc btr bfr {| branch.branch := branch |} in
+    __return ctxt judgement
+  |
+    ((Micheline.Prim loc Alpha_context.Script.I_PAIR [] annot,
+      Script_typed_ir.Item_t __a_value
+        (Script_typed_ir.Item_t __b_value rest snd_annot) fst_annot), _) =>
+    let 'existT _ [__59, __61, __62]
+      [loc, annot, __a_value, __b_value, rest, snd_annot, fst_annot] :=
+      existT (A := [Set ** Set ** Set])
+        (fun '[__59, __61, __62] =>
+          [Alpha_context.Script.location ** Micheline.annot **
+            (Script_typed_ir.ty __59) ** (Script_typed_ir.ty __61) **
+            (Script_typed_ir.stack_ty __62) **
+            (option Script_typed_ir.var_annot) **
+            (option Script_typed_ir.var_annot)]) [_, _, _]
+        [loc, annot, __a_value, __b_value, rest, snd_annot, fst_annot] in
+    let!? '(annot, ty_name, l_field, r_field) :=
+      parse_constr_annot loc
+        (Some (Script_ir_annot.var_to_field_annot fst_annot))
+        (Some (Script_ir_annot.var_to_field_annot snd_annot)) annot in
+    typed ctxt loc Script_typed_ir.Cons_pair
+      (Script_typed_ir.Item_t
+        (Script_typed_ir.Pair_t (__a_value, l_field, fst_annot)
+          (__b_value, r_field, snd_annot) ty_name
+          (Pervasives.op_pipepipe (has_big_map __a_value)
+            (has_big_map __b_value))) rest annot)
+  |
+    ((Micheline.Prim loc Alpha_context.Script.I_CAR [] annot,
+      Script_typed_ir.Item_t
+        (Script_typed_ir.Pair_t (__a_value, expected_field_annot, a_annot) _ _ _)
+        rest pair_annot), _) =>
+    let 'existT _ [__64, __65]
+      [loc, annot, __a_value, expected_field_annot, a_annot, rest, pair_annot]
+      :=
+      existT (A := [Set ** Set])
+        (fun '[__64, __65] =>
+          [Alpha_context.Script.location ** Micheline.annot **
+            (Script_typed_ir.ty __65) ** (option Script_typed_ir.field_annot) **
+            (option Script_typed_ir.var_annot) **
+            (Script_typed_ir.stack_ty __64) **
+            (option Script_typed_ir.var_annot)]) [_, _]
+        [loc, annot, __a_value, expected_field_annot, a_annot, rest, pair_annot]
+      in
+    let!? '(annot, field_annot) :=
+      parse_destr_annot loc annot Script_ir_annot.default_car_annot
+        expected_field_annot pair_annot a_annot in
+    let!? '_ :=
+      Lwt.__return
+        (Script_ir_annot.check_correct_field field_annot expected_field_annot)
+      in
+    typed ctxt loc Script_typed_ir.Car
+      (Script_typed_ir.Item_t __a_value rest annot)
+  |
+    ((Micheline.Prim loc Alpha_context.Script.I_CDR [] annot,
+      Script_typed_ir.Item_t
+        (Script_typed_ir.Pair_t _ (__b_value, expected_field_annot, b_annot) _ _)
+        rest pair_annot), _) =>
+    let 'existT _ [__68, __70]
+      [loc, annot, __b_value, expected_field_annot, b_annot, rest, pair_annot]
+      :=
+      existT (A := [Set ** Set])
+        (fun '[__68, __70] =>
+          [Alpha_context.Script.location ** Micheline.annot **
+            (Script_typed_ir.ty __70) ** (option Script_typed_ir.field_annot) **
+            (option Script_typed_ir.var_annot) **
+            (Script_typed_ir.stack_ty __68) **
+            (option Script_typed_ir.var_annot)]) [_, _]
+        [loc, annot, __b_value, expected_field_annot, b_annot, rest, pair_annot]
+      in
+    let!? '(annot, field_annot) :=
+      parse_destr_annot loc annot Script_ir_annot.default_cdr_annot
+        expected_field_annot pair_annot b_annot in
+    let!? '_ :=
+      Lwt.__return
+        (Script_ir_annot.check_correct_field field_annot expected_field_annot)
+      in
+    typed ctxt loc Script_typed_ir.Cdr
+      (Script_typed_ir.Item_t __b_value rest annot)
+  |
+    ((Micheline.Prim loc Alpha_context.Script.I_LEFT (cons tr []) annot,
+      Script_typed_ir.Item_t tl rest stack_annot), _) =>
+    let 'existT _ [__71, __72] [loc, tr, annot, tl, rest, stack_annot] :=
+      existT (A := [Set ** Set])
+        (fun '[__71, __72] =>
+          [Alpha_context.Script.location **
+            (Micheline.node Alpha_context.Script.location
+              Alpha_context.Script.prim) ** Micheline.annot **
+            (Script_typed_ir.ty __71) ** (Script_typed_ir.stack_ty __72) **
+            (option Script_typed_ir.var_annot)]) [_, _]
+        [loc, tr, annot, tl, rest, stack_annot] in
+    let!? '(Ex_ty tr, ctxt) := Lwt.__return (parse_any_ty ctxt legacy tr) in
+    let 'existT _ __Ex_ty_'a3 [tr, ctxt] :=
+      existT (A := Set)
+        (fun __Ex_ty_'a3 =>
+          [(Script_typed_ir.ty __Ex_ty_'a3) ** Alpha_context.context]) _
+        [tr, ctxt] in
+    let!? '(annot, tname, l_field, r_field) :=
+      parse_constr_annot loc
+        (Some (Script_ir_annot.var_to_field_annot stack_annot)) None annot in
+    typed ctxt loc Script_typed_ir.Left
+      (Script_typed_ir.Item_t
+        (Script_typed_ir.Union_t (tl, l_field) (tr, r_field) tname
+          (Pervasives.op_pipepipe (has_big_map tl) (has_big_map tr))) rest annot)
+  |
+    ((Micheline.Prim loc Alpha_context.Script.I_RIGHT (cons tl []) annot,
+      Script_typed_ir.Item_t tr rest stack_annot), _) =>
+    let 'existT _ [__73, __74] [loc, tl, annot, tr, rest, stack_annot] :=
+      existT (A := [Set ** Set])
+        (fun '[__73, __74] =>
+          [Alpha_context.Script.location **
+            (Micheline.node Alpha_context.Script.location
+              Alpha_context.Script.prim) ** Micheline.annot **
+            (Script_typed_ir.ty __73) ** (Script_typed_ir.stack_ty __74) **
+            (option Script_typed_ir.var_annot)]) [_, _]
+        [loc, tl, annot, tr, rest, stack_annot] in
+    let!? '(Ex_ty tl, ctxt) := Lwt.__return (parse_any_ty ctxt legacy tl) in
+    let 'existT _ __Ex_ty_'a4 [tl, ctxt] :=
+      existT (A := Set)
+        (fun __Ex_ty_'a4 =>
+          [(Script_typed_ir.ty __Ex_ty_'a4) ** Alpha_context.context]) _
+        [tl, ctxt] in
+    let!? '(annot, tname, l_field, r_field) :=
+      parse_constr_annot loc None
+        (Some (Script_ir_annot.var_to_field_annot stack_annot)) annot in
+    typed ctxt loc Script_typed_ir.Right
+      (Script_typed_ir.Item_t
+        (Script_typed_ir.Union_t (tl, l_field) (tr, r_field) tname
+          (Pervasives.op_pipepipe (has_big_map tl) (has_big_map tr))) rest annot)
+  |
+    ((Micheline.Prim loc Alpha_context.Script.I_IF_LEFT (cons bt (cons bf []))
+      annot,
+      (Script_typed_ir.Item_t
+        (Script_typed_ir.Union_t (tl, l_field) (tr, r_field) _ _) rest
+        union_annot) as bef), _) =>
+    let 'existT _ [__76, __77, __78]
+      [loc, bt, bf, annot, tl, l_field, tr, r_field, rest, union_annot, bef] :=
+      existT (A := [Set ** Set ** Set])
+        (fun '[__76, __77, __78] =>
+          [Alpha_context.Script.location **
+            (Micheline.node Alpha_context.Script.location
+              Alpha_context.Script.prim) **
+            (Micheline.node Alpha_context.Script.location
+              Alpha_context.Script.prim) ** Micheline.annot **
+            (Script_typed_ir.ty __77) ** (option Script_typed_ir.field_annot) **
+            (Script_typed_ir.ty __78) ** (option Script_typed_ir.field_annot) **
+            (Script_typed_ir.stack_ty __76) **
+            (option Script_typed_ir.var_annot) **
+            (Script_typed_ir.stack_ty (Script_typed_ir.union __77 __78 * __76))])
+        [_, _, _]
+        [loc, bt, bf, annot, tl, l_field, tr, r_field, rest, union_annot, bef]
+      in
+    let!? '_ := check_kind [ Script_tc_errors.Seq_kind ] bt in
+    let!? '_ := check_kind [ Script_tc_errors.Seq_kind ] bf in
+    let!? '_ := Script_ir_annot.fail_unexpected_annot loc annot in
+    let left_annot :=
+      Script_ir_annot.gen_access_annot union_annot
+        (Some Script_ir_annot.default_left_annot) l_field in
+    let right_annot :=
+      Script_ir_annot.gen_access_annot union_annot
+        (Some Script_ir_annot.default_right_annot) r_field in
+    let!? '(btr, ctxt) :=
+      parse_instr type_logger tc_context ctxt legacy bt
+        (Script_typed_ir.Item_t tl rest left_annot) in
+    let!? '(bfr, ctxt) :=
+      parse_instr type_logger tc_context ctxt legacy bf
+        (Script_typed_ir.Item_t tr rest right_annot) in
+    let branch {B : Set}
+      (ibt : Script_typed_ir.descr (__77 * __76) B)
+      (ibf : Script_typed_ir.descr (__78 * __76) B)
+      : Script_typed_ir.descr (Script_typed_ir.union __77 __78 * __76) B :=
+      {| Script_typed_ir.descr.loc := loc; Script_typed_ir.descr.bef := bef;
+        Script_typed_ir.descr.aft := ibt.(Script_typed_ir.descr.aft);
+        Script_typed_ir.descr.instr := Script_typed_ir.If_left ibt ibf |} in
+    let!? '(judgement, ctxt) :=
+      merge_branches legacy ctxt loc btr bfr {| branch.branch := branch |} in
+    __return ctxt judgement
+  |
+    ((Micheline.Prim loc Alpha_context.Script.I_NIL (cons __t_value []) annot,
+      __stack_value), _) =>
+    let!? '(Ex_ty __t_value, ctxt) :=
+      Lwt.__return (parse_any_ty ctxt legacy __t_value) in
+    let 'existT _ __Ex_ty_'a5 [__t_value, ctxt] :=
+      existT (A := Set)
+        (fun __Ex_ty_'a5 =>
+          [(Script_typed_ir.ty __Ex_ty_'a5) ** Alpha_context.context]) _
+        [__t_value, ctxt] in
+    let!? '(annot, ty_name) := parse_var_type_annot loc annot in
+    typed ctxt loc Script_typed_ir.Nil
+      (Script_typed_ir.Item_t
+        (Script_typed_ir.List_t __t_value ty_name (has_big_map __t_value))
+        __stack_value annot)
+  |
+    ((Micheline.Prim loc Alpha_context.Script.I_CONS [] annot,
+      Script_typed_ir.Item_t tv
+        (Script_typed_ir.Item_t
+          (Script_typed_ir.List_t __t_value ty_name has_big_map) rest _) _), _)
+    =>
+    let 'existT _ [__79, __82, __83]
+      [loc, annot, tv, __t_value, ty_name, has_big_map, rest] :=
+      existT (A := [Set ** Set ** Set])
+        (fun '[__79, __82, __83] =>
+          [Alpha_context.Script.location ** Micheline.annot **
+            (Script_typed_ir.ty __79) ** (Script_typed_ir.ty __83) **
+            (option Script_typed_ir.type_annot) ** bool **
+            (Script_typed_ir.stack_ty __82)]) [_, _, _]
+        [loc, annot, tv, __t_value, ty_name, has_big_map, rest] in
+    let!? '(Eq, __t_value, ctxt) :=
+      check_item_ty ctxt tv __t_value loc Alpha_context.Script.I_CONS 1 2 in
+    let!? annot := parse_var_annot loc None annot in
+    typed ctxt loc Script_typed_ir.Cons_list
+      (Script_typed_ir.Item_t
+        (Script_typed_ir.List_t __t_value ty_name has_big_map) rest annot)
+  |
+    ((Micheline.Prim loc Alpha_context.Script.I_IF_CONS (cons bt (cons bf []))
+      annot,
+      (Script_typed_ir.Item_t
+        (Script_typed_ir.List_t __t_value ty_name has_big_map) rest list_annot)
+        as bef), _) =>
+    let 'existT _ [__85, __86]
+      [loc, bt, bf, annot, __t_value, ty_name, has_big_map, rest, list_annot,
+        bef] :=
+      existT (A := [Set ** Set])
+        (fun '[__85, __86] =>
+          [Alpha_context.Script.location **
+            (Micheline.node Alpha_context.Script.location
+              Alpha_context.Script.prim) **
+            (Micheline.node Alpha_context.Script.location
+              Alpha_context.Script.prim) ** Micheline.annot **
+            (Script_typed_ir.ty __86) ** (option Script_typed_ir.type_annot) **
+            bool ** (Script_typed_ir.stack_ty __85) **
+            (option Script_typed_ir.var_annot) **
+            (Script_typed_ir.stack_ty (list __86 * __85))]) [_, _]
+        [loc, bt, bf, annot, __t_value, ty_name, has_big_map, rest, list_annot,
+          bef] in
+    let!? '_ := check_kind [ Script_tc_errors.Seq_kind ] bt in
+    let!? '_ := check_kind [ Script_tc_errors.Seq_kind ] bf in
+    let!? '_ := Script_ir_annot.fail_unexpected_annot loc annot in
+    let hd_annot :=
+      Script_ir_annot.gen_access_annot list_annot None
+        Script_ir_annot.default_hd_annot in
+    let tl_annot :=
+      Script_ir_annot.gen_access_annot list_annot None
+        Script_ir_annot.default_tl_annot in
+    let!? '(btr, ctxt) :=
+      parse_instr type_logger tc_context ctxt legacy bt
+        (Script_typed_ir.Item_t __t_value
           (Script_typed_ir.Item_t
-            (Script_typed_ir.Union_t (tl, l_field) (tr, _) _ _) rest union_annot)
-            as __stack_value), _) =>
-        let 'existT _ [__173, __174, __175]
-          [loc, body, annot, tl, l_field, tr, rest, union_annot, __stack_value]
-          :=
+            (Script_typed_ir.List_t __t_value ty_name has_big_map) rest tl_annot)
+          hd_annot) in
+    let!? '(bfr, ctxt) := parse_instr type_logger tc_context ctxt legacy bf rest
+      in
+    let branch {B : Set}
+      (ibt : Script_typed_ir.descr (__86 * (list __86 * __85)) B)
+      (ibf : Script_typed_ir.descr __85 B)
+      : Script_typed_ir.descr (list __86 * __85) B :=
+      {| Script_typed_ir.descr.loc := loc; Script_typed_ir.descr.bef := bef;
+        Script_typed_ir.descr.aft := ibt.(Script_typed_ir.descr.aft);
+        Script_typed_ir.descr.instr := Script_typed_ir.If_cons ibt ibf |} in
+    let!? '(judgement, ctxt) :=
+      merge_branches legacy ctxt loc btr bfr {| branch.branch := branch |} in
+    __return ctxt judgement
+  |
+    ((Micheline.Prim loc Alpha_context.Script.I_SIZE [] annot,
+      Script_typed_ir.Item_t (Script_typed_ir.List_t _ _ _) rest _), _) =>
+    let 'existT _ __88 [loc, annot, rest] :=
+      existT (A := Set)
+        (fun __88 =>
+          [Alpha_context.Script.location ** Micheline.annot **
+            (Script_typed_ir.stack_ty __88)]) _ [loc, annot, rest] in
+    let!? '(annot, tname) := parse_var_type_annot loc annot in
+    typed ctxt loc Script_typed_ir.List_size
+      (Script_typed_ir.Item_t (Script_typed_ir.Nat_t tname) rest annot)
+  |
+    ((Micheline.Prim loc Alpha_context.Script.I_MAP (cons body []) annot,
+      Script_typed_ir.Item_t (Script_typed_ir.List_t __elt_value _ _)
+        starting_rest list_annot), _) =>
+    let 'existT _ [__91, __92]
+      [loc, body, annot, __elt_value, starting_rest, list_annot] :=
+      existT (A := [Set ** Set])
+        (fun '[__91, __92] =>
+          [Alpha_context.Script.location **
+            (Micheline.node Alpha_context.Script.location
+              Alpha_context.Script.prim) ** Micheline.annot **
+            (Script_typed_ir.ty __92) ** (Script_typed_ir.stack_ty __91) **
+            (option Script_typed_ir.var_annot)]) [_, _]
+        [loc, body, annot, __elt_value, starting_rest, list_annot] in
+    let!? '_ := check_kind [ Script_tc_errors.Seq_kind ] body in
+    let!? '(ret_annot, list_ty_name) := parse_var_type_annot loc annot in
+    let elt_annot :=
+      Script_ir_annot.gen_access_annot list_annot None
+        Script_ir_annot.default_elt_annot in
+    let!? '(judgement, ctxt) :=
+      parse_instr type_logger tc_context ctxt legacy body
+        (Script_typed_ir.Item_t __elt_value starting_rest elt_annot) in
+    match judgement with
+    |
+      Typed
+        ({| Script_typed_ir.descr.aft := Script_typed_ir.Item_t ret rest _ |} as
+          ibody) =>
+      let 'existT _ [__478, __479, __Typed_'aft3] [ret, rest, ibody] :=
+        existT (A := [Set ** Set ** Set])
+          (fun '[__478, __479, __Typed_'aft3] =>
+            [(Script_typed_ir.ty __478) ** (Script_typed_ir.stack_ty __479) **
+              (Script_typed_ir.descr (__92 * __91) __Typed_'aft3)]) [_, _, _]
+          [ret, rest, ibody] in
+      let invalid_map_body (function_parameter : unit)
+        : Lwt.t (Error_monad.tzresult Error_monad.__error) :=
+        let '_ := function_parameter in
+        Error_monad.op_gtgtpipequestion
+          (serialize_stack_for_error ctxt ibody.(Script_typed_ir.descr.aft))
+          (fun function_parameter =>
+            let '(aft, _ctxt) := function_parameter in
+            extensible_type_value) in
+      Error_monad.trace_eval invalid_map_body
+        (let!? '(Eq, ctxt) :=
+          Lwt.__return (stack_ty_eq ctxt 1 rest starting_rest) in
+        let!? '(rest, ctxt) :=
+          Lwt.__return (merge_stacks legacy loc ctxt rest starting_rest) in
+        typed ctxt loc (Script_typed_ir.List_map ibody)
+          (Script_typed_ir.Item_t
+            (Script_typed_ir.List_t ret list_ty_name (has_big_map ret)) rest
+            ret_annot))
+    | Typed {| Script_typed_ir.descr.aft := aft |} =>
+      let 'existT _ __Typed_'aft4 aft :=
+        existT (A := Set)
+          (fun __Typed_'aft4 => (Script_typed_ir.stack_ty __Typed_'aft4)) _ aft
+        in
+      let!? '(aft, _ctxt) := serialize_stack_for_error ctxt aft in
+      Error_monad.fail extensible_type_value
+    | Failed _ => Error_monad.fail extensible_type_value
+    end
+  |
+    ((Micheline.Prim loc Alpha_context.Script.I_ITER (cons body []) annot,
+      Script_typed_ir.Item_t (Script_typed_ir.List_t __elt_value _ _) rest
+        list_annot), _) =>
+    let 'existT _ [__94, __95] [loc, body, annot, __elt_value, rest, list_annot]
+      :=
+      existT (A := [Set ** Set])
+        (fun '[__94, __95] =>
+          [Alpha_context.Script.location **
+            (Micheline.node Alpha_context.Script.location
+              Alpha_context.Script.prim) ** Micheline.annot **
+            (Script_typed_ir.ty __95) ** (Script_typed_ir.stack_ty __94) **
+            (option Script_typed_ir.var_annot)]) [_, _]
+        [loc, body, annot, __elt_value, rest, list_annot] in
+    let!? '_ := check_kind [ Script_tc_errors.Seq_kind ] body in
+    let!? '_ := Script_ir_annot.fail_unexpected_annot loc annot in
+    let elt_annot :=
+      Script_ir_annot.gen_access_annot list_annot None
+        Script_ir_annot.default_elt_annot in
+    let!? '(judgement, ctxt) :=
+      parse_instr type_logger tc_context ctxt legacy body
+        (Script_typed_ir.Item_t __elt_value rest elt_annot) in
+    match judgement with
+    | Typed ({| Script_typed_ir.descr.aft := aft |} as ibody) =>
+      let 'existT _ __Typed_'aft5 [aft, ibody] :=
+        existT (A := Set)
+          (fun __Typed_'aft5 =>
+            [(Script_typed_ir.stack_ty __Typed_'aft5) **
+              (Script_typed_ir.descr (__95 * __94) __Typed_'aft5)]) _
+          [aft, ibody] in
+      let invalid_iter_body (function_parameter : unit)
+        : Lwt.t (Error_monad.tzresult Error_monad.__error) :=
+        let '_ := function_parameter in
+        let!? '(aft, ctxt) :=
+          serialize_stack_for_error ctxt ibody.(Script_typed_ir.descr.aft) in
+        Error_monad.op_gtgtpipequestion (serialize_stack_for_error ctxt rest)
+          (fun function_parameter =>
+            let '(rest, _ctxt) := function_parameter in
+            extensible_type_value) in
+      Error_monad.trace_eval invalid_iter_body
+        (let!? '(Eq, ctxt) := Lwt.__return (stack_ty_eq ctxt 1 aft rest) in
+        let!? '(rest, ctxt) :=
+          Lwt.__return (merge_stacks legacy loc ctxt aft rest) in
+        typed ctxt loc (Script_typed_ir.List_iter ibody) rest)
+    | Failed {| judgement.Failed.descr := __descr_value |} =>
+      typed ctxt loc (Script_typed_ir.List_iter (__descr_value rest)) rest
+    end
+  |
+    ((Micheline.Prim loc Alpha_context.Script.I_EMPTY_SET (cons __t_value [])
+      annot, rest), _) =>
+    let!? '(Ex_comparable_ty __t_value, ctxt) :=
+      Lwt.__return (parse_comparable_ty ctxt __t_value) in
+    let 'existT _ __Ex_comparable_ty_'a1 [__t_value, ctxt] :=
+      existT (A := Set)
+        (fun __Ex_comparable_ty_'a1 =>
+          [(Script_typed_ir.comparable_ty __Ex_comparable_ty_'a1) **
+            Alpha_context.context]) _ [__t_value, ctxt] in
+    let!? '(annot, tname) := parse_var_type_annot loc annot in
+    typed ctxt loc (Script_typed_ir.Empty_set __t_value)
+      (Script_typed_ir.Item_t (Script_typed_ir.Set_t __t_value tname) rest annot)
+  |
+    ((Micheline.Prim loc Alpha_context.Script.I_ITER (cons body []) annot,
+      Script_typed_ir.Item_t (Script_typed_ir.Set_t comp_elt _) rest set_annot),
+      _) =>
+    let 'existT _ [__97, __98] [loc, body, annot, comp_elt, rest, set_annot] :=
+      existT (A := [Set ** Set])
+        (fun '[__97, __98] =>
+          [Alpha_context.Script.location **
+            (Micheline.node Alpha_context.Script.location
+              Alpha_context.Script.prim) ** Micheline.annot **
+            (Script_typed_ir.comparable_ty __98) **
+            (Script_typed_ir.stack_ty __97) **
+            (option Script_typed_ir.var_annot)]) [_, _]
+        [loc, body, annot, comp_elt, rest, set_annot] in
+    let!? '_ := check_kind [ Script_tc_errors.Seq_kind ] body in
+    let!? '_ := Script_ir_annot.fail_unexpected_annot loc annot in
+    let elt_annot :=
+      Script_ir_annot.gen_access_annot set_annot None
+        Script_ir_annot.default_elt_annot in
+    let __elt_value := ty_of_comparable_ty comp_elt in
+    let!? '(judgement, ctxt) :=
+      parse_instr type_logger tc_context ctxt legacy body
+        (Script_typed_ir.Item_t __elt_value rest elt_annot) in
+    match judgement with
+    | Typed ({| Script_typed_ir.descr.aft := aft |} as ibody) =>
+      let 'existT _ __Typed_'aft6 [aft, ibody] :=
+        existT (A := Set)
+          (fun __Typed_'aft6 =>
+            [(Script_typed_ir.stack_ty __Typed_'aft6) **
+              (Script_typed_ir.descr (__98 * __97) __Typed_'aft6)]) _
+          [aft, ibody] in
+      let invalid_iter_body (function_parameter : unit)
+        : Lwt.t (Error_monad.tzresult Error_monad.__error) :=
+        let '_ := function_parameter in
+        let!? '(aft, ctxt) :=
+          serialize_stack_for_error ctxt ibody.(Script_typed_ir.descr.aft) in
+        Error_monad.op_gtgtpipequestion (serialize_stack_for_error ctxt rest)
+          (fun function_parameter =>
+            let '(rest, _ctxt) := function_parameter in
+            extensible_type_value) in
+      Error_monad.trace_eval invalid_iter_body
+        (let!? '(Eq, ctxt) := Lwt.__return (stack_ty_eq ctxt 1 aft rest) in
+        let!? '(rest, ctxt) :=
+          Lwt.__return (merge_stacks legacy loc ctxt aft rest) in
+        typed ctxt loc (Script_typed_ir.Set_iter ibody) rest)
+    | Failed {| judgement.Failed.descr := __descr_value |} =>
+      typed ctxt loc (Script_typed_ir.Set_iter (__descr_value rest)) rest
+    end
+  |
+    ((Micheline.Prim loc Alpha_context.Script.I_MEM [] annot,
+      Script_typed_ir.Item_t v
+        (Script_typed_ir.Item_t (Script_typed_ir.Set_t __elt_value _) rest _) _),
+      _) =>
+    let 'existT _ [__102, __103, __99] [loc, annot, v, __elt_value, rest] :=
+      existT (A := [Set ** Set ** Set])
+        (fun '[__102, __103, __99] =>
+          [Alpha_context.Script.location ** Micheline.annot **
+            (Script_typed_ir.ty __99) ** (Script_typed_ir.comparable_ty __103)
+            ** (Script_typed_ir.stack_ty __102)]) [_, _, _]
+        [loc, annot, v, __elt_value, rest] in
+    let __elt_value := ty_of_comparable_ty __elt_value in
+    let!? '(annot, tname) := parse_var_type_annot loc annot in
+    let!? '(Eq, _, ctxt) :=
+      check_item_ty ctxt __elt_value v loc Alpha_context.Script.I_MEM 1 2 in
+    typed ctxt loc Script_typed_ir.Set_mem
+      (Script_typed_ir.Item_t (Script_typed_ir.Bool_t tname) rest annot)
+  |
+    ((Micheline.Prim loc Alpha_context.Script.I_UPDATE [] annot,
+      Script_typed_ir.Item_t v
+        (Script_typed_ir.Item_t (Script_typed_ir.Bool_t _)
+          (Script_typed_ir.Item_t (Script_typed_ir.Set_t __elt_value tname) rest
+            set_annot) _) _), _) =>
+    let 'existT _ [__104, __109, __110]
+      [loc, annot, v, __elt_value, tname, rest, set_annot] :=
+      existT (A := [Set ** Set ** Set])
+        (fun '[__104, __109, __110] =>
+          [Alpha_context.Script.location ** Micheline.annot **
+            (Script_typed_ir.ty __104) ** (Script_typed_ir.comparable_ty __110)
+            ** (option Script_typed_ir.type_annot) **
+            (Script_typed_ir.stack_ty __109) **
+            (option Script_typed_ir.var_annot)]) [_, _, _]
+        [loc, annot, v, __elt_value, tname, rest, set_annot] in
+    match comparable_ty_of_ty v with
+    | None =>
+      let!? '(v, _ctxt) := unparse_ty ctxt v in
+      Error_monad.fail extensible_type_value
+    | Some v =>
+      let!? annot := parse_var_annot loc (Some set_annot) annot in
+      let!? '(Eq, __elt_value) :=
+        check_item_comparable_ty __elt_value v loc Alpha_context.Script.I_UPDATE
+          1 3 in
+      typed ctxt loc Script_typed_ir.Set_update
+        (Script_typed_ir.Item_t (Script_typed_ir.Set_t __elt_value tname) rest
+          annot)
+    end
+  |
+    ((Micheline.Prim loc Alpha_context.Script.I_SIZE [] annot,
+      Script_typed_ir.Item_t (Script_typed_ir.Set_t _ _) rest _), _) =>
+    let 'existT _ __112 [loc, annot, rest] :=
+      existT (A := Set)
+        (fun __112 =>
+          [Alpha_context.Script.location ** Micheline.annot **
+            (Script_typed_ir.stack_ty __112)]) _ [loc, annot, rest] in
+    let!? annot := parse_var_annot loc None annot in
+    typed ctxt loc Script_typed_ir.Set_size
+      (Script_typed_ir.Item_t (Script_typed_ir.Nat_t None) rest annot)
+  |
+    ((Micheline.Prim loc Alpha_context.Script.I_EMPTY_MAP (cons tk (cons tv []))
+      annot, __stack_value), _) =>
+    let!? '(Ex_comparable_ty tk, ctxt) :=
+      Lwt.__return (parse_comparable_ty ctxt tk) in
+    let 'existT _ __Ex_comparable_ty_'a2 [tk, ctxt] :=
+      existT (A := Set)
+        (fun __Ex_comparable_ty_'a2 =>
+          [(Script_typed_ir.comparable_ty __Ex_comparable_ty_'a2) **
+            Alpha_context.context]) _ [tk, ctxt] in
+    let!? '(Ex_ty tv, ctxt) := Lwt.__return (parse_any_ty ctxt legacy tv) in
+    let 'existT _ __Ex_ty_'a6 [tv, ctxt] :=
+      existT (A := Set)
+        (fun __Ex_ty_'a6 =>
+          [(Script_typed_ir.ty __Ex_ty_'a6) ** Alpha_context.context]) _
+        [tv, ctxt] in
+    let!? '(annot, ty_name) := parse_var_type_annot loc annot in
+    typed ctxt loc (Script_typed_ir.Empty_map tk tv)
+      (Script_typed_ir.Item_t
+        (Script_typed_ir.Map_t tk tv ty_name (has_big_map tv)) __stack_value
+        annot)
+  |
+    ((Micheline.Prim loc Alpha_context.Script.I_MAP (cons body []) annot,
+      Script_typed_ir.Item_t (Script_typed_ir.Map_t ck __elt_value _ _)
+        starting_rest _map_annot), _) =>
+    let 'existT _ [__115, __116, __117]
+      [loc, body, annot, ck, __elt_value, starting_rest, _map_annot] :=
+      existT (A := [Set ** Set ** Set])
+        (fun '[__115, __116, __117] =>
+          [Alpha_context.Script.location **
+            (Micheline.node Alpha_context.Script.location
+              Alpha_context.Script.prim) ** Micheline.annot **
+            (Script_typed_ir.comparable_ty __116) ** (Script_typed_ir.ty __117)
+            ** (Script_typed_ir.stack_ty __115) **
+            (option Script_typed_ir.var_annot)]) [_, _, _]
+        [loc, body, annot, ck, __elt_value, starting_rest, _map_annot] in
+    let k := ty_of_comparable_ty ck in
+    let!? '_ := check_kind [ Script_tc_errors.Seq_kind ] body in
+    let!? '(ret_annot, ty_name) := parse_var_type_annot loc annot in
+    let k_name :=
+      Script_ir_annot.field_to_var_annot Script_ir_annot.default_key_annot in
+    let e_name :=
+      Script_ir_annot.field_to_var_annot Script_ir_annot.default_elt_annot in
+    let!? '(judgement, ctxt) :=
+      parse_instr type_logger tc_context ctxt legacy body
+        (Script_typed_ir.Item_t
+          (Script_typed_ir.Pair_t (k, None, k_name) (__elt_value, None, e_name)
+            None (has_big_map __elt_value)) starting_rest None) in
+    match judgement with
+    |
+      Typed
+        ({| Script_typed_ir.descr.aft := Script_typed_ir.Item_t ret rest _ |} as
+          ibody) =>
+      let 'existT _ [__480, __481, __Typed_'aft7] [ret, rest, ibody] :=
+        existT (A := [Set ** Set ** Set])
+          (fun '[__480, __481, __Typed_'aft7] =>
+            [(Script_typed_ir.ty __480) ** (Script_typed_ir.stack_ty __481) **
+              (Script_typed_ir.descr (Script_typed_ir.pair __116 __117 * __115)
+                __Typed_'aft7)]) [_, _, _] [ret, rest, ibody] in
+      let invalid_map_body (function_parameter : unit)
+        : Lwt.t (Error_monad.tzresult Error_monad.__error) :=
+        let '_ := function_parameter in
+        Error_monad.op_gtgtpipequestion
+          (serialize_stack_for_error ctxt ibody.(Script_typed_ir.descr.aft))
+          (fun function_parameter =>
+            let '(aft, _ctxt) := function_parameter in
+            extensible_type_value) in
+      Error_monad.trace_eval invalid_map_body
+        (let!? '(Eq, ctxt) :=
+          Lwt.__return (stack_ty_eq ctxt 1 rest starting_rest) in
+        let!? '(rest, ctxt) :=
+          Lwt.__return (merge_stacks legacy loc ctxt rest starting_rest) in
+        typed ctxt loc (Script_typed_ir.Map_map ibody)
+          (Script_typed_ir.Item_t
+            (Script_typed_ir.Map_t ck ret ty_name (has_big_map ret)) rest
+            ret_annot))
+    | Typed {| Script_typed_ir.descr.aft := aft |} =>
+      let 'existT _ __Typed_'aft8 aft :=
+        existT (A := Set)
+          (fun __Typed_'aft8 => (Script_typed_ir.stack_ty __Typed_'aft8)) _ aft
+        in
+      let!? '(aft, _ctxt) := serialize_stack_for_error ctxt aft in
+      Error_monad.fail extensible_type_value
+    | Failed _ => Error_monad.fail extensible_type_value
+    end
+  |
+    ((Micheline.Prim loc Alpha_context.Script.I_ITER (cons body []) annot,
+      Script_typed_ir.Item_t (Script_typed_ir.Map_t comp_elt element_ty _ _)
+        rest _map_annot), _) =>
+    let 'existT _ [__119, __120, __121]
+      [loc, body, annot, comp_elt, element_ty, rest, _map_annot] :=
+      existT (A := [Set ** Set ** Set])
+        (fun '[__119, __120, __121] =>
+          [Alpha_context.Script.location **
+            (Micheline.node Alpha_context.Script.location
+              Alpha_context.Script.prim) ** Micheline.annot **
+            (Script_typed_ir.comparable_ty __120) ** (Script_typed_ir.ty __121)
+            ** (Script_typed_ir.stack_ty __119) **
+            (option Script_typed_ir.var_annot)]) [_, _, _]
+        [loc, body, annot, comp_elt, element_ty, rest, _map_annot] in
+    let!? '_ := check_kind [ Script_tc_errors.Seq_kind ] body in
+    let!? '_ := Script_ir_annot.fail_unexpected_annot loc annot in
+    let k_name :=
+      Script_ir_annot.field_to_var_annot Script_ir_annot.default_key_annot in
+    let e_name :=
+      Script_ir_annot.field_to_var_annot Script_ir_annot.default_elt_annot in
+    let __key_value := ty_of_comparable_ty comp_elt in
+    let!? '(judgement, ctxt) :=
+      parse_instr type_logger tc_context ctxt legacy body
+        (Script_typed_ir.Item_t
+          (Script_typed_ir.Pair_t (__key_value, None, k_name)
+            (element_ty, None, e_name) None (has_big_map element_ty)) rest None)
+      in
+    match judgement with
+    | Typed ({| Script_typed_ir.descr.aft := aft |} as ibody) =>
+      let 'existT _ __Typed_'aft9 [aft, ibody] :=
+        existT (A := Set)
+          (fun __Typed_'aft9 =>
+            [(Script_typed_ir.stack_ty __Typed_'aft9) **
+              (Script_typed_ir.descr (Script_typed_ir.pair __120 __121 * __119)
+                __Typed_'aft9)]) _ [aft, ibody] in
+      let invalid_iter_body (function_parameter : unit)
+        : Lwt.t (Error_monad.tzresult Error_monad.__error) :=
+        let '_ := function_parameter in
+        let!? '(aft, ctxt) :=
+          serialize_stack_for_error ctxt ibody.(Script_typed_ir.descr.aft) in
+        Error_monad.op_gtgtpipequestion (serialize_stack_for_error ctxt rest)
+          (fun function_parameter =>
+            let '(rest, _ctxt) := function_parameter in
+            extensible_type_value) in
+      Error_monad.trace_eval invalid_iter_body
+        (let!? '(Eq, ctxt) := Lwt.__return (stack_ty_eq ctxt 1 aft rest) in
+        let!? '(rest, ctxt) :=
+          Lwt.__return (merge_stacks legacy loc ctxt aft rest) in
+        typed ctxt loc (Script_typed_ir.Map_iter ibody) rest)
+    | Failed {| judgement.Failed.descr := __descr_value |} =>
+      typed ctxt loc (Script_typed_ir.Map_iter (__descr_value rest)) rest
+    end
+  |
+    ((Micheline.Prim loc Alpha_context.Script.I_MEM [] annot,
+      Script_typed_ir.Item_t vk
+        (Script_typed_ir.Item_t (Script_typed_ir.Map_t ck _ _ _) rest _) _), _)
+    =>
+    let 'existT _ [__122, __125, __126] [loc, annot, vk, ck, rest] :=
+      existT (A := [Set ** Set ** Set])
+        (fun '[__122, __125, __126] =>
+          [Alpha_context.Script.location ** Micheline.annot **
+            (Script_typed_ir.ty __122) ** (Script_typed_ir.comparable_ty __126)
+            ** (Script_typed_ir.stack_ty __125)]) [_, _, _]
+        [loc, annot, vk, ck, rest] in
+    let k := ty_of_comparable_ty ck in
+    let!? '(Eq, _, ctxt) :=
+      check_item_ty ctxt vk k loc Alpha_context.Script.I_MEM 1 2 in
+    let!? annot := parse_var_annot loc None annot in
+    typed ctxt loc Script_typed_ir.Map_mem
+      (Script_typed_ir.Item_t (Script_typed_ir.Bool_t None) rest annot)
+  |
+    ((Micheline.Prim loc Alpha_context.Script.I_GET [] annot,
+      Script_typed_ir.Item_t vk
+        (Script_typed_ir.Item_t
+          (Script_typed_ir.Map_t ck __elt_value _ has_big_map) rest _) _), _) =>
+    let 'existT _ [__128, __131, __132, __133]
+      [loc, annot, vk, ck, __elt_value, has_big_map, rest] :=
+      existT (A := [Set ** Set ** Set ** Set])
+        (fun '[__128, __131, __132, __133] =>
+          [Alpha_context.Script.location ** Micheline.annot **
+            (Script_typed_ir.ty __128) ** (Script_typed_ir.comparable_ty __132)
+            ** (Script_typed_ir.ty __133) ** bool **
+            (Script_typed_ir.stack_ty __131)]) [_, _, _, _]
+        [loc, annot, vk, ck, __elt_value, has_big_map, rest] in
+    let k := ty_of_comparable_ty ck in
+    let!? '(Eq, _, ctxt) :=
+      check_item_ty ctxt vk k loc Alpha_context.Script.I_GET 1 2 in
+    let!? annot := parse_var_annot loc None annot in
+    typed ctxt loc Script_typed_ir.Map_get
+      (Script_typed_ir.Item_t
+        (Script_typed_ir.Option_t __elt_value None has_big_map) rest annot)
+  |
+    ((Micheline.Prim loc Alpha_context.Script.I_UPDATE [] annot,
+      Script_typed_ir.Item_t vk
+        (Script_typed_ir.Item_t (Script_typed_ir.Option_t vv _ _)
+          (Script_typed_ir.Item_t
+            (Script_typed_ir.Map_t ck v map_name has_big_map) rest map_annot) _)
+        _), _) =>
+    let 'existT _ [__134, __138, __140, __141, __142]
+      [loc, annot, vk, vv, ck, v, map_name, has_big_map, rest, map_annot] :=
+      existT (A := [Set ** Set ** Set ** Set ** Set])
+        (fun '[__134, __138, __140, __141, __142] =>
+          [Alpha_context.Script.location ** Micheline.annot **
+            (Script_typed_ir.ty __134) ** (Script_typed_ir.ty __138) **
+            (Script_typed_ir.comparable_ty __141) ** (Script_typed_ir.ty __142)
+            ** (option Script_typed_ir.type_annot) ** bool **
+            (Script_typed_ir.stack_ty __140) **
+            (option Script_typed_ir.var_annot)]) [_, _, _, _, _]
+        [loc, annot, vk, vv, ck, v, map_name, has_big_map, rest, map_annot] in
+    let k := ty_of_comparable_ty ck in
+    let!? '(Eq, _, ctxt) :=
+      check_item_ty ctxt vk k loc Alpha_context.Script.I_UPDATE 1 3 in
+    let!? '(Eq, v, ctxt) :=
+      check_item_ty ctxt vv v loc Alpha_context.Script.I_UPDATE 2 3 in
+    let!? annot := parse_var_annot loc (Some map_annot) annot in
+    typed ctxt loc Script_typed_ir.Map_update
+      (Script_typed_ir.Item_t (Script_typed_ir.Map_t ck v map_name has_big_map)
+        rest annot)
+  |
+    ((Micheline.Prim loc Alpha_context.Script.I_SIZE [] annot,
+      Script_typed_ir.Item_t (Script_typed_ir.Map_t _ _ _ _) rest _), _) =>
+    let 'existT _ __144 [loc, annot, rest] :=
+      existT (A := Set)
+        (fun __144 =>
+          [Alpha_context.Script.location ** Micheline.annot **
+            (Script_typed_ir.stack_ty __144)]) _ [loc, annot, rest] in
+    let!? annot := parse_var_annot loc None annot in
+    typed ctxt loc Script_typed_ir.Map_size
+      (Script_typed_ir.Item_t (Script_typed_ir.Nat_t None) rest annot)
+  |
+    ((Micheline.Prim loc Alpha_context.Script.I_EMPTY_BIG_MAP
+      (cons tk (cons tv [])) annot, __stack_value), _) =>
+    let!? '(Ex_comparable_ty tk, ctxt) :=
+      Lwt.__return (parse_comparable_ty ctxt tk) in
+    let 'existT _ __Ex_comparable_ty_'a3 [tk, ctxt] :=
+      existT (A := Set)
+        (fun __Ex_comparable_ty_'a3 =>
+          [(Script_typed_ir.comparable_ty __Ex_comparable_ty_'a3) **
+            Alpha_context.context]) _ [tk, ctxt] in
+    let!? '(Ex_ty tv, ctxt) := Lwt.__return (parse_packable_ty ctxt legacy tv)
+      in
+    let 'existT _ __Ex_ty_'a7 [tv, ctxt] :=
+      existT (A := Set)
+        (fun __Ex_ty_'a7 =>
+          [(Script_typed_ir.ty __Ex_ty_'a7) ** Alpha_context.context]) _
+        [tv, ctxt] in
+    let!? '(annot, ty_name) := parse_var_type_annot loc annot in
+    typed ctxt loc (Script_typed_ir.Empty_big_map tk tv)
+      (Script_typed_ir.Item_t (Script_typed_ir.Big_map_t tk tv ty_name)
+        __stack_value annot)
+  |
+    ((Micheline.Prim loc Alpha_context.Script.I_MEM [] annot,
+      Script_typed_ir.Item_t set_key
+        (Script_typed_ir.Item_t (Script_typed_ir.Big_map_t map_key _ _) rest _)
+        _), _) =>
+    let 'existT _ [__147, __150, __151] [loc, annot, set_key, map_key, rest] :=
+      existT (A := [Set ** Set ** Set])
+        (fun '[__147, __150, __151] =>
+          [Alpha_context.Script.location ** Micheline.annot **
+            (Script_typed_ir.ty __147) ** (Script_typed_ir.comparable_ty __151)
+            ** (Script_typed_ir.stack_ty __150)]) [_, _, _]
+        [loc, annot, set_key, map_key, rest] in
+    let k := ty_of_comparable_ty map_key in
+    let!? '(Eq, _, ctxt) :=
+      check_item_ty ctxt set_key k loc Alpha_context.Script.I_MEM 1 2 in
+    let!? annot := parse_var_annot loc None annot in
+    typed ctxt loc Script_typed_ir.Big_map_mem
+      (Script_typed_ir.Item_t (Script_typed_ir.Bool_t None) rest annot)
+  |
+    ((Micheline.Prim loc Alpha_context.Script.I_GET [] annot,
+      Script_typed_ir.Item_t vk
+        (Script_typed_ir.Item_t (Script_typed_ir.Big_map_t ck __elt_value _)
+          rest _) _), _) =>
+    let 'existT _ [__153, __156, __157, __158]
+      [loc, annot, vk, ck, __elt_value, rest] :=
+      existT (A := [Set ** Set ** Set ** Set])
+        (fun '[__153, __156, __157, __158] =>
+          [Alpha_context.Script.location ** Micheline.annot **
+            (Script_typed_ir.ty __153) ** (Script_typed_ir.comparable_ty __157)
+            ** (Script_typed_ir.ty __158) ** (Script_typed_ir.stack_ty __156)])
+        [_, _, _, _] [loc, annot, vk, ck, __elt_value, rest] in
+    let k := ty_of_comparable_ty ck in
+    let!? '(Eq, _, ctxt) :=
+      check_item_ty ctxt vk k loc Alpha_context.Script.I_GET 1 2 in
+    let!? annot := parse_var_annot loc None annot in
+    typed ctxt loc Script_typed_ir.Big_map_get
+      (Script_typed_ir.Item_t
+        (Script_typed_ir.Option_t __elt_value None (has_big_map __elt_value))
+        rest annot)
+  |
+    ((Micheline.Prim loc Alpha_context.Script.I_UPDATE [] annot,
+      Script_typed_ir.Item_t set_key
+        (Script_typed_ir.Item_t (Script_typed_ir.Option_t set_value _ _)
+          (Script_typed_ir.Item_t
+            (Script_typed_ir.Big_map_t map_key map_value map_name) rest
+            map_annot) _) _), _) =>
+    let 'existT _ [__159, __163, __165, __166, __167]
+      [loc, annot, set_key, set_value, map_key, map_value, map_name, rest,
+        map_annot] :=
+      existT (A := [Set ** Set ** Set ** Set ** Set])
+        (fun '[__159, __163, __165, __166, __167] =>
+          [Alpha_context.Script.location ** Micheline.annot **
+            (Script_typed_ir.ty __159) ** (Script_typed_ir.ty __163) **
+            (Script_typed_ir.comparable_ty __166) ** (Script_typed_ir.ty __167)
+            ** (option Script_typed_ir.type_annot) **
+            (Script_typed_ir.stack_ty __165) **
+            (option Script_typed_ir.var_annot)]) [_, _, _, _, _]
+        [loc, annot, set_key, set_value, map_key, map_value, map_name, rest,
+          map_annot] in
+    let k := ty_of_comparable_ty map_key in
+    let!? '(Eq, _, ctxt) :=
+      check_item_ty ctxt set_key k loc Alpha_context.Script.I_UPDATE 1 3 in
+    let!? '(Eq, map_value, ctxt) :=
+      check_item_ty ctxt set_value map_value loc Alpha_context.Script.I_UPDATE 2
+        3 in
+    let!? annot := parse_var_annot loc (Some map_annot) annot in
+    typed ctxt loc Script_typed_ir.Big_map_update
+      (Script_typed_ir.Item_t
+        (Script_typed_ir.Big_map_t map_key map_value map_name) rest annot)
+  | ((Micheline.Seq loc [], __stack_value), _) =>
+    typed ctxt loc Script_typed_ir.Nop __stack_value
+  | ((Micheline.Seq loc (cons single []), __stack_value), _) =>
+    let!? '(judgement, ctxt) :=
+      parse_instr type_logger tc_context ctxt legacy single __stack_value in
+    match judgement with
+    | Typed ({| Script_typed_ir.descr.aft := aft |} as instr) =>
+      let 'existT _ __Typed_'aft10 [aft, instr] :=
+        existT (A := Set)
+          (fun __Typed_'aft10 =>
+            [(Script_typed_ir.stack_ty __Typed_'aft10) **
+              (Script_typed_ir.descr bef __Typed_'aft10)]) _ [aft, instr] in
+      let nop :=
+        {| Script_typed_ir.descr.loc := loc; Script_typed_ir.descr.bef := aft;
+          Script_typed_ir.descr.aft := aft;
+          Script_typed_ir.descr.instr := Script_typed_ir.Nop |} in
+      typed ctxt loc (Script_typed_ir.Seq instr nop) aft
+    | Failed {| judgement.Failed.descr := __descr_value |} =>
+      let __descr_value {B : Set} (aft : Script_typed_ir.stack_ty B)
+        : Script_typed_ir.descr bef B :=
+        let nop :=
+          {| Script_typed_ir.descr.loc := loc; Script_typed_ir.descr.bef := aft;
+            Script_typed_ir.descr.aft := aft;
+            Script_typed_ir.descr.instr := Script_typed_ir.Nop |} in
+        let __descr_value := __descr_value aft in
+        Script_typed_ir.descr.with_instr (Script_typed_ir.Seq __descr_value nop)
+          __descr_value in
+      __return ctxt (Failed {| judgement.Failed.descr := __descr_value |})
+    end
+  | ((Micheline.Seq loc (cons hd tl), __stack_value), _) =>
+    let!? '(judgement, ctxt) :=
+      parse_instr type_logger tc_context ctxt legacy hd __stack_value in
+    match judgement with
+    | Failed _ => Error_monad.fail extensible_type_value
+    | Typed ({| Script_typed_ir.descr.aft := middle |} as ihd) =>
+      let 'existT _ __Typed_'aft11 [middle, ihd] :=
+        existT (A := Set)
+          (fun __Typed_'aft11 =>
+            [(Script_typed_ir.stack_ty __Typed_'aft11) **
+              (Script_typed_ir.descr bef __Typed_'aft11)]) _ [middle, ihd] in
+      let!? '(judgement, ctxt) :=
+        parse_instr type_logger tc_context ctxt legacy (Micheline.Seq (-1) tl)
+          middle in
+      match judgement with
+      | Failed {| judgement.Failed.descr := __descr_value |} =>
+        let __descr_value {B : Set} (ret : Script_typed_ir.stack_ty B)
+          : Script_typed_ir.descr bef B :=
+          {| Script_typed_ir.descr.loc := loc;
+            Script_typed_ir.descr.bef := __stack_value;
+            Script_typed_ir.descr.aft := ret;
+            Script_typed_ir.descr.instr :=
+              Script_typed_ir.Seq ihd (__descr_value ret) |} in
+        __return ctxt (Failed {| judgement.Failed.descr := __descr_value |})
+      | Typed itl =>
+        let 'existT _ __Typed_'aft12 itl :=
+          existT (A := Set)
+            (fun __Typed_'aft12 =>
+              (Script_typed_ir.descr __Typed_'aft11 __Typed_'aft12)) _ itl in
+        typed ctxt loc (Script_typed_ir.Seq ihd itl)
+          itl.(Script_typed_ir.descr.aft)
+      end
+    end
+  |
+    ((Micheline.Prim loc Alpha_context.Script.I_IF (cons bt (cons bf [])) annot,
+      (Script_typed_ir.Item_t (Script_typed_ir.Bool_t _) rest _) as bef), _) =>
+    let 'existT _ __169 [loc, bt, bf, annot, rest, bef] :=
+      existT (A := Set)
+        (fun __169 =>
+          [Alpha_context.Script.location **
+            (Micheline.node Alpha_context.Script.location
+              Alpha_context.Script.prim) **
+            (Micheline.node Alpha_context.Script.location
+              Alpha_context.Script.prim) ** Micheline.annot **
+            (Script_typed_ir.stack_ty __169) **
+            (Script_typed_ir.stack_ty (bool * __169))]) _
+        [loc, bt, bf, annot, rest, bef] in
+    let!? '_ := check_kind [ Script_tc_errors.Seq_kind ] bt in
+    let!? '_ := check_kind [ Script_tc_errors.Seq_kind ] bf in
+    let!? '_ := Script_ir_annot.fail_unexpected_annot loc annot in
+    let!? '(btr, ctxt) := parse_instr type_logger tc_context ctxt legacy bt rest
+      in
+    let!? '(bfr, ctxt) := parse_instr type_logger tc_context ctxt legacy bf rest
+      in
+    let branch {B : Set}
+      (ibt : Script_typed_ir.descr __169 B)
+      (ibf : Script_typed_ir.descr __169 B)
+      : Script_typed_ir.descr (bool * __169) B :=
+      {| Script_typed_ir.descr.loc := loc; Script_typed_ir.descr.bef := bef;
+        Script_typed_ir.descr.aft := ibt.(Script_typed_ir.descr.aft);
+        Script_typed_ir.descr.instr := Script_typed_ir.If ibt ibf |} in
+    let!? '(judgement, ctxt) :=
+      merge_branches legacy ctxt loc btr bfr {| branch.branch := branch |} in
+    __return ctxt judgement
+  |
+    ((Micheline.Prim loc Alpha_context.Script.I_LOOP (cons body []) annot,
+      (Script_typed_ir.Item_t (Script_typed_ir.Bool_t _) rest _stack_annot) as
+        __stack_value), _) =>
+    let 'existT _ __171 [loc, body, annot, rest, _stack_annot, __stack_value] :=
+      existT (A := Set)
+        (fun __171 =>
+          [Alpha_context.Script.location **
+            (Micheline.node Alpha_context.Script.location
+              Alpha_context.Script.prim) ** Micheline.annot **
+            (Script_typed_ir.stack_ty __171) **
+            (option Script_typed_ir.var_annot) **
+            (Script_typed_ir.stack_ty (bool * __171))]) _
+        [loc, body, annot, rest, _stack_annot, __stack_value] in
+    let!? '_ := check_kind [ Script_tc_errors.Seq_kind ] body in
+    let!? '_ := Script_ir_annot.fail_unexpected_annot loc annot in
+    let!? '(judgement, ctxt) :=
+      parse_instr type_logger tc_context ctxt legacy body rest in
+    match judgement with
+    | Typed ibody =>
+      let 'existT _ __Typed_'aft13 ibody :=
+        existT (A := Set)
+          (fun __Typed_'aft13 => (Script_typed_ir.descr __171 __Typed_'aft13)) _
+          ibody in
+      let unmatched_branches (function_parameter : unit)
+        : Lwt.t (Error_monad.tzresult Error_monad.__error) :=
+        let '_ := function_parameter in
+        let!? '(aft, ctxt) :=
+          serialize_stack_for_error ctxt ibody.(Script_typed_ir.descr.aft) in
+        Error_monad.op_gtgtpipequestion
+          (serialize_stack_for_error ctxt __stack_value)
+          (fun function_parameter =>
+            let '(__stack_value, _ctxt) := function_parameter in
+            extensible_type_value) in
+      Error_monad.trace_eval unmatched_branches
+        (let!? '(Eq, ctxt) :=
+          Lwt.__return
+            (stack_ty_eq ctxt 1 ibody.(Script_typed_ir.descr.aft) __stack_value)
+          in
+        let!? '(_stack, ctxt) :=
+          Lwt.__return
+            (merge_stacks legacy loc ctxt ibody.(Script_typed_ir.descr.aft)
+              __stack_value) in
+        typed ctxt loc (Script_typed_ir.Loop ibody) rest)
+    | Failed {| judgement.Failed.descr := __descr_value |} =>
+      let ibody := __descr_value __stack_value in
+      typed ctxt loc (Script_typed_ir.Loop ibody) rest
+    end
+  |
+    ((Micheline.Prim loc Alpha_context.Script.I_LOOP_LEFT (cons body []) annot,
+      (Script_typed_ir.Item_t
+        (Script_typed_ir.Union_t (tl, l_field) (tr, _) _ _) rest union_annot) as
+        __stack_value), _) =>
+    let 'existT _ [__173, __174, __175]
+      [loc, body, annot, tl, l_field, tr, rest, union_annot, __stack_value] :=
+      existT (A := [Set ** Set ** Set])
+        (fun '[__173, __174, __175] =>
+          [Alpha_context.Script.location **
+            (Micheline.node Alpha_context.Script.location
+              Alpha_context.Script.prim) ** Micheline.annot **
+            (Script_typed_ir.ty __174) ** (option Script_typed_ir.field_annot)
+            ** (Script_typed_ir.ty __175) ** (Script_typed_ir.stack_ty __173) **
+            (option Script_typed_ir.var_annot) **
+            (Script_typed_ir.stack_ty
+              (Script_typed_ir.union __174 __175 * __173))]) [_, _, _]
+        [loc, body, annot, tl, l_field, tr, rest, union_annot, __stack_value] in
+    let!? '_ := check_kind [ Script_tc_errors.Seq_kind ] body in
+    let!? annot := parse_var_annot loc None annot in
+    let l_annot :=
+      Script_ir_annot.gen_access_annot union_annot
+        (Some Script_ir_annot.default_left_annot) l_field in
+    let!? '(judgement, ctxt) :=
+      parse_instr type_logger tc_context ctxt legacy body
+        (Script_typed_ir.Item_t tl rest l_annot) in
+    match judgement with
+    | Typed ibody =>
+      let 'existT _ __Typed_'aft14 ibody :=
+        existT (A := Set)
+          (fun __Typed_'aft14 =>
+            (Script_typed_ir.descr (__174 * __173) __Typed_'aft14)) _ ibody in
+      let unmatched_branches (function_parameter : unit)
+        : Lwt.t (Error_monad.tzresult Error_monad.__error) :=
+        let '_ := function_parameter in
+        let!? '(aft, ctxt) :=
+          serialize_stack_for_error ctxt ibody.(Script_typed_ir.descr.aft) in
+        Error_monad.op_gtgtpipequestion
+          (serialize_stack_for_error ctxt __stack_value)
+          (fun function_parameter =>
+            let '(__stack_value, _ctxt) := function_parameter in
+            extensible_type_value) in
+      Error_monad.trace_eval unmatched_branches
+        (let!? '(Eq, ctxt) :=
+          Lwt.__return
+            (stack_ty_eq ctxt 1 ibody.(Script_typed_ir.descr.aft) __stack_value)
+          in
+        let!? '(_stack, ctxt) :=
+          Lwt.__return
+            (merge_stacks legacy loc ctxt ibody.(Script_typed_ir.descr.aft)
+              __stack_value) in
+        typed ctxt loc (Script_typed_ir.Loop_left ibody)
+          (Script_typed_ir.Item_t tr rest annot))
+    | Failed {| judgement.Failed.descr := __descr_value |} =>
+      let ibody := __descr_value __stack_value in
+      typed ctxt loc (Script_typed_ir.Loop_left ibody)
+        (Script_typed_ir.Item_t tr rest annot)
+    end
+  |
+    ((Micheline.Prim loc Alpha_context.Script.I_LAMBDA
+      (cons arg (cons ret (cons code []))) annot, __stack_value), _) =>
+    let!? '(Ex_ty arg, ctxt) := Lwt.__return (parse_any_ty ctxt legacy arg) in
+    let 'existT _ __Ex_ty_'a8 [arg, ctxt] :=
+      existT (A := Set)
+        (fun __Ex_ty_'a8 =>
+          [(Script_typed_ir.ty __Ex_ty_'a8) ** Alpha_context.context]) _
+        [arg, ctxt] in
+    let!? '(Ex_ty ret, ctxt) := Lwt.__return (parse_any_ty ctxt legacy ret) in
+    let 'existT _ __Ex_ty_'a9 [ret, ctxt] :=
+      existT (A := Set)
+        (fun __Ex_ty_'a9 =>
+          [(Script_typed_ir.ty __Ex_ty_'a9) ** Alpha_context.context]) _
+        [ret, ctxt] in
+    let!? '_ := check_kind [ Script_tc_errors.Seq_kind ] code in
+    let!? annot := parse_var_annot loc None annot in
+    let!? '(lambda, ctxt) :=
+      parse_returning type_logger Lambda ctxt legacy
+        (arg, Script_ir_annot.default_arg_annot) ret code in
+    typed ctxt loc (Script_typed_ir.Lambda lambda)
+      (Script_typed_ir.Item_t (Script_typed_ir.Lambda_t arg ret None)
+        __stack_value annot)
+  |
+    ((Micheline.Prim loc Alpha_context.Script.I_EXEC [] annot,
+      Script_typed_ir.Item_t arg
+        (Script_typed_ir.Item_t (Script_typed_ir.Lambda_t param ret _) rest _) _),
+      _) =>
+    let 'existT _ [__176, __179, __180, __181]
+      [loc, annot, arg, param, ret, rest] :=
+      existT (A := [Set ** Set ** Set ** Set])
+        (fun '[__176, __179, __180, __181] =>
+          [Alpha_context.Script.location ** Micheline.annot **
+            (Script_typed_ir.ty __176) ** (Script_typed_ir.ty __180) **
+            (Script_typed_ir.ty __181) ** (Script_typed_ir.stack_ty __179)]) [_,
+        _, _, _] [loc, annot, arg, param, ret, rest] in
+    let!? '(Eq, _, ctxt) :=
+      check_item_ty ctxt arg param loc Alpha_context.Script.I_EXEC 1 2 in
+    let!? annot := parse_var_annot loc None annot in
+    typed ctxt loc Script_typed_ir.Exec (Script_typed_ir.Item_t ret rest annot)
+  |
+    ((Micheline.Prim loc Alpha_context.Script.I_APPLY [] annot,
+      Script_typed_ir.Item_t capture
+        (Script_typed_ir.Item_t
+          (Script_typed_ir.Lambda_t
+            (Script_typed_ir.Pair_t (capture_ty, _, _) (arg_ty, _, _) lam_annot
+              _) ret _) rest _) _), _) =>
+    let 'existT _ [__182, __185, __187, __188, __189]
+      [loc, annot, capture, capture_ty, arg_ty, lam_annot, ret, rest] :=
+      existT (A := [Set ** Set ** Set ** Set ** Set])
+        (fun '[__182, __185, __187, __188, __189] =>
+          [Alpha_context.Script.location ** Micheline.annot **
+            (Script_typed_ir.ty __182) ** (Script_typed_ir.ty __188) **
+            (Script_typed_ir.ty __189) ** (option Script_typed_ir.type_annot) **
+            (Script_typed_ir.ty __187) ** (Script_typed_ir.stack_ty __185)]) [_,
+        _, _, _, _]
+        [loc, annot, capture, capture_ty, arg_ty, lam_annot, ret, rest] in
+    let!? '_ := Lwt.__return (check_packable false loc capture_ty) in
+    let!? '(Eq, capture_ty, ctxt) :=
+      check_item_ty ctxt capture capture_ty loc Alpha_context.Script.I_APPLY 1 2
+      in
+    let!? annot := parse_var_annot loc None annot in
+    typed ctxt loc (Script_typed_ir.Apply capture_ty)
+      (Script_typed_ir.Item_t (Script_typed_ir.Lambda_t arg_ty ret lam_annot)
+        rest annot)
+  |
+    ((Micheline.Prim loc Alpha_context.Script.I_DIP (cons code []) annot,
+      Script_typed_ir.Item_t v rest stack_annot), _) =>
+    let 'existT _ [__190, __191] [loc, code, annot, v, rest, stack_annot] :=
+      existT (A := [Set ** Set])
+        (fun '[__190, __191] =>
+          [Alpha_context.Script.location **
+            (Micheline.node Alpha_context.Script.location
+              Alpha_context.Script.prim) ** Micheline.annot **
+            (Script_typed_ir.ty __190) ** (Script_typed_ir.stack_ty __191) **
+            (option Script_typed_ir.var_annot)]) [_, _]
+        [loc, code, annot, v, rest, stack_annot] in
+    let!? '_ := Script_ir_annot.fail_unexpected_annot loc annot in
+    let!? '_ := check_kind [ Script_tc_errors.Seq_kind ] code in
+    let!? '(judgement, ctxt) :=
+      parse_instr type_logger (add_dip v stack_annot tc_context) ctxt legacy
+        code rest in
+    match judgement with
+    | Typed __descr_value =>
+      let 'existT _ __Typed_'aft15 __descr_value :=
+        existT (A := Set)
+          (fun __Typed_'aft15 => (Script_typed_ir.descr __191 __Typed_'aft15)) _
+          __descr_value in
+      typed ctxt loc (Script_typed_ir.Dip __descr_value)
+        (Script_typed_ir.Item_t v __descr_value.(Script_typed_ir.descr.aft)
+          stack_annot)
+    | Failed _ => Error_monad.fail extensible_type_value
+    end
+  |
+    ((Micheline.Prim loc Alpha_context.Script.I_DIP (cons n (cons code []))
+      result_annot, __stack_value), true) =>
+    let fix make_proof_argument {tstk : Set}
+      (n : Z) (inner_tc_context : tc_context)
+      (stk : Script_typed_ir.stack_ty tstk) {struct n}
+      : Lwt.t (Error_monad.tzresult (dipn_proof_argument tstk)) :=
+      match (((|Compare.Int|).(Compare.S.op_eq) n 0), stk) with
+      | (true, rest) =>
+        let!? '(judgement, ctxt) :=
+          parse_instr type_logger inner_tc_context ctxt legacy code rest in
+        match judgement with
+        | Typed __descr_value =>
+          let 'existT _ __Typed_'aft16 __descr_value :=
+            existT (A := Set)
+              (fun __Typed_'aft16 => (Script_typed_ir.descr tstk __Typed_'aft16))
+              _ __descr_value in
+          outer_return
+            (Dipn_proof_argument
+              (Script_typed_ir.Rest, (ctxt, __descr_value),
+                __descr_value.(Script_typed_ir.descr.aft)))
+        | Failed _ => Error_monad.fail extensible_type_value
+        end
+      | (false, Script_typed_ir.Item_t v rest annot) =>
+        let 'existT _ [__482, __483] [v, rest, annot] :=
+          existT (A := [Set ** Set])
+            (fun '[__482, __483] =>
+              [(Script_typed_ir.ty __482) ** (Script_typed_ir.stack_ty __483) **
+                (option Script_typed_ir.var_annot)]) [_, _] [v, rest, annot] in
+        let!? 'Dipn_proof_argument (n', __descr_value, aft') :=
+          make_proof_argument (Pervasives.op_minus n 1)
+            (add_dip v annot tc_context) rest in
+        let 'existT _
+          [__Dipn_proof_argument_'aft, __Dipn_proof_argument_'faft,
+            __Dipn_proof_argument_'fbef] [n', __descr_value, aft'] :=
           existT (A := [Set ** Set ** Set])
-            (fun '[__173, __174, __175] =>
-              [Alpha_context.Script.location **
-                (Micheline.node Alpha_context.Script.location
-                  Alpha_context.Script.prim) ** Micheline.annot **
-                (Script_typed_ir.ty __174) **
-                (option Script_typed_ir.field_annot) **
-                (Script_typed_ir.ty __175) ** (Script_typed_ir.stack_ty __173)
-                ** (option Script_typed_ir.var_annot) **
-                (Script_typed_ir.stack_ty
-                  (Script_typed_ir.union __174 __175 * __173))]) [_, _, _]
-            [loc, body, annot, tl, l_field, tr, rest, union_annot,
-              __stack_value] in
-        Error_monad.op_gtgteqquestion
-          (check_kind [ Script_tc_errors.Seq_kind ] body)
-          (fun function_parameter =>
-            let '_ := function_parameter in
-            Error_monad.op_gtgteqquestion (parse_var_annot loc None annot)
-              (fun annot =>
-                let l_annot :=
-                  Script_ir_annot.gen_access_annot union_annot
-                    (Some Script_ir_annot.default_left_annot) l_field in
-                Error_monad.op_gtgteqquestion
-                  (parse_instr type_logger tc_context ctxt legacy body
-                    (Script_typed_ir.Item_t tl rest l_annot))
-                  (fun function_parameter =>
-                    let '(judgement, ctxt) := function_parameter in
-                    match judgement with
-                    | Typed ibody =>
-                      let 'existT _ __Typed_'aft14 ibody :=
-                        existT (A := Set)
-                          (fun __Typed_'aft14 =>
-                            (Script_typed_ir.descr (__174 * __173)
-                              __Typed_'aft14)) _ ibody in
-                      let unmatched_branches (function_parameter : unit)
-                        : Lwt.t (Error_monad.tzresult Error_monad.__error) :=
-                        let '_ := function_parameter in
-                        Error_monad.op_gtgteqquestion
-                          (serialize_stack_for_error ctxt
-                            ibody.(Script_typed_ir.descr.aft))
-                          (fun function_parameter =>
-                            let '(aft, ctxt) := function_parameter in
-                            Error_monad.op_gtgtpipequestion
-                              (serialize_stack_for_error ctxt __stack_value)
-                              (fun function_parameter =>
-                                let '(__stack_value, _ctxt) :=
-                                  function_parameter in
-                                extensible_type_value)) in
-                      Error_monad.trace_eval unmatched_branches
-                        (Error_monad.op_gtgteqquestion
-                          (Lwt.__return
-                            (stack_ty_eq ctxt 1
-                              ibody.(Script_typed_ir.descr.aft) __stack_value))
-                          (fun function_parameter =>
-                            let '(Eq, ctxt) := function_parameter in
-                            Error_monad.op_gtgteqquestion
-                              (Lwt.__return
-                                (merge_stacks legacy loc ctxt
-                                  ibody.(Script_typed_ir.descr.aft)
-                                  __stack_value))
-                              (fun function_parameter =>
-                                let '(_stack, ctxt) := function_parameter in
-                                typed ctxt loc (Script_typed_ir.Loop_left ibody)
-                                  (Script_typed_ir.Item_t tr rest annot))))
-                    | Failed {| judgement.Failed.descr := __descr_value |} =>
-                      let ibody := __descr_value __stack_value in
-                      typed ctxt loc (Script_typed_ir.Loop_left ibody)
-                        (Script_typed_ir.Item_t tr rest annot)
-                    end)))
-      |
-        ((Micheline.Prim loc Alpha_context.Script.I_LAMBDA
-          (cons arg (cons ret (cons code []))) annot, __stack_value), _) =>
-        Error_monad.op_gtgteqquestion
-          (Lwt.__return (parse_any_ty ctxt legacy arg))
-          (fun function_parameter =>
-            let '(Ex_ty arg, ctxt) := function_parameter in
-            let 'existT _ __Ex_ty_'a8 [arg, ctxt] :=
-              existT (A := Set)
-                (fun __Ex_ty_'a8 =>
-                  [(Script_typed_ir.ty __Ex_ty_'a8) ** Alpha_context.context]) _
-                [arg, ctxt] in
-            Error_monad.op_gtgteqquestion
-              (Lwt.__return (parse_any_ty ctxt legacy ret))
-              (fun function_parameter =>
-                let '(Ex_ty ret, ctxt) := function_parameter in
-                let 'existT _ __Ex_ty_'a9 [ret, ctxt] :=
-                  existT (A := Set)
-                    (fun __Ex_ty_'a9 =>
-                      [(Script_typed_ir.ty __Ex_ty_'a9) **
-                        Alpha_context.context]) _ [ret, ctxt] in
-                Error_monad.op_gtgteqquestion
-                  (check_kind [ Script_tc_errors.Seq_kind ] code)
-                  (fun function_parameter =>
-                    let '_ := function_parameter in
-                    Error_monad.op_gtgteqquestion
-                      (parse_var_annot loc None annot)
-                      (fun annot =>
-                        Error_monad.op_gtgteqquestion
-                          (parse_returning type_logger Lambda ctxt legacy
-                            (arg, Script_ir_annot.default_arg_annot) ret code)
-                          (fun function_parameter =>
-                            let '(lambda, ctxt) := function_parameter in
-                            typed ctxt loc (Script_typed_ir.Lambda lambda)
-                              (Script_typed_ir.Item_t
-                                (Script_typed_ir.Lambda_t arg ret None)
-                                __stack_value annot))))))
-      |
-        ((Micheline.Prim loc Alpha_context.Script.I_EXEC [] annot,
-          Script_typed_ir.Item_t arg
-            (Script_typed_ir.Item_t (Script_typed_ir.Lambda_t param ret _) rest
-              _) _), _) =>
-        let 'existT _ [__176, __179, __180, __181]
-          [loc, annot, arg, param, ret, rest] :=
-          existT (A := [Set ** Set ** Set ** Set])
-            (fun '[__176, __179, __180, __181] =>
-              [Alpha_context.Script.location ** Micheline.annot **
-                (Script_typed_ir.ty __176) ** (Script_typed_ir.ty __180) **
-                (Script_typed_ir.ty __181) ** (Script_typed_ir.stack_ty __179)])
-            [_, _, _, _] [loc, annot, arg, param, ret, rest] in
-        Error_monad.op_gtgteqquestion
-          (check_item_ty ctxt arg param loc Alpha_context.Script.I_EXEC 1 2)
-          (fun function_parameter =>
-            let '(Eq, _, ctxt) := function_parameter in
-            Error_monad.op_gtgteqquestion (parse_var_annot loc None annot)
-              (fun annot =>
-                typed ctxt loc Script_typed_ir.Exec
-                  (Script_typed_ir.Item_t ret rest annot)))
-      |
-        ((Micheline.Prim loc Alpha_context.Script.I_APPLY [] annot,
-          Script_typed_ir.Item_t capture
-            (Script_typed_ir.Item_t
-              (Script_typed_ir.Lambda_t
-                (Script_typed_ir.Pair_t (capture_ty, _, _) (arg_ty, _, _)
-                  lam_annot _) ret _) rest _) _), _) =>
-        let 'existT _ [__182, __185, __187, __188, __189]
-          [loc, annot, capture, capture_ty, arg_ty, lam_annot, ret, rest] :=
-          existT (A := [Set ** Set ** Set ** Set ** Set])
-            (fun '[__182, __185, __187, __188, __189] =>
-              [Alpha_context.Script.location ** Micheline.annot **
-                (Script_typed_ir.ty __182) ** (Script_typed_ir.ty __188) **
-                (Script_typed_ir.ty __189) **
-                (option Script_typed_ir.type_annot) **
-                (Script_typed_ir.ty __187) ** (Script_typed_ir.stack_ty __185)])
-            [_, _, _, _, _]
-            [loc, annot, capture, capture_ty, arg_ty, lam_annot, ret, rest] in
-        Error_monad.op_gtgteqquestion
-          (Lwt.__return (check_packable false loc capture_ty))
-          (fun function_parameter =>
-            let '_ := function_parameter in
-            Error_monad.op_gtgteqquestion
-              (check_item_ty ctxt capture capture_ty loc
-                Alpha_context.Script.I_APPLY 1 2)
-              (fun function_parameter =>
-                let '(Eq, capture_ty, ctxt) := function_parameter in
-                Error_monad.op_gtgteqquestion (parse_var_annot loc None annot)
-                  (fun annot =>
-                    typed ctxt loc (Script_typed_ir.Apply capture_ty)
-                      (Script_typed_ir.Item_t
-                        (Script_typed_ir.Lambda_t arg_ty ret lam_annot) rest
-                        annot))))
-      |
-        ((Micheline.Prim loc Alpha_context.Script.I_DIP (cons code []) annot,
-          Script_typed_ir.Item_t v rest stack_annot), _) =>
-        let 'existT _ [__190, __191] [loc, code, annot, v, rest, stack_annot] :=
-          existT (A := [Set ** Set])
-            (fun '[__190, __191] =>
-              [Alpha_context.Script.location **
-                (Micheline.node Alpha_context.Script.location
-                  Alpha_context.Script.prim) ** Micheline.annot **
-                (Script_typed_ir.ty __190) ** (Script_typed_ir.stack_ty __191)
-                ** (option Script_typed_ir.var_annot)]) [_, _]
-            [loc, code, annot, v, rest, stack_annot] in
-        Error_monad.op_gtgteqquestion
-          (Script_ir_annot.fail_unexpected_annot loc annot)
-          (fun function_parameter =>
-            let '_ := function_parameter in
-            Error_monad.op_gtgteqquestion
-              (check_kind [ Script_tc_errors.Seq_kind ] code)
-              (fun function_parameter =>
-                let '_ := function_parameter in
-                Error_monad.op_gtgteqquestion
-                  (parse_instr type_logger (add_dip v stack_annot tc_context)
-                    ctxt legacy code rest)
-                  (fun function_parameter =>
-                    let '(judgement, ctxt) := function_parameter in
-                    match judgement with
-                    | Typed __descr_value =>
-                      let 'existT _ __Typed_'aft15 __descr_value :=
-                        existT (A := Set)
-                          (fun __Typed_'aft15 =>
-                            (Script_typed_ir.descr __191 __Typed_'aft15)) _
-                          __descr_value in
-                      typed ctxt loc (Script_typed_ir.Dip __descr_value)
-                        (Script_typed_ir.Item_t v
-                          __descr_value.(Script_typed_ir.descr.aft) stack_annot)
-                    | Failed _ => Error_monad.fail extensible_type_value
-                    end)))
-      |
-        ((Micheline.Prim loc Alpha_context.Script.I_DIP (cons n (cons code []))
-          result_annot, __stack_value), true) =>
-        let fix make_proof_argument {tstk : Set}
-          (n : Z) (inner_tc_context : tc_context)
-          (stk : Script_typed_ir.stack_ty tstk) {struct n}
-          : Lwt.t (Error_monad.tzresult (dipn_proof_argument tstk)) :=
-          match (((|Compare.Int|).(Compare.S.op_eq) n 0), stk) with
-          | (true, rest) =>
-            Error_monad.op_gtgteqquestion
-              (parse_instr type_logger inner_tc_context ctxt legacy code rest)
-              (fun function_parameter =>
-                let '(judgement, ctxt) := function_parameter in
-                match judgement with
-                | Typed __descr_value =>
-                  let 'existT _ __Typed_'aft16 __descr_value :=
-                    existT (A := Set)
-                      (fun __Typed_'aft16 =>
-                        (Script_typed_ir.descr tstk __Typed_'aft16)) _
-                      __descr_value in
-                  outer_return
-                    (Dipn_proof_argument
-                      (Script_typed_ir.Rest, (ctxt, __descr_value),
-                        __descr_value.(Script_typed_ir.descr.aft)))
-                | Failed _ => Error_monad.fail extensible_type_value
-                end)
-          | (false, Script_typed_ir.Item_t v rest annot) =>
-            let 'existT _ [__482, __483] [v, rest, annot] :=
-              existT (A := [Set ** Set])
-                (fun '[__482, __483] =>
-                  [(Script_typed_ir.ty __482) **
-                    (Script_typed_ir.stack_ty __483) **
-                    (option Script_typed_ir.var_annot)]) [_, _] [v, rest, annot]
-              in
-            Error_monad.op_gtgteqquestion
-              (make_proof_argument (Pervasives.op_minus n 1)
-                (add_dip v annot tc_context) rest)
-              (fun function_parameter =>
-                let 'Dipn_proof_argument (n', __descr_value, aft') :=
-                  function_parameter in
-                let 'existT _
-                  [__Dipn_proof_argument_'aft, __Dipn_proof_argument_'faft,
-                    __Dipn_proof_argument_'fbef] [n', __descr_value, aft'] :=
-                  existT (A := [Set ** Set ** Set])
-                    (fun
-                      '[__Dipn_proof_argument_'aft, __Dipn_proof_argument_'faft,
-                        __Dipn_proof_argument_'fbef] =>
-                      [(Script_typed_ir.stack_prefix_preservation_witness
-                        __Dipn_proof_argument_'fbef __Dipn_proof_argument_'faft
-                        __483 __Dipn_proof_argument_'aft) **
-                        (Alpha_context.context *
-                          Script_typed_ir.descr __Dipn_proof_argument_'fbef
-                            __Dipn_proof_argument_'faft) **
-                        (Script_typed_ir.stack_ty __Dipn_proof_argument_'aft)])
-                    [_, _, _] [n', __descr_value, aft'] in
-                outer_return
-                  (Dipn_proof_argument
-                    ((Script_typed_ir.Prefix n'), __descr_value,
-                      (Script_typed_ir.Item_t v aft' annot))))
-          | (_, _) =>
-            Error_monad.op_gtgteqquestion
-              (serialize_stack_for_error ctxt __stack_value)
-              (fun function_parameter =>
-                let '(whole_stack, _ctxt) := function_parameter in
-                Error_monad.fail extensible_type_value)
-          end in
-        Error_monad.op_gtgteqquestion (Lwt.__return (parse_int32 n))
-          (fun n =>
-            Error_monad.op_gtgteqquestion
-              (Script_ir_annot.fail_unexpected_annot loc result_annot)
-              (fun function_parameter =>
-                let '_ := function_parameter in
-                Error_monad.op_gtgteqquestion
-                  (make_proof_argument n tc_context __stack_value)
-                  (fun function_parameter =>
-                    let
-                      'Dipn_proof_argument (n', (new_ctxt, __descr_value), aft) :=
-                      function_parameter in
-                    let 'existT _
-                      [__Dipn_proof_argument_'aft1,
-                        __Dipn_proof_argument_'faft1,
-                        __Dipn_proof_argument_'fbef1]
-                      [n', new_ctxt, __descr_value, aft] :=
-                      existT (A := [Set ** Set ** Set])
-                        (fun
-                          '[__Dipn_proof_argument_'aft1,
-                            __Dipn_proof_argument_'faft1,
-                            __Dipn_proof_argument_'fbef1] =>
-                          [(Script_typed_ir.stack_prefix_preservation_witness
-                            __Dipn_proof_argument_'fbef1
-                            __Dipn_proof_argument_'faft1 bef
-                            __Dipn_proof_argument_'aft1) **
-                            Alpha_context.context **
-                            (Script_typed_ir.descr __Dipn_proof_argument_'fbef1
-                              __Dipn_proof_argument_'faft1) **
-                            (Script_typed_ir.stack_ty
-                              __Dipn_proof_argument_'aft1)]) [_, _, _]
-                        [n', new_ctxt, __descr_value, aft] in
-                    typed new_ctxt loc (Script_typed_ir.Dipn n n' __descr_value)
-                      aft)))
-      |
-        ((Micheline.Prim loc Alpha_context.Script.I_DIP
-          (([] | cons _ (cons _ (cons _ _))) as l) _, _), _) =>
+            (fun
+              '[__Dipn_proof_argument_'aft, __Dipn_proof_argument_'faft,
+                __Dipn_proof_argument_'fbef] =>
+              [(Script_typed_ir.stack_prefix_preservation_witness
+                __Dipn_proof_argument_'fbef __Dipn_proof_argument_'faft __483
+                __Dipn_proof_argument_'aft) **
+                (Alpha_context.context *
+                  Script_typed_ir.descr __Dipn_proof_argument_'fbef
+                    __Dipn_proof_argument_'faft) **
+                (Script_typed_ir.stack_ty __Dipn_proof_argument_'aft)]) [_, _,
+            _] [n', __descr_value, aft'] in
+        outer_return
+          (Dipn_proof_argument
+            ((Script_typed_ir.Prefix n'), __descr_value,
+              (Script_typed_ir.Item_t v aft' annot)))
+      | (_, _) =>
+        let!? '(whole_stack, _ctxt) :=
+          serialize_stack_for_error ctxt __stack_value in
         Error_monad.fail extensible_type_value
-      |
-        ((Micheline.Prim loc Alpha_context.Script.I_FAILWITH [] annot,
-          Script_typed_ir.Item_t v _rest _), _) =>
-        let 'existT _ [__192, __193] [loc, annot, v, _rest] :=
-          existT (A := [Set ** Set])
-            (fun '[__192, __193] =>
-              [Alpha_context.Script.location ** Micheline.annot **
-                (Script_typed_ir.ty __192) ** (Script_typed_ir.stack_ty __193)])
-            [_, _] [loc, annot, v, _rest] in
-        Error_monad.op_gtgteqquestion
-          (Script_ir_annot.fail_unexpected_annot loc annot)
-          (fun function_parameter =>
-            let '_ := function_parameter in
-            let __descr_value {B : Set} (aft : Script_typed_ir.stack_ty B)
-              : Script_typed_ir.descr bef B :=
-              {| Script_typed_ir.descr.loc := loc;
-                Script_typed_ir.descr.bef := stack_ty;
-                Script_typed_ir.descr.aft := aft;
-                Script_typed_ir.descr.instr := Script_typed_ir.Failwith v |} in
-            Error_monad.op_gtgteqquestion
-              (log_stack ctxt loc stack_ty Script_typed_ir.Empty_t)
-              (fun function_parameter =>
-                let '_ := function_parameter in
-                __return ctxt
-                  (Failed {| judgement.Failed.descr := __descr_value |})))
-      |
-        ((Micheline.Prim loc Alpha_context.Script.I_ADD [] annot,
-          Script_typed_ir.Item_t (Script_typed_ir.Timestamp_t tname)
-            (Script_typed_ir.Item_t (Script_typed_ir.Int_t _) rest _) _), _) =>
-        let 'existT _ __197 [loc, annot, tname, rest] :=
-          existT (A := Set)
-            (fun __197 =>
-              [Alpha_context.Script.location ** Micheline.annot **
-                (option Script_typed_ir.type_annot) **
-                (Script_typed_ir.stack_ty __197)]) _ [loc, annot, tname, rest]
-          in
-        Error_monad.op_gtgteqquestion (parse_var_annot loc None annot)
-          (fun annot =>
-            typed ctxt loc Script_typed_ir.Add_timestamp_to_seconds
-              (Script_typed_ir.Item_t (Script_typed_ir.Timestamp_t tname) rest
-                annot))
-      |
-        ((Micheline.Prim loc Alpha_context.Script.I_ADD [] annot,
-          Script_typed_ir.Item_t (Script_typed_ir.Int_t _)
-            (Script_typed_ir.Item_t (Script_typed_ir.Timestamp_t tname) rest _)
-            _), _) =>
-        let 'existT _ __201 [loc, annot, tname, rest] :=
-          existT (A := Set)
-            (fun __201 =>
-              [Alpha_context.Script.location ** Micheline.annot **
-                (option Script_typed_ir.type_annot) **
-                (Script_typed_ir.stack_ty __201)]) _ [loc, annot, tname, rest]
-          in
-        Error_monad.op_gtgteqquestion (parse_var_annot loc None annot)
-          (fun annot =>
-            typed ctxt loc Script_typed_ir.Add_seconds_to_timestamp
-              (Script_typed_ir.Item_t (Script_typed_ir.Timestamp_t tname) rest
-                annot))
-      |
-        ((Micheline.Prim loc Alpha_context.Script.I_SUB [] annot,
-          Script_typed_ir.Item_t (Script_typed_ir.Timestamp_t tname)
-            (Script_typed_ir.Item_t (Script_typed_ir.Int_t _) rest _) _), _) =>
-        let 'existT _ __205 [loc, annot, tname, rest] :=
-          existT (A := Set)
-            (fun __205 =>
-              [Alpha_context.Script.location ** Micheline.annot **
-                (option Script_typed_ir.type_annot) **
-                (Script_typed_ir.stack_ty __205)]) _ [loc, annot, tname, rest]
-          in
-        Error_monad.op_gtgteqquestion (parse_var_annot loc None annot)
-          (fun annot =>
-            typed ctxt loc Script_typed_ir.Sub_timestamp_seconds
-              (Script_typed_ir.Item_t (Script_typed_ir.Timestamp_t tname) rest
-                annot))
-      |
-        ((Micheline.Prim loc Alpha_context.Script.I_SUB [] annot,
-          Script_typed_ir.Item_t (Script_typed_ir.Timestamp_t tn1)
-            (Script_typed_ir.Item_t (Script_typed_ir.Timestamp_t tn2) rest _) _),
-          _) =>
-        let 'existT _ __209 [loc, annot, tn1, tn2, rest] :=
-          existT (A := Set)
-            (fun __209 =>
-              [Alpha_context.Script.location ** Micheline.annot **
-                (option Script_typed_ir.type_annot) **
-                (option Script_typed_ir.type_annot) **
-                (Script_typed_ir.stack_ty __209)]) _
-            [loc, annot, tn1, tn2, rest] in
-        Error_monad.op_gtgteqquestion (parse_var_annot loc None annot)
-          (fun annot =>
-            Error_monad.op_gtgteqquestion
-              (Lwt.__return (Script_ir_annot.merge_type_annot legacy tn1 tn2))
-              (fun tname =>
-                typed ctxt loc Script_typed_ir.Diff_timestamps
-                  (Script_typed_ir.Item_t (Script_typed_ir.Int_t tname) rest
-                    annot)))
-      |
-        ((Micheline.Prim loc Alpha_context.Script.I_CONCAT [] annot,
-          Script_typed_ir.Item_t (Script_typed_ir.String_t tn1)
-            (Script_typed_ir.Item_t (Script_typed_ir.String_t tn2) rest _) _), _)
-        =>
-        let 'existT _ __213 [loc, annot, tn1, tn2, rest] :=
-          existT (A := Set)
-            (fun __213 =>
-              [Alpha_context.Script.location ** Micheline.annot **
-                (option Script_typed_ir.type_annot) **
-                (option Script_typed_ir.type_annot) **
-                (Script_typed_ir.stack_ty __213)]) _
-            [loc, annot, tn1, tn2, rest] in
-        Error_monad.op_gtgteqquestion (parse_var_annot loc None annot)
-          (fun annot =>
-            Error_monad.op_gtgteqquestion
-              (Lwt.__return (Script_ir_annot.merge_type_annot legacy tn1 tn2))
-              (fun tname =>
-                typed ctxt loc Script_typed_ir.Concat_string_pair
-                  (Script_typed_ir.Item_t (Script_typed_ir.String_t tname) rest
-                    annot)))
-      |
-        ((Micheline.Prim loc Alpha_context.Script.I_CONCAT [] annot,
-          Script_typed_ir.Item_t
-            (Script_typed_ir.List_t (Script_typed_ir.String_t tname) _ _) rest
-            list_annot), _) =>
-        let 'existT _ __215 [loc, annot, tname, rest, list_annot] :=
-          existT (A := Set)
-            (fun __215 =>
-              [Alpha_context.Script.location ** Micheline.annot **
-                (option Script_typed_ir.type_annot) **
-                (Script_typed_ir.stack_ty __215) **
-                (option Script_typed_ir.var_annot)]) _
-            [loc, annot, tname, rest, list_annot] in
-        Error_monad.op_gtgteqquestion
-          (parse_var_annot loc (Some list_annot) annot)
-          (fun annot =>
-            typed ctxt loc Script_typed_ir.Concat_string
-              (Script_typed_ir.Item_t (Script_typed_ir.String_t tname) rest
-                annot))
-      |
-        ((Micheline.Prim loc Alpha_context.Script.I_SLICE [] annot,
-          Script_typed_ir.Item_t (Script_typed_ir.Nat_t _)
-            (Script_typed_ir.Item_t (Script_typed_ir.Nat_t _)
-              (Script_typed_ir.Item_t (Script_typed_ir.String_t tname) rest
-                string_annot) _) _), _) =>
-        let 'existT _ __222 [loc, annot, tname, rest, string_annot] :=
-          existT (A := Set)
-            (fun __222 =>
-              [Alpha_context.Script.location ** Micheline.annot **
-                (option Script_typed_ir.type_annot) **
-                (Script_typed_ir.stack_ty __222) **
-                (option Script_typed_ir.var_annot)]) _
-            [loc, annot, tname, rest, string_annot] in
-        Error_monad.op_gtgteqquestion
-          (parse_var_annot loc
-            (Some
-              (Script_ir_annot.gen_access_annot string_annot None
-                Script_ir_annot.default_slice_annot)) annot)
-          (fun annot =>
-            typed ctxt loc Script_typed_ir.Slice_string
-              (Script_typed_ir.Item_t
-                (Script_typed_ir.Option_t (Script_typed_ir.String_t tname) None
-                  false) rest annot))
-      |
-        ((Micheline.Prim loc Alpha_context.Script.I_SIZE [] annot,
-          Script_typed_ir.Item_t (Script_typed_ir.String_t _) rest _), _) =>
-        let 'existT _ __224 [loc, annot, rest] :=
-          existT (A := Set)
-            (fun __224 =>
-              [Alpha_context.Script.location ** Micheline.annot **
-                (Script_typed_ir.stack_ty __224)]) _ [loc, annot, rest] in
-        Error_monad.op_gtgteqquestion (parse_var_annot loc None annot)
-          (fun annot =>
-            typed ctxt loc Script_typed_ir.String_size
-              (Script_typed_ir.Item_t (Script_typed_ir.Nat_t None) rest annot))
-      |
-        ((Micheline.Prim loc Alpha_context.Script.I_CONCAT [] annot,
-          Script_typed_ir.Item_t (Script_typed_ir.Bytes_t tn1)
-            (Script_typed_ir.Item_t (Script_typed_ir.Bytes_t tn2) rest _) _), _)
-        =>
-        let 'existT _ __228 [loc, annot, tn1, tn2, rest] :=
-          existT (A := Set)
-            (fun __228 =>
-              [Alpha_context.Script.location ** Micheline.annot **
-                (option Script_typed_ir.type_annot) **
-                (option Script_typed_ir.type_annot) **
-                (Script_typed_ir.stack_ty __228)]) _
-            [loc, annot, tn1, tn2, rest] in
-        Error_monad.op_gtgteqquestion (parse_var_annot loc None annot)
-          (fun annot =>
-            Error_monad.op_gtgteqquestion
-              (Lwt.__return (Script_ir_annot.merge_type_annot legacy tn1 tn2))
-              (fun tname =>
-                typed ctxt loc Script_typed_ir.Concat_bytes_pair
-                  (Script_typed_ir.Item_t (Script_typed_ir.Bytes_t tname) rest
-                    annot)))
-      |
-        ((Micheline.Prim loc Alpha_context.Script.I_CONCAT [] annot,
-          Script_typed_ir.Item_t
-            (Script_typed_ir.List_t (Script_typed_ir.Bytes_t tname) _ _) rest
-            list_annot), _) =>
-        let 'existT _ __230 [loc, annot, tname, rest, list_annot] :=
-          existT (A := Set)
-            (fun __230 =>
-              [Alpha_context.Script.location ** Micheline.annot **
-                (option Script_typed_ir.type_annot) **
-                (Script_typed_ir.stack_ty __230) **
-                (option Script_typed_ir.var_annot)]) _
-            [loc, annot, tname, rest, list_annot] in
-        Error_monad.op_gtgteqquestion
-          (parse_var_annot loc (Some list_annot) annot)
-          (fun annot =>
-            typed ctxt loc Script_typed_ir.Concat_bytes
-              (Script_typed_ir.Item_t (Script_typed_ir.Bytes_t tname) rest annot))
-      |
-        ((Micheline.Prim loc Alpha_context.Script.I_SLICE [] annot,
-          Script_typed_ir.Item_t (Script_typed_ir.Nat_t _)
-            (Script_typed_ir.Item_t (Script_typed_ir.Nat_t _)
-              (Script_typed_ir.Item_t (Script_typed_ir.Bytes_t tname) rest
-                bytes_annot) _) _), _) =>
-        let 'existT _ __237 [loc, annot, tname, rest, bytes_annot] :=
-          existT (A := Set)
-            (fun __237 =>
-              [Alpha_context.Script.location ** Micheline.annot **
-                (option Script_typed_ir.type_annot) **
-                (Script_typed_ir.stack_ty __237) **
-                (option Script_typed_ir.var_annot)]) _
-            [loc, annot, tname, rest, bytes_annot] in
-        Error_monad.op_gtgteqquestion
-          (parse_var_annot loc
-            (Some
-              (Script_ir_annot.gen_access_annot bytes_annot None
-                Script_ir_annot.default_slice_annot)) annot)
-          (fun annot =>
-            typed ctxt loc Script_typed_ir.Slice_bytes
-              (Script_typed_ir.Item_t
-                (Script_typed_ir.Option_t (Script_typed_ir.Bytes_t tname) None
-                  false) rest annot))
-      |
-        ((Micheline.Prim loc Alpha_context.Script.I_SIZE [] annot,
-          Script_typed_ir.Item_t (Script_typed_ir.Bytes_t _) rest _), _) =>
-        let 'existT _ __239 [loc, annot, rest] :=
-          existT (A := Set)
-            (fun __239 =>
-              [Alpha_context.Script.location ** Micheline.annot **
-                (Script_typed_ir.stack_ty __239)]) _ [loc, annot, rest] in
-        Error_monad.op_gtgteqquestion (parse_var_annot loc None annot)
-          (fun annot =>
-            typed ctxt loc Script_typed_ir.Bytes_size
-              (Script_typed_ir.Item_t (Script_typed_ir.Nat_t None) rest annot))
-      |
-        ((Micheline.Prim loc Alpha_context.Script.I_ADD [] annot,
-          Script_typed_ir.Item_t (Script_typed_ir.Mutez_t tn1)
-            (Script_typed_ir.Item_t (Script_typed_ir.Mutez_t tn2) rest _) _), _)
-        =>
-        let 'existT _ __243 [loc, annot, tn1, tn2, rest] :=
-          existT (A := Set)
-            (fun __243 =>
-              [Alpha_context.Script.location ** Micheline.annot **
-                (option Script_typed_ir.type_annot) **
-                (option Script_typed_ir.type_annot) **
-                (Script_typed_ir.stack_ty __243)]) _
-            [loc, annot, tn1, tn2, rest] in
-        Error_monad.op_gtgteqquestion (parse_var_annot loc None annot)
-          (fun annot =>
-            Error_monad.op_gtgteqquestion
-              (Lwt.__return (Script_ir_annot.merge_type_annot legacy tn1 tn2))
-              (fun tname =>
-                typed ctxt loc Script_typed_ir.Add_tez
-                  (Script_typed_ir.Item_t (Script_typed_ir.Mutez_t tname) rest
-                    annot)))
-      |
-        ((Micheline.Prim loc Alpha_context.Script.I_SUB [] annot,
-          Script_typed_ir.Item_t (Script_typed_ir.Mutez_t tn1)
-            (Script_typed_ir.Item_t (Script_typed_ir.Mutez_t tn2) rest _) _), _)
-        =>
-        let 'existT _ __247 [loc, annot, tn1, tn2, rest] :=
-          existT (A := Set)
-            (fun __247 =>
-              [Alpha_context.Script.location ** Micheline.annot **
-                (option Script_typed_ir.type_annot) **
-                (option Script_typed_ir.type_annot) **
-                (Script_typed_ir.stack_ty __247)]) _
-            [loc, annot, tn1, tn2, rest] in
-        Error_monad.op_gtgteqquestion (parse_var_annot loc None annot)
-          (fun annot =>
-            Error_monad.op_gtgteqquestion
-              (Lwt.__return (Script_ir_annot.merge_type_annot legacy tn1 tn2))
-              (fun tname =>
-                typed ctxt loc Script_typed_ir.Sub_tez
-                  (Script_typed_ir.Item_t (Script_typed_ir.Mutez_t tname) rest
-                    annot)))
-      |
-        ((Micheline.Prim loc Alpha_context.Script.I_MUL [] annot,
-          Script_typed_ir.Item_t (Script_typed_ir.Mutez_t tname)
-            (Script_typed_ir.Item_t (Script_typed_ir.Nat_t _) rest _) _), _) =>
-        let 'existT _ __251 [loc, annot, tname, rest] :=
-          existT (A := Set)
-            (fun __251 =>
-              [Alpha_context.Script.location ** Micheline.annot **
-                (option Script_typed_ir.type_annot) **
-                (Script_typed_ir.stack_ty __251)]) _ [loc, annot, tname, rest]
-          in
-        Error_monad.op_gtgteqquestion (parse_var_annot loc None annot)
-          (fun annot =>
-            typed ctxt loc Script_typed_ir.Mul_teznat
-              (Script_typed_ir.Item_t (Script_typed_ir.Mutez_t tname) rest annot))
-      |
-        ((Micheline.Prim loc Alpha_context.Script.I_MUL [] annot,
-          Script_typed_ir.Item_t (Script_typed_ir.Nat_t _)
-            (Script_typed_ir.Item_t (Script_typed_ir.Mutez_t tname) rest _) _),
-          _) =>
-        let 'existT _ __255 [loc, annot, tname, rest] :=
-          existT (A := Set)
-            (fun __255 =>
-              [Alpha_context.Script.location ** Micheline.annot **
-                (option Script_typed_ir.type_annot) **
-                (Script_typed_ir.stack_ty __255)]) _ [loc, annot, tname, rest]
-          in
-        Error_monad.op_gtgteqquestion (parse_var_annot loc None annot)
-          (fun annot =>
-            typed ctxt loc Script_typed_ir.Mul_nattez
-              (Script_typed_ir.Item_t (Script_typed_ir.Mutez_t tname) rest annot))
-      |
-        ((Micheline.Prim loc Alpha_context.Script.I_OR [] annot,
-          Script_typed_ir.Item_t (Script_typed_ir.Bool_t tn1)
-            (Script_typed_ir.Item_t (Script_typed_ir.Bool_t tn2) rest _) _), _)
-        =>
-        let 'existT _ __259 [loc, annot, tn1, tn2, rest] :=
-          existT (A := Set)
-            (fun __259 =>
-              [Alpha_context.Script.location ** Micheline.annot **
-                (option Script_typed_ir.type_annot) **
-                (option Script_typed_ir.type_annot) **
-                (Script_typed_ir.stack_ty __259)]) _
-            [loc, annot, tn1, tn2, rest] in
-        Error_monad.op_gtgteqquestion (parse_var_annot loc None annot)
-          (fun annot =>
-            Error_monad.op_gtgteqquestion
-              (Lwt.__return (Script_ir_annot.merge_type_annot legacy tn1 tn2))
-              (fun tname =>
-                typed ctxt loc Script_typed_ir.Or
-                  (Script_typed_ir.Item_t (Script_typed_ir.Bool_t tname) rest
-                    annot)))
-      |
-        ((Micheline.Prim loc Alpha_context.Script.I_AND [] annot,
-          Script_typed_ir.Item_t (Script_typed_ir.Bool_t tn1)
-            (Script_typed_ir.Item_t (Script_typed_ir.Bool_t tn2) rest _) _), _)
-        =>
-        let 'existT _ __263 [loc, annot, tn1, tn2, rest] :=
-          existT (A := Set)
-            (fun __263 =>
-              [Alpha_context.Script.location ** Micheline.annot **
-                (option Script_typed_ir.type_annot) **
-                (option Script_typed_ir.type_annot) **
-                (Script_typed_ir.stack_ty __263)]) _
-            [loc, annot, tn1, tn2, rest] in
-        Error_monad.op_gtgteqquestion (parse_var_annot loc None annot)
-          (fun annot =>
-            Error_monad.op_gtgteqquestion
-              (Lwt.__return (Script_ir_annot.merge_type_annot legacy tn1 tn2))
-              (fun tname =>
-                typed ctxt loc Script_typed_ir.And
-                  (Script_typed_ir.Item_t (Script_typed_ir.Bool_t tname) rest
-                    annot)))
-      |
-        ((Micheline.Prim loc Alpha_context.Script.I_XOR [] annot,
-          Script_typed_ir.Item_t (Script_typed_ir.Bool_t tn1)
-            (Script_typed_ir.Item_t (Script_typed_ir.Bool_t tn2) rest _) _), _)
-        =>
-        let 'existT _ __267 [loc, annot, tn1, tn2, rest] :=
-          existT (A := Set)
-            (fun __267 =>
-              [Alpha_context.Script.location ** Micheline.annot **
-                (option Script_typed_ir.type_annot) **
-                (option Script_typed_ir.type_annot) **
-                (Script_typed_ir.stack_ty __267)]) _
-            [loc, annot, tn1, tn2, rest] in
-        Error_monad.op_gtgteqquestion (parse_var_annot loc None annot)
-          (fun annot =>
-            Error_monad.op_gtgteqquestion
-              (Lwt.__return (Script_ir_annot.merge_type_annot legacy tn1 tn2))
-              (fun tname =>
-                typed ctxt loc Script_typed_ir.Xor
-                  (Script_typed_ir.Item_t (Script_typed_ir.Bool_t tname) rest
-                    annot)))
-      |
-        ((Micheline.Prim loc Alpha_context.Script.I_NOT [] annot,
-          Script_typed_ir.Item_t (Script_typed_ir.Bool_t tname) rest _), _) =>
-        let 'existT _ __269 [loc, annot, tname, rest] :=
-          existT (A := Set)
-            (fun __269 =>
-              [Alpha_context.Script.location ** Micheline.annot **
-                (option Script_typed_ir.type_annot) **
-                (Script_typed_ir.stack_ty __269)]) _ [loc, annot, tname, rest]
-          in
-        Error_monad.op_gtgteqquestion (parse_var_annot loc None annot)
-          (fun annot =>
-            typed ctxt loc Script_typed_ir.Not
-              (Script_typed_ir.Item_t (Script_typed_ir.Bool_t tname) rest annot))
-      |
-        ((Micheline.Prim loc Alpha_context.Script.I_ABS [] annot,
-          Script_typed_ir.Item_t (Script_typed_ir.Int_t _) rest _), _) =>
-        let 'existT _ __271 [loc, annot, rest] :=
-          existT (A := Set)
-            (fun __271 =>
-              [Alpha_context.Script.location ** Micheline.annot **
-                (Script_typed_ir.stack_ty __271)]) _ [loc, annot, rest] in
-        Error_monad.op_gtgteqquestion (parse_var_annot loc None annot)
-          (fun annot =>
-            typed ctxt loc Script_typed_ir.Abs_int
-              (Script_typed_ir.Item_t (Script_typed_ir.Nat_t None) rest annot))
-      |
-        ((Micheline.Prim loc Alpha_context.Script.I_ISNAT [] annot,
-          Script_typed_ir.Item_t (Script_typed_ir.Int_t _) rest int_annot), _)
-        =>
-        let 'existT _ __273 [loc, annot, rest, int_annot] :=
-          existT (A := Set)
-            (fun __273 =>
-              [Alpha_context.Script.location ** Micheline.annot **
-                (Script_typed_ir.stack_ty __273) **
-                (option Script_typed_ir.var_annot)]) _
-            [loc, annot, rest, int_annot] in
-        Error_monad.op_gtgteqquestion
-          (parse_var_annot loc (Some int_annot) annot)
-          (fun annot =>
-            typed ctxt loc Script_typed_ir.Is_nat
-              (Script_typed_ir.Item_t
-                (Script_typed_ir.Option_t (Script_typed_ir.Nat_t None) None
-                  false) rest annot))
-      |
-        ((Micheline.Prim loc Alpha_context.Script.I_INT [] annot,
-          Script_typed_ir.Item_t (Script_typed_ir.Nat_t _) rest _), _) =>
-        let 'existT _ __275 [loc, annot, rest] :=
-          existT (A := Set)
-            (fun __275 =>
-              [Alpha_context.Script.location ** Micheline.annot **
-                (Script_typed_ir.stack_ty __275)]) _ [loc, annot, rest] in
-        Error_monad.op_gtgteqquestion (parse_var_annot loc None annot)
-          (fun annot =>
-            typed ctxt loc Script_typed_ir.Int_nat
-              (Script_typed_ir.Item_t (Script_typed_ir.Int_t None) rest annot))
-      |
-        ((Micheline.Prim loc Alpha_context.Script.I_NEG [] annot,
-          Script_typed_ir.Item_t (Script_typed_ir.Int_t tname) rest _), _) =>
-        let 'existT _ __277 [loc, annot, tname, rest] :=
-          existT (A := Set)
-            (fun __277 =>
-              [Alpha_context.Script.location ** Micheline.annot **
-                (option Script_typed_ir.type_annot) **
-                (Script_typed_ir.stack_ty __277)]) _ [loc, annot, tname, rest]
-          in
-        Error_monad.op_gtgteqquestion (parse_var_annot loc None annot)
-          (fun annot =>
-            typed ctxt loc Script_typed_ir.Neg_int
-              (Script_typed_ir.Item_t (Script_typed_ir.Int_t tname) rest annot))
-      |
-        ((Micheline.Prim loc Alpha_context.Script.I_NEG [] annot,
-          Script_typed_ir.Item_t (Script_typed_ir.Nat_t _) rest _), _) =>
-        let 'existT _ __279 [loc, annot, rest] :=
-          existT (A := Set)
-            (fun __279 =>
-              [Alpha_context.Script.location ** Micheline.annot **
-                (Script_typed_ir.stack_ty __279)]) _ [loc, annot, rest] in
-        Error_monad.op_gtgteqquestion (parse_var_annot loc None annot)
-          (fun annot =>
-            typed ctxt loc Script_typed_ir.Neg_nat
-              (Script_typed_ir.Item_t (Script_typed_ir.Int_t None) rest annot))
-      |
-        ((Micheline.Prim loc Alpha_context.Script.I_ADD [] annot,
-          Script_typed_ir.Item_t (Script_typed_ir.Int_t tn1)
-            (Script_typed_ir.Item_t (Script_typed_ir.Int_t tn2) rest _) _), _)
-        =>
-        let 'existT _ __283 [loc, annot, tn1, tn2, rest] :=
-          existT (A := Set)
-            (fun __283 =>
-              [Alpha_context.Script.location ** Micheline.annot **
-                (option Script_typed_ir.type_annot) **
-                (option Script_typed_ir.type_annot) **
-                (Script_typed_ir.stack_ty __283)]) _
-            [loc, annot, tn1, tn2, rest] in
-        Error_monad.op_gtgteqquestion (parse_var_annot loc None annot)
-          (fun annot =>
-            Error_monad.op_gtgteqquestion
-              (Lwt.__return (Script_ir_annot.merge_type_annot legacy tn1 tn2))
-              (fun tname =>
-                typed ctxt loc Script_typed_ir.Add_intint
-                  (Script_typed_ir.Item_t (Script_typed_ir.Int_t tname) rest
-                    annot)))
-      |
-        ((Micheline.Prim loc Alpha_context.Script.I_ADD [] annot,
-          Script_typed_ir.Item_t (Script_typed_ir.Int_t tname)
-            (Script_typed_ir.Item_t (Script_typed_ir.Nat_t _) rest _) _), _) =>
-        let 'existT _ __287 [loc, annot, tname, rest] :=
-          existT (A := Set)
-            (fun __287 =>
-              [Alpha_context.Script.location ** Micheline.annot **
-                (option Script_typed_ir.type_annot) **
-                (Script_typed_ir.stack_ty __287)]) _ [loc, annot, tname, rest]
-          in
-        Error_monad.op_gtgteqquestion (parse_var_annot loc None annot)
-          (fun annot =>
-            typed ctxt loc Script_typed_ir.Add_intnat
-              (Script_typed_ir.Item_t (Script_typed_ir.Int_t tname) rest annot))
-      |
-        ((Micheline.Prim loc Alpha_context.Script.I_ADD [] annot,
-          Script_typed_ir.Item_t (Script_typed_ir.Nat_t _)
-            (Script_typed_ir.Item_t (Script_typed_ir.Int_t tname) rest _) _), _)
-        =>
-        let 'existT _ __291 [loc, annot, tname, rest] :=
-          existT (A := Set)
-            (fun __291 =>
-              [Alpha_context.Script.location ** Micheline.annot **
-                (option Script_typed_ir.type_annot) **
-                (Script_typed_ir.stack_ty __291)]) _ [loc, annot, tname, rest]
-          in
-        Error_monad.op_gtgteqquestion (parse_var_annot loc None annot)
-          (fun annot =>
-            typed ctxt loc Script_typed_ir.Add_natint
-              (Script_typed_ir.Item_t (Script_typed_ir.Int_t tname) rest annot))
-      |
-        ((Micheline.Prim loc Alpha_context.Script.I_ADD [] annot,
-          Script_typed_ir.Item_t (Script_typed_ir.Nat_t tn1)
-            (Script_typed_ir.Item_t (Script_typed_ir.Nat_t tn2) rest _) _), _)
-        =>
-        let 'existT _ __295 [loc, annot, tn1, tn2, rest] :=
-          existT (A := Set)
-            (fun __295 =>
-              [Alpha_context.Script.location ** Micheline.annot **
-                (option Script_typed_ir.type_annot) **
-                (option Script_typed_ir.type_annot) **
-                (Script_typed_ir.stack_ty __295)]) _
-            [loc, annot, tn1, tn2, rest] in
-        Error_monad.op_gtgteqquestion (parse_var_annot loc None annot)
-          (fun annot =>
-            Error_monad.op_gtgteqquestion
-              (Lwt.__return (Script_ir_annot.merge_type_annot legacy tn1 tn2))
-              (fun tname =>
-                typed ctxt loc Script_typed_ir.Add_natnat
-                  (Script_typed_ir.Item_t (Script_typed_ir.Nat_t tname) rest
-                    annot)))
-      |
-        ((Micheline.Prim loc Alpha_context.Script.I_SUB [] annot,
-          Script_typed_ir.Item_t (Script_typed_ir.Int_t tn1)
-            (Script_typed_ir.Item_t (Script_typed_ir.Int_t tn2) rest _) _), _)
-        =>
-        let 'existT _ __299 [loc, annot, tn1, tn2, rest] :=
-          existT (A := Set)
-            (fun __299 =>
-              [Alpha_context.Script.location ** Micheline.annot **
-                (option Script_typed_ir.type_annot) **
-                (option Script_typed_ir.type_annot) **
-                (Script_typed_ir.stack_ty __299)]) _
-            [loc, annot, tn1, tn2, rest] in
-        Error_monad.op_gtgteqquestion (parse_var_annot loc None annot)
-          (fun annot =>
-            Error_monad.op_gtgteqquestion
-              (Lwt.__return (Script_ir_annot.merge_type_annot legacy tn1 tn2))
-              (fun tname =>
-                typed ctxt loc Script_typed_ir.Sub_int
-                  (Script_typed_ir.Item_t (Script_typed_ir.Int_t tname) rest
-                    annot)))
-      |
-        ((Micheline.Prim loc Alpha_context.Script.I_SUB [] annot,
-          Script_typed_ir.Item_t (Script_typed_ir.Int_t tname)
-            (Script_typed_ir.Item_t (Script_typed_ir.Nat_t _) rest _) _), _) =>
-        let 'existT _ __303 [loc, annot, tname, rest] :=
-          existT (A := Set)
-            (fun __303 =>
-              [Alpha_context.Script.location ** Micheline.annot **
-                (option Script_typed_ir.type_annot) **
-                (Script_typed_ir.stack_ty __303)]) _ [loc, annot, tname, rest]
-          in
-        Error_monad.op_gtgteqquestion (parse_var_annot loc None annot)
-          (fun annot =>
-            typed ctxt loc Script_typed_ir.Sub_int
-              (Script_typed_ir.Item_t (Script_typed_ir.Int_t tname) rest annot))
-      |
-        ((Micheline.Prim loc Alpha_context.Script.I_SUB [] annot,
-          Script_typed_ir.Item_t (Script_typed_ir.Nat_t _)
-            (Script_typed_ir.Item_t (Script_typed_ir.Int_t tname) rest _) _), _)
-        =>
-        let 'existT _ __307 [loc, annot, tname, rest] :=
-          existT (A := Set)
-            (fun __307 =>
-              [Alpha_context.Script.location ** Micheline.annot **
-                (option Script_typed_ir.type_annot) **
-                (Script_typed_ir.stack_ty __307)]) _ [loc, annot, tname, rest]
-          in
-        Error_monad.op_gtgteqquestion (parse_var_annot loc None annot)
-          (fun annot =>
-            typed ctxt loc Script_typed_ir.Sub_int
-              (Script_typed_ir.Item_t (Script_typed_ir.Int_t tname) rest annot))
-      |
-        ((Micheline.Prim loc Alpha_context.Script.I_SUB [] annot,
-          Script_typed_ir.Item_t (Script_typed_ir.Nat_t tn1)
-            (Script_typed_ir.Item_t (Script_typed_ir.Nat_t tn2) rest _) _), _)
-        =>
-        let 'existT _ __311 [loc, annot, tn1, tn2, rest] :=
-          existT (A := Set)
-            (fun __311 =>
-              [Alpha_context.Script.location ** Micheline.annot **
-                (option Script_typed_ir.type_annot) **
-                (option Script_typed_ir.type_annot) **
-                (Script_typed_ir.stack_ty __311)]) _
-            [loc, annot, tn1, tn2, rest] in
-        Error_monad.op_gtgteqquestion (parse_var_annot loc None annot)
-          (fun annot =>
-            Error_monad.op_gtgteqquestion
-              (Lwt.__return (Script_ir_annot.merge_type_annot legacy tn1 tn2))
-              (fun _tname =>
-                typed ctxt loc Script_typed_ir.Sub_int
-                  (Script_typed_ir.Item_t (Script_typed_ir.Int_t None) rest
-                    annot)))
-      |
-        ((Micheline.Prim loc Alpha_context.Script.I_MUL [] annot,
-          Script_typed_ir.Item_t (Script_typed_ir.Int_t tn1)
-            (Script_typed_ir.Item_t (Script_typed_ir.Int_t tn2) rest _) _), _)
-        =>
-        let 'existT _ __315 [loc, annot, tn1, tn2, rest] :=
-          existT (A := Set)
-            (fun __315 =>
-              [Alpha_context.Script.location ** Micheline.annot **
-                (option Script_typed_ir.type_annot) **
-                (option Script_typed_ir.type_annot) **
-                (Script_typed_ir.stack_ty __315)]) _
-            [loc, annot, tn1, tn2, rest] in
-        Error_monad.op_gtgteqquestion (parse_var_annot loc None annot)
-          (fun annot =>
-            Error_monad.op_gtgteqquestion
-              (Lwt.__return (Script_ir_annot.merge_type_annot legacy tn1 tn2))
-              (fun tname =>
-                typed ctxt loc Script_typed_ir.Mul_intint
-                  (Script_typed_ir.Item_t (Script_typed_ir.Int_t tname) rest
-                    annot)))
-      |
-        ((Micheline.Prim loc Alpha_context.Script.I_MUL [] annot,
-          Script_typed_ir.Item_t (Script_typed_ir.Int_t tname)
-            (Script_typed_ir.Item_t (Script_typed_ir.Nat_t _) rest _) _), _) =>
-        let 'existT _ __319 [loc, annot, tname, rest] :=
-          existT (A := Set)
-            (fun __319 =>
-              [Alpha_context.Script.location ** Micheline.annot **
-                (option Script_typed_ir.type_annot) **
-                (Script_typed_ir.stack_ty __319)]) _ [loc, annot, tname, rest]
-          in
-        Error_monad.op_gtgteqquestion (parse_var_annot loc None annot)
-          (fun annot =>
-            typed ctxt loc Script_typed_ir.Mul_intnat
-              (Script_typed_ir.Item_t (Script_typed_ir.Int_t tname) rest annot))
-      |
-        ((Micheline.Prim loc Alpha_context.Script.I_MUL [] annot,
-          Script_typed_ir.Item_t (Script_typed_ir.Nat_t _)
-            (Script_typed_ir.Item_t (Script_typed_ir.Int_t tname) rest _) _), _)
-        =>
-        let 'existT _ __323 [loc, annot, tname, rest] :=
-          existT (A := Set)
-            (fun __323 =>
-              [Alpha_context.Script.location ** Micheline.annot **
-                (option Script_typed_ir.type_annot) **
-                (Script_typed_ir.stack_ty __323)]) _ [loc, annot, tname, rest]
-          in
-        Error_monad.op_gtgteqquestion (parse_var_annot loc None annot)
-          (fun annot =>
-            typed ctxt loc Script_typed_ir.Mul_natint
-              (Script_typed_ir.Item_t (Script_typed_ir.Int_t tname) rest annot))
-      |
-        ((Micheline.Prim loc Alpha_context.Script.I_MUL [] annot,
-          Script_typed_ir.Item_t (Script_typed_ir.Nat_t tn1)
-            (Script_typed_ir.Item_t (Script_typed_ir.Nat_t tn2) rest _) _), _)
-        =>
-        let 'existT _ __327 [loc, annot, tn1, tn2, rest] :=
-          existT (A := Set)
-            (fun __327 =>
-              [Alpha_context.Script.location ** Micheline.annot **
-                (option Script_typed_ir.type_annot) **
-                (option Script_typed_ir.type_annot) **
-                (Script_typed_ir.stack_ty __327)]) _
-            [loc, annot, tn1, tn2, rest] in
-        Error_monad.op_gtgteqquestion (parse_var_annot loc None annot)
-          (fun annot =>
-            Error_monad.op_gtgteqquestion
-              (Lwt.__return (Script_ir_annot.merge_type_annot legacy tn1 tn2))
-              (fun tname =>
-                typed ctxt loc Script_typed_ir.Mul_natnat
-                  (Script_typed_ir.Item_t (Script_typed_ir.Nat_t tname) rest
-                    annot)))
-      |
-        ((Micheline.Prim loc Alpha_context.Script.I_EDIV [] annot,
-          Script_typed_ir.Item_t (Script_typed_ir.Mutez_t tname)
-            (Script_typed_ir.Item_t (Script_typed_ir.Nat_t _) rest _) _), _) =>
-        let 'existT _ __331 [loc, annot, tname, rest] :=
-          existT (A := Set)
-            (fun __331 =>
-              [Alpha_context.Script.location ** Micheline.annot **
-                (option Script_typed_ir.type_annot) **
-                (Script_typed_ir.stack_ty __331)]) _ [loc, annot, tname, rest]
-          in
-        Error_monad.op_gtgteqquestion (parse_var_annot loc None annot)
-          (fun annot =>
-            typed ctxt loc Script_typed_ir.Ediv_teznat
-              (Script_typed_ir.Item_t
-                (Script_typed_ir.Option_t
-                  (Script_typed_ir.Pair_t
-                    ((Script_typed_ir.Mutez_t tname), None, None)
-                    ((Script_typed_ir.Mutez_t tname), None, None) None false)
-                  None false) rest annot))
-      |
-        ((Micheline.Prim loc Alpha_context.Script.I_EDIV [] annot,
-          Script_typed_ir.Item_t (Script_typed_ir.Mutez_t tn1)
-            (Script_typed_ir.Item_t (Script_typed_ir.Mutez_t tn2) rest _) _), _)
-        =>
-        let 'existT _ __335 [loc, annot, tn1, tn2, rest] :=
-          existT (A := Set)
-            (fun __335 =>
-              [Alpha_context.Script.location ** Micheline.annot **
-                (option Script_typed_ir.type_annot) **
-                (option Script_typed_ir.type_annot) **
-                (Script_typed_ir.stack_ty __335)]) _
-            [loc, annot, tn1, tn2, rest] in
-        Error_monad.op_gtgteqquestion (parse_var_annot loc None annot)
-          (fun annot =>
-            Error_monad.op_gtgteqquestion
-              (Lwt.__return (Script_ir_annot.merge_type_annot legacy tn1 tn2))
-              (fun tname =>
-                typed ctxt loc Script_typed_ir.Ediv_tez
-                  (Script_typed_ir.Item_t
-                    (Script_typed_ir.Option_t
-                      (Script_typed_ir.Pair_t
-                        ((Script_typed_ir.Nat_t None), None, None)
-                        ((Script_typed_ir.Mutez_t tname), None, None) None false)
-                      None false) rest annot)))
-      |
-        ((Micheline.Prim loc Alpha_context.Script.I_EDIV [] annot,
-          Script_typed_ir.Item_t (Script_typed_ir.Int_t tn1)
-            (Script_typed_ir.Item_t (Script_typed_ir.Int_t tn2) rest _) _), _)
-        =>
-        let 'existT _ __339 [loc, annot, tn1, tn2, rest] :=
-          existT (A := Set)
-            (fun __339 =>
-              [Alpha_context.Script.location ** Micheline.annot **
-                (option Script_typed_ir.type_annot) **
-                (option Script_typed_ir.type_annot) **
-                (Script_typed_ir.stack_ty __339)]) _
-            [loc, annot, tn1, tn2, rest] in
-        Error_monad.op_gtgteqquestion (parse_var_annot loc None annot)
-          (fun annot =>
-            Error_monad.op_gtgteqquestion
-              (Lwt.__return (Script_ir_annot.merge_type_annot legacy tn1 tn2))
-              (fun tname =>
-                typed ctxt loc Script_typed_ir.Ediv_intint
-                  (Script_typed_ir.Item_t
-                    (Script_typed_ir.Option_t
-                      (Script_typed_ir.Pair_t
-                        ((Script_typed_ir.Int_t tname), None, None)
-                        ((Script_typed_ir.Nat_t None), None, None) None false)
-                      None false) rest annot)))
-      |
-        ((Micheline.Prim loc Alpha_context.Script.I_EDIV [] annot,
-          Script_typed_ir.Item_t (Script_typed_ir.Int_t tname)
-            (Script_typed_ir.Item_t (Script_typed_ir.Nat_t _) rest _) _), _) =>
-        let 'existT _ __343 [loc, annot, tname, rest] :=
-          existT (A := Set)
-            (fun __343 =>
-              [Alpha_context.Script.location ** Micheline.annot **
-                (option Script_typed_ir.type_annot) **
-                (Script_typed_ir.stack_ty __343)]) _ [loc, annot, tname, rest]
-          in
-        Error_monad.op_gtgteqquestion (parse_var_annot loc None annot)
-          (fun annot =>
-            typed ctxt loc Script_typed_ir.Ediv_intnat
-              (Script_typed_ir.Item_t
-                (Script_typed_ir.Option_t
-                  (Script_typed_ir.Pair_t
-                    ((Script_typed_ir.Int_t tname), None, None)
-                    ((Script_typed_ir.Nat_t None), None, None) None false) None
-                  false) rest annot))
-      |
-        ((Micheline.Prim loc Alpha_context.Script.I_EDIV [] annot,
-          Script_typed_ir.Item_t (Script_typed_ir.Nat_t tname)
-            (Script_typed_ir.Item_t (Script_typed_ir.Int_t _) rest _) _), _) =>
-        let 'existT _ __347 [loc, annot, tname, rest] :=
-          existT (A := Set)
-            (fun __347 =>
-              [Alpha_context.Script.location ** Micheline.annot **
-                (option Script_typed_ir.type_annot) **
-                (Script_typed_ir.stack_ty __347)]) _ [loc, annot, tname, rest]
-          in
-        Error_monad.op_gtgteqquestion (parse_var_annot loc None annot)
-          (fun annot =>
-            typed ctxt loc Script_typed_ir.Ediv_natint
-              (Script_typed_ir.Item_t
-                (Script_typed_ir.Option_t
-                  (Script_typed_ir.Pair_t
-                    ((Script_typed_ir.Int_t None), None, None)
-                    ((Script_typed_ir.Nat_t tname), None, None) None false) None
-                  false) rest annot))
-      |
-        ((Micheline.Prim loc Alpha_context.Script.I_EDIV [] annot,
-          Script_typed_ir.Item_t (Script_typed_ir.Nat_t tn1)
-            (Script_typed_ir.Item_t (Script_typed_ir.Nat_t tn2) rest _) _), _)
-        =>
-        let 'existT _ __351 [loc, annot, tn1, tn2, rest] :=
-          existT (A := Set)
-            (fun __351 =>
-              [Alpha_context.Script.location ** Micheline.annot **
-                (option Script_typed_ir.type_annot) **
-                (option Script_typed_ir.type_annot) **
-                (Script_typed_ir.stack_ty __351)]) _
-            [loc, annot, tn1, tn2, rest] in
-        Error_monad.op_gtgteqquestion (parse_var_annot loc None annot)
-          (fun annot =>
-            Error_monad.op_gtgteqquestion
-              (Lwt.__return (Script_ir_annot.merge_type_annot legacy tn1 tn2))
-              (fun tname =>
-                typed ctxt loc Script_typed_ir.Ediv_natnat
-                  (Script_typed_ir.Item_t
-                    (Script_typed_ir.Option_t
-                      (Script_typed_ir.Pair_t
-                        ((Script_typed_ir.Nat_t tname), None, None)
-                        ((Script_typed_ir.Nat_t tname), None, None) None false)
-                      None false) rest annot)))
-      |
-        ((Micheline.Prim loc Alpha_context.Script.I_LSL [] annot,
-          Script_typed_ir.Item_t (Script_typed_ir.Nat_t tn1)
-            (Script_typed_ir.Item_t (Script_typed_ir.Nat_t tn2) rest _) _), _)
-        =>
-        let 'existT _ __355 [loc, annot, tn1, tn2, rest] :=
-          existT (A := Set)
-            (fun __355 =>
-              [Alpha_context.Script.location ** Micheline.annot **
-                (option Script_typed_ir.type_annot) **
-                (option Script_typed_ir.type_annot) **
-                (Script_typed_ir.stack_ty __355)]) _
-            [loc, annot, tn1, tn2, rest] in
-        Error_monad.op_gtgteqquestion (parse_var_annot loc None annot)
-          (fun annot =>
-            Error_monad.op_gtgteqquestion
-              (Lwt.__return (Script_ir_annot.merge_type_annot legacy tn1 tn2))
-              (fun tname =>
-                typed ctxt loc Script_typed_ir.Lsl_nat
-                  (Script_typed_ir.Item_t (Script_typed_ir.Nat_t tname) rest
-                    annot)))
-      |
-        ((Micheline.Prim loc Alpha_context.Script.I_LSR [] annot,
-          Script_typed_ir.Item_t (Script_typed_ir.Nat_t tn1)
-            (Script_typed_ir.Item_t (Script_typed_ir.Nat_t tn2) rest _) _), _)
-        =>
-        let 'existT _ __359 [loc, annot, tn1, tn2, rest] :=
-          existT (A := Set)
-            (fun __359 =>
-              [Alpha_context.Script.location ** Micheline.annot **
-                (option Script_typed_ir.type_annot) **
-                (option Script_typed_ir.type_annot) **
-                (Script_typed_ir.stack_ty __359)]) _
-            [loc, annot, tn1, tn2, rest] in
-        Error_monad.op_gtgteqquestion (parse_var_annot loc None annot)
-          (fun annot =>
-            Error_monad.op_gtgteqquestion
-              (Lwt.__return (Script_ir_annot.merge_type_annot legacy tn1 tn2))
-              (fun tname =>
-                typed ctxt loc Script_typed_ir.Lsr_nat
-                  (Script_typed_ir.Item_t (Script_typed_ir.Nat_t tname) rest
-                    annot)))
-      |
-        ((Micheline.Prim loc Alpha_context.Script.I_OR [] annot,
-          Script_typed_ir.Item_t (Script_typed_ir.Nat_t tn1)
-            (Script_typed_ir.Item_t (Script_typed_ir.Nat_t tn2) rest _) _), _)
-        =>
-        let 'existT _ __363 [loc, annot, tn1, tn2, rest] :=
-          existT (A := Set)
-            (fun __363 =>
-              [Alpha_context.Script.location ** Micheline.annot **
-                (option Script_typed_ir.type_annot) **
-                (option Script_typed_ir.type_annot) **
-                (Script_typed_ir.stack_ty __363)]) _
-            [loc, annot, tn1, tn2, rest] in
-        Error_monad.op_gtgteqquestion (parse_var_annot loc None annot)
-          (fun annot =>
-            Error_monad.op_gtgteqquestion
-              (Lwt.__return (Script_ir_annot.merge_type_annot legacy tn1 tn2))
-              (fun tname =>
-                typed ctxt loc Script_typed_ir.Or_nat
-                  (Script_typed_ir.Item_t (Script_typed_ir.Nat_t tname) rest
-                    annot)))
-      |
-        ((Micheline.Prim loc Alpha_context.Script.I_AND [] annot,
-          Script_typed_ir.Item_t (Script_typed_ir.Nat_t tn1)
-            (Script_typed_ir.Item_t (Script_typed_ir.Nat_t tn2) rest _) _), _)
-        =>
-        let 'existT _ __367 [loc, annot, tn1, tn2, rest] :=
-          existT (A := Set)
-            (fun __367 =>
-              [Alpha_context.Script.location ** Micheline.annot **
-                (option Script_typed_ir.type_annot) **
-                (option Script_typed_ir.type_annot) **
-                (Script_typed_ir.stack_ty __367)]) _
-            [loc, annot, tn1, tn2, rest] in
-        Error_monad.op_gtgteqquestion (parse_var_annot loc None annot)
-          (fun annot =>
-            Error_monad.op_gtgteqquestion
-              (Lwt.__return (Script_ir_annot.merge_type_annot legacy tn1 tn2))
-              (fun tname =>
-                typed ctxt loc Script_typed_ir.And_nat
-                  (Script_typed_ir.Item_t (Script_typed_ir.Nat_t tname) rest
-                    annot)))
-      |
-        ((Micheline.Prim loc Alpha_context.Script.I_AND [] annot,
-          Script_typed_ir.Item_t (Script_typed_ir.Int_t _)
-            (Script_typed_ir.Item_t (Script_typed_ir.Nat_t tname) rest _) _), _)
-        =>
-        let 'existT _ __371 [loc, annot, tname, rest] :=
-          existT (A := Set)
-            (fun __371 =>
-              [Alpha_context.Script.location ** Micheline.annot **
-                (option Script_typed_ir.type_annot) **
-                (Script_typed_ir.stack_ty __371)]) _ [loc, annot, tname, rest]
-          in
-        Error_monad.op_gtgteqquestion (parse_var_annot loc None annot)
-          (fun annot =>
-            typed ctxt loc Script_typed_ir.And_int_nat
-              (Script_typed_ir.Item_t (Script_typed_ir.Nat_t tname) rest annot))
-      |
-        ((Micheline.Prim loc Alpha_context.Script.I_XOR [] annot,
-          Script_typed_ir.Item_t (Script_typed_ir.Nat_t tn1)
-            (Script_typed_ir.Item_t (Script_typed_ir.Nat_t tn2) rest _) _), _)
-        =>
-        let 'existT _ __375 [loc, annot, tn1, tn2, rest] :=
-          existT (A := Set)
-            (fun __375 =>
-              [Alpha_context.Script.location ** Micheline.annot **
-                (option Script_typed_ir.type_annot) **
-                (option Script_typed_ir.type_annot) **
-                (Script_typed_ir.stack_ty __375)]) _
-            [loc, annot, tn1, tn2, rest] in
-        Error_monad.op_gtgteqquestion (parse_var_annot loc None annot)
-          (fun annot =>
-            Error_monad.op_gtgteqquestion
-              (Lwt.__return (Script_ir_annot.merge_type_annot legacy tn1 tn2))
-              (fun tname =>
-                typed ctxt loc Script_typed_ir.Xor_nat
-                  (Script_typed_ir.Item_t (Script_typed_ir.Nat_t tname) rest
-                    annot)))
-      |
-        ((Micheline.Prim loc Alpha_context.Script.I_NOT [] annot,
-          Script_typed_ir.Item_t (Script_typed_ir.Int_t tname) rest _), _) =>
-        let 'existT _ __377 [loc, annot, tname, rest] :=
-          existT (A := Set)
-            (fun __377 =>
-              [Alpha_context.Script.location ** Micheline.annot **
-                (option Script_typed_ir.type_annot) **
-                (Script_typed_ir.stack_ty __377)]) _ [loc, annot, tname, rest]
-          in
-        Error_monad.op_gtgteqquestion (parse_var_annot loc None annot)
-          (fun annot =>
-            typed ctxt loc Script_typed_ir.Not_int
-              (Script_typed_ir.Item_t (Script_typed_ir.Int_t tname) rest annot))
-      |
-        ((Micheline.Prim loc Alpha_context.Script.I_NOT [] annot,
-          Script_typed_ir.Item_t (Script_typed_ir.Nat_t _) rest _), _) =>
-        let 'existT _ __379 [loc, annot, rest] :=
-          existT (A := Set)
-            (fun __379 =>
-              [Alpha_context.Script.location ** Micheline.annot **
-                (Script_typed_ir.stack_ty __379)]) _ [loc, annot, rest] in
-        Error_monad.op_gtgteqquestion (parse_var_annot loc None annot)
-          (fun annot =>
-            typed ctxt loc Script_typed_ir.Not_nat
-              (Script_typed_ir.Item_t (Script_typed_ir.Int_t None) rest annot))
-      |
-        ((Micheline.Prim loc Alpha_context.Script.I_COMPARE [] annot,
-          Script_typed_ir.Item_t t1 (Script_typed_ir.Item_t t2 rest _) _), _) =>
-        let 'existT _ [__380, __382, __383] [loc, annot, t1, t2, rest] :=
-          existT (A := [Set ** Set ** Set])
-            (fun '[__380, __382, __383] =>
-              [Alpha_context.Script.location ** Micheline.annot **
-                (Script_typed_ir.ty __380) ** (Script_typed_ir.ty __382) **
-                (Script_typed_ir.stack_ty __383)]) [_, _, _]
-            [loc, annot, t1, t2, rest] in
-        Error_monad.op_gtgteqquestion (parse_var_annot loc None annot)
-          (fun annot =>
-            Error_monad.op_gtgteqquestion
-              (check_item_ty ctxt t1 t2 loc Alpha_context.Script.I_COMPARE 1 2)
-              (fun function_parameter =>
-                let '(Eq, __t_value, ctxt) := function_parameter in
-                match comparable_ty_of_ty __t_value with
-                | None =>
-                  Error_monad.op_gtgteqquestion
-                    (Lwt.__return (serialize_ty_for_error ctxt __t_value))
-                    (fun function_parameter =>
-                      let '(__t_value, _ctxt) := function_parameter in
-                      Error_monad.fail extensible_type_value)
-                | Some __key_value =>
-                  typed ctxt loc (Script_typed_ir.Compare __key_value)
-                    (Script_typed_ir.Item_t (Script_typed_ir.Int_t None) rest
-                      annot)
-                end))
-      |
-        ((Micheline.Prim loc Alpha_context.Script.I_EQ [] annot,
-          Script_typed_ir.Item_t (Script_typed_ir.Int_t _) rest _), _) =>
-        let 'existT _ __385 [loc, annot, rest] :=
-          existT (A := Set)
-            (fun __385 =>
-              [Alpha_context.Script.location ** Micheline.annot **
-                (Script_typed_ir.stack_ty __385)]) _ [loc, annot, rest] in
-        Error_monad.op_gtgteqquestion (parse_var_annot loc None annot)
-          (fun annot =>
-            typed ctxt loc Script_typed_ir.Eq
-              (Script_typed_ir.Item_t (Script_typed_ir.Bool_t None) rest annot))
-      |
-        ((Micheline.Prim loc Alpha_context.Script.I_NEQ [] annot,
-          Script_typed_ir.Item_t (Script_typed_ir.Int_t _) rest _), _) =>
-        let 'existT _ __387 [loc, annot, rest] :=
-          existT (A := Set)
-            (fun __387 =>
-              [Alpha_context.Script.location ** Micheline.annot **
-                (Script_typed_ir.stack_ty __387)]) _ [loc, annot, rest] in
-        Error_monad.op_gtgteqquestion (parse_var_annot loc None annot)
-          (fun annot =>
-            typed ctxt loc Script_typed_ir.Neq
-              (Script_typed_ir.Item_t (Script_typed_ir.Bool_t None) rest annot))
-      |
-        ((Micheline.Prim loc Alpha_context.Script.I_LT [] annot,
-          Script_typed_ir.Item_t (Script_typed_ir.Int_t _) rest _), _) =>
-        let 'existT _ __389 [loc, annot, rest] :=
-          existT (A := Set)
-            (fun __389 =>
-              [Alpha_context.Script.location ** Micheline.annot **
-                (Script_typed_ir.stack_ty __389)]) _ [loc, annot, rest] in
-        Error_monad.op_gtgteqquestion (parse_var_annot loc None annot)
-          (fun annot =>
-            typed ctxt loc Script_typed_ir.Lt
-              (Script_typed_ir.Item_t (Script_typed_ir.Bool_t None) rest annot))
-      |
-        ((Micheline.Prim loc Alpha_context.Script.I_GT [] annot,
-          Script_typed_ir.Item_t (Script_typed_ir.Int_t _) rest _), _) =>
-        let 'existT _ __391 [loc, annot, rest] :=
-          existT (A := Set)
-            (fun __391 =>
-              [Alpha_context.Script.location ** Micheline.annot **
-                (Script_typed_ir.stack_ty __391)]) _ [loc, annot, rest] in
-        Error_monad.op_gtgteqquestion (parse_var_annot loc None annot)
-          (fun annot =>
-            typed ctxt loc Script_typed_ir.Gt
-              (Script_typed_ir.Item_t (Script_typed_ir.Bool_t None) rest annot))
-      |
-        ((Micheline.Prim loc Alpha_context.Script.I_LE [] annot,
-          Script_typed_ir.Item_t (Script_typed_ir.Int_t _) rest _), _) =>
-        let 'existT _ __393 [loc, annot, rest] :=
-          existT (A := Set)
-            (fun __393 =>
-              [Alpha_context.Script.location ** Micheline.annot **
-                (Script_typed_ir.stack_ty __393)]) _ [loc, annot, rest] in
-        Error_monad.op_gtgteqquestion (parse_var_annot loc None annot)
-          (fun annot =>
-            typed ctxt loc Script_typed_ir.Le
-              (Script_typed_ir.Item_t (Script_typed_ir.Bool_t None) rest annot))
-      |
-        ((Micheline.Prim loc Alpha_context.Script.I_GE [] annot,
-          Script_typed_ir.Item_t (Script_typed_ir.Int_t _) rest _), _) =>
-        let 'existT _ __395 [loc, annot, rest] :=
-          existT (A := Set)
-            (fun __395 =>
-              [Alpha_context.Script.location ** Micheline.annot **
-                (Script_typed_ir.stack_ty __395)]) _ [loc, annot, rest] in
-        Error_monad.op_gtgteqquestion (parse_var_annot loc None annot)
-          (fun annot =>
-            typed ctxt loc Script_typed_ir.Ge
-              (Script_typed_ir.Item_t (Script_typed_ir.Bool_t None) rest annot))
-      |
-        ((Micheline.Prim loc Alpha_context.Script.I_CAST (cons cast_t []) annot,
-          Script_typed_ir.Item_t __t_value __stack_value item_annot), _) =>
-        let 'existT _ [__396, __397]
-          [loc, cast_t, annot, __t_value, __stack_value, item_annot] :=
-          existT (A := [Set ** Set])
-            (fun '[__396, __397] =>
-              [Alpha_context.Script.location **
-                (Micheline.node Alpha_context.Script.location
-                  Alpha_context.Script.prim) ** Micheline.annot **
-                (Script_typed_ir.ty __396) ** (Script_typed_ir.stack_ty __397)
-                ** (option Script_typed_ir.var_annot)]) [_, _]
-            [loc, cast_t, annot, __t_value, __stack_value, item_annot] in
-        Error_monad.op_gtgteqquestion
-          (parse_var_annot loc (Some item_annot) annot)
-          (fun annot =>
-            Error_monad.op_gtgteqquestion
-              (Lwt.__return (parse_any_ty ctxt legacy cast_t))
-              (fun function_parameter =>
-                let '(Ex_ty cast_t, ctxt) := function_parameter in
-                let 'existT _ __Ex_ty_'a10 [cast_t, ctxt] :=
-                  existT (A := Set)
-                    (fun __Ex_ty_'a10 =>
-                      [(Script_typed_ir.ty __Ex_ty_'a10) **
-                        Alpha_context.context]) _ [cast_t, ctxt] in
-                Error_monad.op_gtgteqquestion
-                  (Lwt.__return (ty_eq ctxt cast_t __t_value))
-                  (fun function_parameter =>
-                    let '(Eq, ctxt) := function_parameter in
-                    Error_monad.op_gtgteqquestion
-                      (Lwt.__return
-                        (merge_types legacy ctxt loc cast_t __t_value))
-                      (fun function_parameter =>
-                        let '(_, ctxt) := function_parameter in
-                        typed ctxt loc Script_typed_ir.Nop
-                          (Script_typed_ir.Item_t cast_t __stack_value annot)))))
-      |
-        ((Micheline.Prim loc Alpha_context.Script.I_RENAME [] annot,
-          Script_typed_ir.Item_t __t_value __stack_value _), _) =>
-        let 'existT _ [__398, __399] [loc, annot, __t_value, __stack_value] :=
-          existT (A := [Set ** Set])
-            (fun '[__398, __399] =>
-              [Alpha_context.Script.location ** Micheline.annot **
-                (Script_typed_ir.ty __398) ** (Script_typed_ir.stack_ty __399)])
-            [_, _] [loc, annot, __t_value, __stack_value] in
-        Error_monad.op_gtgteqquestion (parse_var_annot loc None annot)
-          (fun annot =>
-            typed ctxt loc Script_typed_ir.Nop
-              (Script_typed_ir.Item_t __t_value __stack_value annot))
-      |
-        ((Micheline.Prim loc Alpha_context.Script.I_PACK [] annot,
-          Script_typed_ir.Item_t __t_value rest unpacked_annot), _) =>
-        let 'existT _ [__400, __401]
-          [loc, annot, __t_value, rest, unpacked_annot] :=
-          existT (A := [Set ** Set])
-            (fun '[__400, __401] =>
-              [Alpha_context.Script.location ** Micheline.annot **
-                (Script_typed_ir.ty __400) ** (Script_typed_ir.stack_ty __401)
-                ** (option Script_typed_ir.var_annot)]) [_, _]
-            [loc, annot, __t_value, rest, unpacked_annot] in
-        Error_monad.op_gtgteqquestion
-          (Lwt.__return (check_packable true loc __t_value))
-          (fun function_parameter =>
-            let '_ := function_parameter in
-            Error_monad.op_gtgteqquestion
-              (parse_var_annot loc
-                (Some
-                  (Script_ir_annot.gen_access_annot unpacked_annot None
-                    Script_ir_annot.default_pack_annot)) annot)
-              (fun annot =>
-                typed ctxt loc (Script_typed_ir.Pack __t_value)
-                  (Script_typed_ir.Item_t (Script_typed_ir.Bytes_t None) rest
-                    annot)))
-      |
-        ((Micheline.Prim loc Alpha_context.Script.I_UNPACK (cons ty []) annot,
-          Script_typed_ir.Item_t (Script_typed_ir.Bytes_t _) rest packed_annot),
-          _) =>
-        let 'existT _ __403 [loc, ty, annot, rest, packed_annot] :=
-          existT (A := Set)
-            (fun __403 =>
-              [Alpha_context.Script.location **
-                (Micheline.node Alpha_context.Script.location
-                  Alpha_context.Script.prim) ** Micheline.annot **
-                (Script_typed_ir.stack_ty __403) **
-                (option Script_typed_ir.var_annot)]) _
-            [loc, ty, annot, rest, packed_annot] in
-        Error_monad.op_gtgteqquestion
-          (Lwt.__return (parse_packable_ty ctxt legacy ty))
-          (fun function_parameter =>
-            let '(Ex_ty __t_value, ctxt) := function_parameter in
-            let 'existT _ __Ex_ty_'a11 [__t_value, ctxt] :=
-              existT (A := Set)
-                (fun __Ex_ty_'a11 =>
-                  [(Script_typed_ir.ty __Ex_ty_'a11) ** Alpha_context.context])
-                _ [__t_value, ctxt] in
-            Error_monad.op_gtgteqquestion (parse_var_type_annot loc annot)
-              (fun function_parameter =>
-                let '(annot, ty_name) := function_parameter in
-                let annot :=
-                  Script_ir_annot.default_annot
-                    (Script_ir_annot.gen_access_annot packed_annot None
-                      Script_ir_annot.default_unpack_annot) annot in
-                typed ctxt loc (Script_typed_ir.Unpack __t_value)
-                  (Script_typed_ir.Item_t
-                    (Script_typed_ir.Option_t __t_value ty_name false) rest
-                    annot)))
-      |
-        ((Micheline.Prim loc Alpha_context.Script.I_ADDRESS [] annot,
-          Script_typed_ir.Item_t (Script_typed_ir.Contract_t _ _) rest
-            contract_annot), _) =>
-        let 'existT _ __405 [loc, annot, rest, contract_annot] :=
-          existT (A := Set)
-            (fun __405 =>
-              [Alpha_context.Script.location ** Micheline.annot **
-                (Script_typed_ir.stack_ty __405) **
-                (option Script_typed_ir.var_annot)]) _
-            [loc, annot, rest, contract_annot] in
-        Error_monad.op_gtgteqquestion
-          (parse_var_annot loc
-            (Some
-              (Script_ir_annot.gen_access_annot contract_annot None
-                Script_ir_annot.default_addr_annot)) annot)
-          (fun annot =>
-            typed ctxt loc Script_typed_ir.Address
-              (Script_typed_ir.Item_t (Script_typed_ir.Address_t None) rest
-                annot))
-      |
-        ((Micheline.Prim loc Alpha_context.Script.I_CONTRACT (cons ty []) annot,
-          Script_typed_ir.Item_t (Script_typed_ir.Address_t _) rest addr_annot),
-          _) =>
-        let 'existT _ __408 [loc, ty, annot, rest, addr_annot] :=
-          existT (A := Set)
-            (fun __408 =>
-              [Alpha_context.Script.location **
-                (Micheline.node Alpha_context.Script.location
-                  Alpha_context.Script.prim) ** Micheline.annot **
-                (Script_typed_ir.stack_ty __408) **
-                (option Script_typed_ir.var_annot)]) _
-            [loc, ty, annot, rest, addr_annot] in
-        Error_monad.op_gtgteqquestion
-          (Lwt.__return (parse_parameter_ty ctxt legacy ty))
-          (fun function_parameter =>
-            let '(Ex_ty __t_value, ctxt) := function_parameter in
-            let 'existT _ __Ex_ty_'a12 [__t_value, ctxt] :=
-              existT (A := Set)
-                (fun __Ex_ty_'a12 =>
-                  [(Script_typed_ir.ty __Ex_ty_'a12) ** Alpha_context.context])
-                _ [__t_value, ctxt] in
-            Error_monad.op_gtgteqquestion
-              (parse_entrypoint_annot loc
-                (Some
-                  (Script_ir_annot.gen_access_annot addr_annot None
-                    Script_ir_annot.default_contract_annot)) annot)
-              (fun function_parameter =>
-                let '(annot, entrypoint) := function_parameter in
-                Error_monad.op_gtgteqquestion
-                  (Lwt.__return
-                    match entrypoint with
-                    | None => Pervasives.Ok "default"
-                    | Some (Script_typed_ir.Field_annot "default") =>
-                      Error_monad.__error_value extensible_type_value
-                    | Some (Script_typed_ir.Field_annot entrypoint) =>
-                      if
-                        (|Compare.Int|).(Compare.S.op_gt)
-                          (String.length entrypoint) 31 then
-                        Error_monad.__error_value extensible_type_value
-                      else
-                        Pervasives.Ok entrypoint
-                    end)
-                  (fun entrypoint =>
-                    typed ctxt loc
-                      (Script_typed_ir.Contract __t_value entrypoint)
-                      (Script_typed_ir.Item_t
-                        (Script_typed_ir.Option_t
-                          (Script_typed_ir.Contract_t __t_value None) None false)
-                        rest annot))))
-      |
-        ((Micheline.Prim loc Alpha_context.Script.I_TRANSFER_TOKENS [] annot,
-          Script_typed_ir.Item_t __p_value
-            (Script_typed_ir.Item_t (Script_typed_ir.Mutez_t _)
-              (Script_typed_ir.Item_t (Script_typed_ir.Contract_t cp _) rest _)
-              _) _), _) =>
-        let 'existT _ [__409, __414, __415] [loc, annot, __p_value, cp, rest] :=
-          existT (A := [Set ** Set ** Set])
-            (fun '[__409, __414, __415] =>
-              [Alpha_context.Script.location ** Micheline.annot **
-                (Script_typed_ir.ty __409) ** (Script_typed_ir.ty __415) **
-                (Script_typed_ir.stack_ty __414)]) [_, _, _]
-            [loc, annot, __p_value, cp, rest] in
-        Error_monad.op_gtgteqquestion
-          (check_item_ty ctxt __p_value cp loc
-            Alpha_context.Script.I_TRANSFER_TOKENS 1 4)
-          (fun function_parameter =>
-            let '(Eq, _, ctxt) := function_parameter in
-            Error_monad.op_gtgteqquestion (parse_var_annot loc None annot)
-              (fun annot =>
-                typed ctxt loc Script_typed_ir.Transfer_tokens
-                  (Script_typed_ir.Item_t (Script_typed_ir.Operation_t None)
-                    rest annot)))
-      |
-        ((Micheline.Prim loc Alpha_context.Script.I_SET_DELEGATE [] annot,
-          Script_typed_ir.Item_t
-            (Script_typed_ir.Option_t (Script_typed_ir.Key_hash_t _) _ _) rest _),
-          _) =>
-        let 'existT _ __417 [loc, annot, rest] :=
-          existT (A := Set)
-            (fun __417 =>
-              [Alpha_context.Script.location ** Micheline.annot **
-                (Script_typed_ir.stack_ty __417)]) _ [loc, annot, rest] in
-        Error_monad.op_gtgteqquestion (parse_var_annot loc None annot)
-          (fun annot =>
-            typed ctxt loc Script_typed_ir.Set_delegate
-              (Script_typed_ir.Item_t (Script_typed_ir.Operation_t None) rest
-                annot))
-      |
-        ((Micheline.Prim loc Alpha_context.Script.I_CREATE_ACCOUNT [] annot,
-          Script_typed_ir.Item_t (Script_typed_ir.Key_hash_t _)
-            (Script_typed_ir.Item_t
-              (Script_typed_ir.Option_t (Script_typed_ir.Key_hash_t _) _ _)
-              (Script_typed_ir.Item_t (Script_typed_ir.Bool_t _)
-                (Script_typed_ir.Item_t (Script_typed_ir.Mutez_t _) rest _) _) _)
-            _), _) =>
-        let 'existT _ __427 [loc, annot, rest] :=
-          existT (A := Set)
-            (fun __427 =>
-              [Alpha_context.Script.location ** Micheline.annot **
-                (Script_typed_ir.stack_ty __427)]) _ [loc, annot, rest] in
+      end in
+    let!? n := Lwt.__return (parse_int32 n) in
+    let!? '_ := Script_ir_annot.fail_unexpected_annot loc result_annot in
+    let!? 'Dipn_proof_argument (n', (new_ctxt, __descr_value), aft) :=
+      make_proof_argument n tc_context __stack_value in
+    let 'existT _
+      [__Dipn_proof_argument_'aft1, __Dipn_proof_argument_'faft1,
+        __Dipn_proof_argument_'fbef1] [n', new_ctxt, __descr_value, aft] :=
+      existT (A := [Set ** Set ** Set])
+        (fun
+          '[__Dipn_proof_argument_'aft1, __Dipn_proof_argument_'faft1,
+            __Dipn_proof_argument_'fbef1] =>
+          [(Script_typed_ir.stack_prefix_preservation_witness
+            __Dipn_proof_argument_'fbef1 __Dipn_proof_argument_'faft1 bef
+            __Dipn_proof_argument_'aft1) ** Alpha_context.context **
+            (Script_typed_ir.descr __Dipn_proof_argument_'fbef1
+              __Dipn_proof_argument_'faft1) **
+            (Script_typed_ir.stack_ty __Dipn_proof_argument_'aft1)]) [_, _, _]
+        [n', new_ctxt, __descr_value, aft] in
+    typed new_ctxt loc (Script_typed_ir.Dipn n n' __descr_value) aft
+  |
+    ((Micheline.Prim loc Alpha_context.Script.I_DIP
+      (([] | cons _ (cons _ (cons _ _))) as l) _, _), _) =>
+    Error_monad.fail extensible_type_value
+  |
+    ((Micheline.Prim loc Alpha_context.Script.I_FAILWITH [] annot,
+      Script_typed_ir.Item_t v _rest _), _) =>
+    let 'existT _ [__192, __193] [loc, annot, v, _rest] :=
+      existT (A := [Set ** Set])
+        (fun '[__192, __193] =>
+          [Alpha_context.Script.location ** Micheline.annot **
+            (Script_typed_ir.ty __192) ** (Script_typed_ir.stack_ty __193)]) [_,
+        _] [loc, annot, v, _rest] in
+    let!? '_ := Script_ir_annot.fail_unexpected_annot loc annot in
+    let __descr_value {B : Set} (aft : Script_typed_ir.stack_ty B)
+      : Script_typed_ir.descr bef B :=
+      {| Script_typed_ir.descr.loc := loc;
+        Script_typed_ir.descr.bef := stack_ty; Script_typed_ir.descr.aft := aft;
+        Script_typed_ir.descr.instr := Script_typed_ir.Failwith v |} in
+    let!? '_ := log_stack ctxt loc stack_ty Script_typed_ir.Empty_t in
+    __return ctxt (Failed {| judgement.Failed.descr := __descr_value |})
+  |
+    ((Micheline.Prim loc Alpha_context.Script.I_ADD [] annot,
+      Script_typed_ir.Item_t (Script_typed_ir.Timestamp_t tname)
+        (Script_typed_ir.Item_t (Script_typed_ir.Int_t _) rest _) _), _) =>
+    let 'existT _ __197 [loc, annot, tname, rest] :=
+      existT (A := Set)
+        (fun __197 =>
+          [Alpha_context.Script.location ** Micheline.annot **
+            (option Script_typed_ir.type_annot) **
+            (Script_typed_ir.stack_ty __197)]) _ [loc, annot, tname, rest] in
+    let!? annot := parse_var_annot loc None annot in
+    typed ctxt loc Script_typed_ir.Add_timestamp_to_seconds
+      (Script_typed_ir.Item_t (Script_typed_ir.Timestamp_t tname) rest annot)
+  |
+    ((Micheline.Prim loc Alpha_context.Script.I_ADD [] annot,
+      Script_typed_ir.Item_t (Script_typed_ir.Int_t _)
+        (Script_typed_ir.Item_t (Script_typed_ir.Timestamp_t tname) rest _) _),
+      _) =>
+    let 'existT _ __201 [loc, annot, tname, rest] :=
+      existT (A := Set)
+        (fun __201 =>
+          [Alpha_context.Script.location ** Micheline.annot **
+            (option Script_typed_ir.type_annot) **
+            (Script_typed_ir.stack_ty __201)]) _ [loc, annot, tname, rest] in
+    let!? annot := parse_var_annot loc None annot in
+    typed ctxt loc Script_typed_ir.Add_seconds_to_timestamp
+      (Script_typed_ir.Item_t (Script_typed_ir.Timestamp_t tname) rest annot)
+  |
+    ((Micheline.Prim loc Alpha_context.Script.I_SUB [] annot,
+      Script_typed_ir.Item_t (Script_typed_ir.Timestamp_t tname)
+        (Script_typed_ir.Item_t (Script_typed_ir.Int_t _) rest _) _), _) =>
+    let 'existT _ __205 [loc, annot, tname, rest] :=
+      existT (A := Set)
+        (fun __205 =>
+          [Alpha_context.Script.location ** Micheline.annot **
+            (option Script_typed_ir.type_annot) **
+            (Script_typed_ir.stack_ty __205)]) _ [loc, annot, tname, rest] in
+    let!? annot := parse_var_annot loc None annot in
+    typed ctxt loc Script_typed_ir.Sub_timestamp_seconds
+      (Script_typed_ir.Item_t (Script_typed_ir.Timestamp_t tname) rest annot)
+  |
+    ((Micheline.Prim loc Alpha_context.Script.I_SUB [] annot,
+      Script_typed_ir.Item_t (Script_typed_ir.Timestamp_t tn1)
+        (Script_typed_ir.Item_t (Script_typed_ir.Timestamp_t tn2) rest _) _), _)
+    =>
+    let 'existT _ __209 [loc, annot, tn1, tn2, rest] :=
+      existT (A := Set)
+        (fun __209 =>
+          [Alpha_context.Script.location ** Micheline.annot **
+            (option Script_typed_ir.type_annot) **
+            (option Script_typed_ir.type_annot) **
+            (Script_typed_ir.stack_ty __209)]) _ [loc, annot, tn1, tn2, rest] in
+    let!? annot := parse_var_annot loc None annot in
+    let!? tname :=
+      Lwt.__return (Script_ir_annot.merge_type_annot legacy tn1 tn2) in
+    typed ctxt loc Script_typed_ir.Diff_timestamps
+      (Script_typed_ir.Item_t (Script_typed_ir.Int_t tname) rest annot)
+  |
+    ((Micheline.Prim loc Alpha_context.Script.I_CONCAT [] annot,
+      Script_typed_ir.Item_t (Script_typed_ir.String_t tn1)
+        (Script_typed_ir.Item_t (Script_typed_ir.String_t tn2) rest _) _), _) =>
+    let 'existT _ __213 [loc, annot, tn1, tn2, rest] :=
+      existT (A := Set)
+        (fun __213 =>
+          [Alpha_context.Script.location ** Micheline.annot **
+            (option Script_typed_ir.type_annot) **
+            (option Script_typed_ir.type_annot) **
+            (Script_typed_ir.stack_ty __213)]) _ [loc, annot, tn1, tn2, rest] in
+    let!? annot := parse_var_annot loc None annot in
+    let!? tname :=
+      Lwt.__return (Script_ir_annot.merge_type_annot legacy tn1 tn2) in
+    typed ctxt loc Script_typed_ir.Concat_string_pair
+      (Script_typed_ir.Item_t (Script_typed_ir.String_t tname) rest annot)
+  |
+    ((Micheline.Prim loc Alpha_context.Script.I_CONCAT [] annot,
+      Script_typed_ir.Item_t
+        (Script_typed_ir.List_t (Script_typed_ir.String_t tname) _ _) rest
+        list_annot), _) =>
+    let 'existT _ __215 [loc, annot, tname, rest, list_annot] :=
+      existT (A := Set)
+        (fun __215 =>
+          [Alpha_context.Script.location ** Micheline.annot **
+            (option Script_typed_ir.type_annot) **
+            (Script_typed_ir.stack_ty __215) **
+            (option Script_typed_ir.var_annot)]) _
+        [loc, annot, tname, rest, list_annot] in
+    let!? annot := parse_var_annot loc (Some list_annot) annot in
+    typed ctxt loc Script_typed_ir.Concat_string
+      (Script_typed_ir.Item_t (Script_typed_ir.String_t tname) rest annot)
+  |
+    ((Micheline.Prim loc Alpha_context.Script.I_SLICE [] annot,
+      Script_typed_ir.Item_t (Script_typed_ir.Nat_t _)
+        (Script_typed_ir.Item_t (Script_typed_ir.Nat_t _)
+          (Script_typed_ir.Item_t (Script_typed_ir.String_t tname) rest
+            string_annot) _) _), _) =>
+    let 'existT _ __222 [loc, annot, tname, rest, string_annot] :=
+      existT (A := Set)
+        (fun __222 =>
+          [Alpha_context.Script.location ** Micheline.annot **
+            (option Script_typed_ir.type_annot) **
+            (Script_typed_ir.stack_ty __222) **
+            (option Script_typed_ir.var_annot)]) _
+        [loc, annot, tname, rest, string_annot] in
+    let!? annot :=
+      parse_var_annot loc
+        (Some
+          (Script_ir_annot.gen_access_annot string_annot None
+            Script_ir_annot.default_slice_annot)) annot in
+    typed ctxt loc Script_typed_ir.Slice_string
+      (Script_typed_ir.Item_t
+        (Script_typed_ir.Option_t (Script_typed_ir.String_t tname) None false)
+        rest annot)
+  |
+    ((Micheline.Prim loc Alpha_context.Script.I_SIZE [] annot,
+      Script_typed_ir.Item_t (Script_typed_ir.String_t _) rest _), _) =>
+    let 'existT _ __224 [loc, annot, rest] :=
+      existT (A := Set)
+        (fun __224 =>
+          [Alpha_context.Script.location ** Micheline.annot **
+            (Script_typed_ir.stack_ty __224)]) _ [loc, annot, rest] in
+    let!? annot := parse_var_annot loc None annot in
+    typed ctxt loc Script_typed_ir.String_size
+      (Script_typed_ir.Item_t (Script_typed_ir.Nat_t None) rest annot)
+  |
+    ((Micheline.Prim loc Alpha_context.Script.I_CONCAT [] annot,
+      Script_typed_ir.Item_t (Script_typed_ir.Bytes_t tn1)
+        (Script_typed_ir.Item_t (Script_typed_ir.Bytes_t tn2) rest _) _), _) =>
+    let 'existT _ __228 [loc, annot, tn1, tn2, rest] :=
+      existT (A := Set)
+        (fun __228 =>
+          [Alpha_context.Script.location ** Micheline.annot **
+            (option Script_typed_ir.type_annot) **
+            (option Script_typed_ir.type_annot) **
+            (Script_typed_ir.stack_ty __228)]) _ [loc, annot, tn1, tn2, rest] in
+    let!? annot := parse_var_annot loc None annot in
+    let!? tname :=
+      Lwt.__return (Script_ir_annot.merge_type_annot legacy tn1 tn2) in
+    typed ctxt loc Script_typed_ir.Concat_bytes_pair
+      (Script_typed_ir.Item_t (Script_typed_ir.Bytes_t tname) rest annot)
+  |
+    ((Micheline.Prim loc Alpha_context.Script.I_CONCAT [] annot,
+      Script_typed_ir.Item_t
+        (Script_typed_ir.List_t (Script_typed_ir.Bytes_t tname) _ _) rest
+        list_annot), _) =>
+    let 'existT _ __230 [loc, annot, tname, rest, list_annot] :=
+      existT (A := Set)
+        (fun __230 =>
+          [Alpha_context.Script.location ** Micheline.annot **
+            (option Script_typed_ir.type_annot) **
+            (Script_typed_ir.stack_ty __230) **
+            (option Script_typed_ir.var_annot)]) _
+        [loc, annot, tname, rest, list_annot] in
+    let!? annot := parse_var_annot loc (Some list_annot) annot in
+    typed ctxt loc Script_typed_ir.Concat_bytes
+      (Script_typed_ir.Item_t (Script_typed_ir.Bytes_t tname) rest annot)
+  |
+    ((Micheline.Prim loc Alpha_context.Script.I_SLICE [] annot,
+      Script_typed_ir.Item_t (Script_typed_ir.Nat_t _)
+        (Script_typed_ir.Item_t (Script_typed_ir.Nat_t _)
+          (Script_typed_ir.Item_t (Script_typed_ir.Bytes_t tname) rest
+            bytes_annot) _) _), _) =>
+    let 'existT _ __237 [loc, annot, tname, rest, bytes_annot] :=
+      existT (A := Set)
+        (fun __237 =>
+          [Alpha_context.Script.location ** Micheline.annot **
+            (option Script_typed_ir.type_annot) **
+            (Script_typed_ir.stack_ty __237) **
+            (option Script_typed_ir.var_annot)]) _
+        [loc, annot, tname, rest, bytes_annot] in
+    let!? annot :=
+      parse_var_annot loc
+        (Some
+          (Script_ir_annot.gen_access_annot bytes_annot None
+            Script_ir_annot.default_slice_annot)) annot in
+    typed ctxt loc Script_typed_ir.Slice_bytes
+      (Script_typed_ir.Item_t
+        (Script_typed_ir.Option_t (Script_typed_ir.Bytes_t tname) None false)
+        rest annot)
+  |
+    ((Micheline.Prim loc Alpha_context.Script.I_SIZE [] annot,
+      Script_typed_ir.Item_t (Script_typed_ir.Bytes_t _) rest _), _) =>
+    let 'existT _ __239 [loc, annot, rest] :=
+      existT (A := Set)
+        (fun __239 =>
+          [Alpha_context.Script.location ** Micheline.annot **
+            (Script_typed_ir.stack_ty __239)]) _ [loc, annot, rest] in
+    let!? annot := parse_var_annot loc None annot in
+    typed ctxt loc Script_typed_ir.Bytes_size
+      (Script_typed_ir.Item_t (Script_typed_ir.Nat_t None) rest annot)
+  |
+    ((Micheline.Prim loc Alpha_context.Script.I_ADD [] annot,
+      Script_typed_ir.Item_t (Script_typed_ir.Mutez_t tn1)
+        (Script_typed_ir.Item_t (Script_typed_ir.Mutez_t tn2) rest _) _), _) =>
+    let 'existT _ __243 [loc, annot, tn1, tn2, rest] :=
+      existT (A := Set)
+        (fun __243 =>
+          [Alpha_context.Script.location ** Micheline.annot **
+            (option Script_typed_ir.type_annot) **
+            (option Script_typed_ir.type_annot) **
+            (Script_typed_ir.stack_ty __243)]) _ [loc, annot, tn1, tn2, rest] in
+    let!? annot := parse_var_annot loc None annot in
+    let!? tname :=
+      Lwt.__return (Script_ir_annot.merge_type_annot legacy tn1 tn2) in
+    typed ctxt loc Script_typed_ir.Add_tez
+      (Script_typed_ir.Item_t (Script_typed_ir.Mutez_t tname) rest annot)
+  |
+    ((Micheline.Prim loc Alpha_context.Script.I_SUB [] annot,
+      Script_typed_ir.Item_t (Script_typed_ir.Mutez_t tn1)
+        (Script_typed_ir.Item_t (Script_typed_ir.Mutez_t tn2) rest _) _), _) =>
+    let 'existT _ __247 [loc, annot, tn1, tn2, rest] :=
+      existT (A := Set)
+        (fun __247 =>
+          [Alpha_context.Script.location ** Micheline.annot **
+            (option Script_typed_ir.type_annot) **
+            (option Script_typed_ir.type_annot) **
+            (Script_typed_ir.stack_ty __247)]) _ [loc, annot, tn1, tn2, rest] in
+    let!? annot := parse_var_annot loc None annot in
+    let!? tname :=
+      Lwt.__return (Script_ir_annot.merge_type_annot legacy tn1 tn2) in
+    typed ctxt loc Script_typed_ir.Sub_tez
+      (Script_typed_ir.Item_t (Script_typed_ir.Mutez_t tname) rest annot)
+  |
+    ((Micheline.Prim loc Alpha_context.Script.I_MUL [] annot,
+      Script_typed_ir.Item_t (Script_typed_ir.Mutez_t tname)
+        (Script_typed_ir.Item_t (Script_typed_ir.Nat_t _) rest _) _), _) =>
+    let 'existT _ __251 [loc, annot, tname, rest] :=
+      existT (A := Set)
+        (fun __251 =>
+          [Alpha_context.Script.location ** Micheline.annot **
+            (option Script_typed_ir.type_annot) **
+            (Script_typed_ir.stack_ty __251)]) _ [loc, annot, tname, rest] in
+    let!? annot := parse_var_annot loc None annot in
+    typed ctxt loc Script_typed_ir.Mul_teznat
+      (Script_typed_ir.Item_t (Script_typed_ir.Mutez_t tname) rest annot)
+  |
+    ((Micheline.Prim loc Alpha_context.Script.I_MUL [] annot,
+      Script_typed_ir.Item_t (Script_typed_ir.Nat_t _)
+        (Script_typed_ir.Item_t (Script_typed_ir.Mutez_t tname) rest _) _), _)
+    =>
+    let 'existT _ __255 [loc, annot, tname, rest] :=
+      existT (A := Set)
+        (fun __255 =>
+          [Alpha_context.Script.location ** Micheline.annot **
+            (option Script_typed_ir.type_annot) **
+            (Script_typed_ir.stack_ty __255)]) _ [loc, annot, tname, rest] in
+    let!? annot := parse_var_annot loc None annot in
+    typed ctxt loc Script_typed_ir.Mul_nattez
+      (Script_typed_ir.Item_t (Script_typed_ir.Mutez_t tname) rest annot)
+  |
+    ((Micheline.Prim loc Alpha_context.Script.I_OR [] annot,
+      Script_typed_ir.Item_t (Script_typed_ir.Bool_t tn1)
+        (Script_typed_ir.Item_t (Script_typed_ir.Bool_t tn2) rest _) _), _) =>
+    let 'existT _ __259 [loc, annot, tn1, tn2, rest] :=
+      existT (A := Set)
+        (fun __259 =>
+          [Alpha_context.Script.location ** Micheline.annot **
+            (option Script_typed_ir.type_annot) **
+            (option Script_typed_ir.type_annot) **
+            (Script_typed_ir.stack_ty __259)]) _ [loc, annot, tn1, tn2, rest] in
+    let!? annot := parse_var_annot loc None annot in
+    let!? tname :=
+      Lwt.__return (Script_ir_annot.merge_type_annot legacy tn1 tn2) in
+    typed ctxt loc Script_typed_ir.Or
+      (Script_typed_ir.Item_t (Script_typed_ir.Bool_t tname) rest annot)
+  |
+    ((Micheline.Prim loc Alpha_context.Script.I_AND [] annot,
+      Script_typed_ir.Item_t (Script_typed_ir.Bool_t tn1)
+        (Script_typed_ir.Item_t (Script_typed_ir.Bool_t tn2) rest _) _), _) =>
+    let 'existT _ __263 [loc, annot, tn1, tn2, rest] :=
+      existT (A := Set)
+        (fun __263 =>
+          [Alpha_context.Script.location ** Micheline.annot **
+            (option Script_typed_ir.type_annot) **
+            (option Script_typed_ir.type_annot) **
+            (Script_typed_ir.stack_ty __263)]) _ [loc, annot, tn1, tn2, rest] in
+    let!? annot := parse_var_annot loc None annot in
+    let!? tname :=
+      Lwt.__return (Script_ir_annot.merge_type_annot legacy tn1 tn2) in
+    typed ctxt loc Script_typed_ir.And
+      (Script_typed_ir.Item_t (Script_typed_ir.Bool_t tname) rest annot)
+  |
+    ((Micheline.Prim loc Alpha_context.Script.I_XOR [] annot,
+      Script_typed_ir.Item_t (Script_typed_ir.Bool_t tn1)
+        (Script_typed_ir.Item_t (Script_typed_ir.Bool_t tn2) rest _) _), _) =>
+    let 'existT _ __267 [loc, annot, tn1, tn2, rest] :=
+      existT (A := Set)
+        (fun __267 =>
+          [Alpha_context.Script.location ** Micheline.annot **
+            (option Script_typed_ir.type_annot) **
+            (option Script_typed_ir.type_annot) **
+            (Script_typed_ir.stack_ty __267)]) _ [loc, annot, tn1, tn2, rest] in
+    let!? annot := parse_var_annot loc None annot in
+    let!? tname :=
+      Lwt.__return (Script_ir_annot.merge_type_annot legacy tn1 tn2) in
+    typed ctxt loc Script_typed_ir.Xor
+      (Script_typed_ir.Item_t (Script_typed_ir.Bool_t tname) rest annot)
+  |
+    ((Micheline.Prim loc Alpha_context.Script.I_NOT [] annot,
+      Script_typed_ir.Item_t (Script_typed_ir.Bool_t tname) rest _), _) =>
+    let 'existT _ __269 [loc, annot, tname, rest] :=
+      existT (A := Set)
+        (fun __269 =>
+          [Alpha_context.Script.location ** Micheline.annot **
+            (option Script_typed_ir.type_annot) **
+            (Script_typed_ir.stack_ty __269)]) _ [loc, annot, tname, rest] in
+    let!? annot := parse_var_annot loc None annot in
+    typed ctxt loc Script_typed_ir.Not
+      (Script_typed_ir.Item_t (Script_typed_ir.Bool_t tname) rest annot)
+  |
+    ((Micheline.Prim loc Alpha_context.Script.I_ABS [] annot,
+      Script_typed_ir.Item_t (Script_typed_ir.Int_t _) rest _), _) =>
+    let 'existT _ __271 [loc, annot, rest] :=
+      existT (A := Set)
+        (fun __271 =>
+          [Alpha_context.Script.location ** Micheline.annot **
+            (Script_typed_ir.stack_ty __271)]) _ [loc, annot, rest] in
+    let!? annot := parse_var_annot loc None annot in
+    typed ctxt loc Script_typed_ir.Abs_int
+      (Script_typed_ir.Item_t (Script_typed_ir.Nat_t None) rest annot)
+  |
+    ((Micheline.Prim loc Alpha_context.Script.I_ISNAT [] annot,
+      Script_typed_ir.Item_t (Script_typed_ir.Int_t _) rest int_annot), _) =>
+    let 'existT _ __273 [loc, annot, rest, int_annot] :=
+      existT (A := Set)
+        (fun __273 =>
+          [Alpha_context.Script.location ** Micheline.annot **
+            (Script_typed_ir.stack_ty __273) **
+            (option Script_typed_ir.var_annot)]) _ [loc, annot, rest, int_annot]
+      in
+    let!? annot := parse_var_annot loc (Some int_annot) annot in
+    typed ctxt loc Script_typed_ir.Is_nat
+      (Script_typed_ir.Item_t
+        (Script_typed_ir.Option_t (Script_typed_ir.Nat_t None) None false) rest
+        annot)
+  |
+    ((Micheline.Prim loc Alpha_context.Script.I_INT [] annot,
+      Script_typed_ir.Item_t (Script_typed_ir.Nat_t _) rest _), _) =>
+    let 'existT _ __275 [loc, annot, rest] :=
+      existT (A := Set)
+        (fun __275 =>
+          [Alpha_context.Script.location ** Micheline.annot **
+            (Script_typed_ir.stack_ty __275)]) _ [loc, annot, rest] in
+    let!? annot := parse_var_annot loc None annot in
+    typed ctxt loc Script_typed_ir.Int_nat
+      (Script_typed_ir.Item_t (Script_typed_ir.Int_t None) rest annot)
+  |
+    ((Micheline.Prim loc Alpha_context.Script.I_NEG [] annot,
+      Script_typed_ir.Item_t (Script_typed_ir.Int_t tname) rest _), _) =>
+    let 'existT _ __277 [loc, annot, tname, rest] :=
+      existT (A := Set)
+        (fun __277 =>
+          [Alpha_context.Script.location ** Micheline.annot **
+            (option Script_typed_ir.type_annot) **
+            (Script_typed_ir.stack_ty __277)]) _ [loc, annot, tname, rest] in
+    let!? annot := parse_var_annot loc None annot in
+    typed ctxt loc Script_typed_ir.Neg_int
+      (Script_typed_ir.Item_t (Script_typed_ir.Int_t tname) rest annot)
+  |
+    ((Micheline.Prim loc Alpha_context.Script.I_NEG [] annot,
+      Script_typed_ir.Item_t (Script_typed_ir.Nat_t _) rest _), _) =>
+    let 'existT _ __279 [loc, annot, rest] :=
+      existT (A := Set)
+        (fun __279 =>
+          [Alpha_context.Script.location ** Micheline.annot **
+            (Script_typed_ir.stack_ty __279)]) _ [loc, annot, rest] in
+    let!? annot := parse_var_annot loc None annot in
+    typed ctxt loc Script_typed_ir.Neg_nat
+      (Script_typed_ir.Item_t (Script_typed_ir.Int_t None) rest annot)
+  |
+    ((Micheline.Prim loc Alpha_context.Script.I_ADD [] annot,
+      Script_typed_ir.Item_t (Script_typed_ir.Int_t tn1)
+        (Script_typed_ir.Item_t (Script_typed_ir.Int_t tn2) rest _) _), _) =>
+    let 'existT _ __283 [loc, annot, tn1, tn2, rest] :=
+      existT (A := Set)
+        (fun __283 =>
+          [Alpha_context.Script.location ** Micheline.annot **
+            (option Script_typed_ir.type_annot) **
+            (option Script_typed_ir.type_annot) **
+            (Script_typed_ir.stack_ty __283)]) _ [loc, annot, tn1, tn2, rest] in
+    let!? annot := parse_var_annot loc None annot in
+    let!? tname :=
+      Lwt.__return (Script_ir_annot.merge_type_annot legacy tn1 tn2) in
+    typed ctxt loc Script_typed_ir.Add_intint
+      (Script_typed_ir.Item_t (Script_typed_ir.Int_t tname) rest annot)
+  |
+    ((Micheline.Prim loc Alpha_context.Script.I_ADD [] annot,
+      Script_typed_ir.Item_t (Script_typed_ir.Int_t tname)
+        (Script_typed_ir.Item_t (Script_typed_ir.Nat_t _) rest _) _), _) =>
+    let 'existT _ __287 [loc, annot, tname, rest] :=
+      existT (A := Set)
+        (fun __287 =>
+          [Alpha_context.Script.location ** Micheline.annot **
+            (option Script_typed_ir.type_annot) **
+            (Script_typed_ir.stack_ty __287)]) _ [loc, annot, tname, rest] in
+    let!? annot := parse_var_annot loc None annot in
+    typed ctxt loc Script_typed_ir.Add_intnat
+      (Script_typed_ir.Item_t (Script_typed_ir.Int_t tname) rest annot)
+  |
+    ((Micheline.Prim loc Alpha_context.Script.I_ADD [] annot,
+      Script_typed_ir.Item_t (Script_typed_ir.Nat_t _)
+        (Script_typed_ir.Item_t (Script_typed_ir.Int_t tname) rest _) _), _) =>
+    let 'existT _ __291 [loc, annot, tname, rest] :=
+      existT (A := Set)
+        (fun __291 =>
+          [Alpha_context.Script.location ** Micheline.annot **
+            (option Script_typed_ir.type_annot) **
+            (Script_typed_ir.stack_ty __291)]) _ [loc, annot, tname, rest] in
+    let!? annot := parse_var_annot loc None annot in
+    typed ctxt loc Script_typed_ir.Add_natint
+      (Script_typed_ir.Item_t (Script_typed_ir.Int_t tname) rest annot)
+  |
+    ((Micheline.Prim loc Alpha_context.Script.I_ADD [] annot,
+      Script_typed_ir.Item_t (Script_typed_ir.Nat_t tn1)
+        (Script_typed_ir.Item_t (Script_typed_ir.Nat_t tn2) rest _) _), _) =>
+    let 'existT _ __295 [loc, annot, tn1, tn2, rest] :=
+      existT (A := Set)
+        (fun __295 =>
+          [Alpha_context.Script.location ** Micheline.annot **
+            (option Script_typed_ir.type_annot) **
+            (option Script_typed_ir.type_annot) **
+            (Script_typed_ir.stack_ty __295)]) _ [loc, annot, tn1, tn2, rest] in
+    let!? annot := parse_var_annot loc None annot in
+    let!? tname :=
+      Lwt.__return (Script_ir_annot.merge_type_annot legacy tn1 tn2) in
+    typed ctxt loc Script_typed_ir.Add_natnat
+      (Script_typed_ir.Item_t (Script_typed_ir.Nat_t tname) rest annot)
+  |
+    ((Micheline.Prim loc Alpha_context.Script.I_SUB [] annot,
+      Script_typed_ir.Item_t (Script_typed_ir.Int_t tn1)
+        (Script_typed_ir.Item_t (Script_typed_ir.Int_t tn2) rest _) _), _) =>
+    let 'existT _ __299 [loc, annot, tn1, tn2, rest] :=
+      existT (A := Set)
+        (fun __299 =>
+          [Alpha_context.Script.location ** Micheline.annot **
+            (option Script_typed_ir.type_annot) **
+            (option Script_typed_ir.type_annot) **
+            (Script_typed_ir.stack_ty __299)]) _ [loc, annot, tn1, tn2, rest] in
+    let!? annot := parse_var_annot loc None annot in
+    let!? tname :=
+      Lwt.__return (Script_ir_annot.merge_type_annot legacy tn1 tn2) in
+    typed ctxt loc Script_typed_ir.Sub_int
+      (Script_typed_ir.Item_t (Script_typed_ir.Int_t tname) rest annot)
+  |
+    ((Micheline.Prim loc Alpha_context.Script.I_SUB [] annot,
+      Script_typed_ir.Item_t (Script_typed_ir.Int_t tname)
+        (Script_typed_ir.Item_t (Script_typed_ir.Nat_t _) rest _) _), _) =>
+    let 'existT _ __303 [loc, annot, tname, rest] :=
+      existT (A := Set)
+        (fun __303 =>
+          [Alpha_context.Script.location ** Micheline.annot **
+            (option Script_typed_ir.type_annot) **
+            (Script_typed_ir.stack_ty __303)]) _ [loc, annot, tname, rest] in
+    let!? annot := parse_var_annot loc None annot in
+    typed ctxt loc Script_typed_ir.Sub_int
+      (Script_typed_ir.Item_t (Script_typed_ir.Int_t tname) rest annot)
+  |
+    ((Micheline.Prim loc Alpha_context.Script.I_SUB [] annot,
+      Script_typed_ir.Item_t (Script_typed_ir.Nat_t _)
+        (Script_typed_ir.Item_t (Script_typed_ir.Int_t tname) rest _) _), _) =>
+    let 'existT _ __307 [loc, annot, tname, rest] :=
+      existT (A := Set)
+        (fun __307 =>
+          [Alpha_context.Script.location ** Micheline.annot **
+            (option Script_typed_ir.type_annot) **
+            (Script_typed_ir.stack_ty __307)]) _ [loc, annot, tname, rest] in
+    let!? annot := parse_var_annot loc None annot in
+    typed ctxt loc Script_typed_ir.Sub_int
+      (Script_typed_ir.Item_t (Script_typed_ir.Int_t tname) rest annot)
+  |
+    ((Micheline.Prim loc Alpha_context.Script.I_SUB [] annot,
+      Script_typed_ir.Item_t (Script_typed_ir.Nat_t tn1)
+        (Script_typed_ir.Item_t (Script_typed_ir.Nat_t tn2) rest _) _), _) =>
+    let 'existT _ __311 [loc, annot, tn1, tn2, rest] :=
+      existT (A := Set)
+        (fun __311 =>
+          [Alpha_context.Script.location ** Micheline.annot **
+            (option Script_typed_ir.type_annot) **
+            (option Script_typed_ir.type_annot) **
+            (Script_typed_ir.stack_ty __311)]) _ [loc, annot, tn1, tn2, rest] in
+    let!? annot := parse_var_annot loc None annot in
+    let!? _tname :=
+      Lwt.__return (Script_ir_annot.merge_type_annot legacy tn1 tn2) in
+    typed ctxt loc Script_typed_ir.Sub_int
+      (Script_typed_ir.Item_t (Script_typed_ir.Int_t None) rest annot)
+  |
+    ((Micheline.Prim loc Alpha_context.Script.I_MUL [] annot,
+      Script_typed_ir.Item_t (Script_typed_ir.Int_t tn1)
+        (Script_typed_ir.Item_t (Script_typed_ir.Int_t tn2) rest _) _), _) =>
+    let 'existT _ __315 [loc, annot, tn1, tn2, rest] :=
+      existT (A := Set)
+        (fun __315 =>
+          [Alpha_context.Script.location ** Micheline.annot **
+            (option Script_typed_ir.type_annot) **
+            (option Script_typed_ir.type_annot) **
+            (Script_typed_ir.stack_ty __315)]) _ [loc, annot, tn1, tn2, rest] in
+    let!? annot := parse_var_annot loc None annot in
+    let!? tname :=
+      Lwt.__return (Script_ir_annot.merge_type_annot legacy tn1 tn2) in
+    typed ctxt loc Script_typed_ir.Mul_intint
+      (Script_typed_ir.Item_t (Script_typed_ir.Int_t tname) rest annot)
+  |
+    ((Micheline.Prim loc Alpha_context.Script.I_MUL [] annot,
+      Script_typed_ir.Item_t (Script_typed_ir.Int_t tname)
+        (Script_typed_ir.Item_t (Script_typed_ir.Nat_t _) rest _) _), _) =>
+    let 'existT _ __319 [loc, annot, tname, rest] :=
+      existT (A := Set)
+        (fun __319 =>
+          [Alpha_context.Script.location ** Micheline.annot **
+            (option Script_typed_ir.type_annot) **
+            (Script_typed_ir.stack_ty __319)]) _ [loc, annot, tname, rest] in
+    let!? annot := parse_var_annot loc None annot in
+    typed ctxt loc Script_typed_ir.Mul_intnat
+      (Script_typed_ir.Item_t (Script_typed_ir.Int_t tname) rest annot)
+  |
+    ((Micheline.Prim loc Alpha_context.Script.I_MUL [] annot,
+      Script_typed_ir.Item_t (Script_typed_ir.Nat_t _)
+        (Script_typed_ir.Item_t (Script_typed_ir.Int_t tname) rest _) _), _) =>
+    let 'existT _ __323 [loc, annot, tname, rest] :=
+      existT (A := Set)
+        (fun __323 =>
+          [Alpha_context.Script.location ** Micheline.annot **
+            (option Script_typed_ir.type_annot) **
+            (Script_typed_ir.stack_ty __323)]) _ [loc, annot, tname, rest] in
+    let!? annot := parse_var_annot loc None annot in
+    typed ctxt loc Script_typed_ir.Mul_natint
+      (Script_typed_ir.Item_t (Script_typed_ir.Int_t tname) rest annot)
+  |
+    ((Micheline.Prim loc Alpha_context.Script.I_MUL [] annot,
+      Script_typed_ir.Item_t (Script_typed_ir.Nat_t tn1)
+        (Script_typed_ir.Item_t (Script_typed_ir.Nat_t tn2) rest _) _), _) =>
+    let 'existT _ __327 [loc, annot, tn1, tn2, rest] :=
+      existT (A := Set)
+        (fun __327 =>
+          [Alpha_context.Script.location ** Micheline.annot **
+            (option Script_typed_ir.type_annot) **
+            (option Script_typed_ir.type_annot) **
+            (Script_typed_ir.stack_ty __327)]) _ [loc, annot, tn1, tn2, rest] in
+    let!? annot := parse_var_annot loc None annot in
+    let!? tname :=
+      Lwt.__return (Script_ir_annot.merge_type_annot legacy tn1 tn2) in
+    typed ctxt loc Script_typed_ir.Mul_natnat
+      (Script_typed_ir.Item_t (Script_typed_ir.Nat_t tname) rest annot)
+  |
+    ((Micheline.Prim loc Alpha_context.Script.I_EDIV [] annot,
+      Script_typed_ir.Item_t (Script_typed_ir.Mutez_t tname)
+        (Script_typed_ir.Item_t (Script_typed_ir.Nat_t _) rest _) _), _) =>
+    let 'existT _ __331 [loc, annot, tname, rest] :=
+      existT (A := Set)
+        (fun __331 =>
+          [Alpha_context.Script.location ** Micheline.annot **
+            (option Script_typed_ir.type_annot) **
+            (Script_typed_ir.stack_ty __331)]) _ [loc, annot, tname, rest] in
+    let!? annot := parse_var_annot loc None annot in
+    typed ctxt loc Script_typed_ir.Ediv_teznat
+      (Script_typed_ir.Item_t
+        (Script_typed_ir.Option_t
+          (Script_typed_ir.Pair_t ((Script_typed_ir.Mutez_t tname), None, None)
+            ((Script_typed_ir.Mutez_t tname), None, None) None false) None false)
+        rest annot)
+  |
+    ((Micheline.Prim loc Alpha_context.Script.I_EDIV [] annot,
+      Script_typed_ir.Item_t (Script_typed_ir.Mutez_t tn1)
+        (Script_typed_ir.Item_t (Script_typed_ir.Mutez_t tn2) rest _) _), _) =>
+    let 'existT _ __335 [loc, annot, tn1, tn2, rest] :=
+      existT (A := Set)
+        (fun __335 =>
+          [Alpha_context.Script.location ** Micheline.annot **
+            (option Script_typed_ir.type_annot) **
+            (option Script_typed_ir.type_annot) **
+            (Script_typed_ir.stack_ty __335)]) _ [loc, annot, tn1, tn2, rest] in
+    let!? annot := parse_var_annot loc None annot in
+    let!? tname :=
+      Lwt.__return (Script_ir_annot.merge_type_annot legacy tn1 tn2) in
+    typed ctxt loc Script_typed_ir.Ediv_tez
+      (Script_typed_ir.Item_t
+        (Script_typed_ir.Option_t
+          (Script_typed_ir.Pair_t ((Script_typed_ir.Nat_t None), None, None)
+            ((Script_typed_ir.Mutez_t tname), None, None) None false) None false)
+        rest annot)
+  |
+    ((Micheline.Prim loc Alpha_context.Script.I_EDIV [] annot,
+      Script_typed_ir.Item_t (Script_typed_ir.Int_t tn1)
+        (Script_typed_ir.Item_t (Script_typed_ir.Int_t tn2) rest _) _), _) =>
+    let 'existT _ __339 [loc, annot, tn1, tn2, rest] :=
+      existT (A := Set)
+        (fun __339 =>
+          [Alpha_context.Script.location ** Micheline.annot **
+            (option Script_typed_ir.type_annot) **
+            (option Script_typed_ir.type_annot) **
+            (Script_typed_ir.stack_ty __339)]) _ [loc, annot, tn1, tn2, rest] in
+    let!? annot := parse_var_annot loc None annot in
+    let!? tname :=
+      Lwt.__return (Script_ir_annot.merge_type_annot legacy tn1 tn2) in
+    typed ctxt loc Script_typed_ir.Ediv_intint
+      (Script_typed_ir.Item_t
+        (Script_typed_ir.Option_t
+          (Script_typed_ir.Pair_t ((Script_typed_ir.Int_t tname), None, None)
+            ((Script_typed_ir.Nat_t None), None, None) None false) None false)
+        rest annot)
+  |
+    ((Micheline.Prim loc Alpha_context.Script.I_EDIV [] annot,
+      Script_typed_ir.Item_t (Script_typed_ir.Int_t tname)
+        (Script_typed_ir.Item_t (Script_typed_ir.Nat_t _) rest _) _), _) =>
+    let 'existT _ __343 [loc, annot, tname, rest] :=
+      existT (A := Set)
+        (fun __343 =>
+          [Alpha_context.Script.location ** Micheline.annot **
+            (option Script_typed_ir.type_annot) **
+            (Script_typed_ir.stack_ty __343)]) _ [loc, annot, tname, rest] in
+    let!? annot := parse_var_annot loc None annot in
+    typed ctxt loc Script_typed_ir.Ediv_intnat
+      (Script_typed_ir.Item_t
+        (Script_typed_ir.Option_t
+          (Script_typed_ir.Pair_t ((Script_typed_ir.Int_t tname), None, None)
+            ((Script_typed_ir.Nat_t None), None, None) None false) None false)
+        rest annot)
+  |
+    ((Micheline.Prim loc Alpha_context.Script.I_EDIV [] annot,
+      Script_typed_ir.Item_t (Script_typed_ir.Nat_t tname)
+        (Script_typed_ir.Item_t (Script_typed_ir.Int_t _) rest _) _), _) =>
+    let 'existT _ __347 [loc, annot, tname, rest] :=
+      existT (A := Set)
+        (fun __347 =>
+          [Alpha_context.Script.location ** Micheline.annot **
+            (option Script_typed_ir.type_annot) **
+            (Script_typed_ir.stack_ty __347)]) _ [loc, annot, tname, rest] in
+    let!? annot := parse_var_annot loc None annot in
+    typed ctxt loc Script_typed_ir.Ediv_natint
+      (Script_typed_ir.Item_t
+        (Script_typed_ir.Option_t
+          (Script_typed_ir.Pair_t ((Script_typed_ir.Int_t None), None, None)
+            ((Script_typed_ir.Nat_t tname), None, None) None false) None false)
+        rest annot)
+  |
+    ((Micheline.Prim loc Alpha_context.Script.I_EDIV [] annot,
+      Script_typed_ir.Item_t (Script_typed_ir.Nat_t tn1)
+        (Script_typed_ir.Item_t (Script_typed_ir.Nat_t tn2) rest _) _), _) =>
+    let 'existT _ __351 [loc, annot, tn1, tn2, rest] :=
+      existT (A := Set)
+        (fun __351 =>
+          [Alpha_context.Script.location ** Micheline.annot **
+            (option Script_typed_ir.type_annot) **
+            (option Script_typed_ir.type_annot) **
+            (Script_typed_ir.stack_ty __351)]) _ [loc, annot, tn1, tn2, rest] in
+    let!? annot := parse_var_annot loc None annot in
+    let!? tname :=
+      Lwt.__return (Script_ir_annot.merge_type_annot legacy tn1 tn2) in
+    typed ctxt loc Script_typed_ir.Ediv_natnat
+      (Script_typed_ir.Item_t
+        (Script_typed_ir.Option_t
+          (Script_typed_ir.Pair_t ((Script_typed_ir.Nat_t tname), None, None)
+            ((Script_typed_ir.Nat_t tname), None, None) None false) None false)
+        rest annot)
+  |
+    ((Micheline.Prim loc Alpha_context.Script.I_LSL [] annot,
+      Script_typed_ir.Item_t (Script_typed_ir.Nat_t tn1)
+        (Script_typed_ir.Item_t (Script_typed_ir.Nat_t tn2) rest _) _), _) =>
+    let 'existT _ __355 [loc, annot, tn1, tn2, rest] :=
+      existT (A := Set)
+        (fun __355 =>
+          [Alpha_context.Script.location ** Micheline.annot **
+            (option Script_typed_ir.type_annot) **
+            (option Script_typed_ir.type_annot) **
+            (Script_typed_ir.stack_ty __355)]) _ [loc, annot, tn1, tn2, rest] in
+    let!? annot := parse_var_annot loc None annot in
+    let!? tname :=
+      Lwt.__return (Script_ir_annot.merge_type_annot legacy tn1 tn2) in
+    typed ctxt loc Script_typed_ir.Lsl_nat
+      (Script_typed_ir.Item_t (Script_typed_ir.Nat_t tname) rest annot)
+  |
+    ((Micheline.Prim loc Alpha_context.Script.I_LSR [] annot,
+      Script_typed_ir.Item_t (Script_typed_ir.Nat_t tn1)
+        (Script_typed_ir.Item_t (Script_typed_ir.Nat_t tn2) rest _) _), _) =>
+    let 'existT _ __359 [loc, annot, tn1, tn2, rest] :=
+      existT (A := Set)
+        (fun __359 =>
+          [Alpha_context.Script.location ** Micheline.annot **
+            (option Script_typed_ir.type_annot) **
+            (option Script_typed_ir.type_annot) **
+            (Script_typed_ir.stack_ty __359)]) _ [loc, annot, tn1, tn2, rest] in
+    let!? annot := parse_var_annot loc None annot in
+    let!? tname :=
+      Lwt.__return (Script_ir_annot.merge_type_annot legacy tn1 tn2) in
+    typed ctxt loc Script_typed_ir.Lsr_nat
+      (Script_typed_ir.Item_t (Script_typed_ir.Nat_t tname) rest annot)
+  |
+    ((Micheline.Prim loc Alpha_context.Script.I_OR [] annot,
+      Script_typed_ir.Item_t (Script_typed_ir.Nat_t tn1)
+        (Script_typed_ir.Item_t (Script_typed_ir.Nat_t tn2) rest _) _), _) =>
+    let 'existT _ __363 [loc, annot, tn1, tn2, rest] :=
+      existT (A := Set)
+        (fun __363 =>
+          [Alpha_context.Script.location ** Micheline.annot **
+            (option Script_typed_ir.type_annot) **
+            (option Script_typed_ir.type_annot) **
+            (Script_typed_ir.stack_ty __363)]) _ [loc, annot, tn1, tn2, rest] in
+    let!? annot := parse_var_annot loc None annot in
+    let!? tname :=
+      Lwt.__return (Script_ir_annot.merge_type_annot legacy tn1 tn2) in
+    typed ctxt loc Script_typed_ir.Or_nat
+      (Script_typed_ir.Item_t (Script_typed_ir.Nat_t tname) rest annot)
+  |
+    ((Micheline.Prim loc Alpha_context.Script.I_AND [] annot,
+      Script_typed_ir.Item_t (Script_typed_ir.Nat_t tn1)
+        (Script_typed_ir.Item_t (Script_typed_ir.Nat_t tn2) rest _) _), _) =>
+    let 'existT _ __367 [loc, annot, tn1, tn2, rest] :=
+      existT (A := Set)
+        (fun __367 =>
+          [Alpha_context.Script.location ** Micheline.annot **
+            (option Script_typed_ir.type_annot) **
+            (option Script_typed_ir.type_annot) **
+            (Script_typed_ir.stack_ty __367)]) _ [loc, annot, tn1, tn2, rest] in
+    let!? annot := parse_var_annot loc None annot in
+    let!? tname :=
+      Lwt.__return (Script_ir_annot.merge_type_annot legacy tn1 tn2) in
+    typed ctxt loc Script_typed_ir.And_nat
+      (Script_typed_ir.Item_t (Script_typed_ir.Nat_t tname) rest annot)
+  |
+    ((Micheline.Prim loc Alpha_context.Script.I_AND [] annot,
+      Script_typed_ir.Item_t (Script_typed_ir.Int_t _)
+        (Script_typed_ir.Item_t (Script_typed_ir.Nat_t tname) rest _) _), _) =>
+    let 'existT _ __371 [loc, annot, tname, rest] :=
+      existT (A := Set)
+        (fun __371 =>
+          [Alpha_context.Script.location ** Micheline.annot **
+            (option Script_typed_ir.type_annot) **
+            (Script_typed_ir.stack_ty __371)]) _ [loc, annot, tname, rest] in
+    let!? annot := parse_var_annot loc None annot in
+    typed ctxt loc Script_typed_ir.And_int_nat
+      (Script_typed_ir.Item_t (Script_typed_ir.Nat_t tname) rest annot)
+  |
+    ((Micheline.Prim loc Alpha_context.Script.I_XOR [] annot,
+      Script_typed_ir.Item_t (Script_typed_ir.Nat_t tn1)
+        (Script_typed_ir.Item_t (Script_typed_ir.Nat_t tn2) rest _) _), _) =>
+    let 'existT _ __375 [loc, annot, tn1, tn2, rest] :=
+      existT (A := Set)
+        (fun __375 =>
+          [Alpha_context.Script.location ** Micheline.annot **
+            (option Script_typed_ir.type_annot) **
+            (option Script_typed_ir.type_annot) **
+            (Script_typed_ir.stack_ty __375)]) _ [loc, annot, tn1, tn2, rest] in
+    let!? annot := parse_var_annot loc None annot in
+    let!? tname :=
+      Lwt.__return (Script_ir_annot.merge_type_annot legacy tn1 tn2) in
+    typed ctxt loc Script_typed_ir.Xor_nat
+      (Script_typed_ir.Item_t (Script_typed_ir.Nat_t tname) rest annot)
+  |
+    ((Micheline.Prim loc Alpha_context.Script.I_NOT [] annot,
+      Script_typed_ir.Item_t (Script_typed_ir.Int_t tname) rest _), _) =>
+    let 'existT _ __377 [loc, annot, tname, rest] :=
+      existT (A := Set)
+        (fun __377 =>
+          [Alpha_context.Script.location ** Micheline.annot **
+            (option Script_typed_ir.type_annot) **
+            (Script_typed_ir.stack_ty __377)]) _ [loc, annot, tname, rest] in
+    let!? annot := parse_var_annot loc None annot in
+    typed ctxt loc Script_typed_ir.Not_int
+      (Script_typed_ir.Item_t (Script_typed_ir.Int_t tname) rest annot)
+  |
+    ((Micheline.Prim loc Alpha_context.Script.I_NOT [] annot,
+      Script_typed_ir.Item_t (Script_typed_ir.Nat_t _) rest _), _) =>
+    let 'existT _ __379 [loc, annot, rest] :=
+      existT (A := Set)
+        (fun __379 =>
+          [Alpha_context.Script.location ** Micheline.annot **
+            (Script_typed_ir.stack_ty __379)]) _ [loc, annot, rest] in
+    let!? annot := parse_var_annot loc None annot in
+    typed ctxt loc Script_typed_ir.Not_nat
+      (Script_typed_ir.Item_t (Script_typed_ir.Int_t None) rest annot)
+  |
+    ((Micheline.Prim loc Alpha_context.Script.I_COMPARE [] annot,
+      Script_typed_ir.Item_t t1 (Script_typed_ir.Item_t t2 rest _) _), _) =>
+    let 'existT _ [__380, __382, __383] [loc, annot, t1, t2, rest] :=
+      existT (A := [Set ** Set ** Set])
+        (fun '[__380, __382, __383] =>
+          [Alpha_context.Script.location ** Micheline.annot **
+            (Script_typed_ir.ty __380) ** (Script_typed_ir.ty __382) **
+            (Script_typed_ir.stack_ty __383)]) [_, _, _]
+        [loc, annot, t1, t2, rest] in
+    let!? annot := parse_var_annot loc None annot in
+    let!? '(Eq, __t_value, ctxt) :=
+      check_item_ty ctxt t1 t2 loc Alpha_context.Script.I_COMPARE 1 2 in
+    match comparable_ty_of_ty __t_value with
+    | None =>
+      let!? '(__t_value, _ctxt) :=
+        Lwt.__return (serialize_ty_for_error ctxt __t_value) in
+      Error_monad.fail extensible_type_value
+    | Some __key_value =>
+      typed ctxt loc (Script_typed_ir.Compare __key_value)
+        (Script_typed_ir.Item_t (Script_typed_ir.Int_t None) rest annot)
+    end
+  |
+    ((Micheline.Prim loc Alpha_context.Script.I_EQ [] annot,
+      Script_typed_ir.Item_t (Script_typed_ir.Int_t _) rest _), _) =>
+    let 'existT _ __385 [loc, annot, rest] :=
+      existT (A := Set)
+        (fun __385 =>
+          [Alpha_context.Script.location ** Micheline.annot **
+            (Script_typed_ir.stack_ty __385)]) _ [loc, annot, rest] in
+    let!? annot := parse_var_annot loc None annot in
+    typed ctxt loc Script_typed_ir.Eq
+      (Script_typed_ir.Item_t (Script_typed_ir.Bool_t None) rest annot)
+  |
+    ((Micheline.Prim loc Alpha_context.Script.I_NEQ [] annot,
+      Script_typed_ir.Item_t (Script_typed_ir.Int_t _) rest _), _) =>
+    let 'existT _ __387 [loc, annot, rest] :=
+      existT (A := Set)
+        (fun __387 =>
+          [Alpha_context.Script.location ** Micheline.annot **
+            (Script_typed_ir.stack_ty __387)]) _ [loc, annot, rest] in
+    let!? annot := parse_var_annot loc None annot in
+    typed ctxt loc Script_typed_ir.Neq
+      (Script_typed_ir.Item_t (Script_typed_ir.Bool_t None) rest annot)
+  |
+    ((Micheline.Prim loc Alpha_context.Script.I_LT [] annot,
+      Script_typed_ir.Item_t (Script_typed_ir.Int_t _) rest _), _) =>
+    let 'existT _ __389 [loc, annot, rest] :=
+      existT (A := Set)
+        (fun __389 =>
+          [Alpha_context.Script.location ** Micheline.annot **
+            (Script_typed_ir.stack_ty __389)]) _ [loc, annot, rest] in
+    let!? annot := parse_var_annot loc None annot in
+    typed ctxt loc Script_typed_ir.Lt
+      (Script_typed_ir.Item_t (Script_typed_ir.Bool_t None) rest annot)
+  |
+    ((Micheline.Prim loc Alpha_context.Script.I_GT [] annot,
+      Script_typed_ir.Item_t (Script_typed_ir.Int_t _) rest _), _) =>
+    let 'existT _ __391 [loc, annot, rest] :=
+      existT (A := Set)
+        (fun __391 =>
+          [Alpha_context.Script.location ** Micheline.annot **
+            (Script_typed_ir.stack_ty __391)]) _ [loc, annot, rest] in
+    let!? annot := parse_var_annot loc None annot in
+    typed ctxt loc Script_typed_ir.Gt
+      (Script_typed_ir.Item_t (Script_typed_ir.Bool_t None) rest annot)
+  |
+    ((Micheline.Prim loc Alpha_context.Script.I_LE [] annot,
+      Script_typed_ir.Item_t (Script_typed_ir.Int_t _) rest _), _) =>
+    let 'existT _ __393 [loc, annot, rest] :=
+      existT (A := Set)
+        (fun __393 =>
+          [Alpha_context.Script.location ** Micheline.annot **
+            (Script_typed_ir.stack_ty __393)]) _ [loc, annot, rest] in
+    let!? annot := parse_var_annot loc None annot in
+    typed ctxt loc Script_typed_ir.Le
+      (Script_typed_ir.Item_t (Script_typed_ir.Bool_t None) rest annot)
+  |
+    ((Micheline.Prim loc Alpha_context.Script.I_GE [] annot,
+      Script_typed_ir.Item_t (Script_typed_ir.Int_t _) rest _), _) =>
+    let 'existT _ __395 [loc, annot, rest] :=
+      existT (A := Set)
+        (fun __395 =>
+          [Alpha_context.Script.location ** Micheline.annot **
+            (Script_typed_ir.stack_ty __395)]) _ [loc, annot, rest] in
+    let!? annot := parse_var_annot loc None annot in
+    typed ctxt loc Script_typed_ir.Ge
+      (Script_typed_ir.Item_t (Script_typed_ir.Bool_t None) rest annot)
+  |
+    ((Micheline.Prim loc Alpha_context.Script.I_CAST (cons cast_t []) annot,
+      Script_typed_ir.Item_t __t_value __stack_value item_annot), _) =>
+    let 'existT _ [__396, __397]
+      [loc, cast_t, annot, __t_value, __stack_value, item_annot] :=
+      existT (A := [Set ** Set])
+        (fun '[__396, __397] =>
+          [Alpha_context.Script.location **
+            (Micheline.node Alpha_context.Script.location
+              Alpha_context.Script.prim) ** Micheline.annot **
+            (Script_typed_ir.ty __396) ** (Script_typed_ir.stack_ty __397) **
+            (option Script_typed_ir.var_annot)]) [_, _]
+        [loc, cast_t, annot, __t_value, __stack_value, item_annot] in
+    let!? annot := parse_var_annot loc (Some item_annot) annot in
+    let!? '(Ex_ty cast_t, ctxt) :=
+      Lwt.__return (parse_any_ty ctxt legacy cast_t) in
+    let 'existT _ __Ex_ty_'a10 [cast_t, ctxt] :=
+      existT (A := Set)
+        (fun __Ex_ty_'a10 =>
+          [(Script_typed_ir.ty __Ex_ty_'a10) ** Alpha_context.context]) _
+        [cast_t, ctxt] in
+    let!? '(Eq, ctxt) := Lwt.__return (ty_eq ctxt cast_t __t_value) in
+    let!? '(_, ctxt) :=
+      Lwt.__return (merge_types legacy ctxt loc cast_t __t_value) in
+    typed ctxt loc Script_typed_ir.Nop
+      (Script_typed_ir.Item_t cast_t __stack_value annot)
+  |
+    ((Micheline.Prim loc Alpha_context.Script.I_RENAME [] annot,
+      Script_typed_ir.Item_t __t_value __stack_value _), _) =>
+    let 'existT _ [__398, __399] [loc, annot, __t_value, __stack_value] :=
+      existT (A := [Set ** Set])
+        (fun '[__398, __399] =>
+          [Alpha_context.Script.location ** Micheline.annot **
+            (Script_typed_ir.ty __398) ** (Script_typed_ir.stack_ty __399)]) [_,
+        _] [loc, annot, __t_value, __stack_value] in
+    let!? annot := parse_var_annot loc None annot in
+    typed ctxt loc Script_typed_ir.Nop
+      (Script_typed_ir.Item_t __t_value __stack_value annot)
+  |
+    ((Micheline.Prim loc Alpha_context.Script.I_PACK [] annot,
+      Script_typed_ir.Item_t __t_value rest unpacked_annot), _) =>
+    let 'existT _ [__400, __401] [loc, annot, __t_value, rest, unpacked_annot]
+      :=
+      existT (A := [Set ** Set])
+        (fun '[__400, __401] =>
+          [Alpha_context.Script.location ** Micheline.annot **
+            (Script_typed_ir.ty __400) ** (Script_typed_ir.stack_ty __401) **
+            (option Script_typed_ir.var_annot)]) [_, _]
+        [loc, annot, __t_value, rest, unpacked_annot] in
+    let!? '_ := Lwt.__return (check_packable true loc __t_value) in
+    let!? annot :=
+      parse_var_annot loc
+        (Some
+          (Script_ir_annot.gen_access_annot unpacked_annot None
+            Script_ir_annot.default_pack_annot)) annot in
+    typed ctxt loc (Script_typed_ir.Pack __t_value)
+      (Script_typed_ir.Item_t (Script_typed_ir.Bytes_t None) rest annot)
+  |
+    ((Micheline.Prim loc Alpha_context.Script.I_UNPACK (cons ty []) annot,
+      Script_typed_ir.Item_t (Script_typed_ir.Bytes_t _) rest packed_annot), _)
+    =>
+    let 'existT _ __403 [loc, ty, annot, rest, packed_annot] :=
+      existT (A := Set)
+        (fun __403 =>
+          [Alpha_context.Script.location **
+            (Micheline.node Alpha_context.Script.location
+              Alpha_context.Script.prim) ** Micheline.annot **
+            (Script_typed_ir.stack_ty __403) **
+            (option Script_typed_ir.var_annot)]) _
+        [loc, ty, annot, rest, packed_annot] in
+    let!? '(Ex_ty __t_value, ctxt) :=
+      Lwt.__return (parse_packable_ty ctxt legacy ty) in
+    let 'existT _ __Ex_ty_'a11 [__t_value, ctxt] :=
+      existT (A := Set)
+        (fun __Ex_ty_'a11 =>
+          [(Script_typed_ir.ty __Ex_ty_'a11) ** Alpha_context.context]) _
+        [__t_value, ctxt] in
+    let!? '(annot, ty_name) := parse_var_type_annot loc annot in
+    let annot :=
+      Script_ir_annot.default_annot
+        (Script_ir_annot.gen_access_annot packed_annot None
+          Script_ir_annot.default_unpack_annot) annot in
+    typed ctxt loc (Script_typed_ir.Unpack __t_value)
+      (Script_typed_ir.Item_t (Script_typed_ir.Option_t __t_value ty_name false)
+        rest annot)
+  |
+    ((Micheline.Prim loc Alpha_context.Script.I_ADDRESS [] annot,
+      Script_typed_ir.Item_t (Script_typed_ir.Contract_t _ _) rest
+        contract_annot), _) =>
+    let 'existT _ __405 [loc, annot, rest, contract_annot] :=
+      existT (A := Set)
+        (fun __405 =>
+          [Alpha_context.Script.location ** Micheline.annot **
+            (Script_typed_ir.stack_ty __405) **
+            (option Script_typed_ir.var_annot)]) _
+        [loc, annot, rest, contract_annot] in
+    let!? annot :=
+      parse_var_annot loc
+        (Some
+          (Script_ir_annot.gen_access_annot contract_annot None
+            Script_ir_annot.default_addr_annot)) annot in
+    typed ctxt loc Script_typed_ir.Address
+      (Script_typed_ir.Item_t (Script_typed_ir.Address_t None) rest annot)
+  |
+    ((Micheline.Prim loc Alpha_context.Script.I_CONTRACT (cons ty []) annot,
+      Script_typed_ir.Item_t (Script_typed_ir.Address_t _) rest addr_annot), _)
+    =>
+    let 'existT _ __408 [loc, ty, annot, rest, addr_annot] :=
+      existT (A := Set)
+        (fun __408 =>
+          [Alpha_context.Script.location **
+            (Micheline.node Alpha_context.Script.location
+              Alpha_context.Script.prim) ** Micheline.annot **
+            (Script_typed_ir.stack_ty __408) **
+            (option Script_typed_ir.var_annot)]) _
+        [loc, ty, annot, rest, addr_annot] in
+    let!? '(Ex_ty __t_value, ctxt) :=
+      Lwt.__return (parse_parameter_ty ctxt legacy ty) in
+    let 'existT _ __Ex_ty_'a12 [__t_value, ctxt] :=
+      existT (A := Set)
+        (fun __Ex_ty_'a12 =>
+          [(Script_typed_ir.ty __Ex_ty_'a12) ** Alpha_context.context]) _
+        [__t_value, ctxt] in
+    let!? '(annot, entrypoint) :=
+      parse_entrypoint_annot loc
+        (Some
+          (Script_ir_annot.gen_access_annot addr_annot None
+            Script_ir_annot.default_contract_annot)) annot in
+    let!? entrypoint :=
+      Lwt.__return
+        match entrypoint with
+        | None => Pervasives.Ok "default"
+        | Some (Script_typed_ir.Field_annot "default") =>
+          Error_monad.__error_value extensible_type_value
+        | Some (Script_typed_ir.Field_annot entrypoint) =>
+          if (|Compare.Int|).(Compare.S.op_gt) (String.length entrypoint) 31
+            then
+            Error_monad.__error_value extensible_type_value
+          else
+            Pervasives.Ok entrypoint
+        end in
+    typed ctxt loc (Script_typed_ir.Contract __t_value entrypoint)
+      (Script_typed_ir.Item_t
+        (Script_typed_ir.Option_t (Script_typed_ir.Contract_t __t_value None)
+          None false) rest annot)
+  |
+    ((Micheline.Prim loc Alpha_context.Script.I_TRANSFER_TOKENS [] annot,
+      Script_typed_ir.Item_t __p_value
+        (Script_typed_ir.Item_t (Script_typed_ir.Mutez_t _)
+          (Script_typed_ir.Item_t (Script_typed_ir.Contract_t cp _) rest _) _) _),
+      _) =>
+    let 'existT _ [__409, __414, __415] [loc, annot, __p_value, cp, rest] :=
+      existT (A := [Set ** Set ** Set])
+        (fun '[__409, __414, __415] =>
+          [Alpha_context.Script.location ** Micheline.annot **
+            (Script_typed_ir.ty __409) ** (Script_typed_ir.ty __415) **
+            (Script_typed_ir.stack_ty __414)]) [_, _, _]
+        [loc, annot, __p_value, cp, rest] in
+    let!? '(Eq, _, ctxt) :=
+      check_item_ty ctxt __p_value cp loc Alpha_context.Script.I_TRANSFER_TOKENS
+        1 4 in
+    let!? annot := parse_var_annot loc None annot in
+    typed ctxt loc Script_typed_ir.Transfer_tokens
+      (Script_typed_ir.Item_t (Script_typed_ir.Operation_t None) rest annot)
+  |
+    ((Micheline.Prim loc Alpha_context.Script.I_SET_DELEGATE [] annot,
+      Script_typed_ir.Item_t
+        (Script_typed_ir.Option_t (Script_typed_ir.Key_hash_t _) _ _) rest _), _)
+    =>
+    let 'existT _ __417 [loc, annot, rest] :=
+      existT (A := Set)
+        (fun __417 =>
+          [Alpha_context.Script.location ** Micheline.annot **
+            (Script_typed_ir.stack_ty __417)]) _ [loc, annot, rest] in
+    let!? annot := parse_var_annot loc None annot in
+    typed ctxt loc Script_typed_ir.Set_delegate
+      (Script_typed_ir.Item_t (Script_typed_ir.Operation_t None) rest annot)
+  |
+    ((Micheline.Prim loc Alpha_context.Script.I_CREATE_ACCOUNT [] annot,
+      Script_typed_ir.Item_t (Script_typed_ir.Key_hash_t _)
+        (Script_typed_ir.Item_t
+          (Script_typed_ir.Option_t (Script_typed_ir.Key_hash_t _) _ _)
+          (Script_typed_ir.Item_t (Script_typed_ir.Bool_t _)
+            (Script_typed_ir.Item_t (Script_typed_ir.Mutez_t _) rest _) _) _) _),
+      _) =>
+    let 'existT _ __427 [loc, annot, rest] :=
+      existT (A := Set)
+        (fun __427 =>
+          [Alpha_context.Script.location ** Micheline.annot **
+            (Script_typed_ir.stack_ty __427)]) _ [loc, annot, rest] in
+    if legacy then
+      let!? '(op_annot, addr_annot) := parse_two_var_annot loc annot in
+      typed ctxt loc Script_typed_ir.Create_account
+        (Script_typed_ir.Item_t (Script_typed_ir.Operation_t None)
+          (Script_typed_ir.Item_t (Script_typed_ir.Address_t None) rest
+            addr_annot) op_annot)
+    else
+      Error_monad.fail extensible_type_value
+  |
+    ((Micheline.Prim loc Alpha_context.Script.I_IMPLICIT_ACCOUNT [] annot,
+      Script_typed_ir.Item_t (Script_typed_ir.Key_hash_t _) rest _), _) =>
+    let 'existT _ __429 [loc, annot, rest] :=
+      existT (A := Set)
+        (fun __429 =>
+          [Alpha_context.Script.location ** Micheline.annot **
+            (Script_typed_ir.stack_ty __429)]) _ [loc, annot, rest] in
+    let!? annot := parse_var_annot loc None annot in
+    typed ctxt loc Script_typed_ir.Implicit_account
+      (Script_typed_ir.Item_t
+        (Script_typed_ir.Contract_t (Script_typed_ir.Unit_t None) None) rest
+        annot)
+  |
+    ((Micheline.Prim loc Alpha_context.Script.I_CREATE_CONTRACT
+      (cons ((Micheline.Seq _ _) as code) []) annot,
+      Script_typed_ir.Item_t (Script_typed_ir.Key_hash_t _)
+        (Script_typed_ir.Item_t
+          (Script_typed_ir.Option_t (Script_typed_ir.Key_hash_t _) _ _)
+          (Script_typed_ir.Item_t (Script_typed_ir.Bool_t _)
+            (Script_typed_ir.Item_t (Script_typed_ir.Bool_t _)
+              (Script_typed_ir.Item_t (Script_typed_ir.Mutez_t _)
+                (Script_typed_ir.Item_t ginit rest _) _) _) _) _) _), _) =>
+    let 'existT _ [__441, __442] [loc, code, annot, ginit, rest] :=
+      existT (A := [Set ** Set])
+        (fun '[__441, __442] =>
+          [Alpha_context.Script.location **
+            (Micheline.node Alpha_context.Script.location
+              Alpha_context.Script.prim) ** Micheline.annot **
+            (Script_typed_ir.ty __441) ** (Script_typed_ir.stack_ty __442)]) [_,
+        _] [loc, code, annot, ginit, rest] in
+    if legacy then
+      let!? '(op_annot, addr_annot) := parse_two_var_annot loc annot in
+      let cannonical_code := Pervasives.fst (Micheline.extract_locations code)
+        in
+      let!? '(arg_type, storage_type, code_field, root_name) :=
+        Lwt.__return (parse_toplevel legacy cannonical_code) in
+      let!? '(Ex_ty arg_type, ctxt) :=
+        Error_monad.trace extensible_type_value
+          (Lwt.__return (parse_parameter_ty ctxt legacy arg_type)) in
+      let 'existT _ __Ex_ty_'a13 [arg_type, ctxt] :=
+        existT (A := Set)
+          (fun __Ex_ty_'a13 =>
+            [(Script_typed_ir.ty __Ex_ty_'a13) ** Alpha_context.context]) _
+          [arg_type, ctxt] in
+      let!? '_ :=
         if legacy then
-          Error_monad.op_gtgteqquestion (parse_two_var_annot loc annot)
-            (fun function_parameter =>
-              let '(op_annot, addr_annot) := function_parameter in
-              typed ctxt loc Script_typed_ir.Create_account
-                (Script_typed_ir.Item_t (Script_typed_ir.Operation_t None)
-                  (Script_typed_ir.Item_t (Script_typed_ir.Address_t None) rest
-                    addr_annot) op_annot))
+          Error_monad.__return tt
         else
-          Error_monad.fail extensible_type_value
+          Lwt.__return (well_formed_entrypoints arg_type root_name) in
+      let!? '(Ex_ty storage_type, ctxt) :=
+        Error_monad.trace extensible_type_value
+          (Lwt.__return (parse_storage_ty ctxt legacy storage_type)) in
+      let 'existT _ __Ex_ty_'a14 [storage_type, ctxt] :=
+        existT (A := Set)
+          (fun __Ex_ty_'a14 =>
+            [(Script_typed_ir.ty __Ex_ty_'a14) ** Alpha_context.context]) _
+          [storage_type, ctxt] in
+      let arg_annot :=
+        Script_ir_annot.default_annot Script_ir_annot.default_param_annot
+          (Script_ir_annot.type_to_var_annot (name_of_ty arg_type)) in
+      let storage_annot :=
+        Script_ir_annot.default_annot Script_ir_annot.default_storage_annot
+          (Script_ir_annot.type_to_var_annot (name_of_ty storage_type)) in
+      let arg_type_full :=
+        Script_typed_ir.Pair_t (arg_type, None, arg_annot)
+          (storage_type, None, storage_annot) None
+          (Pervasives.op_pipepipe (has_big_map arg_type)
+            (has_big_map storage_type)) in
+      let ret_type_full :=
+        Script_typed_ir.Pair_t
+          ((Script_typed_ir.List_t (Script_typed_ir.Operation_t None) None false),
+            None, None) (storage_type, None, None) None
+          (has_big_map storage_type) in
+      let!?
+        '({|
+          Script_typed_ir.lambda.lam :=
+            ({|
+              Script_typed_ir.descr.bef :=
+                Script_typed_ir.Item_t arg
+                  Script_typed_ir.Empty_t _;
+                Script_typed_ir.descr.aft :=
+                  Script_typed_ir.Item_t ret
+                    Script_typed_ir.Empty_t
+                    _
+                |}, _)
+            |} as lambda, ctxt) :=
+        Error_monad.trace extensible_type_value
+          (parse_returning type_logger
+            (Toplevel
+              {| tc_context.Toplevel.storage_type := storage_type;
+                tc_context.Toplevel.param_type := arg_type;
+                tc_context.Toplevel.root_name := root_name;
+                tc_context.Toplevel.legacy_create_contract_literal := true |})
+            ctxt legacy (arg_type_full, None) ret_type_full code_field) in
+      let!? '(Eq, ctxt) := Lwt.__return (ty_eq ctxt arg arg_type_full) in
+      let!? '(_, ctxt) :=
+        Lwt.__return (merge_types legacy ctxt loc arg arg_type_full) in
+      let!? '(Eq, ctxt) := Lwt.__return (ty_eq ctxt ret ret_type_full) in
+      let!? '(_, ctxt) :=
+        Lwt.__return (merge_types legacy ctxt loc ret ret_type_full) in
+      let!? '(Eq, ctxt) := Lwt.__return (ty_eq ctxt storage_type ginit) in
+      let!? '(_, ctxt) :=
+        Lwt.__return (merge_types legacy ctxt loc storage_type ginit) in
+      typed ctxt loc
+        (Script_typed_ir.Create_contract storage_type arg_type lambda root_name)
+        (Script_typed_ir.Item_t (Script_typed_ir.Operation_t None)
+          (Script_typed_ir.Item_t (Script_typed_ir.Address_t None) rest
+            addr_annot) op_annot)
+    else
+      Error_monad.fail extensible_type_value
+  |
+    ((Micheline.Prim loc Alpha_context.Script.I_CREATE_CONTRACT
+      (cons ((Micheline.Seq _ _) as code) []) annot,
+      Script_typed_ir.Item_t
+        (Script_typed_ir.Option_t (Script_typed_ir.Key_hash_t _) _ _)
+        (Script_typed_ir.Item_t (Script_typed_ir.Mutez_t _)
+          (Script_typed_ir.Item_t ginit rest _) _) _), _) =>
+    let 'existT _ [__448, __449] [loc, code, annot, ginit, rest] :=
+      existT (A := [Set ** Set])
+        (fun '[__448, __449] =>
+          [Alpha_context.Script.location **
+            (Micheline.node Alpha_context.Script.location
+              Alpha_context.Script.prim) ** Micheline.annot **
+            (Script_typed_ir.ty __448) ** (Script_typed_ir.stack_ty __449)]) [_,
+        _] [loc, code, annot, ginit, rest] in
+    let!? '(op_annot, addr_annot) := parse_two_var_annot loc annot in
+    let cannonical_code := Pervasives.fst (Micheline.extract_locations code) in
+    let!? '(arg_type, storage_type, code_field, root_name) :=
+      Lwt.__return (parse_toplevel legacy cannonical_code) in
+    let!? '(Ex_ty arg_type, ctxt) :=
+      Error_monad.trace extensible_type_value
+        (Lwt.__return (parse_parameter_ty ctxt legacy arg_type)) in
+    let 'existT _ __Ex_ty_'a15 [arg_type, ctxt] :=
+      existT (A := Set)
+        (fun __Ex_ty_'a15 =>
+          [(Script_typed_ir.ty __Ex_ty_'a15) ** Alpha_context.context]) _
+        [arg_type, ctxt] in
+    let!? '_ :=
+      if legacy then
+        Error_monad.__return tt
+      else
+        Lwt.__return (well_formed_entrypoints arg_type root_name) in
+    let!? '(Ex_ty storage_type, ctxt) :=
+      Error_monad.trace extensible_type_value
+        (Lwt.__return (parse_storage_ty ctxt legacy storage_type)) in
+    let 'existT _ __Ex_ty_'a16 [storage_type, ctxt] :=
+      existT (A := Set)
+        (fun __Ex_ty_'a16 =>
+          [(Script_typed_ir.ty __Ex_ty_'a16) ** Alpha_context.context]) _
+        [storage_type, ctxt] in
+    let arg_annot :=
+      Script_ir_annot.default_annot Script_ir_annot.default_param_annot
+        (Script_ir_annot.type_to_var_annot (name_of_ty arg_type)) in
+    let storage_annot :=
+      Script_ir_annot.default_annot Script_ir_annot.default_storage_annot
+        (Script_ir_annot.type_to_var_annot (name_of_ty storage_type)) in
+    let arg_type_full :=
+      Script_typed_ir.Pair_t (arg_type, None, arg_annot)
+        (storage_type, None, storage_annot) None
+        (Pervasives.op_pipepipe (has_big_map arg_type)
+          (has_big_map storage_type)) in
+    let ret_type_full :=
+      Script_typed_ir.Pair_t
+        ((Script_typed_ir.List_t (Script_typed_ir.Operation_t None) None false),
+          None, None) (storage_type, None, None) None (has_big_map storage_type)
+      in
+    let!?
+      '({|
+        Script_typed_ir.lambda.lam :=
+          ({|
+            Script_typed_ir.descr.bef :=
+              Script_typed_ir.Item_t arg Script_typed_ir.Empty_t _;
+              Script_typed_ir.descr.aft :=
+                Script_typed_ir.Item_t ret
+                  Script_typed_ir.Empty_t
+                  _
+              |}, _)
+          |} as lambda, ctxt) :=
+      Error_monad.trace extensible_type_value
+        (parse_returning type_logger
+          (Toplevel
+            {| tc_context.Toplevel.storage_type := storage_type;
+              tc_context.Toplevel.param_type := arg_type;
+              tc_context.Toplevel.root_name := root_name;
+              tc_context.Toplevel.legacy_create_contract_literal := false |})
+          ctxt legacy (arg_type_full, None) ret_type_full code_field) in
+    let!? '(Eq, ctxt) := Lwt.__return (ty_eq ctxt arg arg_type_full) in
+    let!? '(_, ctxt) :=
+      Lwt.__return (merge_types legacy ctxt loc arg arg_type_full) in
+    let!? '(Eq, ctxt) := Lwt.__return (ty_eq ctxt ret ret_type_full) in
+    let!? '(_, ctxt) :=
+      Lwt.__return (merge_types legacy ctxt loc ret ret_type_full) in
+    let!? '(Eq, ctxt) := Lwt.__return (ty_eq ctxt storage_type ginit) in
+    let!? '(_, ctxt) :=
+      Lwt.__return (merge_types legacy ctxt loc storage_type ginit) in
+    typed ctxt loc
+      (Script_typed_ir.Create_contract_2 storage_type arg_type lambda root_name)
+      (Script_typed_ir.Item_t (Script_typed_ir.Operation_t None)
+        (Script_typed_ir.Item_t (Script_typed_ir.Address_t None) rest addr_annot)
+        op_annot)
+  | ((Micheline.Prim loc Alpha_context.Script.I_NOW [] annot, __stack_value), _)
+    =>
+    let!? annot :=
+      parse_var_annot loc (Some Script_ir_annot.default_now_annot) annot in
+    typed ctxt loc Script_typed_ir.Now
+      (Script_typed_ir.Item_t (Script_typed_ir.Timestamp_t None) __stack_value
+        annot)
+  |
+    ((Micheline.Prim loc Alpha_context.Script.I_AMOUNT [] annot, __stack_value),
+      _) =>
+    let!? annot :=
+      parse_var_annot loc (Some Script_ir_annot.default_amount_annot) annot in
+    typed ctxt loc Script_typed_ir.Amount
+      (Script_typed_ir.Item_t (Script_typed_ir.Mutez_t None) __stack_value annot)
+  |
+    ((Micheline.Prim loc Alpha_context.Script.I_CHAIN_ID [] annot, __stack_value),
+      _) =>
+    let!? annot := parse_var_annot loc None annot in
+    typed ctxt loc Script_typed_ir.ChainId
+      (Script_typed_ir.Item_t (Script_typed_ir.Chain_id_t None) __stack_value
+        annot)
+  |
+    ((Micheline.Prim loc Alpha_context.Script.I_BALANCE [] annot, __stack_value),
+      _) =>
+    let!? annot :=
+      parse_var_annot loc (Some Script_ir_annot.default_balance_annot) annot in
+    typed ctxt loc Script_typed_ir.Balance
+      (Script_typed_ir.Item_t (Script_typed_ir.Mutez_t None) __stack_value annot)
+  |
+    ((Micheline.Prim loc Alpha_context.Script.I_HASH_KEY [] annot,
+      Script_typed_ir.Item_t (Script_typed_ir.Key_t _) rest _), _) =>
+    let 'existT _ __451 [loc, annot, rest] :=
+      existT (A := Set)
+        (fun __451 =>
+          [Alpha_context.Script.location ** Micheline.annot **
+            (Script_typed_ir.stack_ty __451)]) _ [loc, annot, rest] in
+    let!? annot := parse_var_annot loc None annot in
+    typed ctxt loc Script_typed_ir.Hash_key
+      (Script_typed_ir.Item_t (Script_typed_ir.Key_hash_t None) rest annot)
+  |
+    ((Micheline.Prim loc Alpha_context.Script.I_CHECK_SIGNATURE [] annot,
+      Script_typed_ir.Item_t (Script_typed_ir.Key_t _)
+        (Script_typed_ir.Item_t (Script_typed_ir.Signature_t _)
+          (Script_typed_ir.Item_t (Script_typed_ir.Bytes_t _) rest _) _) _), _)
+    =>
+    let 'existT _ __457 [loc, annot, rest] :=
+      existT (A := Set)
+        (fun __457 =>
+          [Alpha_context.Script.location ** Micheline.annot **
+            (Script_typed_ir.stack_ty __457)]) _ [loc, annot, rest] in
+    let!? annot := parse_var_annot loc None annot in
+    typed ctxt loc Script_typed_ir.Check_signature
+      (Script_typed_ir.Item_t (Script_typed_ir.Bool_t None) rest annot)
+  |
+    ((Micheline.Prim loc Alpha_context.Script.I_BLAKE2B [] annot,
+      Script_typed_ir.Item_t (Script_typed_ir.Bytes_t _) rest _), _) =>
+    let 'existT _ __459 [loc, annot, rest] :=
+      existT (A := Set)
+        (fun __459 =>
+          [Alpha_context.Script.location ** Micheline.annot **
+            (Script_typed_ir.stack_ty __459)]) _ [loc, annot, rest] in
+    let!? annot := parse_var_annot loc None annot in
+    typed ctxt loc Script_typed_ir.Blake2b
+      (Script_typed_ir.Item_t (Script_typed_ir.Bytes_t None) rest annot)
+  |
+    ((Micheline.Prim loc Alpha_context.Script.I_SHA256 [] annot,
+      Script_typed_ir.Item_t (Script_typed_ir.Bytes_t _) rest _), _) =>
+    let 'existT _ __461 [loc, annot, rest] :=
+      existT (A := Set)
+        (fun __461 =>
+          [Alpha_context.Script.location ** Micheline.annot **
+            (Script_typed_ir.stack_ty __461)]) _ [loc, annot, rest] in
+    let!? annot := parse_var_annot loc None annot in
+    typed ctxt loc Script_typed_ir.Sha256
+      (Script_typed_ir.Item_t (Script_typed_ir.Bytes_t None) rest annot)
+  |
+    ((Micheline.Prim loc Alpha_context.Script.I_SHA512 [] annot,
+      Script_typed_ir.Item_t (Script_typed_ir.Bytes_t _) rest _), _) =>
+    let 'existT _ __463 [loc, annot, rest] :=
+      existT (A := Set)
+        (fun __463 =>
+          [Alpha_context.Script.location ** Micheline.annot **
+            (Script_typed_ir.stack_ty __463)]) _ [loc, annot, rest] in
+    let!? annot := parse_var_annot loc None annot in
+    typed ctxt loc Script_typed_ir.Sha512
+      (Script_typed_ir.Item_t (Script_typed_ir.Bytes_t None) rest annot)
+  |
+    ((Micheline.Prim loc Alpha_context.Script.I_STEPS_TO_QUOTA [] annot,
+      __stack_value), _) =>
+    if legacy then
+      let!? annot :=
+        parse_var_annot loc (Some Script_ir_annot.default_steps_annot) annot in
+      typed ctxt loc Script_typed_ir.Steps_to_quota
+        (Script_typed_ir.Item_t (Script_typed_ir.Nat_t None) __stack_value annot)
+    else
+      Error_monad.fail extensible_type_value
+  |
+    ((Micheline.Prim loc Alpha_context.Script.I_SOURCE [] annot, __stack_value),
+      _) =>
+    let!? annot :=
+      parse_var_annot loc (Some Script_ir_annot.default_source_annot) annot in
+    typed ctxt loc Script_typed_ir.Source
+      (Script_typed_ir.Item_t (Script_typed_ir.Address_t None) __stack_value
+        annot)
+  |
+    ((Micheline.Prim loc Alpha_context.Script.I_SENDER [] annot, __stack_value),
+      _) =>
+    let!? annot :=
+      parse_var_annot loc (Some Script_ir_annot.default_sender_annot) annot in
+    typed ctxt loc Script_typed_ir.Sender
+      (Script_typed_ir.Item_t (Script_typed_ir.Address_t None) __stack_value
+        annot)
+  |
+    ((Micheline.Prim loc Alpha_context.Script.I_SELF [] annot, __stack_value), _)
+    =>
+    let!? '(annot, entrypoint) :=
+      parse_entrypoint_annot loc (Some Script_ir_annot.default_self_annot) annot
+      in
+    let entrypoint :=
+      Option.unopt_map
+        (fun function_parameter =>
+          let 'Script_typed_ir.Field_annot annot := function_parameter in
+          annot) "default" entrypoint in
+    let fix get_toplevel_type (function_parameter : tc_context)
+      {struct function_parameter}
+      : Lwt.t (Error_monad.tzresult (judgement bef * Alpha_context.context)) :=
+      match function_parameter with
+      | Lambda => Error_monad.fail extensible_type_value
+      | Dip _ prev => get_toplevel_type prev
       |
-        ((Micheline.Prim loc Alpha_context.Script.I_IMPLICIT_ACCOUNT [] annot,
-          Script_typed_ir.Item_t (Script_typed_ir.Key_hash_t _) rest _), _) =>
-        let 'existT _ __429 [loc, annot, rest] :=
+        Toplevel {|
+          tc_context.Toplevel.param_type := param_type;
+            tc_context.Toplevel.root_name := root_name;
+            tc_context.Toplevel.legacy_create_contract_literal := false
+            |} =>
+        let 'existT _ __Toplevel_'param [param_type, root_name] :=
           existT (A := Set)
-            (fun __429 =>
-              [Alpha_context.Script.location ** Micheline.annot **
-                (Script_typed_ir.stack_ty __429)]) _ [loc, annot, rest] in
-        Error_monad.op_gtgteqquestion (parse_var_annot loc None annot)
-          (fun annot =>
-            typed ctxt loc Script_typed_ir.Implicit_account
-              (Script_typed_ir.Item_t
-                (Script_typed_ir.Contract_t (Script_typed_ir.Unit_t None) None)
-                rest annot))
-      |
-        ((Micheline.Prim loc Alpha_context.Script.I_CREATE_CONTRACT
-          (cons ((Micheline.Seq _ _) as code) []) annot,
-          Script_typed_ir.Item_t (Script_typed_ir.Key_hash_t _)
-            (Script_typed_ir.Item_t
-              (Script_typed_ir.Option_t (Script_typed_ir.Key_hash_t _) _ _)
-              (Script_typed_ir.Item_t (Script_typed_ir.Bool_t _)
-                (Script_typed_ir.Item_t (Script_typed_ir.Bool_t _)
-                  (Script_typed_ir.Item_t (Script_typed_ir.Mutez_t _)
-                    (Script_typed_ir.Item_t ginit rest _) _) _) _) _) _), _) =>
-        let 'existT _ [__441, __442] [loc, code, annot, ginit, rest] :=
-          existT (A := [Set ** Set])
-            (fun '[__441, __442] =>
-              [Alpha_context.Script.location **
-                (Micheline.node Alpha_context.Script.location
-                  Alpha_context.Script.prim) ** Micheline.annot **
-                (Script_typed_ir.ty __441) ** (Script_typed_ir.stack_ty __442)])
-            [_, _] [loc, code, annot, ginit, rest] in
-        if legacy then
-          Error_monad.op_gtgteqquestion (parse_two_var_annot loc annot)
-            (fun function_parameter =>
-              let '(op_annot, addr_annot) := function_parameter in
-              let cannonical_code :=
-                Pervasives.fst (Micheline.extract_locations code) in
-              Error_monad.op_gtgteqquestion
-                (Lwt.__return (parse_toplevel legacy cannonical_code))
-                (fun function_parameter =>
-                  let '(arg_type, storage_type, code_field, root_name) :=
-                    function_parameter in
-                  Error_monad.op_gtgteqquestion
-                    (Error_monad.trace extensible_type_value
-                      (Lwt.__return (parse_parameter_ty ctxt legacy arg_type)))
-                    (fun function_parameter =>
-                      let '(Ex_ty arg_type, ctxt) := function_parameter in
-                      let 'existT _ __Ex_ty_'a13 [arg_type, ctxt] :=
-                        existT (A := Set)
-                          (fun __Ex_ty_'a13 =>
-                            [(Script_typed_ir.ty __Ex_ty_'a13) **
-                              Alpha_context.context]) _ [arg_type, ctxt] in
-                      Error_monad.op_gtgteqquestion
-                        (if legacy then
-                          Error_monad.__return tt
-                        else
-                          Lwt.__return
-                            (well_formed_entrypoints arg_type root_name))
-                        (fun function_parameter =>
-                          let '_ := function_parameter in
-                          Error_monad.op_gtgteqquestion
-                            (Error_monad.trace extensible_type_value
-                              (Lwt.__return
-                                (parse_storage_ty ctxt legacy storage_type)))
-                            (fun function_parameter =>
-                              let '(Ex_ty storage_type, ctxt) :=
-                                function_parameter in
-                              let 'existT _ __Ex_ty_'a14 [storage_type, ctxt] :=
-                                existT (A := Set)
-                                  (fun __Ex_ty_'a14 =>
-                                    [(Script_typed_ir.ty __Ex_ty_'a14) **
-                                      Alpha_context.context]) _
-                                  [storage_type, ctxt] in
-                              let arg_annot :=
-                                Script_ir_annot.default_annot
-                                  Script_ir_annot.default_param_annot
-                                  (Script_ir_annot.type_to_var_annot
-                                    (name_of_ty arg_type)) in
-                              let storage_annot :=
-                                Script_ir_annot.default_annot
-                                  Script_ir_annot.default_storage_annot
-                                  (Script_ir_annot.type_to_var_annot
-                                    (name_of_ty storage_type)) in
-                              let arg_type_full :=
-                                Script_typed_ir.Pair_t
-                                  (arg_type, None, arg_annot)
-                                  (storage_type, None, storage_annot) None
-                                  (Pervasives.op_pipepipe (has_big_map arg_type)
-                                    (has_big_map storage_type)) in
-                              let ret_type_full :=
-                                Script_typed_ir.Pair_t
-                                  ((Script_typed_ir.List_t
-                                    (Script_typed_ir.Operation_t None) None
-                                    false), None, None)
-                                  (storage_type, None, None) None
-                                  (has_big_map storage_type) in
-                              Error_monad.op_gtgteqquestion
-                                (Error_monad.trace extensible_type_value
-                                  (parse_returning type_logger
-                                    (Toplevel
-                                      {|
-                                        tc_context.Toplevel.storage_type :=
-                                          storage_type;
-                                        tc_context.Toplevel.param_type :=
-                                          arg_type;
-                                        tc_context.Toplevel.root_name :=
-                                          root_name;
-                                        tc_context.Toplevel.legacy_create_contract_literal :=
-                                          true |}) ctxt legacy
-                                    (arg_type_full, None) ret_type_full
-                                    code_field))
-                                (fun function_parameter =>
-                                  let
-                                    '({|
-                                      Script_typed_ir.lambda.lam :=
-                                        ({|
-                                          Script_typed_ir.descr.bef :=
-                                            Script_typed_ir.Item_t
-                                              arg
-                                              Script_typed_ir.Empty_t
-                                              _;
-                                            Script_typed_ir.descr.aft
-                                              :=
-                                              Script_typed_ir.Item_t
-                                                ret
-                                                Script_typed_ir.Empty_t
-                                                _
-                                            |},
-                                          _)
-                                        |} as lambda, ctxt) :=
-                                    function_parameter in
-                                  Error_monad.op_gtgteqquestion
-                                    (Lwt.__return (ty_eq ctxt arg arg_type_full))
-                                    (fun function_parameter =>
-                                      let '(Eq, ctxt) := function_parameter in
-                                      Error_monad.op_gtgteqquestion
-                                        (Lwt.__return
-                                          (merge_types legacy ctxt loc arg
-                                            arg_type_full))
-                                        (fun function_parameter =>
-                                          let '(_, ctxt) := function_parameter
-                                            in
-                                          Error_monad.op_gtgteqquestion
-                                            (Lwt.__return
-                                              (ty_eq ctxt ret ret_type_full))
-                                            (fun function_parameter =>
-                                              let '(Eq, ctxt) :=
-                                                function_parameter in
-                                              Error_monad.op_gtgteqquestion
-                                                (Lwt.__return
-                                                  (merge_types legacy ctxt loc
-                                                    ret ret_type_full))
-                                                (fun function_parameter =>
-                                                  let '(_, ctxt) :=
-                                                    function_parameter in
-                                                  Error_monad.op_gtgteqquestion
-                                                    (Lwt.__return
-                                                      (ty_eq ctxt storage_type
-                                                        ginit))
-                                                    (fun function_parameter =>
-                                                      let '(Eq, ctxt) :=
-                                                        function_parameter in
-                                                      Error_monad.op_gtgteqquestion
-                                                        (Lwt.__return
-                                                          (merge_types legacy
-                                                            ctxt loc
-                                                            storage_type ginit))
-                                                        (fun function_parameter
-                                                          =>
-                                                          let '(_, ctxt) :=
-                                                            function_parameter
-                                                            in
-                                                          typed ctxt loc
-                                                            (Script_typed_ir.Create_contract
-                                                              storage_type
-                                                              arg_type lambda
-                                                              root_name)
-                                                            (Script_typed_ir.Item_t
-                                                              (Script_typed_ir.Operation_t
-                                                                None)
-                                                              (Script_typed_ir.Item_t
-                                                                (Script_typed_ir.Address_t
-                                                                  None) rest
-                                                                addr_annot)
-                                                              op_annot)))))))))))))
-        else
-          Error_monad.fail extensible_type_value
-      |
-        ((Micheline.Prim loc Alpha_context.Script.I_CREATE_CONTRACT
-          (cons ((Micheline.Seq _ _) as code) []) annot,
-          Script_typed_ir.Item_t
-            (Script_typed_ir.Option_t (Script_typed_ir.Key_hash_t _) _ _)
-            (Script_typed_ir.Item_t (Script_typed_ir.Mutez_t _)
-              (Script_typed_ir.Item_t ginit rest _) _) _), _) =>
-        let 'existT _ [__448, __449] [loc, code, annot, ginit, rest] :=
-          existT (A := [Set ** Set])
-            (fun '[__448, __449] =>
-              [Alpha_context.Script.location **
-                (Micheline.node Alpha_context.Script.location
-                  Alpha_context.Script.prim) ** Micheline.annot **
-                (Script_typed_ir.ty __448) ** (Script_typed_ir.stack_ty __449)])
-            [_, _] [loc, code, annot, ginit, rest] in
-        Error_monad.op_gtgteqquestion (parse_two_var_annot loc annot)
-          (fun function_parameter =>
-            let '(op_annot, addr_annot) := function_parameter in
-            let cannonical_code :=
-              Pervasives.fst (Micheline.extract_locations code) in
-            Error_monad.op_gtgteqquestion
-              (Lwt.__return (parse_toplevel legacy cannonical_code))
-              (fun function_parameter =>
-                let '(arg_type, storage_type, code_field, root_name) :=
-                  function_parameter in
-                Error_monad.op_gtgteqquestion
-                  (Error_monad.trace extensible_type_value
-                    (Lwt.__return (parse_parameter_ty ctxt legacy arg_type)))
-                  (fun function_parameter =>
-                    let '(Ex_ty arg_type, ctxt) := function_parameter in
-                    let 'existT _ __Ex_ty_'a15 [arg_type, ctxt] :=
-                      existT (A := Set)
-                        (fun __Ex_ty_'a15 =>
-                          [(Script_typed_ir.ty __Ex_ty_'a15) **
-                            Alpha_context.context]) _ [arg_type, ctxt] in
-                    Error_monad.op_gtgteqquestion
-                      (if legacy then
-                        Error_monad.__return tt
-                      else
-                        Lwt.__return
-                          (well_formed_entrypoints arg_type root_name))
-                      (fun function_parameter =>
-                        let '_ := function_parameter in
-                        Error_monad.op_gtgteqquestion
-                          (Error_monad.trace extensible_type_value
-                            (Lwt.__return
-                              (parse_storage_ty ctxt legacy storage_type)))
-                          (fun function_parameter =>
-                            let '(Ex_ty storage_type, ctxt) :=
-                              function_parameter in
-                            let 'existT _ __Ex_ty_'a16 [storage_type, ctxt] :=
-                              existT (A := Set)
-                                (fun __Ex_ty_'a16 =>
-                                  [(Script_typed_ir.ty __Ex_ty_'a16) **
-                                    Alpha_context.context]) _
-                                [storage_type, ctxt] in
-                            let arg_annot :=
-                              Script_ir_annot.default_annot
-                                Script_ir_annot.default_param_annot
-                                (Script_ir_annot.type_to_var_annot
-                                  (name_of_ty arg_type)) in
-                            let storage_annot :=
-                              Script_ir_annot.default_annot
-                                Script_ir_annot.default_storage_annot
-                                (Script_ir_annot.type_to_var_annot
-                                  (name_of_ty storage_type)) in
-                            let arg_type_full :=
-                              Script_typed_ir.Pair_t (arg_type, None, arg_annot)
-                                (storage_type, None, storage_annot) None
-                                (Pervasives.op_pipepipe (has_big_map arg_type)
-                                  (has_big_map storage_type)) in
-                            let ret_type_full :=
-                              Script_typed_ir.Pair_t
-                                ((Script_typed_ir.List_t
-                                  (Script_typed_ir.Operation_t None) None false),
-                                  None, None) (storage_type, None, None) None
-                                (has_big_map storage_type) in
-                            Error_monad.op_gtgteqquestion
-                              (Error_monad.trace extensible_type_value
-                                (parse_returning type_logger
-                                  (Toplevel
-                                    {|
-                                      tc_context.Toplevel.storage_type :=
-                                        storage_type;
-                                      tc_context.Toplevel.param_type := arg_type;
-                                      tc_context.Toplevel.root_name := root_name;
-                                      tc_context.Toplevel.legacy_create_contract_literal :=
-                                        false |}) ctxt legacy
-                                  (arg_type_full, None) ret_type_full code_field))
-                              (fun function_parameter =>
-                                let
-                                  '({|
-                                    Script_typed_ir.lambda.lam :=
-                                      ({|
-                                        Script_typed_ir.descr.bef :=
-                                          Script_typed_ir.Item_t
-                                            arg
-                                            Script_typed_ir.Empty_t
-                                            _;
-                                          Script_typed_ir.descr.aft
-                                            :=
-                                            Script_typed_ir.Item_t
-                                              ret
-                                              Script_typed_ir.Empty_t
-                                              _
-                                          |},
-                                        _)
-                                      |} as lambda, ctxt) := function_parameter
-                                  in
-                                Error_monad.op_gtgteqquestion
-                                  (Lwt.__return (ty_eq ctxt arg arg_type_full))
-                                  (fun function_parameter =>
-                                    let '(Eq, ctxt) := function_parameter in
-                                    Error_monad.op_gtgteqquestion
-                                      (Lwt.__return
-                                        (merge_types legacy ctxt loc arg
-                                          arg_type_full))
-                                      (fun function_parameter =>
-                                        let '(_, ctxt) := function_parameter in
-                                        Error_monad.op_gtgteqquestion
-                                          (Lwt.__return
-                                            (ty_eq ctxt ret ret_type_full))
-                                          (fun function_parameter =>
-                                            let '(Eq, ctxt) :=
-                                              function_parameter in
-                                            Error_monad.op_gtgteqquestion
-                                              (Lwt.__return
-                                                (merge_types legacy ctxt loc ret
-                                                  ret_type_full))
-                                              (fun function_parameter =>
-                                                let '(_, ctxt) :=
-                                                  function_parameter in
-                                                Error_monad.op_gtgteqquestion
-                                                  (Lwt.__return
-                                                    (ty_eq ctxt storage_type
-                                                      ginit))
-                                                  (fun function_parameter =>
-                                                    let '(Eq, ctxt) :=
-                                                      function_parameter in
-                                                    Error_monad.op_gtgteqquestion
-                                                      (Lwt.__return
-                                                        (merge_types legacy ctxt
-                                                          loc storage_type ginit))
-                                                      (fun function_parameter =>
-                                                        let '(_, ctxt) :=
-                                                          function_parameter in
-                                                        typed ctxt loc
-                                                          (Script_typed_ir.Create_contract_2
-                                                            storage_type
-                                                            arg_type lambda
-                                                            root_name)
-                                                          (Script_typed_ir.Item_t
-                                                            (Script_typed_ir.Operation_t
-                                                              None)
-                                                            (Script_typed_ir.Item_t
-                                                              (Script_typed_ir.Address_t
-                                                                None) rest
-                                                              addr_annot)
-                                                            op_annot)))))))))))))
-      |
-        ((Micheline.Prim loc Alpha_context.Script.I_NOW [] annot, __stack_value),
-          _) =>
-        Error_monad.op_gtgteqquestion
-          (parse_var_annot loc (Some Script_ir_annot.default_now_annot) annot)
-          (fun annot =>
-            typed ctxt loc Script_typed_ir.Now
-              (Script_typed_ir.Item_t (Script_typed_ir.Timestamp_t None)
-                __stack_value annot))
-      |
-        ((Micheline.Prim loc Alpha_context.Script.I_AMOUNT [] annot,
-          __stack_value), _) =>
-        Error_monad.op_gtgteqquestion
-          (parse_var_annot loc (Some Script_ir_annot.default_amount_annot) annot)
-          (fun annot =>
-            typed ctxt loc Script_typed_ir.Amount
-              (Script_typed_ir.Item_t (Script_typed_ir.Mutez_t None)
-                __stack_value annot))
-      |
-        ((Micheline.Prim loc Alpha_context.Script.I_CHAIN_ID [] annot,
-          __stack_value), _) =>
-        Error_monad.op_gtgteqquestion (parse_var_annot loc None annot)
-          (fun annot =>
-            typed ctxt loc Script_typed_ir.ChainId
-              (Script_typed_ir.Item_t (Script_typed_ir.Chain_id_t None)
-                __stack_value annot))
-      |
-        ((Micheline.Prim loc Alpha_context.Script.I_BALANCE [] annot,
-          __stack_value), _) =>
-        Error_monad.op_gtgteqquestion
-          (parse_var_annot loc (Some Script_ir_annot.default_balance_annot)
-            annot)
-          (fun annot =>
-            typed ctxt loc Script_typed_ir.Balance
-              (Script_typed_ir.Item_t (Script_typed_ir.Mutez_t None)
-                __stack_value annot))
-      |
-        ((Micheline.Prim loc Alpha_context.Script.I_HASH_KEY [] annot,
-          Script_typed_ir.Item_t (Script_typed_ir.Key_t _) rest _), _) =>
-        let 'existT _ __451 [loc, annot, rest] :=
+            (fun __Toplevel_'param =>
+              [(Script_typed_ir.ty __Toplevel_'param) ** (option string)]) _
+            [param_type, root_name] in
+        let!? '(_, Ex_ty param_type) :=
+          Lwt.__return (find_entrypoint param_type root_name entrypoint) in
+        let 'existT _ __Ex_ty_'a17 param_type :=
           existT (A := Set)
-            (fun __451 =>
-              [Alpha_context.Script.location ** Micheline.annot **
-                (Script_typed_ir.stack_ty __451)]) _ [loc, annot, rest] in
-        Error_monad.op_gtgteqquestion (parse_var_annot loc None annot)
-          (fun annot =>
-            typed ctxt loc Script_typed_ir.Hash_key
-              (Script_typed_ir.Item_t (Script_typed_ir.Key_hash_t None) rest
-                annot))
+            (fun __Ex_ty_'a17 => (Script_typed_ir.ty __Ex_ty_'a17)) _ param_type
+          in
+        typed ctxt loc (Script_typed_ir.Self param_type entrypoint)
+          (Script_typed_ir.Item_t (Script_typed_ir.Contract_t param_type None)
+            __stack_value annot)
       |
-        ((Micheline.Prim loc Alpha_context.Script.I_CHECK_SIGNATURE [] annot,
-          Script_typed_ir.Item_t (Script_typed_ir.Key_t _)
-            (Script_typed_ir.Item_t (Script_typed_ir.Signature_t _)
-              (Script_typed_ir.Item_t (Script_typed_ir.Bytes_t _) rest _) _) _),
-          _) =>
-        let 'existT _ __457 [loc, annot, rest] :=
+        Toplevel {|
+          tc_context.Toplevel.param_type := param_type;
+            tc_context.Toplevel.root_name := _;
+            tc_context.Toplevel.legacy_create_contract_literal := true
+            |} =>
+        let 'existT _ __Toplevel_'param1 param_type :=
           existT (A := Set)
-            (fun __457 =>
-              [Alpha_context.Script.location ** Micheline.annot **
-                (Script_typed_ir.stack_ty __457)]) _ [loc, annot, rest] in
-        Error_monad.op_gtgteqquestion (parse_var_annot loc None annot)
-          (fun annot =>
-            typed ctxt loc Script_typed_ir.Check_signature
-              (Script_typed_ir.Item_t (Script_typed_ir.Bool_t None) rest annot))
-      |
-        ((Micheline.Prim loc Alpha_context.Script.I_BLAKE2B [] annot,
-          Script_typed_ir.Item_t (Script_typed_ir.Bytes_t _) rest _), _) =>
-        let 'existT _ __459 [loc, annot, rest] :=
-          existT (A := Set)
-            (fun __459 =>
-              [Alpha_context.Script.location ** Micheline.annot **
-                (Script_typed_ir.stack_ty __459)]) _ [loc, annot, rest] in
-        Error_monad.op_gtgteqquestion (parse_var_annot loc None annot)
-          (fun annot =>
-            typed ctxt loc Script_typed_ir.Blake2b
-              (Script_typed_ir.Item_t (Script_typed_ir.Bytes_t None) rest annot))
-      |
-        ((Micheline.Prim loc Alpha_context.Script.I_SHA256 [] annot,
-          Script_typed_ir.Item_t (Script_typed_ir.Bytes_t _) rest _), _) =>
-        let 'existT _ __461 [loc, annot, rest] :=
-          existT (A := Set)
-            (fun __461 =>
-              [Alpha_context.Script.location ** Micheline.annot **
-                (Script_typed_ir.stack_ty __461)]) _ [loc, annot, rest] in
-        Error_monad.op_gtgteqquestion (parse_var_annot loc None annot)
-          (fun annot =>
-            typed ctxt loc Script_typed_ir.Sha256
-              (Script_typed_ir.Item_t (Script_typed_ir.Bytes_t None) rest annot))
-      |
-        ((Micheline.Prim loc Alpha_context.Script.I_SHA512 [] annot,
-          Script_typed_ir.Item_t (Script_typed_ir.Bytes_t _) rest _), _) =>
-        let 'existT _ __463 [loc, annot, rest] :=
-          existT (A := Set)
-            (fun __463 =>
-              [Alpha_context.Script.location ** Micheline.annot **
-                (Script_typed_ir.stack_ty __463)]) _ [loc, annot, rest] in
-        Error_monad.op_gtgteqquestion (parse_var_annot loc None annot)
-          (fun annot =>
-            typed ctxt loc Script_typed_ir.Sha512
-              (Script_typed_ir.Item_t (Script_typed_ir.Bytes_t None) rest annot))
-      |
-        ((Micheline.Prim loc Alpha_context.Script.I_STEPS_TO_QUOTA [] annot,
-          __stack_value), _) =>
-        if legacy then
-          Error_monad.op_gtgteqquestion
-            (parse_var_annot loc (Some Script_ir_annot.default_steps_annot)
-              annot)
-            (fun annot =>
-              typed ctxt loc Script_typed_ir.Steps_to_quota
-                (Script_typed_ir.Item_t (Script_typed_ir.Nat_t None)
-                  __stack_value annot))
-        else
-          Error_monad.fail extensible_type_value
-      |
-        ((Micheline.Prim loc Alpha_context.Script.I_SOURCE [] annot,
-          __stack_value), _) =>
-        Error_monad.op_gtgteqquestion
-          (parse_var_annot loc (Some Script_ir_annot.default_source_annot) annot)
-          (fun annot =>
-            typed ctxt loc Script_typed_ir.Source
-              (Script_typed_ir.Item_t (Script_typed_ir.Address_t None)
-                __stack_value annot))
-      |
-        ((Micheline.Prim loc Alpha_context.Script.I_SENDER [] annot,
-          __stack_value), _) =>
-        Error_monad.op_gtgteqquestion
-          (parse_var_annot loc (Some Script_ir_annot.default_sender_annot) annot)
-          (fun annot =>
-            typed ctxt loc Script_typed_ir.Sender
-              (Script_typed_ir.Item_t (Script_typed_ir.Address_t None)
-                __stack_value annot))
-      |
-        ((Micheline.Prim loc Alpha_context.Script.I_SELF [] annot, __stack_value),
-          _) =>
-        Error_monad.op_gtgteqquestion
-          (parse_entrypoint_annot loc (Some Script_ir_annot.default_self_annot)
-            annot)
-          (fun function_parameter =>
-            let '(annot, entrypoint) := function_parameter in
-            let entrypoint :=
-              Option.unopt_map
-                (fun function_parameter =>
-                  let 'Script_typed_ir.Field_annot annot := function_parameter
-                    in
-                  annot) "default" entrypoint in
-            let fix get_toplevel_type (function_parameter : tc_context)
-              {struct function_parameter}
-              : Lwt.t
-                (Error_monad.tzresult (judgement bef * Alpha_context.context)) :=
-              match function_parameter with
-              | Lambda => Error_monad.fail extensible_type_value
-              | Dip _ prev => get_toplevel_type prev
-              |
-                Toplevel {|
-                  tc_context.Toplevel.param_type := param_type;
-                    tc_context.Toplevel.root_name := root_name;
-                    tc_context.Toplevel.legacy_create_contract_literal := false
-                    |} =>
-                let 'existT _ __Toplevel_'param [param_type, root_name] :=
-                  existT (A := Set)
-                    (fun __Toplevel_'param =>
-                      [(Script_typed_ir.ty __Toplevel_'param) **
-                        (option string)]) _ [param_type, root_name] in
-                Error_monad.op_gtgteqquestion
-                  (Lwt.__return
-                    (find_entrypoint param_type root_name entrypoint))
-                  (fun function_parameter =>
-                    let '(_, Ex_ty param_type) := function_parameter in
-                    let 'existT _ __Ex_ty_'a17 param_type :=
-                      existT (A := Set)
-                        (fun __Ex_ty_'a17 => (Script_typed_ir.ty __Ex_ty_'a17))
-                        _ param_type in
-                    typed ctxt loc (Script_typed_ir.Self param_type entrypoint)
-                      (Script_typed_ir.Item_t
-                        (Script_typed_ir.Contract_t param_type None)
-                        __stack_value annot))
-              |
-                Toplevel {|
-                  tc_context.Toplevel.param_type := param_type;
-                    tc_context.Toplevel.root_name := _;
-                    tc_context.Toplevel.legacy_create_contract_literal := true
-                    |} =>
-                let 'existT _ __Toplevel_'param1 param_type :=
-                  existT (A := Set)
-                    (fun __Toplevel_'param1 =>
-                      (Script_typed_ir.ty __Toplevel_'param1)) _ param_type in
-                typed ctxt loc (Script_typed_ir.Self param_type "default")
-                  (Script_typed_ir.Item_t
-                    (Script_typed_ir.Contract_t param_type None) __stack_value
-                    annot)
-              end in
-            get_toplevel_type tc_context)
-      |
-        ((Micheline.Prim loc
-          ((Alpha_context.Script.I_DUP | Alpha_context.Script.I_SWAP |
-          Alpha_context.Script.I_SOME | Alpha_context.Script.I_UNIT |
-          Alpha_context.Script.I_PAIR | Alpha_context.Script.I_CAR |
-          Alpha_context.Script.I_CDR | Alpha_context.Script.I_CONS |
-          Alpha_context.Script.I_CONCAT | Alpha_context.Script.I_SLICE |
-          Alpha_context.Script.I_MEM | Alpha_context.Script.I_UPDATE |
-          Alpha_context.Script.I_MAP | Alpha_context.Script.I_GET |
-          Alpha_context.Script.I_EXEC | Alpha_context.Script.I_FAILWITH |
-          Alpha_context.Script.I_SIZE | Alpha_context.Script.I_ADD |
-          Alpha_context.Script.I_SUB | Alpha_context.Script.I_MUL |
-          Alpha_context.Script.I_EDIV | Alpha_context.Script.I_OR |
-          Alpha_context.Script.I_AND | Alpha_context.Script.I_XOR |
-          Alpha_context.Script.I_NOT | Alpha_context.Script.I_ABS |
-          Alpha_context.Script.I_NEG | Alpha_context.Script.I_LSL |
-          Alpha_context.Script.I_LSR | Alpha_context.Script.I_COMPARE |
-          Alpha_context.Script.I_EQ | Alpha_context.Script.I_NEQ |
-          Alpha_context.Script.I_LT | Alpha_context.Script.I_GT |
-          Alpha_context.Script.I_LE | Alpha_context.Script.I_GE |
-          Alpha_context.Script.I_TRANSFER_TOKENS |
-          Alpha_context.Script.I_CREATE_ACCOUNT |
-          Alpha_context.Script.I_SET_DELEGATE | Alpha_context.Script.I_NOW |
-          Alpha_context.Script.I_IMPLICIT_ACCOUNT |
-          Alpha_context.Script.I_AMOUNT | Alpha_context.Script.I_BALANCE |
-          Alpha_context.Script.I_CHECK_SIGNATURE |
-          Alpha_context.Script.I_HASH_KEY | Alpha_context.Script.I_SOURCE |
-          Alpha_context.Script.I_SENDER | Alpha_context.Script.I_BLAKE2B |
-          Alpha_context.Script.I_SHA256 | Alpha_context.Script.I_SHA512 |
-          Alpha_context.Script.I_STEPS_TO_QUOTA | Alpha_context.Script.I_ADDRESS)
-            as name) ((cons _ _) as l) _, _), _) =>
-        Error_monad.fail extensible_type_value
-      |
-        ((Micheline.Prim loc
-          ((Alpha_context.Script.I_NONE | Alpha_context.Script.I_LEFT |
-          Alpha_context.Script.I_RIGHT | Alpha_context.Script.I_NIL |
-          Alpha_context.Script.I_MAP | Alpha_context.Script.I_ITER |
-          Alpha_context.Script.I_EMPTY_SET | Alpha_context.Script.I_DIP |
-          Alpha_context.Script.I_LOOP | Alpha_context.Script.I_LOOP_LEFT |
-          Alpha_context.Script.I_CONTRACT) as name)
-          (([] | cons _ (cons _ _)) as l) _, _), _) =>
-        Error_monad.fail extensible_type_value
-      |
-        ((Micheline.Prim loc
-          ((Alpha_context.Script.I_PUSH | Alpha_context.Script.I_IF_NONE |
-          Alpha_context.Script.I_IF_LEFT | Alpha_context.Script.I_IF_CONS |
-          Alpha_context.Script.I_EMPTY_MAP | Alpha_context.Script.I_IF) as name)
-          (([] | cons _ [] | cons _ (cons _ (cons _ _))) as l) _, _), _) =>
-        Error_monad.fail extensible_type_value
-      |
-        ((Micheline.Prim loc Alpha_context.Script.I_LAMBDA
-          (([] | cons _ [] | cons _ (cons _ (cons _ (cons _ _)))) as l) _, _), _)
-        => Error_monad.fail extensible_type_value
-      |
-        ((Micheline.Prim loc
-          ((Alpha_context.Script.I_ADD | Alpha_context.Script.I_SUB |
-          Alpha_context.Script.I_MUL | Alpha_context.Script.I_EDIV |
-          Alpha_context.Script.I_AND | Alpha_context.Script.I_OR |
-          Alpha_context.Script.I_XOR | Alpha_context.Script.I_LSL |
-          Alpha_context.Script.I_LSR) as name) [] _,
-          Script_typed_ir.Item_t ta (Script_typed_ir.Item_t tb _ _) _), _) =>
-        let 'existT _ [__464, __466] [loc, name, ta, tb] :=
-          existT (A := [Set ** Set])
-            (fun '[__464, __466] =>
-              [Alpha_context.Script.location ** Alpha_context.Script.prim **
-                (Script_typed_ir.ty __464) ** (Script_typed_ir.ty __466)]) [_,
-            _] [loc, name, ta, tb] in
-        Error_monad.op_gtgteqquestion
-          (Lwt.__return (serialize_ty_for_error ctxt ta))
-          (fun function_parameter =>
-            let '(ta, ctxt) := function_parameter in
-            Error_monad.op_gtgteqquestion
-              (Lwt.__return (serialize_ty_for_error ctxt tb))
-              (fun function_parameter =>
-                let '(tb, _ctxt) := function_parameter in
-                Error_monad.fail extensible_type_value))
-      |
-        ((Micheline.Prim loc
-          ((Alpha_context.Script.I_NEG | Alpha_context.Script.I_ABS |
-          Alpha_context.Script.I_NOT | Alpha_context.Script.I_CONCAT |
-          Alpha_context.Script.I_SIZE | Alpha_context.Script.I_EQ |
-          Alpha_context.Script.I_NEQ | Alpha_context.Script.I_LT |
-          Alpha_context.Script.I_GT | Alpha_context.Script.I_LE |
-          Alpha_context.Script.I_GE) as name) [] _,
-          Script_typed_ir.Item_t __t_value _ _), _) =>
-        let 'existT _ __468 [loc, name, __t_value] :=
-          existT (A := Set)
-            (fun __468 =>
-              [Alpha_context.Script.location ** Alpha_context.Script.prim **
-                (Script_typed_ir.ty __468)]) _ [loc, name, __t_value] in
-        Error_monad.op_gtgteqquestion
-          (Lwt.__return (serialize_ty_for_error ctxt __t_value))
-          (fun function_parameter =>
-            let '(__t_value, _ctxt) := function_parameter in
-            Error_monad.fail extensible_type_value)
-      |
-        ((Micheline.Prim loc
-          ((Alpha_context.Script.I_UPDATE | Alpha_context.Script.I_SLICE) as
-            name) [] _, __stack_value), _) =>
-        Error_monad.op_gtgteqquestion
-          (serialize_stack_for_error ctxt __stack_value)
-          (fun function_parameter =>
-            let '(__stack_value, _ctxt) := function_parameter in
-            Error_monad.fail extensible_type_value)
-      |
-        ((Micheline.Prim loc Alpha_context.Script.I_CREATE_CONTRACT _ _,
-          __stack_value), _) =>
-        Error_monad.op_gtgteqquestion
-          (serialize_stack_for_error ctxt __stack_value)
-          (fun function_parameter =>
-            let '(__stack_value, _ctxt) := function_parameter in
-            Error_monad.fail extensible_type_value)
-      |
-        ((Micheline.Prim loc Alpha_context.Script.I_CREATE_ACCOUNT [] _,
-          __stack_value), _) =>
-        Error_monad.op_gtgteqquestion
-          (serialize_stack_for_error ctxt __stack_value)
-          (fun function_parameter =>
-            let '(__stack_value, _ctxt) := function_parameter in
-            Error_monad.fail extensible_type_value)
-      |
-        ((Micheline.Prim loc Alpha_context.Script.I_TRANSFER_TOKENS [] _,
-          __stack_value), _) =>
-        Error_monad.op_gtgteqquestion
-          (serialize_stack_for_error ctxt __stack_value)
-          (fun function_parameter =>
-            let '(__stack_value, _ctxt) := function_parameter in
-            Error_monad.fail extensible_type_value)
-      |
-        ((Micheline.Prim loc
-          ((Alpha_context.Script.I_DROP | Alpha_context.Script.I_DUP |
-          Alpha_context.Script.I_CAR | Alpha_context.Script.I_CDR |
-          Alpha_context.Script.I_SOME | Alpha_context.Script.I_BLAKE2B |
-          Alpha_context.Script.I_SHA256 | Alpha_context.Script.I_SHA512 |
-          Alpha_context.Script.I_DIP | Alpha_context.Script.I_IF_NONE |
-          Alpha_context.Script.I_LEFT | Alpha_context.Script.I_RIGHT |
-          Alpha_context.Script.I_IF_LEFT | Alpha_context.Script.I_IF |
-          Alpha_context.Script.I_LOOP | Alpha_context.Script.I_IF_CONS |
-          Alpha_context.Script.I_IMPLICIT_ACCOUNT | Alpha_context.Script.I_NEG |
-          Alpha_context.Script.I_ABS | Alpha_context.Script.I_INT |
-          Alpha_context.Script.I_NOT | Alpha_context.Script.I_HASH_KEY |
-          Alpha_context.Script.I_EQ | Alpha_context.Script.I_NEQ |
-          Alpha_context.Script.I_LT | Alpha_context.Script.I_GT |
-          Alpha_context.Script.I_LE | Alpha_context.Script.I_GE) as name) _ _,
-          __stack_value), _) =>
-        Error_monad.op_gtgteqquestion
-          (serialize_stack_for_error ctxt __stack_value)
-          (fun function_parameter =>
-            let '(__stack_value, _ctxt) := function_parameter in
-            Error_monad.fail extensible_type_value)
-      |
-        ((Micheline.Prim loc
-          ((Alpha_context.Script.I_SWAP | Alpha_context.Script.I_PAIR |
-          Alpha_context.Script.I_CONS | Alpha_context.Script.I_GET |
-          Alpha_context.Script.I_MEM | Alpha_context.Script.I_EXEC |
-          Alpha_context.Script.I_CHECK_SIGNATURE | Alpha_context.Script.I_ADD |
-          Alpha_context.Script.I_SUB | Alpha_context.Script.I_MUL |
-          Alpha_context.Script.I_EDIV | Alpha_context.Script.I_AND |
-          Alpha_context.Script.I_OR | Alpha_context.Script.I_XOR |
-          Alpha_context.Script.I_LSL | Alpha_context.Script.I_LSR) as name) _ _,
-          __stack_value), _) =>
-        Error_monad.op_gtgteqquestion
-          (serialize_stack_for_error ctxt __stack_value)
-          (fun function_parameter =>
-            let '(__stack_value, _ctxt) := function_parameter in
-            Error_monad.fail extensible_type_value)
-      | ((expr, _), _) =>
-        Error_monad.fail
-          (unexpected expr [ Script_tc_errors.Seq_kind ]
-            Script_tc_errors.Instr_namespace
-            [
-              Alpha_context.Script.I_DROP;
-              Alpha_context.Script.I_DUP;
-              Alpha_context.Script.I_DIG;
-              Alpha_context.Script.I_DUG;
-              Alpha_context.Script.I_SWAP;
-              Alpha_context.Script.I_SOME;
-              Alpha_context.Script.I_UNIT;
-              Alpha_context.Script.I_PAIR;
-              Alpha_context.Script.I_CAR;
-              Alpha_context.Script.I_CDR;
-              Alpha_context.Script.I_CONS;
-              Alpha_context.Script.I_MEM;
-              Alpha_context.Script.I_UPDATE;
-              Alpha_context.Script.I_MAP;
-              Alpha_context.Script.I_ITER;
-              Alpha_context.Script.I_GET;
-              Alpha_context.Script.I_EXEC;
-              Alpha_context.Script.I_FAILWITH;
-              Alpha_context.Script.I_SIZE;
-              Alpha_context.Script.I_CONCAT;
-              Alpha_context.Script.I_ADD;
-              Alpha_context.Script.I_SUB;
-              Alpha_context.Script.I_MUL;
-              Alpha_context.Script.I_EDIV;
-              Alpha_context.Script.I_OR;
-              Alpha_context.Script.I_AND;
-              Alpha_context.Script.I_XOR;
-              Alpha_context.Script.I_NOT;
-              Alpha_context.Script.I_ABS;
-              Alpha_context.Script.I_INT;
-              Alpha_context.Script.I_NEG;
-              Alpha_context.Script.I_LSL;
-              Alpha_context.Script.I_LSR;
-              Alpha_context.Script.I_COMPARE;
-              Alpha_context.Script.I_EQ;
-              Alpha_context.Script.I_NEQ;
-              Alpha_context.Script.I_LT;
-              Alpha_context.Script.I_GT;
-              Alpha_context.Script.I_LE;
-              Alpha_context.Script.I_GE;
-              Alpha_context.Script.I_TRANSFER_TOKENS;
-              Alpha_context.Script.I_CREATE_ACCOUNT;
-              Alpha_context.Script.I_CREATE_CONTRACT;
-              Alpha_context.Script.I_NOW;
-              Alpha_context.Script.I_AMOUNT;
-              Alpha_context.Script.I_BALANCE;
-              Alpha_context.Script.I_IMPLICIT_ACCOUNT;
-              Alpha_context.Script.I_CHECK_SIGNATURE;
-              Alpha_context.Script.I_BLAKE2B;
-              Alpha_context.Script.I_SHA256;
-              Alpha_context.Script.I_SHA512;
-              Alpha_context.Script.I_HASH_KEY;
-              Alpha_context.Script.I_STEPS_TO_QUOTA;
-              Alpha_context.Script.I_PUSH;
-              Alpha_context.Script.I_NONE;
-              Alpha_context.Script.I_LEFT;
-              Alpha_context.Script.I_RIGHT;
-              Alpha_context.Script.I_NIL;
-              Alpha_context.Script.I_EMPTY_SET;
-              Alpha_context.Script.I_DIP;
-              Alpha_context.Script.I_LOOP;
-              Alpha_context.Script.I_IF_NONE;
-              Alpha_context.Script.I_IF_LEFT;
-              Alpha_context.Script.I_IF_CONS;
-              Alpha_context.Script.I_EMPTY_MAP;
-              Alpha_context.Script.I_IF;
-              Alpha_context.Script.I_SOURCE;
-              Alpha_context.Script.I_SENDER;
-              Alpha_context.Script.I_SELF;
-              Alpha_context.Script.I_LAMBDA
-            ])
-      end)
+            (fun __Toplevel_'param1 => (Script_typed_ir.ty __Toplevel_'param1))
+            _ param_type in
+        typed ctxt loc (Script_typed_ir.Self param_type "default")
+          (Script_typed_ir.Item_t (Script_typed_ir.Contract_t param_type None)
+            __stack_value annot)
+      end in
+    get_toplevel_type tc_context
+  |
+    ((Micheline.Prim loc
+      ((Alpha_context.Script.I_DUP | Alpha_context.Script.I_SWAP |
+      Alpha_context.Script.I_SOME | Alpha_context.Script.I_UNIT |
+      Alpha_context.Script.I_PAIR | Alpha_context.Script.I_CAR |
+      Alpha_context.Script.I_CDR | Alpha_context.Script.I_CONS |
+      Alpha_context.Script.I_CONCAT | Alpha_context.Script.I_SLICE |
+      Alpha_context.Script.I_MEM | Alpha_context.Script.I_UPDATE |
+      Alpha_context.Script.I_MAP | Alpha_context.Script.I_GET |
+      Alpha_context.Script.I_EXEC | Alpha_context.Script.I_FAILWITH |
+      Alpha_context.Script.I_SIZE | Alpha_context.Script.I_ADD |
+      Alpha_context.Script.I_SUB | Alpha_context.Script.I_MUL |
+      Alpha_context.Script.I_EDIV | Alpha_context.Script.I_OR |
+      Alpha_context.Script.I_AND | Alpha_context.Script.I_XOR |
+      Alpha_context.Script.I_NOT | Alpha_context.Script.I_ABS |
+      Alpha_context.Script.I_NEG | Alpha_context.Script.I_LSL |
+      Alpha_context.Script.I_LSR | Alpha_context.Script.I_COMPARE |
+      Alpha_context.Script.I_EQ | Alpha_context.Script.I_NEQ |
+      Alpha_context.Script.I_LT | Alpha_context.Script.I_GT |
+      Alpha_context.Script.I_LE | Alpha_context.Script.I_GE |
+      Alpha_context.Script.I_TRANSFER_TOKENS |
+      Alpha_context.Script.I_CREATE_ACCOUNT |
+      Alpha_context.Script.I_SET_DELEGATE | Alpha_context.Script.I_NOW |
+      Alpha_context.Script.I_IMPLICIT_ACCOUNT | Alpha_context.Script.I_AMOUNT |
+      Alpha_context.Script.I_BALANCE | Alpha_context.Script.I_CHECK_SIGNATURE |
+      Alpha_context.Script.I_HASH_KEY | Alpha_context.Script.I_SOURCE |
+      Alpha_context.Script.I_SENDER | Alpha_context.Script.I_BLAKE2B |
+      Alpha_context.Script.I_SHA256 | Alpha_context.Script.I_SHA512 |
+      Alpha_context.Script.I_STEPS_TO_QUOTA | Alpha_context.Script.I_ADDRESS) as
+        name) ((cons _ _) as l) _, _), _) =>
+    Error_monad.fail extensible_type_value
+  |
+    ((Micheline.Prim loc
+      ((Alpha_context.Script.I_NONE | Alpha_context.Script.I_LEFT |
+      Alpha_context.Script.I_RIGHT | Alpha_context.Script.I_NIL |
+      Alpha_context.Script.I_MAP | Alpha_context.Script.I_ITER |
+      Alpha_context.Script.I_EMPTY_SET | Alpha_context.Script.I_DIP |
+      Alpha_context.Script.I_LOOP | Alpha_context.Script.I_LOOP_LEFT |
+      Alpha_context.Script.I_CONTRACT) as name) (([] | cons _ (cons _ _)) as l)
+      _, _), _) => Error_monad.fail extensible_type_value
+  |
+    ((Micheline.Prim loc
+      ((Alpha_context.Script.I_PUSH | Alpha_context.Script.I_IF_NONE |
+      Alpha_context.Script.I_IF_LEFT | Alpha_context.Script.I_IF_CONS |
+      Alpha_context.Script.I_EMPTY_MAP | Alpha_context.Script.I_IF) as name)
+      (([] | cons _ [] | cons _ (cons _ (cons _ _))) as l) _, _), _) =>
+    Error_monad.fail extensible_type_value
+  |
+    ((Micheline.Prim loc Alpha_context.Script.I_LAMBDA
+      (([] | cons _ [] | cons _ (cons _ (cons _ (cons _ _)))) as l) _, _), _) =>
+    Error_monad.fail extensible_type_value
+  |
+    ((Micheline.Prim loc
+      ((Alpha_context.Script.I_ADD | Alpha_context.Script.I_SUB |
+      Alpha_context.Script.I_MUL | Alpha_context.Script.I_EDIV |
+      Alpha_context.Script.I_AND | Alpha_context.Script.I_OR |
+      Alpha_context.Script.I_XOR | Alpha_context.Script.I_LSL |
+      Alpha_context.Script.I_LSR) as name) [] _,
+      Script_typed_ir.Item_t ta (Script_typed_ir.Item_t tb _ _) _), _) =>
+    let 'existT _ [__464, __466] [loc, name, ta, tb] :=
+      existT (A := [Set ** Set])
+        (fun '[__464, __466] =>
+          [Alpha_context.Script.location ** Alpha_context.Script.prim **
+            (Script_typed_ir.ty __464) ** (Script_typed_ir.ty __466)]) [_, _]
+        [loc, name, ta, tb] in
+    let!? '(ta, ctxt) := Lwt.__return (serialize_ty_for_error ctxt ta) in
+    let!? '(tb, _ctxt) := Lwt.__return (serialize_ty_for_error ctxt tb) in
+    Error_monad.fail extensible_type_value
+  |
+    ((Micheline.Prim loc
+      ((Alpha_context.Script.I_NEG | Alpha_context.Script.I_ABS |
+      Alpha_context.Script.I_NOT | Alpha_context.Script.I_CONCAT |
+      Alpha_context.Script.I_SIZE | Alpha_context.Script.I_EQ |
+      Alpha_context.Script.I_NEQ | Alpha_context.Script.I_LT |
+      Alpha_context.Script.I_GT | Alpha_context.Script.I_LE |
+      Alpha_context.Script.I_GE) as name) [] _,
+      Script_typed_ir.Item_t __t_value _ _), _) =>
+    let 'existT _ __468 [loc, name, __t_value] :=
+      existT (A := Set)
+        (fun __468 =>
+          [Alpha_context.Script.location ** Alpha_context.Script.prim **
+            (Script_typed_ir.ty __468)]) _ [loc, name, __t_value] in
+    let!? '(__t_value, _ctxt) :=
+      Lwt.__return (serialize_ty_for_error ctxt __t_value) in
+    Error_monad.fail extensible_type_value
+  |
+    ((Micheline.Prim loc
+      ((Alpha_context.Script.I_UPDATE | Alpha_context.Script.I_SLICE) as name)
+      [] _, __stack_value), _) =>
+    let!? '(__stack_value, _ctxt) :=
+      serialize_stack_for_error ctxt __stack_value in
+    Error_monad.fail extensible_type_value
+  |
+    ((Micheline.Prim loc Alpha_context.Script.I_CREATE_CONTRACT _ _,
+      __stack_value), _) =>
+    let!? '(__stack_value, _ctxt) :=
+      serialize_stack_for_error ctxt __stack_value in
+    Error_monad.fail extensible_type_value
+  |
+    ((Micheline.Prim loc Alpha_context.Script.I_CREATE_ACCOUNT [] _,
+      __stack_value), _) =>
+    let!? '(__stack_value, _ctxt) :=
+      serialize_stack_for_error ctxt __stack_value in
+    Error_monad.fail extensible_type_value
+  |
+    ((Micheline.Prim loc Alpha_context.Script.I_TRANSFER_TOKENS [] _,
+      __stack_value), _) =>
+    let!? '(__stack_value, _ctxt) :=
+      serialize_stack_for_error ctxt __stack_value in
+    Error_monad.fail extensible_type_value
+  |
+    ((Micheline.Prim loc
+      ((Alpha_context.Script.I_DROP | Alpha_context.Script.I_DUP |
+      Alpha_context.Script.I_CAR | Alpha_context.Script.I_CDR |
+      Alpha_context.Script.I_SOME | Alpha_context.Script.I_BLAKE2B |
+      Alpha_context.Script.I_SHA256 | Alpha_context.Script.I_SHA512 |
+      Alpha_context.Script.I_DIP | Alpha_context.Script.I_IF_NONE |
+      Alpha_context.Script.I_LEFT | Alpha_context.Script.I_RIGHT |
+      Alpha_context.Script.I_IF_LEFT | Alpha_context.Script.I_IF |
+      Alpha_context.Script.I_LOOP | Alpha_context.Script.I_IF_CONS |
+      Alpha_context.Script.I_IMPLICIT_ACCOUNT | Alpha_context.Script.I_NEG |
+      Alpha_context.Script.I_ABS | Alpha_context.Script.I_INT |
+      Alpha_context.Script.I_NOT | Alpha_context.Script.I_HASH_KEY |
+      Alpha_context.Script.I_EQ | Alpha_context.Script.I_NEQ |
+      Alpha_context.Script.I_LT | Alpha_context.Script.I_GT |
+      Alpha_context.Script.I_LE | Alpha_context.Script.I_GE) as name) _ _,
+      __stack_value), _) =>
+    let!? '(__stack_value, _ctxt) :=
+      serialize_stack_for_error ctxt __stack_value in
+    Error_monad.fail extensible_type_value
+  |
+    ((Micheline.Prim loc
+      ((Alpha_context.Script.I_SWAP | Alpha_context.Script.I_PAIR |
+      Alpha_context.Script.I_CONS | Alpha_context.Script.I_GET |
+      Alpha_context.Script.I_MEM | Alpha_context.Script.I_EXEC |
+      Alpha_context.Script.I_CHECK_SIGNATURE | Alpha_context.Script.I_ADD |
+      Alpha_context.Script.I_SUB | Alpha_context.Script.I_MUL |
+      Alpha_context.Script.I_EDIV | Alpha_context.Script.I_AND |
+      Alpha_context.Script.I_OR | Alpha_context.Script.I_XOR |
+      Alpha_context.Script.I_LSL | Alpha_context.Script.I_LSR) as name) _ _,
+      __stack_value), _) =>
+    let!? '(__stack_value, _ctxt) :=
+      serialize_stack_for_error ctxt __stack_value in
+    Error_monad.fail extensible_type_value
+  | ((expr, _), _) =>
+    Error_monad.fail
+      (unexpected expr [ Script_tc_errors.Seq_kind ]
+        Script_tc_errors.Instr_namespace
+        [
+          Alpha_context.Script.I_DROP;
+          Alpha_context.Script.I_DUP;
+          Alpha_context.Script.I_DIG;
+          Alpha_context.Script.I_DUG;
+          Alpha_context.Script.I_SWAP;
+          Alpha_context.Script.I_SOME;
+          Alpha_context.Script.I_UNIT;
+          Alpha_context.Script.I_PAIR;
+          Alpha_context.Script.I_CAR;
+          Alpha_context.Script.I_CDR;
+          Alpha_context.Script.I_CONS;
+          Alpha_context.Script.I_MEM;
+          Alpha_context.Script.I_UPDATE;
+          Alpha_context.Script.I_MAP;
+          Alpha_context.Script.I_ITER;
+          Alpha_context.Script.I_GET;
+          Alpha_context.Script.I_EXEC;
+          Alpha_context.Script.I_FAILWITH;
+          Alpha_context.Script.I_SIZE;
+          Alpha_context.Script.I_CONCAT;
+          Alpha_context.Script.I_ADD;
+          Alpha_context.Script.I_SUB;
+          Alpha_context.Script.I_MUL;
+          Alpha_context.Script.I_EDIV;
+          Alpha_context.Script.I_OR;
+          Alpha_context.Script.I_AND;
+          Alpha_context.Script.I_XOR;
+          Alpha_context.Script.I_NOT;
+          Alpha_context.Script.I_ABS;
+          Alpha_context.Script.I_INT;
+          Alpha_context.Script.I_NEG;
+          Alpha_context.Script.I_LSL;
+          Alpha_context.Script.I_LSR;
+          Alpha_context.Script.I_COMPARE;
+          Alpha_context.Script.I_EQ;
+          Alpha_context.Script.I_NEQ;
+          Alpha_context.Script.I_LT;
+          Alpha_context.Script.I_GT;
+          Alpha_context.Script.I_LE;
+          Alpha_context.Script.I_GE;
+          Alpha_context.Script.I_TRANSFER_TOKENS;
+          Alpha_context.Script.I_CREATE_ACCOUNT;
+          Alpha_context.Script.I_CREATE_CONTRACT;
+          Alpha_context.Script.I_NOW;
+          Alpha_context.Script.I_AMOUNT;
+          Alpha_context.Script.I_BALANCE;
+          Alpha_context.Script.I_IMPLICIT_ACCOUNT;
+          Alpha_context.Script.I_CHECK_SIGNATURE;
+          Alpha_context.Script.I_BLAKE2B;
+          Alpha_context.Script.I_SHA256;
+          Alpha_context.Script.I_SHA512;
+          Alpha_context.Script.I_HASH_KEY;
+          Alpha_context.Script.I_STEPS_TO_QUOTA;
+          Alpha_context.Script.I_PUSH;
+          Alpha_context.Script.I_NONE;
+          Alpha_context.Script.I_LEFT;
+          Alpha_context.Script.I_RIGHT;
+          Alpha_context.Script.I_NIL;
+          Alpha_context.Script.I_EMPTY_SET;
+          Alpha_context.Script.I_DIP;
+          Alpha_context.Script.I_LOOP;
+          Alpha_context.Script.I_IF_NONE;
+          Alpha_context.Script.I_IF_LEFT;
+          Alpha_context.Script.I_IF_CONS;
+          Alpha_context.Script.I_EMPTY_MAP;
+          Alpha_context.Script.I_IF;
+          Alpha_context.Script.I_SOURCE;
+          Alpha_context.Script.I_SENDER;
+          Alpha_context.Script.I_SELF;
+          Alpha_context.Script.I_LAMBDA
+        ])
+  end
 
 with parse_contract {arg : Set}
   (legacy : bool) (ctxt : Alpha_context.context)
@@ -8122,90 +7008,69 @@ with parse_contract {arg : Set}
   : Lwt.t
     (Error_monad.tzresult
       (Alpha_context.context * Script_typed_ir.typed_contract arg)) :=
-  Error_monad.op_gtgteqquestion
-    (Lwt.__return
-      (Alpha_context.Gas.consume ctxt Typecheck_costs.contract_exists))
-    (fun ctxt =>
-      Error_monad.op_gtgteqquestion
-        (Alpha_context.Contract.__exists ctxt contract)
-        (fun function_parameter =>
-          match function_parameter with
-          | false => Error_monad.fail extensible_type_value
-          | true =>
-            Error_monad.op_gtgteqquestion
-              (Lwt.__return
-                (Alpha_context.Gas.consume ctxt Typecheck_costs.get_script))
-              (fun ctxt =>
-                Error_monad.op_gtgteqquestion
-                  ((Error_monad.trace extensible_type_value)
-                    (Alpha_context.Contract.get_script_code ctxt contract))
+  let!? ctxt :=
+    Lwt.__return
+      (Alpha_context.Gas.consume ctxt Typecheck_costs.contract_exists) in
+  let!? function_parameter := Alpha_context.Contract.__exists ctxt contract in
+  match function_parameter with
+  | false => Error_monad.fail extensible_type_value
+  | true =>
+    let!? ctxt :=
+      Lwt.__return (Alpha_context.Gas.consume ctxt Typecheck_costs.get_script)
+      in
+    let!? '(ctxt, code) :=
+      (Error_monad.trace extensible_type_value)
+        (Alpha_context.Contract.get_script_code ctxt contract) in
+    match code with
+    | None =>
+      Lwt.__return
+        (Error_monad.op_gtgtquestion
+          (ty_eq ctxt arg (Script_typed_ir.Unit_t None))
+          (fun function_parameter =>
+            let '(Eq, ctxt) := function_parameter in
+            match entrypoint with
+            | "default" =>
+              let contract := (arg, (contract, entrypoint)) in
+              Error_monad.ok (ctxt, contract)
+            | entrypoint => Error_monad.__error_value extensible_type_value
+            end))
+    | Some code =>
+      let!? '(code, ctxt) :=
+        Alpha_context.Script.force_decode_in_context ctxt code in
+      Lwt.__return
+        (Error_monad.op_gtgtquestion (parse_toplevel true code)
+          (fun function_parameter =>
+            let '(arg_type, _, _, root_name) := function_parameter in
+            Error_monad.op_gtgtquestion (parse_parameter_ty ctxt true arg_type)
+              (fun function_parameter =>
+                let '(Ex_ty targ, ctxt) := function_parameter in
+                let 'existT _ __Ex_ty_'a18 [targ, ctxt] :=
+                  existT (A := Set)
+                    (fun __Ex_ty_'a18 =>
+                      [(Script_typed_ir.ty __Ex_ty_'a18) **
+                        Alpha_context.context]) _ [targ, ctxt] in
+                let __return
+                  (ctxt : Alpha_context.context) (targ : Script_typed_ir.ty arg)
+                  (entrypoint : string)
+                  : Error_monad.tzresult
+                    (Alpha_context.context * Script_typed_ir.typed_contract arg) :=
+                  Error_monad.op_gtgtquestion
+                    (merge_types legacy ctxt loc targ arg)
+                    (fun function_parameter =>
+                      let '(arg, ctxt) := function_parameter in
+                      let contract := (arg, (contract, entrypoint)) in
+                      Error_monad.ok (ctxt, contract)) in
+                Error_monad.op_gtgtquestion
+                  (find_entrypoint_for_type targ arg root_name entrypoint ctxt)
                   (fun function_parameter =>
-                    let '(ctxt, code) := function_parameter in
-                    match code with
-                    | None =>
-                      Lwt.__return
-                        (Error_monad.op_gtgtquestion
-                          (ty_eq ctxt arg (Script_typed_ir.Unit_t None))
-                          (fun function_parameter =>
-                            let '(Eq, ctxt) := function_parameter in
-                            match entrypoint with
-                            | "default" =>
-                              let contract := (arg, (contract, entrypoint)) in
-                              Error_monad.ok (ctxt, contract)
-                            | entrypoint =>
-                              Error_monad.__error_value extensible_type_value
-                            end))
-                    | Some code =>
-                      Error_monad.op_gtgteqquestion
-                        (Alpha_context.Script.force_decode_in_context ctxt code)
-                        (fun function_parameter =>
-                          let '(code, ctxt) := function_parameter in
-                          Lwt.__return
-                            (Error_monad.op_gtgtquestion
-                              (parse_toplevel true code)
-                              (fun function_parameter =>
-                                let '(arg_type, _, _, root_name) :=
-                                  function_parameter in
-                                Error_monad.op_gtgtquestion
-                                  (parse_parameter_ty ctxt true arg_type)
-                                  (fun function_parameter =>
-                                    let '(Ex_ty targ, ctxt) :=
-                                      function_parameter in
-                                    let 'existT _ __Ex_ty_'a18 [targ, ctxt] :=
-                                      existT (A := Set)
-                                        (fun __Ex_ty_'a18 =>
-                                          [(Script_typed_ir.ty __Ex_ty_'a18) **
-                                            Alpha_context.context]) _
-                                        [targ, ctxt] in
-                                    let __return
-                                      (ctxt : Alpha_context.context)
-                                      (targ : Script_typed_ir.ty arg)
-                                      (entrypoint : string)
-                                      : Error_monad.tzresult
-                                        (Alpha_context.context *
-                                          Script_typed_ir.typed_contract arg) :=
-                                      Error_monad.op_gtgtquestion
-                                        (merge_types legacy ctxt loc targ arg)
-                                        (fun function_parameter =>
-                                          let '(arg, ctxt) := function_parameter
-                                            in
-                                          let contract :=
-                                            (arg, (contract, entrypoint)) in
-                                          Error_monad.ok (ctxt, contract)) in
-                                    Error_monad.op_gtgtquestion
-                                      (find_entrypoint_for_type targ arg
-                                        root_name entrypoint ctxt)
-                                      (fun function_parameter =>
-                                        let '(ctxt, entrypoint, targ) :=
-                                          function_parameter in
-                                        Error_monad.op_gtgtquestion
-                                          (merge_types legacy ctxt loc targ arg)
-                                          (fun function_parameter =>
-                                            let '(targ, ctxt) :=
-                                              function_parameter in
-                                            __return ctxt targ entrypoint))))))
-                    end))
-          end))
+                    let '(ctxt, entrypoint, targ) := function_parameter in
+                    Error_monad.op_gtgtquestion
+                      (merge_types legacy ctxt loc targ arg)
+                      (fun function_parameter =>
+                        let '(targ, ctxt) := function_parameter in
+                        __return ctxt targ entrypoint)))))
+    end
+  end
 
 with parse_contract_for_script {arg : Set}
   (legacy : bool) (ctxt : Alpha_context.context)
@@ -8214,102 +7079,81 @@ with parse_contract_for_script {arg : Set}
   : Lwt.t
     (Error_monad.tzresult
       (Alpha_context.context * option (Script_typed_ir.typed_contract arg))) :=
-  Error_monad.op_gtgteqquestion
-    (Lwt.__return
-      (Alpha_context.Gas.consume ctxt Typecheck_costs.contract_exists))
-    (fun ctxt =>
-      Error_monad.op_gtgteqquestion
-        (Alpha_context.Contract.__exists ctxt contract)
-        (fun function_parameter =>
-          match function_parameter with
-          | false => Error_monad.__return (ctxt, None)
-          | true =>
-            Error_monad.op_gtgteqquestion
-              (Lwt.__return
-                (Alpha_context.Gas.consume ctxt Typecheck_costs.get_script))
-              (fun ctxt =>
-                Error_monad.op_gtgteqquestion
-                  ((Error_monad.trace extensible_type_value)
-                    (Alpha_context.Contract.get_script_code ctxt contract))
-                  (fun function_parameter =>
-                    let '(ctxt, code) := function_parameter in
-                    match code with
-                    | None =>
-                      match entrypoint with
-                      | "default" =>
-                        Lwt.__return
-                          match ty_eq ctxt arg (Script_typed_ir.Unit_t None)
-                            with
-                          | Pervasives.Ok (Eq, ctxt) =>
-                            let contract := (arg, (contract, entrypoint)) in
-                            Error_monad.ok (ctxt, (Some contract))
-                          | Pervasives.Error _ =>
-                            Error_monad.op_gtgtquestion
-                              (Alpha_context.Gas.consume ctxt
-                                Typecheck_costs.cycle)
-                              (fun ctxt => Error_monad.ok (ctxt, None))
-                          end
-                      | _ => Error_monad.__return (ctxt, None)
-                      end
-                    | Some code =>
-                      Error_monad.op_gtgteqquestion
-                        (Alpha_context.Script.force_decode_in_context ctxt code)
+  let!? ctxt :=
+    Lwt.__return
+      (Alpha_context.Gas.consume ctxt Typecheck_costs.contract_exists) in
+  let!? function_parameter := Alpha_context.Contract.__exists ctxt contract in
+  match function_parameter with
+  | false => Error_monad.__return (ctxt, None)
+  | true =>
+    let!? ctxt :=
+      Lwt.__return (Alpha_context.Gas.consume ctxt Typecheck_costs.get_script)
+      in
+    let!? '(ctxt, code) :=
+      (Error_monad.trace extensible_type_value)
+        (Alpha_context.Contract.get_script_code ctxt contract) in
+    match code with
+    | None =>
+      match entrypoint with
+      | "default" =>
+        Lwt.__return
+          match ty_eq ctxt arg (Script_typed_ir.Unit_t None) with
+          | Pervasives.Ok (Eq, ctxt) =>
+            let contract := (arg, (contract, entrypoint)) in
+            Error_monad.ok (ctxt, (Some contract))
+          | Pervasives.Error _ =>
+            Error_monad.op_gtgtquestion
+              (Alpha_context.Gas.consume ctxt Typecheck_costs.cycle)
+              (fun ctxt => Error_monad.ok (ctxt, None))
+          end
+      | _ => Error_monad.__return (ctxt, None)
+      end
+    | Some code =>
+      let!? '(code, ctxt) :=
+        Alpha_context.Script.force_decode_in_context ctxt code in
+      Lwt.__return
+        match parse_toplevel true code with
+        | Pervasives.Error _ => Error_monad.__error_value extensible_type_value
+        | Pervasives.Ok (arg_type, _, _, root_name) =>
+          match parse_parameter_ty ctxt true arg_type with
+          | Pervasives.Error _ =>
+            Error_monad.__error_value extensible_type_value
+          | Pervasives.Ok (Ex_ty targ, ctxt) =>
+            let 'existT _ __Ex_ty_'a19 [targ, ctxt] :=
+              existT (A := Set)
+                (fun __Ex_ty_'a19 =>
+                  [(Script_typed_ir.ty __Ex_ty_'a19) ** Alpha_context.context])
+                _ [targ, ctxt] in
+            match
+              Error_monad.op_gtgtquestion
+                (find_entrypoint_for_type targ arg root_name entrypoint ctxt)
+                (fun function_parameter =>
+                  let '(ctxt, entrypoint, targ) := function_parameter in
+                  Error_monad.op_gtgtquestion
+                    (merge_types legacy ctxt loc targ arg)
+                    (fun function_parameter =>
+                      let '(targ, ctxt) := function_parameter in
+                      Error_monad.op_gtgtquestion
+                        (merge_types legacy ctxt loc targ arg)
                         (fun function_parameter =>
-                          let '(code, ctxt) := function_parameter in
-                          Lwt.__return
-                            match parse_toplevel true code with
-                            | Pervasives.Error _ =>
-                              Error_monad.__error_value extensible_type_value
-                            | Pervasives.Ok (arg_type, _, _, root_name) =>
-                              match parse_parameter_ty ctxt true arg_type with
-                              | Pervasives.Error _ =>
-                                Error_monad.__error_value extensible_type_value
-                              | Pervasives.Ok (Ex_ty targ, ctxt) =>
-                                let 'existT _ __Ex_ty_'a19 [targ, ctxt] :=
-                                  existT (A := Set)
-                                    (fun __Ex_ty_'a19 =>
-                                      [(Script_typed_ir.ty __Ex_ty_'a19) **
-                                        Alpha_context.context]) _ [targ, ctxt]
-                                  in
-                                match
-                                  Error_monad.op_gtgtquestion
-                                    (find_entrypoint_for_type targ arg root_name
-                                      entrypoint ctxt)
-                                    (fun function_parameter =>
-                                      let '(ctxt, entrypoint, targ) :=
-                                        function_parameter in
-                                      Error_monad.op_gtgtquestion
-                                        (merge_types legacy ctxt loc targ arg)
-                                        (fun function_parameter =>
-                                          let '(targ, ctxt) :=
-                                            function_parameter in
-                                          Error_monad.op_gtgtquestion
-                                            (merge_types legacy ctxt loc targ
-                                              arg)
-                                            (fun function_parameter =>
-                                              let '(arg, ctxt) :=
-                                                function_parameter in
-                                              let contract :=
-                                                (arg, (contract, entrypoint)) in
-                                              Error_monad.ok
-                                                (ctxt, (Some contract))))) with
-                                | Pervasives.Ok res => Error_monad.ok res
-                                | Pervasives.Error _ =>
-                                  Error_monad.op_gtgtquestion
-                                    (ty_eq ctxt targ targ)
-                                    (fun function_parameter =>
-                                      let '(Eq, ctxt) := function_parameter in
-                                      Error_monad.op_gtgtquestion
-                                        (merge_types legacy ctxt loc targ targ)
-                                        (fun function_parameter =>
-                                          let '(_, ctxt) := function_parameter
-                                            in
-                                          Error_monad.ok (ctxt, None)))
-                                end
-                              end
-                            end)
-                    end))
-          end))
+                          let '(arg, ctxt) := function_parameter in
+                          let contract := (arg, (contract, entrypoint)) in
+                          Error_monad.ok (ctxt, (Some contract))))) with
+            | Pervasives.Ok res => Error_monad.ok res
+            | Pervasives.Error _ =>
+              Error_monad.op_gtgtquestion (ty_eq ctxt targ targ)
+                (fun function_parameter =>
+                  let '(Eq, ctxt) := function_parameter in
+                  Error_monad.op_gtgtquestion
+                    (merge_types legacy ctxt loc targ targ)
+                    (fun function_parameter =>
+                      let '(_, ctxt) := function_parameter in
+                      Error_monad.ok (ctxt, None)))
+            end
+          end
+        end
+    end
+  end
 
 with parse_toplevel (legacy : bool) (toplevel : Alpha_context.Script.expr)
   {struct legacy}
@@ -8482,195 +7326,139 @@ Definition parse_script
     Alpha_context.Script.t.code := code;
       Alpha_context.Script.t.storage := storage
       |} := function_parameter in
-  Error_monad.op_gtgteqquestion
-    (Alpha_context.Script.force_decode_in_context ctxt code)
-    (fun function_parameter =>
-      let '(code, ctxt) := function_parameter in
-      Error_monad.op_gtgteqquestion
-        (Alpha_context.Script.force_decode_in_context ctxt storage)
-        (fun function_parameter =>
-          let '(storage, ctxt) := function_parameter in
-          Error_monad.op_gtgteqquestion
-            (Lwt.__return (parse_toplevel legacy code))
-            (fun function_parameter =>
-              let '(arg_type, storage_type, code_field, root_name) :=
-                function_parameter in
-              Error_monad.op_gtgteqquestion
-                (Error_monad.trace extensible_type_value
-                  (Lwt.__return (parse_parameter_ty ctxt legacy arg_type)))
-                (fun function_parameter =>
-                  let '(Ex_ty arg_type, ctxt) := function_parameter in
-                  let 'existT _ __Ex_ty_'a [arg_type, ctxt] :=
-                    existT (A := Set)
-                      (fun __Ex_ty_'a =>
-                        [(Script_typed_ir.ty __Ex_ty_'a) **
-                          Alpha_context.context]) _ [arg_type, ctxt] in
-                  Error_monad.op_gtgteqquestion
-                    (if legacy then
-                      Error_monad.__return tt
-                    else
-                      Lwt.__return (well_formed_entrypoints arg_type root_name))
-                    (fun function_parameter =>
-                      let '_ := function_parameter in
-                      Error_monad.op_gtgteqquestion
-                        (Error_monad.trace extensible_type_value
-                          (Lwt.__return
-                            (parse_storage_ty ctxt legacy storage_type)))
-                        (fun function_parameter =>
-                          let '(Ex_ty storage_type, ctxt) := function_parameter
-                            in
-                          let 'existT _ __Ex_ty_'a1 [storage_type, ctxt] :=
-                            existT (A := Set)
-                              (fun __Ex_ty_'a1 =>
-                                [(Script_typed_ir.ty __Ex_ty_'a1) **
-                                  Alpha_context.context]) _ [storage_type, ctxt]
-                            in
-                          let arg_annot :=
-                            Script_ir_annot.default_annot
-                              Script_ir_annot.default_param_annot
-                              (Script_ir_annot.type_to_var_annot
-                                (name_of_ty arg_type)) in
-                          let storage_annot :=
-                            Script_ir_annot.default_annot
-                              Script_ir_annot.default_storage_annot
-                              (Script_ir_annot.type_to_var_annot
-                                (name_of_ty storage_type)) in
-                          let arg_type_full :=
-                            Script_typed_ir.Pair_t (arg_type, None, arg_annot)
-                              (storage_type, None, storage_annot) None
-                              (Pervasives.op_pipepipe (has_big_map arg_type)
-                                (has_big_map storage_type)) in
-                          let ret_type_full :=
-                            Script_typed_ir.Pair_t
-                              ((Script_typed_ir.List_t
-                                (Script_typed_ir.Operation_t None) None false),
-                                None, None) (storage_type, None, None) None
-                              (has_big_map storage_type) in
-                          Error_monad.op_gtgteqquestion
-                            (Error_monad.trace_eval
-                              (fun function_parameter =>
-                                let '_ := function_parameter in
-                                Error_monad.op_gtgtpipequestion
-                                  (Lwt.__return
-                                    (serialize_ty_for_error ctxt storage_type))
-                                  (fun function_parameter =>
-                                    let '(storage_type, _ctxt) :=
-                                      function_parameter in
-                                    extensible_type_value))
-                              (parse_data type_logger ctxt legacy storage_type
-                                (Micheline.root storage)))
-                            (fun function_parameter =>
-                              let '(storage, ctxt) := function_parameter in
-                              Error_monad.op_gtgteqquestion
-                                (Error_monad.trace extensible_type_value
-                                  (parse_returning type_logger
-                                    (Toplevel
-                                      {|
-                                        tc_context.Toplevel.storage_type :=
-                                          storage_type;
-                                        tc_context.Toplevel.param_type :=
-                                          arg_type;
-                                        tc_context.Toplevel.root_name :=
-                                          root_name;
-                                        tc_context.Toplevel.legacy_create_contract_literal :=
-                                          false |}) ctxt legacy
-                                    (arg_type_full, None) ret_type_full
-                                    code_field))
-                                (fun function_parameter =>
-                                  let '(code, ctxt) := function_parameter in
-                                  Error_monad.__return
-                                    ((Ex_script
-                                      {| Script_typed_ir.script.code := code;
-                                        Script_typed_ir.script.arg_type :=
-                                          arg_type;
-                                        Script_typed_ir.script.storage :=
-                                          storage;
-                                        Script_typed_ir.script.storage_type :=
-                                          storage_type;
-                                        Script_typed_ir.script.root_name :=
-                                          root_name |}), ctxt))))))))).
+  let!? '(code, ctxt) := Alpha_context.Script.force_decode_in_context ctxt code
+    in
+  let!? '(storage, ctxt) :=
+    Alpha_context.Script.force_decode_in_context ctxt storage in
+  let!? '(arg_type, storage_type, code_field, root_name) :=
+    Lwt.__return (parse_toplevel legacy code) in
+  let!? '(Ex_ty arg_type, ctxt) :=
+    Error_monad.trace extensible_type_value
+      (Lwt.__return (parse_parameter_ty ctxt legacy arg_type)) in
+  let 'existT _ __Ex_ty_'a [arg_type, ctxt] :=
+    existT (A := Set)
+      (fun __Ex_ty_'a =>
+        [(Script_typed_ir.ty __Ex_ty_'a) ** Alpha_context.context]) _
+      [arg_type, ctxt] in
+  let!? '_ :=
+    if legacy then
+      Error_monad.__return tt
+    else
+      Lwt.__return (well_formed_entrypoints arg_type root_name) in
+  let!? '(Ex_ty storage_type, ctxt) :=
+    Error_monad.trace extensible_type_value
+      (Lwt.__return (parse_storage_ty ctxt legacy storage_type)) in
+  let 'existT _ __Ex_ty_'a1 [storage_type, ctxt] :=
+    existT (A := Set)
+      (fun __Ex_ty_'a1 =>
+        [(Script_typed_ir.ty __Ex_ty_'a1) ** Alpha_context.context]) _
+      [storage_type, ctxt] in
+  let arg_annot :=
+    Script_ir_annot.default_annot Script_ir_annot.default_param_annot
+      (Script_ir_annot.type_to_var_annot (name_of_ty arg_type)) in
+  let storage_annot :=
+    Script_ir_annot.default_annot Script_ir_annot.default_storage_annot
+      (Script_ir_annot.type_to_var_annot (name_of_ty storage_type)) in
+  let arg_type_full :=
+    Script_typed_ir.Pair_t (arg_type, None, arg_annot)
+      (storage_type, None, storage_annot) None
+      (Pervasives.op_pipepipe (has_big_map arg_type) (has_big_map storage_type))
+    in
+  let ret_type_full :=
+    Script_typed_ir.Pair_t
+      ((Script_typed_ir.List_t (Script_typed_ir.Operation_t None) None false),
+        None, None) (storage_type, None, None) None (has_big_map storage_type)
+    in
+  let!? '(storage, ctxt) :=
+    Error_monad.trace_eval
+      (fun function_parameter =>
+        let '_ := function_parameter in
+        Error_monad.op_gtgtpipequestion
+          (Lwt.__return (serialize_ty_for_error ctxt storage_type))
+          (fun function_parameter =>
+            let '(storage_type, _ctxt) := function_parameter in
+            extensible_type_value))
+      (parse_data type_logger ctxt legacy storage_type (Micheline.root storage))
+    in
+  let!? '(code, ctxt) :=
+    Error_monad.trace extensible_type_value
+      (parse_returning type_logger
+        (Toplevel
+          {| tc_context.Toplevel.storage_type := storage_type;
+            tc_context.Toplevel.param_type := arg_type;
+            tc_context.Toplevel.root_name := root_name;
+            tc_context.Toplevel.legacy_create_contract_literal := false |}) ctxt
+        legacy (arg_type_full, None) ret_type_full code_field) in
+  Error_monad.__return
+    ((Ex_script
+      {| Script_typed_ir.script.code := code;
+        Script_typed_ir.script.arg_type := arg_type;
+        Script_typed_ir.script.storage := storage;
+        Script_typed_ir.script.storage_type := storage_type;
+        Script_typed_ir.script.root_name := root_name |}), ctxt).
 
 Definition typecheck_code
   (ctxt : Alpha_context.context) (code : Alpha_context.Script.expr)
   : Lwt.t
     (Error_monad.tzresult (Script_tc_errors.type_map * Alpha_context.context)) :=
   let legacy := false in
-  Error_monad.op_gtgteqquestion (Lwt.__return (parse_toplevel legacy code))
-    (fun function_parameter =>
-      let '(arg_type, storage_type, code_field, root_name) := function_parameter
-        in
-      let type_map := Pervasives.__ref_value nil in
-      Error_monad.op_gtgteqquestion
-        (Error_monad.trace extensible_type_value
-          (Lwt.__return (parse_parameter_ty ctxt legacy arg_type)))
-        (fun function_parameter =>
-          let '(Ex_ty arg_type, ctxt) := function_parameter in
-          let 'existT _ __Ex_ty_'a [arg_type, ctxt] :=
-            existT (A := Set)
-              (fun __Ex_ty_'a =>
-                [(Script_typed_ir.ty __Ex_ty_'a) ** Alpha_context.context]) _
-              [arg_type, ctxt] in
-          Error_monad.op_gtgteqquestion
-            (if legacy then
-              Error_monad.__return tt
-            else
-              Lwt.__return (well_formed_entrypoints arg_type root_name))
-            (fun function_parameter =>
-              let '_ := function_parameter in
-              Error_monad.op_gtgteqquestion
-                (Error_monad.trace extensible_type_value
-                  (Lwt.__return (parse_storage_ty ctxt legacy storage_type)))
-                (fun function_parameter =>
-                  let '(Ex_ty storage_type, ctxt) := function_parameter in
-                  let 'existT _ __Ex_ty_'a1 [storage_type, ctxt] :=
-                    existT (A := Set)
-                      (fun __Ex_ty_'a1 =>
-                        [(Script_typed_ir.ty __Ex_ty_'a1) **
-                          Alpha_context.context]) _ [storage_type, ctxt] in
-                  let arg_annot :=
-                    Script_ir_annot.default_annot
-                      Script_ir_annot.default_param_annot
-                      (Script_ir_annot.type_to_var_annot (name_of_ty arg_type))
-                    in
-                  let storage_annot :=
-                    Script_ir_annot.default_annot
-                      Script_ir_annot.default_storage_annot
-                      (Script_ir_annot.type_to_var_annot
-                        (name_of_ty storage_type)) in
-                  let arg_type_full :=
-                    Script_typed_ir.Pair_t (arg_type, None, arg_annot)
-                      (storage_type, None, storage_annot) None
-                      (Pervasives.op_pipepipe (has_big_map arg_type)
-                        (has_big_map storage_type)) in
-                  let ret_type_full :=
-                    Script_typed_ir.Pair_t
-                      ((Script_typed_ir.List_t
-                        (Script_typed_ir.Operation_t None) None false), None,
-                        None) (storage_type, None, None) None
-                      (has_big_map storage_type) in
-                  let __result_value :=
-                    parse_returning
-                      (Some
-                        (fun loc =>
-                          fun bef =>
-                            fun aft =>
-                              Pervasives.op_coloneq type_map
-                                (cons (loc, (bef, aft))
-                                  (Pervasives.op_exclamation type_map))))
-                      (Toplevel
-                        {| tc_context.Toplevel.storage_type := storage_type;
-                          tc_context.Toplevel.param_type := arg_type;
-                          tc_context.Toplevel.root_name := root_name;
-                          tc_context.Toplevel.legacy_create_contract_literal :=
-                            false |}) ctxt legacy (arg_type_full, None)
-                      ret_type_full code_field in
-                  Error_monad.op_gtgteqquestion
-                    (Error_monad.trace extensible_type_value __result_value)
-                    (fun function_parameter =>
-                      let '({| Script_typed_ir.lambda.lam := _ |}, ctxt) :=
-                        function_parameter in
-                      Error_monad.__return
-                        ((Pervasives.op_exclamation type_map), ctxt)))))).
+  let!? '(arg_type, storage_type, code_field, root_name) :=
+    Lwt.__return (parse_toplevel legacy code) in
+  let type_map := Pervasives.__ref_value nil in
+  let!? '(Ex_ty arg_type, ctxt) :=
+    Error_monad.trace extensible_type_value
+      (Lwt.__return (parse_parameter_ty ctxt legacy arg_type)) in
+  let 'existT _ __Ex_ty_'a [arg_type, ctxt] :=
+    existT (A := Set)
+      (fun __Ex_ty_'a =>
+        [(Script_typed_ir.ty __Ex_ty_'a) ** Alpha_context.context]) _
+      [arg_type, ctxt] in
+  let!? '_ :=
+    if legacy then
+      Error_monad.__return tt
+    else
+      Lwt.__return (well_formed_entrypoints arg_type root_name) in
+  let!? '(Ex_ty storage_type, ctxt) :=
+    Error_monad.trace extensible_type_value
+      (Lwt.__return (parse_storage_ty ctxt legacy storage_type)) in
+  let 'existT _ __Ex_ty_'a1 [storage_type, ctxt] :=
+    existT (A := Set)
+      (fun __Ex_ty_'a1 =>
+        [(Script_typed_ir.ty __Ex_ty_'a1) ** Alpha_context.context]) _
+      [storage_type, ctxt] in
+  let arg_annot :=
+    Script_ir_annot.default_annot Script_ir_annot.default_param_annot
+      (Script_ir_annot.type_to_var_annot (name_of_ty arg_type)) in
+  let storage_annot :=
+    Script_ir_annot.default_annot Script_ir_annot.default_storage_annot
+      (Script_ir_annot.type_to_var_annot (name_of_ty storage_type)) in
+  let arg_type_full :=
+    Script_typed_ir.Pair_t (arg_type, None, arg_annot)
+      (storage_type, None, storage_annot) None
+      (Pervasives.op_pipepipe (has_big_map arg_type) (has_big_map storage_type))
+    in
+  let ret_type_full :=
+    Script_typed_ir.Pair_t
+      ((Script_typed_ir.List_t (Script_typed_ir.Operation_t None) None false),
+        None, None) (storage_type, None, None) None (has_big_map storage_type)
+    in
+  let __result_value :=
+    parse_returning
+      (Some
+        (fun loc =>
+          fun bef =>
+            fun aft =>
+              Pervasives.op_coloneq type_map
+                (cons (loc, (bef, aft)) (Pervasives.op_exclamation type_map))))
+      (Toplevel
+        {| tc_context.Toplevel.storage_type := storage_type;
+          tc_context.Toplevel.param_type := arg_type;
+          tc_context.Toplevel.root_name := root_name;
+          tc_context.Toplevel.legacy_create_contract_literal := false |}) ctxt
+      legacy (arg_type_full, None) ret_type_full code_field in
+  let!? '({| Script_typed_ir.lambda.lam := _ |}, ctxt) :=
+    Error_monad.trace extensible_type_value __result_value in
+  Error_monad.__return ((Pervasives.op_exclamation type_map), ctxt).
 
 Definition typecheck_data
   (type_logger : option type_logger) (ctxt : Alpha_context.context)
@@ -8678,29 +7466,25 @@ Definition typecheck_data
   : Lwt.t (Error_monad.tzresult Alpha_context.context) :=
   let '(data, exp_ty) := function_parameter in
   let legacy := false in
-  Error_monad.op_gtgteqquestion
-    (Error_monad.trace extensible_type_value
-      (Lwt.__return (parse_packable_ty ctxt legacy (Micheline.root exp_ty))))
-    (fun function_parameter =>
-      let '(Ex_ty exp_ty, ctxt) := function_parameter in
-      let 'existT _ __Ex_ty_'a [exp_ty, ctxt] :=
-        existT (A := Set)
-          (fun __Ex_ty_'a =>
-            [(Script_typed_ir.ty __Ex_ty_'a) ** Alpha_context.context]) _
-          [exp_ty, ctxt] in
-      Error_monad.op_gtgteqquestion
-        (Error_monad.trace_eval
+  let!? '(Ex_ty exp_ty, ctxt) :=
+    Error_monad.trace extensible_type_value
+      (Lwt.__return (parse_packable_ty ctxt legacy (Micheline.root exp_ty))) in
+  let 'existT _ __Ex_ty_'a [exp_ty, ctxt] :=
+    existT (A := Set)
+      (fun __Ex_ty_'a =>
+        [(Script_typed_ir.ty __Ex_ty_'a) ** Alpha_context.context]) _
+      [exp_ty, ctxt] in
+  let!? '(_, ctxt) :=
+    Error_monad.trace_eval
+      (fun function_parameter =>
+        let '_ := function_parameter in
+        Error_monad.op_gtgtpipequestion
+          (Lwt.__return (serialize_ty_for_error ctxt exp_ty))
           (fun function_parameter =>
-            let '_ := function_parameter in
-            Error_monad.op_gtgtpipequestion
-              (Lwt.__return (serialize_ty_for_error ctxt exp_ty))
-              (fun function_parameter =>
-                let '(exp_ty, _ctxt) := function_parameter in
-                extensible_type_value))
-          (parse_data type_logger ctxt legacy exp_ty (Micheline.root data)))
-        (fun function_parameter =>
-          let '(_, ctxt) := function_parameter in
-          Error_monad.__return ctxt)).
+            let '(exp_ty, _ctxt) := function_parameter in
+            extensible_type_value))
+      (parse_data type_logger ctxt legacy exp_ty (Micheline.root data)) in
+  Error_monad.__return ctxt.
 
 Definition Entrypoints_map :=
   Map.Make
@@ -8802,415 +7586,347 @@ Fixpoint unparse_data {a : Set}
   (ty : Script_typed_ir.ty a) (__a_value : a) {struct ctxt}
   : Lwt.t
     (Error_monad.tzresult (Alpha_context.Script.node * Alpha_context.context)) :=
-  Error_monad.op_gtgteqquestion
-    (Lwt.__return (Alpha_context.Gas.consume ctxt Unparse_costs.cycle))
-    (fun ctxt =>
-      match (ty, __a_value) with
-      | (Script_typed_ir.Unit_t _, _) =>
-        Error_monad.op_gtgteqquestion
-          (Lwt.__return
-            (Alpha_context.Gas.consume ctxt Unparse_costs.__unit_value))
-          (fun ctxt =>
+  let!? ctxt :=
+    Lwt.__return (Alpha_context.Gas.consume ctxt Unparse_costs.cycle) in
+  match (ty, __a_value) with
+  | (Script_typed_ir.Unit_t _, _) =>
+    let!? ctxt :=
+      Lwt.__return (Alpha_context.Gas.consume ctxt Unparse_costs.__unit_value)
+      in
+    Error_monad.__return
+      ((Micheline.Prim (-1) Alpha_context.Script.D_Unit nil nil), ctxt)
+  | (Script_typed_ir.Int_t _, v) =>
+    let!? ctxt :=
+      Lwt.__return
+        (Alpha_context.Gas.consume ctxt (Unparse_costs.__int_value v)) in
+    Error_monad.__return
+      ((Micheline.Int (-1) (Alpha_context.Script_int.to_zint v)), ctxt)
+  | (Script_typed_ir.Nat_t _, v) =>
+    let!? ctxt :=
+      Lwt.__return
+        (Alpha_context.Gas.consume ctxt (Unparse_costs.__int_value v)) in
+    Error_monad.__return
+      ((Micheline.Int (-1) (Alpha_context.Script_int.to_zint v)), ctxt)
+  | (Script_typed_ir.String_t _, s) =>
+    let!? ctxt :=
+      Lwt.__return
+        (Alpha_context.Gas.consume ctxt (Unparse_costs.__string_value s)) in
+    Error_monad.__return ((Micheline.String (-1) s), ctxt)
+  | (Script_typed_ir.Bytes_t _, s) =>
+    let!? ctxt :=
+      Lwt.__return
+        (Alpha_context.Gas.consume ctxt (Unparse_costs.__bytes_value s)) in
+    Error_monad.__return ((Micheline.Bytes (-1) s), ctxt)
+  | (Script_typed_ir.Bool_t _, true) =>
+    let!? ctxt :=
+      Lwt.__return (Alpha_context.Gas.consume ctxt Unparse_costs.__bool_value)
+      in
+    Error_monad.__return
+      ((Micheline.Prim (-1) Alpha_context.Script.D_True nil nil), ctxt)
+  | (Script_typed_ir.Bool_t _, false) =>
+    let!? ctxt :=
+      Lwt.__return (Alpha_context.Gas.consume ctxt Unparse_costs.__bool_value)
+      in
+    Error_monad.__return
+      ((Micheline.Prim (-1) Alpha_context.Script.D_False nil nil), ctxt)
+  | (Script_typed_ir.Timestamp_t _, __t_value) =>
+    let!? ctxt :=
+      Lwt.__return
+        (Alpha_context.Gas.consume ctxt (Unparse_costs.timestamp __t_value)) in
+    match mode with
+    | Optimized =>
+      Error_monad.__return
+        ((Micheline.Int (-1) (Alpha_context.Script_timestamp.to_zint __t_value)),
+          ctxt)
+    | Readable =>
+      match Alpha_context.Script_timestamp.to_notation __t_value with
+      | None =>
+        Error_monad.__return
+          ((Micheline.Int (-1)
+            (Alpha_context.Script_timestamp.to_zint __t_value)), ctxt)
+      | Some s => Error_monad.__return ((Micheline.String (-1) s), ctxt)
+      end
+    end
+  | (Script_typed_ir.Address_t _, (c, entrypoint)) =>
+    let!? ctxt :=
+      Lwt.__return (Alpha_context.Gas.consume ctxt Unparse_costs.contract) in
+    match mode with
+    | Optimized =>
+      let entrypoint :=
+        match entrypoint with
+        | "default" => ""
+        | name => name
+        end in
+      let __bytes_value :=
+        Data_encoding.Binary.to_bytes_exn
+          (Data_encoding.tup2 Alpha_context.Contract.encoding
+            Data_encoding.__Variable.__string_value) (c, entrypoint) in
+      Error_monad.__return ((Micheline.Bytes (-1) __bytes_value), ctxt)
+    | Readable =>
+      let notation :=
+        match entrypoint with
+        | "default" => Alpha_context.Contract.to_b58check c
+        | entrypoint =>
+          Pervasives.op_caret (Alpha_context.Contract.to_b58check c)
+            (Pervasives.op_caret "%" entrypoint)
+        end in
+      Error_monad.__return ((Micheline.String (-1) notation), ctxt)
+    end
+  | (Script_typed_ir.Contract_t _ _, (_, (c, entrypoint))) =>
+    let!? ctxt :=
+      Lwt.__return (Alpha_context.Gas.consume ctxt Unparse_costs.contract) in
+    match mode with
+    | Optimized =>
+      let entrypoint :=
+        match entrypoint with
+        | "default" => ""
+        | name => name
+        end in
+      let __bytes_value :=
+        Data_encoding.Binary.to_bytes_exn
+          (Data_encoding.tup2 Alpha_context.Contract.encoding
+            Data_encoding.__Variable.__string_value) (c, entrypoint) in
+      Error_monad.__return ((Micheline.Bytes (-1) __bytes_value), ctxt)
+    | Readable =>
+      let notation :=
+        match entrypoint with
+        | "default" => Alpha_context.Contract.to_b58check c
+        | entrypoint =>
+          Pervasives.op_caret (Alpha_context.Contract.to_b58check c)
+            (Pervasives.op_caret "%" entrypoint)
+        end in
+      Error_monad.__return ((Micheline.String (-1) notation), ctxt)
+    end
+  | (Script_typed_ir.Signature_t _, s) =>
+    let!? ctxt :=
+      Lwt.__return (Alpha_context.Gas.consume ctxt Unparse_costs.signature) in
+    match mode with
+    | Optimized =>
+      let __bytes_value :=
+        Data_encoding.Binary.to_bytes_exn Signature.encoding s in
+      Error_monad.__return ((Micheline.Bytes (-1) __bytes_value), ctxt)
+    | Readable =>
+      Error_monad.__return
+        ((Micheline.String (-1) (Signature.to_b58check s)), ctxt)
+    end
+  | (Script_typed_ir.Mutez_t _, v) =>
+    let!? ctxt :=
+      Lwt.__return (Alpha_context.Gas.consume ctxt Unparse_costs.tez) in
+    Error_monad.__return
+      ((Micheline.Int (-1) (Z.of_int64 (Alpha_context.Tez.to_mutez v))), ctxt)
+  | (Script_typed_ir.Key_t _, k) =>
+    let!? ctxt :=
+      Lwt.__return (Alpha_context.Gas.consume ctxt Unparse_costs.__key_value) in
+    match mode with
+    | Optimized =>
+      let __bytes_value :=
+        Data_encoding.Binary.to_bytes_exn
+          (|Signature.Public_key|).(S.SPublic_key.encoding) k in
+      Error_monad.__return ((Micheline.Bytes (-1) __bytes_value), ctxt)
+    | Readable =>
+      Error_monad.__return
+        ((Micheline.String (-1)
+          ((|Signature.Public_key|).(S.SPublic_key.to_b58check) k)), ctxt)
+    end
+  | (Script_typed_ir.Key_hash_t _, k) =>
+    let!? ctxt :=
+      Lwt.__return (Alpha_context.Gas.consume ctxt Unparse_costs.key_hash) in
+    match mode with
+    | Optimized =>
+      let __bytes_value :=
+        Data_encoding.Binary.to_bytes_exn
+          (|Signature.Public_key_hash|).(S.SPublic_key_hash.encoding) k in
+      Error_monad.__return ((Micheline.Bytes (-1) __bytes_value), ctxt)
+    | Readable =>
+      Error_monad.__return
+        ((Micheline.String (-1)
+          ((|Signature.Public_key_hash|).(S.SPublic_key_hash.to_b58check) k)),
+          ctxt)
+    end
+  | (Script_typed_ir.Operation_t _, (op, _big_map_diff)) =>
+    let __bytes_value :=
+      Data_encoding.Binary.to_bytes_exn
+        Alpha_context.Operation.internal_operation_encoding op in
+    let!? ctxt :=
+      Lwt.__return
+        (Alpha_context.Gas.consume ctxt (Unparse_costs.operation __bytes_value))
+      in
+    Error_monad.__return ((Micheline.Bytes (-1) __bytes_value), ctxt)
+  | (Script_typed_ir.Chain_id_t _, chain_id) =>
+    let __bytes_value :=
+      Data_encoding.Binary.to_bytes_exn (|Chain_id|).(S.HASH.encoding) chain_id
+      in
+    let!? ctxt :=
+      Lwt.__return
+        (Alpha_context.Gas.consume ctxt (Unparse_costs.chain_id __bytes_value))
+      in
+    Error_monad.__return ((Micheline.Bytes (-1) __bytes_value), ctxt)
+  | (Script_typed_ir.Pair_t (tl, _, _) (tr, _, _) _ _, (l, __r_value)) =>
+    let 'existT _ [__1, __2] [tl, tr, l, __r_value] :=
+      existT (A := [Set ** Set])
+        (fun '[__1, __2] =>
+          [(Script_typed_ir.ty __1) ** (Script_typed_ir.ty __2) ** __1 ** __2])
+        [_, _] [tl, tr, l, __r_value] in
+    let!? ctxt :=
+      Lwt.__return (Alpha_context.Gas.consume ctxt Unparse_costs.pair) in
+    let!? '(l, ctxt) := unparse_data ctxt mode tl l in
+    let!? '(__r_value, ctxt) := unparse_data ctxt mode tr __r_value in
+    Error_monad.__return
+      ((Micheline.Prim (-1) Alpha_context.Script.D_Pair [ l; __r_value ] nil),
+        ctxt)
+  | (Script_typed_ir.Union_t (tl, _) _ _ _, Script_typed_ir.L l) =>
+    let 'existT _ __3 [tl, l] :=
+      existT (A := Set) (fun __3 => [(Script_typed_ir.ty __3) ** __3]) _ [tl, l]
+      in
+    let!? ctxt :=
+      Lwt.__return (Alpha_context.Gas.consume ctxt Unparse_costs.union) in
+    let!? '(l, ctxt) := unparse_data ctxt mode tl l in
+    Error_monad.__return
+      ((Micheline.Prim (-1) Alpha_context.Script.D_Left [ l ] nil), ctxt)
+  | (Script_typed_ir.Union_t _ (tr, _) _ _, Script_typed_ir.R __r_value) =>
+    let 'existT _ __6 [tr, __r_value] :=
+      existT (A := Set) (fun __6 => [(Script_typed_ir.ty __6) ** __6]) _
+        [tr, __r_value] in
+    let!? ctxt :=
+      Lwt.__return (Alpha_context.Gas.consume ctxt Unparse_costs.union) in
+    let!? '(__r_value, ctxt) := unparse_data ctxt mode tr __r_value in
+    Error_monad.__return
+      ((Micheline.Prim (-1) Alpha_context.Script.D_Right [ __r_value ] nil),
+        ctxt)
+  | (Script_typed_ir.Option_t __t_value _ _, Some v) =>
+    let 'existT _ __7 [__t_value, v] :=
+      existT (A := Set) (fun __7 => [(Script_typed_ir.ty __7) ** __7]) _
+        [__t_value, v] in
+    let!? ctxt :=
+      Lwt.__return (Alpha_context.Gas.consume ctxt Unparse_costs.some) in
+    let!? '(v, ctxt) := unparse_data ctxt mode __t_value v in
+    Error_monad.__return
+      ((Micheline.Prim (-1) Alpha_context.Script.D_Some [ v ] nil), ctxt)
+  | (Script_typed_ir.Option_t _ _ _, None) =>
+    let!? ctxt :=
+      Lwt.__return (Alpha_context.Gas.consume ctxt Unparse_costs.none) in
+    Error_monad.__return
+      ((Micheline.Prim (-1) Alpha_context.Script.D_None nil nil), ctxt)
+  | (Script_typed_ir.List_t __t_value _ _, items) =>
+    let 'existT _ __9 [__t_value, items] :=
+      existT (A := Set) (fun __9 => [(Script_typed_ir.ty __9) ** a]) _
+        [__t_value, items] in
+    let!? '(items, ctxt) :=
+      Error_monad.fold_left_s
+        (fun function_parameter =>
+          let '(l, ctxt) := function_parameter in
+          fun element =>
+            let!? ctxt :=
+              Lwt.__return
+                (Alpha_context.Gas.consume ctxt Unparse_costs.list_element) in
+            let!? '(unparsed, ctxt) := unparse_data ctxt mode __t_value element
+              in
+            Error_monad.__return ((cons unparsed l), ctxt)) (nil, ctxt) items in
+    Error_monad.__return ((Micheline.Seq (-1) (List.rev items)), ctxt)
+  | (Script_typed_ir.Set_t __t_value _, set) =>
+    let 'existT _ __10 [__t_value, set] :=
+      existT (A := Set)
+        (fun __10 => [(Script_typed_ir.comparable_ty __10) ** a]) _
+        [__t_value, set] in
+    let __t_value := ty_of_comparable_ty __t_value in
+    let!? '(items, ctxt) :=
+      Error_monad.fold_left_s
+        (fun function_parameter =>
+          let '(l, ctxt) := function_parameter in
+          fun item =>
+            let!? ctxt :=
+              Lwt.__return
+                (Alpha_context.Gas.consume ctxt Unparse_costs.set_element) in
+            let!? '(item, ctxt) := unparse_data ctxt mode __t_value item in
+            Error_monad.__return ((cons item l), ctxt)) (nil, ctxt)
+        (set_fold (fun e => fun acc => cons e acc) set nil) in
+    Error_monad.__return ((Micheline.Seq (-1) items), ctxt)
+  | (Script_typed_ir.Map_t kt vt _ _, map) =>
+    let 'existT _ [__11, __12] [kt, vt, map] :=
+      existT (A := [Set ** Set])
+        (fun '[__11, __12] =>
+          [(Script_typed_ir.comparable_ty __11) ** (Script_typed_ir.ty __12) **
+            a]) [_, _] [kt, vt, map] in
+    let kt := ty_of_comparable_ty kt in
+    let!? '(items, ctxt) :=
+      Error_monad.fold_left_s
+        (fun function_parameter =>
+          let '(l, ctxt) := function_parameter in
+          fun function_parameter =>
+            let '(k, v) := function_parameter in
+            let!? ctxt :=
+              Lwt.__return
+                (Alpha_context.Gas.consume ctxt Unparse_costs.map_element) in
+            let!? '(__key_value, ctxt) := unparse_data ctxt mode kt k in
+            let!? '(value, ctxt) := unparse_data ctxt mode vt v in
             Error_monad.__return
-              ((Micheline.Prim (-1) Alpha_context.Script.D_Unit nil nil), ctxt))
-      | (Script_typed_ir.Int_t _, v) =>
-        Error_monad.op_gtgteqquestion
-          (Lwt.__return
-            (Alpha_context.Gas.consume ctxt (Unparse_costs.__int_value v)))
-          (fun ctxt =>
+              ((cons
+                (Micheline.Prim (-1) Alpha_context.Script.D_Elt
+                  [ __key_value; value ] nil) l), ctxt)) (nil, ctxt)
+        (map_fold (fun k => fun v => fun acc => cons (k, v) acc) map nil) in
+    Error_monad.__return ((Micheline.Seq (-1) items), ctxt)
+  |
+    (Script_typed_ir.Big_map_t kt vt _, {|
+      Script_typed_ir.big_map.id := None;
+        Script_typed_ir.big_map.diff := Diff
+        |}) =>
+    let 'existT _ [__13, __14] [kt, vt, Diff] :=
+      existT (A := [Set ** Set])
+        (fun '[__13, __14] =>
+          [(Script_typed_ir.comparable_ty __13) ** (Script_typed_ir.ty __14) **
+            (Script_typed_ir.map __13 (option __14))]) [_, _] [kt, vt, Diff] in
+    let 'existS _ _ Diff := Diff in
+    let kt := ty_of_comparable_ty kt in
+    let!? '(items, ctxt) :=
+      Error_monad.fold_left_s
+        (fun function_parameter =>
+          let '(l, ctxt) := function_parameter in
+          fun function_parameter =>
+            let '(k, v) := function_parameter in
+            let!? ctxt :=
+              Lwt.__return
+                (Alpha_context.Gas.consume ctxt Unparse_costs.map_element) in
+            let!? '(__key_value, ctxt) := unparse_data ctxt mode kt k in
+            let!? '(value, ctxt) := unparse_data ctxt mode vt v in
             Error_monad.__return
-              ((Micheline.Int (-1) (Alpha_context.Script_int.to_zint v)), ctxt))
-      | (Script_typed_ir.Nat_t _, v) =>
-        Error_monad.op_gtgteqquestion
-          (Lwt.__return
-            (Alpha_context.Gas.consume ctxt (Unparse_costs.__int_value v)))
-          (fun ctxt =>
-            Error_monad.__return
-              ((Micheline.Int (-1) (Alpha_context.Script_int.to_zint v)), ctxt))
-      | (Script_typed_ir.String_t _, s) =>
-        Error_monad.op_gtgteqquestion
-          (Lwt.__return
-            (Alpha_context.Gas.consume ctxt (Unparse_costs.__string_value s)))
-          (fun ctxt => Error_monad.__return ((Micheline.String (-1) s), ctxt))
-      | (Script_typed_ir.Bytes_t _, s) =>
-        Error_monad.op_gtgteqquestion
-          (Lwt.__return
-            (Alpha_context.Gas.consume ctxt (Unparse_costs.__bytes_value s)))
-          (fun ctxt => Error_monad.__return ((Micheline.Bytes (-1) s), ctxt))
-      | (Script_typed_ir.Bool_t _, true) =>
-        Error_monad.op_gtgteqquestion
-          (Lwt.__return
-            (Alpha_context.Gas.consume ctxt Unparse_costs.__bool_value))
-          (fun ctxt =>
-            Error_monad.__return
-              ((Micheline.Prim (-1) Alpha_context.Script.D_True nil nil), ctxt))
-      | (Script_typed_ir.Bool_t _, false) =>
-        Error_monad.op_gtgteqquestion
-          (Lwt.__return
-            (Alpha_context.Gas.consume ctxt Unparse_costs.__bool_value))
-          (fun ctxt =>
-            Error_monad.__return
-              ((Micheline.Prim (-1) Alpha_context.Script.D_False nil nil), ctxt))
-      | (Script_typed_ir.Timestamp_t _, __t_value) =>
-        Error_monad.op_gtgteqquestion
-          (Lwt.__return
-            (Alpha_context.Gas.consume ctxt (Unparse_costs.timestamp __t_value)))
-          (fun ctxt =>
-            match mode with
-            | Optimized =>
-              Error_monad.__return
-                ((Micheline.Int (-1)
-                  (Alpha_context.Script_timestamp.to_zint __t_value)), ctxt)
-            | Readable =>
-              match Alpha_context.Script_timestamp.to_notation __t_value with
-              | None =>
-                Error_monad.__return
-                  ((Micheline.Int (-1)
-                    (Alpha_context.Script_timestamp.to_zint __t_value)), ctxt)
-              | Some s => Error_monad.__return ((Micheline.String (-1) s), ctxt)
-              end
-            end)
-      | (Script_typed_ir.Address_t _, (c, entrypoint)) =>
-        Error_monad.op_gtgteqquestion
-          (Lwt.__return (Alpha_context.Gas.consume ctxt Unparse_costs.contract))
-          (fun ctxt =>
-            match mode with
-            | Optimized =>
-              let entrypoint :=
-                match entrypoint with
-                | "default" => ""
-                | name => name
-                end in
-              let __bytes_value :=
-                Data_encoding.Binary.to_bytes_exn
-                  (Data_encoding.tup2 Alpha_context.Contract.encoding
-                    Data_encoding.__Variable.__string_value) (c, entrypoint) in
-              Error_monad.__return ((Micheline.Bytes (-1) __bytes_value), ctxt)
-            | Readable =>
-              let notation :=
-                match entrypoint with
-                | "default" => Alpha_context.Contract.to_b58check c
-                | entrypoint =>
-                  Pervasives.op_caret (Alpha_context.Contract.to_b58check c)
-                    (Pervasives.op_caret "%" entrypoint)
-                end in
-              Error_monad.__return ((Micheline.String (-1) notation), ctxt)
-            end)
-      | (Script_typed_ir.Contract_t _ _, (_, (c, entrypoint))) =>
-        Error_monad.op_gtgteqquestion
-          (Lwt.__return (Alpha_context.Gas.consume ctxt Unparse_costs.contract))
-          (fun ctxt =>
-            match mode with
-            | Optimized =>
-              let entrypoint :=
-                match entrypoint with
-                | "default" => ""
-                | name => name
-                end in
-              let __bytes_value :=
-                Data_encoding.Binary.to_bytes_exn
-                  (Data_encoding.tup2 Alpha_context.Contract.encoding
-                    Data_encoding.__Variable.__string_value) (c, entrypoint) in
-              Error_monad.__return ((Micheline.Bytes (-1) __bytes_value), ctxt)
-            | Readable =>
-              let notation :=
-                match entrypoint with
-                | "default" => Alpha_context.Contract.to_b58check c
-                | entrypoint =>
-                  Pervasives.op_caret (Alpha_context.Contract.to_b58check c)
-                    (Pervasives.op_caret "%" entrypoint)
-                end in
-              Error_monad.__return ((Micheline.String (-1) notation), ctxt)
-            end)
-      | (Script_typed_ir.Signature_t _, s) =>
-        Error_monad.op_gtgteqquestion
-          (Lwt.__return (Alpha_context.Gas.consume ctxt Unparse_costs.signature))
-          (fun ctxt =>
-            match mode with
-            | Optimized =>
-              let __bytes_value :=
-                Data_encoding.Binary.to_bytes_exn Signature.encoding s in
-              Error_monad.__return ((Micheline.Bytes (-1) __bytes_value), ctxt)
-            | Readable =>
-              Error_monad.__return
-                ((Micheline.String (-1) (Signature.to_b58check s)), ctxt)
-            end)
-      | (Script_typed_ir.Mutez_t _, v) =>
-        Error_monad.op_gtgteqquestion
-          (Lwt.__return (Alpha_context.Gas.consume ctxt Unparse_costs.tez))
-          (fun ctxt =>
-            Error_monad.__return
-              ((Micheline.Int (-1) (Z.of_int64 (Alpha_context.Tez.to_mutez v))),
-                ctxt))
-      | (Script_typed_ir.Key_t _, k) =>
-        Error_monad.op_gtgteqquestion
-          (Lwt.__return
-            (Alpha_context.Gas.consume ctxt Unparse_costs.__key_value))
-          (fun ctxt =>
-            match mode with
-            | Optimized =>
-              let __bytes_value :=
-                Data_encoding.Binary.to_bytes_exn
-                  (|Signature.Public_key|).(S.SPublic_key.encoding) k in
-              Error_monad.__return ((Micheline.Bytes (-1) __bytes_value), ctxt)
-            | Readable =>
-              Error_monad.__return
-                ((Micheline.String (-1)
-                  ((|Signature.Public_key|).(S.SPublic_key.to_b58check) k)),
-                  ctxt)
-            end)
-      | (Script_typed_ir.Key_hash_t _, k) =>
-        Error_monad.op_gtgteqquestion
-          (Lwt.__return (Alpha_context.Gas.consume ctxt Unparse_costs.key_hash))
-          (fun ctxt =>
-            match mode with
-            | Optimized =>
-              let __bytes_value :=
-                Data_encoding.Binary.to_bytes_exn
-                  (|Signature.Public_key_hash|).(S.SPublic_key_hash.encoding) k
-                in
-              Error_monad.__return ((Micheline.Bytes (-1) __bytes_value), ctxt)
-            | Readable =>
-              Error_monad.__return
-                ((Micheline.String (-1)
-                  ((|Signature.Public_key_hash|).(S.SPublic_key_hash.to_b58check)
-                    k)), ctxt)
-            end)
-      | (Script_typed_ir.Operation_t _, (op, _big_map_diff)) =>
-        let __bytes_value :=
-          Data_encoding.Binary.to_bytes_exn
-            Alpha_context.Operation.internal_operation_encoding op in
-        Error_monad.op_gtgteqquestion
-          (Lwt.__return
-            (Alpha_context.Gas.consume ctxt
-              (Unparse_costs.operation __bytes_value)))
-          (fun ctxt =>
-            Error_monad.__return ((Micheline.Bytes (-1) __bytes_value), ctxt))
-      | (Script_typed_ir.Chain_id_t _, chain_id) =>
-        let __bytes_value :=
-          Data_encoding.Binary.to_bytes_exn (|Chain_id|).(S.HASH.encoding)
-            chain_id in
-        Error_monad.op_gtgteqquestion
-          (Lwt.__return
-            (Alpha_context.Gas.consume ctxt
-              (Unparse_costs.chain_id __bytes_value)))
-          (fun ctxt =>
-            Error_monad.__return ((Micheline.Bytes (-1) __bytes_value), ctxt))
-      | (Script_typed_ir.Pair_t (tl, _, _) (tr, _, _) _ _, (l, __r_value)) =>
-        let 'existT _ [__1, __2] [tl, tr, l, __r_value] :=
-          existT (A := [Set ** Set])
-            (fun '[__1, __2] =>
-              [(Script_typed_ir.ty __1) ** (Script_typed_ir.ty __2) ** __1 **
-                __2]) [_, _] [tl, tr, l, __r_value] in
-        Error_monad.op_gtgteqquestion
-          (Lwt.__return (Alpha_context.Gas.consume ctxt Unparse_costs.pair))
-          (fun ctxt =>
-            Error_monad.op_gtgteqquestion (unparse_data ctxt mode tl l)
-              (fun function_parameter =>
-                let '(l, ctxt) := function_parameter in
-                Error_monad.op_gtgteqquestion
-                  (unparse_data ctxt mode tr __r_value)
-                  (fun function_parameter =>
-                    let '(__r_value, ctxt) := function_parameter in
-                    Error_monad.__return
-                      ((Micheline.Prim (-1) Alpha_context.Script.D_Pair
-                        [ l; __r_value ] nil), ctxt))))
-      | (Script_typed_ir.Union_t (tl, _) _ _ _, Script_typed_ir.L l) =>
-        let 'existT _ __3 [tl, l] :=
-          existT (A := Set) (fun __3 => [(Script_typed_ir.ty __3) ** __3]) _
-            [tl, l] in
-        Error_monad.op_gtgteqquestion
-          (Lwt.__return (Alpha_context.Gas.consume ctxt Unparse_costs.union))
-          (fun ctxt =>
-            Error_monad.op_gtgteqquestion (unparse_data ctxt mode tl l)
-              (fun function_parameter =>
-                let '(l, ctxt) := function_parameter in
-                Error_monad.__return
-                  ((Micheline.Prim (-1) Alpha_context.Script.D_Left [ l ] nil),
-                    ctxt)))
-      | (Script_typed_ir.Union_t _ (tr, _) _ _, Script_typed_ir.R __r_value) =>
-        let 'existT _ __6 [tr, __r_value] :=
-          existT (A := Set) (fun __6 => [(Script_typed_ir.ty __6) ** __6]) _
-            [tr, __r_value] in
-        Error_monad.op_gtgteqquestion
-          (Lwt.__return (Alpha_context.Gas.consume ctxt Unparse_costs.union))
-          (fun ctxt =>
-            Error_monad.op_gtgteqquestion (unparse_data ctxt mode tr __r_value)
-              (fun function_parameter =>
-                let '(__r_value, ctxt) := function_parameter in
-                Error_monad.__return
-                  ((Micheline.Prim (-1) Alpha_context.Script.D_Right
-                    [ __r_value ] nil), ctxt)))
-      | (Script_typed_ir.Option_t __t_value _ _, Some v) =>
-        let 'existT _ __7 [__t_value, v] :=
-          existT (A := Set) (fun __7 => [(Script_typed_ir.ty __7) ** __7]) _
-            [__t_value, v] in
-        Error_monad.op_gtgteqquestion
-          (Lwt.__return (Alpha_context.Gas.consume ctxt Unparse_costs.some))
-          (fun ctxt =>
-            Error_monad.op_gtgteqquestion (unparse_data ctxt mode __t_value v)
-              (fun function_parameter =>
-                let '(v, ctxt) := function_parameter in
-                Error_monad.__return
-                  ((Micheline.Prim (-1) Alpha_context.Script.D_Some [ v ] nil),
-                    ctxt)))
-      | (Script_typed_ir.Option_t _ _ _, None) =>
-        Error_monad.op_gtgteqquestion
-          (Lwt.__return (Alpha_context.Gas.consume ctxt Unparse_costs.none))
-          (fun ctxt =>
-            Error_monad.__return
-              ((Micheline.Prim (-1) Alpha_context.Script.D_None nil nil), ctxt))
-      | (Script_typed_ir.List_t __t_value _ _, items) =>
-        let 'existT _ __9 [__t_value, items] :=
-          existT (A := Set) (fun __9 => [(Script_typed_ir.ty __9) ** a]) _
-            [__t_value, items] in
-        Error_monad.op_gtgteqquestion
-          (Error_monad.fold_left_s
-            (fun function_parameter =>
-              let '(l, ctxt) := function_parameter in
-              fun element =>
-                Error_monad.op_gtgteqquestion
-                  (Lwt.__return
-                    (Alpha_context.Gas.consume ctxt Unparse_costs.list_element))
-                  (fun ctxt =>
-                    Error_monad.op_gtgteqquestion
-                      (unparse_data ctxt mode __t_value element)
-                      (fun function_parameter =>
-                        let '(unparsed, ctxt) := function_parameter in
-                        Error_monad.__return ((cons unparsed l), ctxt))))
-            (nil, ctxt) items)
-          (fun function_parameter =>
-            let '(items, ctxt) := function_parameter in
-            Error_monad.__return ((Micheline.Seq (-1) (List.rev items)), ctxt))
-      | (Script_typed_ir.Set_t __t_value _, set) =>
-        let 'existT _ __10 [__t_value, set] :=
-          existT (A := Set)
-            (fun __10 => [(Script_typed_ir.comparable_ty __10) ** a]) _
-            [__t_value, set] in
-        let __t_value := ty_of_comparable_ty __t_value in
-        Error_monad.op_gtgteqquestion
-          (Error_monad.fold_left_s
-            (fun function_parameter =>
-              let '(l, ctxt) := function_parameter in
-              fun item =>
-                Error_monad.op_gtgteqquestion
-                  (Lwt.__return
-                    (Alpha_context.Gas.consume ctxt Unparse_costs.set_element))
-                  (fun ctxt =>
-                    Error_monad.op_gtgteqquestion
-                      (unparse_data ctxt mode __t_value item)
-                      (fun function_parameter =>
-                        let '(item, ctxt) := function_parameter in
-                        Error_monad.__return ((cons item l), ctxt))))
-            (nil, ctxt) (set_fold (fun e => fun acc => cons e acc) set nil))
-          (fun function_parameter =>
-            let '(items, ctxt) := function_parameter in
-            Error_monad.__return ((Micheline.Seq (-1) items), ctxt))
-      | (Script_typed_ir.Map_t kt vt _ _, map) =>
-        let 'existT _ [__11, __12] [kt, vt, map] :=
-          existT (A := [Set ** Set])
-            (fun '[__11, __12] =>
-              [(Script_typed_ir.comparable_ty __11) ** (Script_typed_ir.ty __12)
-                ** a]) [_, _] [kt, vt, map] in
-        let kt := ty_of_comparable_ty kt in
-        Error_monad.op_gtgteqquestion
-          (Error_monad.fold_left_s
-            (fun function_parameter =>
-              let '(l, ctxt) := function_parameter in
-              fun function_parameter =>
-                let '(k, v) := function_parameter in
-                Error_monad.op_gtgteqquestion
-                  (Lwt.__return
-                    (Alpha_context.Gas.consume ctxt Unparse_costs.map_element))
-                  (fun ctxt =>
-                    Error_monad.op_gtgteqquestion (unparse_data ctxt mode kt k)
-                      (fun function_parameter =>
-                        let '(__key_value, ctxt) := function_parameter in
-                        Error_monad.op_gtgteqquestion
-                          (unparse_data ctxt mode vt v)
-                          (fun function_parameter =>
-                            let '(value, ctxt) := function_parameter in
-                            Error_monad.__return
-                              ((cons
-                                (Micheline.Prim (-1) Alpha_context.Script.D_Elt
-                                  [ __key_value; value ] nil) l), ctxt)))))
-            (nil, ctxt)
-            (map_fold (fun k => fun v => fun acc => cons (k, v) acc) map nil))
-          (fun function_parameter =>
-            let '(items, ctxt) := function_parameter in
-            Error_monad.__return ((Micheline.Seq (-1) items), ctxt))
-      |
-        (Script_typed_ir.Big_map_t kt vt _, {|
-          Script_typed_ir.big_map.id := None;
-            Script_typed_ir.big_map.diff := Diff
-            |}) =>
-        let 'existT _ [__13, __14] [kt, vt, Diff] :=
-          existT (A := [Set ** Set])
-            (fun '[__13, __14] =>
-              [(Script_typed_ir.comparable_ty __13) ** (Script_typed_ir.ty __14)
-                ** (Script_typed_ir.map __13 (option __14))]) [_, _]
-            [kt, vt, Diff] in
-        let 'existS _ _ Diff := Diff in
-        let kt := ty_of_comparable_ty kt in
-        Error_monad.op_gtgteqquestion
-          (Error_monad.fold_left_s
-            (fun function_parameter =>
-              let '(l, ctxt) := function_parameter in
-              fun function_parameter =>
-                let '(k, v) := function_parameter in
-                Error_monad.op_gtgteqquestion
-                  (Lwt.__return
-                    (Alpha_context.Gas.consume ctxt Unparse_costs.map_element))
-                  (fun ctxt =>
-                    Error_monad.op_gtgteqquestion (unparse_data ctxt mode kt k)
-                      (fun function_parameter =>
-                        let '(__key_value, ctxt) := function_parameter in
-                        Error_monad.op_gtgteqquestion
-                          (unparse_data ctxt mode vt v)
-                          (fun function_parameter =>
-                            let '(value, ctxt) := function_parameter in
-                            Error_monad.__return
-                              ((cons
-                                (Micheline.Prim (-1) Alpha_context.Script.D_Elt
-                                  [ __key_value; value ] nil) l), ctxt)))))
-            (nil, ctxt)
-            (Diff.(Script_typed_ir.Boxed_map.OPS).(S.MAP.fold)
-              (fun k =>
-                fun v =>
-                  fun acc =>
-                    match v with
-                    | None => acc
-                    | Some v => cons (k, v) acc
-                    end) (Pervasives.fst Diff.(Script_typed_ir.Boxed_map.boxed))
-              nil))
-          (fun function_parameter =>
-            let '(items, ctxt) := function_parameter in
-            Error_monad.__return ((Micheline.Seq (-1) items), ctxt))
-      |
-        (Script_typed_ir.Big_map_t _kt _kv _, {|
-          Script_typed_ir.big_map.id := Some id;
-            Script_typed_ir.big_map.diff := Diff
-            |}) =>
-        let 'existT _ [__15, __16] [_kt, _kv, id, Diff] :=
-          existT (A := [Set ** Set])
-            (fun '[__15, __16] =>
-              [(Script_typed_ir.comparable_ty __15) ** (Script_typed_ir.ty __16)
-                ** Z.t ** (Script_typed_ir.map __15 (option __16))]) [_, _]
-            [_kt, _kv, id, Diff] in
-        let 'existS _ _ Diff := Diff in
-        if
-          (|Compare.Int|).(Compare.S.op_eq)
-            (Diff.(Script_typed_ir.Boxed_map.OPS).(S.MAP.cardinal)
-              (Pervasives.fst Diff.(Script_typed_ir.Boxed_map.boxed))) 0 then
-          Error_monad.__return ((Micheline.Int (-1) id), ctxt)
-        else
-          (* ❌ Assert instruction is not handled. *)
-          assert false
-      |
-        (Script_typed_ir.Lambda_t _ _ _, {|
-          Script_typed_ir.lambda.lam := (_, original_code) |}) =>
-        unparse_code ctxt mode original_code
-      end)
+              ((cons
+                (Micheline.Prim (-1) Alpha_context.Script.D_Elt
+                  [ __key_value; value ] nil) l), ctxt)) (nil, ctxt)
+        (Diff.(Script_typed_ir.Boxed_map.OPS).(S.MAP.fold)
+          (fun k =>
+            fun v =>
+              fun acc =>
+                match v with
+                | None => acc
+                | Some v => cons (k, v) acc
+                end) (Pervasives.fst Diff.(Script_typed_ir.Boxed_map.boxed)) nil)
+      in
+    Error_monad.__return ((Micheline.Seq (-1) items), ctxt)
+  |
+    (Script_typed_ir.Big_map_t _kt _kv _, {|
+      Script_typed_ir.big_map.id := Some id;
+        Script_typed_ir.big_map.diff := Diff
+        |}) =>
+    let 'existT _ [__15, __16] [_kt, _kv, id, Diff] :=
+      existT (A := [Set ** Set])
+        (fun '[__15, __16] =>
+          [(Script_typed_ir.comparable_ty __15) ** (Script_typed_ir.ty __16) **
+            Z.t ** (Script_typed_ir.map __15 (option __16))]) [_, _]
+        [_kt, _kv, id, Diff] in
+    let 'existS _ _ Diff := Diff in
+    if
+      (|Compare.Int|).(Compare.S.op_eq)
+        (Diff.(Script_typed_ir.Boxed_map.OPS).(S.MAP.cardinal)
+          (Pervasives.fst Diff.(Script_typed_ir.Boxed_map.boxed))) 0 then
+      Error_monad.__return ((Micheline.Int (-1) id), ctxt)
+    else
+      (* ❌ Assert instruction is not handled. *)
+      assert false
+  |
+    (Script_typed_ir.Lambda_t _ _ _, {|
+      Script_typed_ir.lambda.lam := (_, original_code) |}) =>
+    unparse_code ctxt mode original_code
+  end
 
 with unparse_code (ctxt : Alpha_context.context) (mode : unparsing_mode)
   {struct ctxt}
@@ -9224,67 +7940,47 @@ with unparse_code (ctxt : Alpha_context.context) (mode : unparsing_mode)
     |
       Micheline.Prim loc Alpha_context.Script.I_PUSH (cons ty (cons data []))
         annot =>
-      Error_monad.op_gtgteqquestion
-        (Lwt.__return (parse_packable_ty ctxt legacy ty))
-        (fun function_parameter =>
-          let '(Ex_ty __t_value, ctxt) := function_parameter in
-          let 'existT _ __Ex_ty_'a [__t_value, ctxt] :=
-            existT (A := Set)
-              (fun __Ex_ty_'a =>
-                [(Script_typed_ir.ty __Ex_ty_'a) ** Alpha_context.context]) _
-              [__t_value, ctxt] in
-          Error_monad.op_gtgteqquestion
-            (parse_data None ctxt legacy __t_value data)
-            (fun function_parameter =>
-              let '(data, ctxt) := function_parameter in
-              Error_monad.op_gtgteqquestion
-                (unparse_data ctxt mode __t_value data)
-                (fun function_parameter =>
-                  let '(data, ctxt) := function_parameter in
-                  Error_monad.op_gtgteqquestion
-                    (Lwt.__return
-                      (Alpha_context.Gas.consume ctxt
-                        (Unparse_costs.prim_cost 2 annot)))
-                    (fun ctxt =>
-                      Error_monad.__return
-                        ((Micheline.Prim loc Alpha_context.Script.I_PUSH
-                          [ ty; data ] annot), ctxt)))))
+      let!? '(Ex_ty __t_value, ctxt) :=
+        Lwt.__return (parse_packable_ty ctxt legacy ty) in
+      let 'existT _ __Ex_ty_'a [__t_value, ctxt] :=
+        existT (A := Set)
+          (fun __Ex_ty_'a =>
+            [(Script_typed_ir.ty __Ex_ty_'a) ** Alpha_context.context]) _
+          [__t_value, ctxt] in
+      let!? '(data, ctxt) := parse_data None ctxt legacy __t_value data in
+      let!? '(data, ctxt) := unparse_data ctxt mode __t_value data in
+      let!? ctxt :=
+        Lwt.__return
+          (Alpha_context.Gas.consume ctxt (Unparse_costs.prim_cost 2 annot)) in
+      Error_monad.__return
+        ((Micheline.Prim loc Alpha_context.Script.I_PUSH [ ty; data ] annot),
+          ctxt)
     | Micheline.Seq loc items =>
-      Error_monad.op_gtgteqquestion
-        (Error_monad.fold_left_s
+      let!? '(items, ctxt) :=
+        Error_monad.fold_left_s
           (fun function_parameter =>
             let '(l, ctxt) := function_parameter in
             fun item =>
-              Error_monad.op_gtgteqquestion (unparse_code ctxt mode item)
-                (fun function_parameter =>
-                  let '(item, ctxt) := function_parameter in
-                  Error_monad.__return ((cons item l), ctxt))) (nil, ctxt) items)
-        (fun function_parameter =>
-          let '(items, ctxt) := function_parameter in
-          Error_monad.op_gtgteqquestion
-            (Lwt.__return
-              (Alpha_context.Gas.consume ctxt
-                (Unparse_costs.seq_cost (List.length items))))
-            (fun ctxt =>
-              Error_monad.__return ((Micheline.Seq loc (List.rev items)), ctxt)))
+              let!? '(item, ctxt) := unparse_code ctxt mode item in
+              Error_monad.__return ((cons item l), ctxt)) (nil, ctxt) items in
+      let!? ctxt :=
+        Lwt.__return
+          (Alpha_context.Gas.consume ctxt
+            (Unparse_costs.seq_cost (List.length items))) in
+      Error_monad.__return ((Micheline.Seq loc (List.rev items)), ctxt)
     | Micheline.Prim loc prim items annot =>
-      Error_monad.op_gtgteqquestion
-        (Error_monad.fold_left_s
+      let!? '(items, ctxt) :=
+        Error_monad.fold_left_s
           (fun function_parameter =>
             let '(l, ctxt) := function_parameter in
             fun item =>
-              Error_monad.op_gtgteqquestion (unparse_code ctxt mode item)
-                (fun function_parameter =>
-                  let '(item, ctxt) := function_parameter in
-                  Error_monad.__return ((cons item l), ctxt))) (nil, ctxt) items)
-        (fun function_parameter =>
-          let '(items, ctxt) := function_parameter in
-          Error_monad.op_gtgteqquestion
-            (Lwt.__return
-              (Alpha_context.Gas.consume ctxt (Unparse_costs.prim_cost 3 annot)))
-            (fun ctxt =>
-              Error_monad.__return
-                ((Micheline.Prim loc prim (List.rev items) annot), ctxt)))
+              let!? '(item, ctxt) := unparse_code ctxt mode item in
+              Error_monad.__return ((cons item l), ctxt)) (nil, ctxt) items in
+      let!? ctxt :=
+        Lwt.__return
+          (Alpha_context.Gas.consume ctxt (Unparse_costs.prim_cost 3 annot)) in
+      Error_monad.__return
+        ((Micheline.Prim loc prim (List.rev items) annot), ctxt)
     | (Micheline.Int _ _ | Micheline.String _ _ | Micheline.Bytes _ _) as atom
       => Error_monad.__return (atom, ctxt)
     end.
@@ -9302,95 +7998,72 @@ Definition unparse_script {A B : Set}
       Script_typed_ir.script.root_name := root_name
       |} := function_parameter in
   let '{| Script_typed_ir.lambda.lam := (_, original_code) |} := code in
-  Error_monad.op_gtgteqquestion (unparse_code ctxt mode original_code)
-    (fun function_parameter =>
-      let '(code, ctxt) := function_parameter in
-      Error_monad.op_gtgteqquestion
-        (unparse_data ctxt mode storage_type storage)
-        (fun function_parameter =>
-          let '(storage, ctxt) := function_parameter in
-          Error_monad.op_gtgteqquestion (unparse_ty ctxt arg_type)
-            (fun function_parameter =>
-              let '(arg_type, ctxt) := function_parameter in
-              Error_monad.op_gtgteqquestion (unparse_ty ctxt storage_type)
-                (fun function_parameter =>
-                  let '(storage_type, ctxt) := function_parameter in
-                  let arg_type :=
-                    add_field_annot
-                      (Option.map (fun n => Script_typed_ir.Field_annot n)
-                        root_name) None arg_type in
-                  let code :=
-                    Micheline.Seq (-1)
-                      [
-                        Micheline.Prim (-1) Alpha_context.Script.K_parameter
-                          [ arg_type ] nil;
-                        Micheline.Prim (-1) Alpha_context.Script.K_storage
-                          [ storage_type ] nil;
-                        Micheline.Prim (-1) Alpha_context.Script.K_code [ code ]
-                          nil
-                      ] in
-                  Error_monad.op_gtgteqquestion
-                    (Lwt.__return
-                      (Error_monad.op_gtgtquestion
-                        (Alpha_context.Gas.consume ctxt
-                          (Unparse_costs.seq_cost 3))
-                        (fun ctxt =>
-                          Error_monad.op_gtgtquestion
-                            (Alpha_context.Gas.consume ctxt
-                              (Unparse_costs.prim_cost 1 nil))
-                            (fun ctxt =>
-                              Error_monad.op_gtgtquestion
-                                (Alpha_context.Gas.consume ctxt
-                                  (Unparse_costs.prim_cost 1 nil))
-                                (fun ctxt =>
-                                  Alpha_context.Gas.consume ctxt
-                                    (Unparse_costs.prim_cost 1 nil))))))
-                    (fun ctxt =>
-                      Error_monad.__return
-                        ({|
-                          Alpha_context.Script.t.code :=
-                            Alpha_context.Script.__lazy_expr_value
-                              (Micheline.strip_locations code);
-                          Alpha_context.Script.t.storage :=
-                            Alpha_context.Script.__lazy_expr_value
-                              (Micheline.strip_locations storage) |}, ctxt)))))).
+  let!? '(code, ctxt) := unparse_code ctxt mode original_code in
+  let!? '(storage, ctxt) := unparse_data ctxt mode storage_type storage in
+  let!? '(arg_type, ctxt) := unparse_ty ctxt arg_type in
+  let!? '(storage_type, ctxt) := unparse_ty ctxt storage_type in
+  let arg_type :=
+    add_field_annot
+      (Option.map (fun n => Script_typed_ir.Field_annot n) root_name) None
+      arg_type in
+  let code :=
+    Micheline.Seq (-1)
+      [
+        Micheline.Prim (-1) Alpha_context.Script.K_parameter [ arg_type ] nil;
+        Micheline.Prim (-1) Alpha_context.Script.K_storage [ storage_type ] nil;
+        Micheline.Prim (-1) Alpha_context.Script.K_code [ code ] nil
+      ] in
+  let!? ctxt :=
+    Lwt.__return
+      (Error_monad.op_gtgtquestion
+        (Alpha_context.Gas.consume ctxt (Unparse_costs.seq_cost 3))
+        (fun ctxt =>
+          Error_monad.op_gtgtquestion
+            (Alpha_context.Gas.consume ctxt (Unparse_costs.prim_cost 1 nil))
+            (fun ctxt =>
+              Error_monad.op_gtgtquestion
+                (Alpha_context.Gas.consume ctxt (Unparse_costs.prim_cost 1 nil))
+                (fun ctxt =>
+                  Alpha_context.Gas.consume ctxt (Unparse_costs.prim_cost 1 nil)))))
+    in
+  Error_monad.__return
+    ({|
+      Alpha_context.Script.t.code :=
+        Alpha_context.Script.__lazy_expr_value (Micheline.strip_locations code);
+      Alpha_context.Script.t.storage :=
+        Alpha_context.Script.__lazy_expr_value
+          (Micheline.strip_locations storage) |}, ctxt).
 
 Definition pack_data {A : Set}
   (ctxt : Alpha_context.context) (typ : Script_typed_ir.ty A) (data : A)
   : Lwt.t (Error_monad.tzresult (MBytes.t * Alpha_context.context)) :=
-  Error_monad.op_gtgteqquestion (unparse_data ctxt Optimized typ data)
-    (fun function_parameter =>
-      let '(unparsed, ctxt) := function_parameter in
-      let __bytes_value :=
-        Data_encoding.Binary.to_bytes_exn Alpha_context.Script.expr_encoding
-          (Micheline.strip_locations unparsed) in
-      Error_monad.op_gtgteqquestion
-        (Lwt.__return
-          (Alpha_context.Gas.consume ctxt
-            (Alpha_context.Script.serialized_cost __bytes_value)))
-        (fun ctxt =>
-          let __bytes_value :=
-            MBytes.concat "" [ MBytes.of_string "\005"; __bytes_value ] in
-          Error_monad.op_gtgteqquestion
-            (Lwt.__return
-              (Alpha_context.Gas.consume ctxt
-                (Alpha_context.Script.serialized_cost __bytes_value)))
-            (fun ctxt => Error_monad.__return (__bytes_value, ctxt)))).
+  let!? '(unparsed, ctxt) := unparse_data ctxt Optimized typ data in
+  let __bytes_value :=
+    Data_encoding.Binary.to_bytes_exn Alpha_context.Script.expr_encoding
+      (Micheline.strip_locations unparsed) in
+  let!? ctxt :=
+    Lwt.__return
+      (Alpha_context.Gas.consume ctxt
+        (Alpha_context.Script.serialized_cost __bytes_value)) in
+  let __bytes_value :=
+    MBytes.concat "" [ MBytes.of_string "\005"; __bytes_value ] in
+  let!? ctxt :=
+    Lwt.__return
+      (Alpha_context.Gas.consume ctxt
+        (Alpha_context.Script.serialized_cost __bytes_value)) in
+  Error_monad.__return (__bytes_value, ctxt).
 
 Definition hash_data {A : Set}
   (ctxt : Alpha_context.context) (typ : Script_typed_ir.ty A) (data : A)
   : Lwt.t (Error_monad.tzresult (Script_expr_hash.t * Alpha_context.context)) :=
-  Error_monad.op_gtgteqquestion (pack_data ctxt typ data)
-    (fun function_parameter =>
-      let '(__bytes_value, ctxt) := function_parameter in
-      Error_monad.op_gtgteqquestion
-        (Lwt.__return
-          (Alpha_context.Gas.consume ctxt
-            (Michelson_v1_gas.Cost_of.Legacy.__hash_value __bytes_value
-              Script_expr_hash.size)))
-        (fun ctxt =>
-          Error_monad.__return
-            ((Script_expr_hash.hash_bytes None [ __bytes_value ]), ctxt))).
+  let!? '(__bytes_value, ctxt) := pack_data ctxt typ data in
+  let!? ctxt :=
+    Lwt.__return
+      (Alpha_context.Gas.consume ctxt
+        (Michelson_v1_gas.Cost_of.Legacy.__hash_value __bytes_value
+          Script_expr_hash.size)) in
+  Error_monad.__return
+    ((Script_expr_hash.hash_bytes None [ __bytes_value ]), ctxt).
 
 Definition empty_big_map {A B : Set}
   (tk : Script_typed_ir.comparable_ty A) (tv : Script_typed_ir.ty B)
@@ -9412,14 +8085,9 @@ Definition big_map_mem {A B : Set}
   match ((map_get __key_value diff), id) with
   | (None, None) => Error_monad.__return (false, ctxt)
   | (None, Some id) =>
-    Error_monad.op_gtgteqquestion (hash_data ctxt key_type __key_value)
-      (fun function_parameter =>
-        let '(__hash_value, ctxt) := function_parameter in
-        Error_monad.op_gtgteqquestion
-          (Alpha_context.Big_map.mem ctxt id __hash_value)
-          (fun function_parameter =>
-            let '(ctxt, res) := function_parameter in
-            Error_monad.__return (res, ctxt)))
+    let!? '(__hash_value, ctxt) := hash_data ctxt key_type __key_value in
+    let!? '(ctxt, res) := Alpha_context.Big_map.mem ctxt id __hash_value in
+    Error_monad.__return (res, ctxt)
   | (Some None, _) => Error_monad.__return (false, ctxt)
   | (Some (Some _), _) => Error_monad.__return (true, ctxt)
   end.
@@ -9438,21 +8106,16 @@ Definition big_map_get {A B : Set}
   | (Some x, _) => Error_monad.__return (x, ctxt)
   | (None, None) => Error_monad.__return (None, ctxt)
   | (None, Some id) =>
-    Error_monad.op_gtgteqquestion (hash_data ctxt key_type __key_value)
-      (fun function_parameter =>
-        let '(__hash_value, ctxt) := function_parameter in
-        Error_monad.op_gtgteqquestion
-          (Alpha_context.Big_map.get_opt ctxt id __hash_value)
-          (fun function_parameter =>
-            match function_parameter with
-            | (ctxt, None) => Error_monad.__return (None, ctxt)
-            | (ctxt, Some value) =>
-              Error_monad.op_gtgteqquestion
-                (parse_data None ctxt true value_type (Micheline.root value))
-                (fun function_parameter =>
-                  let '(x, ctxt) := function_parameter in
-                  Error_monad.__return ((Some x), ctxt))
-            end))
+    let!? '(__hash_value, ctxt) := hash_data ctxt key_type __key_value in
+    let!? function_parameter :=
+      Alpha_context.Big_map.get_opt ctxt id __hash_value in
+    match function_parameter with
+    | (ctxt, None) => Error_monad.__return (None, ctxt)
+    | (ctxt, Some value) =>
+      let!? '(x, ctxt) :=
+        parse_data None ctxt true value_type (Micheline.root value) in
+      Error_monad.__return ((Some x), ctxt)
+    end
   end.
 
 Definition big_map_update {A B : Set}
@@ -9492,107 +8155,75 @@ Definition diff_of_big_map {A B : Set}
       Script_typed_ir.big_map.key_type := key_type;
       Script_typed_ir.big_map.value_type := value_type
       |} := function_parameter in
-  Error_monad.op_gtgteqquestion
-    (Lwt.__return
+  let!? ctxt :=
+    Lwt.__return
       (Alpha_context.Gas.consume ctxt
-        (Michelson_v1_gas.Cost_of.Legacy.map_to_list diff)))
-    (fun ctxt =>
-      Error_monad.op_gtgteqquestion
-        match id with
-        | Some id =>
-          if (|Ids|).(S.SET.mem) id ids then
-            Error_monad.op_gtgteqquestion (fresh ctxt)
-              (fun function_parameter =>
-                let '(ctxt, duplicate) := function_parameter in
-                Error_monad.__return
-                  (ctxt, [ Alpha_context.Contract.Copy id duplicate ], duplicate))
-          else
-            Error_monad.__return (ctxt, nil, id)
-        | None =>
-          Error_monad.op_gtgteqquestion (fresh ctxt)
-            (fun function_parameter =>
-              let '(ctxt, id) := function_parameter in
-              Error_monad.op_gtgteqquestion (unparse_ty ctxt key_type)
-                (fun function_parameter =>
-                  let '(kt, ctxt) := function_parameter in
-                  Error_monad.op_gtgteqquestion (unparse_ty ctxt value_type)
-                    (fun function_parameter =>
-                      let '(kv, ctxt) := function_parameter in
-                      Error_monad.__return
-                        (ctxt,
-                          [
-                            Alpha_context.Contract.Alloc
-                              {|
-                                Alpha_context.Contract.big_map_diff_item.Alloc.big_map :=
-                                  id;
-                                Alpha_context.Contract.big_map_diff_item.Alloc.key_type :=
-                                  Micheline.strip_locations
-                                    kt;
-                                Alpha_context.Contract.big_map_diff_item.Alloc.value_type :=
-                                  Micheline.strip_locations
-                                    kv
-                                |}
-                          ], id))))
-        end
-        (fun function_parameter =>
-          let '(ctxt, init, big_map) := function_parameter in
-          let pairs :=
-            map_fold
-              (fun __key_value =>
-                fun value => fun acc => cons (__key_value, value) acc) diff nil
+        (Michelson_v1_gas.Cost_of.Legacy.map_to_list diff)) in
+  let!? '(ctxt, init, big_map) :=
+    match id with
+    | Some id =>
+      if (|Ids|).(S.SET.mem) id ids then
+        let!? '(ctxt, duplicate) := fresh ctxt in
+        Error_monad.__return
+          (ctxt, [ Alpha_context.Contract.Copy id duplicate ], duplicate)
+      else
+        Error_monad.__return (ctxt, nil, id)
+    | None =>
+      let!? '(ctxt, id) := fresh ctxt in
+      let!? '(kt, ctxt) := unparse_ty ctxt key_type in
+      let!? '(kv, ctxt) := unparse_ty ctxt value_type in
+      Error_monad.__return
+        (ctxt,
+          [
+            Alpha_context.Contract.Alloc
+              {|
+                Alpha_context.Contract.big_map_diff_item.Alloc.big_map :=
+                  id;
+                Alpha_context.Contract.big_map_diff_item.Alloc.key_type :=
+                  Micheline.strip_locations kt;
+                Alpha_context.Contract.big_map_diff_item.Alloc.value_type :=
+                  Micheline.strip_locations kv |}
+          ], id)
+    end in
+  let pairs :=
+    map_fold
+      (fun __key_value => fun value => fun acc => cons (__key_value, value) acc)
+      diff nil in
+  let!? '(diff, ctxt) :=
+    Error_monad.fold_left_s
+      (fun function_parameter =>
+        let '(acc, ctxt) := function_parameter in
+        fun function_parameter =>
+          let '(__key_value, value) := function_parameter in
+          let!? ctxt :=
+            Lwt.__return (Alpha_context.Gas.consume ctxt Typecheck_costs.cycle)
             in
-          Error_monad.op_gtgteqquestion
-            (Error_monad.fold_left_s
-              (fun function_parameter =>
-                let '(acc, ctxt) := function_parameter in
-                fun function_parameter =>
-                  let '(__key_value, value) := function_parameter in
-                  Error_monad.op_gtgteqquestion
-                    (Lwt.__return
-                      (Alpha_context.Gas.consume ctxt Typecheck_costs.cycle))
-                    (fun ctxt =>
-                      Error_monad.op_gtgteqquestion
-                        (hash_data ctxt key_type __key_value)
-                        (fun function_parameter =>
-                          let '(diff_key_hash, ctxt) := function_parameter in
-                          Error_monad.op_gtgteqquestion
-                            (unparse_data ctxt mode key_type __key_value)
-                            (fun function_parameter =>
-                              let '(key_node, ctxt) := function_parameter in
-                              let diff_key := Micheline.strip_locations key_node
-                                in
-                              Error_monad.op_gtgteqquestion
-                                match value with
-                                | None => Error_monad.__return (None, ctxt)
-                                | Some x =>
-                                  Error_monad.op_gtgteqquestion
-                                    (unparse_data ctxt mode value_type x)
-                                    (fun function_parameter =>
-                                      let '(node, ctxt) := function_parameter in
-                                      Error_monad.__return
-                                        ((Some (Micheline.strip_locations node)),
-                                          ctxt))
-                                end
-                                (fun function_parameter =>
-                                  let '(diff_value, ctxt) := function_parameter
-                                    in
-                                  let diff_item :=
-                                    Alpha_context.Contract.Update
-                                      {|
-                                        Alpha_context.Contract.big_map_diff_item.Update.big_map :=
-                                          big_map;
-                                        Alpha_context.Contract.big_map_diff_item.Update.diff_key :=
-                                          diff_key;
-                                        Alpha_context.Contract.big_map_diff_item.Update.diff_key_hash :=
-                                          diff_key_hash;
-                                        Alpha_context.Contract.big_map_diff_item.Update.diff_value :=
-                                          diff_value |} in
-                                  Error_monad.__return
-                                    ((cons diff_item acc), ctxt))))))
-              (nil, ctxt) pairs)
-            (fun function_parameter =>
-              let '(diff, ctxt) := function_parameter in
-              Error_monad.__return ((Pervasives.op_at init diff), big_map, ctxt)))).
+          let!? '(diff_key_hash, ctxt) := hash_data ctxt key_type __key_value in
+          let!? '(key_node, ctxt) := unparse_data ctxt mode key_type __key_value
+            in
+          let diff_key := Micheline.strip_locations key_node in
+          let!? '(diff_value, ctxt) :=
+            match value with
+            | None => Error_monad.__return (None, ctxt)
+            | Some x =>
+              let!? '(node, ctxt) := unparse_data ctxt mode value_type x in
+              Error_monad.__return
+                ((Some (Micheline.strip_locations node)), ctxt)
+            end in
+          let diff_item :=
+            Alpha_context.Contract.Update
+              {|
+                Alpha_context.Contract.big_map_diff_item.Update.big_map :=
+                  big_map;
+                Alpha_context.Contract.big_map_diff_item.Update.diff_key :=
+                  diff_key;
+                Alpha_context.Contract.big_map_diff_item.Update.diff_key_hash :=
+                  diff_key_hash;
+                Alpha_context.Contract.big_map_diff_item.Update.diff_value :=
+                  diff_value |} in
+          Error_monad.__return ((cons diff_item acc), ctxt)) (nil, ctxt) pairs
+    in
+  Error_monad.__return ((Pervasives.op_at init diff), big_map, ctxt).
 
 Fixpoint extract_big_map_updates {a : Set}
   (ctxt : Alpha_context.context)
@@ -9609,143 +8240,113 @@ Fixpoint extract_big_map_updates {a : Set}
         list Alpha_context.Contract.big_map_diff)) :=
   match (ty, x) with
   | (Script_typed_ir.Big_map_t _ _ _, map) =>
-    Error_monad.op_gtgteqquestion (diff_of_big_map ctxt fresh mode ids map)
-      (fun function_parameter =>
-        let '(diff, id, ctxt) := function_parameter in
-        let Map := map.(Script_typed_ir.big_map.diff) in
-        let 'existS _ _ Map := Map in
-        let map :=
-          Script_typed_ir.big_map.with_diff
-            (empty_map Map.(Script_typed_ir.Boxed_map.key_ty))
-            (Script_typed_ir.big_map.with_id (Some id) map) in
-        Error_monad.__return
-          (ctxt, map, ((|Ids|).(S.SET.add) id ids), (cons diff acc)))
+    let!? '(diff, id, ctxt) := diff_of_big_map ctxt fresh mode ids map in
+    let Map := map.(Script_typed_ir.big_map.diff) in
+    let 'existS _ _ Map := Map in
+    let map :=
+      Script_typed_ir.big_map.with_diff
+        (empty_map Map.(Script_typed_ir.Boxed_map.key_ty))
+        (Script_typed_ir.big_map.with_id (Some id) map) in
+    Error_monad.__return
+      (ctxt, map, ((|Ids|).(S.SET.add) id ids), (cons diff acc))
   | (Script_typed_ir.Pair_t (tyl, _, _) (tyr, _, _) _ true, (xl, xr)) =>
     let 'existT _ [__2, __3] [tyl, tyr, xl, xr] :=
       existT (A := [Set ** Set])
         (fun '[__2, __3] =>
           [(Script_typed_ir.ty __2) ** (Script_typed_ir.ty __3) ** __2 ** __3])
         [_, _] [tyl, tyr, xl, xr] in
-    Error_monad.op_gtgteqquestion
-      (Lwt.__return (Alpha_context.Gas.consume ctxt Typecheck_costs.cycle))
-      (fun ctxt =>
-        Error_monad.op_gtgteqquestion
-          (extract_big_map_updates ctxt fresh mode ids acc tyl xl)
-          (fun function_parameter =>
-            let '(ctxt, xl, ids, acc) := function_parameter in
-            Error_monad.op_gtgteqquestion
-              (extract_big_map_updates ctxt fresh mode ids acc tyr xr)
-              (fun function_parameter =>
-                let '(ctxt, xr, ids, acc) := function_parameter in
-                Error_monad.__return (ctxt, (xl, xr), ids, acc))))
+    let!? ctxt :=
+      Lwt.__return (Alpha_context.Gas.consume ctxt Typecheck_costs.cycle) in
+    let!? '(ctxt, xl, ids, acc) :=
+      extract_big_map_updates ctxt fresh mode ids acc tyl xl in
+    let!? '(ctxt, xr, ids, acc) :=
+      extract_big_map_updates ctxt fresh mode ids acc tyr xr in
+    Error_monad.__return (ctxt, (xl, xr), ids, acc)
   | (Script_typed_ir.Union_t (ty, _) (_, _) _ true, Script_typed_ir.L x) =>
     let 'existT _ __4 [ty, x] :=
       existT (A := Set) (fun __4 => [(Script_typed_ir.ty __4) ** __4]) _ [ty, x]
       in
-    Error_monad.op_gtgteqquestion
-      (Lwt.__return (Alpha_context.Gas.consume ctxt Typecheck_costs.cycle))
-      (fun ctxt =>
-        Error_monad.op_gtgteqquestion
-          (extract_big_map_updates ctxt fresh mode ids acc ty x)
-          (fun function_parameter =>
-            let '(ctxt, x, ids, acc) := function_parameter in
-            Error_monad.__return (ctxt, (Script_typed_ir.L x), ids, acc)))
+    let!? ctxt :=
+      Lwt.__return (Alpha_context.Gas.consume ctxt Typecheck_costs.cycle) in
+    let!? '(ctxt, x, ids, acc) :=
+      extract_big_map_updates ctxt fresh mode ids acc ty x in
+    Error_monad.__return (ctxt, (Script_typed_ir.L x), ids, acc)
   | (Script_typed_ir.Union_t (_, _) (ty, _) _ true, Script_typed_ir.R x) =>
     let 'existT _ __7 [ty, x] :=
       existT (A := Set) (fun __7 => [(Script_typed_ir.ty __7) ** __7]) _ [ty, x]
       in
-    Error_monad.op_gtgteqquestion
-      (Lwt.__return (Alpha_context.Gas.consume ctxt Typecheck_costs.cycle))
-      (fun ctxt =>
-        Error_monad.op_gtgteqquestion
-          (extract_big_map_updates ctxt fresh mode ids acc ty x)
-          (fun function_parameter =>
-            let '(ctxt, x, ids, acc) := function_parameter in
-            Error_monad.__return (ctxt, (Script_typed_ir.R x), ids, acc)))
+    let!? ctxt :=
+      Lwt.__return (Alpha_context.Gas.consume ctxt Typecheck_costs.cycle) in
+    let!? '(ctxt, x, ids, acc) :=
+      extract_big_map_updates ctxt fresh mode ids acc ty x in
+    Error_monad.__return (ctxt, (Script_typed_ir.R x), ids, acc)
   | (Script_typed_ir.Option_t ty _ true, Some x) =>
     let 'existT _ __8 [ty, x] :=
       existT (A := Set) (fun __8 => [(Script_typed_ir.ty __8) ** __8]) _ [ty, x]
       in
-    Error_monad.op_gtgteqquestion
-      (Lwt.__return (Alpha_context.Gas.consume ctxt Typecheck_costs.cycle))
-      (fun ctxt =>
-        Error_monad.op_gtgteqquestion
-          (extract_big_map_updates ctxt fresh mode ids acc ty x)
-          (fun function_parameter =>
-            let '(ctxt, x, ids, acc) := function_parameter in
-            Error_monad.__return (ctxt, (Some x), ids, acc)))
+    let!? ctxt :=
+      Lwt.__return (Alpha_context.Gas.consume ctxt Typecheck_costs.cycle) in
+    let!? '(ctxt, x, ids, acc) :=
+      extract_big_map_updates ctxt fresh mode ids acc ty x in
+    Error_monad.__return (ctxt, (Some x), ids, acc)
   | (Script_typed_ir.List_t ty _ true, l) =>
     let 'existT _ __9 [ty, l] :=
       existT (A := Set) (fun __9 => [(Script_typed_ir.ty __9) ** a]) _ [ty, l]
       in
-    Error_monad.op_gtgteqquestion
-      (Error_monad.fold_left_s
+    let!? '(ctxt, l, ids, acc) :=
+      Error_monad.fold_left_s
         (fun function_parameter =>
           let '(ctxt, l, ids, acc) := function_parameter in
           fun x =>
-            Error_monad.op_gtgteqquestion
-              (Lwt.__return
-                (Alpha_context.Gas.consume ctxt Typecheck_costs.cycle))
-              (fun ctxt =>
-                Error_monad.op_gtgteqquestion
-                  (extract_big_map_updates ctxt fresh mode ids acc ty x)
-                  (fun function_parameter =>
-                    let '(ctxt, x, ids, acc) := function_parameter in
-                    Error_monad.__return (ctxt, (cons x l), ids, acc))))
-        (ctxt, nil, ids, acc) l)
-      (fun function_parameter =>
-        let '(ctxt, l, ids, acc) := function_parameter in
-        Error_monad.__return (ctxt, (List.rev l), ids, acc))
+            let!? ctxt :=
+              Lwt.__return
+                (Alpha_context.Gas.consume ctxt Typecheck_costs.cycle) in
+            let!? '(ctxt, x, ids, acc) :=
+              extract_big_map_updates ctxt fresh mode ids acc ty x in
+            Error_monad.__return (ctxt, (cons x l), ids, acc))
+        (ctxt, nil, ids, acc) l in
+    Error_monad.__return (ctxt, (List.rev l), ids, acc)
   | (Script_typed_ir.Map_t _ ty _ true, M as m) =>
     let 'existT _ __11 [ty, M, m] :=
       existT (A := Set) (fun __11 => [(Script_typed_ir.ty __11) ** a ** a]) _
         [ty, M, m] in
     let 'existS _ _ M := M in
-    Error_monad.op_gtgteqquestion
-      (Lwt.__return
+    let!? ctxt :=
+      Lwt.__return
         (Alpha_context.Gas.consume ctxt
-          (Michelson_v1_gas.Cost_of.Legacy.map_to_list m)))
-      (fun ctxt =>
-        Error_monad.op_gtgteqquestion
-          (Error_monad.fold_left_s
-            (fun function_parameter =>
-              let '(ctxt, m, ids, acc) := function_parameter in
-              fun function_parameter =>
-                let '(k, x) := function_parameter in
-                Error_monad.op_gtgteqquestion
-                  (Lwt.__return
-                    (Alpha_context.Gas.consume ctxt Typecheck_costs.cycle))
-                  (fun ctxt =>
-                    Error_monad.op_gtgteqquestion
-                      (extract_big_map_updates ctxt fresh mode ids acc ty x)
-                      (fun function_parameter =>
-                        let '(ctxt, x, ids, acc) := function_parameter in
-                        Error_monad.__return
-                          (ctxt,
-                            (M.(Script_typed_ir.Boxed_map.OPS).(S.MAP.add) k x m),
-                            ids, acc))))
-            (ctxt, M.(Script_typed_ir.Boxed_map.OPS).(S.MAP.empty), ids, acc)
-            (M.(Script_typed_ir.Boxed_map.OPS).(S.MAP.bindings)
-              (Pervasives.fst M.(Script_typed_ir.Boxed_map.boxed))))
-          (fun function_parameter =>
-            let '(ctxt, m, ids, acc) := function_parameter in
-            let M :=
-              let OPS :=
-                existT (A := unit) (fun _ => _) tt
-                  M.(Script_typed_ir.Boxed_map.OPS) in
-              let key := M.(Script_typed_ir.Boxed_map.key) in
-              let value := M.(Script_typed_ir.Boxed_map.value) in
-              let key_ty := M.(Script_typed_ir.Boxed_map.key_ty) in
-              let boxed :=
-                (m, (Pervasives.snd M.(Script_typed_ir.Boxed_map.boxed))) in
-              existT (A := unit) (fun _ => _) tt
-                {|
-                  Script_typed_ir.Boxed_map.OPS := (|OPS|);
-                  Script_typed_ir.Boxed_map.key_ty := key_ty;
-                  Script_typed_ir.Boxed_map.boxed := boxed
-                |} in
+          (Michelson_v1_gas.Cost_of.Legacy.map_to_list m)) in
+    let!? '(ctxt, m, ids, acc) :=
+      Error_monad.fold_left_s
+        (fun function_parameter =>
+          let '(ctxt, m, ids, acc) := function_parameter in
+          fun function_parameter =>
+            let '(k, x) := function_parameter in
+            let!? ctxt :=
+              Lwt.__return
+                (Alpha_context.Gas.consume ctxt Typecheck_costs.cycle) in
+            let!? '(ctxt, x, ids, acc) :=
+              extract_big_map_updates ctxt fresh mode ids acc ty x in
             Error_monad.__return
-              (ctxt, (pack (existT (A := Set -> Set) _ _ (|M|))), ids, acc)))
+              (ctxt, (M.(Script_typed_ir.Boxed_map.OPS).(S.MAP.add) k x m), ids,
+                acc))
+        (ctxt, M.(Script_typed_ir.Boxed_map.OPS).(S.MAP.empty), ids, acc)
+        (M.(Script_typed_ir.Boxed_map.OPS).(S.MAP.bindings)
+          (Pervasives.fst M.(Script_typed_ir.Boxed_map.boxed))) in
+    let M :=
+      let OPS :=
+        existT (A := unit) (fun _ => _) tt M.(Script_typed_ir.Boxed_map.OPS) in
+      let key := M.(Script_typed_ir.Boxed_map.key) in
+      let value := M.(Script_typed_ir.Boxed_map.value) in
+      let key_ty := M.(Script_typed_ir.Boxed_map.key_ty) in
+      let boxed := (m, (Pervasives.snd M.(Script_typed_ir.Boxed_map.boxed))) in
+      existT (A := unit) (fun _ => _) tt
+        {|
+          Script_typed_ir.Boxed_map.OPS := (|OPS|);
+          Script_typed_ir.Boxed_map.key_ty := key_ty;
+          Script_typed_ir.Boxed_map.boxed := boxed
+        |} in
+    Error_monad.__return
+      (ctxt, (pack (existT (A := Set -> Set) _ _ (|M|))), ids, acc)
   | (Script_typed_ir.Option_t _ _ true, None) =>
     Error_monad.__return (ctxt, None, ids, acc)
   | (Script_typed_ir.List_t _ _ false, v) =>
@@ -9895,23 +8496,21 @@ Definition extract_big_map_diff {A : Set}
       fun c => Error_monad.__return (Alpha_context.Big_map.fresh_temporary c)
     else
       Alpha_context.Big_map.fresh in
-  Error_monad.op_gtgteqquestion
-    (extract_big_map_updates ctxt fresh mode to_duplicate nil ty v)
-    (fun function_parameter =>
-      let '(ctxt, v, alive, diffs) := function_parameter in
-      let diffs :=
-        if temporary then
-          diffs
-        else
-          let dead := (|Ids|).(S.SET.diff) to_update alive in
-          cons
-            ((|Ids|).(S.SET.fold)
-              (fun id => fun acc => cons (Alpha_context.Contract.Clear id) acc)
-              dead nil) diffs in
-      match diffs with
-      | [] => Error_monad.__return (v, None, ctxt)
-      | diffs => Error_monad.__return (v, (Some (List.flatten diffs)), ctxt)
-      end).
+  let!? '(ctxt, v, alive, diffs) :=
+    extract_big_map_updates ctxt fresh mode to_duplicate nil ty v in
+  let diffs :=
+    if temporary then
+      diffs
+    else
+      let dead := (|Ids|).(S.SET.diff) to_update alive in
+      cons
+        ((|Ids|).(S.SET.fold)
+          (fun id => fun acc => cons (Alpha_context.Contract.Clear id) acc) dead
+          nil) diffs in
+  match diffs with
+  | [] => Error_monad.__return (v, None, ctxt)
+  | diffs => Error_monad.__return (v, (Some (List.flatten diffs)), ctxt)
+  end.
 
 Definition list_of_big_map_ids (ids : (|Ids|).(S.SET.t))
   : list (|Ids|).(S.SET.elt) := (|Ids|).(S.SET.elements) ids.

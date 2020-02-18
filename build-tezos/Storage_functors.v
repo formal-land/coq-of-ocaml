@@ -10,6 +10,7 @@ Unset Positivity Checking.
 Unset Guard Checking.
 
 Require Import Tezos.Environment.
+Import Notations.
 Require Tezos.Gas_limit_repr.
 Require Tezos.Misc.
 Require Tezos.Raw_context.
@@ -215,14 +216,13 @@ Definition Make_single_data_storage :=
           let to_bytes := (|Encoder|).(ENCODER.to_bytes) in
           let get (__t_value : (|C|).(Raw_context.T.context))
             : Lwt.t (Error_monad.tzresult (|V|).(Storage_sigs.VALUE.t)) :=
-            Error_monad.op_gtgteqquestion
-              ((|C|).(Raw_context.T.get) __t_value
-                (|N|).(Storage_sigs.NAME.name))
-              (fun __b_value =>
-                let __key_value :=
-                  (|C|).(Raw_context.T.absolute_key) __t_value
-                    (|N|).(Storage_sigs.NAME.name) in
-                Lwt.__return (of_bytes __key_value __b_value)) in
+            let!? __b_value :=
+              (|C|).(Raw_context.T.get) __t_value (|N|).(Storage_sigs.NAME.name)
+              in
+            let __key_value :=
+              (|C|).(Raw_context.T.absolute_key) __t_value
+                (|N|).(Storage_sigs.NAME.name) in
+            Lwt.__return (of_bytes __key_value __b_value) in
           let get_option (__t_value : (|C|).(Raw_context.T.context))
             : Lwt.t (Error_monad.tzresult (option (|V|).(Storage_sigs.VALUE.t))) :=
             Error_monad.op_gtgteq
@@ -245,22 +245,18 @@ Definition Make_single_data_storage :=
             (__t_value : (|C|).(Raw_context.T.context))
             (v : (|V|).(Storage_sigs.VALUE.t))
             : Lwt.t (Error_monad.tzresult Raw_context.root_context) :=
-            Error_monad.op_gtgteqquestion
-              ((|C|).(Raw_context.T.init) __t_value
-                (|N|).(Storage_sigs.NAME.name) (to_bytes v))
-              (fun __t_value =>
-                Error_monad.__return ((|C|).(Raw_context.T.project) __t_value))
-            in
+            let!? __t_value :=
+              (|C|).(Raw_context.T.init) __t_value
+                (|N|).(Storage_sigs.NAME.name) (to_bytes v) in
+            Error_monad.__return ((|C|).(Raw_context.T.project) __t_value) in
           let set
             (__t_value : (|C|).(Raw_context.T.context))
             (v : (|V|).(Storage_sigs.VALUE.t))
             : Lwt.t (Error_monad.tzresult Raw_context.root_context) :=
-            Error_monad.op_gtgteqquestion
-              ((|C|).(Raw_context.T.set) __t_value
-                (|N|).(Storage_sigs.NAME.name) (to_bytes v))
-              (fun __t_value =>
-                Error_monad.__return ((|C|).(Raw_context.T.project) __t_value))
-            in
+            let!? __t_value :=
+              (|C|).(Raw_context.T.set) __t_value (|N|).(Storage_sigs.NAME.name)
+                (to_bytes v) in
+            Error_monad.__return ((|C|).(Raw_context.T.project) __t_value) in
           let init_set
             (__t_value : (|C|).(Raw_context.T.context))
             (v : (|V|).(Storage_sigs.VALUE.t))
@@ -288,12 +284,10 @@ Definition Make_single_data_storage :=
                 Lwt.__return ((|C|).(Raw_context.T.project) __t_value)) in
           let delete (__t_value : (|C|).(Raw_context.T.context))
             : Lwt.t (Error_monad.tzresult Raw_context.root_context) :=
-            Error_monad.op_gtgteqquestion
-              ((|C|).(Raw_context.T.delete) __t_value
-                (|N|).(Storage_sigs.NAME.name))
-              (fun __t_value =>
-                Error_monad.__return ((|C|).(Raw_context.T.project) __t_value))
-            in
+            let!? __t_value :=
+              (|C|).(Raw_context.T.delete) __t_value
+                (|N|).(Storage_sigs.NAME.name) in
+            Error_monad.__return ((|C|).(Raw_context.T.project) __t_value) in
           (* ❌ top_level_evaluation *)
           existT (A := unit) (fun _ => _) tt
             {|
@@ -461,13 +455,12 @@ Definition Make_indexed_data_storage :=
           (|C|).(Raw_context.T.mem) s ((|I|).(INDEX.to_path) i nil) in
         let get (s : (|C|).(Raw_context.T.context)) (i : (|I|).(INDEX.t))
           : Lwt.t (Error_monad.tzresult (|V|).(Storage_sigs.VALUE.t)) :=
-          Error_monad.op_gtgteqquestion
-            ((|C|).(Raw_context.T.get) s ((|I|).(INDEX.to_path) i nil))
-            (fun __b_value =>
-              let __key_value :=
-                (|C|).(Raw_context.T.absolute_key) s
-                  ((|I|).(INDEX.to_path) i nil) in
-              Lwt.__return (of_bytes __key_value __b_value)) in
+          let!? __b_value :=
+            (|C|).(Raw_context.T.get) s ((|I|).(INDEX.to_path) i nil) in
+          let __key_value :=
+            (|C|).(Raw_context.T.absolute_key) s ((|I|).(INDEX.to_path) i nil)
+            in
+          Lwt.__return (of_bytes __key_value __b_value) in
         let get_option (s : (|C|).(Raw_context.T.context)) (i : (|I|).(INDEX.t))
           : Lwt.t (Error_monad.tzresult (option (|V|).(Storage_sigs.VALUE.t))) :=
           Error_monad.op_gtgteq
@@ -489,20 +482,18 @@ Definition Make_indexed_data_storage :=
           (s : (|C|).(Raw_context.T.context)) (i : (|I|).(INDEX.t))
           (v : (|V|).(Storage_sigs.VALUE.t))
           : Lwt.t (Error_monad.tzresult Raw_context.root_context) :=
-          Error_monad.op_gtgteqquestion
-            ((|C|).(Raw_context.T.set) s ((|I|).(INDEX.to_path) i nil)
-              (to_bytes v))
-            (fun __t_value =>
-              Error_monad.__return ((|C|).(Raw_context.T.project) __t_value)) in
+          let!? __t_value :=
+            (|C|).(Raw_context.T.set) s ((|I|).(INDEX.to_path) i nil)
+              (to_bytes v) in
+          Error_monad.__return ((|C|).(Raw_context.T.project) __t_value) in
         let init
           (s : (|C|).(Raw_context.T.context)) (i : (|I|).(INDEX.t))
           (v : (|V|).(Storage_sigs.VALUE.t))
           : Lwt.t (Error_monad.tzresult Raw_context.root_context) :=
-          Error_monad.op_gtgteqquestion
-            ((|C|).(Raw_context.T.init) s ((|I|).(INDEX.to_path) i nil)
-              (to_bytes v))
-            (fun __t_value =>
-              Error_monad.__return ((|C|).(Raw_context.T.project) __t_value)) in
+          let!? __t_value :=
+            (|C|).(Raw_context.T.init) s ((|I|).(INDEX.to_path) i nil)
+              (to_bytes v) in
+          Error_monad.__return ((|C|).(Raw_context.T.project) __t_value) in
         let init_set
           (s : (|C|).(Raw_context.T.context)) (i : (|I|).(INDEX.t))
           (v : (|V|).(Storage_sigs.VALUE.t)) : Lwt.t Raw_context.root_context :=
@@ -528,10 +519,9 @@ Definition Make_indexed_data_storage :=
               Lwt.__return ((|C|).(Raw_context.T.project) __t_value)) in
         let delete (s : (|C|).(Raw_context.T.context)) (i : (|I|).(INDEX.t))
           : Lwt.t (Error_monad.tzresult Raw_context.root_context) :=
-          Error_monad.op_gtgteqquestion
-            ((|C|).(Raw_context.T.delete) s ((|I|).(INDEX.to_path) i nil))
-            (fun __t_value =>
-              Error_monad.__return ((|C|).(Raw_context.T.project) __t_value)) in
+          let!? __t_value :=
+            (|C|).(Raw_context.T.delete) s ((|I|).(INDEX.to_path) i nil) in
+          Error_monad.__return ((|C|).(Raw_context.T.project) __t_value) in
         let clear (s : (|C|).(Raw_context.T.context))
           : Lwt.t Raw_context.root_context :=
           Error_monad.op_gtgteq ((|C|).(Raw_context.T.remove_rec) s nil)
@@ -640,8 +630,8 @@ Definition Make_indexed_carbonated_data_storage :=
               match function_parameter with
               | None => Error_monad.__return (0, false)
               | Some len =>
-                Error_monad.op_gtgteqquestion (decode_len_value (len_key i) len)
-                  (fun len => Error_monad.__return (len, true))
+                let!? len := decode_len_value (len_key i) len in
+                Error_monad.__return (len, true)
               end) in
         let consume_read_gas
           (get :
@@ -649,13 +639,11 @@ Definition Make_indexed_carbonated_data_storage :=
             Lwt.t (Error_monad.tzresult MBytes.t))
           (c : (|C|).(Raw_context.T.context)) (i : (|I|).(INDEX.t))
           : Lwt.t (Error_monad.tzresult (|C|).(Raw_context.T.context)) :=
-          Error_monad.op_gtgteqquestion (get c (len_key i))
-            (fun len =>
-              Error_monad.op_gtgteqquestion (decode_len_value (len_key i) len)
-                (fun len =>
-                  Lwt.__return
-                    ((|C|).(Raw_context.T.consume_gas) c
-                      (Gas_limit_repr.read_bytes_cost (Z.of_int len))))) in
+          let!? len := get c (len_key i) in
+          let!? len := decode_len_value (len_key i) len in
+          Lwt.__return
+            ((|C|).(Raw_context.T.consume_gas) c
+              (Gas_limit_repr.read_bytes_cost (Z.of_int len))) in
         let consume_serialize_write_gas {A : Set}
           (set :
             (|C|).(Raw_context.T.context) -> list string -> MBytes.t ->
@@ -664,104 +652,80 @@ Definition Make_indexed_carbonated_data_storage :=
           : Lwt.t (Error_monad.tzresult (A * MBytes.t)) :=
           let __bytes_value := to_bytes v in
           let len := MBytes.length __bytes_value in
-          Error_monad.op_gtgteqquestion
-            (Lwt.__return
+          let!? c :=
+            Lwt.__return
               ((|C|).(Raw_context.T.consume_gas) c
-                (Gas_limit_repr.alloc_mbytes_cost len)))
-            (fun c =>
-              Error_monad.op_gtgteqquestion
-                (Lwt.__return
-                  ((|C|).(Raw_context.T.consume_gas) c
-                    (Gas_limit_repr.write_bytes_cost (Z.of_int len))))
-                (fun c =>
-                  Error_monad.op_gtgteqquestion
-                    (set c (len_key i) (encode_len_value __bytes_value))
-                    (fun c => Error_monad.__return (c, __bytes_value)))) in
+                (Gas_limit_repr.alloc_mbytes_cost len)) in
+          let!? c :=
+            Lwt.__return
+              ((|C|).(Raw_context.T.consume_gas) c
+                (Gas_limit_repr.write_bytes_cost (Z.of_int len))) in
+          let!? c := set c (len_key i) (encode_len_value __bytes_value) in
+          Error_monad.__return (c, __bytes_value) in
         let consume_remove_gas {A : Set}
           (del :
             (|C|).(Raw_context.T.context) -> list string ->
             Lwt.t (Error_monad.tzresult A)) (c : (|C|).(Raw_context.T.context))
           (i : (|I|).(INDEX.t)) : Lwt.t (Error_monad.tzresult A) :=
-          Error_monad.op_gtgteqquestion
-            (Lwt.__return
+          let!? c :=
+            Lwt.__return
               ((|C|).(Raw_context.T.consume_gas) c
-                (Gas_limit_repr.write_bytes_cost Z.zero)))
-            (fun c => del c (len_key i)) in
+                (Gas_limit_repr.write_bytes_cost Z.zero)) in
+          del c (len_key i) in
         let mem (s : (|C|).(Raw_context.T.context)) (i : (|I|).(INDEX.t))
           : Lwt.t (Error_monad.tzresult (Raw_context.root_context * bool)) :=
-          Error_monad.op_gtgteqquestion (consume_mem_gas s)
-            (fun s =>
-              Error_monad.op_gtgteq ((|C|).(Raw_context.T.mem) s (data_key i))
-                (fun __exists =>
-                  Error_monad.__return
-                    (((|C|).(Raw_context.T.project) s), __exists))) in
+          let!? s := consume_mem_gas s in
+          Error_monad.op_gtgteq ((|C|).(Raw_context.T.mem) s (data_key i))
+            (fun __exists =>
+              Error_monad.__return (((|C|).(Raw_context.T.project) s), __exists))
+          in
         let get (s : (|C|).(Raw_context.T.context)) (i : (|I|).(INDEX.t))
           : Lwt.t
             (Error_monad.tzresult
               (Raw_context.root_context * (|V|).(Storage_sigs.VALUE.t))) :=
-          Error_monad.op_gtgteqquestion
-            (consume_read_gas (|C|).(Raw_context.T.get) s i)
-            (fun s =>
-              Error_monad.op_gtgteqquestion
-                ((|C|).(Raw_context.T.get) s (data_key i))
-                (fun __b_value =>
-                  let __key_value :=
-                    (|C|).(Raw_context.T.absolute_key) s (data_key i) in
-                  Error_monad.op_gtgteqquestion
-                    (Lwt.__return (of_bytes __key_value __b_value))
-                    (fun v =>
-                      Error_monad.__return
-                        (((|C|).(Raw_context.T.project) s), v)))) in
+          let!? s := consume_read_gas (|C|).(Raw_context.T.get) s i in
+          let!? __b_value := (|C|).(Raw_context.T.get) s (data_key i) in
+          let __key_value := (|C|).(Raw_context.T.absolute_key) s (data_key i)
+            in
+          let!? v := Lwt.__return (of_bytes __key_value __b_value) in
+          Error_monad.__return (((|C|).(Raw_context.T.project) s), v) in
         let get_option (s : (|C|).(Raw_context.T.context)) (i : (|I|).(INDEX.t))
           : Lwt.t
             (Error_monad.tzresult
               (Raw_context.root_context * option (|V|).(Storage_sigs.VALUE.t))) :=
-          Error_monad.op_gtgteqquestion (consume_mem_gas s)
-            (fun s =>
-              Error_monad.op_gtgteq ((|C|).(Raw_context.T.mem) s (data_key i))
-                (fun __exists =>
-                  if __exists then
-                    Error_monad.op_gtgteqquestion (get s i)
-                      (fun function_parameter =>
-                        let '(s, v) := function_parameter in
-                        Error_monad.__return (s, (Some v)))
-                  else
-                    Error_monad.__return
-                      (((|C|).(Raw_context.T.project) s), None))) in
+          let!? s := consume_mem_gas s in
+          Error_monad.op_gtgteq ((|C|).(Raw_context.T.mem) s (data_key i))
+            (fun __exists =>
+              if __exists then
+                let!? '(s, v) := get s i in
+                Error_monad.__return (s, (Some v))
+              else
+                Error_monad.__return (((|C|).(Raw_context.T.project) s), None))
+          in
         let set
           (s : (|C|).(Raw_context.T.context)) (i : (|I|).(INDEX.t))
           (v : (|V|).(Storage_sigs.VALUE.t))
           : Lwt.t (Error_monad.tzresult (Raw_context.root_context * Z)) :=
-          Error_monad.op_gtgteqquestion (existing_size s i)
-            (fun function_parameter =>
-              let '(prev_size, _) := function_parameter in
-              Error_monad.op_gtgteqquestion
-                (consume_serialize_write_gas (|C|).(Raw_context.T.set) s i v)
-                (fun function_parameter =>
-                  let '(s, __bytes_value) := function_parameter in
-                  Error_monad.op_gtgteqquestion
-                    ((|C|).(Raw_context.T.set) s (data_key i) __bytes_value)
-                    (fun __t_value =>
-                      let size_diff :=
-                        Pervasives.op_minus (MBytes.length __bytes_value)
-                          prev_size in
-                      Error_monad.__return
-                        (((|C|).(Raw_context.T.project) __t_value), size_diff))))
-          in
+          let!? '(prev_size, _) := existing_size s i in
+          let!? '(s, __bytes_value) :=
+            consume_serialize_write_gas (|C|).(Raw_context.T.set) s i v in
+          let!? __t_value :=
+            (|C|).(Raw_context.T.set) s (data_key i) __bytes_value in
+          let size_diff :=
+            Pervasives.op_minus (MBytes.length __bytes_value) prev_size in
+          Error_monad.__return
+            (((|C|).(Raw_context.T.project) __t_value), size_diff) in
         let init
           (s : (|C|).(Raw_context.T.context)) (i : (|I|).(INDEX.t))
           (v : (|V|).(Storage_sigs.VALUE.t))
           : Lwt.t (Error_monad.tzresult (Raw_context.root_context * Z)) :=
-          Error_monad.op_gtgteqquestion
-            (consume_serialize_write_gas (|C|).(Raw_context.T.init) s i v)
-            (fun function_parameter =>
-              let '(s, __bytes_value) := function_parameter in
-              Error_monad.op_gtgteqquestion
-                ((|C|).(Raw_context.T.init) s (data_key i) __bytes_value)
-                (fun __t_value =>
-                  let size := MBytes.length __bytes_value in
-                  Error_monad.__return
-                    (((|C|).(Raw_context.T.project) __t_value), size))) in
+          let!? '(s, __bytes_value) :=
+            consume_serialize_write_gas (|C|).(Raw_context.T.init) s i v in
+          let!? __t_value :=
+            (|C|).(Raw_context.T.init) s (data_key i) __bytes_value in
+          let size := MBytes.length __bytes_value in
+          Error_monad.__return (((|C|).(Raw_context.T.project) __t_value), size)
+          in
         let init_set
           (s : (|C|).(Raw_context.T.context)) (i : (|I|).(INDEX.t))
           (v : (|V|).(Storage_sigs.VALUE.t))
@@ -772,52 +736,32 @@ Definition Make_indexed_carbonated_data_storage :=
             : Lwt.t (Error_monad.tzresult (|C|).(Raw_context.T.context)) :=
             Error_monad.op_gtgteq ((|C|).(Raw_context.T.init_set) s i v)
               Error_monad.__return in
-          Error_monad.op_gtgteqquestion (existing_size s i)
-            (fun function_parameter =>
-              let '(prev_size, existed) := function_parameter in
-              Error_monad.op_gtgteqquestion
-                (consume_serialize_write_gas init_set s i v)
-                (fun function_parameter =>
-                  let '(s, __bytes_value) := function_parameter in
-                  Error_monad.op_gtgteqquestion
-                    (init_set s (data_key i) __bytes_value)
-                    (fun __t_value =>
-                      let size_diff :=
-                        Pervasives.op_minus (MBytes.length __bytes_value)
-                          prev_size in
-                      Error_monad.__return
-                        (((|C|).(Raw_context.T.project) __t_value), size_diff,
-                          existed)))) in
+          let!? '(prev_size, existed) := existing_size s i in
+          let!? '(s, __bytes_value) :=
+            consume_serialize_write_gas init_set s i v in
+          let!? __t_value := init_set s (data_key i) __bytes_value in
+          let size_diff :=
+            Pervasives.op_minus (MBytes.length __bytes_value) prev_size in
+          Error_monad.__return
+            (((|C|).(Raw_context.T.project) __t_value), size_diff, existed) in
         let remove (s : (|C|).(Raw_context.T.context)) (i : (|I|).(INDEX.t))
           : Lwt.t (Error_monad.tzresult (Raw_context.root_context * Z * bool)) :=
           let remove (s : (|C|).(Raw_context.T.context)) (i : Raw_context.key)
             : Lwt.t (Error_monad.tzresult (|C|).(Raw_context.T.context)) :=
             Error_monad.op_gtgteq ((|C|).(Raw_context.T.remove) s i)
               Error_monad.__return in
-          Error_monad.op_gtgteqquestion (existing_size s i)
-            (fun function_parameter =>
-              let '(prev_size, existed) := function_parameter in
-              Error_monad.op_gtgteqquestion (consume_remove_gas remove s i)
-                (fun s =>
-                  Error_monad.op_gtgteqquestion (remove s (data_key i))
-                    (fun __t_value =>
-                      Error_monad.__return
-                        (((|C|).(Raw_context.T.project) __t_value), prev_size,
-                          existed)))) in
+          let!? '(prev_size, existed) := existing_size s i in
+          let!? s := consume_remove_gas remove s i in
+          let!? __t_value := remove s (data_key i) in
+          Error_monad.__return
+            (((|C|).(Raw_context.T.project) __t_value), prev_size, existed) in
         let delete (s : (|C|).(Raw_context.T.context)) (i : (|I|).(INDEX.t))
           : Lwt.t (Error_monad.tzresult (Raw_context.root_context * Z)) :=
-          Error_monad.op_gtgteqquestion (existing_size s i)
-            (fun function_parameter =>
-              let '(prev_size, _) := function_parameter in
-              Error_monad.op_gtgteqquestion
-                (consume_remove_gas (|C|).(Raw_context.T.delete) s i)
-                (fun s =>
-                  Error_monad.op_gtgteqquestion
-                    ((|C|).(Raw_context.T.delete) s (data_key i))
-                    (fun __t_value =>
-                      Error_monad.__return
-                        (((|C|).(Raw_context.T.project) __t_value), prev_size))))
-          in
+          let!? '(prev_size, _) := existing_size s i in
+          let!? s := consume_remove_gas (|C|).(Raw_context.T.delete) s i in
+          let!? __t_value := (|C|).(Raw_context.T.delete) s (data_key i) in
+          Error_monad.__return
+            (((|C|).(Raw_context.T.project) __t_value), prev_size) in
         let set_option
           (s : (|C|).(Raw_context.T.context)) (i : (|I|).(INDEX.t))
           (v : option (|V|).(Storage_sigs.VALUE.t))
@@ -987,11 +931,9 @@ Definition Make_indexed_data_snapshotable_storage :=
             (s : (|C|).(Raw_context.T.context))
             (id : (|Snapshot_index|).(INDEX.t))
             : Lwt.t (Error_monad.tzresult Raw_context.root_context) :=
-            Error_monad.op_gtgteqquestion
-              ((|C|).(Raw_context.T.copy) s data_name (snapshot_path id))
-              (fun __t_value =>
-                Error_monad.__return ((|C|).(Raw_context.T.project) __t_value))
-            in
+            let!? __t_value :=
+              (|C|).(Raw_context.T.copy) s data_name (snapshot_path id) in
+            Error_monad.__return ((|C|).(Raw_context.T.project) __t_value) in
           let delete_snapshot
             (s : (|C|).(Raw_context.T.context))
             (id : (|Snapshot_index|).(INDEX.t))
@@ -1132,9 +1074,9 @@ Definition Make_indexed_subcontext :=
             (Error_monad.tzresult
               ((|I|).(INDEX.ipath) (|C|).(Raw_context.T.context))) :=
           let '(__t_value, i) := unpack c in
-          Error_monad.op_gtgteqquestion
-            ((|C|).(Raw_context.T.init) __t_value (to_key i k) v)
-            (fun __t_value => Error_monad.__return (pack __t_value i)) in
+          let!? __t_value := (|C|).(Raw_context.T.init) __t_value (to_key i k) v
+            in
+          Error_monad.__return (pack __t_value i) in
         let set
           (c : (|I|).(INDEX.ipath) (|C|).(Raw_context.T.context))
           (k : list string) (v : Raw_context.value)
@@ -1142,9 +1084,9 @@ Definition Make_indexed_subcontext :=
             (Error_monad.tzresult
               ((|I|).(INDEX.ipath) (|C|).(Raw_context.T.context))) :=
           let '(__t_value, i) := unpack c in
-          Error_monad.op_gtgteqquestion
-            ((|C|).(Raw_context.T.set) __t_value (to_key i k) v)
-            (fun __t_value => Error_monad.__return (pack __t_value i)) in
+          let!? __t_value := (|C|).(Raw_context.T.set) __t_value (to_key i k) v
+            in
+          Error_monad.__return (pack __t_value i) in
         let init_set
           (c : (|I|).(INDEX.ipath) (|C|).(Raw_context.T.context))
           (k : list string) (v : Raw_context.value)
@@ -1168,9 +1110,9 @@ Definition Make_indexed_subcontext :=
             (Error_monad.tzresult
               ((|I|).(INDEX.ipath) (|C|).(Raw_context.T.context))) :=
           let '(__t_value, i) := unpack c in
-          Error_monad.op_gtgteqquestion
-            ((|C|).(Raw_context.T.delete) __t_value (to_key i k))
-            (fun __t_value => Error_monad.__return (pack __t_value i)) in
+          let!? __t_value := (|C|).(Raw_context.T.delete) __t_value (to_key i k)
+            in
+          Error_monad.__return (pack __t_value i) in
         let remove
           (c : (|I|).(INDEX.ipath) (|C|).(Raw_context.T.context))
           (k : list string)
@@ -1194,9 +1136,10 @@ Definition Make_indexed_subcontext :=
             (Error_monad.tzresult
               ((|I|).(INDEX.ipath) (|C|).(Raw_context.T.context))) :=
           let '(__t_value, i) := unpack c in
-          Error_monad.op_gtgteqquestion
-            ((|C|).(Raw_context.T.copy) __t_value (to_key i from) (to_key i to_))
-            (fun __t_value => Error_monad.__return (pack __t_value i)) in
+          let!? __t_value :=
+            (|C|).(Raw_context.T.copy) __t_value (to_key i from) (to_key i to_)
+            in
+          Error_monad.__return (pack __t_value i) in
         let fold {A : Set}
           (c : (|I|).(INDEX.ipath) (|C|).(Raw_context.T.context))
           (k : list string) (init : A) (f : Context.dir_or_key -> A -> Lwt.t A)
@@ -1435,14 +1378,13 @@ Definition Make_indexed_subcontext :=
                 (|N|).(Storage_sigs.NAME.name) in
             let get (s : (|C|).(Raw_context.T.context)) (i : (|I|).(INDEX.t))
               : Lwt.t (Error_monad.tzresult (|V|).(Storage_sigs.VALUE.t)) :=
-              Error_monad.op_gtgteqquestion
-                ((|Raw_context|).(Raw_context.T.get) (pack s i)
-                  (|N|).(Storage_sigs.NAME.name))
-                (fun __b_value =>
-                  let __key_value :=
-                    (|Raw_context|).(Raw_context.T.absolute_key) (pack s i)
-                      (|N|).(Storage_sigs.NAME.name) in
-                  Lwt.__return (of_bytes __key_value __b_value)) in
+              let!? __b_value :=
+                (|Raw_context|).(Raw_context.T.get) (pack s i)
+                  (|N|).(Storage_sigs.NAME.name) in
+              let __key_value :=
+                (|Raw_context|).(Raw_context.T.absolute_key) (pack s i)
+                  (|N|).(Storage_sigs.NAME.name) in
+              Lwt.__return (of_bytes __key_value __b_value) in
             let get_option
               (s : (|C|).(Raw_context.T.context)) (i : (|I|).(INDEX.t))
               : Lwt.t
@@ -1467,22 +1409,20 @@ Definition Make_indexed_subcontext :=
               (s : (|C|).(Raw_context.T.context)) (i : (|I|).(INDEX.t))
               (v : (|V|).(Storage_sigs.VALUE.t))
               : Lwt.t (Error_monad.tzresult Raw_context.root_context) :=
-              Error_monad.op_gtgteqquestion
-                ((|Raw_context|).(Raw_context.T.set) (pack s i)
-                  (|N|).(Storage_sigs.NAME.name) (to_bytes v))
-                (fun c =>
-                  let '(s, _) := unpack c in
-                  Error_monad.__return ((|C|).(Raw_context.T.project) s)) in
+              let!? c :=
+                (|Raw_context|).(Raw_context.T.set) (pack s i)
+                  (|N|).(Storage_sigs.NAME.name) (to_bytes v) in
+              let '(s, _) := unpack c in
+              Error_monad.__return ((|C|).(Raw_context.T.project) s) in
             let init
               (s : (|C|).(Raw_context.T.context)) (i : (|I|).(INDEX.t))
               (v : (|V|).(Storage_sigs.VALUE.t))
               : Lwt.t (Error_monad.tzresult Raw_context.root_context) :=
-              Error_monad.op_gtgteqquestion
-                ((|Raw_context|).(Raw_context.T.init) (pack s i)
-                  (|N|).(Storage_sigs.NAME.name) (to_bytes v))
-                (fun c =>
-                  let '(s, _) := unpack c in
-                  Error_monad.__return ((|C|).(Raw_context.T.project) s)) in
+              let!? c :=
+                (|Raw_context|).(Raw_context.T.init) (pack s i)
+                  (|N|).(Storage_sigs.NAME.name) (to_bytes v) in
+              let '(s, _) := unpack c in
+              Error_monad.__return ((|C|).(Raw_context.T.project) s) in
             let init_set
               (s : (|C|).(Raw_context.T.context)) (i : (|I|).(INDEX.t))
               (v : (|V|).(Storage_sigs.VALUE.t))
@@ -1513,12 +1453,11 @@ Definition Make_indexed_subcontext :=
                   Lwt.__return ((|C|).(Raw_context.T.project) s)) in
             let delete (s : (|C|).(Raw_context.T.context)) (i : (|I|).(INDEX.t))
               : Lwt.t (Error_monad.tzresult Raw_context.root_context) :=
-              Error_monad.op_gtgteqquestion
-                ((|Raw_context|).(Raw_context.T.delete) (pack s i)
-                  (|N|).(Storage_sigs.NAME.name))
-                (fun c =>
-                  let '(s, _) := unpack c in
-                  Error_monad.__return ((|C|).(Raw_context.T.project) s)) in
+              let!? c :=
+                (|Raw_context|).(Raw_context.T.delete) (pack s i)
+                  (|N|).(Storage_sigs.NAME.name) in
+              let '(s, _) := unpack c in
+              Error_monad.__return ((|C|).(Raw_context.T.project) s) in
             let clear (s : (|C|).(Raw_context.T.context))
               : Lwt.t Raw_context.root_context :=
               Error_monad.op_gtgteq
@@ -1619,9 +1558,8 @@ Definition Make_indexed_subcontext :=
                   match function_parameter with
                   | None => Error_monad.__return (0, false)
                   | Some len =>
-                    Error_monad.op_gtgteqquestion
-                      (decode_len_value len_name len)
-                      (fun len => Error_monad.__return (len, true))
+                    let!? len := decode_len_value len_name len in
+                    Error_monad.__return (len, true)
                   end) in
             let consume_read_gas
               (get :
@@ -1630,13 +1568,11 @@ Definition Make_indexed_subcontext :=
               (c : (|Raw_context|).(Raw_context.T.context))
               : Lwt.t
                 (Error_monad.tzresult (|Raw_context|).(Raw_context.T.context)) :=
-              Error_monad.op_gtgteqquestion (get c len_name)
-                (fun len =>
-                  Error_monad.op_gtgteqquestion (decode_len_value len_name len)
-                    (fun len =>
-                      Lwt.__return
-                        ((|Raw_context|).(Raw_context.T.consume_gas) c
-                          (Gas_limit_repr.read_bytes_cost (Z.of_int len))))) in
+              let!? len := get c len_name in
+              let!? len := decode_len_value len_name len in
+              Lwt.__return
+                ((|Raw_context|).(Raw_context.T.consume_gas) c
+                  (Gas_limit_repr.read_bytes_cost (Z.of_int len))) in
             let consume_write_gas {A : Set}
               (set :
                 (|Raw_context|).(Raw_context.T.context) -> list string ->
@@ -1646,111 +1582,89 @@ Definition Make_indexed_subcontext :=
               : Lwt.t (Error_monad.tzresult (A * MBytes.t)) :=
               let __bytes_value := to_bytes v in
               let len := MBytes.length __bytes_value in
-              Error_monad.op_gtgteqquestion
-                (Lwt.__return
+              let!? c :=
+                Lwt.__return
                   ((|Raw_context|).(Raw_context.T.consume_gas) c
-                    (Gas_limit_repr.write_bytes_cost (Z.of_int len))))
-                (fun c =>
-                  Error_monad.op_gtgteqquestion
-                    (set c len_name (encode_len_value __bytes_value))
-                    (fun c => Error_monad.__return (c, __bytes_value))) in
+                    (Gas_limit_repr.write_bytes_cost (Z.of_int len))) in
+              let!? c := set c len_name (encode_len_value __bytes_value) in
+              Error_monad.__return (c, __bytes_value) in
             let consume_remove_gas {A : Set}
               (del :
                 (|Raw_context|).(Raw_context.T.context) -> list string ->
                 Lwt.t (Error_monad.tzresult A))
               (c : (|Raw_context|).(Raw_context.T.context))
               : Lwt.t (Error_monad.tzresult A) :=
-              Error_monad.op_gtgteqquestion
-                (Lwt.__return
+              let!? c :=
+                Lwt.__return
                   ((|Raw_context|).(Raw_context.T.consume_gas) c
-                    (Gas_limit_repr.write_bytes_cost Z.zero)))
-                (fun c => del c len_name) in
+                    (Gas_limit_repr.write_bytes_cost Z.zero)) in
+              del c len_name in
             let mem (s : (|C|).(Raw_context.T.context)) (i : (|I|).(INDEX.t))
               : Lwt.t (Error_monad.tzresult (Raw_context.root_context * bool)) :=
-              Error_monad.op_gtgteqquestion (consume_mem_gas (pack s i))
-                (fun c =>
-                  Error_monad.op_gtgteq
-                    ((|Raw_context|).(Raw_context.T.mem) c data_name)
-                    (fun res =>
-                      Error_monad.__return
-                        (((|Raw_context|).(Raw_context.T.project) c), res))) in
+              let!? c := consume_mem_gas (pack s i) in
+              Error_monad.op_gtgteq
+                ((|Raw_context|).(Raw_context.T.mem) c data_name)
+                (fun res =>
+                  Error_monad.__return
+                    (((|Raw_context|).(Raw_context.T.project) c), res)) in
             let get (s : (|C|).(Raw_context.T.context)) (i : (|I|).(INDEX.t))
               : Lwt.t
                 (Error_monad.tzresult
                   (Raw_context.root_context * (|V|).(Storage_sigs.VALUE.t))) :=
-              Error_monad.op_gtgteqquestion
-                (consume_read_gas (|Raw_context|).(Raw_context.T.get) (pack s i))
-                (fun c =>
-                  Error_monad.op_gtgteqquestion
-                    ((|Raw_context|).(Raw_context.T.get) c data_name)
-                    (fun __b_value =>
-                      let __key_value :=
-                        (|Raw_context|).(Raw_context.T.absolute_key) c data_name
-                        in
-                      Error_monad.op_gtgteqquestion
-                        (Lwt.__return (of_bytes __key_value __b_value))
-                        (fun v =>
-                          Error_monad.__return
-                            (((|Raw_context|).(Raw_context.T.project) c), v))))
-              in
+              let!? c :=
+                consume_read_gas (|Raw_context|).(Raw_context.T.get) (pack s i)
+                in
+              let!? __b_value := (|Raw_context|).(Raw_context.T.get) c data_name
+                in
+              let __key_value :=
+                (|Raw_context|).(Raw_context.T.absolute_key) c data_name in
+              let!? v := Lwt.__return (of_bytes __key_value __b_value) in
+              Error_monad.__return
+                (((|Raw_context|).(Raw_context.T.project) c), v) in
             let get_option
               (s : (|C|).(Raw_context.T.context)) (i : (|I|).(INDEX.t))
               : Lwt.t
                 (Error_monad.tzresult
                   (Raw_context.root_context *
                     option (|V|).(Storage_sigs.VALUE.t))) :=
-              Error_monad.op_gtgteqquestion (consume_mem_gas (pack s i))
-                (fun c =>
-                  let '(s, _) := unpack c in
-                  Error_monad.op_gtgteq
-                    ((|Raw_context|).(Raw_context.T.mem) (pack s i) data_name)
-                    (fun __exists =>
-                      if __exists then
-                        Error_monad.op_gtgteqquestion (get s i)
-                          (fun function_parameter =>
-                            let '(s, v) := function_parameter in
-                            Error_monad.__return (s, (Some v)))
-                      else
-                        Error_monad.__return
-                          (((|C|).(Raw_context.T.project) s), None))) in
+              let!? c := consume_mem_gas (pack s i) in
+              let '(s, _) := unpack c in
+              Error_monad.op_gtgteq
+                ((|Raw_context|).(Raw_context.T.mem) (pack s i) data_name)
+                (fun __exists =>
+                  if __exists then
+                    let!? '(s, v) := get s i in
+                    Error_monad.__return (s, (Some v))
+                  else
+                    Error_monad.__return
+                      (((|C|).(Raw_context.T.project) s), None)) in
             let set
               (s : (|C|).(Raw_context.T.context)) (i : (|I|).(INDEX.t))
               (v : (|V|).(Storage_sigs.VALUE.t))
               : Lwt.t (Error_monad.tzresult (Raw_context.root_context * Z)) :=
-              Error_monad.op_gtgteqquestion (existing_size (pack s i))
-                (fun function_parameter =>
-                  let '(prev_size, _) := function_parameter in
-                  Error_monad.op_gtgteqquestion
-                    (consume_write_gas (|Raw_context|).(Raw_context.T.set)
-                      (pack s i) v)
-                    (fun function_parameter =>
-                      let '(c, __bytes_value) := function_parameter in
-                      Error_monad.op_gtgteqquestion
-                        ((|Raw_context|).(Raw_context.T.set) c data_name
-                          __bytes_value)
-                        (fun c =>
-                          let size_diff :=
-                            Pervasives.op_minus (MBytes.length __bytes_value)
-                              prev_size in
-                          Error_monad.__return
-                            (((|Raw_context|).(Raw_context.T.project) c),
-                              size_diff)))) in
+              let!? '(prev_size, _) := existing_size (pack s i) in
+              let!? '(c, __bytes_value) :=
+                consume_write_gas (|Raw_context|).(Raw_context.T.set) (pack s i)
+                  v in
+              let!? c :=
+                (|Raw_context|).(Raw_context.T.set) c data_name __bytes_value in
+              let size_diff :=
+                Pervasives.op_minus (MBytes.length __bytes_value) prev_size in
+              Error_monad.__return
+                (((|Raw_context|).(Raw_context.T.project) c), size_diff) in
             let init
               (s : (|C|).(Raw_context.T.context)) (i : (|I|).(INDEX.t))
               (v : (|V|).(Storage_sigs.VALUE.t))
               : Lwt.t (Error_monad.tzresult (Raw_context.root_context * Z)) :=
-              Error_monad.op_gtgteqquestion
-                (consume_write_gas (|Raw_context|).(Raw_context.T.init)
-                  (pack s i) v)
-                (fun function_parameter =>
-                  let '(c, __bytes_value) := function_parameter in
-                  Error_monad.op_gtgteqquestion
-                    ((|Raw_context|).(Raw_context.T.init) c data_name
-                      __bytes_value)
-                    (fun c =>
-                      let size := MBytes.length __bytes_value in
-                      Error_monad.__return
-                        (((|Raw_context|).(Raw_context.T.project) c), size))) in
+              let!? '(c, __bytes_value) :=
+                consume_write_gas (|Raw_context|).(Raw_context.T.init)
+                  (pack s i) v in
+              let!? c :=
+                (|Raw_context|).(Raw_context.T.init) c data_name __bytes_value
+                in
+              let size := MBytes.length __bytes_value in
+              Error_monad.__return
+                (((|Raw_context|).(Raw_context.T.project) c), size) in
             let init_set
               (s : (|C|).(Raw_context.T.context)) (i : (|I|).(INDEX.t))
               (v : (|V|).(Storage_sigs.VALUE.t))
@@ -1764,22 +1678,15 @@ Definition Make_indexed_subcontext :=
                 Error_monad.op_gtgteq
                   ((|Raw_context|).(Raw_context.T.init_set) c k v)
                   Error_monad.__return in
-              Error_monad.op_gtgteqquestion (existing_size (pack s i))
-                (fun function_parameter =>
-                  let '(prev_size, existed) := function_parameter in
-                  Error_monad.op_gtgteqquestion
-                    (consume_write_gas init_set (pack s i) v)
-                    (fun function_parameter =>
-                      let '(c, __bytes_value) := function_parameter in
-                      Error_monad.op_gtgteqquestion
-                        (init_set c data_name __bytes_value)
-                        (fun c =>
-                          let size_diff :=
-                            Pervasives.op_minus (MBytes.length __bytes_value)
-                              prev_size in
-                          Error_monad.__return
-                            (((|Raw_context|).(Raw_context.T.project) c),
-                              size_diff, existed)))) in
+              let!? '(prev_size, existed) := existing_size (pack s i) in
+              let!? '(c, __bytes_value) :=
+                consume_write_gas init_set (pack s i) v in
+              let!? c := init_set c data_name __bytes_value in
+              let size_diff :=
+                Pervasives.op_minus (MBytes.length __bytes_value) prev_size in
+              Error_monad.__return
+                (((|Raw_context|).(Raw_context.T.project) c), size_diff, existed)
+              in
             let remove (s : (|C|).(Raw_context.T.context)) (i : (|I|).(INDEX.t))
               : Lwt.t
                 (Error_monad.tzresult (Raw_context.root_context * Z * bool)) :=
@@ -1791,32 +1698,21 @@ Definition Make_indexed_subcontext :=
                 Error_monad.op_gtgteq
                   ((|Raw_context|).(Raw_context.T.remove) c k)
                   Error_monad.__return in
-              Error_monad.op_gtgteqquestion (existing_size (pack s i))
-                (fun function_parameter =>
-                  let '(prev_size, existed) := function_parameter in
-                  Error_monad.op_gtgteqquestion
-                    (consume_remove_gas remove (pack s i))
-                    (fun c =>
-                      Error_monad.op_gtgteqquestion (remove c data_name)
-                        (fun c =>
-                          Error_monad.__return
-                            (((|Raw_context|).(Raw_context.T.project) c),
-                              prev_size, existed)))) in
+              let!? '(prev_size, existed) := existing_size (pack s i) in
+              let!? c := consume_remove_gas remove (pack s i) in
+              let!? c := remove c data_name in
+              Error_monad.__return
+                (((|Raw_context|).(Raw_context.T.project) c), prev_size, existed)
+              in
             let delete (s : (|C|).(Raw_context.T.context)) (i : (|I|).(INDEX.t))
               : Lwt.t (Error_monad.tzresult (Raw_context.root_context * Z)) :=
-              Error_monad.op_gtgteqquestion (existing_size (pack s i))
-                (fun function_parameter =>
-                  let '(prev_size, _) := function_parameter in
-                  Error_monad.op_gtgteqquestion
-                    (consume_remove_gas (|Raw_context|).(Raw_context.T.delete)
-                      (pack s i))
-                    (fun c =>
-                      Error_monad.op_gtgteqquestion
-                        ((|Raw_context|).(Raw_context.T.delete) c data_name)
-                        (fun c =>
-                          Error_monad.__return
-                            (((|Raw_context|).(Raw_context.T.project) c),
-                              prev_size)))) in
+              let!? '(prev_size, _) := existing_size (pack s i) in
+              let!? c :=
+                consume_remove_gas (|Raw_context|).(Raw_context.T.delete)
+                  (pack s i) in
+              let!? c := (|Raw_context|).(Raw_context.T.delete) c data_name in
+              Error_monad.__return
+                (((|Raw_context|).(Raw_context.T.project) c), prev_size) in
             let set_option
               (s : (|C|).(Raw_context.T.context)) (i : (|I|).(INDEX.t))
               (v : option (|V|).(Storage_sigs.VALUE.t))

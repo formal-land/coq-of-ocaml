@@ -10,6 +10,7 @@ Unset Positivity Checking.
 Unset Guard Checking.
 
 Require Import Tezos.Environment.
+Import Notations.
 Require Tezos.Alpha_context.
 Require Tezos.Amendment.
 Require Tezos.Apply_results_mli. Module Apply_results := Apply_results_mli.
@@ -99,420 +100,247 @@ Definition apply_manager_operation_content {kind : Set}
         Apply_results.successful_manager_operation_result kind *
         list Alpha_context.packed_internal_operation)) :=
   let before_operation := ctxt in
-  Error_monad.op_gtgteqquestion (Alpha_context.Contract.must_exist ctxt source)
-    (fun function_parameter =>
-      let '_ := function_parameter in
-      Error_monad.op_gtgteqquestion
-        (Lwt.__return
-          (Alpha_context.Gas.consume ctxt
-            Michelson_v1_gas.Cost_of.manager_operation))
-        (fun ctxt =>
-          match operation with
-          | Alpha_context.Reveal _ =>
-            Error_monad.__return
-              (ctxt,
-                (Apply_results.Reveal_result
-                  {|
-                    Apply_results.successful_manager_operation_result.Reveal_result.consumed_gas :=
-                      Alpha_context.Gas.consumed before_operation ctxt |}), nil)
-          |
-            Alpha_context.Transaction {|
-              Alpha_context.manager_operation.Transaction.amount := amount;
-                Alpha_context.manager_operation.Transaction.parameters :=
-                  parameters;
-                Alpha_context.manager_operation.Transaction.entrypoint :=
-                  entrypoint;
-                Alpha_context.manager_operation.Transaction.destination :=
-                  destination
-                |} =>
-            Error_monad.op_gtgteqquestion
-              (Alpha_context.Contract.spend ctxt source amount)
-              (fun ctxt =>
-                Error_monad.op_gtgteqquestion
-                  match Alpha_context.Contract.is_implicit destination with
-                  | None => Error_monad.__return (ctxt, nil, false)
-                  | Some _ =>
-                    Error_monad.op_gtgteqquestion
-                      (Alpha_context.Contract.allocated ctxt destination)
-                      (fun function_parameter =>
-                        match function_parameter with
-                        | true => Error_monad.__return (ctxt, nil, false)
-                        | false =>
-                          Error_monad.op_gtgteqquestion
-                            (Alpha_context.Fees.origination_burn ctxt)
-                            (fun function_parameter =>
-                              let '(ctxt, origination_burn) :=
-                                function_parameter in
-                              Error_monad.__return
-                                (ctxt,
-                                  [
-                                    ((Alpha_context.Delegate.Contract payer),
-                                      (Alpha_context.Delegate.Debited
-                                        origination_burn))
-                                  ], true))
-                        end)
-                  end
-                  (fun function_parameter =>
-                    let
-                      '(ctxt, maybe_burn_balance_update,
-                        allocated_destination_contract) := function_parameter in
-                    Error_monad.op_gtgteqquestion
-                      (Alpha_context.Contract.credit ctxt destination amount)
-                      (fun ctxt =>
-                        Error_monad.op_gtgteqquestion
-                          (Alpha_context.Contract.get_script ctxt destination)
-                          (fun function_parameter =>
-                            let '(ctxt, script) := function_parameter in
-                            match script with
-                            | None =>
-                              Error_monad.op_gtgteqquestion
-                                (Error_monad.op_gtgteqquestion
-                                  match entrypoint with
-                                  | "default" => Error_monad.__return tt
-                                  | entrypoint =>
-                                    Error_monad.fail extensible_type_value
-                                  end
-                                  (fun function_parameter =>
-                                    let '_ := function_parameter in
-                                    Error_monad.op_gtgteqquestion
-                                      (Alpha_context.Script.force_decode_in_context
-                                        ctxt parameters)
-                                      (fun function_parameter =>
-                                        let '(arg, ctxt) := function_parameter
-                                          in
-                                        let cost_arg :=
-                                          Alpha_context.Script.deserialized_cost
-                                            arg in
-                                        Error_monad.op_gtgteqquestion
-                                          (Lwt.__return
-                                            (Alpha_context.Gas.consume ctxt
-                                              cost_arg))
-                                          (fun ctxt =>
-                                            match Micheline.root arg with
-                                            |
-                                              Micheline.Prim _
-                                                Alpha_context.Script.D_Unit [] _
-                                              => Error_monad.__return ctxt
-                                            | _ =>
-                                              Error_monad.fail
-                                                extensible_type_value
-                                            end))))
-                                (fun ctxt =>
-                                  let __result_value :=
-                                    Apply_results.Transaction_result
-                                      {|
-                                        Apply_results.successful_manager_operation_result.Transaction_result.storage :=
-                                          None;
-                                        Apply_results.successful_manager_operation_result.Transaction_result.big_map_diff :=
-                                          None;
-                                        Apply_results.successful_manager_operation_result.Transaction_result.balance_updates :=
-                                          Alpha_context.Delegate.cleanup_balance_updates
-                                            (Pervasives.op_at
-                                              [
-                                                ((Alpha_context.Delegate.Contract
-                                                  source),
-                                                  (Alpha_context.Delegate.Debited
-                                                    amount));
-                                                ((Alpha_context.Delegate.Contract
-                                                  destination),
-                                                  (Alpha_context.Delegate.Credited
-                                                    amount))
-                                              ] maybe_burn_balance_update);
-                                        Apply_results.successful_manager_operation_result.Transaction_result.originated_contracts :=
-                                          nil;
-                                        Apply_results.successful_manager_operation_result.Transaction_result.consumed_gas :=
-                                          Alpha_context.Gas.consumed
-                                            before_operation ctxt;
-                                        Apply_results.successful_manager_operation_result.Transaction_result.storage_size :=
-                                          Z.zero;
-                                        Apply_results.successful_manager_operation_result.Transaction_result.paid_storage_size_diff :=
-                                          Z.zero;
-                                        Apply_results.successful_manager_operation_result.Transaction_result.allocated_destination_contract :=
-                                          allocated_destination_contract |} in
-                                  Error_monad.__return
-                                    (ctxt, __result_value, nil))
-                            | Some script =>
-                              Error_monad.op_gtgteqquestion
-                                (Alpha_context.Script.force_decode_in_context
-                                  ctxt parameters)
-                                (fun function_parameter =>
-                                  let '(parameter, ctxt) := function_parameter
-                                    in
-                                  let cost_parameter :=
-                                    Alpha_context.Script.deserialized_cost
-                                      parameter in
-                                  Error_monad.op_gtgteqquestion
-                                    (Lwt.__return
-                                      (Alpha_context.Gas.consume ctxt
-                                        cost_parameter))
-                                    (fun ctxt =>
-                                      let step_constants :=
-                                        {|
-                                          Script_interpreter.step_constants.source :=
-                                            source;
-                                          Script_interpreter.step_constants.payer :=
-                                            payer;
-                                          Script_interpreter.step_constants.self :=
-                                            destination;
-                                          Script_interpreter.step_constants.amount :=
-                                            amount;
-                                          Script_interpreter.step_constants.chain_id :=
-                                            chain_id |} in
-                                      Error_monad.op_gtgteqquestion
-                                        (Script_interpreter.execute_wrapper ctxt
-                                          mode step_constants script entrypoint
-                                          parameter)
-                                        (fun function_parameter =>
-                                          let '{|
-                                            Script_interpreter.execution_result.ctxt := ctxt;
-                                              Script_interpreter.execution_result.storage
-                                                :=
-                                                storage;
-                                              Script_interpreter.execution_result.big_map_diff
-                                                :=
-                                                big_map_diff;
-                                              Script_interpreter.execution_result.operations
-                                                :=
-                                                operations
-                                              |} := function_parameter in
-                                          Error_monad.op_gtgteqquestion
-                                            (Alpha_context.Contract.update_script_storage
-                                              ctxt destination storage
-                                              big_map_diff)
-                                            (fun ctxt =>
-                                              Error_monad.op_gtgteqquestion
-                                                (Alpha_context.Fees.record_paid_storage_space
-                                                  ctxt destination)
-                                                (fun function_parameter =>
-                                                  let
-                                                    '(ctxt, new_size,
-                                                      paid_storage_size_diff,
-                                                      fees) :=
-                                                    function_parameter in
-                                                  Error_monad.op_gtgteqquestion
-                                                    (Alpha_context.Contract.originated_from_current_nonce
-                                                      before_operation ctxt)
-                                                    (fun originated_contracts =>
-                                                      let __result_value :=
-                                                        Apply_results.Transaction_result
-                                                          {|
-                                                            Apply_results.successful_manager_operation_result.Transaction_result.storage :=
-                                                              Some storage;
-                                                            Apply_results.successful_manager_operation_result.Transaction_result.big_map_diff :=
-                                                              big_map_diff;
-                                                            Apply_results.successful_manager_operation_result.Transaction_result.balance_updates :=
-                                                              Alpha_context.Delegate.cleanup_balance_updates
-                                                                [
-                                                                  ((Alpha_context.Delegate.Contract
-                                                                    payer),
-                                                                    (Alpha_context.Delegate.Debited
-                                                                      fees));
-                                                                  ((Alpha_context.Delegate.Contract
-                                                                    source),
-                                                                    (Alpha_context.Delegate.Debited
-                                                                      amount));
-                                                                  ((Alpha_context.Delegate.Contract
-                                                                    destination),
-                                                                    (Alpha_context.Delegate.Credited
-                                                                      amount))
-                                                                ];
-                                                            Apply_results.successful_manager_operation_result.Transaction_result.originated_contracts :=
-                                                              originated_contracts;
-                                                            Apply_results.successful_manager_operation_result.Transaction_result.consumed_gas :=
-                                                              Alpha_context.Gas.consumed
-                                                                before_operation
-                                                                ctxt;
-                                                            Apply_results.successful_manager_operation_result.Transaction_result.storage_size :=
-                                                              new_size;
-                                                            Apply_results.successful_manager_operation_result.Transaction_result.paid_storage_size_diff :=
-                                                              paid_storage_size_diff;
-                                                            Apply_results.successful_manager_operation_result.Transaction_result.allocated_destination_contract :=
-                                                              allocated_destination_contract
-                                                            |} in
-                                                      Error_monad.__return
-                                                        (ctxt, __result_value,
-                                                          operations)))))))
-                            end))))
-          |
-            Alpha_context.Origination {|
-              Alpha_context.manager_operation.Origination.delegate := delegate;
-                Alpha_context.manager_operation.Origination.script := script;
-                Alpha_context.manager_operation.Origination.credit := credit;
-                Alpha_context.manager_operation.Origination.preorigination :=
-                  preorigination
-                |} =>
-            Error_monad.op_gtgteqquestion
-              (Alpha_context.Script.force_decode_in_context ctxt
-                script.(Alpha_context.Script.t.storage))
-              (fun function_parameter =>
-                let '(unparsed_storage, ctxt) := function_parameter in
-                Error_monad.op_gtgteqquestion
-                  (Lwt.__return
-                    (Alpha_context.Gas.consume ctxt
-                      (Alpha_context.Script.deserialized_cost unparsed_storage)))
-                  (fun ctxt =>
-                    Error_monad.op_gtgteqquestion
-                      (Alpha_context.Script.force_decode_in_context ctxt
-                        script.(Alpha_context.Script.t.code))
-                      (fun function_parameter =>
-                        let '(unparsed_code, ctxt) := function_parameter in
-                        Error_monad.op_gtgteqquestion
-                          (Lwt.__return
-                            (Alpha_context.Gas.consume ctxt
-                              (Alpha_context.Script.deserialized_cost
-                                unparsed_code)))
-                          (fun ctxt =>
-                            Error_monad.op_gtgteqquestion
-                              (Script_ir_translator.parse_script None ctxt false
-                                script)
-                              (fun function_parameter =>
-                                let
-                                  '(Script_ir_translator.Ex_script parsed_script,
-                                    ctxt) := function_parameter in
-                                let 'existT _ [__Ex_script_'a, __Ex_script_'b]
-                                  [parsed_script, ctxt] :=
-                                  existT (A := [Set ** Set])
-                                    (fun '[__Ex_script_'a, __Ex_script_'b] =>
-                                      [(Script_typed_ir.script __Ex_script_'a
-                                        __Ex_script_'b) **
-                                        Alpha_context.context]) [_, _]
-                                    [parsed_script, ctxt] in
-                                Error_monad.op_gtgteqquestion
-                                  (Script_ir_translator.collect_big_maps ctxt
-                                    parsed_script.(Script_typed_ir.script.storage_type)
-                                    parsed_script.(Script_typed_ir.script.storage))
-                                  (fun function_parameter =>
-                                    let '(to_duplicate, ctxt) :=
-                                      function_parameter in
-                                    let to_update :=
-                                      Script_ir_translator.no_big_map_id in
-                                    Error_monad.op_gtgteqquestion
-                                      (Script_ir_translator.extract_big_map_diff
-                                        ctxt Script_ir_translator.Optimized
-                                        false to_duplicate to_update
-                                        parsed_script.(Script_typed_ir.script.storage_type)
-                                        parsed_script.(Script_typed_ir.script.storage))
-                                      (fun function_parameter =>
-                                        let '(storage, big_map_diff, ctxt) :=
-                                          function_parameter in
-                                        Error_monad.op_gtgteqquestion
-                                          (Script_ir_translator.unparse_data
-                                            ctxt Script_ir_translator.Optimized
-                                            parsed_script.(Script_typed_ir.script.storage_type)
-                                            storage)
-                                          (fun function_parameter =>
-                                            let '(storage, ctxt) :=
-                                              function_parameter in
-                                            let storage :=
-                                              Alpha_context.Script.__lazy_expr_value
-                                                (Micheline.strip_locations
-                                                  storage) in
-                                            let script :=
-                                              Alpha_context.Script.t.with_storage
-                                                storage script in
-                                            Error_monad.op_gtgteqquestion
-                                              (Alpha_context.Contract.spend ctxt
-                                                source credit)
-                                              (fun ctxt =>
-                                                Error_monad.op_gtgteqquestion
-                                                  match preorigination with
-                                                  | Some contract =>
-                                                    (* ❌ Sequences of instructions are ignored (operator ";") *)
-                                                    (* ❌ instruction_sequence ";" *)
-                                                    Error_monad.__return
-                                                      (ctxt, contract)
-                                                  | None =>
-                                                    Alpha_context.Contract.fresh_contract_from_current_nonce
-                                                      ctxt
-                                                  end
-                                                  (fun function_parameter =>
-                                                    let '(ctxt, contract) :=
-                                                      function_parameter in
-                                                    Error_monad.op_gtgteqquestion
-                                                      (Alpha_context.Contract.originate
-                                                        ctxt contract credit
-                                                        (script, big_map_diff)
-                                                        delegate)
-                                                      (fun ctxt =>
-                                                        Error_monad.op_gtgteqquestion
-                                                          (Alpha_context.Fees.origination_burn
-                                                            ctxt)
-                                                          (fun
-                                                            function_parameter
-                                                            =>
-                                                            let
-                                                              '(ctxt,
-                                                                origination_burn) :=
-                                                              function_parameter
-                                                              in
-                                                            Error_monad.op_gtgteqquestion
-                                                              (Alpha_context.Fees.record_paid_storage_space
-                                                                ctxt contract)
-                                                              (fun
-                                                                function_parameter
-                                                                =>
-                                                                let
-                                                                  '(ctxt, size,
-                                                                    paid_storage_size_diff,
-                                                                    fees) :=
-                                                                  function_parameter
-                                                                  in
-                                                                let
-                                                                  __result_value
-                                                                  :=
-                                                                  Apply_results.Origination_result
-                                                                    {|
-                                                                      Apply_results.successful_manager_operation_result.Origination_result.big_map_diff :=
-                                                                        big_map_diff;
-                                                                      Apply_results.successful_manager_operation_result.Origination_result.balance_updates :=
-                                                                        Alpha_context.Delegate.cleanup_balance_updates
-                                                                          [
-                                                                            ((Alpha_context.Delegate.Contract
-                                                                              payer),
-                                                                              (Alpha_context.Delegate.Debited
-                                                                                fees));
-                                                                            ((Alpha_context.Delegate.Contract
-                                                                              payer),
-                                                                              (Alpha_context.Delegate.Debited
-                                                                                origination_burn));
-                                                                            ((Alpha_context.Delegate.Contract
-                                                                              source),
-                                                                              (Alpha_context.Delegate.Debited
-                                                                                credit));
-                                                                            ((Alpha_context.Delegate.Contract
-                                                                              contract),
-                                                                              (Alpha_context.Delegate.Credited
-                                                                                credit))
-                                                                          ];
-                                                                      Apply_results.successful_manager_operation_result.Origination_result.originated_contracts :=
-                                                                        [
-                                                                          contract
-                                                                        ];
-                                                                      Apply_results.successful_manager_operation_result.Origination_result.consumed_gas :=
-                                                                        Alpha_context.Gas.consumed
-                                                                          before_operation
-                                                                          ctxt;
-                                                                      Apply_results.successful_manager_operation_result.Origination_result.storage_size :=
-                                                                        size;
-                                                                      Apply_results.successful_manager_operation_result.Origination_result.paid_storage_size_diff :=
-                                                                        paid_storage_size_diff
-                                                                      |} in
-                                                                Error_monad.__return
-                                                                  (ctxt,
-                                                                    __result_value,
-                                                                    nil))))))))))))))
-          | Alpha_context.Delegation delegate =>
-            Error_monad.op_gtgteqquestion
-              (Alpha_context.Delegate.set ctxt source delegate)
-              (fun ctxt =>
-                Error_monad.__return
-                  (ctxt,
-                    (Apply_results.Delegation_result
-                      {|
-                        Apply_results.successful_manager_operation_result.Delegation_result.consumed_gas :=
-                          Alpha_context.Gas.consumed before_operation ctxt |}),
-                    nil))
-          end)).
+  let!? '_ := Alpha_context.Contract.must_exist ctxt source in
+  let!? ctxt :=
+    Lwt.__return
+      (Alpha_context.Gas.consume ctxt Michelson_v1_gas.Cost_of.manager_operation)
+    in
+  match operation with
+  | Alpha_context.Reveal _ =>
+    Error_monad.__return
+      (ctxt,
+        (Apply_results.Reveal_result
+          {|
+            Apply_results.successful_manager_operation_result.Reveal_result.consumed_gas :=
+              Alpha_context.Gas.consumed before_operation ctxt |}), nil)
+  |
+    Alpha_context.Transaction {|
+      Alpha_context.manager_operation.Transaction.amount := amount;
+        Alpha_context.manager_operation.Transaction.parameters := parameters;
+        Alpha_context.manager_operation.Transaction.entrypoint := entrypoint;
+        Alpha_context.manager_operation.Transaction.destination := destination
+        |} =>
+    let!? ctxt := Alpha_context.Contract.spend ctxt source amount in
+    let!? '(ctxt, maybe_burn_balance_update, allocated_destination_contract) :=
+      match Alpha_context.Contract.is_implicit destination with
+      | None => Error_monad.__return (ctxt, nil, false)
+      | Some _ =>
+        let!? function_parameter :=
+          Alpha_context.Contract.allocated ctxt destination in
+        match function_parameter with
+        | true => Error_monad.__return (ctxt, nil, false)
+        | false =>
+          let!? '(ctxt, origination_burn) :=
+            Alpha_context.Fees.origination_burn ctxt in
+          Error_monad.__return
+            (ctxt,
+              [
+                ((Alpha_context.Delegate.Contract payer),
+                  (Alpha_context.Delegate.Debited origination_burn))
+              ], true)
+        end
+      end in
+    let!? ctxt := Alpha_context.Contract.credit ctxt destination amount in
+    let!? '(ctxt, script) := Alpha_context.Contract.get_script ctxt destination
+      in
+    match script with
+    | None =>
+      let!? ctxt :=
+        let!? '_ :=
+          match entrypoint with
+          | "default" => Error_monad.__return tt
+          | entrypoint => Error_monad.fail extensible_type_value
+          end in
+        let!? '(arg, ctxt) :=
+          Alpha_context.Script.force_decode_in_context ctxt parameters in
+        let cost_arg := Alpha_context.Script.deserialized_cost arg in
+        let!? ctxt := Lwt.__return (Alpha_context.Gas.consume ctxt cost_arg) in
+        match Micheline.root arg with
+        | Micheline.Prim _ Alpha_context.Script.D_Unit [] _ =>
+          Error_monad.__return ctxt
+        | _ => Error_monad.fail extensible_type_value
+        end in
+      let __result_value :=
+        Apply_results.Transaction_result
+          {|
+            Apply_results.successful_manager_operation_result.Transaction_result.storage :=
+              None;
+            Apply_results.successful_manager_operation_result.Transaction_result.big_map_diff :=
+              None;
+            Apply_results.successful_manager_operation_result.Transaction_result.balance_updates :=
+              Alpha_context.Delegate.cleanup_balance_updates
+                (Pervasives.op_at
+                  [
+                    ((Alpha_context.Delegate.Contract source),
+                      (Alpha_context.Delegate.Debited amount));
+                    ((Alpha_context.Delegate.Contract destination),
+                      (Alpha_context.Delegate.Credited amount))
+                  ] maybe_burn_balance_update);
+            Apply_results.successful_manager_operation_result.Transaction_result.originated_contracts :=
+              nil;
+            Apply_results.successful_manager_operation_result.Transaction_result.consumed_gas :=
+              Alpha_context.Gas.consumed before_operation ctxt;
+            Apply_results.successful_manager_operation_result.Transaction_result.storage_size :=
+              Z.zero;
+            Apply_results.successful_manager_operation_result.Transaction_result.paid_storage_size_diff :=
+              Z.zero;
+            Apply_results.successful_manager_operation_result.Transaction_result.allocated_destination_contract :=
+              allocated_destination_contract |} in
+      Error_monad.__return (ctxt, __result_value, nil)
+    | Some script =>
+      let!? '(parameter, ctxt) :=
+        Alpha_context.Script.force_decode_in_context ctxt parameters in
+      let cost_parameter := Alpha_context.Script.deserialized_cost parameter in
+      let!? ctxt := Lwt.__return (Alpha_context.Gas.consume ctxt cost_parameter)
+        in
+      let step_constants :=
+        {| Script_interpreter.step_constants.source := source;
+          Script_interpreter.step_constants.payer := payer;
+          Script_interpreter.step_constants.self := destination;
+          Script_interpreter.step_constants.amount := amount;
+          Script_interpreter.step_constants.chain_id := chain_id |} in
+      let!? '{|
+        Script_interpreter.execution_result.ctxt := ctxt;
+          Script_interpreter.execution_result.storage := storage;
+          Script_interpreter.execution_result.big_map_diff := big_map_diff;
+          Script_interpreter.execution_result.operations := operations
+          |} :=
+        Script_interpreter.execute_wrapper ctxt mode step_constants script
+          entrypoint parameter in
+      let!? ctxt :=
+        Alpha_context.Contract.update_script_storage ctxt destination storage
+          big_map_diff in
+      let!? '(ctxt, new_size, paid_storage_size_diff, fees) :=
+        Alpha_context.Fees.record_paid_storage_space ctxt destination in
+      let!? originated_contracts :=
+        Alpha_context.Contract.originated_from_current_nonce before_operation
+          ctxt in
+      let __result_value :=
+        Apply_results.Transaction_result
+          {|
+            Apply_results.successful_manager_operation_result.Transaction_result.storage :=
+              Some storage;
+            Apply_results.successful_manager_operation_result.Transaction_result.big_map_diff :=
+              big_map_diff;
+            Apply_results.successful_manager_operation_result.Transaction_result.balance_updates :=
+              Alpha_context.Delegate.cleanup_balance_updates
+                [
+                  ((Alpha_context.Delegate.Contract payer),
+                    (Alpha_context.Delegate.Debited fees));
+                  ((Alpha_context.Delegate.Contract source),
+                    (Alpha_context.Delegate.Debited amount));
+                  ((Alpha_context.Delegate.Contract destination),
+                    (Alpha_context.Delegate.Credited amount))
+                ];
+            Apply_results.successful_manager_operation_result.Transaction_result.originated_contracts :=
+              originated_contracts;
+            Apply_results.successful_manager_operation_result.Transaction_result.consumed_gas :=
+              Alpha_context.Gas.consumed before_operation ctxt;
+            Apply_results.successful_manager_operation_result.Transaction_result.storage_size :=
+              new_size;
+            Apply_results.successful_manager_operation_result.Transaction_result.paid_storage_size_diff :=
+              paid_storage_size_diff;
+            Apply_results.successful_manager_operation_result.Transaction_result.allocated_destination_contract :=
+              allocated_destination_contract |} in
+      Error_monad.__return (ctxt, __result_value, operations)
+    end
+  |
+    Alpha_context.Origination {|
+      Alpha_context.manager_operation.Origination.delegate := delegate;
+        Alpha_context.manager_operation.Origination.script := script;
+        Alpha_context.manager_operation.Origination.credit := credit;
+        Alpha_context.manager_operation.Origination.preorigination :=
+          preorigination
+        |} =>
+    let!? '(unparsed_storage, ctxt) :=
+      Alpha_context.Script.force_decode_in_context ctxt
+        script.(Alpha_context.Script.t.storage) in
+    let!? ctxt :=
+      Lwt.__return
+        (Alpha_context.Gas.consume ctxt
+          (Alpha_context.Script.deserialized_cost unparsed_storage)) in
+    let!? '(unparsed_code, ctxt) :=
+      Alpha_context.Script.force_decode_in_context ctxt
+        script.(Alpha_context.Script.t.code) in
+    let!? ctxt :=
+      Lwt.__return
+        (Alpha_context.Gas.consume ctxt
+          (Alpha_context.Script.deserialized_cost unparsed_code)) in
+    let!? '(Script_ir_translator.Ex_script parsed_script, ctxt) :=
+      Script_ir_translator.parse_script None ctxt false script in
+    let 'existT _ [__Ex_script_'a, __Ex_script_'b] [parsed_script, ctxt] :=
+      existT (A := [Set ** Set])
+        (fun '[__Ex_script_'a, __Ex_script_'b] =>
+          [(Script_typed_ir.script __Ex_script_'a __Ex_script_'b) **
+            Alpha_context.context]) [_, _] [parsed_script, ctxt] in
+    let!? '(to_duplicate, ctxt) :=
+      Script_ir_translator.collect_big_maps ctxt
+        parsed_script.(Script_typed_ir.script.storage_type)
+        parsed_script.(Script_typed_ir.script.storage) in
+    let to_update := Script_ir_translator.no_big_map_id in
+    let!? '(storage, big_map_diff, ctxt) :=
+      Script_ir_translator.extract_big_map_diff ctxt
+        Script_ir_translator.Optimized false to_duplicate to_update
+        parsed_script.(Script_typed_ir.script.storage_type)
+        parsed_script.(Script_typed_ir.script.storage) in
+    let!? '(storage, ctxt) :=
+      Script_ir_translator.unparse_data ctxt Script_ir_translator.Optimized
+        parsed_script.(Script_typed_ir.script.storage_type) storage in
+    let storage :=
+      Alpha_context.Script.__lazy_expr_value (Micheline.strip_locations storage)
+      in
+    let script := Alpha_context.Script.t.with_storage storage script in
+    let!? ctxt := Alpha_context.Contract.spend ctxt source credit in
+    let!? '(ctxt, contract) :=
+      match preorigination with
+      | Some contract =>
+        (* ❌ Sequences of instructions are ignored (operator ";") *)
+        (* ❌ instruction_sequence ";" *)
+        Error_monad.__return (ctxt, contract)
+      | None => Alpha_context.Contract.fresh_contract_from_current_nonce ctxt
+      end in
+    let!? ctxt :=
+      Alpha_context.Contract.originate ctxt contract credit
+        (script, big_map_diff) delegate in
+    let!? '(ctxt, origination_burn) := Alpha_context.Fees.origination_burn ctxt
+      in
+    let!? '(ctxt, size, paid_storage_size_diff, fees) :=
+      Alpha_context.Fees.record_paid_storage_space ctxt contract in
+    let __result_value :=
+      Apply_results.Origination_result
+        {|
+          Apply_results.successful_manager_operation_result.Origination_result.big_map_diff :=
+            big_map_diff;
+          Apply_results.successful_manager_operation_result.Origination_result.balance_updates :=
+            Alpha_context.Delegate.cleanup_balance_updates
+              [
+                ((Alpha_context.Delegate.Contract payer),
+                  (Alpha_context.Delegate.Debited fees));
+                ((Alpha_context.Delegate.Contract payer),
+                  (Alpha_context.Delegate.Debited origination_burn));
+                ((Alpha_context.Delegate.Contract source),
+                  (Alpha_context.Delegate.Debited credit));
+                ((Alpha_context.Delegate.Contract contract),
+                  (Alpha_context.Delegate.Credited credit))
+              ];
+          Apply_results.successful_manager_operation_result.Origination_result.originated_contracts :=
+            [ contract ];
+          Apply_results.successful_manager_operation_result.Origination_result.consumed_gas :=
+            Alpha_context.Gas.consumed before_operation ctxt;
+          Apply_results.successful_manager_operation_result.Origination_result.storage_size :=
+            size;
+          Apply_results.successful_manager_operation_result.Origination_result.paid_storage_size_diff :=
+            paid_storage_size_diff |} in
+    Error_monad.__return (ctxt, __result_value, nil)
+  | Alpha_context.Delegation delegate =>
+    let!? ctxt := Alpha_context.Delegate.set ctxt source delegate in
+    Error_monad.__return
+      (ctxt,
+        (Apply_results.Delegation_result
+          {|
+            Apply_results.successful_manager_operation_result.Delegation_result.consumed_gas :=
+              Alpha_context.Gas.consumed before_operation ctxt |}), nil)
+  end.
 
 Definition apply_internal_manager_operations
   (ctxt : Alpha_context.context) (mode : Script_ir_translator.unparsing_mode)
@@ -606,102 +434,70 @@ Definition precheck_manager_contents {A B : Set}
         Alpha_context.contents.Manager_operation.gas_limit := gas_limit;
         Alpha_context.contents.Manager_operation.storage_limit := storage_limit
         |} := op in
-  Error_monad.op_gtgteqquestion
-    (Lwt.__return (Alpha_context.Gas.check_limit ctxt gas_limit))
-    (fun function_parameter =>
-      let '_ := function_parameter in
-      let ctxt := Alpha_context.Gas.set_limit ctxt gas_limit in
-      Error_monad.op_gtgteqquestion
-        (Lwt.__return
-          (Alpha_context.Fees.check_storage_limit ctxt storage_limit))
+  let!? '_ := Lwt.__return (Alpha_context.Gas.check_limit ctxt gas_limit) in
+  let ctxt := Alpha_context.Gas.set_limit ctxt gas_limit in
+  let!? '_ :=
+    Lwt.__return (Alpha_context.Fees.check_storage_limit ctxt storage_limit) in
+  let!? '_ :=
+    Alpha_context.Contract.must_be_allocated ctxt
+      (Alpha_context.Contract.implicit_contract source) in
+  let!? '_ := Alpha_context.Contract.check_counter_increment ctxt source counter
+    in
+  let!? ctxt :=
+    match operation with
+    | Alpha_context.Reveal pk =>
+      Alpha_context.Contract.reveal_manager_key ctxt source pk
+    |
+      Alpha_context.Transaction {|
+        Alpha_context.manager_operation.Transaction.parameters := parameters
+          |} =>
+      let!? '_ :=
+        Lwt.__return
+          ((Error_monad.record_trace extensible_type_value)
+            (Alpha_context.Gas.check_enough ctxt
+              (Alpha_context.Script.minimal_deserialize_cost parameters))) in
+      Error_monad.op_gtgtpipequestion
+        ((Error_monad.trace extensible_type_value)
+          (Alpha_context.Script.force_decode_in_context ctxt parameters))
         (fun function_parameter =>
-          let '_ := function_parameter in
-          Error_monad.op_gtgteqquestion
-            (Alpha_context.Contract.must_be_allocated ctxt
-              (Alpha_context.Contract.implicit_contract source))
-            (fun function_parameter =>
-              let '_ := function_parameter in
-              Error_monad.op_gtgteqquestion
-                (Alpha_context.Contract.check_counter_increment ctxt source
-                  counter)
-                (fun function_parameter =>
-                  let '_ := function_parameter in
-                  Error_monad.op_gtgteqquestion
-                    match operation with
-                    | Alpha_context.Reveal pk =>
-                      Alpha_context.Contract.reveal_manager_key ctxt source pk
-                    |
-                      Alpha_context.Transaction {|
-                        Alpha_context.manager_operation.Transaction.parameters := parameters
-                          |} =>
-                      Error_monad.op_gtgteqquestion
-                        (Lwt.__return
-                          ((Error_monad.record_trace extensible_type_value)
-                            (Alpha_context.Gas.check_enough ctxt
-                              (Alpha_context.Script.minimal_deserialize_cost
-                                parameters))))
-                        (fun function_parameter =>
-                          let '_ := function_parameter in
-                          Error_monad.op_gtgtpipequestion
-                            ((Error_monad.trace extensible_type_value)
-                              (Alpha_context.Script.force_decode_in_context ctxt
-                                parameters))
-                            (fun function_parameter =>
-                              let '(_arg, ctxt) := function_parameter in
-                              ctxt))
-                    |
-                      Alpha_context.Origination {|
-                        Alpha_context.manager_operation.Origination.script := script
-                          |} =>
-                      Error_monad.op_gtgteqquestion
-                        (Lwt.__return
-                          ((Error_monad.record_trace extensible_type_value)
-                            (Error_monad.op_gtgtquestion
-                              (Alpha_context.Gas.consume ctxt
-                                (Alpha_context.Script.minimal_deserialize_cost
-                                  script.(Alpha_context.Script.t.code)))
-                              (fun ctxt =>
-                                Alpha_context.Gas.check_enough ctxt
-                                  (Alpha_context.Script.minimal_deserialize_cost
-                                    script.(Alpha_context.Script.t.storage))))))
-                        (fun function_parameter =>
-                          let '_ := function_parameter in
-                          Error_monad.op_gtgteqquestion
-                            ((Error_monad.trace extensible_type_value)
-                              (Alpha_context.Script.force_decode_in_context ctxt
-                                script.(Alpha_context.Script.t.code)))
-                            (fun function_parameter =>
-                              let '(_code, ctxt) := function_parameter in
-                              Error_monad.op_gtgtpipequestion
-                                ((Error_monad.trace extensible_type_value)
-                                  (Alpha_context.Script.force_decode_in_context
-                                    ctxt script.(Alpha_context.Script.t.storage)))
-                                (fun function_parameter =>
-                                  let '(_storage, ctxt) := function_parameter in
-                                  ctxt)))
-                    | _ => Error_monad.__return ctxt
-                    end
-                    (fun ctxt =>
-                      Error_monad.op_gtgteqquestion
-                        (Alpha_context.Contract.get_manager_key ctxt source)
-                        (fun public_key =>
-                          Error_monad.op_gtgteqquestion
-                            (Alpha_context.Operation.check_signature public_key
-                              chain_id raw_operation)
-                            (fun function_parameter =>
-                              let '_ := function_parameter in
-                              Error_monad.op_gtgteqquestion
-                                (Alpha_context.Contract.increment_counter ctxt
-                                  source)
-                                (fun ctxt =>
-                                  Error_monad.op_gtgteqquestion
-                                    (Alpha_context.Contract.spend ctxt
-                                      (Alpha_context.Contract.implicit_contract
-                                        source) fee)
-                                    (fun ctxt =>
-                                      Error_monad.op_gtgteqquestion
-                                        (Alpha_context.add_fees ctxt fee)
-                                        (fun ctxt => Error_monad.__return ctxt)))))))))).
+          let '(_arg, ctxt) := function_parameter in
+          ctxt)
+    |
+      Alpha_context.Origination {|
+        Alpha_context.manager_operation.Origination.script := script |} =>
+      let!? '_ :=
+        Lwt.__return
+          ((Error_monad.record_trace extensible_type_value)
+            (Error_monad.op_gtgtquestion
+              (Alpha_context.Gas.consume ctxt
+                (Alpha_context.Script.minimal_deserialize_cost
+                  script.(Alpha_context.Script.t.code)))
+              (fun ctxt =>
+                Alpha_context.Gas.check_enough ctxt
+                  (Alpha_context.Script.minimal_deserialize_cost
+                    script.(Alpha_context.Script.t.storage))))) in
+      let!? '(_code, ctxt) :=
+        (Error_monad.trace extensible_type_value)
+          (Alpha_context.Script.force_decode_in_context ctxt
+            script.(Alpha_context.Script.t.code)) in
+      Error_monad.op_gtgtpipequestion
+        ((Error_monad.trace extensible_type_value)
+          (Alpha_context.Script.force_decode_in_context ctxt
+            script.(Alpha_context.Script.t.storage)))
+        (fun function_parameter =>
+          let '(_storage, ctxt) := function_parameter in
+          ctxt)
+    | _ => Error_monad.__return ctxt
+    end in
+  let!? public_key := Alpha_context.Contract.get_manager_key ctxt source in
+  let!? '_ :=
+    Alpha_context.Operation.check_signature public_key chain_id raw_operation in
+  let!? ctxt := Alpha_context.Contract.increment_counter ctxt source in
+  let!? ctxt :=
+    Alpha_context.Contract.spend ctxt
+      (Alpha_context.Contract.implicit_contract source) fee in
+  let!? ctxt := Alpha_context.add_fees ctxt fee in
+  Error_monad.__return ctxt.
 
 Definition apply_manager_contents {A : Set}
   (ctxt : Alpha_context.context) (mode : Script_ir_translator.unparsing_mode)
@@ -853,10 +649,8 @@ Fixpoint precheck_manager_contents_list {A kind : Set}
           [(Alpha_context.contents (Alpha_context.Kind.manager __0)) **
             (Alpha_context.contents_list (Alpha_context.Kind.manager __1))]) [_,
         _] [op, rest] in
-    Error_monad.op_gtgteqquestion
-      (precheck_manager_contents ctxt chain_id raw_operation op)
-      (fun ctxt =>
-        precheck_manager_contents_list ctxt chain_id raw_operation rest)
+    let!? ctxt := precheck_manager_contents ctxt chain_id raw_operation op in
+    precheck_manager_contents_list ctxt chain_id raw_operation rest
   end.
 
 Fixpoint apply_manager_contents_list_rec {kind : Set}
@@ -1070,79 +864,60 @@ Definition apply_contents_list {A : Set}
     let block :=
       operation.(Alpha_context.operation.shell).(Operation.shell_header.branch)
       in
-    Error_monad.op_gtgteqquestion
-      (Error_monad.fail_unless ((|Block_hash|).(S.HASH.equal) block pred_block)
-        extensible_type_value)
-      (fun function_parameter =>
-        let '_ := function_parameter in
-        let current_level :=
-          (Alpha_context.Level.current ctxt).(Alpha_context.Level.t.level) in
-        Error_monad.op_gtgteqquestion
-          (Error_monad.fail_unless
-            (Alpha_context.Raw_level.op_eq (Alpha_context.Raw_level.succ level)
-              current_level) extensible_type_value)
-          (fun function_parameter =>
-            let '_ := function_parameter in
-            Error_monad.op_gtgteqquestion
-              (Baking.check_endorsement_rights ctxt chain_id operation)
-              (fun function_parameter =>
-                let '(delegate, slots, used) := function_parameter in
-                if used then
-                  Error_monad.fail extensible_type_value
-                else
-                  let ctxt := Alpha_context.record_endorsement ctxt delegate in
-                  let gap := List.length slots in
-                  Error_monad.op_gtgteqquestion
-                    (Lwt.__return
-                      (Alpha_context.Tez.op_starquestion
-                        (Alpha_context.Constants.endorsement_security_deposit
-                          ctxt) (Int64.of_int gap)))
-                    (fun deposit =>
-                      Error_monad.op_gtgteqquestion
-                        (Alpha_context.Delegate.freeze_deposit ctxt delegate
-                          deposit)
-                        (fun ctxt =>
-                          Error_monad.op_gtgteqquestion
-                            (Alpha_context.Global.get_block_priority ctxt)
-                            (fun block_priority =>
-                              Error_monad.op_gtgteqquestion
-                                (Baking.endorsing_reward ctxt block_priority gap)
-                                (fun reward =>
-                                  Error_monad.op_gtgteqquestion
-                                    (Alpha_context.Delegate.freeze_rewards ctxt
-                                      delegate reward)
-                                    (fun ctxt =>
-                                      let level :=
-                                        Alpha_context.Level.from_raw ctxt None
-                                          level in
-                                      Error_monad.__return
-                                        (ctxt,
-                                          (Apply_results.Single_result
-                                            (Apply_results.Endorsement_result
-                                              {|
-                                                Apply_results.contents_result.Endorsement_result.balance_updates :=
-                                                  Alpha_context.Delegate.cleanup_balance_updates
-                                                    [
-                                                      ((Alpha_context.Delegate.Contract
-                                                        (Alpha_context.Contract.implicit_contract
-                                                          delegate)),
-                                                        (Alpha_context.Delegate.Debited
-                                                          deposit));
-                                                      ((Alpha_context.Delegate.Deposits
-                                                        delegate
-                                                        level.(Alpha_context.Level.t.cycle)),
-                                                        (Alpha_context.Delegate.Credited
-                                                          deposit));
-                                                      ((Alpha_context.Delegate.Rewards
-                                                        delegate
-                                                        level.(Alpha_context.Level.t.cycle)),
-                                                        (Alpha_context.Delegate.Credited
-                                                          reward))
-                                                    ];
-                                                Apply_results.contents_result.Endorsement_result.delegate :=
-                                                  delegate;
-                                                Apply_results.contents_result.Endorsement_result.slots :=
-                                                  slots |})))))))))))
+    let!? '_ :=
+      Error_monad.fail_unless ((|Block_hash|).(S.HASH.equal) block pred_block)
+        extensible_type_value in
+    let current_level :=
+      (Alpha_context.Level.current ctxt).(Alpha_context.Level.t.level) in
+    let!? '_ :=
+      Error_monad.fail_unless
+        (Alpha_context.Raw_level.op_eq (Alpha_context.Raw_level.succ level)
+          current_level) extensible_type_value in
+    let!? '(delegate, slots, used) :=
+      Baking.check_endorsement_rights ctxt chain_id operation in
+    if used then
+      Error_monad.fail extensible_type_value
+    else
+      let ctxt := Alpha_context.record_endorsement ctxt delegate in
+      let gap := List.length slots in
+      let!? deposit :=
+        Lwt.__return
+          (Alpha_context.Tez.op_starquestion
+            (Alpha_context.Constants.endorsement_security_deposit ctxt)
+            (Int64.of_int gap)) in
+      let!? ctxt := Alpha_context.Delegate.freeze_deposit ctxt delegate deposit
+        in
+      let!? block_priority := Alpha_context.Global.get_block_priority ctxt in
+      let!? reward := Baking.endorsing_reward ctxt block_priority gap in
+      let!? ctxt := Alpha_context.Delegate.freeze_rewards ctxt delegate reward
+        in
+      let level := Alpha_context.Level.from_raw ctxt None level in
+      Error_monad.__return
+        (ctxt,
+          (Apply_results.Single_result
+            (Apply_results.Endorsement_result
+              {|
+                Apply_results.contents_result.Endorsement_result.balance_updates :=
+                  Alpha_context.Delegate.cleanup_balance_updates
+                    [
+                      ((Alpha_context.Delegate.Contract
+                        (Alpha_context.Contract.implicit_contract
+                          delegate)),
+                        (Alpha_context.Delegate.Debited
+                          deposit));
+                      ((Alpha_context.Delegate.Deposits delegate
+                        level.(Alpha_context.Level.t.cycle)),
+                        (Alpha_context.Delegate.Credited
+                          deposit));
+                      ((Alpha_context.Delegate.Rewards delegate
+                        level.(Alpha_context.Level.t.cycle)),
+                        (Alpha_context.Delegate.Credited
+                          reward))
+                    ];
+                Apply_results.contents_result.Endorsement_result.delegate :=
+                  delegate;
+                Apply_results.contents_result.Endorsement_result.slots := slots
+                |})))
   |
     Alpha_context.Single
       (Alpha_context.Seed_nonce_revelation {|
@@ -1150,24 +925,20 @@ Definition apply_contents_list {A : Set}
           Alpha_context.contents.Seed_nonce_revelation.nonce := __nonce_value
           |}) =>
     let level := Alpha_context.Level.from_raw ctxt None level in
-    Error_monad.op_gtgteqquestion
-      (Alpha_context.Nonce.reveal ctxt level __nonce_value)
-      (fun ctxt =>
-        let seed_nonce_revelation_tip :=
-          Alpha_context.Constants.seed_nonce_revelation_tip ctxt in
-        Error_monad.op_gtgteqquestion
-          (Alpha_context.add_rewards ctxt seed_nonce_revelation_tip)
-          (fun ctxt =>
-            Error_monad.__return
-              (ctxt,
-                (Apply_results.Single_result
-                  (Apply_results.Seed_nonce_revelation_result
-                    [
-                      ((Alpha_context.Delegate.Rewards baker
-                        level.(Alpha_context.Level.t.cycle)),
-                        (Alpha_context.Delegate.Credited
-                          seed_nonce_revelation_tip))
-                    ])))))
+    let!? ctxt := Alpha_context.Nonce.reveal ctxt level __nonce_value in
+    let seed_nonce_revelation_tip :=
+      Alpha_context.Constants.seed_nonce_revelation_tip ctxt in
+    let!? ctxt := Alpha_context.add_rewards ctxt seed_nonce_revelation_tip in
+    Error_monad.__return
+      (ctxt,
+        (Apply_results.Single_result
+          (Apply_results.Seed_nonce_revelation_result
+            [
+              ((Alpha_context.Delegate.Rewards baker
+                level.(Alpha_context.Level.t.cycle)),
+                (Alpha_context.Delegate.Credited
+                  seed_nonce_revelation_tip))
+            ])))
   |
     Alpha_context.Single
       (Alpha_context.Double_endorsement_evidence {|
@@ -1201,99 +972,66 @@ Definition apply_contents_list {A : Set}
         Alpha_context.Level.from_raw ctxt None
           e1.(Alpha_context.contents.Endorsement.level) in
       let oldest_level := Alpha_context.Level.last_allowed_fork_level ctxt in
-      Error_monad.op_gtgteqquestion
-        (Error_monad.fail_unless
+      let!? '_ :=
+        Error_monad.fail_unless
           (Alpha_context.Level.op_lt level (Alpha_context.Level.current ctxt))
-          extensible_type_value)
-        (fun function_parameter =>
-          let '_ := function_parameter in
-          Error_monad.op_gtgteqquestion
-            (Error_monad.fail_unless
-              (Alpha_context.Raw_level.op_lteq oldest_level
-                level.(Alpha_context.Level.t.level)) extensible_type_value)
-            (fun function_parameter =>
-              let '_ := function_parameter in
-              Error_monad.op_gtgteqquestion
-                (Baking.check_endorsement_rights ctxt chain_id op1)
-                (fun function_parameter =>
-                  let '(delegate1, _, _) := function_parameter in
-                  Error_monad.op_gtgteqquestion
-                    (Baking.check_endorsement_rights ctxt chain_id op2)
-                    (fun function_parameter =>
-                      let '(delegate2, _, _) := function_parameter in
-                      Error_monad.op_gtgteqquestion
-                        (Error_monad.fail_unless
-                          ((|Signature.Public_key_hash|).(S.SPublic_key_hash.equal)
-                            delegate1 delegate2) extensible_type_value)
-                        (fun function_parameter =>
-                          let '_ := function_parameter in
-                          Error_monad.op_gtgteqquestion
-                            (Alpha_context.Delegate.has_frozen_balance ctxt
-                              delegate1 level.(Alpha_context.Level.t.cycle))
-                            (fun valid =>
-                              Error_monad.op_gtgteqquestion
-                                (Error_monad.fail_unless valid
-                                  extensible_type_value)
-                                (fun function_parameter =>
-                                  let '_ := function_parameter in
-                                  Error_monad.op_gtgteqquestion
-                                    (Alpha_context.Delegate.punish ctxt
-                                      delegate1
-                                      level.(Alpha_context.Level.t.cycle))
-                                    (fun function_parameter =>
-                                      let '(ctxt, balance) := function_parameter
-                                        in
-                                      Error_monad.op_gtgteqquestion
-                                        (Lwt.__return
-                                          (Alpha_context.Tez.op_plusquestion
-                                            balance.(Alpha_context.Delegate.frozen_balance.deposit)
-                                            balance.(Alpha_context.Delegate.frozen_balance.fees)))
-                                        (fun burned =>
-                                          let reward :=
-                                            match
-                                              Alpha_context.Tez.op_divquestion
-                                                burned
-                                                (* ❌ Constant of type int64 is converted to int *)
-                                                2 with
-                                            | Pervasives.Ok v => v
-                                            | Pervasives.Error _ =>
-                                              Alpha_context.Tez.zero
-                                            end in
-                                          Error_monad.op_gtgteqquestion
-                                            (Alpha_context.add_rewards ctxt
-                                              reward)
-                                            (fun ctxt =>
-                                              let current_cycle :=
-                                                (Alpha_context.Level.current
-                                                  ctxt).(Alpha_context.Level.t.cycle)
-                                                in
-                                              Error_monad.__return
-                                                (ctxt,
-                                                  (Apply_results.Single_result
-                                                    (Apply_results.Double_endorsement_evidence_result
-                                                      (Alpha_context.Delegate.cleanup_balance_updates
-                                                        [
-                                                          ((Alpha_context.Delegate.Deposits
-                                                            delegate1
-                                                            level.(Alpha_context.Level.t.cycle)),
-                                                            (Alpha_context.Delegate.Debited
-                                                              balance.(Alpha_context.Delegate.frozen_balance.deposit)));
-                                                          ((Alpha_context.Delegate.Fees
-                                                            delegate1
-                                                            level.(Alpha_context.Level.t.cycle)),
-                                                            (Alpha_context.Delegate.Debited
-                                                              balance.(Alpha_context.Delegate.frozen_balance.fees)));
-                                                          ((Alpha_context.Delegate.Rewards
-                                                            delegate1
-                                                            level.(Alpha_context.Level.t.cycle)),
-                                                            (Alpha_context.Delegate.Debited
-                                                              balance.(Alpha_context.Delegate.frozen_balance.rewards)));
-                                                          ((Alpha_context.Delegate.Rewards
-                                                            baker
-                                                            current_cycle),
-                                                            (Alpha_context.Delegate.Credited
-                                                              reward))
-                                                        ]))))))))))))))
+          extensible_type_value in
+      let!? '_ :=
+        Error_monad.fail_unless
+          (Alpha_context.Raw_level.op_lteq oldest_level
+            level.(Alpha_context.Level.t.level)) extensible_type_value in
+      let!? '(delegate1, _, _) :=
+        Baking.check_endorsement_rights ctxt chain_id op1 in
+      let!? '(delegate2, _, _) :=
+        Baking.check_endorsement_rights ctxt chain_id op2 in
+      let!? '_ :=
+        Error_monad.fail_unless
+          ((|Signature.Public_key_hash|).(S.SPublic_key_hash.equal) delegate1
+            delegate2) extensible_type_value in
+      let!? valid :=
+        Alpha_context.Delegate.has_frozen_balance ctxt delegate1
+          level.(Alpha_context.Level.t.cycle) in
+      let!? '_ := Error_monad.fail_unless valid extensible_type_value in
+      let!? '(ctxt, balance) :=
+        Alpha_context.Delegate.punish ctxt delegate1
+          level.(Alpha_context.Level.t.cycle) in
+      let!? burned :=
+        Lwt.__return
+          (Alpha_context.Tez.op_plusquestion
+            balance.(Alpha_context.Delegate.frozen_balance.deposit)
+            balance.(Alpha_context.Delegate.frozen_balance.fees)) in
+      let reward :=
+        match
+          Alpha_context.Tez.op_divquestion burned
+            (* ❌ Constant of type int64 is converted to int *)
+            2 with
+        | Pervasives.Ok v => v
+        | Pervasives.Error _ => Alpha_context.Tez.zero
+        end in
+      let!? ctxt := Alpha_context.add_rewards ctxt reward in
+      let current_cycle :=
+        (Alpha_context.Level.current ctxt).(Alpha_context.Level.t.cycle) in
+      Error_monad.__return
+        (ctxt,
+          (Apply_results.Single_result
+            (Apply_results.Double_endorsement_evidence_result
+              (Alpha_context.Delegate.cleanup_balance_updates
+                [
+                  ((Alpha_context.Delegate.Deposits delegate1
+                    level.(Alpha_context.Level.t.cycle)),
+                    (Alpha_context.Delegate.Debited
+                      balance.(Alpha_context.Delegate.frozen_balance.deposit)));
+                  ((Alpha_context.Delegate.Fees delegate1
+                    level.(Alpha_context.Level.t.cycle)),
+                    (Alpha_context.Delegate.Debited
+                      balance.(Alpha_context.Delegate.frozen_balance.fees)));
+                  ((Alpha_context.Delegate.Rewards delegate1
+                    level.(Alpha_context.Level.t.cycle)),
+                    (Alpha_context.Delegate.Debited
+                      balance.(Alpha_context.Delegate.frozen_balance.rewards)));
+                  ((Alpha_context.Delegate.Rewards baker current_cycle),
+                    (Alpha_context.Delegate.Credited reward))
+                ]))))
     | ((_, _), _) => Error_monad.fail extensible_type_value
     end
   |
@@ -1304,133 +1042,90 @@ Definition apply_contents_list {A : Set}
           |}) =>
     let hash1 := Alpha_context.Block_header.__hash_value bh1 in
     let hash2 := Alpha_context.Block_header.__hash_value bh2 in
-    Error_monad.op_gtgteqquestion
-      (Error_monad.fail_unless
+    let!? '_ :=
+      Error_monad.fail_unless
         (Pervasives.op_andand
           ((|Compare.Int32|).(Compare.S.op_eq)
             bh1.(Alpha_context.Block_header.t.shell).(Block_header.shell_header.level)
             bh2.(Alpha_context.Block_header.t.shell).(Block_header.shell_header.level))
           (Pervasives.not ((|Block_hash|).(S.HASH.equal) hash1 hash2)))
-        extensible_type_value)
-      (fun function_parameter =>
-        let '_ := function_parameter in
-        Error_monad.op_gtgteqquestion
-          (Lwt.__return
-            (Alpha_context.Raw_level.of_int32
-              bh1.(Alpha_context.Block_header.t.shell).(Block_header.shell_header.level)))
-          (fun raw_level =>
-            let oldest_level := Alpha_context.Level.last_allowed_fork_level ctxt
-              in
-            Error_monad.op_gtgteqquestion
-              (Error_monad.fail_unless
-                (Alpha_context.Raw_level.op_lt raw_level
-                  (Alpha_context.Level.current ctxt).(Alpha_context.Level.t.level))
-                extensible_type_value)
-              (fun function_parameter =>
-                let '_ := function_parameter in
-                Error_monad.op_gtgteqquestion
-                  (Error_monad.fail_unless
-                    (Alpha_context.Raw_level.op_lteq oldest_level raw_level)
-                    extensible_type_value)
-                  (fun function_parameter =>
-                    let '_ := function_parameter in
-                    let level :=
-                      Alpha_context.Level.from_raw ctxt None raw_level in
-                    Error_monad.op_gtgteqquestion
-                      (Alpha_context.Roll.baking_rights_owner ctxt level
-                        bh1.(Alpha_context.Block_header.t.protocol_data).(Alpha_context.Block_header.protocol_data.contents).(Alpha_context.Block_header.contents.priority))
-                      (fun delegate1 =>
-                        Error_monad.op_gtgteqquestion
-                          (Baking.check_signature bh1 chain_id delegate1)
-                          (fun function_parameter =>
-                            let '_ := function_parameter in
-                            Error_monad.op_gtgteqquestion
-                              (Alpha_context.Roll.baking_rights_owner ctxt level
-                                bh2.(Alpha_context.Block_header.t.protocol_data).(Alpha_context.Block_header.protocol_data.contents).(Alpha_context.Block_header.contents.priority))
-                              (fun delegate2 =>
-                                Error_monad.op_gtgteqquestion
-                                  (Baking.check_signature bh2 chain_id delegate2)
-                                  (fun function_parameter =>
-                                    let '_ := function_parameter in
-                                    Error_monad.op_gtgteqquestion
-                                      (Error_monad.fail_unless
-                                        ((|Signature.Public_key|).(S.SPublic_key.equal)
-                                          delegate1 delegate2)
-                                        extensible_type_value)
-                                      (fun function_parameter =>
-                                        let '_ := function_parameter in
-                                        let delegate :=
-                                          (|Signature.Public_key|).(S.SPublic_key.__hash_value)
-                                            delegate1 in
-                                        Error_monad.op_gtgteqquestion
-                                          (Alpha_context.Delegate.has_frozen_balance
-                                            ctxt delegate
-                                            level.(Alpha_context.Level.t.cycle))
-                                          (fun valid =>
-                                            Error_monad.op_gtgteqquestion
-                                              (Error_monad.fail_unless valid
-                                                extensible_type_value)
-                                              (fun function_parameter =>
-                                                let '_ := function_parameter in
-                                                Error_monad.op_gtgteqquestion
-                                                  (Alpha_context.Delegate.punish
-                                                    ctxt delegate
-                                                    level.(Alpha_context.Level.t.cycle))
-                                                  (fun function_parameter =>
-                                                    let '(ctxt, balance) :=
-                                                      function_parameter in
-                                                    Error_monad.op_gtgteqquestion
-                                                      (Lwt.__return
-                                                        (Alpha_context.Tez.op_plusquestion
-                                                          balance.(Alpha_context.Delegate.frozen_balance.deposit)
-                                                          balance.(Alpha_context.Delegate.frozen_balance.fees)))
-                                                      (fun burned =>
-                                                        let reward :=
-                                                          match
-                                                            Alpha_context.Tez.op_divquestion
-                                                              burned
-                                                              (* ❌ Constant of type int64 is converted to int *)
-                                                              2 with
-                                                          | Pervasives.Ok v => v
-                                                          | Pervasives.Error _
-                                                            =>
-                                                            Alpha_context.Tez.zero
-                                                          end in
-                                                        Error_monad.op_gtgteqquestion
-                                                          (Alpha_context.add_rewards
-                                                            ctxt reward)
-                                                          (fun ctxt =>
-                                                            let current_cycle :=
-                                                              (Alpha_context.Level.current
-                                                                ctxt).(Alpha_context.Level.t.cycle)
-                                                              in
-                                                            Error_monad.__return
-                                                              (ctxt,
-                                                                (Apply_results.Single_result
-                                                                  (Apply_results.Double_baking_evidence_result
-                                                                    (Alpha_context.Delegate.cleanup_balance_updates
-                                                                      [
-                                                                        ((Alpha_context.Delegate.Deposits
-                                                                          delegate
-                                                                          level.(Alpha_context.Level.t.cycle)),
-                                                                          (Alpha_context.Delegate.Debited
-                                                                            balance.(Alpha_context.Delegate.frozen_balance.deposit)));
-                                                                        ((Alpha_context.Delegate.Fees
-                                                                          delegate
-                                                                          level.(Alpha_context.Level.t.cycle)),
-                                                                          (Alpha_context.Delegate.Debited
-                                                                            balance.(Alpha_context.Delegate.frozen_balance.fees)));
-                                                                        ((Alpha_context.Delegate.Rewards
-                                                                          delegate
-                                                                          level.(Alpha_context.Level.t.cycle)),
-                                                                          (Alpha_context.Delegate.Debited
-                                                                            balance.(Alpha_context.Delegate.frozen_balance.rewards)));
-                                                                        ((Alpha_context.Delegate.Rewards
-                                                                          baker
-                                                                          current_cycle),
-                                                                          (Alpha_context.Delegate.Credited
-                                                                            reward))
-                                                                      ]))))))))))))))))))
+        extensible_type_value in
+    let!? raw_level :=
+      Lwt.__return
+        (Alpha_context.Raw_level.of_int32
+          bh1.(Alpha_context.Block_header.t.shell).(Block_header.shell_header.level))
+      in
+    let oldest_level := Alpha_context.Level.last_allowed_fork_level ctxt in
+    let!? '_ :=
+      Error_monad.fail_unless
+        (Alpha_context.Raw_level.op_lt raw_level
+          (Alpha_context.Level.current ctxt).(Alpha_context.Level.t.level))
+        extensible_type_value in
+    let!? '_ :=
+      Error_monad.fail_unless
+        (Alpha_context.Raw_level.op_lteq oldest_level raw_level)
+        extensible_type_value in
+    let level := Alpha_context.Level.from_raw ctxt None raw_level in
+    let!? delegate1 :=
+      Alpha_context.Roll.baking_rights_owner ctxt level
+        bh1.(Alpha_context.Block_header.t.protocol_data).(Alpha_context.Block_header.protocol_data.contents).(Alpha_context.Block_header.contents.priority)
+      in
+    let!? '_ := Baking.check_signature bh1 chain_id delegate1 in
+    let!? delegate2 :=
+      Alpha_context.Roll.baking_rights_owner ctxt level
+        bh2.(Alpha_context.Block_header.t.protocol_data).(Alpha_context.Block_header.protocol_data.contents).(Alpha_context.Block_header.contents.priority)
+      in
+    let!? '_ := Baking.check_signature bh2 chain_id delegate2 in
+    let!? '_ :=
+      Error_monad.fail_unless
+        ((|Signature.Public_key|).(S.SPublic_key.equal) delegate1 delegate2)
+        extensible_type_value in
+    let delegate :=
+      (|Signature.Public_key|).(S.SPublic_key.__hash_value) delegate1 in
+    let!? valid :=
+      Alpha_context.Delegate.has_frozen_balance ctxt delegate
+        level.(Alpha_context.Level.t.cycle) in
+    let!? '_ := Error_monad.fail_unless valid extensible_type_value in
+    let!? '(ctxt, balance) :=
+      Alpha_context.Delegate.punish ctxt delegate
+        level.(Alpha_context.Level.t.cycle) in
+    let!? burned :=
+      Lwt.__return
+        (Alpha_context.Tez.op_plusquestion
+          balance.(Alpha_context.Delegate.frozen_balance.deposit)
+          balance.(Alpha_context.Delegate.frozen_balance.fees)) in
+    let reward :=
+      match
+        Alpha_context.Tez.op_divquestion burned
+          (* ❌ Constant of type int64 is converted to int *)
+          2 with
+      | Pervasives.Ok v => v
+      | Pervasives.Error _ => Alpha_context.Tez.zero
+      end in
+    let!? ctxt := Alpha_context.add_rewards ctxt reward in
+    let current_cycle :=
+      (Alpha_context.Level.current ctxt).(Alpha_context.Level.t.cycle) in
+    Error_monad.__return
+      (ctxt,
+        (Apply_results.Single_result
+          (Apply_results.Double_baking_evidence_result
+            (Alpha_context.Delegate.cleanup_balance_updates
+              [
+                ((Alpha_context.Delegate.Deposits delegate
+                  level.(Alpha_context.Level.t.cycle)),
+                  (Alpha_context.Delegate.Debited
+                    balance.(Alpha_context.Delegate.frozen_balance.deposit)));
+                ((Alpha_context.Delegate.Fees delegate
+                  level.(Alpha_context.Level.t.cycle)),
+                  (Alpha_context.Delegate.Debited
+                    balance.(Alpha_context.Delegate.frozen_balance.fees)));
+                ((Alpha_context.Delegate.Rewards delegate
+                  level.(Alpha_context.Level.t.cycle)),
+                  (Alpha_context.Delegate.Debited
+                    balance.(Alpha_context.Delegate.frozen_balance.rewards)));
+                ((Alpha_context.Delegate.Rewards baker current_cycle),
+                  (Alpha_context.Delegate.Credited reward))
+              ]))))
   |
     Alpha_context.Single
       (Alpha_context.Activate_account {|
@@ -1440,31 +1135,24 @@ Definition apply_contents_list {A : Set}
           |}) =>
     let blinded_pkh :=
       Blinded_public_key_hash.of_ed25519_pkh activation_code pkh in
-    Error_monad.op_gtgteqquestion
-      (Alpha_context.Commitment.get_opt ctxt blinded_pkh)
-      (fun function_parameter =>
-        match function_parameter with
-        | None => Error_monad.fail extensible_type_value
-        | Some amount =>
-          Error_monad.op_gtgteqquestion
-            (Alpha_context.Commitment.delete ctxt blinded_pkh)
-            (fun ctxt =>
-              let contract :=
-                Alpha_context.Contract.implicit_contract
-                  (Signature.Ed25519Hash pkh) in
-              Error_monad.op_gtgteqquestion
-                (Alpha_context.Contract.credit ctxt contract amount)
-                (fun ctxt =>
-                  Error_monad.__return
-                    (ctxt,
-                      (Apply_results.Single_result
-                        (Apply_results.Activate_account_result
-                          [
-                            ((Alpha_context.Delegate.Contract contract),
-                              (Alpha_context.Delegate.Credited
-                                amount))
-                          ])))))
-        end)
+    let!? function_parameter :=
+      Alpha_context.Commitment.get_opt ctxt blinded_pkh in
+    match function_parameter with
+    | None => Error_monad.fail extensible_type_value
+    | Some amount =>
+      let!? ctxt := Alpha_context.Commitment.delete ctxt blinded_pkh in
+      let contract :=
+        Alpha_context.Contract.implicit_contract (Signature.Ed25519Hash pkh) in
+      let!? ctxt := Alpha_context.Contract.credit ctxt contract amount in
+      Error_monad.__return
+        (ctxt,
+          (Apply_results.Single_result
+            (Apply_results.Activate_account_result
+              [
+                ((Alpha_context.Delegate.Contract contract),
+                  (Alpha_context.Delegate.Credited amount))
+              ])))
+    end
   |
     Alpha_context.Single
       (Alpha_context.Proposals {|
@@ -1472,28 +1160,18 @@ Definition apply_contents_list {A : Set}
           Alpha_context.contents.Proposals.period := period;
           Alpha_context.contents.Proposals.proposals := proposals
           |}) =>
-    Error_monad.op_gtgteqquestion
-      (Alpha_context.Roll.delegate_pubkey ctxt source)
-      (fun delegate =>
-        Error_monad.op_gtgteqquestion
-          (Alpha_context.Operation.check_signature delegate chain_id operation)
-          (fun function_parameter =>
-            let '_ := function_parameter in
-            let level := Alpha_context.Level.current ctxt in
-            Error_monad.op_gtgteqquestion
-              (Error_monad.fail_unless
-                (Alpha_context.Voting_period.op_eq
-                  level.(Alpha_context.Level.t.voting_period) period)
-                extensible_type_value)
-              (fun function_parameter =>
-                let '_ := function_parameter in
-                Error_monad.op_gtgteqquestion
-                  (Amendment.record_proposals ctxt source proposals)
-                  (fun ctxt =>
-                    Error_monad.__return
-                      (ctxt,
-                        (Apply_results.Single_result
-                          Apply_results.Proposals_result))))))
+    let!? delegate := Alpha_context.Roll.delegate_pubkey ctxt source in
+    let!? '_ :=
+      Alpha_context.Operation.check_signature delegate chain_id operation in
+    let level := Alpha_context.Level.current ctxt in
+    let!? '_ :=
+      Error_monad.fail_unless
+        (Alpha_context.Voting_period.op_eq
+          level.(Alpha_context.Level.t.voting_period) period)
+        extensible_type_value in
+    let!? ctxt := Amendment.record_proposals ctxt source proposals in
+    Error_monad.__return
+      (ctxt, (Apply_results.Single_result Apply_results.Proposals_result))
   |
     Alpha_context.Single
       (Alpha_context.Ballot {|
@@ -1502,55 +1180,42 @@ Definition apply_contents_list {A : Set}
           Alpha_context.contents.Ballot.proposal := proposal;
           Alpha_context.contents.Ballot.ballot := ballot
           |}) =>
-    Error_monad.op_gtgteqquestion
-      (Alpha_context.Roll.delegate_pubkey ctxt source)
-      (fun delegate =>
-        Error_monad.op_gtgteqquestion
-          (Alpha_context.Operation.check_signature delegate chain_id operation)
-          (fun function_parameter =>
-            let '_ := function_parameter in
-            let level := Alpha_context.Level.current ctxt in
-            Error_monad.op_gtgteqquestion
-              (Error_monad.fail_unless
-                (Alpha_context.Voting_period.op_eq
-                  level.(Alpha_context.Level.t.voting_period) period)
-                extensible_type_value)
-              (fun function_parameter =>
-                let '_ := function_parameter in
-                Error_monad.op_gtgteqquestion
-                  (Amendment.record_ballot ctxt source proposal ballot)
-                  (fun ctxt =>
-                    Error_monad.__return
-                      (ctxt,
-                        (Apply_results.Single_result Apply_results.Ballot_result))))))
+    let!? delegate := Alpha_context.Roll.delegate_pubkey ctxt source in
+    let!? '_ :=
+      Alpha_context.Operation.check_signature delegate chain_id operation in
+    let level := Alpha_context.Level.current ctxt in
+    let!? '_ :=
+      Error_monad.fail_unless
+        (Alpha_context.Voting_period.op_eq
+          level.(Alpha_context.Level.t.voting_period) period)
+        extensible_type_value in
+    let!? ctxt := Amendment.record_ballot ctxt source proposal ballot in
+    Error_monad.__return
+      (ctxt, (Apply_results.Single_result Apply_results.Ballot_result))
   | (Alpha_context.Single (Alpha_context.Manager_operation _)) as op =>
     let 'existT _ __0 op :=
       existT (A := Set)
         (fun __0 =>
           (Alpha_context.contents_list (Alpha_context.Kind.manager __0))) _ op
       in
-    Error_monad.op_gtgteqquestion
-      (precheck_manager_contents_list ctxt chain_id operation op)
-      (fun ctxt =>
-        Error_monad.op_gtgteq
-          (apply_manager_contents_list ctxt mode baker chain_id op)
-          (fun function_parameter =>
-            let '(ctxt, __result_value) := function_parameter in
-            Error_monad.__return (ctxt, __result_value)))
+    let!? ctxt := precheck_manager_contents_list ctxt chain_id operation op in
+    Error_monad.op_gtgteq
+      (apply_manager_contents_list ctxt mode baker chain_id op)
+      (fun function_parameter =>
+        let '(ctxt, __result_value) := function_parameter in
+        Error_monad.__return (ctxt, __result_value))
   | (Alpha_context.Cons (Alpha_context.Manager_operation _) _) as op =>
     let 'existT _ [__1, __2] op :=
       existT (A := [Set ** Set])
         (fun '[__1, __2] =>
           (Alpha_context.contents_list (Alpha_context.Kind.manager (__1 * __2))))
         [_, _] op in
-    Error_monad.op_gtgteqquestion
-      (precheck_manager_contents_list ctxt chain_id operation op)
-      (fun ctxt =>
-        Error_monad.op_gtgteq
-          (apply_manager_contents_list ctxt mode baker chain_id op)
-          (fun function_parameter =>
-            let '(ctxt, __result_value) := function_parameter in
-            Error_monad.__return (ctxt, __result_value)))
+    let!? ctxt := precheck_manager_contents_list ctxt chain_id operation op in
+    Error_monad.op_gtgteq
+      (apply_manager_contents_list ctxt mode baker chain_id op)
+      (fun function_parameter =>
+        let '(ctxt, __result_value) := function_parameter in
+        Error_monad.__return (ctxt, __result_value))
   end.
 
 Definition apply_operation {A : Set}
@@ -1564,15 +1229,14 @@ Definition apply_operation {A : Set}
     (Error_monad.tzresult
       (Alpha_context.context * Apply_results.operation_metadata A)) :=
   let ctxt := Alpha_context.Contract.init_origination_nonce ctxt __hash_value in
-  Error_monad.op_gtgteqquestion
-    (apply_contents_list ctxt chain_id mode pred_block baker operation
-      operation.(Alpha_context.operation.protocol_data).(Alpha_context.protocol_data.contents))
-    (fun function_parameter =>
-      let '(ctxt, __result_value) := function_parameter in
-      let ctxt := Alpha_context.Gas.set_unlimited ctxt in
-      let ctxt := Alpha_context.Contract.unset_origination_nonce ctxt in
-      Error_monad.__return
-        (ctxt, {| Apply_results.operation_metadata.contents := __result_value |})).
+  let!? '(ctxt, __result_value) :=
+    apply_contents_list ctxt chain_id mode pred_block baker operation
+      operation.(Alpha_context.operation.protocol_data).(Alpha_context.protocol_data.contents)
+    in
+  let ctxt := Alpha_context.Gas.set_unlimited ctxt in
+  let ctxt := Alpha_context.Contract.unset_origination_nonce ctxt in
+  Error_monad.__return
+    (ctxt, {| Apply_results.operation_metadata.contents := __result_value |}).
 
 Definition may_snapshot_roll (ctxt : Alpha_context.context)
   : Lwt.t (Error_monad.tzresult Alpha_context.context) :=
@@ -1583,8 +1247,8 @@ Definition may_snapshot_roll (ctxt : Alpha_context.context)
     (|Compare.Int32|).(Compare.S.equal)
       (Int32.rem level.(Alpha_context.Level.t.cycle_position)
         blocks_per_roll_snapshot) (Int32.pred blocks_per_roll_snapshot) then
-    Error_monad.op_gtgteqquestion (Alpha_context.Roll.snapshot_rolls ctxt)
-      (fun ctxt => Error_monad.__return ctxt)
+    let!? ctxt := Alpha_context.Roll.snapshot_rolls ctxt in
+    Error_monad.__return ctxt
   else
     Error_monad.__return ctxt.
 
@@ -1593,29 +1257,17 @@ Definition may_start_new_cycle (ctxt : Alpha_context.context)
     (Error_monad.tzresult
       (Alpha_context.context * Alpha_context.Delegate.balance_updates *
         list (|Signature.Public_key_hash|).(S.SPublic_key_hash.t))) :=
-  Error_monad.op_gtgteqquestion (Baking.dawn_of_a_new_cycle ctxt)
-    (fun function_parameter =>
-      match function_parameter with
-      | None => Error_monad.__return (ctxt, nil, nil)
-      | Some last_cycle =>
-        Error_monad.op_gtgteqquestion
-          (Alpha_context.Seed.cycle_end ctxt last_cycle)
-          (fun function_parameter =>
-            let '(ctxt, unrevealed) := function_parameter in
-            Error_monad.op_gtgteqquestion
-              (Alpha_context.Roll.cycle_end ctxt last_cycle)
-              (fun ctxt =>
-                Error_monad.op_gtgteqquestion
-                  (Alpha_context.Delegate.cycle_end ctxt last_cycle unrevealed)
-                  (fun function_parameter =>
-                    let '(ctxt, update_balances, deactivated) :=
-                      function_parameter in
-                    Error_monad.op_gtgteqquestion
-                      (Alpha_context.Bootstrap.cycle_end ctxt last_cycle)
-                      (fun ctxt =>
-                        Error_monad.__return
-                          (ctxt, update_balances, deactivated)))))
-      end).
+  let!? function_parameter := Baking.dawn_of_a_new_cycle ctxt in
+  match function_parameter with
+  | None => Error_monad.__return (ctxt, nil, nil)
+  | Some last_cycle =>
+    let!? '(ctxt, unrevealed) := Alpha_context.Seed.cycle_end ctxt last_cycle in
+    let!? ctxt := Alpha_context.Roll.cycle_end ctxt last_cycle in
+    let!? '(ctxt, update_balances, deactivated) :=
+      Alpha_context.Delegate.cycle_end ctxt last_cycle unrevealed in
+    let!? ctxt := Alpha_context.Bootstrap.cycle_end ctxt last_cycle in
+    Error_monad.__return (ctxt, update_balances, deactivated)
+  end.
 
 Definition begin_full_construction
   (ctxt : Alpha_context.context) (pred_timestamp : Time.t)
@@ -1624,28 +1276,21 @@ Definition begin_full_construction
     (Error_monad.tzresult
       (Alpha_context.context * Alpha_context.Block_header.contents *
         Alpha_context.public_key * Alpha_context.Period.t)) :=
-  Error_monad.op_gtgteqquestion
-    (Alpha_context.Global.set_block_priority ctxt
-      protocol_data.(Alpha_context.Block_header.contents.priority))
-    (fun ctxt =>
-      Error_monad.op_gtgteqquestion
-        (Baking.check_baking_rights ctxt protocol_data pred_timestamp)
-        (fun function_parameter =>
-          let '(delegate_pk, block_delay) := function_parameter in
-          let ctxt := Alpha_context.Fitness.increase None ctxt in
-          match Alpha_context.Level.pred ctxt (Alpha_context.Level.current ctxt)
-            with
-          | None =>
-            (* ❌ Assert instruction is not handled. *)
-            assert false
-          | Some pred_level =>
-            Error_monad.op_gtgteqquestion
-              (Baking.endorsement_rights ctxt pred_level)
-              (fun rights =>
-                let ctxt := Alpha_context.init_endorsements ctxt rights in
-                Error_monad.__return
-                  (ctxt, protocol_data, delegate_pk, block_delay))
-          end)).
+  let!? ctxt :=
+    Alpha_context.Global.set_block_priority ctxt
+      protocol_data.(Alpha_context.Block_header.contents.priority) in
+  let!? '(delegate_pk, block_delay) :=
+    Baking.check_baking_rights ctxt protocol_data pred_timestamp in
+  let ctxt := Alpha_context.Fitness.increase None ctxt in
+  match Alpha_context.Level.pred ctxt (Alpha_context.Level.current ctxt) with
+  | None =>
+    (* ❌ Assert instruction is not handled. *)
+    assert false
+  | Some pred_level =>
+    let!? rights := Baking.endorsement_rights ctxt pred_level in
+    let ctxt := Alpha_context.init_endorsements ctxt rights in
+    Error_monad.__return (ctxt, protocol_data, delegate_pk, block_delay)
+  end.
 
 Definition begin_partial_construction (ctxt : Alpha_context.context)
   : Lwt.t (Error_monad.tzresult Alpha_context.context) :=
@@ -1655,10 +1300,9 @@ Definition begin_partial_construction (ctxt : Alpha_context.context)
     (* ❌ Assert instruction is not handled. *)
     assert false
   | Some pred_level =>
-    Error_monad.op_gtgteqquestion (Baking.endorsement_rights ctxt pred_level)
-      (fun rights =>
-        let ctxt := Alpha_context.init_endorsements ctxt rights in
-        Error_monad.__return ctxt)
+    let!? rights := Baking.endorsement_rights ctxt pred_level in
+    let ctxt := Alpha_context.init_endorsements ctxt rights in
+    Error_monad.__return ctxt
   end.
 
 Definition begin_application
@@ -1667,60 +1311,40 @@ Definition begin_application
   : Lwt.t
     (Error_monad.tzresult
       (Alpha_context.context * Alpha_context.public_key * Alpha_context.Period.t)) :=
-  Error_monad.op_gtgteqquestion
-    (Alpha_context.Global.set_block_priority ctxt
-      block_header.(Alpha_context.Block_header.t.protocol_data).(Alpha_context.Block_header.protocol_data.contents).(Alpha_context.Block_header.contents.priority))
-    (fun ctxt =>
-      let current_level := Alpha_context.Level.current ctxt in
-      Error_monad.op_gtgteqquestion
-        (Baking.check_proof_of_work_stamp ctxt block_header)
-        (fun function_parameter =>
-          let '_ := function_parameter in
-          Error_monad.op_gtgteqquestion
-            (Baking.check_fitness_gap ctxt block_header)
-            (fun function_parameter =>
-              let '_ := function_parameter in
-              Error_monad.op_gtgteqquestion
-                (Baking.check_baking_rights ctxt
-                  block_header.(Alpha_context.Block_header.t.protocol_data).(Alpha_context.Block_header.protocol_data.contents)
-                  pred_timestamp)
-                (fun function_parameter =>
-                  let '(delegate_pk, block_delay) := function_parameter in
-                  Error_monad.op_gtgteqquestion
-                    (Baking.check_signature block_header chain_id delegate_pk)
-                    (fun function_parameter =>
-                      let '_ := function_parameter in
-                      let has_commitment :=
-                        match
-                          block_header.(Alpha_context.Block_header.t.protocol_data).(Alpha_context.Block_header.protocol_data.contents).(Alpha_context.Block_header.contents.seed_nonce_hash)
-                          with
-                        | None => false
-                        | Some _ => true
-                        end in
-                      Error_monad.op_gtgteqquestion
-                        (Error_monad.fail_unless
-                          ((|Compare.Bool|).(Compare.S.op_eq) has_commitment
-                            current_level.(Alpha_context.Level.t.expected_commitment))
-                          extensible_type_value)
-                        (fun function_parameter =>
-                          let '_ := function_parameter in
-                          let ctxt := Alpha_context.Fitness.increase None ctxt
-                            in
-                          match
-                            Alpha_context.Level.pred ctxt
-                              (Alpha_context.Level.current ctxt) with
-                          | None =>
-                            (* ❌ Assert instruction is not handled. *)
-                            assert false
-                          | Some pred_level =>
-                            Error_monad.op_gtgteqquestion
-                              (Baking.endorsement_rights ctxt pred_level)
-                              (fun rights =>
-                                let ctxt :=
-                                  Alpha_context.init_endorsements ctxt rights in
-                                Error_monad.__return
-                                  (ctxt, delegate_pk, block_delay))
-                          end)))))).
+  let!? ctxt :=
+    Alpha_context.Global.set_block_priority ctxt
+      block_header.(Alpha_context.Block_header.t.protocol_data).(Alpha_context.Block_header.protocol_data.contents).(Alpha_context.Block_header.contents.priority)
+    in
+  let current_level := Alpha_context.Level.current ctxt in
+  let!? '_ := Baking.check_proof_of_work_stamp ctxt block_header in
+  let!? '_ := Baking.check_fitness_gap ctxt block_header in
+  let!? '(delegate_pk, block_delay) :=
+    Baking.check_baking_rights ctxt
+      block_header.(Alpha_context.Block_header.t.protocol_data).(Alpha_context.Block_header.protocol_data.contents)
+      pred_timestamp in
+  let!? '_ := Baking.check_signature block_header chain_id delegate_pk in
+  let has_commitment :=
+    match
+      block_header.(Alpha_context.Block_header.t.protocol_data).(Alpha_context.Block_header.protocol_data.contents).(Alpha_context.Block_header.contents.seed_nonce_hash)
+      with
+    | None => false
+    | Some _ => true
+    end in
+  let!? '_ :=
+    Error_monad.fail_unless
+      ((|Compare.Bool|).(Compare.S.op_eq) has_commitment
+        current_level.(Alpha_context.Level.t.expected_commitment))
+      extensible_type_value in
+  let ctxt := Alpha_context.Fitness.increase None ctxt in
+  match Alpha_context.Level.pred ctxt (Alpha_context.Level.current ctxt) with
+  | None =>
+    (* ❌ Assert instruction is not handled. *)
+    assert false
+  | Some pred_level =>
+    let!? rights := Baking.endorsement_rights ctxt pred_level in
+    let ctxt := Alpha_context.init_endorsements ctxt rights in
+    Error_monad.__return (ctxt, delegate_pk, block_delay)
+  end.
 
 Definition check_minimum_endorsements
   (ctxt : Alpha_context.context)
@@ -1742,125 +1366,67 @@ Definition finalize_application
   : Lwt.t
     (Error_monad.tzresult (Alpha_context.context * Apply_results.block_metadata)) :=
   let included_endorsements := Alpha_context.included_endorsements ctxt in
-  Error_monad.op_gtgteqquestion
-    (check_minimum_endorsements ctxt protocol_data block_delay
-      included_endorsements)
-    (fun function_parameter =>
-      let '_ := function_parameter in
-      let deposit := Alpha_context.Constants.block_security_deposit ctxt in
-      Error_monad.op_gtgteqquestion
-        (Alpha_context.add_deposit ctxt delegate deposit)
-        (fun ctxt =>
-          Error_monad.op_gtgteqquestion
-            (Baking.baking_reward ctxt
-              protocol_data.(Alpha_context.Block_header.contents.priority)
-              included_endorsements)
-            (fun reward =>
-              Error_monad.op_gtgteqquestion
-                (Alpha_context.add_rewards ctxt reward)
-                (fun ctxt =>
-                  Error_monad.op_gtgteqquestion
-                    ((|Signature.Public_key_hash|).(S.SPublic_key_hash.Map).(S.INDEXES_Map.fold)
-                      (fun delegate =>
-                        fun deposit =>
-                          fun ctxt =>
-                            Error_monad.op_gtgteqquestion ctxt
-                              (fun ctxt =>
-                                Alpha_context.Delegate.freeze_deposit ctxt
-                                  delegate deposit))
-                      (Alpha_context.get_deposits ctxt)
-                      (Error_monad.__return ctxt))
-                    (fun ctxt =>
-                      let fees := Alpha_context.get_fees ctxt in
-                      Error_monad.op_gtgteqquestion
-                        (Alpha_context.Delegate.freeze_fees ctxt delegate fees)
-                        (fun ctxt =>
-                          let rewards := Alpha_context.get_rewards ctxt in
-                          Error_monad.op_gtgteqquestion
-                            (Alpha_context.Delegate.freeze_rewards ctxt delegate
-                              rewards)
-                            (fun ctxt =>
-                              Error_monad.op_gtgteqquestion
-                                match
-                                  protocol_data.(Alpha_context.Block_header.contents.seed_nonce_hash)
-                                  with
-                                | None => Error_monad.__return ctxt
-                                | Some nonce_hash =>
-                                  Alpha_context.Nonce.record_hash ctxt
-                                    {|
-                                      Alpha_context.Nonce.unrevealed.nonce_hash :=
-                                        nonce_hash;
-                                      Alpha_context.Nonce.unrevealed.delegate :=
-                                        delegate;
-                                      Alpha_context.Nonce.unrevealed.rewards :=
-                                        rewards;
-                                      Alpha_context.Nonce.unrevealed.fees :=
-                                        fees |}
-                                end
-                                (fun ctxt =>
-                                  Error_monad.op_gtgteqquestion
-                                    (may_snapshot_roll ctxt)
-                                    (fun ctxt =>
-                                      Error_monad.op_gtgteqquestion
-                                        (may_start_new_cycle ctxt)
-                                        (fun function_parameter =>
-                                          let
-                                            '(ctxt, balance_updates, deactivated) :=
-                                            function_parameter in
-                                          Error_monad.op_gtgteqquestion
-                                            (Amendment.may_start_new_voting_period
-                                              ctxt)
-                                            (fun ctxt =>
-                                              let cycle :=
-                                                (Alpha_context.Level.current
-                                                  ctxt).(Alpha_context.Level.t.cycle)
-                                                in
-                                              let balance_updates :=
-                                                Alpha_context.Delegate.cleanup_balance_updates
-                                                  (Pervasives.op_at
-                                                    [
-                                                      ((Alpha_context.Delegate.Contract
-                                                        (Alpha_context.Contract.implicit_contract
-                                                          delegate)),
-                                                        (Alpha_context.Delegate.Debited
-                                                          deposit));
-                                                      ((Alpha_context.Delegate.Deposits
-                                                        delegate
-                                                        cycle),
-                                                        (Alpha_context.Delegate.Credited
-                                                          deposit));
-                                                      ((Alpha_context.Delegate.Rewards
-                                                        delegate
-                                                        cycle),
-                                                        (Alpha_context.Delegate.Credited
-                                                          reward))
-                                                    ] balance_updates) in
-                                              let consumed_gas :=
-                                                Z.sub
-                                                  (Alpha_context.Constants.hard_gas_limit_per_block
-                                                    ctxt)
-                                                  (Alpha_context.Gas.block_level
-                                                    ctxt) in
-                                              Error_monad.op_gtgteqquestion
-                                                (Alpha_context.Vote.get_current_period_kind
-                                                  ctxt)
-                                                (fun voting_period_kind =>
-                                                  let receipt :=
-                                                    {|
-                                                      Apply_results.block_metadata.baker :=
-                                                        delegate;
-                                                      Apply_results.block_metadata.level :=
-                                                        Alpha_context.Level.current
-                                                          ctxt;
-                                                      Apply_results.block_metadata.voting_period_kind :=
-                                                        voting_period_kind;
-                                                      Apply_results.block_metadata.nonce_hash :=
-                                                        protocol_data.(Alpha_context.Block_header.contents.seed_nonce_hash);
-                                                      Apply_results.block_metadata.consumed_gas :=
-                                                        consumed_gas;
-                                                      Apply_results.block_metadata.deactivated :=
-                                                        deactivated;
-                                                      Apply_results.block_metadata.balance_updates :=
-                                                        balance_updates |} in
-                                                  Error_monad.__return
-                                                    (ctxt, receipt))))))))))))).
+  let!? '_ :=
+    check_minimum_endorsements ctxt protocol_data block_delay
+      included_endorsements in
+  let deposit := Alpha_context.Constants.block_security_deposit ctxt in
+  let!? ctxt := Alpha_context.add_deposit ctxt delegate deposit in
+  let!? reward :=
+    Baking.baking_reward ctxt
+      protocol_data.(Alpha_context.Block_header.contents.priority)
+      included_endorsements in
+  let!? ctxt := Alpha_context.add_rewards ctxt reward in
+  let!? ctxt :=
+    (|Signature.Public_key_hash|).(S.SPublic_key_hash.Map).(S.INDEXES_Map.fold)
+      (fun delegate =>
+        fun deposit =>
+          fun ctxt =>
+            let!? ctxt := ctxt in
+            Alpha_context.Delegate.freeze_deposit ctxt delegate deposit)
+      (Alpha_context.get_deposits ctxt) (Error_monad.__return ctxt) in
+  let fees := Alpha_context.get_fees ctxt in
+  let!? ctxt := Alpha_context.Delegate.freeze_fees ctxt delegate fees in
+  let rewards := Alpha_context.get_rewards ctxt in
+  let!? ctxt := Alpha_context.Delegate.freeze_rewards ctxt delegate rewards in
+  let!? ctxt :=
+    match protocol_data.(Alpha_context.Block_header.contents.seed_nonce_hash)
+      with
+    | None => Error_monad.__return ctxt
+    | Some nonce_hash =>
+      Alpha_context.Nonce.record_hash ctxt
+        {| Alpha_context.Nonce.unrevealed.nonce_hash := nonce_hash;
+          Alpha_context.Nonce.unrevealed.delegate := delegate;
+          Alpha_context.Nonce.unrevealed.rewards := rewards;
+          Alpha_context.Nonce.unrevealed.fees := fees |}
+    end in
+  let!? ctxt := may_snapshot_roll ctxt in
+  let!? '(ctxt, balance_updates, deactivated) := may_start_new_cycle ctxt in
+  let!? ctxt := Amendment.may_start_new_voting_period ctxt in
+  let cycle := (Alpha_context.Level.current ctxt).(Alpha_context.Level.t.cycle)
+    in
+  let balance_updates :=
+    Alpha_context.Delegate.cleanup_balance_updates
+      (Pervasives.op_at
+        [
+          ((Alpha_context.Delegate.Contract
+            (Alpha_context.Contract.implicit_contract delegate)),
+            (Alpha_context.Delegate.Debited deposit));
+          ((Alpha_context.Delegate.Deposits delegate cycle),
+            (Alpha_context.Delegate.Credited deposit));
+          ((Alpha_context.Delegate.Rewards delegate cycle),
+            (Alpha_context.Delegate.Credited reward))
+        ] balance_updates) in
+  let consumed_gas :=
+    Z.sub (Alpha_context.Constants.hard_gas_limit_per_block ctxt)
+      (Alpha_context.Gas.block_level ctxt) in
+  let!? voting_period_kind := Alpha_context.Vote.get_current_period_kind ctxt in
+  let receipt :=
+    {| Apply_results.block_metadata.baker := delegate;
+      Apply_results.block_metadata.level := Alpha_context.Level.current ctxt;
+      Apply_results.block_metadata.voting_period_kind := voting_period_kind;
+      Apply_results.block_metadata.nonce_hash :=
+        protocol_data.(Alpha_context.Block_header.contents.seed_nonce_hash);
+      Apply_results.block_metadata.consumed_gas := consumed_gas;
+      Apply_results.block_metadata.deactivated := deactivated;
+      Apply_results.block_metadata.balance_updates := balance_updates |} in
+  Error_monad.__return (ctxt, receipt).

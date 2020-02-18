@@ -10,6 +10,7 @@ Unset Positivity Checking.
 Unset Guard Checking.
 
 Require Import Tezos.Environment.
+Import Notations.
 Require Tezos.Gas_limit_repr.
 Require Tezos.Michelson_v1_primitives.
 

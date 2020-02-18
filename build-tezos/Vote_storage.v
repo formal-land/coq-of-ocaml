@@ -10,6 +10,7 @@ Unset Positivity Checking.
 Unset Guard Checking.
 
 Require Import Tezos.Environment.
+Import Notations.
 Require Tezos.Constants_storage.
 Require Tezos.Raw_context.
 Require Tezos.Roll_storage.
@@ -26,14 +27,13 @@ Definition recorded_proposal_count_for_delegate
   : Lwt.t
     (Error_monad.tzresult
       (|Storage.Vote.Proposals_count|).(Storage_sigs.Indexed_data_storage.value)) :=
-  Error_monad.op_gtgteqquestion
-    ((|Storage.Vote.Proposals_count|).(Storage_sigs.Indexed_data_storage.get_option)
-      ctxt proposer)
-    (fun function_parameter =>
-      match function_parameter with
-      | None => Error_monad.__return 0
-      | Some count => Error_monad.__return count
-      end).
+  let!? function_parameter :=
+    (|Storage.Vote.Proposals_count|).(Storage_sigs.Indexed_data_storage.get_option)
+      ctxt proposer in
+  match function_parameter with
+  | None => Error_monad.__return 0
+  | Some count => Error_monad.__return count
+  end.
 
 Definition record_proposal
   (ctxt :
@@ -42,16 +42,14 @@ Definition record_proposal
   (proposer :
     (|Storage.Vote.Proposals_count|).(Storage_sigs.Indexed_data_storage.key))
   : Lwt.t (Error_monad.tzresult Raw_context.t) :=
-  Error_monad.op_gtgteqquestion
-    (recorded_proposal_count_for_delegate ctxt proposer)
-    (fun count =>
+  let!? count := recorded_proposal_count_for_delegate ctxt proposer in
+  Error_monad.op_gtgteq
+    ((|Storage.Vote.Proposals_count|).(Storage_sigs.Indexed_data_storage.init_set)
+      ctxt proposer (Pervasives.op_plus count 1))
+    (fun ctxt =>
       Error_monad.op_gtgteq
-        ((|Storage.Vote.Proposals_count|).(Storage_sigs.Indexed_data_storage.init_set)
-          ctxt proposer (Pervasives.op_plus count 1))
-        (fun ctxt =>
-          Error_monad.op_gtgteq
-            ((|Storage.Vote.Proposals|).(Storage_sigs.Data_set_storage.add) ctxt
-              (proposal, proposer)) (fun ctxt => Error_monad.__return ctxt))).
+        ((|Storage.Vote.Proposals|).(Storage_sigs.Data_set_storage.add) ctxt
+          (proposal, proposer)) (fun ctxt => Error_monad.__return ctxt)).
 
 Definition get_proposals
   (ctxt : (|Storage.Vote.Proposals|).(Storage_sigs.Data_set_storage.context))
@@ -63,25 +61,24 @@ Definition get_proposals
     (fun function_parameter =>
       let '(proposal, delegate) := function_parameter in
       fun acc =>
-        Error_monad.op_gtgteqquestion
-          ((|Storage.Vote.Listings|).(Storage_sigs.Indexed_data_storage.get)
-            ctxt delegate)
-          (fun weight =>
-            Lwt.__return
-              (Error_monad.op_gtgtquestion acc
-                (fun acc =>
-                  let previous :=
-                    match
-                      (|Protocol_hash|).(S.HASH.Map).(S.INDEXES_Map.find_opt)
-                        proposal acc with
-                    | None =>
-                      (* ❌ Constant of type int32 is converted to int *)
-                      0
-                    | Some x => x
-                    end in
-                  Error_monad.ok
-                    ((|Protocol_hash|).(S.HASH.Map).(S.INDEXES_Map.add) proposal
-                      (Int32.add weight previous) acc))))).
+        let!? weight :=
+          (|Storage.Vote.Listings|).(Storage_sigs.Indexed_data_storage.get) ctxt
+            delegate in
+        Lwt.__return
+          (Error_monad.op_gtgtquestion acc
+            (fun acc =>
+              let previous :=
+                match
+                  (|Protocol_hash|).(S.HASH.Map).(S.INDEXES_Map.find_opt)
+                    proposal acc with
+                | None =>
+                  (* ❌ Constant of type int32 is converted to int *)
+                  0
+                | Some x => x
+                end in
+              Error_monad.ok
+                ((|Protocol_hash|).(S.HASH.Map).(S.INDEXES_Map.add) proposal
+                  (Int32.add weight previous) acc)))).
 
 Definition clear_proposals
   (ctxt :
@@ -154,26 +151,24 @@ Definition get_ballots
     (fun delegate =>
       fun ballot =>
         fun ballots =>
-          Error_monad.op_gtgteqquestion
-            ((|Storage.Vote.Listings|).(Storage_sigs.Indexed_data_storage.get)
-              ctxt delegate)
-            (fun weight =>
-              let count := Int32.add weight in
-              Lwt.__return
-                (Error_monad.op_gtgtquestion ballots
-                  (fun ballots =>
-                    match ballot with
-                    | Vote_repr.Yay =>
-                      Error_monad.ok
-                        (ballots.with_yay (count ballots.(ballots.yay)) ballots)
-                    | Vote_repr.Nay =>
-                      Error_monad.ok
-                        (ballots.with_nay (count ballots.(ballots.nay)) ballots)
-                    | Vote_repr.Pass =>
-                      Error_monad.ok
-                        (ballots.with_pass (count ballots.(ballots.pass))
-                          ballots)
-                    end)))).
+          let!? weight :=
+            (|Storage.Vote.Listings|).(Storage_sigs.Indexed_data_storage.get)
+              ctxt delegate in
+          let count := Int32.add weight in
+          Lwt.__return
+            (Error_monad.op_gtgtquestion ballots
+              (fun ballots =>
+                match ballot with
+                | Vote_repr.Yay =>
+                  Error_monad.ok
+                    (ballots.with_yay (count ballots.(ballots.yay)) ballots)
+                | Vote_repr.Nay =>
+                  Error_monad.ok
+                    (ballots.with_nay (count ballots.(ballots.nay)) ballots)
+                | Vote_repr.Pass =>
+                  Error_monad.ok
+                    (ballots.with_pass (count ballots.(ballots.pass)) ballots)
+                end))).
 
 Definition get_ballot_list
   : (|Storage.Vote.Ballots|).(Storage_sigs.Indexed_data_storage.context) ->
@@ -199,39 +194,36 @@ Definition listings_encoding
 
 Definition freeze_listings (ctxt : Raw_context.t)
   : Lwt.t (Error_monad.tzresult Raw_context.t) :=
-  Error_monad.op_gtgteqquestion
-    (Roll_storage.fold ctxt
+  let!? '(ctxt, total) :=
+    Roll_storage.fold ctxt
       (fun _roll =>
         fun delegate =>
           fun function_parameter =>
             let '(ctxt, total) := function_parameter in
             let delegate :=
               (|Signature.Public_key|).(S.SPublic_key.__hash_value) delegate in
-            Error_monad.op_gtgteqquestion
-              (Error_monad.op_gtgteqquestion
-                ((|Storage.Vote.Listings|).(Storage_sigs.Indexed_data_storage.get_option)
-                  ctxt delegate)
-                (fun function_parameter =>
-                  match function_parameter with
-                  | None =>
-                    Error_monad.__return
-                      (* ❌ Constant of type int32 is converted to int *)
-                      0
-                  | Some count => Error_monad.__return count
-                  end))
-              (fun count =>
-                Error_monad.op_gtgteq
-                  ((|Storage.Vote.Listings|).(Storage_sigs.Indexed_data_storage.init_set)
-                    ctxt delegate (Int32.succ count))
-                  (fun ctxt => Error_monad.__return (ctxt, (Int32.succ total)))))
+            let!? count :=
+              let!? function_parameter :=
+                (|Storage.Vote.Listings|).(Storage_sigs.Indexed_data_storage.get_option)
+                  ctxt delegate in
+              match function_parameter with
+              | None =>
+                Error_monad.__return
+                  (* ❌ Constant of type int32 is converted to int *)
+                  0
+              | Some count => Error_monad.__return count
+              end in
+            Error_monad.op_gtgteq
+              ((|Storage.Vote.Listings|).(Storage_sigs.Indexed_data_storage.init_set)
+                ctxt delegate (Int32.succ count))
+              (fun ctxt => Error_monad.__return (ctxt, (Int32.succ total))))
       (ctxt,
         (* ❌ Constant of type int32 is converted to int *)
-        0))
-    (fun function_parameter =>
-      let '(ctxt, total) := function_parameter in
-      Error_monad.op_gtgteqquestion
-        ((|Storage.Vote.Listings_size|).(Storage_sigs.Single_data_storage.init)
-          ctxt total) (fun ctxt => Error_monad.__return ctxt)).
+        0) in
+  let!? ctxt :=
+    (|Storage.Vote.Listings_size|).(Storage_sigs.Single_data_storage.init) ctxt
+      total in
+  Error_monad.__return ctxt.
 
 Definition listing_size
   : (|Storage.Vote.Listings_size|).(Storage_sigs.Single_data_storage.context) ->
@@ -283,18 +275,17 @@ Definition get_current_quorum
   (ctxt :
     (|Storage.Vote.Participation_ema|).(Storage_sigs.Single_data_storage.context))
   : Lwt.t (Error_monad.tzresult int32) :=
-  Error_monad.op_gtgteqquestion
-    ((|Storage.Vote.Participation_ema|).(Storage_sigs.Single_data_storage.get)
-      ctxt)
-    (fun participation_ema =>
-      let quorum_min := Constants_storage.quorum_min ctxt in
-      let quorum_max := Constants_storage.quorum_max ctxt in
-      let quorum_diff := Int32.sub quorum_max quorum_min in
-      Error_monad.__return
-        (Int32.add quorum_min
-          (Int32.div (Int32.mul participation_ema quorum_diff)
-            (* ❌ Constant of type int32 is converted to int *)
-            10000))).
+  let!? participation_ema :=
+    (|Storage.Vote.Participation_ema|).(Storage_sigs.Single_data_storage.get)
+      ctxt in
+  let quorum_min := Constants_storage.quorum_min ctxt in
+  let quorum_max := Constants_storage.quorum_max ctxt in
+  let quorum_diff := Int32.sub quorum_max quorum_min in
+  Error_monad.__return
+    (Int32.add quorum_min
+      (Int32.div (Int32.mul participation_ema quorum_diff)
+        (* ❌ Constant of type int32 is converted to int *)
+        10000)).
 
 Definition get_participation_ema
   : (|Storage.Vote.Participation_ema|).(Storage_sigs.Single_data_storage.context)
@@ -334,11 +325,10 @@ Definition clear_current_proposal
 Definition init (ctxt : Raw_context.context)
   : Lwt.t (Error_monad.tzresult Raw_context.t) :=
   let participation_ema := Constants_storage.quorum_max ctxt in
-  Error_monad.op_gtgteqquestion
-    ((|Storage.Vote.Participation_ema|).(Storage_sigs.Single_data_storage.init)
-      ctxt participation_ema)
-    (fun ctxt =>
-      Error_monad.op_gtgteqquestion
-        ((|Storage.Vote.Current_period_kind|).(Storage_sigs.Single_data_storage.init)
-          ctxt Voting_period_repr.Proposal)
-        (fun ctxt => Error_monad.__return ctxt)).
+  let!? ctxt :=
+    (|Storage.Vote.Participation_ema|).(Storage_sigs.Single_data_storage.init)
+      ctxt participation_ema in
+  let!? ctxt :=
+    (|Storage.Vote.Current_period_kind|).(Storage_sigs.Single_data_storage.init)
+      ctxt Voting_period_repr.Proposal in
+  Error_monad.__return ctxt.

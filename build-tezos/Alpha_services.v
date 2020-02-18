@@ -10,6 +10,7 @@ Unset Positivity Checking.
 Unset Guard Checking.
 
 Require Import Tezos.Environment.
+Import Notations.
 Require Tezos.Alpha_context.
 Require Tezos.Constants_services_mli. Module Constants_services := Constants_services_mli.
 Require Tezos.Contract_services_mli. Module Contract_services := Contract_services_mli.

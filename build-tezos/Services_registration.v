@@ -10,6 +10,7 @@ Unset Positivity Checking.
 Unset Guard Checking.
 
 Require Import Tezos.Environment.
+Import Notations.
 Require Tezos.Alpha_context.
 Require Tezos.Storage_description.
 
@@ -39,13 +40,12 @@ Definition rpc_init (function_parameter : Updater.rpc_context)
   let level := block_header.(Block_header.shell_header.level) in
   let timestamp := block_header.(Block_header.shell_header.timestamp) in
   let fitness := block_header.(Block_header.shell_header.fitness) in
-  Error_monad.op_gtgteqquestion
-    (Alpha_context.prepare context level timestamp timestamp fitness)
-    (fun context =>
-      Error_monad.__return
-        {| rpc_context.block_hash := block_hash;
-          rpc_context.block_header := block_header;
-          rpc_context.context := context |}).
+  let!? context :=
+    Alpha_context.prepare context level timestamp timestamp fitness in
+  Error_monad.__return
+    {| rpc_context.block_hash := block_hash;
+      rpc_context.block_header := block_header; rpc_context.context := context
+      |}.
 
 Definition rpc_services
   : Pervasives.ref (RPC_directory.t Updater.rpc_context) :=
@@ -63,8 +63,8 @@ Definition register0_fullctxt {A B C : Set}
       (fun ctxt =>
         fun q =>
           fun i =>
-            Error_monad.op_gtgteqquestion (rpc_init ctxt)
-              (fun ctxt => f ctxt q i))).
+            let!? ctxt := rpc_init ctxt in
+            f ctxt q i)).
 
 Definition opt_register0_fullctxt {A B C : Set}
   (s :
@@ -79,8 +79,8 @@ Definition opt_register0_fullctxt {A B C : Set}
       (fun ctxt =>
         fun q =>
           fun i =>
-            Error_monad.op_gtgteqquestion (rpc_init ctxt)
-              (fun ctxt => f ctxt q i))).
+            let!? ctxt := rpc_init ctxt in
+            f ctxt q i)).
 
 Definition register0 {A B C : Set}
   (s :
@@ -119,8 +119,8 @@ Definition register1_fullctxt {A B C D : Set}
         let '(ctxt, arg) := function_parameter in
         fun q =>
           fun i =>
-            Error_monad.op_gtgteqquestion (rpc_init ctxt)
-              (fun ctxt => f ctxt arg q i))).
+            let!? ctxt := rpc_init ctxt in
+            f ctxt arg q i)).
 
 Definition register1 {A B C D : Set}
   (s :
@@ -161,8 +161,8 @@ Definition register2_fullctxt {A B C D E : Set}
         let '((ctxt, arg1), arg2) := function_parameter in
         fun q =>
           fun i =>
-            Error_monad.op_gtgteqquestion (rpc_init ctxt)
-              (fun ctxt => f ctxt arg1 arg2 q i))).
+            let!? ctxt := rpc_init ctxt in
+            f ctxt arg1 arg2 q i)).
 
 Definition register2 {A B C D E : Set}
   (s :

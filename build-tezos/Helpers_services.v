@@ -10,6 +10,7 @@ Unset Positivity Checking.
 Unset Guard Checking.
 
 Require Import Tezos.Environment.
+Import Notations.
 Require Tezos.Alpha_context.
 Require Tezos.Apply_results_mli. Module Apply_results := Apply_results_mli.
 Require Tezos.Constants_repr.
@@ -262,24 +263,22 @@ Module Scripts.
       let ctxt :=
         Alpha_context.Contract.init_origination_nonce ctxt
           (|Operation_hash|).(S.HASH.zero) in
-      Error_monad.op_gtgteqquestion
-        (Alpha_context.Contract.fresh_contract_from_current_nonce ctxt)
-        (fun function_parameter =>
-          let '(ctxt, dummy_contract) := function_parameter in
-          let balance :=
-            match
-              Alpha_context.Tez.of_mutez
-                (* ❌ Constant of type int64 is converted to int *)
-                4000000000000 with
-            | Some balance => balance
-            | None =>
-              (* ❌ Assert instruction is not handled. *)
-              assert false
-            end in
-          Error_monad.op_gtgteqquestion
-            (Alpha_context.Contract.originate ctxt dummy_contract balance
-              (script, None) None)
-            (fun ctxt => Error_monad.__return (ctxt, dummy_contract))) in
+      let!? '(ctxt, dummy_contract) :=
+        Alpha_context.Contract.fresh_contract_from_current_nonce ctxt in
+      let balance :=
+        match
+          Alpha_context.Tez.of_mutez
+            (* ❌ Constant of type int64 is converted to int *)
+            4000000000000 with
+        | Some balance => balance
+        | None =>
+          (* ❌ Assert instruction is not handled. *)
+          assert false
+        end in
+      let!? ctxt :=
+        Alpha_context.Contract.originate ctxt dummy_contract balance
+          (script, None) None in
+      Error_monad.__return (ctxt, dummy_contract) in
     (* ❌ Sequences of instructions are ignored (operator ";") *)
     (* ❌ instruction_sequence ";" *)
     (* ❌ Sequences of instructions are ignored (operator ";") *)
@@ -301,8 +300,8 @@ Module Scripts.
           fun expr =>
             let ctxt := Alpha_context.Gas.set_unlimited ctxt in
             let legacy := false in
-            Error_monad.op_gtgteqquestion
-              (Lwt.__return
+            let!? '(unreachable_entrypoint, map) :=
+              Lwt.__return
                 (Error_monad.op_gtgtquestion
                   (Script_ir_translator.parse_toplevel legacy expr)
                   (fun function_parameter =>
@@ -318,18 +317,16 @@ Module Scripts.
                             (fun __Ex_ty_'a3 => (Script_typed_ir.ty __Ex_ty_'a3))
                             _ arg_type in
                         Script_ir_translator.list_entrypoints arg_type ctxt
-                          root_name))))
-              (fun function_parameter =>
-                let '(unreachable_entrypoint, map) := function_parameter in
-                Error_monad.__return
-                  (unreachable_entrypoint,
-                    ((|Script_ir_translator.Entrypoints_map|).(S.MAP.fold)
-                      (fun entry =>
-                        fun function_parameter =>
-                          let '(_, ty) := function_parameter in
-                          fun acc =>
-                            cons (entry, (Micheline.strip_locations ty)) acc)
-                      map nil)))).
+                          root_name))) in
+            Error_monad.__return
+              (unreachable_entrypoint,
+                ((|Script_ir_translator.Entrypoints_map|).(S.MAP.fold)
+                  (fun entry =>
+                    fun function_parameter =>
+                      let '(_, ty) := function_parameter in
+                      fun acc =>
+                        cons (entry, (Micheline.strip_locations ty)) acc) map
+                  nil))).
   
   Definition run_code {D E G I K L a b c i o q : Set}
     (ctxt :

@@ -10,6 +10,7 @@ Unset Positivity Checking.
 Unset Guard Checking.
 
 Require Import Tezos.Environment.
+Import Notations.
 Require Tezos.Blinded_public_key_hash.
 Require Tezos.Commitment_repr.
 Require Tezos.Raw_context.
