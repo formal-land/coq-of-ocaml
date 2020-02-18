@@ -72,9 +72,9 @@ Module Cost_of.
               Script_typed_ir.comparable_struct __1 __Pair_key ** __0 * __1])
           [l, __r_value, v] in
       obj_magic Z
-        (let '(lval, rval) := v in
-        Pervasives.op_plus (size_of_comparable l lval)
-          (size_of_comparable __r_value rval))
+      (let '(lval, rval) := v in
+      Pervasives.op_plus (size_of_comparable l lval)
+        (size_of_comparable __r_value rval))
     end.
   
   Definition __string_value (length : Z) : Alpha_context.Gas.cost :=
@@ -619,9 +619,9 @@ Module Cost_of.
                 Script_typed_ir.comparable_struct __1 __Pair_key ** __0 * __1 **
                 __0 * __1]) [tl, tr, x, y] in
         obj_magic Alpha_context.Gas.cost
-          (let '(xl, xr) := x in
-          let '(yl, yr) := y in
-          Alpha_context.Gas.op_plusat (compare tl xl yl) (compare tr xr yr))
+        (let '(xl, xr) := x in
+        let '(yl, yr) := y in
+        Alpha_context.Gas.op_plusat (compare tl xl yl) (compare tr xr yr))
       end.
   End Interpreter.
   

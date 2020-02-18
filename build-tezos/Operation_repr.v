@@ -395,7 +395,7 @@ Fixpoint to_list (function_parameter : packed_contents_list)
           [contents (Kind.manager __0) ** contents_list (Kind.manager __1)])
         [o, os] in
     obj_magic (list packed_contents)
-      (cons (Contents o) (to_list (Contents_list os)))
+    (cons (Contents o) (to_list (Contents_list os)))
   end.
 
 Fixpoint of_list (function_parameter : list packed_contents)

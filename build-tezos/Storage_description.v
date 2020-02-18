@@ -142,11 +142,11 @@ Fixpoint unpack {a b c : Set} (v : args a b c) (x : c) {struct v} : a * b :=
           [args a __0 __Pair_'inter_key ** args __Pair_'inter_key __1 c])
         [l, __r_value] in
     obj_magic (a * b)
-      (let unpack_l := unpack l in
-      let unpack_r := unpack __r_value in
-      let '(c, d) := unpack_r x in
-      let '(__b_value, __a_value) := unpack_l c in
-      (__b_value, (__a_value, d)))
+    (let unpack_l := unpack l in
+    let unpack_r := unpack __r_value in
+    let '(c, d) := unpack_r x in
+    let '(__b_value, __a_value) := unpack_l c in
+    (__b_value, (__a_value, d)))
   end.
 
 Fixpoint pack {a b c : Set} (v : args a b c) (x : a) (y : b) {struct v} : c :=
@@ -159,11 +159,11 @@ Fixpoint pack {a b c : Set} (v : args a b c) (x : a) (y : b) {struct v} : c :=
           [args a __0 __Pair_'inter_key ** args __Pair_'inter_key __1 c **
             __0 * __1]) [l, __r_value, y] in
     obj_magic c
-      (let pack_l := pack l in
-      let pack_r := pack __r_value in
-      let '(__a_value, d) := y in
-      let c := pack_l x __a_value in
-      pack_r c d)
+    (let pack_l := pack l in
+    let pack_r := pack __r_value in
+    let '(__a_value, d) := y in
+    let c := pack_l x __a_value in
+    pack_r c d)
   end.
 
 Fixpoint compare {a b c : Set} (function_parameter : args a b c)
@@ -179,16 +179,16 @@ Fixpoint compare {a b c : Set} (function_parameter : args a b c)
           [args a __0 __Pair_'inter_key ** args __Pair_'inter_key __1 c])
         [l, __r_value] in
     obj_magic (b -> b -> Z)
-      (let compare_l := compare l in
-      let compare_r := compare __r_value in
+    (let compare_l := compare l in
+    let compare_r := compare __r_value in
+    fun function_parameter =>
+      let '(a1, b1) := function_parameter in
       fun function_parameter =>
-        let '(a1, b1) := function_parameter in
-        fun function_parameter =>
-          let '(a2, b2) := function_parameter in
-          match compare_l a1 a2 with
-          | 0 => compare_r b1 b2
-          | x => x
-          end)
+        let '(a2, b2) := function_parameter in
+        match compare_l a1 a2 with
+        | 0 => compare_r b1 b2
+        | x => x
+        end)
   end.
 
 Definition destutter {A B : Set} (equal : A -> A -> bool) (l : list (A * B))
@@ -223,51 +223,51 @@ Fixpoint register_indexed_subcontext {a b r : Set}
             r -> Lwt.t (Error_monad.tzresult (list (__0 * __1)))])
         [__left, __right, __list_value] in
     obj_magic (t b)
-      (let compare_left := compare __left in
-      let equal_left (x : __0) (y : __0) : bool :=
-        (|Compare.Int|).(Compare.S.op_eq) (compare_left x y) 0 in
-      let list_left (__r_value : r) : Lwt.t (Error_monad.tzresult (list __0)) :=
-        let=? l := __list_value __r_value in
-        Error_monad.__return (destutter equal_left l) in
-      let list_right (__r_value : __Pair_'inter_key)
-        : Lwt.t (Error_monad.tzresult (list __1)) :=
-        let '(__a_value, k) := unpack __left __r_value in
-        let=? l := __list_value __a_value in
-        Error_monad.__return
-          (List.map Pervasives.snd
-            (List.filter
-              (fun function_parameter =>
-                let '(x, _) := function_parameter in
-                equal_left x k) l)) in
-      register_indexed_subcontext
-        (register_indexed_subcontext dir list_left __left) list_right __right)
+    (let compare_left := compare __left in
+    let equal_left (x : __0) (y : __0) : bool :=
+      (|Compare.Int|).(Compare.S.op_eq) (compare_left x y) 0 in
+    let list_left (__r_value : r) : Lwt.t (Error_monad.tzresult (list __0)) :=
+      let=? l := __list_value __r_value in
+      Error_monad.__return (destutter equal_left l) in
+    let list_right (__r_value : __Pair_'inter_key)
+      : Lwt.t (Error_monad.tzresult (list __1)) :=
+      let '(__a_value, k) := unpack __left __r_value in
+      let=? l := __list_value __a_value in
+      Error_monad.__return
+        (List.map Pervasives.snd
+          (List.filter
+            (fun function_parameter =>
+              let '(x, _) := function_parameter in
+              equal_left x k) l)) in
+    register_indexed_subcontext
+      (register_indexed_subcontext dir list_left __left) list_right __right)
   | (One {| args.One.rpc_arg := arg; args.One.encoding := arg_encoding |}, _) =>
     let '[arg, arg_encoding] :=
       obj_magic [RPC_arg.t a ** Data_encoding.t a] [arg, arg_encoding] in
     obj_magic (t b)
-      match Pervasives.op_exclamation dir with
-      | Value _ => Pervasives.invalid_arg ""
-      | NamedDir _ => Pervasives.invalid_arg ""
-      | Empty =>
-        let subdir := Pervasives.__ref_value Empty in
-        (* ❌ Sequences of instructions are ignored (operator ";") *)
-        (* ❌ instruction_sequence ";" *)
-        subdir
-      |
-        IndexedDir {|
-          description.IndexedDir.arg := inner_arg;
-            description.IndexedDir.subdir := subdir
-            |} =>
-        let 'existT _ __IndexedDir_'a [inner_arg, subdir] :=
-          existT (A := Set)
-            (fun __IndexedDir_'a =>
-              [RPC_arg.t __IndexedDir_'a ** t (r * __IndexedDir_'a)]) _
-            [inner_arg, subdir] in
-        match RPC_arg.__eq_value arg inner_arg with
-        | None => obj_magic (t b) ((Pervasives.invalid_arg (a := t b)) "")
-        | Some RPC_arg.Eq => obj_magic (t b) subdir
-        end
+    match Pervasives.op_exclamation dir with
+    | Value _ => Pervasives.invalid_arg ""
+    | NamedDir _ => Pervasives.invalid_arg ""
+    | Empty =>
+      let subdir := Pervasives.__ref_value Empty in
+      (* ❌ Sequences of instructions are ignored (operator ";") *)
+      (* ❌ instruction_sequence ";" *)
+      subdir
+    |
+      IndexedDir {|
+        description.IndexedDir.arg := inner_arg;
+          description.IndexedDir.subdir := subdir
+          |} =>
+      let 'existT _ __IndexedDir_'a [inner_arg, subdir] :=
+        existT (A := Set)
+          (fun __IndexedDir_'a =>
+            [RPC_arg.t __IndexedDir_'a ** t (r * __IndexedDir_'a)]) _
+          [inner_arg, subdir] in
+      match RPC_arg.__eq_value arg inner_arg with
+      | None => obj_magic (t b) ((Pervasives.invalid_arg (a := t b)) "")
+      | Some RPC_arg.Eq => obj_magic (t b) subdir
       end
+    end
   end.
 
 Definition register_value {a b : Set}
