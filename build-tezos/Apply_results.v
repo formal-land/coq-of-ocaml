@@ -647,7 +647,7 @@ where "'contents_result" := (fun (_ : Set) => contents_result_gadt)
 and "'contents_result.Endorsement_result" :=
   (contents_result.Endorsement_result_skeleton
     Alpha_context.Delegate.balance_updates
-    (|Signature.Public_key_hash|).(S.SPublic_key_hash.t) (list Z))
+    (|Signature.Public_key_hash|).(S.SPublic_key_hash.t) (list int))
 and "'contents_result.Manager_operation_result" := (fun (t_kind : Set) =>
   contents_result.Manager_operation_result_skeleton
     Alpha_context.Delegate.balance_updates (manager_operation_result t_kind)
@@ -1289,7 +1289,7 @@ Definition contents_result_encoding
     let 'existT _ __Case_'a [tag, name, encoding, select, proj, inj] :=
       existT (A := Set)
         (fun __Case_'a =>
-          [Z ** string ** Data_encoding.t __Case_'a **
+          [int ** string ** Data_encoding.t __Case_'a **
             packed_contents_result -> option (contents_result A) **
             contents_result A -> __Case_'a ** __Case_'a -> contents_result A]) _
         [tag, name, encoding, select, proj, inj] in
@@ -1345,7 +1345,7 @@ Definition contents_and_result_encoding
         meta_inj] :=
       existT (A := [Set ** Set])
         (fun '[__Case_'a, __Case_'a1] =>
-          [Z ** string ** Data_encoding.t __Case_'a1 **
+          [int ** string ** Data_encoding.t __Case_'a1 **
             Alpha_context.Operation.contents A -> __Case_'a1 **
             __Case_'a1 -> Alpha_context.Operation.contents A **
             Data_encoding.t __Case_'a **

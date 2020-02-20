@@ -75,12 +75,13 @@ Module operation.
 End operation.
 Definition operation := operation.record.
 
-Definition acceptable_passes : Alpha_context.packed_operation -> list Z :=
+Definition acceptable_passes : Alpha_context.packed_operation -> list int :=
   Alpha_context.Operation.acceptable_passes.
 
-Definition max_block_length : Z := Alpha_context.Block_header.max_header_length.
+Definition max_block_length : int :=
+  Alpha_context.Block_header.max_header_length.
 
-Definition max_operation_data_length : Z :=
+Definition max_operation_data_length : int :=
   Alpha_context.Constants.max_operation_data_length.
 
 Definition validation_passes : list Updater.quota :=
@@ -180,7 +181,7 @@ Module validation_state.
     mode : validation_mode;
     chain_id : (|Chain_id|).(S.HASH.t);
     ctxt : Alpha_context.t;
-    op_count : Z }.
+    op_count : int }.
   Definition with_mode mode (r : record) :=
     Build mode r.(chain_id) r.(ctxt) r.(op_count).
   Definition with_chain_id chain_id (r : record) :=
@@ -476,7 +477,7 @@ Definition finalize_block (function_parameter : validation_state)
 
 Definition compare_operations
   (op1 : Alpha_context.packed_operation) (op2 : Alpha_context.packed_operation)
-  : Z :=
+  : int :=
   let 'Alpha_context.Operation_data op1 :=
     op1.(Alpha_context.packed_operation.protocol_data) in
   let 'existT _ __Operation_data_'kind op1 :=

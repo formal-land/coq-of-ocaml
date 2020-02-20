@@ -23,7 +23,7 @@ Parameter init :
   Lwt.t
     (Error_monad.tzresult
       ((Script_repr.t * option Contract_storage.big_map_diff) * Raw_context.t)))
-  -> option Z -> option Z -> list Parameters_repr.bootstrap_account ->
+  -> option int -> option int -> list Parameters_repr.bootstrap_account ->
   list Parameters_repr.bootstrap_contract ->
   Lwt.t (Error_monad.tzresult Raw_context.t).
 

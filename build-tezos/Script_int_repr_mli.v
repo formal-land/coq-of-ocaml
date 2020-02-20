@@ -24,7 +24,7 @@ Parameter zero_n : num n.
 
 Parameter zero : num z.
 
-Parameter compare : forall {a : Set}, num a -> num a -> Z.
+Parameter compare : forall {a : Set}, num a -> num a -> int.
 
 Parameter to_string : forall {A : Set}, num A -> string.
 
@@ -34,9 +34,9 @@ Parameter to_int64 : forall {A : Set}, num A -> option int64.
 
 Parameter of_int64 : int64 -> num z.
 
-Parameter to_int : forall {A : Set}, num A -> option Z.
+Parameter to_int : forall {A : Set}, num A -> option int.
 
-Parameter of_int : Z -> num z.
+Parameter of_int : int -> num z.
 
 Parameter of_zint : Z.t -> num z.
 

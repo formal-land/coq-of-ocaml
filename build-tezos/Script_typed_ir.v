@@ -72,7 +72,7 @@ Module Boxed_set.
     elt_ty : comparable_ty elt;
     OPS : S.SET.signature elt OPS_t;
     boxed : OPS.(S.SET.t);
-    size : Z;
+    size : int;
   }.
   Arguments signature : clear implicits.
 End Boxed_set.
@@ -85,7 +85,7 @@ Module Boxed_map.
     value := value;
     key_ty : comparable_ty key;
     OPS : S.MAP.signature key OPS_t;
-    boxed : OPS.(S.MAP.t) value * Z;
+    boxed : OPS.(S.MAP.t) value * int;
   }.
   Arguments signature : clear implicits.
 End Boxed_map.
@@ -371,14 +371,16 @@ with instr_gadt : Set :=
 | Self : forall {p : Set}, 'ty p -> string -> instr_gadt
 | Amount : instr_gadt
 | Dig : forall {aft bef rest x : Set},
-  Z -> 'stack_prefix_preservation_witness (x * rest) rest bef aft -> instr_gadt
+  int -> 'stack_prefix_preservation_witness (x * rest) rest bef aft ->
+  instr_gadt
 | Dug : forall {aft bef rest x : Set},
-  Z -> 'stack_prefix_preservation_witness rest (x * rest) bef aft -> instr_gadt
+  int -> 'stack_prefix_preservation_witness rest (x * rest) bef aft ->
+  instr_gadt
 | Dipn : forall {aft bef faft fbef : Set},
-  Z -> 'stack_prefix_preservation_witness fbef faft bef aft ->
+  int -> 'stack_prefix_preservation_witness fbef faft bef aft ->
   'descr fbef faft -> instr_gadt
 | Dropn : forall {C bef rest : Set},
-  Z -> 'stack_prefix_preservation_witness rest rest bef C -> instr_gadt
+  int -> 'stack_prefix_preservation_witness rest rest bef C -> instr_gadt
 | ChainId : instr_gadt
 
 with stack_prefix_preservation_witness_gadt : Set :=

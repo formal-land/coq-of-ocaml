@@ -40,7 +40,7 @@ Definition op_gteq : contract -> contract -> bool :=
 Definition op_gt : contract -> contract -> bool :=
   (|Included_S|).(Compare.S.op_gt).
 
-Definition compare : contract -> contract -> Z :=
+Definition compare : contract -> contract -> int :=
   (|Included_S|).(Compare.S.compare).
 
 Definition equal : contract -> contract -> bool :=

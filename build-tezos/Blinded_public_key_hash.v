@@ -115,7 +115,7 @@ Definition of_ed25519_pkh
 
 Definition activation_code : Set := MBytes.t.
 
-Definition activation_code_size : Z :=
+Definition activation_code_size : int :=
   (|Ed25519|).(S.SIGNATURE.Public_key_hash).(S.SPublic_key_hash.size).
 
 Definition activation_code_encoding : Data_encoding.encoding MBytes.t :=

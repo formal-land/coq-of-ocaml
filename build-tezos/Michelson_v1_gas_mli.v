@@ -22,7 +22,7 @@ Module Cost_of.
   Module Legacy.
     Parameter z_to_int64 : Alpha_context.Gas.cost.
     
-    Parameter __hash_value : MBytes.t -> Z -> Alpha_context.Gas.cost.
+    Parameter __hash_value : MBytes.t -> int -> Alpha_context.Gas.cost.
     
     Parameter map_to_list : forall {b c : Set},
       Script_typed_ir.map b c -> Alpha_context.Gas.cost.
@@ -46,7 +46,7 @@ Module Cost_of.
     
     Parameter stack_op : Alpha_context.Gas.cost.
     
-    Parameter stack_n_op : Z -> Alpha_context.Gas.cost.
+    Parameter stack_n_op : int -> Alpha_context.Gas.cost.
     
     Parameter bool_binop : forall {a b : Set}, a -> b -> Alpha_context.Gas.cost.
     
@@ -66,7 +66,7 @@ Module Cost_of.
     
     Parameter concat_bytes : list MBytes.t -> Alpha_context.Gas.cost.
     
-    Parameter slice_string : Z -> Alpha_context.Gas.cost.
+    Parameter slice_string : int -> Alpha_context.Gas.cost.
     
     Parameter map_mem : forall {a b : Set},
       a -> Script_typed_ir.map a b -> Alpha_context.Gas.cost.
@@ -228,9 +228,9 @@ Module Cost_of.
     
     Parameter z : Z.t -> Alpha_context.Gas.cost.
     
-    Parameter __string_value : Z -> Alpha_context.Gas.cost.
+    Parameter __string_value : int -> Alpha_context.Gas.cost.
     
-    Parameter __bytes_value : Z -> Alpha_context.Gas.cost.
+    Parameter __bytes_value : int -> Alpha_context.Gas.cost.
     
     Parameter int_of_string : string -> Alpha_context.Gas.cost.
     
@@ -262,9 +262,9 @@ Module Cost_of.
     
     Parameter list_element : Alpha_context.Gas.cost.
     
-    Parameter set_element : Z -> Alpha_context.Gas.cost.
+    Parameter set_element : int -> Alpha_context.Gas.cost.
     
-    Parameter map_element : Z -> Alpha_context.Gas.cost.
+    Parameter map_element : int -> Alpha_context.Gas.cost.
     
     Parameter primitive_type : Alpha_context.Gas.cost.
     
@@ -272,9 +272,9 @@ Module Cost_of.
     
     Parameter two_arg_type : Alpha_context.Gas.cost.
     
-    Parameter operation : Z -> Alpha_context.Gas.cost.
+    Parameter operation : int -> Alpha_context.Gas.cost.
     
-    Parameter type_ : Z -> Alpha_context.Gas.cost.
+    Parameter type_ : int -> Alpha_context.Gas.cost.
     
     Parameter instr : forall {a b : Set},
       Script_typed_ir.instr a b -> Alpha_context.Gas.cost.
@@ -282,9 +282,9 @@ Module Cost_of.
   
   Module Unparse.
     Parameter prim_cost :
-      Z -> Alpha_context.Script.annot -> Alpha_context.Gas.cost.
+      int -> Alpha_context.Script.annot -> Alpha_context.Gas.cost.
     
-    Parameter seq_cost : Z -> Alpha_context.Gas.cost.
+    Parameter seq_cost : int -> Alpha_context.Gas.cost.
     
     Parameter cycle : Alpha_context.Gas.cost.
     

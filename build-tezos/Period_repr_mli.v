@@ -30,7 +30,7 @@ Definition op_gteq : t -> t -> bool := (|Included_S|).(Compare.S.op_gteq).
 
 Definition op_gt : t -> t -> bool := (|Included_S|).(Compare.S.op_gt).
 
-Definition compare : t -> t -> Z := (|Included_S|).(Compare.S.compare).
+Definition compare : t -> t -> int := (|Included_S|).(Compare.S.compare).
 
 Definition equal : t -> t -> bool := (|Included_S|).(Compare.S.equal).
 

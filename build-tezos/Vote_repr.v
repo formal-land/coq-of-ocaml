@@ -20,14 +20,14 @@ Inductive ballot : Set :=
 | Pass : ballot.
 
 Definition ballot_encoding : Data_encoding.encoding ballot :=
-  let of_int8 (function_parameter : Z) : ballot :=
+  let of_int8 (function_parameter : int) : ballot :=
     match function_parameter with
     | 0 => Yay
     | 1 => Nay
     | 2 => Pass
     | _ => Pervasives.invalid_arg "ballot_of_int8"
     end in
-  let to_int8 (function_parameter : ballot) : Z :=
+  let to_int8 (function_parameter : ballot) : int :=
     match function_parameter with
     | Yay => 0
     | Nay => 1

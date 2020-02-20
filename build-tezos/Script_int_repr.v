@@ -20,7 +20,7 @@ Inductive z : Set :=
 
 Definition num (t : Set) : Set := Z.t.
 
-Definition compare (x : Z.t) (y : Z.t) : Z := Z.compare x y.
+Definition compare (x : Z.t) (y : Z.t) : int := Z.compare x y.
 
 Definition zero : Z.t := Z.zero.
 
@@ -38,11 +38,11 @@ Definition to_int64 (x : Z.t) : option int64 :=
 
 Definition of_int64 (n : int64) : Z.t := Z.of_int64 n.
 
-Definition to_int (x : Z.t) : option Z :=
+Definition to_int (x : Z.t) : option int :=
   (* ❌ Try-with are not handled *)
   try (Some (Z.to_int x)).
 
-Definition of_int (n : Z) : Z.t := Z.of_int n.
+Definition of_int (n : int) : Z.t := Z.of_int n.
 
 Definition of_zint {A : Set} (x : A) : A := x.
 

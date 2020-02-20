@@ -75,7 +75,7 @@ Definition init
     Lwt.t
       (Error_monad.tzresult
         ((Script_repr.t * option Contract_storage.big_map_diff) * Raw_context.t)))
-  (ramp_up_cycles : option Z) (no_reward_cycles : option Z)
+  (ramp_up_cycles : option int) (no_reward_cycles : option int)
   (accounts : list Parameters_repr.bootstrap_account)
   (contracts : list Parameters_repr.bootstrap_contract)
   : Lwt.t (Error_monad.tzresult Raw_context.t) :=

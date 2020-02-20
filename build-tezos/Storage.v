@@ -35,7 +35,7 @@ Require Tezos.Voting_period_repr.
 Import Storage_functors.
 
 Definition Int :=
-  let t := Z in
+  let t := int in
   let encoding := Data_encoding.uint16 in
   existT (A := unit) (fun _ => _) tt
     {|
@@ -59,11 +59,11 @@ Definition Z_value :=
     |}.
 
 Definition Int_index :=
-  let t := Z in
+  let t := int in
   let path_length := 1 in
-  let to_path (c : Z) (l : list string) : list string :=
+  let to_path (c : int) (l : list string) : list string :=
     cons (Pervasives.string_of_int c) l in
-  let of_path (function_parameter : list string) : option Z :=
+  let of_path (function_parameter : list string) : option int :=
     match function_parameter with
     | ([] | cons _ (cons _ _)) => None
     | cons c [] => Pervasives.int_of_string_opt c
@@ -431,7 +431,7 @@ Module Contract.
         (contract :
           (|I|).(Storage_sigs.Non_iterable_indexed_carbonated_data_storage.key))
         (value : Script_repr.lazy_expr)
-        : Lwt.t (Error_monad.tzresult (Raw_context.t * Z)) :=
+        : Lwt.t (Error_monad.tzresult (Raw_context.t * int)) :=
         let=? ctxt := consume_serialize_gas ctxt value in
         (|I|).(Storage_sigs.Non_iterable_indexed_carbonated_data_storage.set)
           ctxt contract value in
@@ -443,7 +443,7 @@ Module Contract.
         (value_opt :
           option
             (|I|).(Storage_sigs.Non_iterable_indexed_carbonated_data_storage.value))
-        : Lwt.t (Error_monad.tzresult (Raw_context.t * Z * bool)) :=
+        : Lwt.t (Error_monad.tzresult (Raw_context.t * int * bool)) :=
         match value_opt with
         | None =>
           (|I|).(Storage_sigs.Non_iterable_indexed_carbonated_data_storage.set_option)
@@ -458,7 +458,7 @@ Module Contract.
         (contract :
           (|I|).(Storage_sigs.Non_iterable_indexed_carbonated_data_storage.key))
         (value : Script_repr.lazy_expr)
-        : Lwt.t (Error_monad.tzresult (Raw_context.t * Z)) :=
+        : Lwt.t (Error_monad.tzresult (Raw_context.t * int)) :=
         let=? ctxt := consume_serialize_gas ctxt value in
         (|I|).(Storage_sigs.Non_iterable_indexed_carbonated_data_storage.init)
           ctxt contract value in
@@ -467,7 +467,7 @@ Module Contract.
         (contract :
           (|I|).(Storage_sigs.Non_iterable_indexed_carbonated_data_storage.key))
         (value : Script_repr.lazy_expr)
-        : Lwt.t (Error_monad.tzresult (Raw_context.t * Z * bool)) :=
+        : Lwt.t (Error_monad.tzresult (Raw_context.t * int * bool)) :=
         let=? ctxt := consume_serialize_gas ctxt value in
         (|I|).(Storage_sigs.Non_iterable_indexed_carbonated_data_storage.init_set)
           ctxt contract value in
@@ -852,14 +852,14 @@ Module Big_map.
       : (|I|).(Storage_sigs.Non_iterable_indexed_carbonated_data_storage.context)
       ->
       (|I|).(Storage_sigs.Non_iterable_indexed_carbonated_data_storage.key) ->
-      Lwt.t (Error_monad.tzresult (Raw_context.t * Z)) :=
+      Lwt.t (Error_monad.tzresult (Raw_context.t * int)) :=
       (|I|).(Storage_sigs.Non_iterable_indexed_carbonated_data_storage.delete).
     
     Definition remove
       : (|I|).(Storage_sigs.Non_iterable_indexed_carbonated_data_storage.context)
       ->
       (|I|).(Storage_sigs.Non_iterable_indexed_carbonated_data_storage.key) ->
-      Lwt.t (Error_monad.tzresult (Raw_context.t * Z * bool)) :=
+      Lwt.t (Error_monad.tzresult (Raw_context.t * int * bool)) :=
       (|I|).(Storage_sigs.Non_iterable_indexed_carbonated_data_storage.remove).
     
     Definition set
@@ -867,7 +867,7 @@ Module Big_map.
       ->
       (|I|).(Storage_sigs.Non_iterable_indexed_carbonated_data_storage.key) ->
       (|I|).(Storage_sigs.Non_iterable_indexed_carbonated_data_storage.value) ->
-      Lwt.t (Error_monad.tzresult (Raw_context.t * Z)) :=
+      Lwt.t (Error_monad.tzresult (Raw_context.t * int)) :=
       (|I|).(Storage_sigs.Non_iterable_indexed_carbonated_data_storage.set).
     
     Definition set_option
@@ -876,7 +876,7 @@ Module Big_map.
       (|I|).(Storage_sigs.Non_iterable_indexed_carbonated_data_storage.key) ->
       option
         (|I|).(Storage_sigs.Non_iterable_indexed_carbonated_data_storage.value)
-      -> Lwt.t (Error_monad.tzresult (Raw_context.t * Z * bool)) :=
+      -> Lwt.t (Error_monad.tzresult (Raw_context.t * int * bool)) :=
       (|I|).(Storage_sigs.Non_iterable_indexed_carbonated_data_storage.set_option).
     
     Definition init
@@ -884,7 +884,7 @@ Module Big_map.
       ->
       (|I|).(Storage_sigs.Non_iterable_indexed_carbonated_data_storage.key) ->
       (|I|).(Storage_sigs.Non_iterable_indexed_carbonated_data_storage.value) ->
-      Lwt.t (Error_monad.tzresult (Raw_context.t * Z)) :=
+      Lwt.t (Error_monad.tzresult (Raw_context.t * int)) :=
       (|I|).(Storage_sigs.Non_iterable_indexed_carbonated_data_storage.init).
     
     Definition init_set
@@ -892,7 +892,7 @@ Module Big_map.
       ->
       (|I|).(Storage_sigs.Non_iterable_indexed_carbonated_data_storage.key) ->
       (|I|).(Storage_sigs.Non_iterable_indexed_carbonated_data_storage.value) ->
-      Lwt.t (Error_monad.tzresult (Raw_context.t * Z * bool)) :=
+      Lwt.t (Error_monad.tzresult (Raw_context.t * int * bool)) :=
       (|I|).(Storage_sigs.Non_iterable_indexed_carbonated_data_storage.init_set).
     
     Definition consume_deserialize_gas
@@ -1382,15 +1382,15 @@ Module Roll.
         |}).
   
   Module Snapshoted_owner_index.
-    Definition t : Set := Cycle_repr.t * Z.
+    Definition t : Set := Cycle_repr.t * int.
     
-    Definition path_length : Z :=
+    Definition path_length : int :=
       Pervasives.op_plus
         (|Cycle_repr.Index|).(Storage_description.INDEX.path_length) 1.
     
     Definition to_path
       (function_parameter :
-        (|Cycle_repr.Index|).(Storage_description.INDEX.t) * Z)
+        (|Cycle_repr.Index|).(Storage_description.INDEX.t) * int)
       : list string -> list string :=
       let '(c, n) := function_parameter in
       fun s =>
@@ -1398,7 +1398,7 @@ Module Roll.
           (cons (Pervasives.string_of_int n) s).
     
     Definition of_path (l : list string)
-      : option ((|Cycle_repr.Index|).(Storage_description.INDEX.t) * Z) :=
+      : option ((|Cycle_repr.Index|).(Storage_description.INDEX.t) * int) :=
       match
         Misc.take (|Cycle_repr.Index|).(Storage_description.INDEX.path_length) l
         with
@@ -1412,7 +1412,7 @@ Module Roll.
         end
       end.
     
-    Definition ipath (a : Set) : Set := (a * Cycle_repr.t) * Z.
+    Definition ipath (a : Set) : Set := (a * Cycle_repr.t) * int.
     
     Definition left_args {A : Set}
       : Storage_description.args A Cycle_repr.cycle (A * Cycle_repr.cycle) :=

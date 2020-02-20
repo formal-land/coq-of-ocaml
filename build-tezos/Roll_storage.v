@@ -189,7 +189,7 @@ Module Random.
       ].
   
   Definition owner
-    (c : Raw_context.t) (kind : string) (level : Level_repr.t) (offset : Z)
+    (c : Raw_context.t) (kind : string) (level : Level_repr.t) (offset : int)
     : Lwt.t
       (Error_monad.tzresult
         (|Storage.Roll.Owner|).(Storage_sigs.Indexed_data_snapshotable_storage.Snapshot).(Storage_sigs.Indexed_data_storage.value)) :=
@@ -226,14 +226,14 @@ Module Random.
 End Random.
 
 Definition baking_rights_owner
-  (c : Raw_context.t) (level : Level_repr.t) (priority : Z)
+  (c : Raw_context.t) (level : Level_repr.t) (priority : int)
   : Lwt.t
     (Error_monad.tzresult
       (|Storage.Roll.Owner|).(Storage_sigs.Indexed_data_snapshotable_storage.Snapshot).(Storage_sigs.Indexed_data_storage.value)) :=
   Random.owner c "baking" level priority.
 
 Definition endorsement_rights_owner
-  (c : Raw_context.t) (level : Level_repr.t) (slot : Z)
+  (c : Raw_context.t) (level : Level_repr.t) (slot : int)
   : Lwt.t
     (Error_monad.tzresult
       (|Storage.Roll.Owner|).(Storage_sigs.Indexed_data_snapshotable_storage.Snapshot).(Storage_sigs.Indexed_data_storage.value)) :=
@@ -284,7 +284,7 @@ Definition count_rolls
     (|Storage.Roll.Delegate_roll_list|).(Storage_sigs.Indexed_data_storage.context))
   (delegate :
     (|Storage.Roll.Delegate_roll_list|).(Storage_sigs.Indexed_data_storage.key))
-  : Lwt.t (Error_monad.tzresult Z) :=
+  : Lwt.t (Error_monad.tzresult int) :=
   let=? function_parameter :=
     (|Storage.Roll.Delegate_roll_list|).(Storage_sigs.Indexed_data_storage.get_option)
       ctxt delegate in
@@ -292,9 +292,9 @@ Definition count_rolls
   | None => Error_monad.__return 0
   | Some head_roll =>
     let fix loop
-      (acc : Z)
+      (acc : int)
       (roll : (|Storage.Roll.Successor|).(Storage_sigs.Indexed_data_storage.key))
-      {struct acc} : Lwt.t (Error_monad.tzresult Z) :=
+      {struct acc} : Lwt.t (Error_monad.tzresult int) :=
       let=? function_parameter :=
         (|Storage.Roll.Successor|).(Storage_sigs.Indexed_data_storage.get_option)
           ctxt roll in

@@ -476,8 +476,8 @@ Definition prims_of_strings (expr : Micheline.canonical string)
 
 Definition strings_of_prims (expr : Micheline.canonical prim)
   : Micheline.canonical string :=
-  let fix convert (function_parameter : Micheline.node Z prim)
-    {struct function_parameter} : Micheline.node Z string :=
+  let fix convert (function_parameter : Micheline.node int prim)
+    {struct function_parameter} : Micheline.node int string :=
     match function_parameter with
     | Micheline.Int l x => Micheline.Int l x
     | Micheline.String l x => Micheline.String l x

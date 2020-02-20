@@ -40,7 +40,7 @@ Import Misc.
 (* top_level_evaluation *)
 
 Definition minimal_time
-  (c : Alpha_context.context) (priority : Z)
+  (c : Alpha_context.context) (priority : int)
   (pred_timestamp : Alpha_context.Timestamp.time)
   : Lwt.t (Error_monad.tzresult Alpha_context.Timestamp.time) :=
   let priority := Int32.of_int priority in
@@ -92,7 +92,7 @@ Definition earlier_predecessor_timestamp
     Error_monad.__return __result_value.
 
 Definition check_timestamp
-  (c : Alpha_context.context) (priority : Z)
+  (c : Alpha_context.context) (priority : int)
   (pred_timestamp : Alpha_context.Timestamp.time)
   : Lwt.t (Error_monad.tzresult Alpha_context.Period.t) :=
   let=? minimal_time := minimal_time c priority pred_timestamp in
@@ -157,8 +157,8 @@ Definition baking_reward
     Alpha_context.Tez.op_divquestion val2 prio_factor_denominator).
 
 Definition endorsing_reward
-  (ctxt : Alpha_context.context) (prio : (|Compare.Int|).(Compare.S.t)) (n : Z)
-  : Lwt.t (Error_monad.tzresult Alpha_context.Tez.tez) :=
+  (ctxt : Alpha_context.context) (prio : (|Compare.Int|).(Compare.S.t))
+  (n : int) : Lwt.t (Error_monad.tzresult Alpha_context.Tez.tez) :=
   if (|Compare.Int|).(Compare.S.op_gteq) prio 0 then
     let=? tez :=
       Lwt.__return
@@ -172,7 +172,7 @@ Definition endorsing_reward
 Definition baking_priorities
   (c : Alpha_context.context) (level : Alpha_context.Level.t)
   : Lwt.t (Error_monad.tzresult (Misc.lazy_list_t Alpha_context.public_key)) :=
-  let fix f (priority : Z) {struct priority}
+  let fix f (priority : int) {struct priority}
     : Lwt.t (Error_monad.tzresult (Misc.lazy_list_t Alpha_context.public_key)) :=
     let=? delegate := Alpha_context.Roll.baking_rights_owner c level priority in
     Error_monad.__return
@@ -187,7 +187,7 @@ Definition endorsement_rights
   : Lwt.t
     (Error_monad.tzresult
       ((|Signature.Public_key_hash|).(S.SPublic_key_hash.Map).(S.INDEXES_Map.t)
-        (Alpha_context.public_key * list Z * bool))) :=
+        (Alpha_context.public_key * list int * bool))) :=
   Error_monad.fold_left_s
     (fun acc =>
       fun slot =>
@@ -213,7 +213,7 @@ Definition check_endorsement_rights
   : Lwt.t
     (Error_monad.tzresult
       ((|Signature.Public_key_hash|).(S.SPublic_key_hash.Map).(S.INDEXES_Map.key)
-        * list Z * bool)) :=
+        * list int * bool)) :=
   let current_level := Alpha_context.Level.current ctxt in
   let
     'Alpha_context.Single
@@ -397,7 +397,7 @@ Definition minimum_allowed_endorsements
     (Pervasives.op_minus minimum reduced_time_constraint).
 
 Definition minimal_valid_time
-  (ctxt : Alpha_context.context) (priority : Z) (endorsing_power : Z)
+  (ctxt : Alpha_context.context) (priority : int) (endorsing_power : int)
   : Lwt.t (Error_monad.tzresult Time.t) :=
   let predecessor_timestamp := Alpha_context.Timestamp.current ctxt in
   let=? minimal_time := minimal_time ctxt priority predecessor_timestamp in

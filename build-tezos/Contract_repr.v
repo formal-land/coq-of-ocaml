@@ -21,7 +21,7 @@ Inductive t : Set :=
 Definition CompareModule :=
   Compare.Make
     (let t := t in
-    let compare (l1 : t) (l2 : t) : Z :=
+    let compare (l1 : t) (l2 : t) : int :=
       match (l1, l2) with
       | (Implicit pkh1, Implicit pkh2) =>
         (|Signature.Public_key_hash|).(S.SPublic_key_hash.compare) pkh1 pkh2

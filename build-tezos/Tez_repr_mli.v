@@ -52,7 +52,7 @@ Definition of_mutez_exn : int64 -> t :=
 
 Definition add_exn : t -> t -> t := (|Included_S|).(Qty_repr.S.add_exn).
 
-Definition mul_exn : t -> Z -> t := (|Included_S|).(Qty_repr.S.mul_exn).
+Definition mul_exn : t -> int -> t := (|Included_S|).(Qty_repr.S.mul_exn).
 
 Definition qty_encoding : Data_encoding.t t :=
   (|Included_S|).(Qty_repr.S.qty_encoding).
@@ -71,7 +71,7 @@ Definition op_gteq : t -> t -> bool := (|Included_S|).(Qty_repr.S.op_gteq).
 
 Definition op_gt : t -> t -> bool := (|Included_S|).(Qty_repr.S.op_gt).
 
-Definition compare : t -> t -> Z := (|Included_S|).(Qty_repr.S.compare).
+Definition compare : t -> t -> int := (|Included_S|).(Qty_repr.S.compare).
 
 Definition equal : t -> t -> bool := (|Included_S|).(Qty_repr.S.equal).
 

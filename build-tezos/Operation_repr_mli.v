@@ -320,7 +320,7 @@ Module internal_operation.
   Record record {kind : Set} : Set := Build {
     source : Contract_repr.contract;
     operation : manager_operation kind;
-    nonce : Z }.
+    nonce : int }.
   Arguments record : clear implicits.
   Definition with_source {t_kind} source (r : record t_kind) :=
     Build t_kind source r.(operation) r.(nonce).
@@ -390,7 +390,7 @@ Parameter __hash_value : forall {A : Set},
 
 Parameter hash_packed : packed_operation -> (|Operation_hash|).(S.HASH.t).
 
-Parameter acceptable_passes : packed_operation -> list Z.
+Parameter acceptable_passes : packed_operation -> list int.
 
 (* extensible_type_definition `error` *)
 
@@ -440,7 +440,7 @@ Module Encoding.
   | Case : forall {a : Set}, 'case.Case a b -> case b
   
   where "'case.Case" := (fun (t_a t_b : Set) =>
-    case.Case_skeleton Z string (Data_encoding.t t_a)
+    case.Case_skeleton int string (Data_encoding.t t_a)
       (packed_contents -> option (contents t_b)) (contents t_b -> t_a)
       (t_a -> contents t_b)).
   
@@ -499,7 +499,7 @@ Module Encoding.
     
     where "'case" := (fun (_ : Set) => case_gadt)
     and "'case.MCase" := (fun (t_a t_kind : Set) =>
-      case.MCase_skeleton Z string (Data_encoding.t t_a)
+      case.MCase_skeleton int string (Data_encoding.t t_a)
         (packed_manager_operation -> option (manager_operation t_kind))
         (manager_operation t_kind -> t_a) (t_a -> manager_operation t_kind)).
     

@@ -108,24 +108,25 @@ Parameter merge_var_annot :
   option Script_typed_ir.var_annot.
 
 Parameter error_unexpected_annot : forall {a : Set},
-  Z -> list a -> Error_monad.tzresult unit.
+  int -> list a -> Error_monad.tzresult unit.
 
 Parameter fail_unexpected_annot : forall {a : Set},
-  Z -> list a -> Lwt.t (Error_monad.tzresult unit).
+  int -> list a -> Lwt.t (Error_monad.tzresult unit).
 
 Parameter parse_type_annot :
-  Z -> list string -> Error_monad.tzresult (option Script_typed_ir.type_annot).
+  int -> list string -> Error_monad.tzresult (option Script_typed_ir.type_annot).
 
 Parameter parse_field_annot :
-  Z -> list string -> Error_monad.tzresult (option Script_typed_ir.field_annot).
+  int -> list string ->
+  Error_monad.tzresult (option Script_typed_ir.field_annot).
 
 Parameter parse_type_field_annot :
-  Z -> list string ->
+  int -> list string ->
   Error_monad.tzresult
     (option Script_typed_ir.type_annot * option Script_typed_ir.field_annot).
 
 Parameter parse_composed_type_annot :
-  Z -> list string ->
+  int -> list string ->
   Error_monad.tzresult
     (option Script_typed_ir.type_annot * option Script_typed_ir.field_annot *
       option Script_typed_ir.field_annot).
@@ -140,34 +141,34 @@ Parameter check_correct_field :
   Error_monad.tzresult unit.
 
 Parameter parse_var_annot :
-  Z -> option (option Script_typed_ir.var_annot) -> list string ->
+  int -> option (option Script_typed_ir.var_annot) -> list string ->
   Error_monad.tzresult (option Script_typed_ir.var_annot).
 
 Parameter parse_constr_annot :
-  Z -> option (option Script_typed_ir.field_annot) ->
+  int -> option (option Script_typed_ir.field_annot) ->
   option (option Script_typed_ir.field_annot) -> list string ->
   Error_monad.tzresult
     (option Script_typed_ir.var_annot * option Script_typed_ir.type_annot *
       option Script_typed_ir.field_annot * option Script_typed_ir.field_annot).
 
 Parameter parse_two_var_annot :
-  Z -> list string ->
+  int -> list string ->
   Error_monad.tzresult
     (option Script_typed_ir.var_annot * option Script_typed_ir.var_annot).
 
 Parameter parse_destr_annot :
-  Z -> list string -> option Script_typed_ir.field_annot ->
+  int -> list string -> option Script_typed_ir.field_annot ->
   option Script_typed_ir.field_annot -> option Script_typed_ir.var_annot ->
   option Script_typed_ir.var_annot ->
   Error_monad.tzresult
     (option Script_typed_ir.var_annot * option Script_typed_ir.field_annot).
 
 Parameter parse_entrypoint_annot :
-  Z -> option (option Script_typed_ir.var_annot) -> list string ->
+  int -> option (option Script_typed_ir.var_annot) -> list string ->
   Error_monad.tzresult
     (option Script_typed_ir.var_annot * option Script_typed_ir.field_annot).
 
 Parameter parse_var_type_annot :
-  Z -> list string ->
+  int -> list string ->
   Error_monad.tzresult
     (option Script_typed_ir.var_annot * option Script_typed_ir.type_annot).

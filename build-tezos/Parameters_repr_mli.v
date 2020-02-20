@@ -50,8 +50,8 @@ Module t.
     bootstrap_contracts : list bootstrap_contract;
     commitments : list Commitment_repr.t;
     constants : Constants_repr.parametric;
-    security_deposit_ramp_up_cycles : option Z;
-    no_reward_cycles : option Z }.
+    security_deposit_ramp_up_cycles : option int;
+    no_reward_cycles : option int }.
   Definition with_bootstrap_accounts bootstrap_accounts (r : record) :=
     Build bootstrap_accounts r.(bootstrap_contracts) r.(commitments)
       r.(constants) r.(security_deposit_ramp_up_cycles) r.(no_reward_cycles).

@@ -39,7 +39,7 @@ Parameter Make_single_data_storage :
 Module INDEX.
   Record signature {t : Set} {ipath : Set -> Set} : Set := {
     t := t;
-    path_length : Z;
+    path_length : int;
     to_path : t -> list string -> list string;
     of_path : list string -> option t;
     ipath := ipath;

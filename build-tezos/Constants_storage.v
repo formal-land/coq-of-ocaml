@@ -16,7 +16,7 @@ Require Tezos.Period_repr.
 Require Tezos.Raw_context.
 Require Tezos.Tez_repr.
 
-Definition preserved_cycles (c : Raw_context.context) : Z :=
+Definition preserved_cycles (c : Raw_context.context) : int :=
   let constants := Raw_context.constants c in
   constants.(Constants_repr.parametric.preserved_cycles).
 
@@ -40,11 +40,11 @@ Definition time_between_blocks (c : Raw_context.context) : list Period_repr.t :=
   let constants := Raw_context.constants c in
   constants.(Constants_repr.parametric.time_between_blocks).
 
-Definition endorsers_per_block (c : Raw_context.context) : Z :=
+Definition endorsers_per_block (c : Raw_context.context) : int :=
   let constants := Raw_context.constants c in
   constants.(Constants_repr.parametric.endorsers_per_block).
 
-Definition initial_endorsers (c : Raw_context.context) : Z :=
+Definition initial_endorsers (c : Raw_context.context) : int :=
   let constants := Raw_context.constants c in
   constants.(Constants_repr.parametric.initial_endorsers).
 
@@ -77,7 +77,7 @@ Definition tokens_per_roll (c : Raw_context.context) : Tez_repr.t :=
   let constants := Raw_context.constants c in
   constants.(Constants_repr.parametric.tokens_per_roll).
 
-Definition michelson_maximum_type_size (c : Raw_context.context) : Z :=
+Definition michelson_maximum_type_size (c : Raw_context.context) : int :=
   let constants := Raw_context.constants c in
   constants.(Constants_repr.parametric.michelson_maximum_type_size).
 
@@ -85,7 +85,7 @@ Definition seed_nonce_revelation_tip (c : Raw_context.context) : Tez_repr.t :=
   let constants := Raw_context.constants c in
   constants.(Constants_repr.parametric.seed_nonce_revelation_tip).
 
-Definition origination_size (c : Raw_context.context) : Z :=
+Definition origination_size (c : Raw_context.context) : int :=
   let constants := Raw_context.constants c in
   constants.(Constants_repr.parametric.origination_size).
 

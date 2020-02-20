@@ -31,7 +31,7 @@ Import Misc.
 (* extensible_type_definition `error` *)
 
 Parameter minimal_time :
-  Alpha_context.context -> Z -> Time.t -> Lwt.t (Error_monad.tzresult Time.t).
+  Alpha_context.context -> int -> Time.t -> Lwt.t (Error_monad.tzresult Time.t).
 
 Parameter check_baking_rights :
   Alpha_context.context -> Alpha_context.Block_header.contents -> Time.t ->
@@ -43,19 +43,19 @@ Parameter endorsement_rights :
   Lwt.t
     (Error_monad.tzresult
       ((|Signature.Public_key_hash|).(S.SPublic_key_hash.Map).(S.INDEXES_Map.t)
-        (Alpha_context.public_key * list Z * bool))).
+        (Alpha_context.public_key * list int * bool))).
 
 Parameter check_endorsement_rights :
   Alpha_context.context -> (|Chain_id|).(S.HASH.t) ->
   Alpha_context.Operation.t Alpha_context.Kind.endorsement ->
-  Lwt.t (Error_monad.tzresult (Alpha_context.public_key_hash * list Z * bool)).
+  Lwt.t (Error_monad.tzresult (Alpha_context.public_key_hash * list int * bool)).
 
 Parameter baking_reward :
-  Alpha_context.context -> Z -> Z ->
+  Alpha_context.context -> int -> int ->
   Lwt.t (Error_monad.tzresult Alpha_context.Tez.t).
 
 Parameter endorsing_reward :
-  Alpha_context.context -> Z -> Z ->
+  Alpha_context.context -> int -> int ->
   Lwt.t (Error_monad.tzresult Alpha_context.Tez.t).
 
 Parameter baking_priorities :
@@ -63,8 +63,8 @@ Parameter baking_priorities :
   Misc.lazy_list Alpha_context.public_key.
 
 Parameter first_baking_priorities :
-  Alpha_context.context -> option Z -> Alpha_context.public_key_hash ->
-  Alpha_context.Level.t -> Lwt.t (Error_monad.tzresult (list Z)).
+  Alpha_context.context -> option int -> Alpha_context.public_key_hash ->
+  Alpha_context.Level.t -> Lwt.t (Error_monad.tzresult (list int)).
 
 Parameter check_signature :
   Alpha_context.Block_header.t -> (|Chain_id|).(S.HASH.t) ->
@@ -91,7 +91,7 @@ Parameter earlier_predecessor_timestamp :
   Lwt.t (Error_monad.tzresult Alpha_context.Timestamp.t).
 
 Parameter minimum_allowed_endorsements :
-  Alpha_context.context -> Alpha_context.Period.t -> Z.
+  Alpha_context.context -> Alpha_context.Period.t -> int.
 
 Parameter minimal_valid_time :
-  Alpha_context.context -> Z -> Z -> Lwt.t (Error_monad.tzresult Time.t).
+  Alpha_context.context -> int -> int -> Lwt.t (Error_monad.tzresult Time.t).

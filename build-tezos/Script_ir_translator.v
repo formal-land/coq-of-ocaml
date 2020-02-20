@@ -81,7 +81,7 @@ Inductive unparsing_mode : Set :=
 | Readable : unparsing_mode.
 
 Definition type_logger : Set :=
-  Z -> list (Alpha_context.Script.expr * Alpha_context.Script.annot) ->
+  int -> list (Alpha_context.Script.expr * Alpha_context.Script.annot) ->
   list (Alpha_context.Script.expr * Alpha_context.Script.annot) -> unit.
 
 Definition add_dip {A : Set}
@@ -98,7 +98,7 @@ Definition add_dip {A : Set}
   end.
 
 Fixpoint comparable_type_size {a t : Set}
-  (ty : Script_typed_ir.comparable_struct t a) {struct ty} : Z :=
+  (ty : Script_typed_ir.comparable_struct t a) {struct ty} : int :=
   match ty with
   | Script_typed_ir.Int_key _ => 1
   | Script_typed_ir.Nat_key _ => 1
@@ -117,7 +117,7 @@ Fixpoint comparable_type_size {a t : Set}
     Pervasives.op_plus 1 (comparable_type_size __t_value)
   end.
 
-Fixpoint type_size {t : Set} (ty : Script_typed_ir.ty t) {struct ty} : Z :=
+Fixpoint type_size {t : Set} (ty : Script_typed_ir.ty t) {struct ty} : int :=
   match ty with
   | Script_typed_ir.Unit_t _ => 1
   | Script_typed_ir.Int_t _ => 1
@@ -188,8 +188,8 @@ Fixpoint type_size {t : Set} (ty : Script_typed_ir.ty t) {struct ty} : Z :=
   end.
 
 Fixpoint type_size_of_stack_head {st : Set}
-  (__stack_value : Script_typed_ir.stack_ty st) (up_to : Z)
-  {struct __stack_value} : Z :=
+  (__stack_value : Script_typed_ir.stack_ty st) (up_to : int)
+  {struct __stack_value} : int :=
   match __stack_value with
   | Script_typed_ir.Empty_t => 0
   | Script_typed_ir.Item_t head tail _annot =>
@@ -206,7 +206,7 @@ Fixpoint type_size_of_stack_head {st : Set}
   end.
 
 Definition number_of_generated_growing_types {a b : Set}
-  (function_parameter : Script_typed_ir.instr b a) : Z :=
+  (function_parameter : Script_typed_ir.instr b a) : int :=
   match function_parameter with
   | Script_typed_ir.Drop => 0
   | Script_typed_ir.Dup => 0
@@ -458,7 +458,7 @@ Definition check_kind {A : Set}
 
 Definition wrap_compare {A B : Set}
   (compare : A -> B -> (|Compare.Int|).(Compare.S.t)) (__a_value : A)
-  (__b_value : B) : Z :=
+  (__b_value : B) : int :=
   let res := compare __a_value __b_value in
   if (|Compare.Int|).(Compare.S.op_eq) res 0 then
     0
@@ -469,7 +469,8 @@ Definition wrap_compare {A B : Set}
       (-1).
 
 Fixpoint compare_comparable {a s : Set}
-  (kind : Script_typed_ir.comparable_struct a s) {struct kind} : a -> a -> Z :=
+  (kind : Script_typed_ir.comparable_struct a s) {struct kind}
+  : a -> a -> int :=
   match kind with
   | Script_typed_ir.String_key _ =>
     wrap_compare (|Compare.String|).(Compare.S.compare)
@@ -612,7 +613,7 @@ Definition empty_map {a b : Set} (ty : Script_typed_ir.comparable_ty a)
     let value := b in
     let key_ty := ty in
     let OPS := existT (A := unit) (fun _ => _) tt (|OPS|) in
-    let boxed {C : Set} : (|OPS|).(S.MAP.t) C * Z :=
+    let boxed {C : Set} : (|OPS|).(S.MAP.t) C * int :=
       ((|OPS|).(S.MAP.empty), 0) in
     existT (A := Set -> Set) _ _
       {|
@@ -869,8 +870,8 @@ Fixpoint unparse_ty_no_lwt {a : Set}
   let? ctxt := Alpha_context.Gas.consume ctxt Unparse_costs.cycle in
   let __return {B : Set}
     (ctxt : Alpha_context.context)
-    (function_parameter : B * list (Micheline.node Z B) * Micheline.annot)
-    : Error_monad.tzresult (Micheline.node Z B * Alpha_context.context) :=
+    (function_parameter : B * list (Micheline.node int B) * Micheline.annot)
+    : Error_monad.tzresult (Micheline.node int B * Alpha_context.context) :=
     let '(name, args, annot) := function_parameter in
     let __result_value := Micheline.Prim (-1) name args annot in
     let? ctxt :=
@@ -1198,7 +1199,7 @@ Fixpoint ty_eq {ta tb : Set}
     (eq (Script_typed_ir.ty ta) (Script_typed_ir.ty tb) * Alpha_context.context) :=
   let ok
     (__eq_value : eq (Script_typed_ir.ty ta) (Script_typed_ir.ty tb))
-    (ctxt : Alpha_context.context) (nb_args : Z)
+    (ctxt : Alpha_context.context) (nb_args : int)
     : Error_monad.tzresult
       (eq (Script_typed_ir.ty ta) (Script_typed_ir.ty tb) *
         Alpha_context.context) :=
@@ -1328,7 +1329,7 @@ Fixpoint ty_eq {ta tb : Set}
   end.
 
 Fixpoint stack_ty_eq {ta tb : Set}
-  (ctxt : Alpha_context.context) (lvl : Z) (ta : Script_typed_ir.stack_ty ta)
+  (ctxt : Alpha_context.context) (lvl : int) (ta : Script_typed_ir.stack_ty ta)
   (tb : Script_typed_ir.stack_ty tb) {struct ctxt}
   : Error_monad.tzresult
     (eq (Script_typed_ir.stack_ty ta) (Script_typed_ir.stack_ty tb) *
@@ -1741,7 +1742,7 @@ End branch.
 Definition branch := branch.record.
 
 Definition merge_branches {a b bef : Set}
-  (legacy : bool) (ctxt : Alpha_context.context) (loc : Z) (btr : judgement a)
+  (legacy : bool) (ctxt : Alpha_context.context) (loc : int) (btr : judgement a)
   (bfr : judgement b) (function_parameter : branch a b bef)
   : Lwt.t (Error_monad.tzresult (judgement bef * Alpha_context.context)) :=
   let '{| branch.branch := branch |} := function_parameter in
@@ -2373,13 +2374,13 @@ Inductive dropn_proof_argument (bef : Set) : Set :=
 Arguments Dropn_proof_argument {_ _ _}.
 
 Definition parse_var_annot
-  (loc : Z) (default : option (option Script_typed_ir.var_annot))
+  (loc : int) (default : option (option Script_typed_ir.var_annot))
   (annot : list string)
   : Lwt.t (Error_monad.tzresult (option Script_typed_ir.var_annot)) :=
   Lwt.__return (Script_ir_annot.parse_var_annot loc default annot).
 
 Definition parse_entrypoint_annot
-  (loc : Z) (default : option (option Script_typed_ir.var_annot))
+  (loc : int) (default : option (option Script_typed_ir.var_annot))
   (annot : list string)
   : Lwt.t
     (Error_monad.tzresult
@@ -2387,7 +2388,7 @@ Definition parse_entrypoint_annot
   Lwt.__return (Script_ir_annot.parse_entrypoint_annot loc default annot).
 
 Definition parse_constr_annot
-  (loc : Z) (if_special_first : option (option Script_typed_ir.field_annot))
+  (loc : int) (if_special_first : option (option Script_typed_ir.field_annot))
   (if_special_second : option (option Script_typed_ir.field_annot))
   (annot : list string)
   : Lwt.t
@@ -2398,14 +2399,14 @@ Definition parse_constr_annot
     (Script_ir_annot.parse_constr_annot loc if_special_first if_special_second
       annot).
 
-Definition parse_two_var_annot (loc : Z) (annot : list string)
+Definition parse_two_var_annot (loc : int) (annot : list string)
   : Lwt.t
     (Error_monad.tzresult
       (option Script_typed_ir.var_annot * option Script_typed_ir.var_annot)) :=
   Lwt.__return (Script_ir_annot.parse_two_var_annot loc annot).
 
 Definition parse_destr_annot
-  (loc : Z) (annot : list string)
+  (loc : int) (annot : list string)
   (default_accessor : option Script_typed_ir.field_annot)
   (field_name : option Script_typed_ir.field_annot)
   (pair_annot : option Script_typed_ir.var_annot)
@@ -2417,7 +2418,7 @@ Definition parse_destr_annot
     (Script_ir_annot.parse_destr_annot loc annot default_accessor field_name
       pair_annot value_annot).
 
-Definition parse_var_type_annot (loc : Z) (annot : list string)
+Definition parse_var_type_annot (loc : int) (annot : list string)
   : Lwt.t
     (Error_monad.tzresult
       (option Script_typed_ir.var_annot * option Script_typed_ir.type_annot)) :=
@@ -3396,7 +3397,7 @@ with parse_returning {arg ret : Set}
 
 with parse_int32
   (n : Micheline.node Alpha_context.Script.location Alpha_context.Script.prim)
-  {struct n} : Error_monad.tzresult Z :=
+  {struct n} : Error_monad.tzresult int :=
   let error' (function_parameter : unit) : Error_monad.__error :=
     let '_ := function_parameter in
     extensible_type_value in
@@ -3423,7 +3424,7 @@ with parse_instr {bef : Set}
   : Lwt.t (Error_monad.tzresult (judgement bef * Alpha_context.context)) :=
   let _check_item {B : Set}
     (check : Error_monad.tzresult B) (loc : Alpha_context.Script.location)
-    (name : Alpha_context.Script.prim) (n : Z) (m : Z)
+    (name : Alpha_context.Script.prim) (n : int) (m : int)
     : Lwt.t (Error_monad.tzresult B) :=
     (Error_monad.trace_eval
       (fun function_parameter =>
@@ -3437,7 +3438,7 @@ with parse_instr {bef : Set}
   let check_item_ty {B C : Set}
     (ctxt : Alpha_context.context) (exp : Script_typed_ir.ty B)
     (got : Script_typed_ir.ty C) (loc : Alpha_context.Script.location)
-    (name : Alpha_context.Script.prim) (n : Z) (m : Z)
+    (name : Alpha_context.Script.prim) (n : int) (m : int)
     : Lwt.t
       (Error_monad.tzresult
         (eq B C * Script_typed_ir.ty B * Alpha_context.context)) :=
@@ -3458,7 +3459,7 @@ with parse_instr {bef : Set}
     (exp : Script_typed_ir.comparable_ty B)
     (got : Script_typed_ir.comparable_ty C)
     (loc : Alpha_context.Script.location) (name : Alpha_context.Script.prim)
-    (n : Z) (m : Z)
+    (n : int) (m : int)
     : Lwt.t (Error_monad.tzresult (eq B C * Script_typed_ir.comparable_ty B)) :=
     (Error_monad.trace_eval
       (fun function_parameter =>
@@ -3474,7 +3475,7 @@ with parse_instr {bef : Set}
           let? ty := merge_comparable_types legacy exp got in
           Error_monad.ok (Eq, ty)))) in
   let log_stack {B C : Set}
-    (ctxt : Alpha_context.context) (loc : Z)
+    (ctxt : Alpha_context.context) (loc : int)
     (stack_ty : Script_typed_ir.stack_ty B) (aft : Script_typed_ir.stack_ty C)
     : Lwt.t (Error_monad.tzresult unit) :=
     match (type_logger, script_instr) with
@@ -3519,7 +3520,7 @@ with parse_instr {bef : Set}
     | Failed _ => Error_monad.__return (judgement, ctxt)
     end in
   let typed {B : Set}
-    (ctxt : Alpha_context.context) (loc : Z)
+    (ctxt : Alpha_context.context) (loc : int)
     (instr : Script_typed_ir.instr bef B) (aft : Script_typed_ir.stack_ty B)
     : Lwt.t (Error_monad.tzresult (judgement bef * Alpha_context.context)) :=
     let=? '_ := log_stack ctxt loc stack_ty aft in
@@ -3561,7 +3562,7 @@ with parse_instr {bef : Set}
       whole_stack), _) =>
     let=? whole_n := Lwt.__return (parse_int32 n) in
     let fix make_proof_argument {tstk : Set}
-      (n : Z) (stk : Script_typed_ir.stack_ty tstk) {struct n}
+      (n : int) (stk : Script_typed_ir.stack_ty tstk) {struct n}
       : Lwt.t (Error_monad.tzresult (dropn_proof_argument tstk)) :=
       match (((|Compare.Int|).(Compare.S.op_eq) n 0), stk) with
       | (true, rest) =>
@@ -3629,7 +3630,7 @@ with parse_instr {bef : Set}
     ((Micheline.Prim loc Alpha_context.Script.I_DIG (cons n []) result_annot,
       __stack_value), _) =>
     let fix make_proof_argument {tstk : Set}
-      (n : Z) (stk : Script_typed_ir.stack_ty tstk) {struct n}
+      (n : int) (stk : Script_typed_ir.stack_ty tstk) {struct n}
       : Lwt.t (Error_monad.tzresult (dig_proof_argument tstk)) :=
       match (((|Compare.Int|).(Compare.S.op_eq) n 0), stk) with
       | (true, Script_typed_ir.Item_t v rest annot) =>
@@ -3710,7 +3711,7 @@ with parse_instr {bef : Set}
         [loc, n, result_annot, x, whole_stack, stack_annot] in
     let=? whole_n := Lwt.__return (parse_int32 n) in
     let fix make_proof_argument {tstk x : Set}
-      (n : Z) (x : Script_typed_ir.ty x)
+      (n : int) (x : Script_typed_ir.ty x)
       (stack_annot : option Script_typed_ir.var_annot)
       (stk : Script_typed_ir.stack_ty tstk) {struct n}
       : Lwt.t (Error_monad.tzresult (dug_proof_argument tstk x)) :=
@@ -4959,7 +4960,7 @@ with parse_instr {bef : Set}
     ((Micheline.Prim loc Alpha_context.Script.I_DIP (cons n (cons code []))
       result_annot, __stack_value), true) =>
     let fix make_proof_argument {tstk : Set}
-      (n : Z) (inner_tc_context : tc_context)
+      (n : int) (inner_tc_context : tc_context)
       (stk : Script_typed_ir.stack_ty tstk) {struct n}
       : Lwt.t (Error_monad.tzresult (dipn_proof_argument tstk)) :=
       match (((|Compare.Int|).(Compare.S.op_eq) n 0), stk) with
@@ -7564,7 +7565,7 @@ with unparse_code (ctxt : Alpha_context.context) (mode : unparsing_mode)
   : Alpha_context.Script.node ->
   Lwt.t
     (Error_monad.tzresult
-      (Micheline.node Z Alpha_context.Script.prim * Alpha_context.context)) :=
+      (Micheline.node int Alpha_context.Script.prim * Alpha_context.context)) :=
   let legacy := true in
   fun function_parameter =>
     match function_parameter with

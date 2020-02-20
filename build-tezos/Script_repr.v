@@ -74,28 +74,28 @@ Definition encoding : Data_encoding.encoding t :=
         (Data_encoding.req None None "code" lazy_expr_encoding)
         (Data_encoding.req None None "storage" lazy_expr_encoding))).
 
-Definition int_node_size_of_numbits (n : Z) : Z * Z :=
+Definition int_node_size_of_numbits (n : int) : int * int :=
   (1, (Pervasives.op_plus 1 (Pervasives.op_div (Pervasives.op_plus n 63) 64))).
 
-Definition int_node_size (n : Z.t) : Z * Z :=
+Definition int_node_size (n : Z.t) : int * int :=
   int_node_size_of_numbits (Z.numbits n).
 
-Definition string_node_size_of_length (s : Z) : Z * Z :=
+Definition string_node_size_of_length (s : int) : int * int :=
   (1, (Pervasives.op_plus 1 (Pervasives.op_div (Pervasives.op_plus s 7) 8))).
 
-Definition string_node_size (s : string) : Z * Z :=
+Definition string_node_size (s : string) : int * int :=
   string_node_size_of_length (String.length s).
 
-Definition bytes_node_size_of_length (s : Z) : Z * Z :=
+Definition bytes_node_size_of_length (s : int) : int * int :=
   (2,
     (Pervasives.op_plus
       (Pervasives.op_plus 1 (Pervasives.op_div (Pervasives.op_plus s 7) 8)) 12)).
 
-Definition bytes_node_size (s : MBytes.t) : Z * Z :=
+Definition bytes_node_size (s : MBytes.t) : int * int :=
   bytes_node_size_of_length (MBytes.length s).
 
-Definition prim_node_size_nonrec_of_lengths (n_args : Z) (annots : list string)
-  : Z * Z :=
+Definition prim_node_size_nonrec_of_lengths
+  (n_args : int) (annots : list string) : int * int :=
   let annots_length :=
     List.fold_left
       (fun acc => fun s => Pervasives.op_plus acc (String.length s)) 0 annots in
@@ -108,20 +108,20 @@ Definition prim_node_size_nonrec_of_lengths (n_args : Z) (annots : list string)
         (Pervasives.op_div (Pervasives.op_plus annots_length 7) 8))).
 
 Definition prim_node_size_nonrec {A : Set}
-  (args : list A) (annots : list string) : Z * Z :=
+  (args : list A) (annots : list string) : int * int :=
   let n_args := List.length args in
   prim_node_size_nonrec_of_lengths n_args annots.
 
-Definition seq_node_size_nonrec_of_length (n_args : Z) : Z * Z :=
+Definition seq_node_size_nonrec_of_length (n_args : int) : int * int :=
   ((Pervasives.op_plus 1 n_args),
     (Pervasives.op_plus 2 (Pervasives.op_star 2 n_args))).
 
-Definition seq_node_size_nonrec {A : Set} (args : list A) : Z * Z :=
+Definition seq_node_size_nonrec {A : Set} (args : list A) : int * int :=
   let n_args := List.length args in
   seq_node_size_nonrec_of_length n_args.
 
 Fixpoint node_size {A B : Set} (node : Micheline.node A B) {struct node}
-  : Z * Z :=
+  : int * int :=
   match node with
   | Micheline.Int _ n => int_node_size n
   | Micheline.String _ s => string_node_size s
@@ -145,7 +145,7 @@ Fixpoint node_size {A B : Set} (node : Micheline.node A B) {struct node}
             (Pervasives.op_plus words nwords))) (seq_node_size_nonrec args) args
   end.
 
-Definition expr_size {A : Set} (expr : Micheline.canonical A) : Z * Z :=
+Definition expr_size {A : Set} (expr : Micheline.canonical A) : int * int :=
   node_size (Micheline.root expr).
 
 Definition traversal_cost {A B : Set} (node : Micheline.node A B)
@@ -153,7 +153,8 @@ Definition traversal_cost {A B : Set} (node : Micheline.node A B)
   let '(blocks, _words) := node_size node in
   Gas_limit_repr.step_cost blocks.
 
-Definition cost_of_size (function_parameter : Z * Z) : Gas_limit_repr.cost :=
+Definition cost_of_size (function_parameter : int * int)
+  : Gas_limit_repr.cost :=
   let '(blocks, words) := function_parameter in
   Gas_limit_repr.op_plusat
     (Gas_limit_repr.op_plusat
@@ -168,33 +169,33 @@ Definition node_cost {A B : Set} (node : Micheline.node A B)
 Definition int_node_cost (n : Z.t) : Gas_limit_repr.cost :=
   cost_of_size (int_node_size n).
 
-Definition int_node_cost_of_numbits (n : Z) : Gas_limit_repr.cost :=
+Definition int_node_cost_of_numbits (n : int) : Gas_limit_repr.cost :=
   cost_of_size (int_node_size_of_numbits n).
 
 Definition string_node_cost (s : string) : Gas_limit_repr.cost :=
   cost_of_size (string_node_size s).
 
-Definition string_node_cost_of_length (s : Z) : Gas_limit_repr.cost :=
+Definition string_node_cost_of_length (s : int) : Gas_limit_repr.cost :=
   cost_of_size (string_node_size_of_length s).
 
 Definition bytes_node_cost (s : MBytes.t) : Gas_limit_repr.cost :=
   cost_of_size (bytes_node_size s).
 
-Definition bytes_node_cost_of_length (s : Z) : Gas_limit_repr.cost :=
+Definition bytes_node_cost_of_length (s : int) : Gas_limit_repr.cost :=
   cost_of_size (bytes_node_size_of_length s).
 
 Definition prim_node_cost_nonrec {A : Set} (args : list A) (annot : list string)
   : Gas_limit_repr.cost := cost_of_size (prim_node_size_nonrec args annot).
 
-Definition prim_node_cost_nonrec_of_length (n_args : Z) (annot : list string)
+Definition prim_node_cost_nonrec_of_length (n_args : int) (annot : list string)
   : Gas_limit_repr.cost :=
   cost_of_size (prim_node_size_nonrec_of_lengths n_args annot).
 
 Definition seq_node_cost_nonrec {A : Set} (args : list A)
   : Gas_limit_repr.cost := cost_of_size (seq_node_size_nonrec args).
 
-Definition seq_node_cost_nonrec_of_length (n_args : Z) : Gas_limit_repr.cost :=
-  cost_of_size (seq_node_size_nonrec_of_length n_args).
+Definition seq_node_cost_nonrec_of_length (n_args : int)
+  : Gas_limit_repr.cost := cost_of_size (seq_node_size_nonrec_of_length n_args).
 
 Definition deserialized_cost {A : Set} (expr : Micheline.canonical A)
   : Gas_limit_repr.cost := cost_of_size (expr_size expr).

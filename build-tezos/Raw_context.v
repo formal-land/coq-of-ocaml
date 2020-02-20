@@ -40,20 +40,20 @@ Module t.
     deposits :
       (|Signature.Public_key_hash|).(S.SPublic_key_hash.Map).(S.INDEXES_Map.t)
         Tez_repr.t;
-    included_endorsements : Z;
+    included_endorsements : int;
     allowed_endorsements :
       (|Signature.Public_key_hash|).(S.SPublic_key_hash.Map).(S.INDEXES_Map.t)
-        ((|Signature.Public_key|).(S.SPublic_key.t) * list Z * bool);
+        ((|Signature.Public_key|).(S.SPublic_key.t) * list int * bool);
     fees : Tez_repr.t;
     rewards : Tez_repr.t;
     block_gas : Z.t;
     operation_gas : Gas_limit_repr.t;
     internal_gas : Gas_limit_repr.internal_gas;
     storage_space_to_pay : option Z.t;
-    allocated_contracts : option Z;
+    allocated_contracts : option int;
     origination_nonce : option Contract_repr.origination_nonce;
     temporary_big_map : Z.t;
-    internal_nonce : Z;
+    internal_nonce : int;
     internal_nonces_used : (|Int_set|).(S.SET.t) }.
   Definition with_context context (r : record) :=
     Build context r.(constants) r.(first_level) r.(level)
@@ -251,7 +251,7 @@ Definition init_endorsements
   (ctxt : t)
   (allowed_endorsements :
     (|Signature.Public_key_hash|).(S.SPublic_key_hash.Map).(S.INDEXES_Map.t)
-      ((|Signature.Public_key|).(S.SPublic_key.t) * list Z * bool)) : t :=
+      ((|Signature.Public_key|).(S.SPublic_key.t) * list int * bool)) : t :=
   if
     (|Signature.Public_key_hash|).(S.SPublic_key_hash.Map).(S.INDEXES_Map.is_empty)
       allowed_endorsements then
@@ -268,10 +268,10 @@ Definition init_endorsements
 
 Definition allowed_endorsements (ctxt : t)
   : (|Signature.Public_key_hash|).(S.SPublic_key_hash.Map).(S.INDEXES_Map.t)
-    ((|Signature.Public_key|).(S.SPublic_key.t) * list Z * bool) :=
+    ((|Signature.Public_key|).(S.SPublic_key.t) * list int * bool) :=
   ctxt.(t.allowed_endorsements).
 
-Definition included_endorsements (ctxt : t) : Z :=
+Definition included_endorsements (ctxt : t) : int :=
   ctxt.(t.included_endorsements).
 
 (* ❌ Structure item `typext` not handled. *)
@@ -280,7 +280,7 @@ Definition included_endorsements (ctxt : t) : Z :=
 (* ❌ Top-level evaluations are ignored *)
 (* top_level_evaluation *)
 
-Definition fresh_internal_nonce (ctxt : t) : Error_monad.tzresult (t * Z) :=
+Definition fresh_internal_nonce (ctxt : t) : Error_monad.tzresult (t * int) :=
   if (|Compare.Int|).(Compare.S.op_gteq) ctxt.(t.internal_nonce) 65535 then
     Error_monad.__error_value extensible_type_value
   else
@@ -454,7 +454,7 @@ Definition update_allocated_contracts_count (ctxt : t) : t :=
     t.with_allocated_contracts (Some (Pervasives.succ allocated_contracts)) ctxt
   end.
 
-Definition clear_storage_space_to_pay (ctxt : t) : t * Z.t * Z :=
+Definition clear_storage_space_to_pay (ctxt : t) : t * Z.t * int :=
   match (ctxt.(t.storage_space_to_pay), ctxt.(t.allocated_contracts)) with
   | ((None, _) | (_, None)) =>
     (* ❌ Assert instruction is not handled. *)

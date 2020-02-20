@@ -17,7 +17,7 @@ Require Tezos.Nonce_hash.
 
 Module contents.
   Record record : Set := Build {
-    priority : Z;
+    priority : int;
     seed_nonce_hash : option Nonce_hash.t;
     proof_of_work_nonce : MBytes.t }.
   Definition with_priority priority (r : record) :=
@@ -131,7 +131,7 @@ Definition encoding : Data_encoding.encoding t :=
       (Data_encoding.merge_objs Block_header.shell_header_encoding
         protocol_data_encoding)).
 
-Definition max_header_length : Z :=
+Definition max_header_length : int :=
   let fake_shell :=
     {|
       Block_header.shell_header.level :=

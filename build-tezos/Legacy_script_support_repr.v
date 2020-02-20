@@ -1316,9 +1316,9 @@ Definition add_root_entrypoint (script_code : Script_repr.lazy_expr)
                   =>
                   let fix rewrite_self
                     (function_parameter :
-                      Micheline.node Z Michelson_v1_primitives.prim)
+                      Micheline.node int Michelson_v1_primitives.prim)
                     {struct function_parameter}
-                    : Micheline.node Z Michelson_v1_primitives.prim :=
+                    : Micheline.node int Michelson_v1_primitives.prim :=
                     match function_parameter with
                     |
                       (Micheline.Int _ _ | Micheline.String _ _ |

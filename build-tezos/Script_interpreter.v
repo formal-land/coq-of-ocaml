@@ -2443,7 +2443,7 @@ Fixpoint step {a b : Set}
       let 'existT _ [__189, __190, __Dig_'rest] [n, n', __stack_value] :=
         obj_magic_exists (Es := [Set ** Set ** Set])
           (fun '[__189, __190, __Dig_'rest] =>
-            [Z **
+            [int **
               Script_typed_ir.stack_prefix_preservation_witness
                 (__189 * __Dig_'rest) __Dig_'rest b __190 ** stack b])
           [n, n', __stack_value] in
@@ -2468,7 +2468,7 @@ Fixpoint step {a b : Set}
       let 'existT _ [__191, __192, __Dug_'rest] [n, n', v, rest] :=
         obj_magic_exists (Es := [Set ** Set ** Set])
           (fun '[__191, __192, __Dug_'rest] =>
-            [Z **
+            [int **
               Script_typed_ir.stack_prefix_preservation_witness __Dug_'rest
                 (__191 * __Dug_'rest) __192 a ** __191 ** stack __192])
           [n, n', v, rest] in
@@ -2485,7 +2485,7 @@ Fixpoint step {a b : Set}
         [n, n', __b_value, __stack_value] :=
         obj_magic_exists (Es := [Set ** Set])
           (fun '[__Dipn_'faft, __Dipn_'fbef] =>
-            [Z **
+            [int **
               Script_typed_ir.stack_prefix_preservation_witness __Dipn_'fbef
                 __Dipn_'faft b a **
               Script_typed_ir.descr __Dipn_'fbef __Dipn_'faft ** stack b])
@@ -2504,7 +2504,7 @@ Fixpoint step {a b : Set}
       let 'existT _ __Dropn [n, n', __stack_value] :=
         obj_magic_exists (Es := Set)
           (fun __Dropn =>
-            [Z **
+            [int **
               Script_typed_ir.stack_prefix_preservation_witness a a b __Dropn **
               stack b]) [n, n', __stack_value] in
       obj_magic (Lwt.t (Error_monad.tzresult (stack a * Alpha_context.context)))

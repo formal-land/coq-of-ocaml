@@ -31,7 +31,7 @@ Parameter empty : seed.
 
 Parameter deterministic_seed : seed -> seed.
 
-Parameter initial_seeds : Z -> list seed.
+Parameter initial_seeds : int -> list seed.
 
 Parameter nonce : Set.
 

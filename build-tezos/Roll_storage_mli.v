@@ -37,11 +37,11 @@ Parameter fold : forall {a : Set},
   Lwt.t (Error_monad.tzresult a)) -> a -> Lwt.t (Error_monad.tzresult a).
 
 Parameter baking_rights_owner :
-  Raw_context.t -> Level_repr.t -> Z ->
+  Raw_context.t -> Level_repr.t -> int ->
   Lwt.t (Error_monad.tzresult (|Signature.Public_key|).(S.SPublic_key.t)).
 
 Parameter endorsement_rights_owner :
-  Raw_context.t -> Level_repr.t -> Z ->
+  Raw_context.t -> Level_repr.t -> int ->
   Lwt.t (Error_monad.tzresult (|Signature.Public_key|).(S.SPublic_key.t)).
 
 Module Delegate.

@@ -73,7 +73,7 @@ Definition encode_len_value (__bytes_value : MBytes.t) : MBytes.t :=
   (Data_encoding.Binary.to_bytes_exn Data_encoding.int31) length.
 
 Definition decode_len_value (__key_value : list string) (len : MBytes.t)
-  : Lwt.t (Error_monad.tzresult Z) :=
+  : Lwt.t (Error_monad.tzresult int) :=
   match (Data_encoding.Binary.of_bytes Data_encoding.int31) len with
   | None => Error_monad.fail extensible_type_value
   | Some len => Error_monad.__return len
@@ -306,7 +306,7 @@ Definition Make_single_data_storage :=
 Module INDEX.
   Record signature {t : Set} {ipath : Set -> Set} : Set := {
     t := t;
-    path_length : Z;
+    path_length : int;
     to_path : t -> list string -> list string;
     of_path : list string -> option t;
     ipath := ipath;
@@ -612,7 +612,7 @@ Definition Make_indexed_carbonated_data_storage :=
               (Gas_limit_repr.read_bytes_cost Z.zero)) in
         let existing_size
           (c : (|C|).(Raw_context.T.context)) (i : (|I|).(INDEX.t))
-          : Lwt.t (Error_monad.tzresult (Z * bool)) :=
+          : Lwt.t (Error_monad.tzresult (int * bool)) :=
           let= function_parameter :=
             (|C|).(Raw_context.T.get_option) c (len_key i) in
           match function_parameter with
@@ -689,7 +689,7 @@ Definition Make_indexed_carbonated_data_storage :=
         let set
           (s : (|C|).(Raw_context.T.context)) (i : (|I|).(INDEX.t))
           (v : (|V|).(Storage_sigs.VALUE.t))
-          : Lwt.t (Error_monad.tzresult (Raw_context.root_context * Z)) :=
+          : Lwt.t (Error_monad.tzresult (Raw_context.root_context * int)) :=
           let=? '(prev_size, _) := existing_size s i in
           let=? '(s, __bytes_value) :=
             consume_serialize_write_gas (|C|).(Raw_context.T.set) s i v in
@@ -702,7 +702,7 @@ Definition Make_indexed_carbonated_data_storage :=
         let init
           (s : (|C|).(Raw_context.T.context)) (i : (|I|).(INDEX.t))
           (v : (|V|).(Storage_sigs.VALUE.t))
-          : Lwt.t (Error_monad.tzresult (Raw_context.root_context * Z)) :=
+          : Lwt.t (Error_monad.tzresult (Raw_context.root_context * int)) :=
           let=? '(s, __bytes_value) :=
             consume_serialize_write_gas (|C|).(Raw_context.T.init) s i v in
           let=? __t_value :=
@@ -713,7 +713,7 @@ Definition Make_indexed_carbonated_data_storage :=
         let init_set
           (s : (|C|).(Raw_context.T.context)) (i : (|I|).(INDEX.t))
           (v : (|V|).(Storage_sigs.VALUE.t))
-          : Lwt.t (Error_monad.tzresult (Raw_context.root_context * Z * bool)) :=
+          : Lwt.t (Error_monad.tzresult (Raw_context.root_context * int * bool)) :=
           let init_set
             (s : (|C|).(Raw_context.T.context)) (i : Raw_context.key)
             (v : Raw_context.value)
@@ -729,7 +729,7 @@ Definition Make_indexed_carbonated_data_storage :=
           Error_monad.__return
             (((|C|).(Raw_context.T.project) __t_value), size_diff, existed) in
         let remove (s : (|C|).(Raw_context.T.context)) (i : (|I|).(INDEX.t))
-          : Lwt.t (Error_monad.tzresult (Raw_context.root_context * Z * bool)) :=
+          : Lwt.t (Error_monad.tzresult (Raw_context.root_context * int * bool)) :=
           let remove (s : (|C|).(Raw_context.T.context)) (i : Raw_context.key)
             : Lwt.t (Error_monad.tzresult (|C|).(Raw_context.T.context)) :=
             Error_monad.op_gtgteq ((|C|).(Raw_context.T.remove) s i)
@@ -740,7 +740,7 @@ Definition Make_indexed_carbonated_data_storage :=
           Error_monad.__return
             (((|C|).(Raw_context.T.project) __t_value), prev_size, existed) in
         let delete (s : (|C|).(Raw_context.T.context)) (i : (|I|).(INDEX.t))
-          : Lwt.t (Error_monad.tzresult (Raw_context.root_context * Z)) :=
+          : Lwt.t (Error_monad.tzresult (Raw_context.root_context * int)) :=
           let=? '(prev_size, _) := existing_size s i in
           let=? s := consume_remove_gas (|C|).(Raw_context.T.delete) s i in
           let=? __t_value := (|C|).(Raw_context.T.delete) s (data_key i) in
@@ -749,7 +749,7 @@ Definition Make_indexed_carbonated_data_storage :=
         let set_option
           (s : (|C|).(Raw_context.T.context)) (i : (|I|).(INDEX.t))
           (v : option (|V|).(Storage_sigs.VALUE.t))
-          : Lwt.t (Error_monad.tzresult (Raw_context.root_context * Z * bool)) :=
+          : Lwt.t (Error_monad.tzresult (Raw_context.root_context * int * bool)) :=
           match v with
           | None => remove s i
           | Some v => init_set s i v
@@ -1513,7 +1513,7 @@ Definition Make_indexed_subcontext :=
                 ((|Raw_context|).(Raw_context.T.consume_gas) c
                   (Gas_limit_repr.read_bytes_cost Z.zero)) in
             let existing_size (c : (|Raw_context|).(Raw_context.T.context))
-              : Lwt.t (Error_monad.tzresult (Z * bool)) :=
+              : Lwt.t (Error_monad.tzresult (int * bool)) :=
               let= function_parameter :=
                 (|Raw_context|).(Raw_context.T.get_option) c len_name in
               match function_parameter with
@@ -1599,7 +1599,7 @@ Definition Make_indexed_subcontext :=
             let set
               (s : (|C|).(Raw_context.T.context)) (i : (|I|).(INDEX.t))
               (v : (|V|).(Storage_sigs.VALUE.t))
-              : Lwt.t (Error_monad.tzresult (Raw_context.root_context * Z)) :=
+              : Lwt.t (Error_monad.tzresult (Raw_context.root_context * int)) :=
               let=? '(prev_size, _) := existing_size (pack s i) in
               let=? '(c, __bytes_value) :=
                 consume_write_gas (|Raw_context|).(Raw_context.T.set) (pack s i)
@@ -1613,7 +1613,7 @@ Definition Make_indexed_subcontext :=
             let init
               (s : (|C|).(Raw_context.T.context)) (i : (|I|).(INDEX.t))
               (v : (|V|).(Storage_sigs.VALUE.t))
-              : Lwt.t (Error_monad.tzresult (Raw_context.root_context * Z)) :=
+              : Lwt.t (Error_monad.tzresult (Raw_context.root_context * int)) :=
               let=? '(c, __bytes_value) :=
                 consume_write_gas (|Raw_context|).(Raw_context.T.init)
                   (pack s i) v in
@@ -1627,7 +1627,7 @@ Definition Make_indexed_subcontext :=
               (s : (|C|).(Raw_context.T.context)) (i : (|I|).(INDEX.t))
               (v : (|V|).(Storage_sigs.VALUE.t))
               : Lwt.t
-                (Error_monad.tzresult (Raw_context.root_context * Z * bool)) :=
+                (Error_monad.tzresult (Raw_context.root_context * int * bool)) :=
               let init_set
                 (c : (|Raw_context|).(Raw_context.T.context))
                 (k : Raw_context.key) (v : Raw_context.value)
@@ -1647,7 +1647,7 @@ Definition Make_indexed_subcontext :=
               in
             let remove (s : (|C|).(Raw_context.T.context)) (i : (|I|).(INDEX.t))
               : Lwt.t
-                (Error_monad.tzresult (Raw_context.root_context * Z * bool)) :=
+                (Error_monad.tzresult (Raw_context.root_context * int * bool)) :=
               let remove
                 (c : (|Raw_context|).(Raw_context.T.context))
                 (k : Raw_context.key)
@@ -1663,7 +1663,7 @@ Definition Make_indexed_subcontext :=
                 (((|Raw_context|).(Raw_context.T.project) c), prev_size, existed)
               in
             let delete (s : (|C|).(Raw_context.T.context)) (i : (|I|).(INDEX.t))
-              : Lwt.t (Error_monad.tzresult (Raw_context.root_context * Z)) :=
+              : Lwt.t (Error_monad.tzresult (Raw_context.root_context * int)) :=
               let=? '(prev_size, _) := existing_size (pack s i) in
               let=? c :=
                 consume_remove_gas (|Raw_context|).(Raw_context.T.delete)
@@ -1675,7 +1675,7 @@ Definition Make_indexed_subcontext :=
               (s : (|C|).(Raw_context.T.context)) (i : (|I|).(INDEX.t))
               (v : option (|V|).(Storage_sigs.VALUE.t))
               : Lwt.t
-                (Error_monad.tzresult (Raw_context.root_context * Z * bool)) :=
+                (Error_monad.tzresult (Raw_context.root_context * int * bool)) :=
               match v with
               | None => remove s i
               | Some v => init_set s i v

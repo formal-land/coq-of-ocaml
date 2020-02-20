@@ -27,7 +27,7 @@ Parameter op_gteq : t -> t -> bool.
 
 Parameter op_gt : t -> t -> bool.
 
-Parameter compare : t -> t -> Z.
+Parameter compare : t -> t -> int.
 
 Parameter equal : t -> t -> bool.
 

@@ -36,7 +36,7 @@ Module S.
     of_mutez : int64 -> option qty;
     of_mutez_exn : int64 -> qty;
     add_exn : qty -> qty -> qty;
-    mul_exn : qty -> Z -> qty;
+    mul_exn : qty -> int -> qty;
     qty_encoding : Data_encoding.t qty;
     to_int64 : qty -> int64;
     op_eq : qty -> qty -> bool;
@@ -45,7 +45,7 @@ Module S.
     op_lteq : qty -> qty -> bool;
     op_gteq : qty -> qty -> bool;
     op_gt : qty -> qty -> bool;
-    compare : qty -> qty -> Z;
+    compare : qty -> qty -> int;
     equal : qty -> qty -> bool;
     max : qty -> qty -> qty;
     min : qty -> qty -> qty;
@@ -185,8 +185,8 @@ Definition Make :=
                 CamlinternalFormatBasics.No_padding
                 CamlinternalFormatBasics.No_precision
                 CamlinternalFormatBasics.End_of_format) "%Ld") __r_value in
-      let __right (ppf : Format.formatter) (amount : Z) : unit :=
-        let triplet (ppf : Format.formatter) (v : Z) : unit :=
+      let __right (ppf : Format.formatter) (amount : int) : unit :=
+        let triplet (ppf : Format.formatter) (v : int) : unit :=
           if (|Compare.Int|).(Compare.S.op_gt) (Pervasives.__mod v 10) 0 then
             Format.fprintf ppf
               (CamlinternalFormatBasics.Format
@@ -316,7 +316,7 @@ Definition Make :=
         Pervasives.invalid_arg "add_exn"
       else
         __t_value in
-    let mul_exn (__t_value : qty) (m : Z) : t :=
+    let mul_exn (__t_value : qty) (m : int) : t :=
       match op_starquestion __t_value (Int64.of_int m) with
       | Pervasives.Ok v => v
       | Pervasives.Error _ => Pervasives.invalid_arg "mul_exn"

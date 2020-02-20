@@ -57,23 +57,23 @@ Parameter node_cost : node -> Gas_limit_repr.cost.
 
 Parameter int_node_cost : Z.t -> Gas_limit_repr.cost.
 
-Parameter int_node_cost_of_numbits : Z -> Gas_limit_repr.cost.
+Parameter int_node_cost_of_numbits : int -> Gas_limit_repr.cost.
 
 Parameter string_node_cost : string -> Gas_limit_repr.cost.
 
-Parameter string_node_cost_of_length : Z -> Gas_limit_repr.cost.
+Parameter string_node_cost_of_length : int -> Gas_limit_repr.cost.
 
 Parameter bytes_node_cost : MBytes.t -> Gas_limit_repr.cost.
 
-Parameter bytes_node_cost_of_length : Z -> Gas_limit_repr.cost.
+Parameter bytes_node_cost_of_length : int -> Gas_limit_repr.cost.
 
 Parameter prim_node_cost_nonrec : list expr -> annot -> Gas_limit_repr.cost.
 
-Parameter prim_node_cost_nonrec_of_length : Z -> annot -> Gas_limit_repr.cost.
+Parameter prim_node_cost_nonrec_of_length : int -> annot -> Gas_limit_repr.cost.
 
 Parameter seq_node_cost_nonrec : list expr -> Gas_limit_repr.cost.
 
-Parameter seq_node_cost_nonrec_of_length : Z -> Gas_limit_repr.cost.
+Parameter seq_node_cost_nonrec_of_length : int -> Gas_limit_repr.cost.
 
 Parameter force_decode :
   lazy_expr -> Error_monad.tzresult (expr * Gas_limit_repr.cost).

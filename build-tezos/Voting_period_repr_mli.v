@@ -42,7 +42,7 @@ Definition op_gteq : voting_period -> voting_period -> bool :=
 Definition op_gt : voting_period -> voting_period -> bool :=
   (|Included_S|).(Compare.S.op_gt).
 
-Definition compare : voting_period -> voting_period -> Z :=
+Definition compare : voting_period -> voting_period -> int :=
   (|Included_S|).(Compare.S.compare).
 
 Definition equal : voting_period -> voting_period -> bool :=

@@ -46,16 +46,19 @@ Module Single_carbonated_data_storage.
     get : context -> Lwt.t (Error_monad.tzresult (Raw_context.t * value));
     get_option :
       context -> Lwt.t (Error_monad.tzresult (Raw_context.t * option value));
-    init : context -> value -> Lwt.t (Error_monad.tzresult (Raw_context.t * Z));
-    set : context -> value -> Lwt.t (Error_monad.tzresult (Raw_context.t * Z));
+    init :
+      context -> value -> Lwt.t (Error_monad.tzresult (Raw_context.t * int));
+    set :
+      context -> value -> Lwt.t (Error_monad.tzresult (Raw_context.t * int));
     init_set :
       context -> value ->
-      Lwt.t (Error_monad.tzresult (Raw_context.t * Z * bool));
+      Lwt.t (Error_monad.tzresult (Raw_context.t * int * bool));
     set_option :
       context -> option value ->
-      Lwt.t (Error_monad.tzresult (Raw_context.t * Z * bool));
-    delete : context -> Lwt.t (Error_monad.tzresult (Raw_context.t * Z));
-    remove : context -> Lwt.t (Error_monad.tzresult (Raw_context.t * Z * bool));
+      Lwt.t (Error_monad.tzresult (Raw_context.t * int * bool));
+    delete : context -> Lwt.t (Error_monad.tzresult (Raw_context.t * int));
+    remove :
+      context -> Lwt.t (Error_monad.tzresult (Raw_context.t * int * bool));
   }.
   Arguments signature : clear implicits.
 End Single_carbonated_data_storage.
@@ -96,19 +99,21 @@ Module Non_iterable_indexed_carbonated_data_storage.
       Lwt.t (Error_monad.tzresult (Raw_context.t * option value));
     set :
       context -> key -> value ->
-      Lwt.t (Error_monad.tzresult (Raw_context.t * Z));
+      Lwt.t (Error_monad.tzresult (Raw_context.t * int));
     init :
       context -> key -> value ->
-      Lwt.t (Error_monad.tzresult (Raw_context.t * Z));
+      Lwt.t (Error_monad.tzresult (Raw_context.t * int));
     init_set :
       context -> key -> value ->
-      Lwt.t (Error_monad.tzresult (Raw_context.t * Z * bool));
+      Lwt.t (Error_monad.tzresult (Raw_context.t * int * bool));
     set_option :
       context -> key -> option value ->
-      Lwt.t (Error_monad.tzresult (Raw_context.t * Z * bool));
-    delete : context -> key -> Lwt.t (Error_monad.tzresult (Raw_context.t * Z));
+      Lwt.t (Error_monad.tzresult (Raw_context.t * int * bool));
+    delete :
+      context -> key -> Lwt.t (Error_monad.tzresult (Raw_context.t * int));
     remove :
-      context -> key -> Lwt.t (Error_monad.tzresult (Raw_context.t * Z * bool));
+      context -> key ->
+      Lwt.t (Error_monad.tzresult (Raw_context.t * int * bool));
   }.
   Arguments signature : clear implicits.
 End Non_iterable_indexed_carbonated_data_storage.

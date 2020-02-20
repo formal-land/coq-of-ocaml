@@ -110,7 +110,7 @@ Inductive unparsing_mode : Set :=
 | Readable : unparsing_mode.
 
 Definition type_logger : Set :=
-  Z -> list (Alpha_context.Script.expr * Alpha_context.Script.annot) ->
+  int -> list (Alpha_context.Script.expr * Alpha_context.Script.annot) ->
   list (Alpha_context.Script.expr * Alpha_context.Script.annot) -> unit.
 
 Parameter empty_set : forall {a : Set},
@@ -172,7 +172,7 @@ Parameter ty_eq : forall {ta tb : Set},
     (eq (Script_typed_ir.ty ta) (Script_typed_ir.ty tb) * Alpha_context.context).
 
 Parameter compare_comparable : forall {a : Set},
-  Script_typed_ir.comparable_ty a -> a -> a -> Z.
+  Script_typed_ir.comparable_ty a -> a -> a -> int.
 
 Parameter parse_data : forall {a : Set},
   option type_logger -> Alpha_context.context -> bool -> Script_typed_ir.ty a ->

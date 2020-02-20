@@ -187,7 +187,7 @@ Definition byte_read_weight : Z.t := Z.of_int 10.
 
 Definition byte_written_weight : Z.t := Z.of_int 15.
 
-Definition rescaling_bits : Z := 7.
+Definition rescaling_bits : int := 7.
 
 Definition rescaling_mask : Z.t :=
   Z.sub (Z.shift_left Z.one rescaling_bits) Z.one.
@@ -248,24 +248,24 @@ Definition check_enough_raw
 
 Definition internal_gas_zero : internal_gas := Z.zero.
 
-Definition alloc_cost (n : Z) : cost :=
+Definition alloc_cost (n : int) : cost :=
   {| cost.allocations := scale (Z.of_int (Pervasives.op_plus n 1));
     cost.steps := Z.zero; cost.reads := Z.zero; cost.writes := Z.zero;
     cost.bytes_read := Z.zero; cost.bytes_written := Z.zero |}.
 
-Definition alloc_bytes_cost (n : Z) : cost :=
+Definition alloc_bytes_cost (n : int) : cost :=
   alloc_cost (Pervasives.op_div (Pervasives.op_plus n 7) 8).
 
-Definition alloc_bits_cost (n : Z) : cost :=
+Definition alloc_bits_cost (n : int) : cost :=
   alloc_cost (Pervasives.op_div (Pervasives.op_plus n 63) 64).
 
-Definition atomic_step_cost (n : Z) : cost :=
+Definition atomic_step_cost (n : int) : cost :=
   {| cost.allocations := Z.zero;
     cost.steps := Z.of_int (Pervasives.op_star 2 n); cost.reads := Z.zero;
     cost.writes := Z.zero; cost.bytes_read := Z.zero;
     cost.bytes_written := Z.zero |}.
 
-Definition step_cost (n : Z) : cost :=
+Definition step_cost (n : int) : cost :=
   {| cost.allocations := Z.zero; cost.steps := scale (Z.of_int n);
     cost.reads := Z.zero; cost.writes := Z.zero; cost.bytes_read := Z.zero;
     cost.bytes_written := Z.zero |}.
@@ -293,7 +293,7 @@ Definition op_plusat (x : cost) (y : cost) : cost :=
     cost.bytes_read := Z.add x.(cost.bytes_read) y.(cost.bytes_read);
     cost.bytes_written := Z.add x.(cost.bytes_written) y.(cost.bytes_written) |}.
 
-Definition op_starat (x : Z) (y : cost) : cost :=
+Definition op_starat (x : int) (y : cost) : cost :=
   {| cost.allocations := Z.mul (Z.of_int x) y.(cost.allocations);
     cost.steps := Z.mul (Z.of_int x) y.(cost.steps);
     cost.reads := Z.mul (Z.of_int x) y.(cost.reads);
@@ -301,7 +301,7 @@ Definition op_starat (x : Z) (y : cost) : cost :=
     cost.bytes_read := Z.mul (Z.of_int x) y.(cost.bytes_read);
     cost.bytes_written := Z.mul (Z.of_int x) y.(cost.bytes_written) |}.
 
-Definition alloc_mbytes_cost (n : Z) : cost :=
+Definition alloc_mbytes_cost (n : int) : cost :=
   op_plusat (alloc_cost 12) (alloc_bytes_cost n).
 
 (* ❌ Top-level evaluations are ignored *)

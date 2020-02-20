@@ -593,7 +593,7 @@ Module Baking_rights.
     Record record : Set := Build {
       level : Alpha_context.Raw_level.t;
       delegate : (|Signature.Public_key_hash|).(S.SPublic_key_hash.t);
-      priority : Z;
+      priority : int;
       timestamp : option Alpha_context.Timestamp.t }.
     Definition with_level level (r : record) :=
       Build level r.(delegate) r.(priority) r.(timestamp).
@@ -641,7 +641,7 @@ Module Baking_rights.
         levels : list Alpha_context.Raw_level.t;
         cycles : list Alpha_context.Cycle.t;
         delegates : list (|Signature.Public_key_hash|).(S.SPublic_key_hash.t);
-        max_priority : option Z;
+        max_priority : option int;
         all : bool }.
       Definition with_levels levels (r : record) :=
         Build levels r.(cycles) r.(delegates) r.(max_priority) r.(all).
@@ -812,7 +812,8 @@ Module Baking_rights.
     (op_staroptstar : option (list Alpha_context.Raw_level.t))
     : option (list Alpha_context.Cycle.t) ->
     option (list (|Signature.Public_key_hash|).(S.SPublic_key_hash.t)) ->
-    option bool -> option Z -> D -> Lwt.t (Error_monad.shell_tzresult (list t)) :=
+    option bool -> option int -> D ->
+    Lwt.t (Error_monad.shell_tzresult (list t)) :=
     let levels :=
       match op_staroptstar with
       | Some op_starsthstar => op_starsthstar
@@ -851,7 +852,7 @@ Module Endorsing_rights.
     Record record : Set := Build {
       level : Alpha_context.Raw_level.t;
       delegate : (|Signature.Public_key_hash|).(S.SPublic_key_hash.t);
-      slots : list Z;
+      slots : list int;
       estimated_time : option Time.t }.
     Definition with_level level (r : record) :=
       Build level r.(delegate) r.(slots) r.(estimated_time).
@@ -1038,7 +1039,7 @@ Module Endorsing_power.
     (ctxt : Alpha_context.context)
     (function_parameter :
       Alpha_context.packed_operation * (|Chain_id|).(S.HASH.t))
-    : Lwt.t (Error_monad.tzresult Z) :=
+    : Lwt.t (Error_monad.tzresult int) :=
     let '(operation, chain_id) := function_parameter in
     let 'Alpha_context.Operation_data data :=
       operation.(Alpha_context.packed_operation.protocol_data) in
@@ -1062,7 +1063,7 @@ Module Endorsing_power.
     Definition endorsing_power
       : RPC_service.service (* `POST *) unit Updater.rpc_context
         Updater.rpc_context unit
-        (Alpha_context.Operation.packed * (|Chain_id|).(S.HASH.t)) Z :=
+        (Alpha_context.Operation.packed * (|Chain_id|).(S.HASH.t)) int :=
       RPC_service.post_service
         (Some
           "Get the endorsing power of an endorsement, that is, the number of slots that the endorser has")
@@ -1109,14 +1110,14 @@ Module Endorsing_power.
             i -> Lwt.t (Error_monad.shell_tzresult o)) *
               (K * a * b * c * q * i * o)) * L)))) * L * D) (block : D)
     (op : Alpha_context.Operation.packed) (chain_id : (|Chain_id|).(S.HASH.t))
-    : Lwt.t (Error_monad.shell_tzresult Z) :=
+    : Lwt.t (Error_monad.shell_tzresult int) :=
     RPC_context.make_call0 S.endorsing_power ctxt block tt (op, chain_id).
 End Endorsing_power.
 
 Module Required_endorsements.
   Definition required_endorsements
     (ctxt : Alpha_context.context) (block_delay : Alpha_context.Period.t)
-    : Lwt.t (Error_monad.tzresult Z) :=
+    : Lwt.t (Error_monad.tzresult int) :=
     Error_monad.__return (Baking.minimum_allowed_endorsements ctxt block_delay).
   
   Module S.
@@ -1139,7 +1140,7 @@ Module Required_endorsements.
     
     Definition required_endorsements
       : RPC_service.service (* `GET *) unit Updater.rpc_context
-        Updater.rpc_context t unit Z :=
+        Updater.rpc_context t unit int :=
       RPC_service.get_service
         (Some
           "Minimum number of endorsements for a block to be valid, given a delay of the block's timestamp with respect to the minimum time to bake at the block's priority")
@@ -1181,22 +1182,22 @@ Module Required_endorsements.
             i -> Lwt.t (Error_monad.shell_tzresult o)) *
               (K * a * b * c * q * i * o)) * L)))) * L * D) (block : D)
     (block_delay : Alpha_context.Period.t)
-    : Lwt.t (Error_monad.shell_tzresult Z) :=
+    : Lwt.t (Error_monad.shell_tzresult int) :=
     RPC_context.make_call0 S.required_endorsements ctxt block
       {| S.t.block_delay := block_delay |} tt.
 End Required_endorsements.
 
 Module Minimal_valid_time.
   Definition minimal_valid_time
-    (ctxt : Alpha_context.context) (priority : Z) (endorsing_power : Z)
+    (ctxt : Alpha_context.context) (priority : int) (endorsing_power : int)
     : Lwt.t (Error_monad.tzresult Time.t) :=
     Baking.minimal_valid_time ctxt priority endorsing_power.
   
   Module S.
     Module t.
       Record record : Set := Build {
-        priority : Z;
-        endorsing_power : Z }.
+        priority : int;
+        endorsing_power : int }.
       Definition with_priority priority (r : record) :=
         Build priority r.(endorsing_power).
       Definition with_endorsing_power endorsing_power (r : record) :=
@@ -1264,7 +1265,7 @@ Module Minimal_valid_time.
               (((RPC_context.t * a) * b) * c) q i o -> D -> a -> b -> c -> q ->
             i -> Lwt.t (Error_monad.shell_tzresult o)) *
               (K * a * b * c * q * i * o)) * L)))) * L * D) (block : D)
-    (priority : Z) (endorsing_power : Z)
+    (priority : int) (endorsing_power : int)
     : Lwt.t (Error_monad.shell_tzresult Time.t) :=
     RPC_context.make_call0 S.minimal_valid_time ctxt block
       {| S.t.priority := priority; S.t.endorsing_power := endorsing_power |} tt.
@@ -1326,15 +1327,15 @@ Definition baking_rights
 Definition endorsing_power
   (ctxt : Alpha_context.context)
   (operation : Alpha_context.packed_operation * (|Chain_id|).(S.HASH.t))
-  : Lwt.t (Error_monad.tzresult Z) :=
+  : Lwt.t (Error_monad.tzresult int) :=
   Endorsing_power.endorsing_power ctxt operation.
 
 Definition required_endorsements
   (ctxt : Alpha_context.context) (delay : Alpha_context.Period.t)
-  : Lwt.t (Error_monad.tzresult Z) :=
+  : Lwt.t (Error_monad.tzresult int) :=
   Required_endorsements.required_endorsements ctxt delay.
 
 Definition minimal_valid_time
-  (ctxt : Alpha_context.context) (priority : Z) (endorsing_power : Z)
+  (ctxt : Alpha_context.context) (priority : int) (endorsing_power : int)
   : Lwt.t (Error_monad.tzresult Time.t) :=
   Minimal_valid_time.minimal_valid_time ctxt priority endorsing_power.

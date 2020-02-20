@@ -27,7 +27,7 @@ Module BASIC_DATA.
     op_lteq : t -> t -> bool;
     op_gteq : t -> t -> bool;
     op_gt : t -> t -> bool;
-    compare : t -> t -> Z;
+    compare : t -> t -> int;
     equal : t -> t -> bool;
     max : t -> t -> t;
     min : t -> t -> t;
@@ -71,7 +71,7 @@ Module Tez.
   Definition op_gt : t -> t -> bool :=
     (|Included_BASIC_DATA|).(BASIC_DATA.op_gt).
   
-  Definition compare : t -> t -> Z :=
+  Definition compare : t -> t -> int :=
     (|Included_BASIC_DATA|).(BASIC_DATA.compare).
   
   Definition equal : t -> t -> bool :=
@@ -139,7 +139,7 @@ Module Period.
   Definition op_gt : t -> t -> bool :=
     (|Included_BASIC_DATA|).(BASIC_DATA.op_gt).
   
-  Definition compare : t -> t -> Z :=
+  Definition compare : t -> t -> int :=
     (|Included_BASIC_DATA|).(BASIC_DATA.compare).
   
   Definition equal : t -> t -> bool :=
@@ -197,7 +197,7 @@ Module Timestamp.
   Definition op_gt : t -> t -> bool :=
     (|Included_BASIC_DATA|).(BASIC_DATA.op_gt).
   
-  Definition compare : t -> t -> Z :=
+  Definition compare : t -> t -> int :=
     (|Included_BASIC_DATA|).(BASIC_DATA.compare).
   
   Definition equal : t -> t -> bool :=
@@ -253,7 +253,7 @@ Module Raw_level.
   Definition op_gt : t -> t -> bool :=
     (|Included_BASIC_DATA|).(BASIC_DATA.op_gt).
   
-  Definition compare : t -> t -> Z :=
+  Definition compare : t -> t -> int :=
     (|Included_BASIC_DATA|).(BASIC_DATA.compare).
   
   Definition equal : t -> t -> bool :=
@@ -309,7 +309,7 @@ Module Cycle.
   Definition op_gt : t -> t -> bool :=
     (|Included_BASIC_DATA|).(BASIC_DATA.op_gt).
   
-  Definition compare : t -> t -> Z :=
+  Definition compare : t -> t -> int :=
     (|Included_BASIC_DATA|).(BASIC_DATA.compare).
   
   Definition equal : t -> t -> bool :=
@@ -335,9 +335,9 @@ Module Cycle.
   
   Parameter pred : cycle -> option cycle.
   
-  Parameter add : cycle -> Z -> cycle.
+  Parameter add : cycle -> int -> cycle.
   
-  Parameter sub : cycle -> Z -> option cycle.
+  Parameter sub : cycle -> int -> option cycle.
   
   Parameter to_int32 : cycle -> int32.
   
@@ -387,23 +387,23 @@ Module Gas.
   
   Parameter free : cost.
   
-  Parameter atomic_step_cost : Z -> cost.
+  Parameter atomic_step_cost : int -> cost.
   
-  Parameter step_cost : Z -> cost.
+  Parameter step_cost : int -> cost.
   
-  Parameter alloc_cost : Z -> cost.
+  Parameter alloc_cost : int -> cost.
   
-  Parameter alloc_bytes_cost : Z -> cost.
+  Parameter alloc_bytes_cost : int -> cost.
   
-  Parameter alloc_mbytes_cost : Z -> cost.
+  Parameter alloc_mbytes_cost : int -> cost.
   
-  Parameter alloc_bits_cost : Z -> cost.
+  Parameter alloc_bits_cost : int -> cost.
   
   Parameter read_bytes_cost : Z.t -> cost.
   
   Parameter write_bytes_cost : Z.t -> cost.
   
-  Parameter op_starat : Z -> cost -> cost.
+  Parameter op_starat : int -> cost -> cost.
   
   Parameter op_plusat : cost -> cost -> cost.
   
@@ -431,7 +431,7 @@ Module Script_timestamp.
   
   Parameter t : Set.
   
-  Parameter compare : t -> t -> Z.
+  Parameter compare : t -> t -> int.
   
   Parameter to_string : t -> string.
   
@@ -618,23 +618,23 @@ Module Script.
   
   Parameter int_node_cost : Z.t -> Gas.cost.
   
-  Parameter int_node_cost_of_numbits : Z -> Gas.cost.
+  Parameter int_node_cost_of_numbits : int -> Gas.cost.
   
   Parameter string_node_cost : string -> Gas.cost.
   
-  Parameter string_node_cost_of_length : Z -> Gas.cost.
+  Parameter string_node_cost_of_length : int -> Gas.cost.
   
   Parameter bytes_node_cost : MBytes.t -> Gas.cost.
   
-  Parameter bytes_node_cost_of_length : Z -> Gas.cost.
+  Parameter bytes_node_cost_of_length : int -> Gas.cost.
   
   Parameter prim_node_cost_nonrec : list expr -> annot -> Gas.cost.
   
-  Parameter prim_node_cost_nonrec_of_length : Z -> annot -> Gas.cost.
+  Parameter prim_node_cost_nonrec_of_length : int -> annot -> Gas.cost.
   
   Parameter seq_node_cost_nonrec : list expr -> Gas.cost.
   
-  Parameter seq_node_cost_nonrec_of_length : Z -> Gas.cost.
+  Parameter seq_node_cost_nonrec_of_length : int -> Gas.cost.
   
   Parameter minimal_deserialize_cost : lazy_expr -> Gas.cost.
   
@@ -667,11 +667,11 @@ End Script.
 Module Constants.
   Module fixed.
     Record record : Set := Build {
-      proof_of_work_nonce_size : Z;
-      nonce_length : Z;
-      max_revelations_per_block : Z;
-      max_operation_data_length : Z;
-      max_proposals_per_delegate : Z }.
+      proof_of_work_nonce_size : int;
+      nonce_length : int;
+      max_revelations_per_block : int;
+      max_operation_data_length : int;
+      max_proposals_per_delegate : int }.
     Definition with_proof_of_work_nonce_size proof_of_work_nonce_size
       (r : record) :=
       Build proof_of_work_nonce_size r.(nonce_length)
@@ -703,32 +703,32 @@ Module Constants.
   
   Parameter __fixed_value : fixed.
   
-  Parameter proof_of_work_nonce_size : Z.
+  Parameter proof_of_work_nonce_size : int.
   
-  Parameter nonce_length : Z.
+  Parameter nonce_length : int.
   
-  Parameter max_revelations_per_block : Z.
+  Parameter max_revelations_per_block : int.
   
-  Parameter max_operation_data_length : Z.
+  Parameter max_operation_data_length : int.
   
-  Parameter max_proposals_per_delegate : Z.
+  Parameter max_proposals_per_delegate : int.
   
   Module parametric.
     Record record : Set := Build {
-      preserved_cycles : Z;
+      preserved_cycles : int;
       blocks_per_cycle : int32;
       blocks_per_commitment : int32;
       blocks_per_roll_snapshot : int32;
       blocks_per_voting_period : int32;
       time_between_blocks : list Period.t;
-      endorsers_per_block : Z;
+      endorsers_per_block : int;
       hard_gas_limit_per_operation : Z.t;
       hard_gas_limit_per_block : Z.t;
       proof_of_work_threshold : int64;
       tokens_per_roll : Tez.t;
-      michelson_maximum_type_size : Z;
+      michelson_maximum_type_size : int;
       seed_nonce_revelation_tip : Tez.t;
-      origination_size : Z;
+      origination_size : int;
       block_security_deposit : Tez.t;
       endorsement_security_deposit : Tez.t;
       block_reward : Tez.t;
@@ -739,7 +739,7 @@ Module Constants.
       quorum_min : int32;
       quorum_max : int32;
       min_proposal_quorum : int32;
-      initial_endorsers : Z;
+      initial_endorsers : int;
       delay_per_missing_endorsement : Period.t }.
     Definition with_preserved_cycles preserved_cycles (r : record) :=
       Build preserved_cycles r.(blocks_per_cycle) r.(blocks_per_commitment)
@@ -1097,7 +1097,7 @@ Module Constants.
   
   Parameter __parametric_value : context -> parametric.
   
-  Parameter preserved_cycles : context -> Z.
+  Parameter preserved_cycles : context -> int.
   
   Parameter blocks_per_cycle : context -> int32.
   
@@ -1109,9 +1109,9 @@ Module Constants.
   
   Parameter time_between_blocks : context -> list Period.t.
   
-  Parameter endorsers_per_block : context -> Z.
+  Parameter endorsers_per_block : context -> int.
   
-  Parameter initial_endorsers : context -> Z.
+  Parameter initial_endorsers : context -> int.
   
   Parameter delay_per_missing_endorsement : context -> Period.t.
   
@@ -1127,7 +1127,7 @@ Module Constants.
   
   Parameter tokens_per_roll : context -> Tez.t.
   
-  Parameter michelson_maximum_type_size : context -> Z.
+  Parameter michelson_maximum_type_size : context -> int.
   
   Parameter block_reward : context -> Tez.t.
   
@@ -1135,7 +1135,7 @@ Module Constants.
   
   Parameter seed_nonce_revelation_tip : context -> Tez.t.
   
-  Parameter origination_size : context -> Z.
+  Parameter origination_size : context -> int.
   
   Parameter block_security_deposit : context -> Tez.t.
   
@@ -1186,7 +1186,7 @@ Module Voting_period.
   Definition op_gt : t -> t -> bool :=
     (|Included_BASIC_DATA|).(BASIC_DATA.op_gt).
   
-  Definition compare : t -> t -> Z :=
+  Definition compare : t -> t -> int :=
     (|Included_BASIC_DATA|).(BASIC_DATA.compare).
   
   Definition equal : t -> t -> bool :=
@@ -1276,7 +1276,7 @@ Module Level.
   Definition op_gt : t -> t -> bool :=
     (|Included_BASIC_DATA|).(BASIC_DATA.op_gt).
   
-  Definition compare : t -> t -> Z :=
+  Definition compare : t -> t -> int :=
     (|Included_BASIC_DATA|).(BASIC_DATA.compare).
   
   Definition equal : t -> t -> bool :=
@@ -1333,7 +1333,7 @@ Module Fitness.
   
   Parameter op_gt : t -> t -> bool.
   
-  Parameter compare : t -> t -> Z.
+  Parameter compare : t -> t -> int.
   
   Parameter equal : t -> t -> bool.
   
@@ -1351,7 +1351,7 @@ Module Fitness.
   
   Definition fitness : Set := t.
   
-  Parameter increase : option Z -> context -> context.
+  Parameter increase : option int -> context -> context.
   
   Parameter current : context -> int64.
   
@@ -1462,7 +1462,7 @@ Module Contract.
   Definition op_gt : t -> t -> bool :=
     (|Included_BASIC_DATA|).(BASIC_DATA.op_gt).
   
-  Definition compare : t -> t -> Z :=
+  Definition compare : t -> t -> int :=
     (|Included_BASIC_DATA|).(BASIC_DATA.compare).
   
   Definition equal : t -> t -> bool :=
@@ -1745,7 +1745,7 @@ Module Vote.
   Parameter clear_proposals : context -> Lwt.t context.
   
   Parameter recorded_proposal_count_for_delegate :
-    context -> public_key_hash -> Lwt.t (Error_monad.tzresult Z).
+    context -> public_key_hash -> Lwt.t (Error_monad.tzresult int).
   
   Parameter listings_encoding :
     Data_encoding.t
@@ -1824,7 +1824,7 @@ End Vote.
 Module Block_header.
   Module contents.
     Record record : Set := Build {
-      priority : Z;
+      priority : int;
       seed_nonce_hash : option Nonce_hash.t;
       proof_of_work_nonce : MBytes.t }.
     Definition with_priority priority (r : record) :=
@@ -1882,7 +1882,7 @@ Module Block_header.
   
   Parameter shell_header_encoding : Data_encoding.encoding shell_header.
   
-  Parameter max_header_length : Z.
+  Parameter max_header_length : int.
 End Block_header.
 
 Module Kind.
@@ -2170,7 +2170,7 @@ Module internal_operation.
   Record record {kind : Set} : Set := Build {
     source : Contract.contract;
     operation : manager_operation kind;
-    nonce : Z }.
+    nonce : int }.
   Arguments record : clear implicits.
   Definition with_source {t_kind} source (r : record t_kind) :=
     Build t_kind source r.(operation) r.(nonce).
@@ -2292,7 +2292,7 @@ Module Operation.
   
   Parameter hash_packed : packed_operation -> (|Operation_hash|).(S.HASH.t).
   
-  Parameter acceptable_passes : packed_operation -> list Z.
+  Parameter acceptable_passes : packed_operation -> list int.
   
   (* extensible_type_definition `error` *)
   
@@ -2344,7 +2344,7 @@ Module Operation.
     | Case : forall {a : Set}, 'case.Case a b -> case b
     
     where "'case.Case" := (fun (t_a t_b : Set) =>
-      case.Case_skeleton Z string (Data_encoding.t t_a)
+      case.Case_skeleton int string (Data_encoding.t t_a)
         (packed_contents -> option (contents t_b)) (contents t_b -> t_a)
         (t_a -> contents t_b)).
     
@@ -2403,7 +2403,7 @@ Module Operation.
       
       where "'case" := (fun (_ : Set) => case_gadt)
       and "'case.MCase" := (fun (t_a t_kind : Set) =>
-        case.MCase_skeleton Z string (Data_encoding.t t_a)
+        case.MCase_skeleton int string (Data_encoding.t t_a)
           (packed_manager_operation -> option (manager_operation t_kind))
           (manager_operation t_kind -> t_a) (t_a -> manager_operation t_kind)).
       
@@ -2444,10 +2444,10 @@ Module Roll.
     context -> Cycle.t -> Lwt.t (Error_monad.tzresult context).
   
   Parameter baking_rights_owner :
-    context -> Level.t -> Z -> Lwt.t (Error_monad.tzresult public_key).
+    context -> Level.t -> int -> Lwt.t (Error_monad.tzresult public_key).
   
   Parameter endorsement_rights_owner :
-    context -> Level.t -> Z -> Lwt.t (Error_monad.tzresult public_key).
+    context -> Level.t -> int -> Lwt.t (Error_monad.tzresult public_key).
   
   Parameter delegate_pubkey :
     context -> public_key_hash -> Lwt.t (Error_monad.tzresult public_key).
@@ -2488,10 +2488,10 @@ Module Bootstrap.
 End Bootstrap.
 
 Module Global.
-  Parameter get_block_priority : context -> Lwt.t (Error_monad.tzresult Z).
+  Parameter get_block_priority : context -> Lwt.t (Error_monad.tzresult int).
   
   Parameter set_block_priority :
-    context -> Z -> Lwt.t (Error_monad.tzresult context).
+    context -> int -> Lwt.t (Error_monad.tzresult context).
 End Global.
 
 Parameter prepare_first_block :
@@ -2518,22 +2518,23 @@ Parameter record_endorsement :
 Parameter allowed_endorsements :
   context ->
   (|Signature.Public_key_hash|).(S.SPublic_key_hash.Map).(S.INDEXES_Map.t)
-    ((|Signature.Public_key|).(S.SPublic_key.t) * list Z * bool).
+    ((|Signature.Public_key|).(S.SPublic_key.t) * list int * bool).
 
 Parameter init_endorsements :
   context ->
   (|Signature.Public_key_hash|).(S.SPublic_key_hash.Map).(S.INDEXES_Map.t)
-    ((|Signature.Public_key|).(S.SPublic_key.t) * list Z * bool) -> context.
+    ((|Signature.Public_key|).(S.SPublic_key.t) * list int * bool) -> context.
 
-Parameter included_endorsements : context -> Z.
+Parameter included_endorsements : context -> int.
 
 Parameter reset_internal_nonce : context -> context.
 
-Parameter fresh_internal_nonce : context -> Error_monad.tzresult (context * Z).
+Parameter fresh_internal_nonce :
+  context -> Error_monad.tzresult (context * int).
 
-Parameter record_internal_nonce : context -> Z -> context.
+Parameter record_internal_nonce : context -> int -> context.
 
-Parameter internal_nonce_already_recorded : context -> Z -> bool.
+Parameter internal_nonce_already_recorded : context -> int -> bool.
 
 Parameter add_fees : context -> Tez.t -> Lwt.t (Error_monad.tzresult context).
 

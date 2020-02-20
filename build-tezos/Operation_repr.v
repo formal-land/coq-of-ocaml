@@ -328,7 +328,7 @@ Module internal_operation.
   Record record {kind : Set} : Set := Build {
     source : Contract_repr.contract;
     operation : manager_operation kind;
-    nonce : Z }.
+    nonce : int }.
   Arguments record : clear implicits.
   Definition with_source {t_kind} source (r : record t_kind) :=
     Build t_kind source r.(operation) r.(nonce).
@@ -471,7 +471,7 @@ Module Encoding.
     | MCase : forall {a : Set}, 'case.MCase a kind -> case kind
     
     where "'case.MCase" := (fun (t_a t_kind : Set) =>
-      case.MCase_skeleton Z string (Data_encoding.t t_a)
+      case.MCase_skeleton int string (Data_encoding.t t_a)
         (packed_manager_operation -> option (manager_operation t_kind))
         (manager_operation t_kind -> t_a) (t_a -> manager_operation t_kind)).
     
@@ -506,7 +506,7 @@ Module Encoding.
       : Data_encoding.encoding (|Compare.String|).(Compare.S.t) :=
       (Data_encoding.def "entrypoint" (Some "entrypoint")
         (Some "Named entrypoint to a Michelson smart contract"))
-        (let builtin_case (tag : Z) (name : (|Compare.String|).(Compare.S.t))
+        (let builtin_case (tag : int) (name : (|Compare.String|).(Compare.S.t))
           : Data_encoding.case (|Compare.String|).(Compare.S.t) :=
           Data_encoding.__case_value name None (Data_encoding.Tag tag)
             (Data_encoding.constant name)
@@ -649,7 +649,7 @@ Module Encoding.
         let 'existT _ __MCase_'a [tag, name, encoding, select, proj, inj] :=
           existT (A := Set)
             (fun __MCase_'a =>
-              [Z ** string ** Data_encoding.t __MCase_'a **
+              [int ** string ** Data_encoding.t __MCase_'a **
                 packed_manager_operation -> option (manager_operation A) **
                 manager_operation A -> __MCase_'a **
                 __MCase_'a -> manager_operation A]) _
@@ -689,7 +689,7 @@ Module Encoding.
   | Case : forall {a : Set}, 'case.Case a b -> case b
   
   where "'case.Case" := (fun (t_a t_b : Set) =>
-    case.Case_skeleton Z string (Data_encoding.t t_a)
+    case.Case_skeleton int string (Data_encoding.t t_a)
       (packed_contents -> option (contents t_b)) (contents t_b -> t_a)
       (t_a -> contents t_b)).
   
@@ -741,8 +741,9 @@ Module Encoding.
       let 'existT _ __Case_'a [tag, name, encoding, proj, inj] :=
         existT (A := Set)
           (fun __Case_'a =>
-            [Z ** string ** Data_encoding.t __Case_'a ** contents A -> __Case_'a
-              ** __Case_'a -> contents A]) _ [tag, name, encoding, proj, inj] in
+            [int ** string ** Data_encoding.t __Case_'a **
+              contents A -> __Case_'a ** __Case_'a -> contents A]) _
+          [tag, name, encoding, proj, inj] in
       __case_value (Data_encoding.Tag tag) name encoding
         (fun o => Some (proj o)) (fun x => inj x) in
     let to_list (function_parameter : contents_list Kind.endorsement)
@@ -1014,7 +1015,7 @@ Module Encoding.
           contents.Manager_operation.storage_limit := storage_limit |}.
   
   Definition make_manager_case {A : Set}
-    (tag : Z) (function_parameter : Manager_operations.case A)
+    (tag : int) (function_parameter : Manager_operations.case A)
     : case (Kind.manager A) :=
     let 'Manager_operations.MCase mcase := function_parameter in
     let 'existT _ __MCase_'a mcase :=
@@ -1091,7 +1092,7 @@ Module Encoding.
       let 'existT _ __Case_'a [tag, name, encoding, select, proj, inj] :=
         existT (A := Set)
           (fun __Case_'a =>
-            [Z ** string ** Data_encoding.t __Case_'a **
+            [int ** string ** Data_encoding.t __Case_'a **
               packed_contents -> option (contents A) ** contents A -> __Case_'a
               ** __Case_'a -> contents A]) _
           [tag, name, encoding, select, proj, inj] in
@@ -1208,7 +1209,7 @@ Module Encoding.
             existT (A := Set)
               (fun __Internal_operation_'kind =>
                 [Contract_repr.contract **
-                  manager_operation __Internal_operation_'kind ** Z]) _
+                  manager_operation __Internal_operation_'kind ** int]) _
               [source, operation, __nonce_value] in
           ((source, __nonce_value), (Manager operation)))
         (fun function_parameter =>
@@ -1217,7 +1218,7 @@ Module Encoding.
           let 'existT _ __Manager_'kind [source, __nonce_value, operation] :=
             existT (A := Set)
               (fun __Manager_'kind =>
-                [Contract_repr.contract ** Z **
+                [Contract_repr.contract ** int **
                   manager_operation __Manager_'kind]) _
               [source, __nonce_value, operation] in
           Internal_operation
@@ -1263,7 +1264,7 @@ Definition __raw_value {A : Set} (function_parameter : operation A)
       (Operation_data protocol_data) in
   {| Operation.t.shell := shell; Operation.t.proto := proto |}.
 
-Definition acceptable_passes (op : packed_operation) : list Z :=
+Definition acceptable_passes (op : packed_operation) : list int :=
   let 'Operation_data protocol_data := op.(packed_operation.protocol_data) in
   let 'existT _ __Operation_data_'kind protocol_data :=
     existT (A := Set)

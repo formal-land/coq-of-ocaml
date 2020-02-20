@@ -15,7 +15,7 @@ Require Tezos.Nonce_hash.
 
 Module contents.
   Record record : Set := Build {
-    priority : Z;
+    priority : int;
     seed_nonce_hash : option Nonce_hash.t;
     proof_of_work_nonce : MBytes.t }.
   Definition with_priority priority (r : record) :=
@@ -70,7 +70,7 @@ Parameter protocol_data_encoding : Data_encoding.encoding protocol_data.
 
 Parameter shell_header_encoding : Data_encoding.encoding shell_header.
 
-Parameter max_header_length : Z.
+Parameter max_header_length : int.
 
 Parameter __hash_value : block_header -> (|Block_hash|).(S.HASH.t).
 

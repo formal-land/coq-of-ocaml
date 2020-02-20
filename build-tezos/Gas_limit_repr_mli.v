@@ -63,22 +63,22 @@ Parameter internal_gas_zero : internal_gas.
 
 Parameter free : cost.
 
-Parameter atomic_step_cost : Z -> cost.
+Parameter atomic_step_cost : int -> cost.
 
-Parameter step_cost : Z -> cost.
+Parameter step_cost : int -> cost.
 
-Parameter alloc_cost : Z -> cost.
+Parameter alloc_cost : int -> cost.
 
-Parameter alloc_bytes_cost : Z -> cost.
+Parameter alloc_bytes_cost : int -> cost.
 
-Parameter alloc_mbytes_cost : Z -> cost.
+Parameter alloc_mbytes_cost : int -> cost.
 
-Parameter alloc_bits_cost : Z -> cost.
+Parameter alloc_bits_cost : int -> cost.
 
 Parameter read_bytes_cost : Z.t -> cost.
 
 Parameter write_bytes_cost : Z.t -> cost.
 
-Parameter op_starat : Z -> cost -> cost.
+Parameter op_starat : int -> cost -> cost.
 
 Parameter op_plusat : cost -> cost -> cost.

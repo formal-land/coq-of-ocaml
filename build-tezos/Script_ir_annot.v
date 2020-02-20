@@ -406,7 +406,7 @@ Definition get_two_annot {A : Set}
   | _ => Error_monad.__error_value extensible_type_value
   end.
 
-Definition parse_type_annot (loc : Z) (annot : list string)
+Definition parse_type_annot (loc : int) (annot : list string)
   : Error_monad.tzresult (option Script_typed_ir.type_annot) :=
   let? '(vars, types, fields) :=
     Error_monad.op_gtgtquestion (parse_annots loc None None annot)
@@ -415,7 +415,7 @@ Definition parse_type_annot (loc : Z) (annot : list string)
   let? '_ := error_unexpected_annot loc fields in
   get_one_annot loc types.
 
-Definition parse_type_field_annot (loc : Z) (annot : list string)
+Definition parse_type_field_annot (loc : int) (annot : list string)
   : Error_monad.tzresult
     (option Script_typed_ir.type_annot * option Script_typed_ir.field_annot) :=
   let? '(vars, types, fields) :=
@@ -426,7 +426,7 @@ Definition parse_type_field_annot (loc : Z) (annot : list string)
   Error_monad.op_gtpipequestion (get_one_annot loc fields)
     (fun f => (__t_value, f)).
 
-Definition parse_composed_type_annot (loc : Z) (annot : list string)
+Definition parse_composed_type_annot (loc : int) (annot : list string)
   : Error_monad.tzresult
     (option Script_typed_ir.type_annot * option Script_typed_ir.field_annot *
       option Script_typed_ir.field_annot) :=
@@ -440,7 +440,7 @@ Definition parse_composed_type_annot (loc : Z) (annot : list string)
       let '(f1, f2) := function_parameter in
       (__t_value, f1, f2)).
 
-Definition parse_field_annot (loc : Z) (annot : list string)
+Definition parse_field_annot (loc : int) (annot : list string)
   : Error_monad.tzresult (option Script_typed_ir.field_annot) :=
   let? '(vars, types, fields) :=
     Error_monad.op_gtgtquestion (parse_annots loc None None annot)
@@ -497,7 +497,7 @@ Definition check_correct_field
   end.
 
 Definition parse_var_annot
-  (loc : Z) (default : option (option Script_typed_ir.var_annot))
+  (loc : int) (default : option (option Script_typed_ir.var_annot))
   (annot : list string)
   : Error_monad.tzresult (option Script_typed_ir.var_annot) :=
   let? '(vars, types, fields) :=
@@ -561,7 +561,7 @@ Definition common_prefix
   end.
 
 Definition parse_constr_annot
-  (loc : Z) (if_special_first : option (option Script_typed_ir.field_annot))
+  (loc : int) (if_special_first : option (option Script_typed_ir.field_annot))
   (if_special_second : option (option Script_typed_ir.field_annot))
   (annot : list string)
   : Error_monad.tzresult
@@ -598,7 +598,7 @@ Definition parse_constr_annot
         end in
       (v, __t_value, f1, f2)).
 
-Definition parse_two_var_annot (loc : Z) (annot : list string)
+Definition parse_two_var_annot (loc : int) (annot : list string)
   : Error_monad.tzresult
     (option Script_typed_ir.var_annot * option Script_typed_ir.var_annot) :=
   let? '(vars, types, fields) :=
@@ -609,7 +609,7 @@ Definition parse_two_var_annot (loc : Z) (annot : list string)
   get_two_annot loc vars.
 
 Definition parse_destr_annot
-  (loc : Z) (annot : list string)
+  (loc : int) (annot : list string)
   (default_accessor : option Script_typed_ir.field_annot)
   (field_name : option Script_typed_ir.field_annot)
   (pair_annot : option Script_typed_ir.var_annot)
@@ -635,7 +635,7 @@ Definition parse_destr_annot
       (v, f)).
 
 Definition parse_entrypoint_annot
-  (loc : Z) (default : option (option Script_typed_ir.var_annot))
+  (loc : int) (default : option (option Script_typed_ir.var_annot))
   (annot : list string)
   : Error_monad.tzresult
     (option Script_typed_ir.var_annot * option Script_typed_ir.field_annot) :=
@@ -655,7 +655,7 @@ Definition parse_entrypoint_annot
         end
       end).
 
-Definition parse_var_type_annot (loc : Z) (annot : list string)
+Definition parse_var_type_annot (loc : int) (annot : list string)
   : Error_monad.tzresult
     (option Script_typed_ir.var_annot * option Script_typed_ir.type_annot) :=
   let? '(vars, types, fields) :=

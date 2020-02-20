@@ -125,7 +125,7 @@ Parameter update_storage_space_to_pay : t -> Z.t -> t.
 
 Parameter update_allocated_contracts_count : t -> t.
 
-Parameter clear_storage_space_to_pay : t -> t * Z.t * Z.
+Parameter clear_storage_space_to_pay : t -> t * Z.t * int.
 
 (* extensible_type_definition `error` *)
 
@@ -240,23 +240,24 @@ Definition description : Storage_description.t context :=
 
 Parameter reset_internal_nonce : context -> context.
 
-Parameter fresh_internal_nonce : context -> Error_monad.tzresult (context * Z).
+Parameter fresh_internal_nonce :
+  context -> Error_monad.tzresult (context * int).
 
-Parameter record_internal_nonce : context -> Z -> context.
+Parameter record_internal_nonce : context -> int -> context.
 
-Parameter internal_nonce_already_recorded : context -> Z -> bool.
+Parameter internal_nonce_already_recorded : context -> int -> bool.
 
 Parameter allowed_endorsements :
   context ->
   (|Signature.Public_key_hash|).(S.SPublic_key_hash.Map).(S.INDEXES_Map.t)
-    ((|Signature.Public_key|).(S.SPublic_key.t) * list Z * bool).
+    ((|Signature.Public_key|).(S.SPublic_key.t) * list int * bool).
 
-Parameter included_endorsements : context -> Z.
+Parameter included_endorsements : context -> int.
 
 Parameter init_endorsements :
   context ->
   (|Signature.Public_key_hash|).(S.SPublic_key_hash.Map).(S.INDEXES_Map.t)
-    ((|Signature.Public_key|).(S.SPublic_key.t) * list Z * bool) -> context.
+    ((|Signature.Public_key|).(S.SPublic_key.t) * list int * bool) -> context.
 
 Parameter record_endorsement :
   context -> (|Signature.Public_key_hash|).(S.SPublic_key_hash.t) -> context.

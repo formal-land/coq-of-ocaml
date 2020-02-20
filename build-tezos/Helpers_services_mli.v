@@ -597,7 +597,7 @@ Module Forge.
               (* `POST *) unit + (* `PATCH *) unit) RPC_context.t
             (((RPC_context.t * a) * b) * c) q i o -> a -> a -> b -> c -> q ->
           i -> Lwt.t (Error_monad.shell_tzresult o)) *
-            (J * a * b * c * q * i * o)) * K)))) * K * a -> a -> Z ->
+            (J * a * b * c * q * i * o)) * K)))) * K * a -> a -> int ->
     option Nonce_hash.t -> option MBytes.t -> unit ->
     Lwt.t (Error_monad.shell_tzresult MBytes.t).
 End Forge.

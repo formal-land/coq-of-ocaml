@@ -30,20 +30,20 @@ Require Tezos.Voting_period_repr.
 Import Storage_sigs.
 
 Module Block_priority.
-  Parameter get : Raw_context.t -> Lwt.t (Error_monad.tzresult Z).
+  Parameter get : Raw_context.t -> Lwt.t (Error_monad.tzresult int).
   
   Parameter set :
-    Raw_context.t -> Z -> Lwt.t (Error_monad.tzresult Raw_context.t).
+    Raw_context.t -> int -> Lwt.t (Error_monad.tzresult Raw_context.t).
   
   Parameter init :
-    Raw_context.t -> Z -> Lwt.t (Error_monad.tzresult Raw_context.t).
+    Raw_context.t -> int -> Lwt.t (Error_monad.tzresult Raw_context.t).
 End Block_priority.
 
 Module Roll.
   Parameter Owner :
     {_ : unit &
-      Indexed_data_snapshotable_storage.signature (Cycle_repr.t * Z) Roll_repr.t
-        Raw_context.t (|Signature.Public_key|).(S.SPublic_key.t)}.
+      Indexed_data_snapshotable_storage.signature (Cycle_repr.t * int)
+        Roll_repr.t Raw_context.t (|Signature.Public_key|).(S.SPublic_key.t)}.
   
   Parameter clear : Raw_context.t -> Lwt.t Raw_context.t.
   
@@ -68,11 +68,11 @@ Module Roll.
         (|Signature.Public_key_hash|).(S.SPublic_key_hash.t) Tez_repr.t}.
   
   Parameter Snapshot_for_cycle :
-    {_ : unit & Indexed_data_storage.signature Raw_context.t Cycle_repr.t Z}.
+    {_ : unit & Indexed_data_storage.signature Raw_context.t Cycle_repr.t int}.
   
   Parameter Last_for_snapshot :
     {_ : unit &
-      Indexed_data_storage.signature (Raw_context.t * Cycle_repr.t) Z
+      Indexed_data_storage.signature (Raw_context.t * Cycle_repr.t) int
         Roll_repr.t}.
 End Roll.
 
@@ -240,7 +240,7 @@ Module Vote.
   Parameter Proposals_count :
     {_ : unit &
       Indexed_data_storage.signature Raw_context.t
-        (|Signature.Public_key_hash|).(S.SPublic_key_hash.t) Z}.
+        (|Signature.Public_key_hash|).(S.SPublic_key_hash.t) int}.
   
   Parameter Ballots :
     {_ : unit &

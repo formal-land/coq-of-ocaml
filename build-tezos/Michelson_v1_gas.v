@@ -20,50 +20,50 @@ Import Alpha_context.
 Import Alpha_context.Gas.
 
 Module Cost_of.
-  Definition log2 : Z -> Z :=
-    let fix help (acc : Z) (function_parameter : Z) {struct acc} : Z :=
+  Definition log2 : int -> int :=
+    let fix help (acc : int) (function_parameter : int) {struct acc} : int :=
       match function_parameter with
       | 0 => acc
       | n => help (Pervasives.op_plus acc 1) (Pervasives.op_div n 2)
       end in
     help 1.
   
-  Definition z_bytes (z : Z.t) : Z :=
+  Definition z_bytes (z : Z.t) : int :=
     let bits := Z.numbits z in
     Pervasives.op_div (Pervasives.op_plus 7 bits) 8.
   
-  Definition int_bytes {a : Set} (z : Alpha_context.Script_int.num a) : Z :=
+  Definition int_bytes {a : Set} (z : Alpha_context.Script_int.num a) : int :=
     z_bytes (Alpha_context.Script_int.to_zint z).
   
   Definition timestamp_bytes (__t_value : Alpha_context.Script_timestamp.t)
-    : Z :=
+    : int :=
     let z := Alpha_context.Script_timestamp.to_zint __t_value in
     z_bytes z.
   
   Fixpoint size_of_comparable {a b : Set}
-    (wit : Script_typed_ir.comparable_struct a b) (v : a) {struct wit} : Z :=
+    (wit : Script_typed_ir.comparable_struct a b) (v : a) {struct wit} : int :=
     match (wit, v) with
     | (Script_typed_ir.Int_key _, _ as v) =>
       let v := obj_magic (Script_int_repr.num Alpha_context.Script_int.z) v in
-      obj_magic Z (int_bytes v)
+      obj_magic int (int_bytes v)
     | (Script_typed_ir.Nat_key _, _ as v) =>
       let v := obj_magic (Script_int_repr.num Alpha_context.Script_int.n) v in
-      obj_magic Z (int_bytes v)
+      obj_magic int (int_bytes v)
     | (Script_typed_ir.String_key _, _ as v) =>
       let v := obj_magic string v in
-      obj_magic Z (String.length v)
+      obj_magic int (String.length v)
     | (Script_typed_ir.Bytes_key _, _ as v) =>
       let v := obj_magic MBytes.t v in
-      obj_magic Z (MBytes.length v)
-    | (Script_typed_ir.Bool_key _, _) => obj_magic Z 8
+      obj_magic int (MBytes.length v)
+    | (Script_typed_ir.Bool_key _, _) => obj_magic int 8
     | (Script_typed_ir.Key_hash_key _, _) =>
-      obj_magic Z (|Signature.Public_key_hash|).(S.SPublic_key_hash.size)
+      obj_magic int (|Signature.Public_key_hash|).(S.SPublic_key_hash.size)
     | (Script_typed_ir.Timestamp_key _, _ as v) =>
       let v := obj_magic Alpha_context.Script_timestamp.t v in
-      obj_magic Z (timestamp_bytes v)
+      obj_magic int (timestamp_bytes v)
     | (Script_typed_ir.Address_key _, _) =>
-      obj_magic Z (|Signature.Public_key_hash|).(S.SPublic_key_hash.size)
-    | (Script_typed_ir.Mutez_key _, _) => obj_magic Z 8
+      obj_magic int (|Signature.Public_key_hash|).(S.SPublic_key_hash.size)
+    | (Script_typed_ir.Mutez_key _, _) => obj_magic int 8
     | (Script_typed_ir.Pair_key (l, _) (__r_value, _) _, _ as v) =>
       let 'existT _ [__0, __1, __Pair_key] [l, __r_value, v] :=
         obj_magic_exists (Es := [Set ** Set ** Set])
@@ -71,16 +71,16 @@ Module Cost_of.
             [Script_typed_ir.comparable_struct __0 Script_typed_ir.leaf **
               Script_typed_ir.comparable_struct __1 __Pair_key ** __0 * __1])
           [l, __r_value, v] in
-      obj_magic Z
+      obj_magic int
       (let '(lval, rval) := v in
       Pervasives.op_plus (size_of_comparable l lval)
         (size_of_comparable __r_value rval))
     end.
   
-  Definition __string_value (length : Z) : Alpha_context.Gas.cost :=
+  Definition __string_value (length : int) : Alpha_context.Gas.cost :=
     Alpha_context.Gas.alloc_bytes_cost length.
   
-  Definition __bytes_value (length : Z) : Alpha_context.Gas.cost :=
+  Definition __bytes_value (length : int) : Alpha_context.Gas.cost :=
     Alpha_context.Gas.alloc_mbytes_cost length.
   
   Definition manager_operation : Alpha_context.Gas.cost :=
@@ -106,7 +106,7 @@ Module Cost_of.
       Alpha_context.Gas.op_plusat (Alpha_context.Gas.step_cost 2)
         (Alpha_context.Gas.alloc_cost 1).
     
-    Definition __hash_value (data : MBytes.t) (len : Z)
+    Definition __hash_value (data : MBytes.t) (len : int)
       : Alpha_context.Gas.cost :=
       Alpha_context.Gas.op_plusat
         (Alpha_context.Gas.op_starat 10
@@ -114,7 +114,7 @@ Module Cost_of.
         (__bytes_value len).
     
     Definition set_access {elt : Set}
-      (_key : elt) (Box : Script_typed_ir.set elt) : Z :=
+      (_key : elt) (Box : Script_typed_ir.set elt) : int :=
       let 'existS _ _ Box := Box in
       log2 Box.(Script_typed_ir.Boxed_set.size).
     
@@ -271,7 +271,7 @@ Module Cost_of.
         (Pervasives.op_plus 51
           (Pervasives.op_div ((|Compare.Int|).(Compare.S.max) bytes1 bytes2) 62)).
     
-    Fixpoint concat_loop {A : Set} (l : list A) (acc : Z) {struct l} : Z :=
+    Fixpoint concat_loop {A : Set} (l : list A) (acc : int) {struct l} : int :=
       match l with
       | [] => 30
       | cons _ tl => concat_loop tl (Pervasives.op_plus acc 30)
@@ -281,7 +281,7 @@ Module Cost_of.
       : Alpha_context.Gas.cost :=
       Alpha_context.Gas.atomic_step_cost (concat_loop string_list 0).
     
-    Definition slice_string (string_length : Z) : Alpha_context.Gas.cost :=
+    Definition slice_string (string_length : int) : Alpha_context.Gas.cost :=
       Alpha_context.Gas.atomic_step_cost
         (Pervasives.op_plus 40 (Pervasives.op_div string_length 70)).
     
@@ -345,7 +345,7 @@ Module Cost_of.
     
     Definition indic_lt
       (x : (|Compare.Int|).(Compare.S.t)) (y : (|Compare.Int|).(Compare.S.t))
-      : Z :=
+      : int :=
       if (|Compare.Int|).(Compare.S.op_lt) x y then
         1
       else
@@ -501,17 +501,17 @@ Module Cost_of.
     Definition now : Alpha_context.Gas.cost :=
       Alpha_context.Gas.atomic_step_cost 10.
     
-    Definition check_signature_secp256k1 (__bytes_value : Z)
+    Definition check_signature_secp256k1 (__bytes_value : int)
       : Alpha_context.Gas.cost :=
       Alpha_context.Gas.atomic_step_cost
         (Pervasives.op_plus 10342 (Pervasives.op_div __bytes_value 5)).
     
-    Definition check_signature_ed25519 (__bytes_value : Z)
+    Definition check_signature_ed25519 (__bytes_value : int)
       : Alpha_context.Gas.cost :=
       Alpha_context.Gas.atomic_step_cost
         (Pervasives.op_plus 36864 (Pervasives.op_div __bytes_value 5)).
     
-    Definition check_signature_p256 (__bytes_value : Z)
+    Definition check_signature_p256 (__bytes_value : int)
       : Alpha_context.Gas.cost :=
       Alpha_context.Gas.atomic_step_cost
         (Pervasives.op_plus 36864 (Pervasives.op_div __bytes_value 5)).
@@ -560,7 +560,7 @@ Module Cost_of.
     Definition chain_id : Alpha_context.Gas.cost :=
       Alpha_context.Gas.step_cost 1.
     
-    Definition stack_n_op (n : Z) : Alpha_context.Gas.cost :=
+    Definition stack_n_op (n : int) : Alpha_context.Gas.cost :=
       Alpha_context.Gas.atomic_step_cost
         (Pervasives.op_plus 20
           (Pervasives.op_plus
@@ -632,9 +632,9 @@ Module Cost_of.
     
     Definition __unit_value : Alpha_context.Gas.cost := Alpha_context.Gas.free.
     
-    Definition __string_value : Z -> Alpha_context.Gas.cost := __string_value.
+    Definition __string_value : int -> Alpha_context.Gas.cost := __string_value.
     
-    Definition __bytes_value : Z -> Alpha_context.Gas.cost := __bytes_value.
+    Definition __bytes_value : int -> Alpha_context.Gas.cost := __bytes_value.
     
     Definition z : Z.t -> Alpha_context.Gas.cost := Legacy.zint.
     
@@ -692,12 +692,12 @@ Module Cost_of.
       Alpha_context.Gas.op_plusat (Alpha_context.Gas.alloc_cost 2)
         (Alpha_context.Gas.step_cost 1).
     
-    Definition set_element (size : Z) : Alpha_context.Gas.cost :=
+    Definition set_element (size : int) : Alpha_context.Gas.cost :=
       Alpha_context.Gas.op_starat (log2 size)
         (Alpha_context.Gas.op_plusat (Alpha_context.Gas.alloc_cost 3)
           (Alpha_context.Gas.step_cost 2)).
     
-    Definition map_element (size : Z) : Alpha_context.Gas.cost :=
+    Definition map_element (size : int) : Alpha_context.Gas.cost :=
       Alpha_context.Gas.op_starat (log2 size)
         (Alpha_context.Gas.op_plusat (Alpha_context.Gas.alloc_cost 4)
           (Alpha_context.Gas.step_cost 2)).
@@ -711,10 +711,10 @@ Module Cost_of.
     Definition two_arg_type : Alpha_context.Gas.cost :=
       Alpha_context.Gas.alloc_cost 3.
     
-    Definition operation (__b_value : Z) : Alpha_context.Gas.cost :=
+    Definition operation (__b_value : int) : Alpha_context.Gas.cost :=
       __bytes_value __b_value.
     
-    Definition type_ (nb_args : Z) : Alpha_context.Gas.cost :=
+    Definition type_ (nb_args : int) : Alpha_context.Gas.cost :=
       Alpha_context.Gas.alloc_cost (Pervasives.op_plus nb_args 1).
     
     Definition instr {a b : Set} (i : Script_typed_ir.instr b a)
@@ -861,14 +861,14 @@ Module Cost_of.
   End Typechecking.
   
   Module Unparse.
-    Definition prim_cost (l : Z) (annot : Alpha_context.Script.annot)
+    Definition prim_cost (l : int) (annot : Alpha_context.Script.annot)
       : Alpha_context.Gas.cost :=
       Alpha_context.Script.prim_node_cost_nonrec_of_length l annot.
     
-    Definition seq_cost : Z -> Alpha_context.Gas.cost :=
+    Definition seq_cost : int -> Alpha_context.Gas.cost :=
       Alpha_context.Script.seq_node_cost_nonrec_of_length.
     
-    Definition string_cost (length : Z) : Alpha_context.Gas.cost :=
+    Definition string_cost (length : int) : Alpha_context.Gas.cost :=
       Alpha_context.Script.string_node_cost_of_length length.
     
     Definition cycle : Alpha_context.Gas.cost := Alpha_context.Gas.step_cost 1.

@@ -121,7 +121,7 @@ Inductive args_gadt : Set :=
 
 where "'args" := (fun (_ _ _ : Set) => args_gadt)
 and "'args.One" := (fun (t_a : Set) =>
-  args.One_skeleton (RPC_arg.t t_a) (Data_encoding.t t_a) (t_a -> t_a -> Z)).
+  args.One_skeleton (RPC_arg.t t_a) (Data_encoding.t t_a) (t_a -> t_a -> int)).
 
 Module ConstructorRecordNotations_args_gadt.
   Module args.
@@ -167,18 +167,18 @@ Fixpoint pack {a b c : Set} (v : args a b c) (x : a) (y : b) {struct v} : c :=
   end.
 
 Fixpoint compare {a b c : Set} (function_parameter : args a b c)
-  {struct function_parameter} : b -> b -> Z :=
+  {struct function_parameter} : b -> b -> int :=
   match function_parameter with
   | One {| args.One.compare := compare' |} =>
-    let compare' := obj_magic (b -> b -> Z) compare' in
-    obj_magic (b -> b -> Z) compare'
+    let compare' := obj_magic (b -> b -> int) compare' in
+    obj_magic (b -> b -> int) compare'
   | Pair l __r_value =>
     let 'existT _ [__0, __1, __Pair_'inter_key] [l, __r_value] :=
       obj_magic_exists (Es := [Set ** Set ** Set])
         (fun '[__0, __1, __Pair_'inter_key] =>
           [args a __0 __Pair_'inter_key ** args __Pair_'inter_key __1 c])
         [l, __r_value] in
-    obj_magic (b -> b -> Z)
+    obj_magic (b -> b -> int)
     (let compare_l := compare l in
     let compare_r := compare __r_value in
     fun function_parameter =>
@@ -361,12 +361,12 @@ with pp_item {a : Set}
 Module INDEX.
   Record signature {t : Set} : Set := {
     t := t;
-    path_length : Z;
+    path_length : int;
     to_path : t -> list string -> list string;
     of_path : list string -> option t;
     rpc_arg : RPC_arg.t t;
     encoding : Data_encoding.t t;
-    compare : t -> t -> Z;
+    compare : t -> t -> int;
   }.
   Arguments signature : clear implicits.
 End INDEX.
@@ -388,7 +388,7 @@ Inductive handler (key : Set) : Set :=
 
 where "'handler.Handler" := (fun (t_a t_key : Set) =>
   handler.Handler_skeleton (Data_encoding.t t_a)
-    (t_key -> Z -> Lwt.t (Error_monad.tzresult t_a))).
+    (t_key -> int -> Lwt.t (Error_monad.tzresult t_a))).
 
 Module ConstructorRecordNotations_handler.
   Module handler.
@@ -417,7 +417,7 @@ Inductive opt_handler (key : Set) : Set :=
 
 where "'opt_handler.Opt_handler" := (fun (t_a t_key : Set) =>
   opt_handler.Opt_handler_skeleton (Data_encoding.t t_a)
-    (t_key -> Z -> Lwt.t (Error_monad.tzresult (option t_a)))).
+    (t_key -> int -> Lwt.t (Error_monad.tzresult (option t_a)))).
 
 Module ConstructorRecordNotations_opt_handler.
   Module opt_handler.
@@ -470,7 +470,7 @@ Fixpoint combine_object {A : Set}
 
 Module query.
   Record record : Set := Build {
-    depth : Z }.
+    depth : int }.
   Definition with_depth depth (r : record) :=
     Build depth.
 End query.
@@ -497,8 +497,9 @@ Definition build_directory {key : Set} (dir : t key) : RPC_directory.t key :=
       existT (A := Set)
         (fun __Opt_handler_'a =>
           [Data_encoding.t __Opt_handler_'a **
-            ikey -> Z -> Lwt.t (Error_monad.tzresult (option __Opt_handler_'a))])
-        _ [encoding, get] in
+            ikey -> int ->
+            Lwt.t (Error_monad.tzresult (option __Opt_handler_'a))]) _
+        [encoding, get] in
     let service := RPC_service.get_service None depth_query encoding path in
     Pervasives.op_coloneq rpc_dir
       (RPC_directory.register (Pervasives.op_exclamation rpc_dir) service

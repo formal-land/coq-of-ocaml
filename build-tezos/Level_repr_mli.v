@@ -67,7 +67,8 @@ Definition op_gteq : level -> level -> bool :=
 
 Definition op_gt : level -> level -> bool := (|Included_S|).(Compare.S.op_gt).
 
-Definition compare : level -> level -> Z := (|Included_S|).(Compare.S.compare).
+Definition compare : level -> level -> int :=
+  (|Included_S|).(Compare.S.compare).
 
 Definition equal : level -> level -> bool := (|Included_S|).(Compare.S.equal).
 

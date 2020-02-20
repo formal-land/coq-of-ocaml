@@ -91,7 +91,7 @@ Module validation_state.
     mode : validation_mode;
     chain_id : (|Chain_id|).(S.HASH.t);
     ctxt : Alpha_context.t;
-    op_count : Z }.
+    op_count : int }.
   Definition with_mode mode (r : record) :=
     Build mode r.(chain_id) r.(ctxt) r.(op_count).
   Definition with_chain_id chain_id (r : record) :=
@@ -122,10 +122,10 @@ Parameter Included_PROTOCOL :
       block_header Apply_results.block_metadata operation_data
       Apply_results.packed_operation_metadata operation validation_state}.
 
-Definition max_block_length : Z :=
+Definition max_block_length : int :=
   (|Included_PROTOCOL|).(Updater.PROTOCOL.max_block_length).
 
-Definition max_operation_data_length : Z :=
+Definition max_operation_data_length : int :=
   (|Included_PROTOCOL|).(Updater.PROTOCOL.max_operation_data_length).
 
 Definition validation_passes : list Updater.quota :=
@@ -160,10 +160,10 @@ Definition operation_data_and_receipt_encoding :
   Data_encoding.t (operation_data * operation_receipt) :=
   (|Included_PROTOCOL|).(Updater.PROTOCOL.operation_data_and_receipt_encoding).
 
-Definition acceptable_passes : operation -> list Z :=
+Definition acceptable_passes : operation -> list int :=
   (|Included_PROTOCOL|).(Updater.PROTOCOL.acceptable_passes).
 
-Definition compare_operations : operation -> operation -> Z :=
+Definition compare_operations : operation -> operation -> int :=
   (|Included_PROTOCOL|).(Updater.PROTOCOL.compare_operations).
 
 Definition current_context :

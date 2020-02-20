@@ -187,7 +187,7 @@ and "'successful_manager_operation_result" := (fun (_ : Set) =>
 and "'contents_result.Endorsement_result" :=
   (contents_result.Endorsement_result_skeleton
     Alpha_context.Delegate.balance_updates
-    (|Signature.Public_key_hash|).(S.SPublic_key_hash.t) (list Z))
+    (|Signature.Public_key_hash|).(S.SPublic_key_hash.t) (list int))
 and "'contents_result.Manager_operation_result" := (fun (t_kind : Set) =>
   contents_result.Manager_operation_result_skeleton
     Alpha_context.Delegate.balance_updates ('manager_operation_result t_kind)

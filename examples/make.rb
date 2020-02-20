@@ -156,7 +156,8 @@ File.open("tezos/index.html", "w") do |file|
     :tezos,
     "Protocol of Tezos",
     "These are the sources of the <a href=\"https://gitlab.com/tezos/tezos/tree/master/src/proto_alpha/lib_protocol\">protocol</a> of <a href=\"https://tezos.com/\">Tezos</a> imported to <a href=\"https://coq.inria.fr/\">Coq</a> by the current development version of <a href=\"https://github.com/clarus/coq-of-ocaml\">coq-of-ocaml</a>. Tezos is a crypto-currency with smart-contracts and an upgradable protocol.",
-    "(2020-02-15) The Michelson interpreter <a href=\"#script_interpreter.ml\"><code>script_interpreter.ml</code></a> now compiles in Coq. We will attempt to show its equivalence to the <a href=\"https://gitlab.com/nomadic-labs/mi-cho-coq/\">Mi-Cho-Coq</a> formalization, for the subset of instructions where it is possible.",
+    "(2020-02-20) We continue the import of the code to Coq, waiting for advices from <a href=\"https://gitlab.com/rafoo_\">Raphaël</a> on the proofs of the interpreter.",
+    #"(2020-02-15) The Michelson interpreter <a href=\"#script_interpreter.ml\"><code>script_interpreter.ml</code></a> now compiles in Coq. We will attempt to show its equivalence to the <a href=\"https://gitlab.com/nomadic-labs/mi-cho-coq/\">Mi-Cho-Coq</a> formalization, for the subset of instructions where it is possible.",
     tezos_directory,
     :active_development,
     <<-END
@@ -198,6 +199,8 @@ File.open("tezos/index.html", "w") do |file|
           30401,
           29240,
           29013,
+          29013,
+          29028,
         ],
         generated: [
           47563,
@@ -236,6 +239,8 @@ File.open("tezos/index.html", "w") do |file|
           53116,
           49938,
           49269,
+          49269,
+          49288,
         ],
         labels: [
           "01-14",
@@ -274,6 +279,8 @@ File.open("tezos/index.html", "w") do |file|
           "02-16",
           "02-17",
           "02-18",
+          "02-19",
+          "02-20",
         ]
       }
     END

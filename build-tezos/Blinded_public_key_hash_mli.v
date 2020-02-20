@@ -39,7 +39,7 @@ Definition op_gteq : t -> t -> bool := (|Included_HASH|).(S.HASH.op_gteq).
 
 Definition op_gt : t -> t -> bool := (|Included_HASH|).(S.HASH.op_gt).
 
-Definition compare : t -> t -> Z := (|Included_HASH|).(S.HASH.compare).
+Definition compare : t -> t -> int := (|Included_HASH|).(S.HASH.compare).
 
 Definition equal : t -> t -> bool := (|Included_HASH|).(S.HASH.equal).
 
@@ -55,7 +55,7 @@ Definition hash_string : option string -> list string -> t :=
 
 Definition zero : t := (|Included_HASH|).(S.HASH.zero).
 
-Definition size : Z := (|Included_HASH|).(S.HASH.size).
+Definition size : int := (|Included_HASH|).(S.HASH.size).
 
 Definition to_bytes : t -> MBytes.t := (|Included_HASH|).(S.HASH.to_bytes).
 
@@ -95,7 +95,7 @@ Definition of_path_exn : list string -> t :=
 Definition prefix_path : string -> list string :=
   (|Included_HASH|).(S.HASH.prefix_path).
 
-Definition path_length : Z := (|Included_HASH|).(S.HASH.path_length).
+Definition path_length : int := (|Included_HASH|).(S.HASH.path_length).
 
 Definition __Set := existT (fun _ => _) tt (|Included_HASH|).(S.HASH.__Set).
 

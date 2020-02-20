@@ -19,7 +19,7 @@ Parameter t : Set.
 
 Parameter of_int64 : int64 -> t.
 
-Parameter compare : t -> t -> Z.
+Parameter compare : t -> t -> int.
 
 Parameter to_notation : t -> option string.
 

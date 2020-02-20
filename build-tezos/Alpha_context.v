@@ -64,7 +64,7 @@ Module BASIC_DATA.
     op_lteq : t -> t -> bool;
     op_gteq : t -> t -> bool;
     op_gt : t -> t -> bool;
-    compare : t -> t -> Z;
+    compare : t -> t -> int;
     equal : t -> t -> bool;
     max : t -> t -> t;
     min : t -> t -> t;
@@ -368,11 +368,11 @@ End Commitment.
 
 Module Global.
   Definition get_block_priority
-    : Raw_context.t -> Lwt.t (Error_monad.tzresult Z) :=
+    : Raw_context.t -> Lwt.t (Error_monad.tzresult int) :=
     Storage.Block_priority.get.
   
   Definition set_block_priority
-    : Raw_context.t -> Z -> Lwt.t (Error_monad.tzresult Raw_context.t) :=
+    : Raw_context.t -> int -> Lwt.t (Error_monad.tzresult Raw_context.t) :=
     Storage.Block_priority.set.
 End Global.
 
@@ -416,30 +416,31 @@ Definition record_endorsement
 Definition allowed_endorsements
   : Raw_context.context ->
   (|Signature.Public_key_hash|).(S.SPublic_key_hash.Map).(S.INDEXES_Map.t)
-    ((|Signature.Public_key|).(S.SPublic_key.t) * list Z * bool) :=
+    ((|Signature.Public_key|).(S.SPublic_key.t) * list int * bool) :=
   Raw_context.allowed_endorsements.
 
 Definition init_endorsements
   : Raw_context.context ->
   (|Signature.Public_key_hash|).(S.SPublic_key_hash.Map).(S.INDEXES_Map.t)
-    ((|Signature.Public_key|).(S.SPublic_key.t) * list Z * bool) ->
+    ((|Signature.Public_key|).(S.SPublic_key.t) * list int * bool) ->
   Raw_context.context := Raw_context.init_endorsements.
 
-Definition included_endorsements : Raw_context.context -> Z :=
+Definition included_endorsements : Raw_context.context -> int :=
   Raw_context.included_endorsements.
 
 Definition reset_internal_nonce : Raw_context.context -> Raw_context.context :=
   Raw_context.reset_internal_nonce.
 
 Definition fresh_internal_nonce
-  : Raw_context.context -> Error_monad.tzresult (Raw_context.context * Z) :=
+  : Raw_context.context -> Error_monad.tzresult (Raw_context.context * int) :=
   Raw_context.fresh_internal_nonce.
 
 Definition record_internal_nonce
-  : Raw_context.context -> Z -> Raw_context.context :=
+  : Raw_context.context -> int -> Raw_context.context :=
   Raw_context.record_internal_nonce.
 
-Definition internal_nonce_already_recorded : Raw_context.context -> Z -> bool :=
+Definition internal_nonce_already_recorded
+  : Raw_context.context -> int -> bool :=
   Raw_context.internal_nonce_already_recorded.
 
 Definition add_deposit

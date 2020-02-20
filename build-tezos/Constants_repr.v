@@ -18,23 +18,23 @@ Definition version_number_004 : string := "\000".
 
 Definition version_number : string := "\001".
 
-Definition proof_of_work_nonce_size : Z := 8.
+Definition proof_of_work_nonce_size : int := 8.
 
-Definition nonce_length : Z := 32.
+Definition nonce_length : int := 32.
 
-Definition max_revelations_per_block : Z := 32.
+Definition max_revelations_per_block : int := 32.
 
-Definition max_proposals_per_delegate : Z := 20.
+Definition max_proposals_per_delegate : int := 20.
 
-Definition max_operation_data_length : Z := Pervasives.op_star 16 1024.
+Definition max_operation_data_length : int := Pervasives.op_star 16 1024.
 
 Module fixed.
   Record record : Set := Build {
-    proof_of_work_nonce_size : Z;
-    nonce_length : Z;
-    max_revelations_per_block : Z;
-    max_operation_data_length : Z;
-    max_proposals_per_delegate : Z }.
+    proof_of_work_nonce_size : int;
+    nonce_length : int;
+    max_revelations_per_block : int;
+    max_operation_data_length : int;
+    max_proposals_per_delegate : int }.
   Definition with_proof_of_work_nonce_size proof_of_work_nonce_size
     (r : record) :=
     Build proof_of_work_nonce_size r.(nonce_length)
@@ -99,20 +99,20 @@ Definition __fixed_value : fixed :=
 
 Module parametric.
   Record record : Set := Build {
-    preserved_cycles : Z;
+    preserved_cycles : int;
     blocks_per_cycle : int32;
     blocks_per_commitment : int32;
     blocks_per_roll_snapshot : int32;
     blocks_per_voting_period : int32;
     time_between_blocks : list Period_repr.t;
-    endorsers_per_block : Z;
+    endorsers_per_block : int;
     hard_gas_limit_per_operation : Z.t;
     hard_gas_limit_per_block : Z.t;
     proof_of_work_threshold : int64;
     tokens_per_roll : Tez_repr.t;
-    michelson_maximum_type_size : Z;
+    michelson_maximum_type_size : int;
     seed_nonce_revelation_tip : Tez_repr.t;
-    origination_size : Z;
+    origination_size : int;
     block_security_deposit : Tez_repr.t;
     endorsement_security_deposit : Tez_repr.t;
     block_reward : Tez_repr.t;
@@ -123,7 +123,7 @@ Module parametric.
     quorum_min : int32;
     quorum_max : int32;
     min_proposal_quorum : int32;
-    initial_endorsers : Z;
+    initial_endorsers : int;
     delay_per_missing_endorsement : Period_repr.t }.
   Definition with_preserved_cycles preserved_cycles (r : record) :=
     Build preserved_cycles r.(blocks_per_cycle) r.(blocks_per_commitment)

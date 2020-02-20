@@ -306,7 +306,7 @@ Module Baking_rights.
     Record record : Set := Build {
       level : Alpha_context.Raw_level.t;
       delegate : (|Signature.Public_key_hash|).(S.SPublic_key_hash.t);
-      priority : Z;
+      priority : int;
       timestamp : option Alpha_context.Timestamp.t }.
     Definition with_level level (r : record) :=
       Build level r.(delegate) r.(priority) r.(timestamp).
@@ -342,7 +342,7 @@ Module Baking_rights.
             (J * a * b * c * q * i * o)) * K)))) * K * a ->
     option (list Alpha_context.Raw_level.t) ->
     option (list Alpha_context.Cycle.t) ->
-    option (list Signature.public_key_hash) -> option bool -> option Z -> a ->
+    option (list Signature.public_key_hash) -> option bool -> option int -> a ->
     Lwt.t (Error_monad.shell_tzresult (list t)).
 End Baking_rights.
 
@@ -351,7 +351,7 @@ Module Endorsing_rights.
     Record record : Set := Build {
       level : Alpha_context.Raw_level.t;
       delegate : (|Signature.Public_key_hash|).(S.SPublic_key_hash.t);
-      slots : list Z;
+      slots : list int;
       estimated_time : option Alpha_context.Timestamp.t }.
     Definition with_level level (r : record) :=
       Build level r.(delegate) r.(slots) r.(estimated_time).
@@ -414,7 +414,7 @@ Module Endorsing_power.
           i -> Lwt.t (Error_monad.shell_tzresult o)) *
             (J * a * b * c * q * i * o)) * K)))) * K * a -> a ->
     Alpha_context.packed_operation -> (|Chain_id|).(S.HASH.t) ->
-    Lwt.t (Error_monad.shell_tzresult Z).
+    Lwt.t (Error_monad.shell_tzresult int).
 End Endorsing_power.
 
 Module Required_endorsements.
@@ -439,7 +439,7 @@ Module Required_endorsements.
             (((RPC_context.t * a) * b) * c) q i o -> a -> a -> b -> c -> q ->
           i -> Lwt.t (Error_monad.shell_tzresult o)) *
             (J * a * b * c * q * i * o)) * K)))) * K * a -> a ->
-    Alpha_context.Period.t -> Lwt.t (Error_monad.shell_tzresult Z).
+    Alpha_context.Period.t -> Lwt.t (Error_monad.shell_tzresult int).
 End Required_endorsements.
 
 Module Minimal_valid_time.
@@ -463,7 +463,7 @@ Module Minimal_valid_time.
               (* `POST *) unit + (* `PATCH *) unit) RPC_context.t
             (((RPC_context.t * a) * b) * c) q i o -> a -> a -> b -> c -> q ->
           i -> Lwt.t (Error_monad.shell_tzresult o)) *
-            (J * a * b * c * q * i * o)) * K)))) * K * a -> a -> Z -> Z ->
+            (J * a * b * c * q * i * o)) * K)))) * K * a -> a -> int -> int ->
     Lwt.t (Error_monad.shell_tzresult Time.t).
 End Minimal_valid_time.
 
@@ -472,7 +472,7 @@ Parameter endorsement_rights :
   Lwt.t (Error_monad.tzresult (list Alpha_context.public_key_hash)).
 
 Parameter baking_rights :
-  Alpha_context.t -> option Z ->
+  Alpha_context.t -> option int ->
   Lwt.t
     (Error_monad.tzresult
       (Alpha_context.Raw_level.t *
@@ -480,12 +480,12 @@ Parameter baking_rights :
 
 Parameter endorsing_power :
   Alpha_context.t -> Alpha_context.packed_operation * (|Chain_id|).(S.HASH.t) ->
-  Lwt.t (Error_monad.tzresult Z).
+  Lwt.t (Error_monad.tzresult int).
 
 Parameter required_endorsements :
-  Alpha_context.t -> Alpha_context.Period.t -> Lwt.t (Error_monad.tzresult Z).
+  Alpha_context.t -> Alpha_context.Period.t -> Lwt.t (Error_monad.tzresult int).
 
 Parameter minimal_valid_time :
-  Alpha_context.t -> Z -> Z -> Lwt.t (Error_monad.tzresult Time.t).
+  Alpha_context.t -> int -> int -> Lwt.t (Error_monad.tzresult Time.t).
 
 Parameter register : unit -> unit.

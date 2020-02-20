@@ -16,7 +16,7 @@ Require Tezos.Raw_context.
 Definition current : Raw_context.context -> Int64.t :=
   Raw_context.current_fitness.
 
-Definition increase (op_staroptstar : option Z)
+Definition increase (op_staroptstar : option int)
   : Raw_context.context -> Raw_context.t :=
   let gap :=
     match op_staroptstar with

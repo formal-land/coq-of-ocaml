@@ -371,8 +371,8 @@ Definition apply_internal_manager_operations
         existT (A := Set)
           (fun __Internal_operation_'kind =>
             [Alpha_context.Contract.contract **
-              Alpha_context.manager_operation __Internal_operation_'kind ** Z **
-              Alpha_context.internal_operation __Internal_operation_'kind **
+              Alpha_context.manager_operation __Internal_operation_'kind ** int
+              ** Alpha_context.internal_operation __Internal_operation_'kind **
               list Alpha_context.packed_internal_operation]) _
           [source, operation, __nonce_value, op, rest] in
       let= function_parameter :=

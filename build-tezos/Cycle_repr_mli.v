@@ -31,7 +31,7 @@ Definition op_gteq : t -> t -> bool := (|Included_S|).(Compare.S.op_gteq).
 
 Definition op_gt : t -> t -> bool := (|Included_S|).(Compare.S.op_gt).
 
-Definition compare : t -> t -> Z := (|Included_S|).(Compare.S.compare).
+Definition compare : t -> t -> int := (|Included_S|).(Compare.S.compare).
 
 Definition equal : t -> t -> bool := (|Included_S|).(Compare.S.equal).
 
@@ -49,9 +49,9 @@ Parameter root : cycle.
 
 Parameter pred : cycle -> option cycle.
 
-Parameter add : cycle -> Z -> cycle.
+Parameter add : cycle -> int -> cycle.
 
-Parameter sub : cycle -> Z -> option cycle.
+Parameter sub : cycle -> int -> option cycle.
 
 Parameter succ : cycle -> cycle.
 

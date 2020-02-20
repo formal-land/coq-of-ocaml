@@ -60,7 +60,7 @@
 opam pin add https://github.com/clarus/coq-of-ocaml.git#master</code></pre>
     <ul>
       <li>OCaml size: 6154 lines</li>
-      <li>Coq size: 3356 lines (-46% compared to&nbsp;OCaml)</li>
+      <li>Coq size: 3386 lines (-45% compared to&nbsp;OCaml)</li>
       <li>Warnings from coq-of-ocaml: 191</li>
     </ul>
     
@@ -104,7 +104,7 @@ opam pin add https://github.com/clarus/coq-of-ocaml.git#master</code></pre>
     <h3>Environment_mli</h3>
     <ul>
       <li>OCaml size: 6154 lines</li>
-      <li>Coq size: 3356 lines (-46% compared to&nbsp;OCaml)</li>
+      <li>Coq size: 3386 lines (-45% compared to&nbsp;OCaml)</li>
     </ul>
   </div>
   <div class="col-md-6">
@@ -6787,65 +6787,65 @@ Module Pervasives.
   
   Parameter __FILE__ : string.
   
-  Parameter __LINE__ : Z.
+  Parameter __LINE__ : int.
   
   Parameter __MODULE__ : string.
   
-  Parameter __POS__ : string * Z * Z * Z.
+  Parameter __POS__ : string * int * int * int.
   
   Parameter __LOC_OF__ : forall {a : Set}, a -&gt; string * a.
   
-  Parameter __LINE_OF__ : forall {a : Set}, a -&gt; Z * a.
+  Parameter __LINE_OF__ : forall {a : Set}, a -&gt; int * a.
   
-  Parameter __POS_OF__ : forall {a : Set}, a -&gt; (string * Z * Z * Z) * a.
+  Parameter __POS_OF__ : forall {a : Set}, a -&gt; (string * int * int * int) * a.
   
   Parameter op_pipegt : forall {a b : Set}, a -&gt; (a -&gt; b) -&gt; b.
   
   Parameter op_atat : forall {a b : Set}, (a -&gt; b) -&gt; a -&gt; b.
   
-  Parameter op_tildeminus : Z -&gt; Z.
+  Parameter op_tildeminus : int -&gt; int.
   
-  Parameter op_tildeplus : Z -&gt; Z.
+  Parameter op_tildeplus : int -&gt; int.
   
-  Parameter succ : Z -&gt; Z.
+  Parameter succ : int -&gt; int.
   
-  Parameter pred : Z -&gt; Z.
+  Parameter pred : int -&gt; int.
   
-  Parameter op_plus : Z -&gt; Z -&gt; Z.
+  Parameter op_plus : int -&gt; int -&gt; int.
   
-  Parameter op_minus : Z -&gt; Z -&gt; Z.
+  Parameter op_minus : int -&gt; int -&gt; int.
   
-  Parameter op_star : Z -&gt; Z -&gt; Z.
+  Parameter op_star : int -&gt; int -&gt; int.
   
-  Parameter op_div : Z -&gt; Z -&gt; Z.
+  Parameter op_div : int -&gt; int -&gt; int.
   
-  Parameter __mod : Z -&gt; Z -&gt; Z.
+  Parameter __mod : int -&gt; int -&gt; int.
   
-  Parameter abs : Z -&gt; Z.
+  Parameter abs : int -&gt; int.
   
-  Parameter max_int : Z.
+  Parameter max_int : int.
   
-  Parameter min_int : Z.
+  Parameter min_int : int.
   
-  Parameter land : Z -&gt; Z -&gt; Z.
+  Parameter land : int -&gt; int -&gt; int.
   
-  Parameter lor : Z -&gt; Z -&gt; Z.
+  Parameter lor : int -&gt; int -&gt; int.
   
-  Parameter lxor : Z -&gt; Z -&gt; Z.
+  Parameter lxor : int -&gt; int -&gt; int.
   
-  Parameter lnot : Z -&gt; Z.
+  Parameter lnot : int -&gt; int.
   
-  Parameter lsl : Z -&gt; Z -&gt; Z.
+  Parameter lsl : int -&gt; int -&gt; int.
   
-  Parameter lsr : Z -&gt; Z -&gt; Z.
+  Parameter lsr : int -&gt; int -&gt; int.
   
-  Parameter asr : Z -&gt; Z -&gt; Z.
+  Parameter asr : int -&gt; int -&gt; int.
   
   Parameter op_caret : string -&gt; string -&gt; string.
   
-  Parameter int_of_char : ascii -&gt; Z.
+  Parameter int_of_char : ascii -&gt; int.
   
-  Parameter char_of_int : Z -&gt; ascii.
+  Parameter char_of_int : int -&gt; ascii.
   
   Parameter ignore : forall {a : Set}, a -&gt; unit.
   
@@ -6853,9 +6853,9 @@ Module Pervasives.
   
   Parameter bool_of_string_opt : string -&gt; option bool.
   
-  Parameter string_of_int : Z -&gt; string.
+  Parameter string_of_int : int -&gt; string.
   
-  Parameter int_of_string_opt : string -&gt; option Z.
+  Parameter int_of_string_opt : string -&gt; option int.
   
   Parameter fst : forall {a b : Set}, a * b -&gt; a.
   
@@ -6878,9 +6878,9 @@ Module Pervasives.
   
   Parameter op_coloneq : forall {a : Set}, ref a -&gt; a -&gt; unit.
   
-  Parameter incr : ref Z -&gt; unit.
+  Parameter incr : ref int -&gt; unit.
   
-  Parameter decr : ref Z -&gt; unit.
+  Parameter decr : ref int -&gt; unit.
   
   Inductive result (a b : Set) : Set :=
   | Ok : a -&gt; result a b
@@ -6909,11 +6909,11 @@ End Pervasives.
 Import Pervasives.
 
 Module List.
-  Parameter length : forall {a : Set}, list a -&gt; Z.
+  Parameter length : forall {a : Set}, list a -&gt; int.
   
-  Parameter compare_lengths : forall {a b : Set}, list a -&gt; list b -&gt; Z.
+  Parameter compare_lengths : forall {a b : Set}, list a -&gt; list b -&gt; int.
   
-  Parameter compare_length_with : forall {a : Set}, list a -&gt; Z -&gt; Z.
+  Parameter compare_length_with : forall {a : Set}, list a -&gt; int -&gt; int.
   
   Parameter __cons_value : forall {a : Set}, a -&gt; list a -&gt; list a.
   
@@ -6921,11 +6921,11 @@ Module List.
   
   Parameter tl : forall {a : Set}, list a -&gt; list a.
   
-  Parameter nth_opt : forall {a : Set}, list a -&gt; Z -&gt; option a.
+  Parameter nth_opt : forall {a : Set}, list a -&gt; int -&gt; option a.
   
   Parameter rev : forall {a : Set}, list a -&gt; list a.
   
-  Parameter init : forall {a : Set}, Z -&gt; (Z -&gt; a) -&gt; list a.
+  Parameter init : forall {a : Set}, int -&gt; (int -&gt; a) -&gt; list a.
   
   Parameter append : forall {a : Set}, list a -&gt; list a -&gt; list a.
   
@@ -6937,11 +6937,11 @@ Module List.
   
   Parameter iter : forall {a : Set}, (a -&gt; unit) -&gt; list a -&gt; unit.
   
-  Parameter iteri : forall {a : Set}, (Z -&gt; a -&gt; unit) -&gt; list a -&gt; unit.
+  Parameter iteri : forall {a : Set}, (int -&gt; a -&gt; unit) -&gt; list a -&gt; unit.
   
   Parameter map : forall {a b : Set}, (a -&gt; b) -&gt; list a -&gt; list b.
   
-  Parameter mapi : forall {a b : Set}, (Z -&gt; a -&gt; b) -&gt; list a -&gt; list b.
+  Parameter mapi : forall {a b : Set}, (int -&gt; a -&gt; b) -&gt; list a -&gt; list b.
   
   Parameter rev_map : forall {a b : Set}, (a -&gt; b) -&gt; list a -&gt; list b.
   
@@ -7004,58 +7004,58 @@ Module List.
   
   Parameter combine : forall {a b : Set}, list a -&gt; list b -&gt; list (a * b).
   
-  Parameter sort : forall {a : Set}, (a -&gt; a -&gt; Z) -&gt; list a -&gt; list a.
+  Parameter sort : forall {a : Set}, (a -&gt; a -&gt; int) -&gt; list a -&gt; list a.
   
-  Parameter stable_sort : forall {a : Set}, (a -&gt; a -&gt; Z) -&gt; list a -&gt; list a.
+  Parameter stable_sort : forall {a : Set}, (a -&gt; a -&gt; int) -&gt; list a -&gt; list a.
   
-  Parameter fast_sort : forall {a : Set}, (a -&gt; a -&gt; Z) -&gt; list a -&gt; list a.
+  Parameter fast_sort : forall {a : Set}, (a -&gt; a -&gt; int) -&gt; list a -&gt; list a.
   
-  Parameter sort_uniq : forall {a : Set}, (a -&gt; a -&gt; Z) -&gt; list a -&gt; list a.
+  Parameter sort_uniq : forall {a : Set}, (a -&gt; a -&gt; int) -&gt; list a -&gt; list a.
   
   Parameter merge : forall {a : Set},
-    (a -&gt; a -&gt; Z) -&gt; list a -&gt; list a -&gt; list a.
+    (a -&gt; a -&gt; int) -&gt; list a -&gt; list a -&gt; list a.
 End List.
 
 Module String.
-  Parameter length : string -&gt; Z.
+  Parameter length : string -&gt; int.
   
-  Parameter get : string -&gt; Z -&gt; ascii.
+  Parameter get : string -&gt; int -&gt; ascii.
   
-  Parameter make : Z -&gt; ascii -&gt; string.
+  Parameter make : int -&gt; ascii -&gt; string.
   
-  Parameter init : Z -&gt; (Z -&gt; ascii) -&gt; string.
+  Parameter init : int -&gt; (int -&gt; ascii) -&gt; string.
   
-  Parameter sub : string -&gt; Z -&gt; Z -&gt; string.
+  Parameter sub : string -&gt; int -&gt; int -&gt; string.
   
-  Parameter blit : string -&gt; Z -&gt; string -&gt; Z -&gt; Z -&gt; unit.
+  Parameter blit : string -&gt; int -&gt; bytes -&gt; int -&gt; int -&gt; unit.
   
   Parameter concat : string -&gt; list string -&gt; string.
   
   Parameter iter : (ascii -&gt; unit) -&gt; string -&gt; unit.
   
-  Parameter iteri : (Z -&gt; ascii -&gt; unit) -&gt; string -&gt; unit.
+  Parameter iteri : (int -&gt; ascii -&gt; unit) -&gt; string -&gt; unit.
   
   Parameter map : (ascii -&gt; ascii) -&gt; string -&gt; string.
   
-  Parameter mapi : (Z -&gt; ascii -&gt; ascii) -&gt; string -&gt; string.
+  Parameter mapi : (int -&gt; ascii -&gt; ascii) -&gt; string -&gt; string.
   
   Parameter trim : string -&gt; string.
   
   Parameter escaped : string -&gt; string.
   
-  Parameter index_opt : string -&gt; ascii -&gt; option Z.
+  Parameter index_opt : string -&gt; ascii -&gt; option int.
   
-  Parameter rindex_opt : string -&gt; ascii -&gt; option Z.
+  Parameter rindex_opt : string -&gt; ascii -&gt; option int.
   
-  Parameter index_from_opt : string -&gt; Z -&gt; ascii -&gt; option Z.
+  Parameter index_from_opt : string -&gt; int -&gt; ascii -&gt; option int.
   
-  Parameter rindex_from_opt : string -&gt; Z -&gt; ascii -&gt; option Z.
+  Parameter rindex_from_opt : string -&gt; int -&gt; ascii -&gt; option int.
   
   Parameter contains : string -&gt; ascii -&gt; bool.
   
-  Parameter contains_from : string -&gt; Z -&gt; ascii -&gt; bool.
+  Parameter contains_from : string -&gt; int -&gt; ascii -&gt; bool.
   
-  Parameter rcontains_from : string -&gt; Z -&gt; ascii -&gt; bool.
+  Parameter rcontains_from : string -&gt; int -&gt; ascii -&gt; bool.
   
   Parameter uppercase_ascii : string -&gt; string.
   
@@ -7067,34 +7067,34 @@ Module String.
   
   Definition t : Set := string.
   
-  Parameter compare : t -&gt; t -&gt; Z.
+  Parameter compare : t -&gt; t -&gt; int.
   
   Parameter equal : t -&gt; t -&gt; bool.
   
   Parameter split_on_char : ascii -&gt; string -&gt; list string.
   
-  Parameter get_char : t -&gt; Z -&gt; ascii.
+  Parameter get_char : t -&gt; int -&gt; ascii.
   
-  Parameter get_uint8 : t -&gt; Z -&gt; Z.
+  Parameter get_uint8 : t -&gt; int -&gt; int.
   
-  Parameter get_int8 : t -&gt; Z -&gt; Z.
+  Parameter get_int8 : t -&gt; int -&gt; int.
   
-  Parameter get_uint16 : t -&gt; Z -&gt; Z.
+  Parameter get_uint16 : t -&gt; int -&gt; int.
   
-  Parameter get_int16 : t -&gt; Z -&gt; Z.
+  Parameter get_int16 : t -&gt; int -&gt; int.
   
-  Parameter get_int32 : t -&gt; Z -&gt; int32.
+  Parameter get_int32 : t -&gt; int -&gt; int32.
   
-  Parameter get_int64 : t -&gt; Z -&gt; int64.
+  Parameter get_int64 : t -&gt; int -&gt; int64.
   
   Module LE.
-    Parameter get_uint16 : t -&gt; Z -&gt; Z.
+    Parameter get_uint16 : t -&gt; int -&gt; int.
     
-    Parameter get_int16 : t -&gt; Z -&gt; Z.
+    Parameter get_int16 : t -&gt; int -&gt; int.
     
-    Parameter get_int32 : t -&gt; Z -&gt; int32.
+    Parameter get_int32 : t -&gt; int -&gt; int32.
     
-    Parameter get_int64 : t -&gt; Z -&gt; int64.
+    Parameter get_int64 : t -&gt; int -&gt; int64.
   End LE.
 End String.
 
@@ -7135,19 +7135,19 @@ Module Int32.
   
   Parameter lognot : int32 -&gt; int32.
   
-  Parameter shift_left : int32 -&gt; Z -&gt; int32.
+  Parameter shift_left : int32 -&gt; int -&gt; int32.
   
-  Parameter shift_right : int32 -&gt; Z -&gt; int32.
+  Parameter shift_right : int32 -&gt; int -&gt; int32.
   
-  Parameter shift_right_logical : int32 -&gt; Z -&gt; int32.
+  Parameter shift_right_logical : int32 -&gt; int -&gt; int32.
   
-  Parameter of_int : Z -&gt; int32.
+  Parameter of_int : int -&gt; int32.
   
-  Parameter to_int : int32 -&gt; Z.
+  Parameter to_int : int32 -&gt; int.
   
-  Parameter of_float : Z -&gt; int32.
+  Parameter of_float : float -&gt; int32.
   
-  Parameter to_float : int32 -&gt; Z.
+  Parameter to_float : int32 -&gt; float.
   
   Parameter of_string : string -&gt; int32.
   
@@ -7155,13 +7155,13 @@ Module Int32.
   
   Parameter to_string : int32 -&gt; string.
   
-  Parameter bits_of_float : Z -&gt; int32.
+  Parameter bits_of_float : float -&gt; int32.
   
-  Parameter float_of_bits : int32 -&gt; Z.
+  Parameter float_of_bits : int32 -&gt; float.
   
   Definition t : Set := int32.
   
-  Parameter compare : t -&gt; t -&gt; Z.
+  Parameter compare : t -&gt; t -&gt; int.
   
   Parameter equal : t -&gt; t -&gt; bool.
 End Int32.
@@ -7203,19 +7203,19 @@ Module Int64.
   
   Parameter lognot : int64 -&gt; int64.
   
-  Parameter shift_left : int64 -&gt; Z -&gt; int64.
+  Parameter shift_left : int64 -&gt; int -&gt; int64.
   
-  Parameter shift_right : int64 -&gt; Z -&gt; int64.
+  Parameter shift_right : int64 -&gt; int -&gt; int64.
   
-  Parameter shift_right_logical : int64 -&gt; Z -&gt; int64.
+  Parameter shift_right_logical : int64 -&gt; int -&gt; int64.
   
-  Parameter of_int : Z -&gt; int64.
+  Parameter of_int : int -&gt; int64.
   
-  Parameter to_int : int64 -&gt; Z.
+  Parameter to_int : int64 -&gt; int.
   
-  Parameter of_float : Z -&gt; int64.
+  Parameter of_float : float -&gt; int64.
   
-  Parameter to_float : int64 -&gt; Z.
+  Parameter to_float : int64 -&gt; float.
   
   Parameter of_int32 : int32 -&gt; int64.
   
@@ -7231,13 +7231,13 @@ Module Int64.
   
   Parameter to_string : int64 -&gt; string.
   
-  Parameter bits_of_float : Z -&gt; int64.
+  Parameter bits_of_float : float -&gt; int64.
   
-  Parameter float_of_bits : int64 -&gt; Z.
+  Parameter float_of_bits : int64 -&gt; float.
   
   Definition t : Set := int64.
   
-  Parameter compare : t -&gt; t -&gt; Z.
+  Parameter compare : t -&gt; t -&gt; int.
   
   Parameter equal : t -&gt; t -&gt; bool.
 End Int64.
@@ -7245,25 +7245,25 @@ End Int64.
 Module Format.
   Parameter formatter : Set.
   
-  Parameter pp_open_box : formatter -&gt; Z -&gt; unit.
+  Parameter pp_open_box : formatter -&gt; int -&gt; unit.
   
   Parameter pp_close_box : formatter -&gt; unit -&gt; unit.
   
   Parameter pp_open_hbox : formatter -&gt; unit -&gt; unit.
   
-  Parameter pp_open_vbox : formatter -&gt; Z -&gt; unit.
+  Parameter pp_open_vbox : formatter -&gt; int -&gt; unit.
   
-  Parameter pp_open_hvbox : formatter -&gt; Z -&gt; unit.
+  Parameter pp_open_hvbox : formatter -&gt; int -&gt; unit.
   
-  Parameter pp_open_hovbox : formatter -&gt; Z -&gt; unit.
+  Parameter pp_open_hovbox : formatter -&gt; int -&gt; unit.
   
   Parameter pp_print_string : formatter -&gt; string -&gt; unit.
   
-  Parameter pp_print_as : formatter -&gt; Z -&gt; string -&gt; unit.
+  Parameter pp_print_as : formatter -&gt; int -&gt; string -&gt; unit.
   
-  Parameter pp_print_int : formatter -&gt; Z -&gt; unit.
+  Parameter pp_print_int : formatter -&gt; int -&gt; unit.
   
-  Parameter pp_print_float : formatter -&gt; Z -&gt; unit.
+  Parameter pp_print_float : formatter -&gt; float -&gt; unit.
   
   Parameter pp_print_char : formatter -&gt; ascii -&gt; unit.
   
@@ -7273,7 +7273,7 @@ Module Format.
   
   Parameter pp_print_cut : formatter -&gt; unit -&gt; unit.
   
-  Parameter pp_print_break : formatter -&gt; Z -&gt; Z -&gt; unit.
+  Parameter pp_print_break : formatter -&gt; int -&gt; int -&gt; unit.
   
   Parameter pp_force_newline : formatter -&gt; unit -&gt; unit.
   
@@ -7283,17 +7283,17 @@ Module Format.
   
   Parameter pp_print_newline : formatter -&gt; unit -&gt; unit.
   
-  Parameter pp_set_margin : formatter -&gt; Z -&gt; unit.
+  Parameter pp_set_margin : formatter -&gt; int -&gt; unit.
   
-  Parameter pp_get_margin : formatter -&gt; unit -&gt; Z.
+  Parameter pp_get_margin : formatter -&gt; unit -&gt; int.
   
-  Parameter pp_set_max_indent : formatter -&gt; Z -&gt; unit.
+  Parameter pp_set_max_indent : formatter -&gt; int -&gt; unit.
   
-  Parameter pp_get_max_indent : formatter -&gt; unit -&gt; Z.
+  Parameter pp_get_max_indent : formatter -&gt; unit -&gt; int.
   
-  Parameter pp_set_max_boxes : formatter -&gt; Z -&gt; unit.
+  Parameter pp_set_max_boxes : formatter -&gt; int -&gt; unit.
   
-  Parameter pp_get_max_boxes : formatter -&gt; unit -&gt; Z.
+  Parameter pp_get_max_boxes : formatter -&gt; unit -&gt; int.
   
   Parameter pp_over_max_boxes : formatter -&gt; unit -&gt; bool.
   
@@ -7305,7 +7305,7 @@ Module Format.
   
   Parameter pp_print_tab : formatter -&gt; unit -&gt; unit.
   
-  Parameter pp_print_tbreak : formatter -&gt; Z -&gt; Z -&gt; unit.
+  Parameter pp_print_tbreak : formatter -&gt; int -&gt; int -&gt; unit.
   
   Parameter pp_set_ellipsis_text : formatter -&gt; string -&gt; unit.
   
@@ -7360,64 +7360,64 @@ End Format.
 Module MBytes.
   Parameter t : Set.
   
-  Parameter create : Z -&gt; t.
+  Parameter create : int -&gt; t.
   
-  Parameter length : t -&gt; Z.
+  Parameter length : t -&gt; int.
   
   Parameter copy : t -&gt; t.
   
-  Parameter sub : t -&gt; Z -&gt; Z -&gt; t.
+  Parameter sub : t -&gt; int -&gt; int -&gt; t.
   
-  Parameter blit : t -&gt; Z -&gt; t -&gt; Z -&gt; Z -&gt; unit.
+  Parameter blit : t -&gt; int -&gt; t -&gt; int -&gt; int -&gt; unit.
   
-  Parameter blit_of_string : string -&gt; Z -&gt; t -&gt; Z -&gt; Z -&gt; unit.
+  Parameter blit_of_string : string -&gt; int -&gt; t -&gt; int -&gt; int -&gt; unit.
   
-  Parameter blit_to_bytes : t -&gt; Z -&gt; string -&gt; Z -&gt; Z -&gt; unit.
+  Parameter blit_to_bytes : t -&gt; int -&gt; bytes -&gt; int -&gt; int -&gt; unit.
   
   Parameter of_string : string -&gt; t.
   
   Parameter to_string : t -&gt; string.
   
-  Parameter sub_string : t -&gt; Z -&gt; Z -&gt; string.
+  Parameter sub_string : t -&gt; int -&gt; int -&gt; string.
   
-  Parameter get_char : t -&gt; Z -&gt; ascii.
+  Parameter get_char : t -&gt; int -&gt; ascii.
   
-  Parameter get_uint8 : t -&gt; Z -&gt; Z.
+  Parameter get_uint8 : t -&gt; int -&gt; int.
   
-  Parameter get_int8 : t -&gt; Z -&gt; Z.
+  Parameter get_int8 : t -&gt; int -&gt; int.
   
-  Parameter set_char : t -&gt; Z -&gt; ascii -&gt; unit.
+  Parameter set_char : t -&gt; int -&gt; ascii -&gt; unit.
   
-  Parameter set_int8 : t -&gt; Z -&gt; Z -&gt; unit.
+  Parameter set_int8 : t -&gt; int -&gt; int -&gt; unit.
   
-  Parameter get_uint16 : t -&gt; Z -&gt; Z.
+  Parameter get_uint16 : t -&gt; int -&gt; int.
   
-  Parameter get_int16 : t -&gt; Z -&gt; Z.
+  Parameter get_int16 : t -&gt; int -&gt; int.
   
-  Parameter get_int32 : t -&gt; Z -&gt; int32.
+  Parameter get_int32 : t -&gt; int -&gt; int32.
   
-  Parameter get_int64 : t -&gt; Z -&gt; int64.
+  Parameter get_int64 : t -&gt; int -&gt; int64.
   
-  Parameter set_int16 : t -&gt; Z -&gt; Z -&gt; unit.
+  Parameter set_int16 : t -&gt; int -&gt; int -&gt; unit.
   
-  Parameter set_int32 : t -&gt; Z -&gt; int32 -&gt; unit.
+  Parameter set_int32 : t -&gt; int -&gt; int32 -&gt; unit.
   
-  Parameter set_int64 : t -&gt; Z -&gt; int64 -&gt; unit.
+  Parameter set_int64 : t -&gt; int -&gt; int64 -&gt; unit.
   
   Module LE.
-    Parameter get_uint16 : t -&gt; Z -&gt; Z.
+    Parameter get_uint16 : t -&gt; int -&gt; int.
     
-    Parameter get_int16 : t -&gt; Z -&gt; Z.
+    Parameter get_int16 : t -&gt; int -&gt; int.
     
-    Parameter get_int32 : t -&gt; Z -&gt; int32.
+    Parameter get_int32 : t -&gt; int -&gt; int32.
     
-    Parameter get_int64 : t -&gt; Z -&gt; int64.
+    Parameter get_int64 : t -&gt; int -&gt; int64.
     
-    Parameter set_int16 : t -&gt; Z -&gt; Z -&gt; unit.
+    Parameter set_int16 : t -&gt; int -&gt; int -&gt; unit.
     
-    Parameter set_int32 : t -&gt; Z -&gt; int32 -&gt; unit.
+    Parameter set_int32 : t -&gt; int -&gt; int32 -&gt; unit.
     
-    Parameter set_int64 : t -&gt; Z -&gt; int64 -&gt; unit.
+    Parameter set_int64 : t -&gt; int -&gt; int64 -&gt; unit.
   End LE.
   
   Parameter op_eq : t -&gt; t -&gt; bool.
@@ -7432,7 +7432,7 @@ Module MBytes.
   
   Parameter op_gt : t -&gt; t -&gt; bool.
   
-  Parameter compare : t -&gt; t -&gt; Z.
+  Parameter compare : t -&gt; t -&gt; int.
   
   Parameter concat : string -&gt; list t -&gt; t.
   
@@ -7444,7 +7444,7 @@ Module MBytes.
   Parameter of_hex : hex -&gt; t.
 End MBytes.
 
-Module Z.
+Module Type Z_type.
   Parameter t : Set.
   
   Parameter zero : t.
@@ -7473,9 +7473,9 @@ Module Z.
   
   Parameter lognot : t -&gt; t.
   
-  Parameter shift_left : t -&gt; Z -&gt; t.
+  Parameter shift_left : t -&gt; int -&gt; t.
   
-  Parameter shift_right : t -&gt; Z -&gt; t.
+  Parameter shift_right : t -&gt; int -&gt; t.
   
   Parameter to_string : t -&gt; string.
   
@@ -7485,19 +7485,49 @@ Module Z.
   
   Parameter of_int64 : int64 -&gt; t.
   
-  Parameter to_int : t -&gt; Z.
+  Parameter to_int : t -&gt; int.
   
-  Parameter of_int : Z -&gt; t.
+  Parameter of_int : int -&gt; t.
   
-  Parameter to_bits : option Z -&gt; t -&gt; MBytes.t.
+  Parameter to_bits : option int -&gt; t -&gt; MBytes.t.
   
   Parameter of_bits : MBytes.t -&gt; t.
   
   Parameter equal : t -&gt; t -&gt; bool.
   
-  Parameter compare : t -&gt; t -&gt; Z.
+  Parameter compare : t -&gt; t -&gt; int.
   
-  Parameter numbits : t -&gt; Z.
+  Parameter numbits : t -&gt; int.
+End Z_type.
+
+Module Z : Z_type.
+  Definition t := Z.
+  Definition zero := 0.
+  Definition one := 1.
+  Definition succ z := Z.add z 1.
+  Definition abs := Z.abs.
+  Definition neg z := -z.
+  Definition add := Z.add.
+  Definition sub := Z.sub.
+  Definition mul := Z.mul.
+  Parameter ediv_rem : t -&gt; t -&gt; t * t.
+  Parameter logand : t -&gt; t -&gt; t.
+  Parameter logor : t -&gt; t -&gt; t.
+  Parameter logxor : t -&gt; t -&gt; t.
+  Parameter lognot : t -&gt; t.
+  Parameter shift_left : t -&gt; int -&gt; t.
+  Parameter shift_right : t -&gt; int -&gt; t.
+  Parameter to_string : t -&gt; string.
+  Parameter of_string : string -&gt; t.
+  Parameter to_int64 : t -&gt; int64.
+  Parameter of_int64 : int64 -&gt; t.
+  Parameter to_int : t -&gt; int.
+  Parameter of_int : int -&gt; t.
+  Parameter to_bits : option int -&gt; t -&gt; MBytes.t.
+  Parameter of_bits : MBytes.t -&gt; t.
+  Definition equal := Z.eqb.
+  Parameter compare : t -&gt; t -&gt; int.
+  Parameter numbits : t -&gt; int.
 End Z.
 
 Module Lwt.
@@ -7540,10 +7570,10 @@ Module Lwt_list.
     (a -&gt; Lwt.t b) -&gt; list a -&gt; Lwt.t (list b).
   
   Parameter mapi_s : forall {a b : Set},
-    (Z -&gt; a -&gt; Lwt.t b) -&gt; list a -&gt; Lwt.t (list b).
+    (int -&gt; a -&gt; Lwt.t b) -&gt; list a -&gt; Lwt.t (list b).
   
   Parameter mapi_p : forall {a b : Set},
-    (Z -&gt; a -&gt; Lwt.t b) -&gt; list a -&gt; Lwt.t (list b).
+    (int -&gt; a -&gt; Lwt.t b) -&gt; list a -&gt; Lwt.t (list b).
   
   Parameter rev_map_s : forall {a b : Set},
     (a -&gt; Lwt.t b) -&gt; list a -&gt; Lwt.t (list b).
@@ -7602,7 +7632,7 @@ Module Compare.
   Module COMPARABLE.
     Record signature {t : Set} : Set := {
       t := t;
-      compare : t -&gt; t -&gt; Z;
+      compare : t -&gt; t -&gt; int;
     }.
     Arguments signature : clear implicits.
   End COMPARABLE.
@@ -7616,7 +7646,7 @@ Module Compare.
       op_lteq : t -&gt; t -&gt; bool;
       op_gteq : t -&gt; t -&gt; bool;
       op_gt : t -&gt; t -&gt; bool;
-      compare : t -&gt; t -&gt; Z;
+      compare : t -&gt; t -&gt; int;
       equal : t -&gt; t -&gt; bool;
       max : t -&gt; t -&gt; t;
       min : t -&gt; t -&gt; t;
@@ -7632,7 +7662,7 @@ Module Compare.
   
   Parameter Bool : {_ : unit &amp; S.signature bool}.
   
-  Parameter Int : {_ : unit &amp; S.signature Z}.
+  Parameter Int : {_ : unit &amp; S.signature int}.
   
   Parameter Int32 : {_ : unit &amp; S.signature int32}.
   
@@ -7642,7 +7672,7 @@ Module Compare.
   
   Parameter Uint64 : {_ : unit &amp; S.signature int64}.
   
-  Parameter Float : {_ : unit &amp; S.signature Z}.
+  Parameter Float : {_ : unit &amp; S.signature float}.
   
   Parameter String : {_ : unit &amp; S.signature string}.
   
@@ -7662,7 +7692,7 @@ Module Data_encoding.
   | Bool : bool -&gt; json
   | Null : json
   | O : list (string * json) -&gt; json
-  | Float : Z -&gt; json
+  | Float : float -&gt; json
   | String : string -&gt; json
   | A : list json -&gt; json.
   
@@ -7673,7 +7703,7 @@ Module Data_encoding.
   Definition encoding (a : Set) : Set := t a.
   
   Parameter classify : forall {a : Set},
-    encoding a -&gt; (* `Variable *) unit + (* `Fixed *) Z + (* `Dynamic *) unit.
+    encoding a -&gt; (* `Variable *) unit + (* `Fixed *) int + (* `Dynamic *) unit.
   
   Parameter splitted : forall {a : Set}, encoding a -&gt; encoding a -&gt; encoding a.
   
@@ -7685,15 +7715,15 @@ Module Data_encoding.
   
   Parameter constant : string -&gt; encoding unit.
   
-  Parameter int8 : encoding Z.
+  Parameter int8 : encoding int.
   
-  Parameter uint8 : encoding Z.
+  Parameter uint8 : encoding int.
   
-  Parameter int16 : encoding Z.
+  Parameter int16 : encoding int.
   
-  Parameter uint16 : encoding Z.
+  Parameter uint16 : encoding int.
   
-  Parameter int31 : encoding Z.
+  Parameter int31 : encoding int.
   
   Parameter __int32_value : encoding int32.
   
@@ -7709,7 +7739,7 @@ Module Data_encoding.
   
   Parameter __bytes_value : encoding MBytes.t.
   
-  Parameter __float_value : encoding Z.
+  Parameter __float_value : encoding float.
   
   Parameter __option_value : forall {a : Set},
     encoding a -&gt; encoding (option a).
@@ -7717,11 +7747,11 @@ Module Data_encoding.
   Parameter string_enum : forall {a : Set}, list (string * a) -&gt; encoding a.
   
   Module Fixed.
-    Parameter __string_value : Z -&gt; encoding string.
+    Parameter __string_value : int -&gt; encoding string.
     
-    Parameter __bytes_value : Z -&gt; encoding MBytes.t.
+    Parameter __bytes_value : int -&gt; encoding MBytes.t.
     
-    Parameter add_padding : forall {a : Set}, encoding a -&gt; Z -&gt; encoding a.
+    Parameter add_padding : forall {a : Set}, encoding a -&gt; int -&gt; encoding a.
   End Fixed.
   
   Module __Variable.
@@ -7730,16 +7760,16 @@ Module Data_encoding.
     Parameter __bytes_value : encoding MBytes.t.
     
     Parameter array : forall {a : Set},
-      option Z -&gt; encoding a -&gt; encoding (array a).
+      option int -&gt; encoding a -&gt; encoding (array a).
     
     Parameter __list_value : forall {a : Set},
-      option Z -&gt; encoding a -&gt; encoding (list a).
+      option int -&gt; encoding a -&gt; encoding (list a).
   End __Variable.
   
   Module Bounded.
-    Parameter __string_value : Z -&gt; encoding string.
+    Parameter __string_value : int -&gt; encoding string.
     
-    Parameter __bytes_value : Z -&gt; encoding MBytes.t.
+    Parameter __bytes_value : int -&gt; encoding MBytes.t.
   End Bounded.
   
   Parameter dynamic_size : forall {a : Set},
@@ -7847,16 +7877,16 @@ Module Data_encoding.
     encoding a1 -&gt; encoding a2 -&gt; encoding (a1 * a2).
   
   Parameter array : forall {a : Set},
-    option Z -&gt; encoding a -&gt; encoding (array a).
+    option int -&gt; encoding a -&gt; encoding (array a).
   
   Parameter __list_value : forall {a : Set},
-    option Z -&gt; encoding a -&gt; encoding (list a).
+    option int -&gt; encoding a -&gt; encoding (list a).
   
   Parameter assoc : forall {a : Set},
     encoding a -&gt; encoding (list (string * a)).
   
   Inductive case_tag : Set :=
-  | Tag : Z -&gt; case_tag
+  | Tag : int -&gt; case_tag
   | Json_only : case_tag.
   
   Parameter case : forall (t : Set), Set.
@@ -7906,7 +7936,7 @@ Module Data_encoding.
     Reserved Notation &quot;'path&quot;.
     
     Inductive path_item : Set :=
-    | Index : Z -&gt; path_item
+    | Index : int -&gt; path_item
     | Field : string -&gt; path_item
     | Next : path_item
     | Star : path_item
@@ -7940,15 +7970,15 @@ Module Data_encoding.
   End Json.
   
   Module Binary.
-    Parameter length : forall {a : Set}, encoding a -&gt; a -&gt; Z.
+    Parameter length : forall {a : Set}, encoding a -&gt; a -&gt; int.
     
-    Parameter fixed_length : forall {a : Set}, encoding a -&gt; option Z.
+    Parameter fixed_length : forall {a : Set}, encoding a -&gt; option int.
     
     Parameter read : forall {a : Set},
-      encoding a -&gt; MBytes.t -&gt; Z -&gt; Z -&gt; option (Z * a).
+      encoding a -&gt; MBytes.t -&gt; int -&gt; int -&gt; option (int * a).
     
     Parameter write : forall {a : Set},
-      encoding a -&gt; a -&gt; MBytes.t -&gt; Z -&gt; Z -&gt; option Z.
+      encoding a -&gt; a -&gt; MBytes.t -&gt; int -&gt; int -&gt; option int.
     
     Parameter to_bytes : forall {a : Set}, encoding a -&gt; a -&gt; option MBytes.t.
     
@@ -7961,7 +7991,7 @@ Module Data_encoding.
     (* exception Write_error *)
   End Binary.
   
-  Parameter check_size : forall {a : Set}, Z -&gt; encoding a -&gt; encoding a.
+  Parameter check_size : forall {a : Set}, int -&gt; encoding a -&gt; encoding a.
 End Data_encoding.
 
 Module Error_monad.
@@ -8158,7 +8188,7 @@ Module Time.
   
   Definition op_gt : t -&gt; t -&gt; bool := (|Included_S|).(Compare.S.op_gt).
   
-  Definition compare : t -&gt; t -&gt; Z := (|Included_S|).(Compare.S.compare).
+  Definition compare : t -&gt; t -&gt; int := (|Included_S|).(Compare.S.compare).
   
   Definition equal : t -&gt; t -&gt; bool := (|Included_S|).(Compare.S.equal).
   
@@ -8227,13 +8257,13 @@ Module RPC_arg.
   
   Parameter __descr_value : forall {a : Set}, arg a -&gt; descr.
   
-  Parameter __int_value : arg Z.
+  Parameter __int_value : arg int.
   
   Parameter __int32_value : arg int32.
   
   Parameter __int64_value : arg int64.
   
-  Parameter __float_value : arg Z.
+  Parameter __float_value : arg float.
   
   Parameter __string_value : arg string.
   
@@ -8727,11 +8757,11 @@ Module Base58.
   Definition data : Set := extensible_type.
   
   Parameter register_encoding : forall {a : Set},
-    string -&gt; Z -&gt; (a -&gt; string) -&gt; (string -&gt; option a) -&gt; (a -&gt; data) -&gt;
+    string -&gt; int -&gt; (a -&gt; string) -&gt; (string -&gt; option a) -&gt; (a -&gt; data) -&gt;
     encoding a.
   
   Parameter check_encoded_prefix : forall {a : Set},
-    encoding a -&gt; string -&gt; Z -&gt; unit.
+    encoding a -&gt; string -&gt; int -&gt; unit.
   
   Parameter decode : string -&gt; option data.
 End Base58.
@@ -8746,7 +8776,7 @@ Module S.
       op_lteq : t -&gt; t -&gt; bool;
       op_gteq : t -&gt; t -&gt; bool;
       op_gt : t -&gt; t -&gt; bool;
-      compare : t -&gt; t -&gt; Z;
+      compare : t -&gt; t -&gt; int;
       equal : t -&gt; t -&gt; bool;
       max : t -&gt; t -&gt; t;
       min : t -&gt; t -&gt; t;
@@ -8767,7 +8797,7 @@ Module S.
       op_lteq : t -&gt; t -&gt; bool;
       op_gteq : t -&gt; t -&gt; bool;
       op_gt : t -&gt; t -&gt; bool;
-      compare : t -&gt; t -&gt; Z;
+      compare : t -&gt; t -&gt; int;
       equal : t -&gt; t -&gt; bool;
       max : t -&gt; t -&gt; t;
       min : t -&gt; t -&gt; t;
@@ -8795,7 +8825,7 @@ Module S.
       op_lteq : t -&gt; t -&gt; bool;
       op_gteq : t -&gt; t -&gt; bool;
       op_gt : t -&gt; t -&gt; bool;
-      compare : t -&gt; t -&gt; Z;
+      compare : t -&gt; t -&gt; int;
       equal : t -&gt; t -&gt; bool;
       max : t -&gt; t -&gt; t;
       min : t -&gt; t -&gt; t;
@@ -8809,7 +8839,7 @@ Module S.
   Module RAW_DATA.
     Record signature {t : Set} : Set := {
       t := t;
-      size : Z;
+      size : int;
       to_bytes : t -&gt; MBytes.t;
       of_bytes_opt : MBytes.t -&gt; option t;
       of_bytes_exn : MBytes.t -&gt; t;
@@ -8852,7 +8882,7 @@ Module S.
       union : t -&gt; t -&gt; t;
       inter : t -&gt; t -&gt; t;
       diff : t -&gt; t -&gt; t;
-      compare : t -&gt; t -&gt; Z;
+      compare : t -&gt; t -&gt; int;
       equal : t -&gt; t -&gt; bool;
       subset : t -&gt; t -&gt; bool;
       iter : (elt -&gt; unit) -&gt; t -&gt; unit;
@@ -8862,7 +8892,7 @@ Module S.
       __exists : (elt -&gt; bool) -&gt; t -&gt; bool;
       filter : (elt -&gt; bool) -&gt; t -&gt; t;
       partition : (elt -&gt; bool) -&gt; t -&gt; t * t;
-      cardinal : t -&gt; Z;
+      cardinal : t -&gt; int;
       elements : t -&gt; list elt;
       min_elt_opt : t -&gt; option elt;
       max_elt_opt : t -&gt; option elt;
@@ -8891,7 +8921,7 @@ Module S.
         (key -&gt; option a -&gt; option b -&gt; option c) -&gt; t a -&gt; t b -&gt; t c;
       union : forall {a : Set},
         (key -&gt; a -&gt; a -&gt; option a) -&gt; t a -&gt; t a -&gt; t a;
-      compare : forall {a : Set}, (a -&gt; a -&gt; Z) -&gt; t a -&gt; t a -&gt; Z;
+      compare : forall {a : Set}, (a -&gt; a -&gt; int) -&gt; t a -&gt; t a -&gt; int;
       equal : forall {a : Set}, (a -&gt; a -&gt; bool) -&gt; t a -&gt; t a -&gt; bool;
       iter : forall {a : Set}, (key -&gt; a -&gt; unit) -&gt; t a -&gt; unit;
       fold : forall {a b : Set}, (key -&gt; a -&gt; b -&gt; b) -&gt; t a -&gt; b -&gt; b;
@@ -8899,7 +8929,7 @@ Module S.
       __exists : forall {a : Set}, (key -&gt; a -&gt; bool) -&gt; t a -&gt; bool;
       filter : forall {a : Set}, (key -&gt; a -&gt; bool) -&gt; t a -&gt; t a;
       partition : forall {a : Set}, (key -&gt; a -&gt; bool) -&gt; t a -&gt; t a * t a;
-      cardinal : forall {a : Set}, t a -&gt; Z;
+      cardinal : forall {a : Set}, t a -&gt; int;
       bindings : forall {a : Set}, t a -&gt; list (key * a);
       min_binding_opt : forall {a : Set}, t a -&gt; option (key * a);
       max_binding_opt : forall {a : Set}, t a -&gt; option (key * a);
@@ -8929,7 +8959,7 @@ Module S.
       union : t -&gt; t -&gt; t;
       inter : t -&gt; t -&gt; t;
       diff : t -&gt; t -&gt; t;
-      compare : t -&gt; t -&gt; Z;
+      compare : t -&gt; t -&gt; int;
       equal : t -&gt; t -&gt; bool;
       subset : t -&gt; t -&gt; bool;
       iter : (elt -&gt; unit) -&gt; t -&gt; unit;
@@ -8939,7 +8969,7 @@ Module S.
       __exists : (elt -&gt; bool) -&gt; t -&gt; bool;
       filter : (elt -&gt; bool) -&gt; t -&gt; t;
       partition : (elt -&gt; bool) -&gt; t -&gt; t * t;
-      cardinal : t -&gt; Z;
+      cardinal : t -&gt; int;
       elements : t -&gt; list elt;
       min_elt : t -&gt; elt;
       min_elt_opt : t -&gt; option elt;
@@ -8979,7 +9009,7 @@ Module S.
         (key -&gt; option a -&gt; option b -&gt; option c) -&gt; t a -&gt; t b -&gt; t c;
       union : forall {a : Set},
         (key -&gt; a -&gt; a -&gt; option a) -&gt; t a -&gt; t a -&gt; t a;
-      compare : forall {a : Set}, (a -&gt; a -&gt; Z) -&gt; t a -&gt; t a -&gt; Z;
+      compare : forall {a : Set}, (a -&gt; a -&gt; int) -&gt; t a -&gt; t a -&gt; int;
       equal : forall {a : Set}, (a -&gt; a -&gt; bool) -&gt; t a -&gt; t a -&gt; bool;
       iter : forall {a : Set}, (key -&gt; a -&gt; unit) -&gt; t a -&gt; unit;
       fold : forall {a b : Set}, (key -&gt; a -&gt; b -&gt; b) -&gt; t a -&gt; b -&gt; b;
@@ -8987,7 +9017,7 @@ Module S.
       __exists : forall {a : Set}, (key -&gt; a -&gt; bool) -&gt; t a -&gt; bool;
       filter : forall {a : Set}, (key -&gt; a -&gt; bool) -&gt; t a -&gt; t a;
       partition : forall {a : Set}, (key -&gt; a -&gt; bool) -&gt; t a -&gt; t a * t a;
-      cardinal : forall {a : Set}, t a -&gt; Z;
+      cardinal : forall {a : Set}, t a -&gt; int;
       bindings : forall {a : Set}, t a -&gt; list (key * a);
       min_binding : forall {a : Set}, t a -&gt; key * a;
       min_binding_opt : forall {a : Set}, t a -&gt; option (key * a);
@@ -9022,7 +9052,7 @@ Module S.
       of_path : list string -&gt; option t;
       of_path_exn : list string -&gt; t;
       prefix_path : string -&gt; list string;
-      path_length : Z;
+      path_length : int;
       __Set : INDEXES_Set.signature t __Set_t;
       Map : INDEXES_Map.signature t Map_t;
     }.
@@ -9042,14 +9072,14 @@ Module S.
       op_lteq : t -&gt; t -&gt; bool;
       op_gteq : t -&gt; t -&gt; bool;
       op_gt : t -&gt; t -&gt; bool;
-      compare : t -&gt; t -&gt; Z;
+      compare : t -&gt; t -&gt; int;
       equal : t -&gt; t -&gt; bool;
       max : t -&gt; t -&gt; t;
       min : t -&gt; t -&gt; t;
       hash_bytes : option MBytes.t -&gt; list MBytes.t -&gt; t;
       hash_string : option string -&gt; list string -&gt; t;
       zero : t;
-      size : Z;
+      size : int;
       to_bytes : t -&gt; MBytes.t;
       of_bytes_opt : MBytes.t -&gt; option t;
       of_bytes_exn : MBytes.t -&gt; t;
@@ -9065,7 +9095,7 @@ Module S.
       of_path : list string -&gt; option t;
       of_path_exn : list string -&gt; t;
       prefix_path : string -&gt; list string;
-      path_length : Z;
+      path_length : int;
       __Set : INDEXES_Set.signature t __Set_t;
       Map : INDEXES_Map.signature t Map_t;
     }.
@@ -9087,14 +9117,14 @@ Module S.
       op_lteq : t -&gt; t -&gt; bool;
       op_gteq : t -&gt; t -&gt; bool;
       op_gt : t -&gt; t -&gt; bool;
-      compare : t -&gt; t -&gt; Z;
+      compare : t -&gt; t -&gt; int;
       equal : t -&gt; t -&gt; bool;
       max : t -&gt; t -&gt; t;
       min : t -&gt; t -&gt; t;
       hash_bytes : option MBytes.t -&gt; list MBytes.t -&gt; t;
       hash_string : option string -&gt; list string -&gt; t;
       zero : t;
-      size : Z;
+      size : int;
       to_bytes : t -&gt; MBytes.t;
       of_bytes_opt : MBytes.t -&gt; option t;
       of_bytes_exn : MBytes.t -&gt; t;
@@ -9110,14 +9140,14 @@ Module S.
       of_path : list string -&gt; option t;
       of_path_exn : list string -&gt; t;
       prefix_path : string -&gt; list string;
-      path_length : Z;
+      path_length : int;
       __Set : INDEXES_Set.signature t __Set_t;
       Map : INDEXES_Map.signature t Map_t;
       compute : list elt -&gt; t;
       empty : t;
       path := path;
-      compute_path : list elt -&gt; Z -&gt; path;
-      check_path : path -&gt; elt -&gt; t * Z;
+      compute_path : list elt -&gt; int -&gt; path;
+      check_path : path -&gt; elt -&gt; t * int;
       path_encoding : Data_encoding.t path;
     }.
     Arguments signature : clear implicits.
@@ -9134,11 +9164,11 @@ Module S.
       op_lteq : t -&gt; t -&gt; bool;
       op_gteq : t -&gt; t -&gt; bool;
       op_gt : t -&gt; t -&gt; bool;
-      compare : t -&gt; t -&gt; Z;
+      compare : t -&gt; t -&gt; int;
       equal : t -&gt; t -&gt; bool;
       max : t -&gt; t -&gt; t;
       min : t -&gt; t -&gt; t;
-      size : Z;
+      size : int;
       to_bytes : t -&gt; MBytes.t;
       of_bytes_opt : MBytes.t -&gt; option t;
       of_bytes_exn : MBytes.t -&gt; t;
@@ -9154,7 +9184,7 @@ Module S.
       of_path : list string -&gt; option t;
       of_path_exn : list string -&gt; t;
       prefix_path : string -&gt; list string;
-      path_length : Z;
+      path_length : int;
       __Set : INDEXES_Set.signature t __Set_t;
       Map : INDEXES_Map.signature t Map_t;
       zero : t;
@@ -9172,7 +9202,7 @@ Module S.
       op_lteq : t -&gt; t -&gt; bool;
       op_gteq : t -&gt; t -&gt; bool;
       op_gt : t -&gt; t -&gt; bool;
-      compare : t -&gt; t -&gt; Z;
+      compare : t -&gt; t -&gt; int;
       equal : t -&gt; t -&gt; bool;
       max : t -&gt; t -&gt; t;
       min : t -&gt; t -&gt; t;
@@ -9201,7 +9231,7 @@ Module S.
         SPublic_key.signature Public_key_t Public_key_hash.(SPublic_key_hash.t);
       t := t;
       pp : Format.formatter -&gt; t -&gt; unit;
-      size : Z;
+      size : int;
       to_bytes : t -&gt; MBytes.t;
       of_bytes_opt : MBytes.t -&gt; option t;
       of_bytes_exn : MBytes.t -&gt; t;
@@ -9211,7 +9241,7 @@ Module S.
       op_lteq : t -&gt; t -&gt; bool;
       op_gteq : t -&gt; t -&gt; bool;
       op_gt : t -&gt; t -&gt; bool;
-      compare : t -&gt; t -&gt; Z;
+      compare : t -&gt; t -&gt; int;
       equal : t -&gt; t -&gt; bool;
       max : t -&gt; t -&gt; t;
       min : t -&gt; t -&gt; t;
@@ -9249,7 +9279,7 @@ Module Blake2B.
     Record signature : Set := {
       name : string;
       title : string;
-      size : option Z;
+      size : option int;
     }.
   End Name.
   
@@ -9257,7 +9287,7 @@ Module Blake2B.
     Record signature : Set := {
       name : string;
       title : string;
-      size : option Z;
+      size : option int;
       b58check_prefix : string;
     }.
   End PrefixedName.
@@ -9269,7 +9299,7 @@ Module Blake2B.
   Module SRegister.
     Record signature : Set := {
       register_encoding : forall {a : Set},
-        string -&gt; Z -&gt; (a -&gt; string) -&gt; (string -&gt; option a) -&gt;
+        string -&gt; int -&gt; (a -&gt; string) -&gt; (string -&gt; option a) -&gt;
         (a -&gt; Base58.data) -&gt; Base58.encoding a;
     }.
   End SRegister.
@@ -9344,7 +9374,7 @@ Module Signature.
   Definition pp : Format.formatter -&gt; t -&gt; unit :=
     (|Included_SIGNATURE|).(S.SIGNATURE.pp).
   
-  Definition size : Z := (|Included_SIGNATURE|).(S.SIGNATURE.size).
+  Definition size : int := (|Included_SIGNATURE|).(S.SIGNATURE.size).
   
   Definition to_bytes : t -&gt; MBytes.t :=
     (|Included_SIGNATURE|).(S.SIGNATURE.to_bytes).
@@ -9373,7 +9403,7 @@ Module Signature.
   Definition op_gt : t -&gt; t -&gt; bool :=
     (|Included_SIGNATURE|).(S.SIGNATURE.op_gt).
   
-  Definition compare : t -&gt; t -&gt; Z :=
+  Definition compare : t -&gt; t -&gt; int :=
     (|Included_SIGNATURE|).(S.SIGNATURE.compare).
   
   Definition equal : t -&gt; t -&gt; bool :=
@@ -9450,7 +9480,7 @@ Module Micheline.
   
   Parameter canonical : forall (p : Set), Set.
   
-  Definition canonical_location : Set := Z.
+  Definition canonical_location : Set := int.
   
   Parameter root : forall {p : Set}, canonical p -&gt; node canonical_location p.
   
@@ -9480,10 +9510,10 @@ Module Block_header.
   Module shell_header.
     Record record : Set := Build {
       level : Int32.t;
-      proto_level : Z;
+      proto_level : int;
       predecessor : (|Block_hash|).(S.HASH.t);
       timestamp : Time.t;
-      validation_passes : Z;
+      validation_passes : int;
       operations_hash : (|Operation_list_list_hash|).(S.MERKLE_TREE.t);
       fitness : list MBytes.t;
       context : (|Context_hash|).(S.HASH.t) }.
@@ -9545,7 +9575,7 @@ Module Block_header.
   
   Definition op_gt : t -&gt; t -&gt; bool := (|Included_HASHABLE|).(S.HASHABLE.op_gt).
   
-  Definition compare : t -&gt; t -&gt; Z :=
+  Definition compare : t -&gt; t -&gt; int :=
     (|Included_HASHABLE|).(S.HASHABLE.compare).
   
   Definition equal : t -&gt; t -&gt; bool := (|Included_HASHABLE|).(S.HASHABLE.equal).
@@ -9615,7 +9645,7 @@ Module Operation.
   
   Definition op_gt : t -&gt; t -&gt; bool := (|Included_HASHABLE|).(S.HASHABLE.op_gt).
   
-  Definition compare : t -&gt; t -&gt; Z :=
+  Definition compare : t -&gt; t -&gt; int :=
     (|Included_HASHABLE|).(S.HASHABLE.compare).
   
   Definition equal : t -&gt; t -&gt; bool := (|Included_HASHABLE|).(S.HASHABLE.equal).
@@ -9713,7 +9743,7 @@ Module Protocol.
   
   Definition op_gt : t -&gt; t -&gt; bool := (|Included_HASHABLE|).(S.HASHABLE.op_gt).
   
-  Definition compare : t -&gt; t -&gt; Z :=
+  Definition compare : t -&gt; t -&gt; int :=
     (|Included_HASHABLE|).(S.HASHABLE.compare).
   
   Definition equal : t -&gt; t -&gt; bool := (|Included_HASHABLE|).(S.HASHABLE.equal).
@@ -9786,7 +9816,7 @@ Module Updater.
       context : Context.t;
       fitness : (|Fitness|).(S.T.t);
       message : option string;
-      max_operations_ttl : Z;
+      max_operations_ttl : int;
       last_allowed_fork_level : Int32.t }.
     Definition with_context context (r : record) :=
       Build context r.(fitness) r.(message) r.(max_operations_ttl)
@@ -9809,8 +9839,8 @@ Module Updater.
   
   Module quota.
     Record record : Set := Build {
-      max_size : Z;
-      max_op : option Z }.
+      max_size : int;
+      max_op : option int }.
     Definition with_max_size max_size (r : record) :=
       Build max_size r.(max_op).
     Definition with_max_op max_op (r : record) :=
@@ -9836,8 +9866,8 @@ Module Updater.
     Record signature {block_header_data block_header block_header_metadata
       operation_data operation_receipt operation validation_state : Set} : Set
       := {
-      max_block_length : Z;
-      max_operation_data_length : Z;
+      max_block_length : int;
+      max_operation_data_length : int;
       validation_passes : list quota;
       block_header_data := block_header_data;
       block_header_data_encoding : Data_encoding.t block_header_data;
@@ -9851,8 +9881,8 @@ Module Updater.
       operation_receipt_encoding : Data_encoding.t operation_receipt;
       operation_data_and_receipt_encoding :
         Data_encoding.t (operation_data * operation_receipt);
-      acceptable_passes : operation -&gt; list Z;
-      compare_operations : operation -&gt; operation -&gt; Z;
+      acceptable_passes : operation -&gt; list int;
+      compare_operations : operation -&gt; operation -&gt; int;
       validation_state := validation_state;
       current_context :
         validation_state -&gt; Lwt.t (Error_monad.tzresult Context.t);

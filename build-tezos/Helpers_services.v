@@ -600,7 +600,7 @@ Module Forge.
     
     Definition protocol_data
       : RPC_service.service (* `POST *) unit Updater.rpc_context
-        Updater.rpc_context unit (Z * option Nonce_hash.t * MBytes.t) MBytes.t :=
+        Updater.rpc_context unit (int * option Nonce_hash.t * MBytes.t) MBytes.t :=
       RPC_service.post_service
         (Some "Forge the protocol-specific part of a block header")
         RPC_query.empty
@@ -1147,7 +1147,7 @@ Module Forge.
               (((RPC_context.t * a) * b) * c) q i o -> D -> a -> b -> c -> q ->
             i -> Lwt.t (Error_monad.shell_tzresult o)) *
               (K * a * b * c * q * i * o)) * L)))) * L * D) (block : D)
-    (priority : Z) (seed_nonce_hash : option Nonce_hash.t)
+    (priority : int) (seed_nonce_hash : option Nonce_hash.t)
     (op_staroptstar : option MBytes.t)
     : unit -> Lwt.t (Error_monad.shell_tzresult MBytes.t) :=
     let proof_of_work_nonce :=

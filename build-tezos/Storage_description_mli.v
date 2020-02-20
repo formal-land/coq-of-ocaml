@@ -49,7 +49,7 @@ Inductive args_gadt : Set :=
 
 where "'args" := (fun (_ _ _ : Set) => args_gadt)
 and "'args.One" := (fun (t_a : Set) =>
-  args.One_skeleton (RPC_arg.t t_a) (Data_encoding.t t_a) (t_a -> t_a -> Z)).
+  args.One_skeleton (RPC_arg.t t_a) (Data_encoding.t t_a) (t_a -> t_a -> int)).
 
 Module ConstructorRecordNotations_args_gadt.
   Module args.
@@ -73,12 +73,12 @@ Parameter unpack : forall {a key sub_key : Set},
 Module INDEX.
   Record signature {t : Set} : Set := {
     t := t;
-    path_length : Z;
+    path_length : int;
     to_path : t -> list string -> list string;
     of_path : list string -> option t;
     rpc_arg : RPC_arg.t t;
     encoding : Data_encoding.t t;
-    compare : t -> t -> Z;
+    compare : t -> t -> int;
   }.
   Arguments signature : clear implicits.
 End INDEX.

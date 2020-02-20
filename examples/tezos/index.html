@@ -52,15 +52,15 @@
       </small>
     </h2>
     <p>These are the sources of the <a href="https://gitlab.com/tezos/tezos/tree/master/src/proto_alpha/lib_protocol">protocol</a> of <a href="https://tezos.com/">Tezos</a> imported to <a href="https://coq.inria.fr/">Coq</a> by the current development version of <a href="https://github.com/clarus/coq-of-ocaml">coq-of-ocaml</a>. Tezos is a crypto-currency with smart-contracts and an upgradable protocol.</p>
-    <blockquote class="blockquote"><p class="mb-0" style="font-size: 16px;">(2020-02-15) The Michelson interpreter <a href="#script_interpreter.ml"><code>script_interpreter.ml</code></a> now compiles in Coq. We will attempt to show its equivalence to the <a href="https://gitlab.com/nomadic-labs/mi-cho-coq/">Mi-Cho-Coq</a> formalization, for the subset of instructions where it is possible.</p></blockquote>
+    <blockquote class="blockquote"><p class="mb-0" style="font-size: 16px;">(2020-02-20) We continue the import of the code to Coq, waiting for advices from <a href="https://gitlab.com/rafoo_">Raphaël</a> on the proofs of the interpreter.</p></blockquote>
 
-    <p>We show the original&nbsp;<a href="https://ocaml.org/">OCaml</a> code on the left and the imported&nbsp;<a href="https://coq.inria.fr/">Coq</a> code on the right. The imported code does not compile. Warnings reported on the&nbsp;OCaml side are due to either various incompleteness in our tool, or to side-effects in the source code. Go on the <a href="https://gitter.im/clarus/coq-of-ocaml">Gitter chat</a> for more information. Work currently made at <a href="https://www.nomadic-labs.com/">Nomadic Labs</a>.</p>
+    <p>We show the original&nbsp;<a href="https://ocaml.org/">OCaml</a> code on the left and the imported&nbsp;<a href="https://coq.inria.fr/">Coq</a> code on the right. The imported code does not necessarily compile. Warnings reported on the&nbsp;OCaml side are due to either various incompleteness in our tool, or to side-effects in the source code. Go on the <a href="https://gitter.im/clarus/coq-of-ocaml">Gitter chat</a> for more information. Work currently made at <a href="https://www.nomadic-labs.com/">Nomadic Labs</a>.</p>
     <p>To install the latest development version of <a href="https://clarus.github.io/coq-of-ocaml/">coq-of-ocaml</a> with <a href="https://opam.ocaml.org/">opam</a>:</p>
     <pre><code>opam repo add coq-released https://coq.inria.fr/opam/released
 opam pin add https://github.com/clarus/coq-of-ocaml.git#master</code></pre>
     <ul>
       <li>OCaml size: 36144 lines</li>
-      <li>Coq size: 49269 lines (+36% compared to&nbsp;OCaml)</li>
+      <li>Coq size: 49288 lines (+36% compared to&nbsp;OCaml)</li>
       <li>Warnings from coq-of-ocaml: 2508</li>
     </ul>
     
@@ -104,6 +104,8 @@ opam pin add https://github.com/clarus/coq-of-ocaml.git#master</code></pre>
           30401,
           29240,
           29013,
+          29013,
+          29028,
         ],
         generated: [
           47563,
@@ -142,6 +144,8 @@ opam pin add https://github.com/clarus/coq-of-ocaml.git#master</code></pre>
           53116,
           49938,
           49269,
+          49269,
+          49288,
         ],
         labels: [
           "01-14",
@@ -180,6 +184,8 @@ opam pin add https://github.com/clarus/coq-of-ocaml.git#master</code></pre>
           "02-16",
           "02-17",
           "02-18",
+          "02-19",
+          "02-20",
         ]
       }
 ;
@@ -712,7 +718,7 @@ opam pin add https://github.com/clarus/coq-of-ocaml.git#master</code></pre>
     <h3>Alpha_context</h3>
     <ul>
       <li>OCaml size: 279 lines</li>
-      <li>Coq size: 469 lines (+68% compared to&nbsp;OCaml)</li>
+      <li>Coq size: 470 lines (+68% compared to&nbsp;OCaml)</li>
     </ul>
   </div>
   <div class="col-md-6">
@@ -1067,7 +1073,7 @@ Module BASIC_DATA.
     op_lteq : t -&gt; t -&gt; bool;
     op_gteq : t -&gt; t -&gt; bool;
     op_gt : t -&gt; t -&gt; bool;
-    compare : t -&gt; t -&gt; Z;
+    compare : t -&gt; t -&gt; int;
     equal : t -&gt; t -&gt; bool;
     max : t -&gt; t -&gt; t;
     min : t -&gt; t -&gt; t;
@@ -1371,11 +1377,11 @@ End Commitment.
 
 Module Global.
   Definition get_block_priority
-    : Raw_context.t -&gt; Lwt.t (Error_monad.tzresult Z) :=
+    : Raw_context.t -&gt; Lwt.t (Error_monad.tzresult int) :=
     Storage.Block_priority.get.
   
   Definition set_block_priority
-    : Raw_context.t -&gt; Z -&gt; Lwt.t (Error_monad.tzresult Raw_context.t) :=
+    : Raw_context.t -&gt; int -&gt; Lwt.t (Error_monad.tzresult Raw_context.t) :=
     Storage.Block_priority.set.
 End Global.
 
@@ -1419,30 +1425,31 @@ Definition record_endorsement
 Definition allowed_endorsements
   : Raw_context.context -&gt;
   (|Signature.Public_key_hash|).(S.SPublic_key_hash.Map).(S.INDEXES_Map.t)
-    ((|Signature.Public_key|).(S.SPublic_key.t) * list Z * bool) :=
+    ((|Signature.Public_key|).(S.SPublic_key.t) * list int * bool) :=
   Raw_context.allowed_endorsements.
 
 Definition init_endorsements
   : Raw_context.context -&gt;
   (|Signature.Public_key_hash|).(S.SPublic_key_hash.Map).(S.INDEXES_Map.t)
-    ((|Signature.Public_key|).(S.SPublic_key.t) * list Z * bool) -&gt;
+    ((|Signature.Public_key|).(S.SPublic_key.t) * list int * bool) -&gt;
   Raw_context.context := Raw_context.init_endorsements.
 
-Definition included_endorsements : Raw_context.context -&gt; Z :=
+Definition included_endorsements : Raw_context.context -&gt; int :=
   Raw_context.included_endorsements.
 
 Definition reset_internal_nonce : Raw_context.context -&gt; Raw_context.context :=
   Raw_context.reset_internal_nonce.
 
 Definition fresh_internal_nonce
-  : Raw_context.context -&gt; Error_monad.tzresult (Raw_context.context * Z) :=
+  : Raw_context.context -&gt; Error_monad.tzresult (Raw_context.context * int) :=
   Raw_context.fresh_internal_nonce.
 
 Definition record_internal_nonce
-  : Raw_context.context -&gt; Z -&gt; Raw_context.context :=
+  : Raw_context.context -&gt; int -&gt; Raw_context.context :=
   Raw_context.record_internal_nonce.
 
-Definition internal_nonce_already_recorded : Raw_context.context -&gt; Z -&gt; bool :=
+Definition internal_nonce_already_recorded
+  : Raw_context.context -&gt; int -&gt; bool :=
   Raw_context.internal_nonce_already_recorded.
 
 Definition add_deposit
@@ -1480,7 +1487,7 @@ Definition description : Storage_description.t Raw_context.context :=
     <h3>Alpha_context_mli</h3>
     <ul>
       <li>OCaml size: 1392 lines</li>
-      <li>Coq size: 2555 lines (+83% compared to&nbsp;OCaml)</li>
+      <li>Coq size: 2556 lines (+83% compared to&nbsp;OCaml)</li>
     </ul>
   </div>
   <div class="col-md-6">
@@ -2911,7 +2918,7 @@ Module BASIC_DATA.
     op_lteq : t -&gt; t -&gt; bool;
     op_gteq : t -&gt; t -&gt; bool;
     op_gt : t -&gt; t -&gt; bool;
-    compare : t -&gt; t -&gt; Z;
+    compare : t -&gt; t -&gt; int;
     equal : t -&gt; t -&gt; bool;
     max : t -&gt; t -&gt; t;
     min : t -&gt; t -&gt; t;
@@ -2955,7 +2962,7 @@ Module Tez.
   Definition op_gt : t -&gt; t -&gt; bool :=
     (|Included_BASIC_DATA|).(BASIC_DATA.op_gt).
   
-  Definition compare : t -&gt; t -&gt; Z :=
+  Definition compare : t -&gt; t -&gt; int :=
     (|Included_BASIC_DATA|).(BASIC_DATA.compare).
   
   Definition equal : t -&gt; t -&gt; bool :=
@@ -3023,7 +3030,7 @@ Module Period.
   Definition op_gt : t -&gt; t -&gt; bool :=
     (|Included_BASIC_DATA|).(BASIC_DATA.op_gt).
   
-  Definition compare : t -&gt; t -&gt; Z :=
+  Definition compare : t -&gt; t -&gt; int :=
     (|Included_BASIC_DATA|).(BASIC_DATA.compare).
   
   Definition equal : t -&gt; t -&gt; bool :=
@@ -3081,7 +3088,7 @@ Module Timestamp.
   Definition op_gt : t -&gt; t -&gt; bool :=
     (|Included_BASIC_DATA|).(BASIC_DATA.op_gt).
   
-  Definition compare : t -&gt; t -&gt; Z :=
+  Definition compare : t -&gt; t -&gt; int :=
     (|Included_BASIC_DATA|).(BASIC_DATA.compare).
   
   Definition equal : t -&gt; t -&gt; bool :=
@@ -3137,7 +3144,7 @@ Module Raw_level.
   Definition op_gt : t -&gt; t -&gt; bool :=
     (|Included_BASIC_DATA|).(BASIC_DATA.op_gt).
   
-  Definition compare : t -&gt; t -&gt; Z :=
+  Definition compare : t -&gt; t -&gt; int :=
     (|Included_BASIC_DATA|).(BASIC_DATA.compare).
   
   Definition equal : t -&gt; t -&gt; bool :=
@@ -3193,7 +3200,7 @@ Module Cycle.
   Definition op_gt : t -&gt; t -&gt; bool :=
     (|Included_BASIC_DATA|).(BASIC_DATA.op_gt).
   
-  Definition compare : t -&gt; t -&gt; Z :=
+  Definition compare : t -&gt; t -&gt; int :=
     (|Included_BASIC_DATA|).(BASIC_DATA.compare).
   
   Definition equal : t -&gt; t -&gt; bool :=
@@ -3219,9 +3226,9 @@ Module Cycle.
   
   Parameter pred : cycle -&gt; option cycle.
   
-  Parameter add : cycle -&gt; Z -&gt; cycle.
+  Parameter add : cycle -&gt; int -&gt; cycle.
   
-  Parameter sub : cycle -&gt; Z -&gt; option cycle.
+  Parameter sub : cycle -&gt; int -&gt; option cycle.
   
   Parameter to_int32 : cycle -&gt; int32.
   
@@ -3271,23 +3278,23 @@ Module Gas.
   
   Parameter free : cost.
   
-  Parameter atomic_step_cost : Z -&gt; cost.
+  Parameter atomic_step_cost : int -&gt; cost.
   
-  Parameter step_cost : Z -&gt; cost.
+  Parameter step_cost : int -&gt; cost.
   
-  Parameter alloc_cost : Z -&gt; cost.
+  Parameter alloc_cost : int -&gt; cost.
   
-  Parameter alloc_bytes_cost : Z -&gt; cost.
+  Parameter alloc_bytes_cost : int -&gt; cost.
   
-  Parameter alloc_mbytes_cost : Z -&gt; cost.
+  Parameter alloc_mbytes_cost : int -&gt; cost.
   
-  Parameter alloc_bits_cost : Z -&gt; cost.
+  Parameter alloc_bits_cost : int -&gt; cost.
   
   Parameter read_bytes_cost : Z.t -&gt; cost.
   
   Parameter write_bytes_cost : Z.t -&gt; cost.
   
-  Parameter op_starat : Z -&gt; cost -&gt; cost.
+  Parameter op_starat : int -&gt; cost -&gt; cost.
   
   Parameter op_plusat : cost -&gt; cost -&gt; cost.
   
@@ -3315,7 +3322,7 @@ Module Script_timestamp.
   
   Parameter t : Set.
   
-  Parameter compare : t -&gt; t -&gt; Z.
+  Parameter compare : t -&gt; t -&gt; int.
   
   Parameter to_string : t -&gt; string.
   
@@ -3502,23 +3509,23 @@ Module Script.
   
   Parameter int_node_cost : Z.t -&gt; Gas.cost.
   
-  Parameter int_node_cost_of_numbits : Z -&gt; Gas.cost.
+  Parameter int_node_cost_of_numbits : int -&gt; Gas.cost.
   
   Parameter string_node_cost : string -&gt; Gas.cost.
   
-  Parameter string_node_cost_of_length : Z -&gt; Gas.cost.
+  Parameter string_node_cost_of_length : int -&gt; Gas.cost.
   
   Parameter bytes_node_cost : MBytes.t -&gt; Gas.cost.
   
-  Parameter bytes_node_cost_of_length : Z -&gt; Gas.cost.
+  Parameter bytes_node_cost_of_length : int -&gt; Gas.cost.
   
   Parameter prim_node_cost_nonrec : list expr -&gt; annot -&gt; Gas.cost.
   
-  Parameter prim_node_cost_nonrec_of_length : Z -&gt; annot -&gt; Gas.cost.
+  Parameter prim_node_cost_nonrec_of_length : int -&gt; annot -&gt; Gas.cost.
   
   Parameter seq_node_cost_nonrec : list expr -&gt; Gas.cost.
   
-  Parameter seq_node_cost_nonrec_of_length : Z -&gt; Gas.cost.
+  Parameter seq_node_cost_nonrec_of_length : int -&gt; Gas.cost.
   
   Parameter minimal_deserialize_cost : lazy_expr -&gt; Gas.cost.
   
@@ -3551,11 +3558,11 @@ End Script.
 Module Constants.
   Module fixed.
     Record record : Set := Build {
-      proof_of_work_nonce_size : Z;
-      nonce_length : Z;
-      max_revelations_per_block : Z;
-      max_operation_data_length : Z;
-      max_proposals_per_delegate : Z }.
+      proof_of_work_nonce_size : int;
+      nonce_length : int;
+      max_revelations_per_block : int;
+      max_operation_data_length : int;
+      max_proposals_per_delegate : int }.
     Definition with_proof_of_work_nonce_size proof_of_work_nonce_size
       (r : record) :=
       Build proof_of_work_nonce_size r.(nonce_length)
@@ -3587,32 +3594,32 @@ Module Constants.
   
   Parameter __fixed_value : fixed.
   
-  Parameter proof_of_work_nonce_size : Z.
+  Parameter proof_of_work_nonce_size : int.
   
-  Parameter nonce_length : Z.
+  Parameter nonce_length : int.
   
-  Parameter max_revelations_per_block : Z.
+  Parameter max_revelations_per_block : int.
   
-  Parameter max_operation_data_length : Z.
+  Parameter max_operation_data_length : int.
   
-  Parameter max_proposals_per_delegate : Z.
+  Parameter max_proposals_per_delegate : int.
   
   Module parametric.
     Record record : Set := Build {
-      preserved_cycles : Z;
+      preserved_cycles : int;
       blocks_per_cycle : int32;
       blocks_per_commitment : int32;
       blocks_per_roll_snapshot : int32;
       blocks_per_voting_period : int32;
       time_between_blocks : list Period.t;
-      endorsers_per_block : Z;
+      endorsers_per_block : int;
       hard_gas_limit_per_operation : Z.t;
       hard_gas_limit_per_block : Z.t;
       proof_of_work_threshold : int64;
       tokens_per_roll : Tez.t;
-      michelson_maximum_type_size : Z;
+      michelson_maximum_type_size : int;
       seed_nonce_revelation_tip : Tez.t;
-      origination_size : Z;
+      origination_size : int;
       block_security_deposit : Tez.t;
       endorsement_security_deposit : Tez.t;
       block_reward : Tez.t;
@@ -3623,7 +3630,7 @@ Module Constants.
       quorum_min : int32;
       quorum_max : int32;
       min_proposal_quorum : int32;
-      initial_endorsers : Z;
+      initial_endorsers : int;
       delay_per_missing_endorsement : Period.t }.
     Definition with_preserved_cycles preserved_cycles (r : record) :=
       Build preserved_cycles r.(blocks_per_cycle) r.(blocks_per_commitment)
@@ -3981,7 +3988,7 @@ Module Constants.
   
   Parameter __parametric_value : context -&gt; parametric.
   
-  Parameter preserved_cycles : context -&gt; Z.
+  Parameter preserved_cycles : context -&gt; int.
   
   Parameter blocks_per_cycle : context -&gt; int32.
   
@@ -3993,9 +4000,9 @@ Module Constants.
   
   Parameter time_between_blocks : context -&gt; list Period.t.
   
-  Parameter endorsers_per_block : context -&gt; Z.
+  Parameter endorsers_per_block : context -&gt; int.
   
-  Parameter initial_endorsers : context -&gt; Z.
+  Parameter initial_endorsers : context -&gt; int.
   
   Parameter delay_per_missing_endorsement : context -&gt; Period.t.
   
@@ -4011,7 +4018,7 @@ Module Constants.
   
   Parameter tokens_per_roll : context -&gt; Tez.t.
   
-  Parameter michelson_maximum_type_size : context -&gt; Z.
+  Parameter michelson_maximum_type_size : context -&gt; int.
   
   Parameter block_reward : context -&gt; Tez.t.
   
@@ -4019,7 +4026,7 @@ Module Constants.
   
   Parameter seed_nonce_revelation_tip : context -&gt; Tez.t.
   
-  Parameter origination_size : context -&gt; Z.
+  Parameter origination_size : context -&gt; int.
   
   Parameter block_security_deposit : context -&gt; Tez.t.
   
@@ -4070,7 +4077,7 @@ Module Voting_period.
   Definition op_gt : t -&gt; t -&gt; bool :=
     (|Included_BASIC_DATA|).(BASIC_DATA.op_gt).
   
-  Definition compare : t -&gt; t -&gt; Z :=
+  Definition compare : t -&gt; t -&gt; int :=
     (|Included_BASIC_DATA|).(BASIC_DATA.compare).
   
   Definition equal : t -&gt; t -&gt; bool :=
@@ -4160,7 +4167,7 @@ Module Level.
   Definition op_gt : t -&gt; t -&gt; bool :=
     (|Included_BASIC_DATA|).(BASIC_DATA.op_gt).
   
-  Definition compare : t -&gt; t -&gt; Z :=
+  Definition compare : t -&gt; t -&gt; int :=
     (|Included_BASIC_DATA|).(BASIC_DATA.compare).
   
   Definition equal : t -&gt; t -&gt; bool :=
@@ -4217,7 +4224,7 @@ Module Fitness.
   
   Parameter op_gt : t -&gt; t -&gt; bool.
   
-  Parameter compare : t -&gt; t -&gt; Z.
+  Parameter compare : t -&gt; t -&gt; int.
   
   Parameter equal : t -&gt; t -&gt; bool.
   
@@ -4235,7 +4242,7 @@ Module Fitness.
   
   Definition fitness : Set := t.
   
-  Parameter increase : option Z -&gt; context -&gt; context.
+  Parameter increase : option int -&gt; context -&gt; context.
   
   Parameter current : context -&gt; int64.
   
@@ -4346,7 +4353,7 @@ Module Contract.
   Definition op_gt : t -&gt; t -&gt; bool :=
     (|Included_BASIC_DATA|).(BASIC_DATA.op_gt).
   
-  Definition compare : t -&gt; t -&gt; Z :=
+  Definition compare : t -&gt; t -&gt; int :=
     (|Included_BASIC_DATA|).(BASIC_DATA.compare).
   
   Definition equal : t -&gt; t -&gt; bool :=
@@ -4629,7 +4636,7 @@ Module Vote.
   Parameter clear_proposals : context -&gt; Lwt.t context.
   
   Parameter recorded_proposal_count_for_delegate :
-    context -&gt; public_key_hash -&gt; Lwt.t (Error_monad.tzresult Z).
+    context -&gt; public_key_hash -&gt; Lwt.t (Error_monad.tzresult int).
   
   Parameter listings_encoding :
     Data_encoding.t
@@ -4708,7 +4715,7 @@ End Vote.
 Module Block_header.
   Module contents.
     Record record : Set := Build {
-      priority : Z;
+      priority : int;
       seed_nonce_hash : option Nonce_hash.t;
       proof_of_work_nonce : MBytes.t }.
     Definition with_priority priority (r : record) :=
@@ -4766,7 +4773,7 @@ Module Block_header.
   
   Parameter shell_header_encoding : Data_encoding.encoding shell_header.
   
-  Parameter max_header_length : Z.
+  Parameter max_header_length : int.
 End Block_header.
 
 Module Kind.
@@ -5054,7 +5061,7 @@ Module internal_operation.
   Record record {kind : Set} : Set := Build {
     source : Contract.contract;
     operation : manager_operation kind;
-    nonce : Z }.
+    nonce : int }.
   Arguments record : clear implicits.
   Definition with_source {t_kind} source (r : record t_kind) :=
     Build t_kind source r.(operation) r.(nonce).
@@ -5176,7 +5183,7 @@ Module Operation.
   
   Parameter hash_packed : packed_operation -&gt; (|Operation_hash|).(S.HASH.t).
   
-  Parameter acceptable_passes : packed_operation -&gt; list Z.
+  Parameter acceptable_passes : packed_operation -&gt; list int.
   
   (* extensible_type_definition `error` *)
   
@@ -5228,7 +5235,7 @@ Module Operation.
     | Case : forall {a : Set}, 'case.Case a b -&gt; case b
     
     where &quot;'case.Case&quot; := (fun (t_a t_b : Set) =&gt;
-      case.Case_skeleton Z string (Data_encoding.t t_a)
+      case.Case_skeleton int string (Data_encoding.t t_a)
         (packed_contents -&gt; option (contents t_b)) (contents t_b -&gt; t_a)
         (t_a -&gt; contents t_b)).
     
@@ -5287,7 +5294,7 @@ Module Operation.
       
       where &quot;'case&quot; := (fun (_ : Set) =&gt; case_gadt)
       and &quot;'case.MCase&quot; := (fun (t_a t_kind : Set) =&gt;
-        case.MCase_skeleton Z string (Data_encoding.t t_a)
+        case.MCase_skeleton int string (Data_encoding.t t_a)
           (packed_manager_operation -&gt; option (manager_operation t_kind))
           (manager_operation t_kind -&gt; t_a) (t_a -&gt; manager_operation t_kind)).
       
@@ -5328,10 +5335,10 @@ Module Roll.
     context -&gt; Cycle.t -&gt; Lwt.t (Error_monad.tzresult context).
   
   Parameter baking_rights_owner :
-    context -&gt; Level.t -&gt; Z -&gt; Lwt.t (Error_monad.tzresult public_key).
+    context -&gt; Level.t -&gt; int -&gt; Lwt.t (Error_monad.tzresult public_key).
   
   Parameter endorsement_rights_owner :
-    context -&gt; Level.t -&gt; Z -&gt; Lwt.t (Error_monad.tzresult public_key).
+    context -&gt; Level.t -&gt; int -&gt; Lwt.t (Error_monad.tzresult public_key).
   
   Parameter delegate_pubkey :
     context -&gt; public_key_hash -&gt; Lwt.t (Error_monad.tzresult public_key).
@@ -5372,10 +5379,10 @@ Module Bootstrap.
 End Bootstrap.
 
 Module Global.
-  Parameter get_block_priority : context -&gt; Lwt.t (Error_monad.tzresult Z).
+  Parameter get_block_priority : context -&gt; Lwt.t (Error_monad.tzresult int).
   
   Parameter set_block_priority :
-    context -&gt; Z -&gt; Lwt.t (Error_monad.tzresult context).
+    context -&gt; int -&gt; Lwt.t (Error_monad.tzresult context).
 End Global.
 
 Parameter prepare_first_block :
@@ -5402,22 +5409,23 @@ Parameter record_endorsement :
 Parameter allowed_endorsements :
   context -&gt;
   (|Signature.Public_key_hash|).(S.SPublic_key_hash.Map).(S.INDEXES_Map.t)
-    ((|Signature.Public_key|).(S.SPublic_key.t) * list Z * bool).
+    ((|Signature.Public_key|).(S.SPublic_key.t) * list int * bool).
 
 Parameter init_endorsements :
   context -&gt;
   (|Signature.Public_key_hash|).(S.SPublic_key_hash.Map).(S.INDEXES_Map.t)
-    ((|Signature.Public_key|).(S.SPublic_key.t) * list Z * bool) -&gt; context.
+    ((|Signature.Public_key|).(S.SPublic_key.t) * list int * bool) -&gt; context.
 
-Parameter included_endorsements : context -&gt; Z.
+Parameter included_endorsements : context -&gt; int.
 
 Parameter reset_internal_nonce : context -&gt; context.
 
-Parameter fresh_internal_nonce : context -&gt; Error_monad.tzresult (context * Z).
+Parameter fresh_internal_nonce :
+  context -&gt; Error_monad.tzresult (context * int).
 
-Parameter record_internal_nonce : context -&gt; Z -&gt; context.
+Parameter record_internal_nonce : context -&gt; int -&gt; context.
 
-Parameter internal_nonce_already_recorded : context -&gt; Z -&gt; bool.
+Parameter internal_nonce_already_recorded : context -&gt; int -&gt; bool.
 
 Parameter add_fees : context -&gt; Tez.t -&gt; Lwt.t (Error_monad.tzresult context).
 
@@ -8840,8 +8848,8 @@ Definition apply_internal_manager_operations
         existT (A := Set)
           (fun __Internal_operation_'kind =&gt;
             [Alpha_context.Contract.contract **
-              Alpha_context.manager_operation __Internal_operation_'kind ** Z **
-              Alpha_context.internal_operation __Internal_operation_'kind **
+              Alpha_context.manager_operation __Internal_operation_'kind ** int
+              ** Alpha_context.internal_operation __Internal_operation_'kind **
               list Alpha_context.packed_internal_operation]) _
           [source, operation, __nonce_value, op, rest] in
       let= function_parameter :=
@@ -11731,7 +11739,7 @@ where &quot;'contents_result&quot; := (fun (_ : Set) =&gt; contents_result_gadt)
 and &quot;'contents_result.Endorsement_result&quot; :=
   (contents_result.Endorsement_result_skeleton
     Alpha_context.Delegate.balance_updates
-    (|Signature.Public_key_hash|).(S.SPublic_key_hash.t) (list Z))
+    (|Signature.Public_key_hash|).(S.SPublic_key_hash.t) (list int))
 and &quot;'contents_result.Manager_operation_result&quot; := (fun (t_kind : Set) =&gt;
   contents_result.Manager_operation_result_skeleton
     Alpha_context.Delegate.balance_updates (manager_operation_result t_kind)
@@ -12373,7 +12381,7 @@ Definition contents_result_encoding
     let 'existT _ __Case_'a [tag, name, encoding, select, proj, inj] :=
       existT (A := Set)
         (fun __Case_'a =&gt;
-          [Z ** string ** Data_encoding.t __Case_'a **
+          [int ** string ** Data_encoding.t __Case_'a **
             packed_contents_result -&gt; option (contents_result A) **
             contents_result A -&gt; __Case_'a ** __Case_'a -&gt; contents_result A]) _
         [tag, name, encoding, select, proj, inj] in
@@ -12429,7 +12437,7 @@ Definition contents_and_result_encoding
         meta_inj] :=
       existT (A := [Set ** Set])
         (fun '[__Case_'a, __Case_'a1] =&gt;
-          [Z ** string ** Data_encoding.t __Case_'a1 **
+          [int ** string ** Data_encoding.t __Case_'a1 **
             Alpha_context.Operation.contents A -&gt; __Case_'a1 **
             __Case_'a1 -&gt; Alpha_context.Operation.contents A **
             Data_encoding.t __Case_'a **
@@ -13609,7 +13617,7 @@ and &quot;'successful_manager_operation_result&quot; := (fun (_ : Set) =&gt;
 and &quot;'contents_result.Endorsement_result&quot; :=
   (contents_result.Endorsement_result_skeleton
     Alpha_context.Delegate.balance_updates
-    (|Signature.Public_key_hash|).(S.SPublic_key_hash.t) (list Z))
+    (|Signature.Public_key_hash|).(S.SPublic_key_hash.t) (list int))
 and &quot;'contents_result.Manager_operation_result&quot; := (fun (t_kind : Set) =&gt;
   contents_result.Manager_operation_result_skeleton
     Alpha_context.Delegate.balance_updates ('manager_operation_result t_kind)
@@ -14225,7 +14233,7 @@ Import Misc.
 (* top_level_evaluation *)
 
 Definition minimal_time
-  (c : Alpha_context.context) (priority : Z)
+  (c : Alpha_context.context) (priority : int)
   (pred_timestamp : Alpha_context.Timestamp.time)
   : Lwt.t (Error_monad.tzresult Alpha_context.Timestamp.time) :=
   let priority := Int32.of_int priority in
@@ -14277,7 +14285,7 @@ Definition earlier_predecessor_timestamp
     Error_monad.__return __result_value.
 
 Definition check_timestamp
-  (c : Alpha_context.context) (priority : Z)
+  (c : Alpha_context.context) (priority : int)
   (pred_timestamp : Alpha_context.Timestamp.time)
   : Lwt.t (Error_monad.tzresult Alpha_context.Period.t) :=
   let=? minimal_time := minimal_time c priority pred_timestamp in
@@ -14342,8 +14350,8 @@ Definition baking_reward
     Alpha_context.Tez.op_divquestion val2 prio_factor_denominator).
 
 Definition endorsing_reward
-  (ctxt : Alpha_context.context) (prio : (|Compare.Int|).(Compare.S.t)) (n : Z)
-  : Lwt.t (Error_monad.tzresult Alpha_context.Tez.tez) :=
+  (ctxt : Alpha_context.context) (prio : (|Compare.Int|).(Compare.S.t))
+  (n : int) : Lwt.t (Error_monad.tzresult Alpha_context.Tez.tez) :=
   if (|Compare.Int|).(Compare.S.op_gteq) prio 0 then
     let=? tez :=
       Lwt.__return
@@ -14357,7 +14365,7 @@ Definition endorsing_reward
 Definition baking_priorities
   (c : Alpha_context.context) (level : Alpha_context.Level.t)
   : Lwt.t (Error_monad.tzresult (Misc.lazy_list_t Alpha_context.public_key)) :=
-  let fix f (priority : Z) {struct priority}
+  let fix f (priority : int) {struct priority}
     : Lwt.t (Error_monad.tzresult (Misc.lazy_list_t Alpha_context.public_key)) :=
     let=? delegate := Alpha_context.Roll.baking_rights_owner c level priority in
     Error_monad.__return
@@ -14372,7 +14380,7 @@ Definition endorsement_rights
   : Lwt.t
     (Error_monad.tzresult
       ((|Signature.Public_key_hash|).(S.SPublic_key_hash.Map).(S.INDEXES_Map.t)
-        (Alpha_context.public_key * list Z * bool))) :=
+        (Alpha_context.public_key * list int * bool))) :=
   Error_monad.fold_left_s
     (fun acc =&gt;
       fun slot =&gt;
@@ -14398,7 +14406,7 @@ Definition check_endorsement_rights
   : Lwt.t
     (Error_monad.tzresult
       ((|Signature.Public_key_hash|).(S.SPublic_key_hash.Map).(S.INDEXES_Map.key)
-        * list Z * bool)) :=
+        * list int * bool)) :=
   let current_level := Alpha_context.Level.current ctxt in
   let
     'Alpha_context.Single
@@ -14582,7 +14590,7 @@ Definition minimum_allowed_endorsements
     (Pervasives.op_minus minimum reduced_time_constraint).
 
 Definition minimal_valid_time
-  (ctxt : Alpha_context.context) (priority : Z) (endorsing_power : Z)
+  (ctxt : Alpha_context.context) (priority : int) (endorsing_power : int)
   : Lwt.t (Error_monad.tzresult Time.t) :=
   let predecessor_timestamp := Alpha_context.Timestamp.current ctxt in
   let=? minimal_time := minimal_time ctxt priority predecessor_timestamp in
@@ -14819,7 +14827,7 @@ Import Misc.
 (* extensible_type_definition `error` *)
 
 Parameter minimal_time :
-  Alpha_context.context -&gt; Z -&gt; Time.t -&gt; Lwt.t (Error_monad.tzresult Time.t).
+  Alpha_context.context -&gt; int -&gt; Time.t -&gt; Lwt.t (Error_monad.tzresult Time.t).
 
 Parameter check_baking_rights :
   Alpha_context.context -&gt; Alpha_context.Block_header.contents -&gt; Time.t -&gt;
@@ -14831,19 +14839,19 @@ Parameter endorsement_rights :
   Lwt.t
     (Error_monad.tzresult
       ((|Signature.Public_key_hash|).(S.SPublic_key_hash.Map).(S.INDEXES_Map.t)
-        (Alpha_context.public_key * list Z * bool))).
+        (Alpha_context.public_key * list int * bool))).
 
 Parameter check_endorsement_rights :
   Alpha_context.context -&gt; (|Chain_id|).(S.HASH.t) -&gt;
   Alpha_context.Operation.t Alpha_context.Kind.endorsement -&gt;
-  Lwt.t (Error_monad.tzresult (Alpha_context.public_key_hash * list Z * bool)).
+  Lwt.t (Error_monad.tzresult (Alpha_context.public_key_hash * list int * bool)).
 
 Parameter baking_reward :
-  Alpha_context.context -&gt; Z -&gt; Z -&gt;
+  Alpha_context.context -&gt; int -&gt; int -&gt;
   Lwt.t (Error_monad.tzresult Alpha_context.Tez.t).
 
 Parameter endorsing_reward :
-  Alpha_context.context -&gt; Z -&gt; Z -&gt;
+  Alpha_context.context -&gt; int -&gt; int -&gt;
   Lwt.t (Error_monad.tzresult Alpha_context.Tez.t).
 
 Parameter baking_priorities :
@@ -14851,8 +14859,8 @@ Parameter baking_priorities :
   Misc.lazy_list Alpha_context.public_key.
 
 Parameter first_baking_priorities :
-  Alpha_context.context -&gt; option Z -&gt; Alpha_context.public_key_hash -&gt;
-  Alpha_context.Level.t -&gt; Lwt.t (Error_monad.tzresult (list Z)).
+  Alpha_context.context -&gt; option int -&gt; Alpha_context.public_key_hash -&gt;
+  Alpha_context.Level.t -&gt; Lwt.t (Error_monad.tzresult (list int)).
 
 Parameter check_signature :
   Alpha_context.Block_header.t -&gt; (|Chain_id|).(S.HASH.t) -&gt;
@@ -14879,10 +14887,10 @@ Parameter earlier_predecessor_timestamp :
   Lwt.t (Error_monad.tzresult Alpha_context.Timestamp.t).
 
 Parameter minimum_allowed_endorsements :
-  Alpha_context.context -&gt; Alpha_context.Period.t -&gt; Z.
+  Alpha_context.context -&gt; Alpha_context.Period.t -&gt; int.
 
 Parameter minimal_valid_time :
-  Alpha_context.context -&gt; Z -&gt; Z -&gt; Lwt.t (Error_monad.tzresult Time.t).
+  Alpha_context.context -&gt; int -&gt; int -&gt; Lwt.t (Error_monad.tzresult Time.t).
 </pre>
   </div>
 </div>
@@ -15079,7 +15087,7 @@ Definition of_ed25519_pkh
 
 Definition activation_code : Set := MBytes.t.
 
-Definition activation_code_size : Z :=
+Definition activation_code_size : int :=
   (|Ed25519|).(S.SIGNATURE.Public_key_hash).(S.SPublic_key_hash.size).
 
 Definition activation_code_encoding : Data_encoding.encoding MBytes.t :=
@@ -15188,7 +15196,7 @@ Definition op_gteq : t -&gt; t -&gt; bool := (|Included_HASH|).(S.HASH.op_gteq).
 
 Definition op_gt : t -&gt; t -&gt; bool := (|Included_HASH|).(S.HASH.op_gt).
 
-Definition compare : t -&gt; t -&gt; Z := (|Included_HASH|).(S.HASH.compare).
+Definition compare : t -&gt; t -&gt; int := (|Included_HASH|).(S.HASH.compare).
 
 Definition equal : t -&gt; t -&gt; bool := (|Included_HASH|).(S.HASH.equal).
 
@@ -15204,7 +15212,7 @@ Definition hash_string : option string -&gt; list string -&gt; t :=
 
 Definition zero : t := (|Included_HASH|).(S.HASH.zero).
 
-Definition size : Z := (|Included_HASH|).(S.HASH.size).
+Definition size : int := (|Included_HASH|).(S.HASH.size).
 
 Definition to_bytes : t -&gt; MBytes.t := (|Included_HASH|).(S.HASH.to_bytes).
 
@@ -15244,7 +15252,7 @@ Definition of_path_exn : list string -&gt; t :=
 Definition prefix_path : string -&gt; list string :=
   (|Included_HASH|).(S.HASH.prefix_path).
 
-Definition path_length : Z := (|Included_HASH|).(S.HASH.path_length).
+Definition path_length : int := (|Included_HASH|).(S.HASH.path_length).
 
 Definition __Set := existT (fun _ =&gt; _) tt (|Included_HASH|).(S.HASH.__Set).
 
@@ -15431,7 +15439,7 @@ Require Tezos.Nonce_hash.
 
 Module contents.
   Record record : Set := Build {
-    priority : Z;
+    priority : int;
     seed_nonce_hash : option Nonce_hash.t;
     proof_of_work_nonce : MBytes.t }.
   Definition with_priority priority (r : record) :=
@@ -15545,7 +15553,7 @@ Definition encoding : Data_encoding.encoding t :=
       (Data_encoding.merge_objs Block_header.shell_header_encoding
         protocol_data_encoding)).
 
-Definition max_header_length : Z :=
+Definition max_header_length : int :=
   let fake_shell :=
     {|
       Block_header.shell_header.level :=
@@ -15682,7 +15690,7 @@ Require Tezos.Nonce_hash.
 
 Module contents.
   Record record : Set := Build {
-    priority : Z;
+    priority : int;
     seed_nonce_hash : option Nonce_hash.t;
     proof_of_work_nonce : MBytes.t }.
   Definition with_priority priority (r : record) :=
@@ -15737,7 +15745,7 @@ Parameter protocol_data_encoding : Data_encoding.encoding protocol_data.
 
 Parameter shell_header_encoding : Data_encoding.encoding shell_header.
 
-Parameter max_header_length : Z.
+Parameter max_header_length : int.
 
 Parameter __hash_value : block_header -&gt; (|Block_hash|).(S.HASH.t).
 
@@ -15991,7 +15999,7 @@ Definition init
     Lwt.t
       (Error_monad.tzresult
         ((Script_repr.t * option Contract_storage.big_map_diff) * Raw_context.t)))
-  (ramp_up_cycles : option Z) (no_reward_cycles : option Z)
+  (ramp_up_cycles : option int) (no_reward_cycles : option int)
   (accounts : list Parameters_repr.bootstrap_account)
   (contracts : list Parameters_repr.bootstrap_contract)
   : Lwt.t (Error_monad.tzresult Raw_context.t) :=
@@ -16189,7 +16197,7 @@ Parameter init :
   Lwt.t
     (Error_monad.tzresult
       ((Script_repr.t * option Contract_storage.big_map_diff) * Raw_context.t)))
-  -&gt; option Z -&gt; option Z -&gt; list Parameters_repr.bootstrap_account -&gt;
+  -&gt; option int -&gt; option int -&gt; list Parameters_repr.bootstrap_account -&gt;
   list Parameters_repr.bootstrap_contract -&gt;
   Lwt.t (Error_monad.tzresult Raw_context.t).
 
@@ -16850,23 +16858,23 @@ Definition version_number_004 : string := &quot;\000&quot;.
 
 Definition version_number : string := &quot;\001&quot;.
 
-Definition proof_of_work_nonce_size : Z := 8.
+Definition proof_of_work_nonce_size : int := 8.
 
-Definition nonce_length : Z := 32.
+Definition nonce_length : int := 32.
 
-Definition max_revelations_per_block : Z := 32.
+Definition max_revelations_per_block : int := 32.
 
-Definition max_proposals_per_delegate : Z := 20.
+Definition max_proposals_per_delegate : int := 20.
 
-Definition max_operation_data_length : Z := Pervasives.op_star 16 1024.
+Definition max_operation_data_length : int := Pervasives.op_star 16 1024.
 
 Module fixed.
   Record record : Set := Build {
-    proof_of_work_nonce_size : Z;
-    nonce_length : Z;
-    max_revelations_per_block : Z;
-    max_operation_data_length : Z;
-    max_proposals_per_delegate : Z }.
+    proof_of_work_nonce_size : int;
+    nonce_length : int;
+    max_revelations_per_block : int;
+    max_operation_data_length : int;
+    max_proposals_per_delegate : int }.
   Definition with_proof_of_work_nonce_size proof_of_work_nonce_size
     (r : record) :=
     Build proof_of_work_nonce_size r.(nonce_length)
@@ -16931,20 +16939,20 @@ Definition __fixed_value : fixed :=
 
 Module parametric.
   Record record : Set := Build {
-    preserved_cycles : Z;
+    preserved_cycles : int;
     blocks_per_cycle : int32;
     blocks_per_commitment : int32;
     blocks_per_roll_snapshot : int32;
     blocks_per_voting_period : int32;
     time_between_blocks : list Period_repr.t;
-    endorsers_per_block : Z;
+    endorsers_per_block : int;
     hard_gas_limit_per_operation : Z.t;
     hard_gas_limit_per_block : Z.t;
     proof_of_work_threshold : int64;
     tokens_per_roll : Tez_repr.t;
-    michelson_maximum_type_size : Z;
+    michelson_maximum_type_size : int;
     seed_nonce_revelation_tip : Tez_repr.t;
-    origination_size : Z;
+    origination_size : int;
     block_security_deposit : Tez_repr.t;
     endorsement_security_deposit : Tez_repr.t;
     block_reward : Tez_repr.t;
@@ -16955,7 +16963,7 @@ Module parametric.
     quorum_min : int32;
     quorum_max : int32;
     min_proposal_quorum : int32;
-    initial_endorsers : Z;
+    initial_endorsers : int;
     delay_per_missing_endorsement : Period_repr.t }.
   Definition with_preserved_cycles preserved_cycles (r : record) :=
     Build preserved_cycles r.(blocks_per_cycle) r.(blocks_per_commitment)
@@ -18101,7 +18109,7 @@ Require Tezos.Period_repr.
 Require Tezos.Raw_context.
 Require Tezos.Tez_repr.
 
-Definition preserved_cycles (c : Raw_context.context) : Z :=
+Definition preserved_cycles (c : Raw_context.context) : int :=
   let constants := Raw_context.constants c in
   constants.(Constants_repr.parametric.preserved_cycles).
 
@@ -18125,11 +18133,11 @@ Definition time_between_blocks (c : Raw_context.context) : list Period_repr.t :=
   let constants := Raw_context.constants c in
   constants.(Constants_repr.parametric.time_between_blocks).
 
-Definition endorsers_per_block (c : Raw_context.context) : Z :=
+Definition endorsers_per_block (c : Raw_context.context) : int :=
   let constants := Raw_context.constants c in
   constants.(Constants_repr.parametric.endorsers_per_block).
 
-Definition initial_endorsers (c : Raw_context.context) : Z :=
+Definition initial_endorsers (c : Raw_context.context) : int :=
   let constants := Raw_context.constants c in
   constants.(Constants_repr.parametric.initial_endorsers).
 
@@ -18162,7 +18170,7 @@ Definition tokens_per_roll (c : Raw_context.context) : Tez_repr.t :=
   let constants := Raw_context.constants c in
   constants.(Constants_repr.parametric.tokens_per_roll).
 
-Definition michelson_maximum_type_size (c : Raw_context.context) : Z :=
+Definition michelson_maximum_type_size (c : Raw_context.context) : int :=
   let constants := Raw_context.constants c in
   constants.(Constants_repr.parametric.michelson_maximum_type_size).
 
@@ -18170,7 +18178,7 @@ Definition seed_nonce_revelation_tip (c : Raw_context.context) : Tez_repr.t :=
   let constants := Raw_context.constants c in
   constants.(Constants_repr.parametric.seed_nonce_revelation_tip).
 
-Definition origination_size (c : Raw_context.context) : Z :=
+Definition origination_size (c : Raw_context.context) : int :=
   let constants := Raw_context.constants c in
   constants.(Constants_repr.parametric.origination_size).
 
@@ -18668,7 +18676,7 @@ Inductive t : Set :=
 Definition CompareModule :=
   Compare.Make
     (let t := t in
-    let compare (l1 : t) (l2 : t) : Z :=
+    let compare (l1 : t) (l2 : t) : int :=
       match (l1, l2) with
       | (Implicit pkh1, Implicit pkh2) =&gt;
         (|Signature.Public_key_hash|).(S.SPublic_key_hash.compare) pkh1 pkh2
@@ -19036,7 +19044,7 @@ Definition op_gteq : contract -&gt; contract -&gt; bool :=
 Definition op_gt : contract -&gt; contract -&gt; bool :=
   (|Included_S|).(Compare.S.op_gt).
 
-Definition compare : contract -&gt; contract -&gt; Z :=
+Definition compare : contract -&gt; contract -&gt; int :=
   (|Included_S|).(Compare.S.compare).
 
 Definition equal : contract -&gt; contract -&gt; bool :=
@@ -23094,9 +23102,9 @@ Definition big_map_diff_encoding
   fun eta =&gt; arg None None eta)
     (Data_encoding.__list_value None big_map_diff_item_encoding).
 
-Definition big_map_key_cost : Z := 65.
+Definition big_map_key_cost : int := 65.
 
-Definition big_map_cost : Z := 33.
+Definition big_map_cost : int := 33.
 
 Definition update_script_big_map
   (c :
@@ -24413,7 +24421,7 @@ Definition op_gteq : t -&gt; t -&gt; bool := (|Included_S|).(Compare.S.op_gteq).
 
 Definition op_gt : t -&gt; t -&gt; bool := (|Included_S|).(Compare.S.op_gt).
 
-Definition compare : t -&gt; t -&gt; Z := (|Included_S|).(Compare.S.compare).
+Definition compare : t -&gt; t -&gt; int := (|Included_S|).(Compare.S.compare).
 
 Definition equal : t -&gt; t -&gt; bool := (|Included_S|).(Compare.S.equal).
 
@@ -24431,9 +24439,9 @@ Parameter root : cycle.
 
 Parameter pred : cycle -&gt; option cycle.
 
-Parameter add : cycle -&gt; Z -&gt; cycle.
+Parameter add : cycle -&gt; int -&gt; cycle.
 
-Parameter sub : cycle -&gt; Z -&gt; option cycle.
+Parameter sub : cycle -&gt; int -&gt; option cycle.
 
 Parameter succ : cycle -&gt; cycle.
 
@@ -24454,7 +24462,7 @@ Parameter Index : {_ : unit &amp; Storage_description.INDEX.signature cycle}.
     <h3>Delegate_services</h3>
     <ul>
       <li>OCaml size: 697 lines</li>
-      <li>Coq size: 1340 lines (+92% compared to&nbsp;OCaml)</li>
+      <li>Coq size: 1341 lines (+92% compared to&nbsp;OCaml)</li>
     </ul>
   </div>
   <div class="col-md-6">
@@ -26504,7 +26512,7 @@ Module Baking_rights.
     Record record : Set := Build {
       level : Alpha_context.Raw_level.t;
       delegate : (|Signature.Public_key_hash|).(S.SPublic_key_hash.t);
-      priority : Z;
+      priority : int;
       timestamp : option Alpha_context.Timestamp.t }.
     Definition with_level level (r : record) :=
       Build level r.(delegate) r.(priority) r.(timestamp).
@@ -26552,7 +26560,7 @@ Module Baking_rights.
         levels : list Alpha_context.Raw_level.t;
         cycles : list Alpha_context.Cycle.t;
         delegates : list (|Signature.Public_key_hash|).(S.SPublic_key_hash.t);
-        max_priority : option Z;
+        max_priority : option int;
         all : bool }.
       Definition with_levels levels (r : record) :=
         Build levels r.(cycles) r.(delegates) r.(max_priority) r.(all).
@@ -26723,7 +26731,8 @@ Module Baking_rights.
     (op_staroptstar : option (list Alpha_context.Raw_level.t))
     : option (list Alpha_context.Cycle.t) -&gt;
     option (list (|Signature.Public_key_hash|).(S.SPublic_key_hash.t)) -&gt;
-    option bool -&gt; option Z -&gt; D -&gt; Lwt.t (Error_monad.shell_tzresult (list t)) :=
+    option bool -&gt; option int -&gt; D -&gt;
+    Lwt.t (Error_monad.shell_tzresult (list t)) :=
     let levels :=
       match op_staroptstar with
       | Some op_starsthstar =&gt; op_starsthstar
@@ -26762,7 +26771,7 @@ Module Endorsing_rights.
     Record record : Set := Build {
       level : Alpha_context.Raw_level.t;
       delegate : (|Signature.Public_key_hash|).(S.SPublic_key_hash.t);
-      slots : list Z;
+      slots : list int;
       estimated_time : option Time.t }.
     Definition with_level level (r : record) :=
       Build level r.(delegate) r.(slots) r.(estimated_time).
@@ -26949,7 +26958,7 @@ Module Endorsing_power.
     (ctxt : Alpha_context.context)
     (function_parameter :
       Alpha_context.packed_operation * (|Chain_id|).(S.HASH.t))
-    : Lwt.t (Error_monad.tzresult Z) :=
+    : Lwt.t (Error_monad.tzresult int) :=
     let '(operation, chain_id) := function_parameter in
     let 'Alpha_context.Operation_data data :=
       operation.(Alpha_context.packed_operation.protocol_data) in
@@ -26973,7 +26982,7 @@ Module Endorsing_power.
     Definition endorsing_power
       : RPC_service.service (* `POST *) unit Updater.rpc_context
         Updater.rpc_context unit
-        (Alpha_context.Operation.packed * (|Chain_id|).(S.HASH.t)) Z :=
+        (Alpha_context.Operation.packed * (|Chain_id|).(S.HASH.t)) int :=
       RPC_service.post_service
         (Some
           &quot;Get the endorsing power of an endorsement, that is, the number of slots that the endorser has&quot;)
@@ -27020,14 +27029,14 @@ Module Endorsing_power.
             i -&gt; Lwt.t (Error_monad.shell_tzresult o)) *
               (K * a * b * c * q * i * o)) * L)))) * L * D) (block : D)
     (op : Alpha_context.Operation.packed) (chain_id : (|Chain_id|).(S.HASH.t))
-    : Lwt.t (Error_monad.shell_tzresult Z) :=
+    : Lwt.t (Error_monad.shell_tzresult int) :=
     RPC_context.make_call0 S.endorsing_power ctxt block tt (op, chain_id).
 End Endorsing_power.
 
 Module Required_endorsements.
   Definition required_endorsements
     (ctxt : Alpha_context.context) (block_delay : Alpha_context.Period.t)
-    : Lwt.t (Error_monad.tzresult Z) :=
+    : Lwt.t (Error_monad.tzresult int) :=
     Error_monad.__return (Baking.minimum_allowed_endorsements ctxt block_delay).
   
   Module S.
@@ -27050,7 +27059,7 @@ Module Required_endorsements.
     
     Definition required_endorsements
       : RPC_service.service (* `GET *) unit Updater.rpc_context
-        Updater.rpc_context t unit Z :=
+        Updater.rpc_context t unit int :=
       RPC_service.get_service
         (Some
           &quot;Minimum number of endorsements for a block to be valid, given a delay of the block's timestamp with respect to the minimum time to bake at the block's priority&quot;)
@@ -27092,22 +27101,22 @@ Module Required_endorsements.
             i -&gt; Lwt.t (Error_monad.shell_tzresult o)) *
               (K * a * b * c * q * i * o)) * L)))) * L * D) (block : D)
     (block_delay : Alpha_context.Period.t)
-    : Lwt.t (Error_monad.shell_tzresult Z) :=
+    : Lwt.t (Error_monad.shell_tzresult int) :=
     RPC_context.make_call0 S.required_endorsements ctxt block
       {| S.t.block_delay := block_delay |} tt.
 End Required_endorsements.
 
 Module Minimal_valid_time.
   Definition minimal_valid_time
-    (ctxt : Alpha_context.context) (priority : Z) (endorsing_power : Z)
+    (ctxt : Alpha_context.context) (priority : int) (endorsing_power : int)
     : Lwt.t (Error_monad.tzresult Time.t) :=
     Baking.minimal_valid_time ctxt priority endorsing_power.
   
   Module S.
     Module t.
       Record record : Set := Build {
-        priority : Z;
-        endorsing_power : Z }.
+        priority : int;
+        endorsing_power : int }.
       Definition with_priority priority (r : record) :=
         Build priority r.(endorsing_power).
       Definition with_endorsing_power endorsing_power (r : record) :=
@@ -27175,7 +27184,7 @@ Module Minimal_valid_time.
               (((RPC_context.t * a) * b) * c) q i o -&gt; D -&gt; a -&gt; b -&gt; c -&gt; q -&gt;
             i -&gt; Lwt.t (Error_monad.shell_tzresult o)) *
               (K * a * b * c * q * i * o)) * L)))) * L * D) (block : D)
-    (priority : Z) (endorsing_power : Z)
+    (priority : int) (endorsing_power : int)
     : Lwt.t (Error_monad.shell_tzresult Time.t) :=
     RPC_context.make_call0 S.minimal_valid_time ctxt block
       {| S.t.priority := priority; S.t.endorsing_power := endorsing_power |} tt.
@@ -27237,16 +27246,16 @@ Definition baking_rights
 Definition endorsing_power
   (ctxt : Alpha_context.context)
   (operation : Alpha_context.packed_operation * (|Chain_id|).(S.HASH.t))
-  : Lwt.t (Error_monad.tzresult Z) :=
+  : Lwt.t (Error_monad.tzresult int) :=
   Endorsing_power.endorsing_power ctxt operation.
 
 Definition required_endorsements
   (ctxt : Alpha_context.context) (delay : Alpha_context.Period.t)
-  : Lwt.t (Error_monad.tzresult Z) :=
+  : Lwt.t (Error_monad.tzresult int) :=
   Required_endorsements.required_endorsements ctxt delay.
 
 Definition minimal_valid_time
-  (ctxt : Alpha_context.context) (priority : Z) (endorsing_power : Z)
+  (ctxt : Alpha_context.context) (priority : int) (endorsing_power : int)
   : Lwt.t (Error_monad.tzresult Time.t) :=
   Minimal_valid_time.minimal_valid_time ctxt priority endorsing_power.
 </pre>
@@ -28508,7 +28517,7 @@ Module Baking_rights.
     Record record : Set := Build {
       level : Alpha_context.Raw_level.t;
       delegate : (|Signature.Public_key_hash|).(S.SPublic_key_hash.t);
-      priority : Z;
+      priority : int;
       timestamp : option Alpha_context.Timestamp.t }.
     Definition with_level level (r : record) :=
       Build level r.(delegate) r.(priority) r.(timestamp).
@@ -28544,7 +28553,7 @@ Module Baking_rights.
             (J * a * b * c * q * i * o)) * K)))) * K * a -&gt;
     option (list Alpha_context.Raw_level.t) -&gt;
     option (list Alpha_context.Cycle.t) -&gt;
-    option (list Signature.public_key_hash) -&gt; option bool -&gt; option Z -&gt; a -&gt;
+    option (list Signature.public_key_hash) -&gt; option bool -&gt; option int -&gt; a -&gt;
     Lwt.t (Error_monad.shell_tzresult (list t)).
 End Baking_rights.
 
@@ -28553,7 +28562,7 @@ Module Endorsing_rights.
     Record record : Set := Build {
       level : Alpha_context.Raw_level.t;
       delegate : (|Signature.Public_key_hash|).(S.SPublic_key_hash.t);
-      slots : list Z;
+      slots : list int;
       estimated_time : option Alpha_context.Timestamp.t }.
     Definition with_level level (r : record) :=
       Build level r.(delegate) r.(slots) r.(estimated_time).
@@ -28616,7 +28625,7 @@ Module Endorsing_power.
           i -&gt; Lwt.t (Error_monad.shell_tzresult o)) *
             (J * a * b * c * q * i * o)) * K)))) * K * a -&gt; a -&gt;
     Alpha_context.packed_operation -&gt; (|Chain_id|).(S.HASH.t) -&gt;
-    Lwt.t (Error_monad.shell_tzresult Z).
+    Lwt.t (Error_monad.shell_tzresult int).
 End Endorsing_power.
 
 Module Required_endorsements.
@@ -28641,7 +28650,7 @@ Module Required_endorsements.
             (((RPC_context.t * a) * b) * c) q i o -&gt; a -&gt; a -&gt; b -&gt; c -&gt; q -&gt;
           i -&gt; Lwt.t (Error_monad.shell_tzresult o)) *
             (J * a * b * c * q * i * o)) * K)))) * K * a -&gt; a -&gt;
-    Alpha_context.Period.t -&gt; Lwt.t (Error_monad.shell_tzresult Z).
+    Alpha_context.Period.t -&gt; Lwt.t (Error_monad.shell_tzresult int).
 End Required_endorsements.
 
 Module Minimal_valid_time.
@@ -28665,7 +28674,7 @@ Module Minimal_valid_time.
               (* `POST *) unit + (* `PATCH *) unit) RPC_context.t
             (((RPC_context.t * a) * b) * c) q i o -&gt; a -&gt; a -&gt; b -&gt; c -&gt; q -&gt;
           i -&gt; Lwt.t (Error_monad.shell_tzresult o)) *
-            (J * a * b * c * q * i * o)) * K)))) * K * a -&gt; a -&gt; Z -&gt; Z -&gt;
+            (J * a * b * c * q * i * o)) * K)))) * K * a -&gt; a -&gt; int -&gt; int -&gt;
     Lwt.t (Error_monad.shell_tzresult Time.t).
 End Minimal_valid_time.
 
@@ -28674,7 +28683,7 @@ Parameter endorsement_rights :
   Lwt.t (Error_monad.tzresult (list Alpha_context.public_key_hash)).
 
 Parameter baking_rights :
-  Alpha_context.t -&gt; option Z -&gt;
+  Alpha_context.t -&gt; option int -&gt;
   Lwt.t
     (Error_monad.tzresult
       (Alpha_context.Raw_level.t *
@@ -28682,13 +28691,13 @@ Parameter baking_rights :
 
 Parameter endorsing_power :
   Alpha_context.t -&gt; Alpha_context.packed_operation * (|Chain_id|).(S.HASH.t) -&gt;
-  Lwt.t (Error_monad.tzresult Z).
+  Lwt.t (Error_monad.tzresult int).
 
 Parameter required_endorsements :
-  Alpha_context.t -&gt; Alpha_context.Period.t -&gt; Lwt.t (Error_monad.tzresult Z).
+  Alpha_context.t -&gt; Alpha_context.Period.t -&gt; Lwt.t (Error_monad.tzresult int).
 
 Parameter minimal_valid_time :
-  Alpha_context.t -&gt; Z -&gt; Z -&gt; Lwt.t (Error_monad.tzresult Time.t).
+  Alpha_context.t -&gt; int -&gt; int -&gt; Lwt.t (Error_monad.tzresult Time.t).
 
 Parameter register : unit -&gt; unit.
 </pre>
@@ -31276,7 +31285,7 @@ Require Tezos.Raw_context.
 Definition current : Raw_context.context -&gt; Int64.t :=
   Raw_context.current_fitness.
 
-Definition increase (op_staroptstar : option Z)
+Definition increase (op_staroptstar : option int)
   : Raw_context.context -&gt; Raw_context.t :=
   let gap :=
     match op_staroptstar with
@@ -31759,7 +31768,7 @@ Definition byte_read_weight : Z.t := Z.of_int 10.
 
 Definition byte_written_weight : Z.t := Z.of_int 15.
 
-Definition rescaling_bits : Z := 7.
+Definition rescaling_bits : int := 7.
 
 Definition rescaling_mask : Z.t :=
   Z.sub (Z.shift_left Z.one rescaling_bits) Z.one.
@@ -31820,24 +31829,24 @@ Definition check_enough_raw
 
 Definition internal_gas_zero : internal_gas := Z.zero.
 
-Definition alloc_cost (n : Z) : cost :=
+Definition alloc_cost (n : int) : cost :=
   {| cost.allocations := scale (Z.of_int (Pervasives.op_plus n 1));
     cost.steps := Z.zero; cost.reads := Z.zero; cost.writes := Z.zero;
     cost.bytes_read := Z.zero; cost.bytes_written := Z.zero |}.
 
-Definition alloc_bytes_cost (n : Z) : cost :=
+Definition alloc_bytes_cost (n : int) : cost :=
   alloc_cost (Pervasives.op_div (Pervasives.op_plus n 7) 8).
 
-Definition alloc_bits_cost (n : Z) : cost :=
+Definition alloc_bits_cost (n : int) : cost :=
   alloc_cost (Pervasives.op_div (Pervasives.op_plus n 63) 64).
 
-Definition atomic_step_cost (n : Z) : cost :=
+Definition atomic_step_cost (n : int) : cost :=
   {| cost.allocations := Z.zero;
     cost.steps := Z.of_int (Pervasives.op_star 2 n); cost.reads := Z.zero;
     cost.writes := Z.zero; cost.bytes_read := Z.zero;
     cost.bytes_written := Z.zero |}.
 
-Definition step_cost (n : Z) : cost :=
+Definition step_cost (n : int) : cost :=
   {| cost.allocations := Z.zero; cost.steps := scale (Z.of_int n);
     cost.reads := Z.zero; cost.writes := Z.zero; cost.bytes_read := Z.zero;
     cost.bytes_written := Z.zero |}.
@@ -31865,7 +31874,7 @@ Definition op_plusat (x : cost) (y : cost) : cost :=
     cost.bytes_read := Z.add x.(cost.bytes_read) y.(cost.bytes_read);
     cost.bytes_written := Z.add x.(cost.bytes_written) y.(cost.bytes_written) |}.
 
-Definition op_starat (x : Z) (y : cost) : cost :=
+Definition op_starat (x : int) (y : cost) : cost :=
   {| cost.allocations := Z.mul (Z.of_int x) y.(cost.allocations);
     cost.steps := Z.mul (Z.of_int x) y.(cost.steps);
     cost.reads := Z.mul (Z.of_int x) y.(cost.reads);
@@ -31873,7 +31882,7 @@ Definition op_starat (x : Z) (y : cost) : cost :=
     cost.bytes_read := Z.mul (Z.of_int x) y.(cost.bytes_read);
     cost.bytes_written := Z.mul (Z.of_int x) y.(cost.bytes_written) |}.
 
-Definition alloc_mbytes_cost (n : Z) : cost :=
+Definition alloc_mbytes_cost (n : int) : cost :=
   op_plusat (alloc_cost 12) (alloc_bytes_cost n).
 
 (* ❌ Top-level evaluations are ignored *)
@@ -32034,23 +32043,23 @@ Parameter internal_gas_zero : internal_gas.
 
 Parameter free : cost.
 
-Parameter atomic_step_cost : Z -&gt; cost.
+Parameter atomic_step_cost : int -&gt; cost.
 
-Parameter step_cost : Z -&gt; cost.
+Parameter step_cost : int -&gt; cost.
 
-Parameter alloc_cost : Z -&gt; cost.
+Parameter alloc_cost : int -&gt; cost.
 
-Parameter alloc_bytes_cost : Z -&gt; cost.
+Parameter alloc_bytes_cost : int -&gt; cost.
 
-Parameter alloc_mbytes_cost : Z -&gt; cost.
+Parameter alloc_mbytes_cost : int -&gt; cost.
 
-Parameter alloc_bits_cost : Z -&gt; cost.
+Parameter alloc_bits_cost : int -&gt; cost.
 
 Parameter read_bytes_cost : Z.t -&gt; cost.
 
 Parameter write_bytes_cost : Z.t -&gt; cost.
 
-Parameter op_starat : Z -&gt; cost -&gt; cost.
+Parameter op_starat : int -&gt; cost -&gt; cost.
 
 Parameter op_plusat : cost -&gt; cost -&gt; cost.
 </pre>
@@ -34795,7 +34804,7 @@ Module Forge.
     
     Definition protocol_data
       : RPC_service.service (* `POST *) unit Updater.rpc_context
-        Updater.rpc_context unit (Z * option Nonce_hash.t * MBytes.t) MBytes.t :=
+        Updater.rpc_context unit (int * option Nonce_hash.t * MBytes.t) MBytes.t :=
       RPC_service.post_service
         (Some &quot;Forge the protocol-specific part of a block header&quot;)
         RPC_query.empty
@@ -35342,7 +35351,7 @@ Module Forge.
               (((RPC_context.t * a) * b) * c) q i o -&gt; D -&gt; a -&gt; b -&gt; c -&gt; q -&gt;
             i -&gt; Lwt.t (Error_monad.shell_tzresult o)) *
               (K * a * b * c * q * i * o)) * L)))) * L * D) (block : D)
-    (priority : Z) (seed_nonce_hash : option Nonce_hash.t)
+    (priority : int) (seed_nonce_hash : option Nonce_hash.t)
     (op_staroptstar : option MBytes.t)
     : unit -&gt; Lwt.t (Error_monad.shell_tzresult MBytes.t) :=
     let proof_of_work_nonce :=
@@ -37649,7 +37658,7 @@ Module Forge.
               (* `POST *) unit + (* `PATCH *) unit) RPC_context.t
             (((RPC_context.t * a) * b) * c) q i o -&gt; a -&gt; a -&gt; b -&gt; c -&gt; q -&gt;
           i -&gt; Lwt.t (Error_monad.shell_tzresult o)) *
-            (J * a * b * c * q * i * o)) * K)))) * K * a -&gt; a -&gt; Z -&gt;
+            (J * a * b * c * q * i * o)) * K)))) * K * a -&gt; a -&gt; int -&gt;
     option Nonce_hash.t -&gt; option MBytes.t -&gt; unit -&gt;
     Lwt.t (Error_monad.shell_tzresult MBytes.t).
 End Forge.
@@ -40014,9 +40023,9 @@ Definition add_root_entrypoint (script_code : Script_repr.lazy_expr)
                   =&gt;
                   let fix rewrite_self
                     (function_parameter :
-                      Micheline.node Z Michelson_v1_primitives.prim)
+                      Micheline.node int Michelson_v1_primitives.prim)
                     {struct function_parameter}
-                    : Micheline.node Z Michelson_v1_primitives.prim :=
+                    : Micheline.node int Michelson_v1_primitives.prim :=
                     match function_parameter with
                     |
                       (Micheline.Int _ _ | Micheline.String _ _ |
@@ -40417,7 +40426,7 @@ Definition t := t.record.
 Definition CompareModule :=
   Compare.Make
     (let t := t in
-    let compare (function_parameter : t) : t -&gt; Z :=
+    let compare (function_parameter : t) : t -&gt; int :=
       let '{| t.level := l1 |} := function_parameter in
       fun function_parameter =&gt;
         let '{| t.level := l2 |} := function_parameter in
@@ -40586,7 +40595,7 @@ Definition diff (function_parameter : t) : t -&gt; int32 :=
     <h3>Level_repr_mli</h3>
     <ul>
       <li>OCaml size: 74 lines</li>
-      <li>Coq size: 89 lines (+20% compared to&nbsp;OCaml)</li>
+      <li>Coq size: 90 lines (+21% compared to&nbsp;OCaml)</li>
     </ul>
   </div>
   <div class="col-md-6">
@@ -40739,7 +40748,8 @@ Definition op_gteq : level -&gt; level -&gt; bool :=
 
 Definition op_gt : level -&gt; level -&gt; bool := (|Included_S|).(Compare.S.op_gt).
 
-Definition compare : level -&gt; level -&gt; Z := (|Included_S|).(Compare.S.compare).
+Definition compare : level -&gt; level -&gt; int :=
+  (|Included_S|).(Compare.S.compare).
 
 Definition equal : level -&gt; level -&gt; bool := (|Included_S|).(Compare.S.equal).
 
@@ -41162,7 +41172,7 @@ Parameter last_allowed_fork_level : Raw_context.t -&gt; Raw_level_repr.t.
     <h3>Main</h3>
     <ul>
       <li>OCaml size: 380 lines</li>
-      <li>Coq size: 607 lines (+59% compared to&nbsp;OCaml)</li>
+      <li>Coq size: 608 lines (+60% compared to&nbsp;OCaml)</li>
     </ul>
   </div>
   <div class="col-md-6">
@@ -41631,12 +41641,13 @@ Module operation.
 End operation.
 Definition operation := operation.record.
 
-Definition acceptable_passes : Alpha_context.packed_operation -&gt; list Z :=
+Definition acceptable_passes : Alpha_context.packed_operation -&gt; list int :=
   Alpha_context.Operation.acceptable_passes.
 
-Definition max_block_length : Z := Alpha_context.Block_header.max_header_length.
+Definition max_block_length : int :=
+  Alpha_context.Block_header.max_header_length.
 
-Definition max_operation_data_length : Z :=
+Definition max_operation_data_length : int :=
   Alpha_context.Constants.max_operation_data_length.
 
 Definition validation_passes : list Updater.quota :=
@@ -41736,7 +41747,7 @@ Module validation_state.
     mode : validation_mode;
     chain_id : (|Chain_id|).(S.HASH.t);
     ctxt : Alpha_context.t;
-    op_count : Z }.
+    op_count : int }.
   Definition with_mode mode (r : record) :=
     Build mode r.(chain_id) r.(ctxt) r.(op_count).
   Definition with_chain_id chain_id (r : record) :=
@@ -42032,7 +42043,7 @@ Definition finalize_block (function_parameter : validation_state)
 
 Definition compare_operations
   (op1 : Alpha_context.packed_operation) (op2 : Alpha_context.packed_operation)
-  : Z :=
+  : int :=
   let 'Alpha_context.Operation_data op1 :=
     op1.(Alpha_context.packed_operation.protocol_data) in
   let 'existT _ __Operation_data_'kind op1 :=
@@ -42347,7 +42358,7 @@ Module validation_state.
     mode : validation_mode;
     chain_id : (|Chain_id|).(S.HASH.t);
     ctxt : Alpha_context.t;
-    op_count : Z }.
+    op_count : int }.
   Definition with_mode mode (r : record) :=
     Build mode r.(chain_id) r.(ctxt) r.(op_count).
   Definition with_chain_id chain_id (r : record) :=
@@ -42378,10 +42389,10 @@ Parameter Included_PROTOCOL :
       block_header Apply_results.block_metadata operation_data
       Apply_results.packed_operation_metadata operation validation_state}.
 
-Definition max_block_length : Z :=
+Definition max_block_length : int :=
   (|Included_PROTOCOL|).(Updater.PROTOCOL.max_block_length).
 
-Definition max_operation_data_length : Z :=
+Definition max_operation_data_length : int :=
   (|Included_PROTOCOL|).(Updater.PROTOCOL.max_operation_data_length).
 
 Definition validation_passes : list Updater.quota :=
@@ -42416,10 +42427,10 @@ Definition operation_data_and_receipt_encoding :
   Data_encoding.t (operation_data * operation_receipt) :=
   (|Included_PROTOCOL|).(Updater.PROTOCOL.operation_data_and_receipt_encoding).
 
-Definition acceptable_passes : operation -&gt; list Z :=
+Definition acceptable_passes : operation -&gt; list int :=
   (|Included_PROTOCOL|).(Updater.PROTOCOL.acceptable_passes).
 
-Definition compare_operations : operation -&gt; operation -&gt; Z :=
+Definition compare_operations : operation -&gt; operation -&gt; int :=
   (|Included_PROTOCOL|).(Updater.PROTOCOL.compare_operations).
 
 Definition current_context :
@@ -43478,50 +43489,50 @@ Import Alpha_context.
 Import Alpha_context.Gas.
 
 Module Cost_of.
-  Definition log2 : Z -&gt; Z :=
-    let fix help (acc : Z) (function_parameter : Z) {struct acc} : Z :=
+  Definition log2 : int -&gt; int :=
+    let fix help (acc : int) (function_parameter : int) {struct acc} : int :=
       match function_parameter with
       | 0 =&gt; acc
       | n =&gt; help (Pervasives.op_plus acc 1) (Pervasives.op_div n 2)
       end in
     help 1.
   
-  Definition z_bytes (z : Z.t) : Z :=
+  Definition z_bytes (z : Z.t) : int :=
     let bits := Z.numbits z in
     Pervasives.op_div (Pervasives.op_plus 7 bits) 8.
   
-  Definition int_bytes {a : Set} (z : Alpha_context.Script_int.num a) : Z :=
+  Definition int_bytes {a : Set} (z : Alpha_context.Script_int.num a) : int :=
     z_bytes (Alpha_context.Script_int.to_zint z).
   
   Definition timestamp_bytes (__t_value : Alpha_context.Script_timestamp.t)
-    : Z :=
+    : int :=
     let z := Alpha_context.Script_timestamp.to_zint __t_value in
     z_bytes z.
   
   Fixpoint size_of_comparable {a b : Set}
-    (wit : Script_typed_ir.comparable_struct a b) (v : a) {struct wit} : Z :=
+    (wit : Script_typed_ir.comparable_struct a b) (v : a) {struct wit} : int :=
     match (wit, v) with
     | (Script_typed_ir.Int_key _, _ as v) =&gt;
       let v := obj_magic (Script_int_repr.num Alpha_context.Script_int.z) v in
-      obj_magic Z (int_bytes v)
+      obj_magic int (int_bytes v)
     | (Script_typed_ir.Nat_key _, _ as v) =&gt;
       let v := obj_magic (Script_int_repr.num Alpha_context.Script_int.n) v in
-      obj_magic Z (int_bytes v)
+      obj_magic int (int_bytes v)
     | (Script_typed_ir.String_key _, _ as v) =&gt;
       let v := obj_magic string v in
-      obj_magic Z (String.length v)
+      obj_magic int (String.length v)
     | (Script_typed_ir.Bytes_key _, _ as v) =&gt;
       let v := obj_magic MBytes.t v in
-      obj_magic Z (MBytes.length v)
-    | (Script_typed_ir.Bool_key _, _) =&gt; obj_magic Z 8
+      obj_magic int (MBytes.length v)
+    | (Script_typed_ir.Bool_key _, _) =&gt; obj_magic int 8
     | (Script_typed_ir.Key_hash_key _, _) =&gt;
-      obj_magic Z (|Signature.Public_key_hash|).(S.SPublic_key_hash.size)
+      obj_magic int (|Signature.Public_key_hash|).(S.SPublic_key_hash.size)
     | (Script_typed_ir.Timestamp_key _, _ as v) =&gt;
       let v := obj_magic Alpha_context.Script_timestamp.t v in
-      obj_magic Z (timestamp_bytes v)
+      obj_magic int (timestamp_bytes v)
     | (Script_typed_ir.Address_key _, _) =&gt;
-      obj_magic Z (|Signature.Public_key_hash|).(S.SPublic_key_hash.size)
-    | (Script_typed_ir.Mutez_key _, _) =&gt; obj_magic Z 8
+      obj_magic int (|Signature.Public_key_hash|).(S.SPublic_key_hash.size)
+    | (Script_typed_ir.Mutez_key _, _) =&gt; obj_magic int 8
     | (Script_typed_ir.Pair_key (l, _) (__r_value, _) _, _ as v) =&gt;
       let 'existT _ [__0, __1, __Pair_key] [l, __r_value, v] :=
         obj_magic_exists (Es := [Set ** Set ** Set])
@@ -43529,16 +43540,16 @@ Module Cost_of.
             [Script_typed_ir.comparable_struct __0 Script_typed_ir.leaf **
               Script_typed_ir.comparable_struct __1 __Pair_key ** __0 * __1])
           [l, __r_value, v] in
-      obj_magic Z
+      obj_magic int
       (let '(lval, rval) := v in
       Pervasives.op_plus (size_of_comparable l lval)
         (size_of_comparable __r_value rval))
     end.
   
-  Definition __string_value (length : Z) : Alpha_context.Gas.cost :=
+  Definition __string_value (length : int) : Alpha_context.Gas.cost :=
     Alpha_context.Gas.alloc_bytes_cost length.
   
-  Definition __bytes_value (length : Z) : Alpha_context.Gas.cost :=
+  Definition __bytes_value (length : int) : Alpha_context.Gas.cost :=
     Alpha_context.Gas.alloc_mbytes_cost length.
   
   Definition manager_operation : Alpha_context.Gas.cost :=
@@ -43564,7 +43575,7 @@ Module Cost_of.
       Alpha_context.Gas.op_plusat (Alpha_context.Gas.step_cost 2)
         (Alpha_context.Gas.alloc_cost 1).
     
-    Definition __hash_value (data : MBytes.t) (len : Z)
+    Definition __hash_value (data : MBytes.t) (len : int)
       : Alpha_context.Gas.cost :=
       Alpha_context.Gas.op_plusat
         (Alpha_context.Gas.op_starat 10
@@ -43572,7 +43583,7 @@ Module Cost_of.
         (__bytes_value len).
     
     Definition set_access {elt : Set}
-      (_key : elt) (Box : Script_typed_ir.set elt) : Z :=
+      (_key : elt) (Box : Script_typed_ir.set elt) : int :=
       let 'existS _ _ Box := Box in
       log2 Box.(Script_typed_ir.Boxed_set.size).
     
@@ -43729,7 +43740,7 @@ Module Cost_of.
         (Pervasives.op_plus 51
           (Pervasives.op_div ((|Compare.Int|).(Compare.S.max) bytes1 bytes2) 62)).
     
-    Fixpoint concat_loop {A : Set} (l : list A) (acc : Z) {struct l} : Z :=
+    Fixpoint concat_loop {A : Set} (l : list A) (acc : int) {struct l} : int :=
       match l with
       | [] =&gt; 30
       | cons _ tl =&gt; concat_loop tl (Pervasives.op_plus acc 30)
@@ -43739,7 +43750,7 @@ Module Cost_of.
       : Alpha_context.Gas.cost :=
       Alpha_context.Gas.atomic_step_cost (concat_loop string_list 0).
     
-    Definition slice_string (string_length : Z) : Alpha_context.Gas.cost :=
+    Definition slice_string (string_length : int) : Alpha_context.Gas.cost :=
       Alpha_context.Gas.atomic_step_cost
         (Pervasives.op_plus 40 (Pervasives.op_div string_length 70)).
     
@@ -43803,7 +43814,7 @@ Module Cost_of.
     
     Definition indic_lt
       (x : (|Compare.Int|).(Compare.S.t)) (y : (|Compare.Int|).(Compare.S.t))
-      : Z :=
+      : int :=
       if (|Compare.Int|).(Compare.S.op_lt) x y then
         1
       else
@@ -43959,17 +43970,17 @@ Module Cost_of.
     Definition now : Alpha_context.Gas.cost :=
       Alpha_context.Gas.atomic_step_cost 10.
     
-    Definition check_signature_secp256k1 (__bytes_value : Z)
+    Definition check_signature_secp256k1 (__bytes_value : int)
       : Alpha_context.Gas.cost :=
       Alpha_context.Gas.atomic_step_cost
         (Pervasives.op_plus 10342 (Pervasives.op_div __bytes_value 5)).
     
-    Definition check_signature_ed25519 (__bytes_value : Z)
+    Definition check_signature_ed25519 (__bytes_value : int)
       : Alpha_context.Gas.cost :=
       Alpha_context.Gas.atomic_step_cost
         (Pervasives.op_plus 36864 (Pervasives.op_div __bytes_value 5)).
     
-    Definition check_signature_p256 (__bytes_value : Z)
+    Definition check_signature_p256 (__bytes_value : int)
       : Alpha_context.Gas.cost :=
       Alpha_context.Gas.atomic_step_cost
         (Pervasives.op_plus 36864 (Pervasives.op_div __bytes_value 5)).
@@ -44018,7 +44029,7 @@ Module Cost_of.
     Definition chain_id : Alpha_context.Gas.cost :=
       Alpha_context.Gas.step_cost 1.
     
-    Definition stack_n_op (n : Z) : Alpha_context.Gas.cost :=
+    Definition stack_n_op (n : int) : Alpha_context.Gas.cost :=
       Alpha_context.Gas.atomic_step_cost
         (Pervasives.op_plus 20
           (Pervasives.op_plus
@@ -44090,9 +44101,9 @@ Module Cost_of.
     
     Definition __unit_value : Alpha_context.Gas.cost := Alpha_context.Gas.free.
     
-    Definition __string_value : Z -&gt; Alpha_context.Gas.cost := __string_value.
+    Definition __string_value : int -&gt; Alpha_context.Gas.cost := __string_value.
     
-    Definition __bytes_value : Z -&gt; Alpha_context.Gas.cost := __bytes_value.
+    Definition __bytes_value : int -&gt; Alpha_context.Gas.cost := __bytes_value.
     
     Definition z : Z.t -&gt; Alpha_context.Gas.cost := Legacy.zint.
     
@@ -44150,12 +44161,12 @@ Module Cost_of.
       Alpha_context.Gas.op_plusat (Alpha_context.Gas.alloc_cost 2)
         (Alpha_context.Gas.step_cost 1).
     
-    Definition set_element (size : Z) : Alpha_context.Gas.cost :=
+    Definition set_element (size : int) : Alpha_context.Gas.cost :=
       Alpha_context.Gas.op_starat (log2 size)
         (Alpha_context.Gas.op_plusat (Alpha_context.Gas.alloc_cost 3)
           (Alpha_context.Gas.step_cost 2)).
     
-    Definition map_element (size : Z) : Alpha_context.Gas.cost :=
+    Definition map_element (size : int) : Alpha_context.Gas.cost :=
       Alpha_context.Gas.op_starat (log2 size)
         (Alpha_context.Gas.op_plusat (Alpha_context.Gas.alloc_cost 4)
           (Alpha_context.Gas.step_cost 2)).
@@ -44169,10 +44180,10 @@ Module Cost_of.
     Definition two_arg_type : Alpha_context.Gas.cost :=
       Alpha_context.Gas.alloc_cost 3.
     
-    Definition operation (__b_value : Z) : Alpha_context.Gas.cost :=
+    Definition operation (__b_value : int) : Alpha_context.Gas.cost :=
       __bytes_value __b_value.
     
-    Definition type_ (nb_args : Z) : Alpha_context.Gas.cost :=
+    Definition type_ (nb_args : int) : Alpha_context.Gas.cost :=
       Alpha_context.Gas.alloc_cost (Pervasives.op_plus nb_args 1).
     
     Definition instr {a b : Set} (i : Script_typed_ir.instr b a)
@@ -44319,14 +44330,14 @@ Module Cost_of.
   End Typechecking.
   
   Module Unparse.
-    Definition prim_cost (l : Z) (annot : Alpha_context.Script.annot)
+    Definition prim_cost (l : int) (annot : Alpha_context.Script.annot)
       : Alpha_context.Gas.cost :=
       Alpha_context.Script.prim_node_cost_nonrec_of_length l annot.
     
-    Definition seq_cost : Z -&gt; Alpha_context.Gas.cost :=
+    Definition seq_cost : int -&gt; Alpha_context.Gas.cost :=
       Alpha_context.Script.seq_node_cost_nonrec_of_length.
     
-    Definition string_cost (length : Z) : Alpha_context.Gas.cost :=
+    Definition string_cost (length : int) : Alpha_context.Gas.cost :=
       Alpha_context.Script.string_node_cost_of_length length.
     
     Definition cycle : Alpha_context.Gas.cost := Alpha_context.Gas.step_cost 1.
@@ -44761,7 +44772,7 @@ Module Cost_of.
   Module Legacy.
     Parameter z_to_int64 : Alpha_context.Gas.cost.
     
-    Parameter __hash_value : MBytes.t -&gt; Z -&gt; Alpha_context.Gas.cost.
+    Parameter __hash_value : MBytes.t -&gt; int -&gt; Alpha_context.Gas.cost.
     
     Parameter map_to_list : forall {b c : Set},
       Script_typed_ir.map b c -&gt; Alpha_context.Gas.cost.
@@ -44785,7 +44796,7 @@ Module Cost_of.
     
     Parameter stack_op : Alpha_context.Gas.cost.
     
-    Parameter stack_n_op : Z -&gt; Alpha_context.Gas.cost.
+    Parameter stack_n_op : int -&gt; Alpha_context.Gas.cost.
     
     Parameter bool_binop : forall {a b : Set}, a -&gt; b -&gt; Alpha_context.Gas.cost.
     
@@ -44805,7 +44816,7 @@ Module Cost_of.
     
     Parameter concat_bytes : list MBytes.t -&gt; Alpha_context.Gas.cost.
     
-    Parameter slice_string : Z -&gt; Alpha_context.Gas.cost.
+    Parameter slice_string : int -&gt; Alpha_context.Gas.cost.
     
     Parameter map_mem : forall {a b : Set},
       a -&gt; Script_typed_ir.map a b -&gt; Alpha_context.Gas.cost.
@@ -44967,9 +44978,9 @@ Module Cost_of.
     
     Parameter z : Z.t -&gt; Alpha_context.Gas.cost.
     
-    Parameter __string_value : Z -&gt; Alpha_context.Gas.cost.
+    Parameter __string_value : int -&gt; Alpha_context.Gas.cost.
     
-    Parameter __bytes_value : Z -&gt; Alpha_context.Gas.cost.
+    Parameter __bytes_value : int -&gt; Alpha_context.Gas.cost.
     
     Parameter int_of_string : string -&gt; Alpha_context.Gas.cost.
     
@@ -45001,9 +45012,9 @@ Module Cost_of.
     
     Parameter list_element : Alpha_context.Gas.cost.
     
-    Parameter set_element : Z -&gt; Alpha_context.Gas.cost.
+    Parameter set_element : int -&gt; Alpha_context.Gas.cost.
     
-    Parameter map_element : Z -&gt; Alpha_context.Gas.cost.
+    Parameter map_element : int -&gt; Alpha_context.Gas.cost.
     
     Parameter primitive_type : Alpha_context.Gas.cost.
     
@@ -45011,9 +45022,9 @@ Module Cost_of.
     
     Parameter two_arg_type : Alpha_context.Gas.cost.
     
-    Parameter operation : Z -&gt; Alpha_context.Gas.cost.
+    Parameter operation : int -&gt; Alpha_context.Gas.cost.
     
-    Parameter type_ : Z -&gt; Alpha_context.Gas.cost.
+    Parameter type_ : int -&gt; Alpha_context.Gas.cost.
     
     Parameter instr : forall {a b : Set},
       Script_typed_ir.instr a b -&gt; Alpha_context.Gas.cost.
@@ -45021,9 +45032,9 @@ Module Cost_of.
   
   Module Unparse.
     Parameter prim_cost :
-      Z -&gt; Alpha_context.Script.annot -&gt; Alpha_context.Gas.cost.
+      int -&gt; Alpha_context.Script.annot -&gt; Alpha_context.Gas.cost.
     
-    Parameter seq_cost : Z -&gt; Alpha_context.Gas.cost.
+    Parameter seq_cost : int -&gt; Alpha_context.Gas.cost.
     
     Parameter cycle : Alpha_context.Gas.cost.
     
@@ -46460,8 +46471,8 @@ Definition prims_of_strings (expr : Micheline.canonical string)
 
 Definition strings_of_prims (expr : Micheline.canonical prim)
   : Micheline.canonical string :=
-  let fix convert (function_parameter : Micheline.node Z prim)
-    {struct function_parameter} : Micheline.node Z string :=
+  let fix convert (function_parameter : Micheline.node int prim)
+    {struct function_parameter} : Micheline.node int string :=
     match function_parameter with
     | Micheline.Int l x =&gt; Micheline.Int l x
     | Micheline.String l x =&gt; Micheline.String l x
@@ -47295,17 +47306,17 @@ Arguments LCons {_}.
 Definition lazy_list (a : Set) : Set :=
   Lwt.t (Error_monad.tzresult (lazy_list_t a)).
 
-Parameter op_minusminusgt : Z -&gt; Z -&gt; list Z.
+Parameter op_minusminusgt : int -&gt; int -&gt; list int.
 
 Parameter op_minusminusminusgt : Int32.t -&gt; Int32.t -&gt; list Int32.t.
 
 Parameter pp_print_paragraph : Format.formatter -&gt; string -&gt; unit.
 
-Parameter take : forall {a : Set}, Z -&gt; list a -&gt; option (list a * list a).
+Parameter take : forall {a : Set}, int -&gt; list a -&gt; option (list a * list a).
 
 Parameter remove_prefix : string -&gt; string -&gt; option string.
 
-Parameter remove_elem_from_list : forall {a : Set}, Z -&gt; list a -&gt; list a.
+Parameter remove_elem_from_list : forall {a : Set}, int -&gt; list a -&gt; list a.
 </pre>
   </div>
 </div>
@@ -47903,7 +47914,7 @@ Parameter check_hash : nonce -&gt; Nonce_hash.t -&gt; bool.
     <h3>Operation_repr</h3>
     <ul>
       <li>OCaml size: 858 lines</li>
-      <li>Coq size: 1442 lines (+68% compared to&nbsp;OCaml)</li>
+      <li>Coq size: 1443 lines (+68% compared to&nbsp;OCaml)</li>
     </ul>
   </div>
   <div class="col-md-6">
@@ -49107,7 +49118,7 @@ Module internal_operation.
   Record record {kind : Set} : Set := Build {
     source : Contract_repr.contract;
     operation : manager_operation kind;
-    nonce : Z }.
+    nonce : int }.
   Arguments record : clear implicits.
   Definition with_source {t_kind} source (r : record t_kind) :=
     Build t_kind source r.(operation) r.(nonce).
@@ -49250,7 +49261,7 @@ Module Encoding.
     | MCase : forall {a : Set}, 'case.MCase a kind -&gt; case kind
     
     where &quot;'case.MCase&quot; := (fun (t_a t_kind : Set) =&gt;
-      case.MCase_skeleton Z string (Data_encoding.t t_a)
+      case.MCase_skeleton int string (Data_encoding.t t_a)
         (packed_manager_operation -&gt; option (manager_operation t_kind))
         (manager_operation t_kind -&gt; t_a) (t_a -&gt; manager_operation t_kind)).
     
@@ -49285,7 +49296,7 @@ Module Encoding.
       : Data_encoding.encoding (|Compare.String|).(Compare.S.t) :=
       (Data_encoding.def &quot;entrypoint&quot; (Some &quot;entrypoint&quot;)
         (Some &quot;Named entrypoint to a Michelson smart contract&quot;))
-        (let builtin_case (tag : Z) (name : (|Compare.String|).(Compare.S.t))
+        (let builtin_case (tag : int) (name : (|Compare.String|).(Compare.S.t))
           : Data_encoding.case (|Compare.String|).(Compare.S.t) :=
           Data_encoding.__case_value name None (Data_encoding.Tag tag)
             (Data_encoding.constant name)
@@ -49428,7 +49439,7 @@ Module Encoding.
         let 'existT _ __MCase_'a [tag, name, encoding, select, proj, inj] :=
           existT (A := Set)
             (fun __MCase_'a =&gt;
-              [Z ** string ** Data_encoding.t __MCase_'a **
+              [int ** string ** Data_encoding.t __MCase_'a **
                 packed_manager_operation -&gt; option (manager_operation A) **
                 manager_operation A -&gt; __MCase_'a **
                 __MCase_'a -&gt; manager_operation A]) _
@@ -49468,7 +49479,7 @@ Module Encoding.
   | Case : forall {a : Set}, 'case.Case a b -&gt; case b
   
   where &quot;'case.Case&quot; := (fun (t_a t_b : Set) =&gt;
-    case.Case_skeleton Z string (Data_encoding.t t_a)
+    case.Case_skeleton int string (Data_encoding.t t_a)
       (packed_contents -&gt; option (contents t_b)) (contents t_b -&gt; t_a)
       (t_a -&gt; contents t_b)).
   
@@ -49520,8 +49531,9 @@ Module Encoding.
       let 'existT _ __Case_'a [tag, name, encoding, proj, inj] :=
         existT (A := Set)
           (fun __Case_'a =&gt;
-            [Z ** string ** Data_encoding.t __Case_'a ** contents A -&gt; __Case_'a
-              ** __Case_'a -&gt; contents A]) _ [tag, name, encoding, proj, inj] in
+            [int ** string ** Data_encoding.t __Case_'a **
+              contents A -&gt; __Case_'a ** __Case_'a -&gt; contents A]) _
+          [tag, name, encoding, proj, inj] in
       __case_value (Data_encoding.Tag tag) name encoding
         (fun o =&gt; Some (proj o)) (fun x =&gt; inj x) in
     let to_list (function_parameter : contents_list Kind.endorsement)
@@ -49793,7 +49805,7 @@ Module Encoding.
           contents.Manager_operation.storage_limit := storage_limit |}.
   
   Definition make_manager_case {A : Set}
-    (tag : Z) (function_parameter : Manager_operations.case A)
+    (tag : int) (function_parameter : Manager_operations.case A)
     : case (Kind.manager A) :=
     let 'Manager_operations.MCase mcase := function_parameter in
     let 'existT _ __MCase_'a mcase :=
@@ -49870,7 +49882,7 @@ Module Encoding.
       let 'existT _ __Case_'a [tag, name, encoding, select, proj, inj] :=
         existT (A := Set)
           (fun __Case_'a =&gt;
-            [Z ** string ** Data_encoding.t __Case_'a **
+            [int ** string ** Data_encoding.t __Case_'a **
               packed_contents -&gt; option (contents A) ** contents A -&gt; __Case_'a
               ** __Case_'a -&gt; contents A]) _
           [tag, name, encoding, select, proj, inj] in
@@ -49987,7 +49999,7 @@ Module Encoding.
             existT (A := Set)
               (fun __Internal_operation_'kind =&gt;
                 [Contract_repr.contract **
-                  manager_operation __Internal_operation_'kind ** Z]) _
+                  manager_operation __Internal_operation_'kind ** int]) _
               [source, operation, __nonce_value] in
           ((source, __nonce_value), (Manager operation)))
         (fun function_parameter =&gt;
@@ -49996,7 +50008,7 @@ Module Encoding.
           let 'existT _ __Manager_'kind [source, __nonce_value, operation] :=
             existT (A := Set)
               (fun __Manager_'kind =&gt;
-                [Contract_repr.contract ** Z **
+                [Contract_repr.contract ** int **
                   manager_operation __Manager_'kind]) _
               [source, __nonce_value, operation] in
           Internal_operation
@@ -50042,7 +50054,7 @@ Definition __raw_value {A : Set} (function_parameter : operation A)
       (Operation_data protocol_data) in
   {| Operation.t.shell := shell; Operation.t.proto := proto |}.
 
-Definition acceptable_passes (op : packed_operation) : list Z :=
+Definition acceptable_passes (op : packed_operation) : list int :=
   let 'Operation_data protocol_data := op.(packed_operation.protocol_data) in
   let 'existT _ __Operation_data_'kind protocol_data :=
     existT (A := Set)
@@ -50830,7 +50842,7 @@ Module internal_operation.
   Record record {kind : Set} : Set := Build {
     source : Contract_repr.contract;
     operation : manager_operation kind;
-    nonce : Z }.
+    nonce : int }.
   Arguments record : clear implicits.
   Definition with_source {t_kind} source (r : record t_kind) :=
     Build t_kind source r.(operation) r.(nonce).
@@ -50900,7 +50912,7 @@ Parameter __hash_value : forall {A : Set},
 
 Parameter hash_packed : packed_operation -&gt; (|Operation_hash|).(S.HASH.t).
 
-Parameter acceptable_passes : packed_operation -&gt; list Z.
+Parameter acceptable_passes : packed_operation -&gt; list int.
 
 (* extensible_type_definition `error` *)
 
@@ -50950,7 +50962,7 @@ Module Encoding.
   | Case : forall {a : Set}, 'case.Case a b -&gt; case b
   
   where &quot;'case.Case&quot; := (fun (t_a t_b : Set) =&gt;
-    case.Case_skeleton Z string (Data_encoding.t t_a)
+    case.Case_skeleton int string (Data_encoding.t t_a)
       (packed_contents -&gt; option (contents t_b)) (contents t_b -&gt; t_a)
       (t_a -&gt; contents t_b)).
   
@@ -51009,7 +51021,7 @@ Module Encoding.
     
     where &quot;'case&quot; := (fun (_ : Set) =&gt; case_gadt)
     and &quot;'case.MCase&quot; := (fun (t_a t_kind : Set) =&gt;
-      case.MCase_skeleton Z string (Data_encoding.t t_a)
+      case.MCase_skeleton int string (Data_encoding.t t_a)
         (packed_manager_operation -&gt; option (manager_operation t_kind))
         (manager_operation t_kind -&gt; t_a) (t_a -&gt; manager_operation t_kind)).
     
@@ -51232,8 +51244,8 @@ Module t.
     bootstrap_contracts : list bootstrap_contract;
     commitments : list Commitment_repr.t;
     constants : Constants_repr.parametric;
-    security_deposit_ramp_up_cycles : option Z;
-    no_reward_cycles : option Z }.
+    security_deposit_ramp_up_cycles : option int;
+    no_reward_cycles : option int }.
   Definition with_bootstrap_accounts bootstrap_accounts (r : record) :=
     Build bootstrap_accounts r.(bootstrap_contracts) r.(commitments)
       r.(constants) r.(security_deposit_ramp_up_cycles) r.(no_reward_cycles).
@@ -51478,8 +51490,8 @@ Module t.
     bootstrap_contracts : list bootstrap_contract;
     commitments : list Commitment_repr.t;
     constants : Constants_repr.parametric;
-    security_deposit_ramp_up_cycles : option Z;
-    no_reward_cycles : option Z }.
+    security_deposit_ramp_up_cycles : option int;
+    no_reward_cycles : option int }.
   Definition with_bootstrap_accounts bootstrap_accounts (r : record) :=
     Build bootstrap_accounts r.(bootstrap_contracts) r.(commitments)
       r.(constants) r.(security_deposit_ramp_up_cycles) r.(no_reward_cycles).
@@ -51826,7 +51838,7 @@ Definition op_gteq : t -&gt; t -&gt; bool := (|Included_S|).(Compare.S.op_gteq).
 
 Definition op_gt : t -&gt; t -&gt; bool := (|Included_S|).(Compare.S.op_gt).
 
-Definition compare : t -&gt; t -&gt; Z := (|Included_S|).(Compare.S.compare).
+Definition compare : t -&gt; t -&gt; int := (|Included_S|).(Compare.S.compare).
 
 Definition equal : t -&gt; t -&gt; bool := (|Included_S|).(Compare.S.equal).
 
@@ -52264,7 +52276,7 @@ Module S.
     of_mutez : int64 -&gt; option qty;
     of_mutez_exn : int64 -&gt; qty;
     add_exn : qty -&gt; qty -&gt; qty;
-    mul_exn : qty -&gt; Z -&gt; qty;
+    mul_exn : qty -&gt; int -&gt; qty;
     qty_encoding : Data_encoding.t qty;
     to_int64 : qty -&gt; int64;
     op_eq : qty -&gt; qty -&gt; bool;
@@ -52273,7 +52285,7 @@ Module S.
     op_lteq : qty -&gt; qty -&gt; bool;
     op_gteq : qty -&gt; qty -&gt; bool;
     op_gt : qty -&gt; qty -&gt; bool;
-    compare : qty -&gt; qty -&gt; Z;
+    compare : qty -&gt; qty -&gt; int;
     equal : qty -&gt; qty -&gt; bool;
     max : qty -&gt; qty -&gt; qty;
     min : qty -&gt; qty -&gt; qty;
@@ -52413,8 +52425,8 @@ Definition Make :=
                 CamlinternalFormatBasics.No_padding
                 CamlinternalFormatBasics.No_precision
                 CamlinternalFormatBasics.End_of_format) &quot;%Ld&quot;) __r_value in
-      let __right (ppf : Format.formatter) (amount : Z) : unit :=
-        let triplet (ppf : Format.formatter) (v : Z) : unit :=
+      let __right (ppf : Format.formatter) (amount : int) : unit :=
+        let triplet (ppf : Format.formatter) (v : int) : unit :=
           if (|Compare.Int|).(Compare.S.op_gt) (Pervasives.__mod v 10) 0 then
             Format.fprintf ppf
               (CamlinternalFormatBasics.Format
@@ -52544,7 +52556,7 @@ Definition Make :=
         Pervasives.invalid_arg &quot;add_exn&quot;
       else
         __t_value in
-    let mul_exn (__t_value : qty) (m : Z) : t :=
+    let mul_exn (__t_value : qty) (m : int) : t :=
       match op_starquestion __t_value (Int64.of_int m) with
       | Pervasives.Ok v =&gt; v
       | Pervasives.Error _ =&gt; Pervasives.invalid_arg &quot;mul_exn&quot;
@@ -53434,20 +53446,20 @@ Module t.
     deposits :
       (|Signature.Public_key_hash|).(S.SPublic_key_hash.Map).(S.INDEXES_Map.t)
         Tez_repr.t;
-    included_endorsements : Z;
+    included_endorsements : int;
     allowed_endorsements :
       (|Signature.Public_key_hash|).(S.SPublic_key_hash.Map).(S.INDEXES_Map.t)
-        ((|Signature.Public_key|).(S.SPublic_key.t) * list Z * bool);
+        ((|Signature.Public_key|).(S.SPublic_key.t) * list int * bool);
     fees : Tez_repr.t;
     rewards : Tez_repr.t;
     block_gas : Z.t;
     operation_gas : Gas_limit_repr.t;
     internal_gas : Gas_limit_repr.internal_gas;
     storage_space_to_pay : option Z.t;
-    allocated_contracts : option Z;
+    allocated_contracts : option int;
     origination_nonce : option Contract_repr.origination_nonce;
     temporary_big_map : Z.t;
-    internal_nonce : Z;
+    internal_nonce : int;
     internal_nonces_used : (|Int_set|).(S.SET.t) }.
   Definition with_context context (r : record) :=
     Build context r.(constants) r.(first_level) r.(level)
@@ -53645,7 +53657,7 @@ Definition init_endorsements
   (ctxt : t)
   (allowed_endorsements :
     (|Signature.Public_key_hash|).(S.SPublic_key_hash.Map).(S.INDEXES_Map.t)
-      ((|Signature.Public_key|).(S.SPublic_key.t) * list Z * bool)) : t :=
+      ((|Signature.Public_key|).(S.SPublic_key.t) * list int * bool)) : t :=
   if
     (|Signature.Public_key_hash|).(S.SPublic_key_hash.Map).(S.INDEXES_Map.is_empty)
       allowed_endorsements then
@@ -53662,10 +53674,10 @@ Definition init_endorsements
 
 Definition allowed_endorsements (ctxt : t)
   : (|Signature.Public_key_hash|).(S.SPublic_key_hash.Map).(S.INDEXES_Map.t)
-    ((|Signature.Public_key|).(S.SPublic_key.t) * list Z * bool) :=
+    ((|Signature.Public_key|).(S.SPublic_key.t) * list int * bool) :=
   ctxt.(t.allowed_endorsements).
 
-Definition included_endorsements (ctxt : t) : Z :=
+Definition included_endorsements (ctxt : t) : int :=
   ctxt.(t.included_endorsements).
 
 (* ❌ Structure item `typext` not handled. *)
@@ -53674,7 +53686,7 @@ Definition included_endorsements (ctxt : t) : Z :=
 (* ❌ Top-level evaluations are ignored *)
 (* top_level_evaluation *)
 
-Definition fresh_internal_nonce (ctxt : t) : Error_monad.tzresult (t * Z) :=
+Definition fresh_internal_nonce (ctxt : t) : Error_monad.tzresult (t * int) :=
   if (|Compare.Int|).(Compare.S.op_gteq) ctxt.(t.internal_nonce) 65535 then
     Error_monad.__error_value extensible_type_value
   else
@@ -53848,7 +53860,7 @@ Definition update_allocated_contracts_count (ctxt : t) : t :=
     t.with_allocated_contracts (Some (Pervasives.succ allocated_contracts)) ctxt
   end.
 
-Definition clear_storage_space_to_pay (ctxt : t) : t * Z.t * Z :=
+Definition clear_storage_space_to_pay (ctxt : t) : t * Z.t * int :=
   match (ctxt.(t.storage_space_to_pay), ctxt.(t.allocated_contracts)) with
   | ((None, _) | (_, None)) =&gt;
     (* ❌ Assert instruction is not handled. *)
@@ -54349,7 +54361,7 @@ Definition temporary_big_maps {A : Set}
     <h3>Raw_context_mli</h3>
     <ul>
       <li>OCaml size: 293 lines</li>
-      <li>Coq size: 269 lines (-9% compared to&nbsp;OCaml)</li>
+      <li>Coq size: 270 lines (-8% compared to&nbsp;OCaml)</li>
     </ul>
   </div>
   <div class="col-md-6">
@@ -54779,7 +54791,7 @@ Parameter update_storage_space_to_pay : t -&gt; Z.t -&gt; t.
 
 Parameter update_allocated_contracts_count : t -&gt; t.
 
-Parameter clear_storage_space_to_pay : t -&gt; t * Z.t * Z.
+Parameter clear_storage_space_to_pay : t -&gt; t * Z.t * int.
 
 (* extensible_type_definition `error` *)
 
@@ -54894,23 +54906,24 @@ Definition description : Storage_description.t context :=
 
 Parameter reset_internal_nonce : context -&gt; context.
 
-Parameter fresh_internal_nonce : context -&gt; Error_monad.tzresult (context * Z).
+Parameter fresh_internal_nonce :
+  context -&gt; Error_monad.tzresult (context * int).
 
-Parameter record_internal_nonce : context -&gt; Z -&gt; context.
+Parameter record_internal_nonce : context -&gt; int -&gt; context.
 
-Parameter internal_nonce_already_recorded : context -&gt; Z -&gt; bool.
+Parameter internal_nonce_already_recorded : context -&gt; int -&gt; bool.
 
 Parameter allowed_endorsements :
   context -&gt;
   (|Signature.Public_key_hash|).(S.SPublic_key_hash.Map).(S.INDEXES_Map.t)
-    ((|Signature.Public_key|).(S.SPublic_key.t) * list Z * bool).
+    ((|Signature.Public_key|).(S.SPublic_key.t) * list int * bool).
 
-Parameter included_endorsements : context -&gt; Z.
+Parameter included_endorsements : context -&gt; int.
 
 Parameter init_endorsements :
   context -&gt;
   (|Signature.Public_key_hash|).(S.SPublic_key_hash.Map).(S.INDEXES_Map.t)
-    ((|Signature.Public_key|).(S.SPublic_key.t) * list Z * bool) -&gt; context.
+    ((|Signature.Public_key|).(S.SPublic_key.t) * list int * bool) -&gt; context.
 
 Parameter record_endorsement :
   context -&gt; (|Signature.Public_key_hash|).(S.SPublic_key_hash.t) -&gt; context.
@@ -55288,7 +55301,7 @@ Definition op_gteq : raw_level -&gt; raw_level -&gt; bool :=
 Definition op_gt : raw_level -&gt; raw_level -&gt; bool :=
   (|Included_S|).(Compare.S.op_gt).
 
-Definition compare : raw_level -&gt; raw_level -&gt; Z :=
+Definition compare : raw_level -&gt; raw_level -&gt; int :=
   (|Included_S|).(Compare.S.compare).
 
 Definition equal : raw_level -&gt; raw_level -&gt; bool :=
@@ -56408,7 +56421,7 @@ Module Random.
       ].
   
   Definition owner
-    (c : Raw_context.t) (kind : string) (level : Level_repr.t) (offset : Z)
+    (c : Raw_context.t) (kind : string) (level : Level_repr.t) (offset : int)
     : Lwt.t
       (Error_monad.tzresult
         (|Storage.Roll.Owner|).(Storage_sigs.Indexed_data_snapshotable_storage.Snapshot).(Storage_sigs.Indexed_data_storage.value)) :=
@@ -56445,14 +56458,14 @@ Module Random.
 End Random.
 
 Definition baking_rights_owner
-  (c : Raw_context.t) (level : Level_repr.t) (priority : Z)
+  (c : Raw_context.t) (level : Level_repr.t) (priority : int)
   : Lwt.t
     (Error_monad.tzresult
       (|Storage.Roll.Owner|).(Storage_sigs.Indexed_data_snapshotable_storage.Snapshot).(Storage_sigs.Indexed_data_storage.value)) :=
   Random.owner c &quot;baking&quot; level priority.
 
 Definition endorsement_rights_owner
-  (c : Raw_context.t) (level : Level_repr.t) (slot : Z)
+  (c : Raw_context.t) (level : Level_repr.t) (slot : int)
   : Lwt.t
     (Error_monad.tzresult
       (|Storage.Roll.Owner|).(Storage_sigs.Indexed_data_snapshotable_storage.Snapshot).(Storage_sigs.Indexed_data_storage.value)) :=
@@ -56503,7 +56516,7 @@ Definition count_rolls
     (|Storage.Roll.Delegate_roll_list|).(Storage_sigs.Indexed_data_storage.context))
   (delegate :
     (|Storage.Roll.Delegate_roll_list|).(Storage_sigs.Indexed_data_storage.key))
-  : Lwt.t (Error_monad.tzresult Z) :=
+  : Lwt.t (Error_monad.tzresult int) :=
   let=? function_parameter :=
     (|Storage.Roll.Delegate_roll_list|).(Storage_sigs.Indexed_data_storage.get_option)
       ctxt delegate in
@@ -56511,9 +56524,9 @@ Definition count_rolls
   | None =&gt; Error_monad.__return 0
   | Some head_roll =&gt;
     let fix loop
-      (acc : Z)
+      (acc : int)
       (roll : (|Storage.Roll.Successor|).(Storage_sigs.Indexed_data_storage.key))
-      {struct acc} : Lwt.t (Error_monad.tzresult Z) :=
+      {struct acc} : Lwt.t (Error_monad.tzresult int) :=
       let=? function_parameter :=
         (|Storage.Roll.Successor|).(Storage_sigs.Indexed_data_storage.get_option)
           ctxt roll in
@@ -57204,11 +57217,11 @@ Parameter fold : forall {a : Set},
   Lwt.t (Error_monad.tzresult a)) -&gt; a -&gt; Lwt.t (Error_monad.tzresult a).
 
 Parameter baking_rights_owner :
-  Raw_context.t -&gt; Level_repr.t -&gt; Z -&gt;
+  Raw_context.t -&gt; Level_repr.t -&gt; int -&gt;
   Lwt.t (Error_monad.tzresult (|Signature.Public_key|).(S.SPublic_key.t)).
 
 Parameter endorsement_rights_owner :
-  Raw_context.t -&gt; Level_repr.t -&gt; Z -&gt;
+  Raw_context.t -&gt; Level_repr.t -&gt; int -&gt;
   Lwt.t (Error_monad.tzresult (|Signature.Public_key|).(S.SPublic_key.t)).
 
 Module Delegate.
@@ -57583,7 +57596,7 @@ Inductive z : Set :=
 
 Definition num (t : Set) : Set := Z.t.
 
-Definition compare (x : Z.t) (y : Z.t) : Z := Z.compare x y.
+Definition compare (x : Z.t) (y : Z.t) : int := Z.compare x y.
 
 Definition zero : Z.t := Z.zero.
 
@@ -57601,11 +57614,11 @@ Definition to_int64 (x : Z.t) : option int64 :=
 
 Definition of_int64 (n : int64) : Z.t := Z.of_int64 n.
 
-Definition to_int (x : Z.t) : option Z :=
+Definition to_int (x : Z.t) : option int :=
   (* ❌ Try-with are not handled *)
   try (Some (Z.to_int x)).
 
-Definition of_int (n : Z) : Z.t := Z.of_int n.
+Definition of_int (n : int) : Z.t := Z.of_int n.
 
 Definition of_zint {A : Set} (x : A) : A := x.
 
@@ -57856,7 +57869,7 @@ Parameter zero_n : num n.
 
 Parameter zero : num z.
 
-Parameter compare : forall {a : Set}, num a -&gt; num a -&gt; Z.
+Parameter compare : forall {a : Set}, num a -&gt; num a -&gt; int.
 
 Parameter to_string : forall {A : Set}, num A -&gt; string.
 
@@ -57866,9 +57879,9 @@ Parameter to_int64 : forall {A : Set}, num A -&gt; option int64.
 
 Parameter of_int64 : int64 -&gt; num z.
 
-Parameter to_int : forall {A : Set}, num A -&gt; option Z.
+Parameter to_int : forall {A : Set}, num A -&gt; option int.
 
-Parameter of_int : Z -&gt; num z.
+Parameter of_int : int -&gt; num z.
 
 Parameter of_zint : Z.t -&gt; num z.
 
@@ -62105,7 +62118,7 @@ Fixpoint step {a b : Set}
       let 'existT _ [__189, __190, __Dig_'rest] [n, n', __stack_value] :=
         obj_magic_exists (Es := [Set ** Set ** Set])
           (fun '[__189, __190, __Dig_'rest] =&gt;
-            [Z **
+            [int **
               Script_typed_ir.stack_prefix_preservation_witness
                 (__189 * __Dig_'rest) __Dig_'rest b __190 ** stack b])
           [n, n', __stack_value] in
@@ -62130,7 +62143,7 @@ Fixpoint step {a b : Set}
       let 'existT _ [__191, __192, __Dug_'rest] [n, n', v, rest] :=
         obj_magic_exists (Es := [Set ** Set ** Set])
           (fun '[__191, __192, __Dug_'rest] =&gt;
-            [Z **
+            [int **
               Script_typed_ir.stack_prefix_preservation_witness __Dug_'rest
                 (__191 * __Dug_'rest) __192 a ** __191 ** stack __192])
           [n, n', v, rest] in
@@ -62147,7 +62160,7 @@ Fixpoint step {a b : Set}
         [n, n', __b_value, __stack_value] :=
         obj_magic_exists (Es := [Set ** Set])
           (fun '[__Dipn_'faft, __Dipn_'fbef] =&gt;
-            [Z **
+            [int **
               Script_typed_ir.stack_prefix_preservation_witness __Dipn_'fbef
                 __Dipn_'faft b a **
               Script_typed_ir.descr __Dipn_'fbef __Dipn_'faft ** stack b])
@@ -62166,7 +62179,7 @@ Fixpoint step {a b : Set}
       let 'existT _ __Dropn [n, n', __stack_value] :=
         obj_magic_exists (Es := Set)
           (fun __Dropn =&gt;
-            [Z **
+            [int **
               Script_typed_ir.stack_prefix_preservation_witness a a b __Dropn **
               stack b]) [n, n', __stack_value] in
       obj_magic (Lwt.t (Error_monad.tzresult (stack a * Alpha_context.context)))
@@ -63531,7 +63544,7 @@ Definition get_two_annot {A : Set}
   | _ =&gt; Error_monad.__error_value extensible_type_value
   end.
 
-Definition parse_type_annot (loc : Z) (annot : list string)
+Definition parse_type_annot (loc : int) (annot : list string)
   : Error_monad.tzresult (option Script_typed_ir.type_annot) :=
   let? '(vars, types, fields) :=
     Error_monad.op_gtgtquestion (parse_annots loc None None annot)
@@ -63540,7 +63553,7 @@ Definition parse_type_annot (loc : Z) (annot : list string)
   let? '_ := error_unexpected_annot loc fields in
   get_one_annot loc types.
 
-Definition parse_type_field_annot (loc : Z) (annot : list string)
+Definition parse_type_field_annot (loc : int) (annot : list string)
   : Error_monad.tzresult
     (option Script_typed_ir.type_annot * option Script_typed_ir.field_annot) :=
   let? '(vars, types, fields) :=
@@ -63551,7 +63564,7 @@ Definition parse_type_field_annot (loc : Z) (annot : list string)
   Error_monad.op_gtpipequestion (get_one_annot loc fields)
     (fun f =&gt; (__t_value, f)).
 
-Definition parse_composed_type_annot (loc : Z) (annot : list string)
+Definition parse_composed_type_annot (loc : int) (annot : list string)
   : Error_monad.tzresult
     (option Script_typed_ir.type_annot * option Script_typed_ir.field_annot *
       option Script_typed_ir.field_annot) :=
@@ -63565,7 +63578,7 @@ Definition parse_composed_type_annot (loc : Z) (annot : list string)
       let '(f1, f2) := function_parameter in
       (__t_value, f1, f2)).
 
-Definition parse_field_annot (loc : Z) (annot : list string)
+Definition parse_field_annot (loc : int) (annot : list string)
   : Error_monad.tzresult (option Script_typed_ir.field_annot) :=
   let? '(vars, types, fields) :=
     Error_monad.op_gtgtquestion (parse_annots loc None None annot)
@@ -63622,7 +63635,7 @@ Definition check_correct_field
   end.
 
 Definition parse_var_annot
-  (loc : Z) (default : option (option Script_typed_ir.var_annot))
+  (loc : int) (default : option (option Script_typed_ir.var_annot))
   (annot : list string)
   : Error_monad.tzresult (option Script_typed_ir.var_annot) :=
   let? '(vars, types, fields) :=
@@ -63686,7 +63699,7 @@ Definition common_prefix
   end.
 
 Definition parse_constr_annot
-  (loc : Z) (if_special_first : option (option Script_typed_ir.field_annot))
+  (loc : int) (if_special_first : option (option Script_typed_ir.field_annot))
   (if_special_second : option (option Script_typed_ir.field_annot))
   (annot : list string)
   : Error_monad.tzresult
@@ -63723,7 +63736,7 @@ Definition parse_constr_annot
         end in
       (v, __t_value, f1, f2)).
 
-Definition parse_two_var_annot (loc : Z) (annot : list string)
+Definition parse_two_var_annot (loc : int) (annot : list string)
   : Error_monad.tzresult
     (option Script_typed_ir.var_annot * option Script_typed_ir.var_annot) :=
   let? '(vars, types, fields) :=
@@ -63734,7 +63747,7 @@ Definition parse_two_var_annot (loc : Z) (annot : list string)
   get_two_annot loc vars.
 
 Definition parse_destr_annot
-  (loc : Z) (annot : list string)
+  (loc : int) (annot : list string)
   (default_accessor : option Script_typed_ir.field_annot)
   (field_name : option Script_typed_ir.field_annot)
   (pair_annot : option Script_typed_ir.var_annot)
@@ -63760,7 +63773,7 @@ Definition parse_destr_annot
       (v, f)).
 
 Definition parse_entrypoint_annot
-  (loc : Z) (default : option (option Script_typed_ir.var_annot))
+  (loc : int) (default : option (option Script_typed_ir.var_annot))
   (annot : list string)
   : Error_monad.tzresult
     (option Script_typed_ir.var_annot * option Script_typed_ir.field_annot) :=
@@ -63780,7 +63793,7 @@ Definition parse_entrypoint_annot
         end
       end).
 
-Definition parse_var_type_annot (loc : Z) (annot : list string)
+Definition parse_var_type_annot (loc : int) (annot : list string)
   : Error_monad.tzresult
     (option Script_typed_ir.var_annot * option Script_typed_ir.type_annot) :=
   let? '(vars, types, fields) :=
@@ -63800,7 +63813,7 @@ Definition parse_var_type_annot (loc : Z) (annot : list string)
     <h3>Script_ir_annot_mli</h3>
     <ul>
       <li>OCaml size: 198 lines</li>
-      <li>Coq size: 173 lines (-13% compared to&nbsp;OCaml)</li>
+      <li>Coq size: 174 lines (-13% compared to&nbsp;OCaml)</li>
     </ul>
   </div>
   <div class="col-md-6">
@@ -64118,24 +64131,25 @@ Parameter merge_var_annot :
   option Script_typed_ir.var_annot.
 
 Parameter error_unexpected_annot : forall {a : Set},
-  Z -&gt; list a -&gt; Error_monad.tzresult unit.
+  int -&gt; list a -&gt; Error_monad.tzresult unit.
 
 Parameter fail_unexpected_annot : forall {a : Set},
-  Z -&gt; list a -&gt; Lwt.t (Error_monad.tzresult unit).
+  int -&gt; list a -&gt; Lwt.t (Error_monad.tzresult unit).
 
 Parameter parse_type_annot :
-  Z -&gt; list string -&gt; Error_monad.tzresult (option Script_typed_ir.type_annot).
+  int -&gt; list string -&gt; Error_monad.tzresult (option Script_typed_ir.type_annot).
 
 Parameter parse_field_annot :
-  Z -&gt; list string -&gt; Error_monad.tzresult (option Script_typed_ir.field_annot).
+  int -&gt; list string -&gt;
+  Error_monad.tzresult (option Script_typed_ir.field_annot).
 
 Parameter parse_type_field_annot :
-  Z -&gt; list string -&gt;
+  int -&gt; list string -&gt;
   Error_monad.tzresult
     (option Script_typed_ir.type_annot * option Script_typed_ir.field_annot).
 
 Parameter parse_composed_type_annot :
-  Z -&gt; list string -&gt;
+  int -&gt; list string -&gt;
   Error_monad.tzresult
     (option Script_typed_ir.type_annot * option Script_typed_ir.field_annot *
       option Script_typed_ir.field_annot).
@@ -64150,35 +64164,35 @@ Parameter check_correct_field :
   Error_monad.tzresult unit.
 
 Parameter parse_var_annot :
-  Z -&gt; option (option Script_typed_ir.var_annot) -&gt; list string -&gt;
+  int -&gt; option (option Script_typed_ir.var_annot) -&gt; list string -&gt;
   Error_monad.tzresult (option Script_typed_ir.var_annot).
 
 Parameter parse_constr_annot :
-  Z -&gt; option (option Script_typed_ir.field_annot) -&gt;
+  int -&gt; option (option Script_typed_ir.field_annot) -&gt;
   option (option Script_typed_ir.field_annot) -&gt; list string -&gt;
   Error_monad.tzresult
     (option Script_typed_ir.var_annot * option Script_typed_ir.type_annot *
       option Script_typed_ir.field_annot * option Script_typed_ir.field_annot).
 
 Parameter parse_two_var_annot :
-  Z -&gt; list string -&gt;
+  int -&gt; list string -&gt;
   Error_monad.tzresult
     (option Script_typed_ir.var_annot * option Script_typed_ir.var_annot).
 
 Parameter parse_destr_annot :
-  Z -&gt; list string -&gt; option Script_typed_ir.field_annot -&gt;
+  int -&gt; list string -&gt; option Script_typed_ir.field_annot -&gt;
   option Script_typed_ir.field_annot -&gt; option Script_typed_ir.var_annot -&gt;
   option Script_typed_ir.var_annot -&gt;
   Error_monad.tzresult
     (option Script_typed_ir.var_annot * option Script_typed_ir.field_annot).
 
 Parameter parse_entrypoint_annot :
-  Z -&gt; option (option Script_typed_ir.var_annot) -&gt; list string -&gt;
+  int -&gt; option (option Script_typed_ir.var_annot) -&gt; list string -&gt;
   Error_monad.tzresult
     (option Script_typed_ir.var_annot * option Script_typed_ir.field_annot).
 
 Parameter parse_var_type_annot :
-  Z -&gt; list string -&gt;
+  int -&gt; list string -&gt;
   Error_monad.tzresult
     (option Script_typed_ir.var_annot * option Script_typed_ir.type_annot).
 </pre>
@@ -64191,7 +64205,7 @@ Parameter parse_var_type_annot :
     <h3>Script_ir_translator</h3>
     <ul>
       <li>OCaml size: 5996 lines</li>
-      <li>Coq size: 8134 lines (+35% compared to&nbsp;OCaml)</li>
+      <li>Coq size: 8135 lines (+35% compared to&nbsp;OCaml)</li>
     </ul>
   </div>
   <div class="col-md-6">
@@ -70642,7 +70656,7 @@ Inductive unparsing_mode : Set :=
 | Readable : unparsing_mode.
 
 Definition type_logger : Set :=
-  Z -&gt; list (Alpha_context.Script.expr * Alpha_context.Script.annot) -&gt;
+  int -&gt; list (Alpha_context.Script.expr * Alpha_context.Script.annot) -&gt;
   list (Alpha_context.Script.expr * Alpha_context.Script.annot) -&gt; unit.
 
 Definition add_dip {A : Set}
@@ -70659,7 +70673,7 @@ Definition add_dip {A : Set}
   end.
 
 Fixpoint comparable_type_size {a t : Set}
-  (ty : Script_typed_ir.comparable_struct t a) {struct ty} : Z :=
+  (ty : Script_typed_ir.comparable_struct t a) {struct ty} : int :=
   match ty with
   | Script_typed_ir.Int_key _ =&gt; 1
   | Script_typed_ir.Nat_key _ =&gt; 1
@@ -70678,7 +70692,7 @@ Fixpoint comparable_type_size {a t : Set}
     Pervasives.op_plus 1 (comparable_type_size __t_value)
   end.
 
-Fixpoint type_size {t : Set} (ty : Script_typed_ir.ty t) {struct ty} : Z :=
+Fixpoint type_size {t : Set} (ty : Script_typed_ir.ty t) {struct ty} : int :=
   match ty with
   | Script_typed_ir.Unit_t _ =&gt; 1
   | Script_typed_ir.Int_t _ =&gt; 1
@@ -70749,8 +70763,8 @@ Fixpoint type_size {t : Set} (ty : Script_typed_ir.ty t) {struct ty} : Z :=
   end.
 
 Fixpoint type_size_of_stack_head {st : Set}
-  (__stack_value : Script_typed_ir.stack_ty st) (up_to : Z)
-  {struct __stack_value} : Z :=
+  (__stack_value : Script_typed_ir.stack_ty st) (up_to : int)
+  {struct __stack_value} : int :=
   match __stack_value with
   | Script_typed_ir.Empty_t =&gt; 0
   | Script_typed_ir.Item_t head tail _annot =&gt;
@@ -70767,7 +70781,7 @@ Fixpoint type_size_of_stack_head {st : Set}
   end.
 
 Definition number_of_generated_growing_types {a b : Set}
-  (function_parameter : Script_typed_ir.instr b a) : Z :=
+  (function_parameter : Script_typed_ir.instr b a) : int :=
   match function_parameter with
   | Script_typed_ir.Drop =&gt; 0
   | Script_typed_ir.Dup =&gt; 0
@@ -71019,7 +71033,7 @@ Definition check_kind {A : Set}
 
 Definition wrap_compare {A B : Set}
   (compare : A -&gt; B -&gt; (|Compare.Int|).(Compare.S.t)) (__a_value : A)
-  (__b_value : B) : Z :=
+  (__b_value : B) : int :=
   let res := compare __a_value __b_value in
   if (|Compare.Int|).(Compare.S.op_eq) res 0 then
     0
@@ -71030,7 +71044,8 @@ Definition wrap_compare {A B : Set}
       (-1).
 
 Fixpoint compare_comparable {a s : Set}
-  (kind : Script_typed_ir.comparable_struct a s) {struct kind} : a -&gt; a -&gt; Z :=
+  (kind : Script_typed_ir.comparable_struct a s) {struct kind}
+  : a -&gt; a -&gt; int :=
   match kind with
   | Script_typed_ir.String_key _ =&gt;
     wrap_compare (|Compare.String|).(Compare.S.compare)
@@ -71173,7 +71188,7 @@ Definition empty_map {a b : Set} (ty : Script_typed_ir.comparable_ty a)
     let value := b in
     let key_ty := ty in
     let OPS := existT (A := unit) (fun _ =&gt; _) tt (|OPS|) in
-    let boxed {C : Set} : (|OPS|).(S.MAP.t) C * Z :=
+    let boxed {C : Set} : (|OPS|).(S.MAP.t) C * int :=
       ((|OPS|).(S.MAP.empty), 0) in
     existT (A := Set -&gt; Set) _ _
       {|
@@ -71430,8 +71445,8 @@ Fixpoint unparse_ty_no_lwt {a : Set}
   let? ctxt := Alpha_context.Gas.consume ctxt Unparse_costs.cycle in
   let __return {B : Set}
     (ctxt : Alpha_context.context)
-    (function_parameter : B * list (Micheline.node Z B) * Micheline.annot)
-    : Error_monad.tzresult (Micheline.node Z B * Alpha_context.context) :=
+    (function_parameter : B * list (Micheline.node int B) * Micheline.annot)
+    : Error_monad.tzresult (Micheline.node int B * Alpha_context.context) :=
     let '(name, args, annot) := function_parameter in
     let __result_value := Micheline.Prim (-1) name args annot in
     let? ctxt :=
@@ -71759,7 +71774,7 @@ Fixpoint ty_eq {ta tb : Set}
     (eq (Script_typed_ir.ty ta) (Script_typed_ir.ty tb) * Alpha_context.context) :=
   let ok
     (__eq_value : eq (Script_typed_ir.ty ta) (Script_typed_ir.ty tb))
-    (ctxt : Alpha_context.context) (nb_args : Z)
+    (ctxt : Alpha_context.context) (nb_args : int)
     : Error_monad.tzresult
       (eq (Script_typed_ir.ty ta) (Script_typed_ir.ty tb) *
         Alpha_context.context) :=
@@ -71889,7 +71904,7 @@ Fixpoint ty_eq {ta tb : Set}
   end.
 
 Fixpoint stack_ty_eq {ta tb : Set}
-  (ctxt : Alpha_context.context) (lvl : Z) (ta : Script_typed_ir.stack_ty ta)
+  (ctxt : Alpha_context.context) (lvl : int) (ta : Script_typed_ir.stack_ty ta)
   (tb : Script_typed_ir.stack_ty tb) {struct ctxt}
   : Error_monad.tzresult
     (eq (Script_typed_ir.stack_ty ta) (Script_typed_ir.stack_ty tb) *
@@ -72302,7 +72317,7 @@ End branch.
 Definition branch := branch.record.
 
 Definition merge_branches {a b bef : Set}
-  (legacy : bool) (ctxt : Alpha_context.context) (loc : Z) (btr : judgement a)
+  (legacy : bool) (ctxt : Alpha_context.context) (loc : int) (btr : judgement a)
   (bfr : judgement b) (function_parameter : branch a b bef)
   : Lwt.t (Error_monad.tzresult (judgement bef * Alpha_context.context)) :=
   let '{| branch.branch := branch |} := function_parameter in
@@ -72934,13 +72949,13 @@ Inductive dropn_proof_argument (bef : Set) : Set :=
 Arguments Dropn_proof_argument {_ _ _}.
 
 Definition parse_var_annot
-  (loc : Z) (default : option (option Script_typed_ir.var_annot))
+  (loc : int) (default : option (option Script_typed_ir.var_annot))
   (annot : list string)
   : Lwt.t (Error_monad.tzresult (option Script_typed_ir.var_annot)) :=
   Lwt.__return (Script_ir_annot.parse_var_annot loc default annot).
 
 Definition parse_entrypoint_annot
-  (loc : Z) (default : option (option Script_typed_ir.var_annot))
+  (loc : int) (default : option (option Script_typed_ir.var_annot))
   (annot : list string)
   : Lwt.t
     (Error_monad.tzresult
@@ -72948,7 +72963,7 @@ Definition parse_entrypoint_annot
   Lwt.__return (Script_ir_annot.parse_entrypoint_annot loc default annot).
 
 Definition parse_constr_annot
-  (loc : Z) (if_special_first : option (option Script_typed_ir.field_annot))
+  (loc : int) (if_special_first : option (option Script_typed_ir.field_annot))
   (if_special_second : option (option Script_typed_ir.field_annot))
   (annot : list string)
   : Lwt.t
@@ -72959,14 +72974,14 @@ Definition parse_constr_annot
     (Script_ir_annot.parse_constr_annot loc if_special_first if_special_second
       annot).
 
-Definition parse_two_var_annot (loc : Z) (annot : list string)
+Definition parse_two_var_annot (loc : int) (annot : list string)
   : Lwt.t
     (Error_monad.tzresult
       (option Script_typed_ir.var_annot * option Script_typed_ir.var_annot)) :=
   Lwt.__return (Script_ir_annot.parse_two_var_annot loc annot).
 
 Definition parse_destr_annot
-  (loc : Z) (annot : list string)
+  (loc : int) (annot : list string)
   (default_accessor : option Script_typed_ir.field_annot)
   (field_name : option Script_typed_ir.field_annot)
   (pair_annot : option Script_typed_ir.var_annot)
@@ -72978,7 +72993,7 @@ Definition parse_destr_annot
     (Script_ir_annot.parse_destr_annot loc annot default_accessor field_name
       pair_annot value_annot).
 
-Definition parse_var_type_annot (loc : Z) (annot : list string)
+Definition parse_var_type_annot (loc : int) (annot : list string)
   : Lwt.t
     (Error_monad.tzresult
       (option Script_typed_ir.var_annot * option Script_typed_ir.type_annot)) :=
@@ -73957,7 +73972,7 @@ with parse_returning {arg ret : Set}
 
 with parse_int32
   (n : Micheline.node Alpha_context.Script.location Alpha_context.Script.prim)
-  {struct n} : Error_monad.tzresult Z :=
+  {struct n} : Error_monad.tzresult int :=
   let error' (function_parameter : unit) : Error_monad.__error :=
     let '_ := function_parameter in
     extensible_type_value in
@@ -73984,7 +73999,7 @@ with parse_instr {bef : Set}
   : Lwt.t (Error_monad.tzresult (judgement bef * Alpha_context.context)) :=
   let _check_item {B : Set}
     (check : Error_monad.tzresult B) (loc : Alpha_context.Script.location)
-    (name : Alpha_context.Script.prim) (n : Z) (m : Z)
+    (name : Alpha_context.Script.prim) (n : int) (m : int)
     : Lwt.t (Error_monad.tzresult B) :=
     (Error_monad.trace_eval
       (fun function_parameter =&gt;
@@ -73998,7 +74013,7 @@ with parse_instr {bef : Set}
   let check_item_ty {B C : Set}
     (ctxt : Alpha_context.context) (exp : Script_typed_ir.ty B)
     (got : Script_typed_ir.ty C) (loc : Alpha_context.Script.location)
-    (name : Alpha_context.Script.prim) (n : Z) (m : Z)
+    (name : Alpha_context.Script.prim) (n : int) (m : int)
     : Lwt.t
       (Error_monad.tzresult
         (eq B C * Script_typed_ir.ty B * Alpha_context.context)) :=
@@ -74019,7 +74034,7 @@ with parse_instr {bef : Set}
     (exp : Script_typed_ir.comparable_ty B)
     (got : Script_typed_ir.comparable_ty C)
     (loc : Alpha_context.Script.location) (name : Alpha_context.Script.prim)
-    (n : Z) (m : Z)
+    (n : int) (m : int)
     : Lwt.t (Error_monad.tzresult (eq B C * Script_typed_ir.comparable_ty B)) :=
     (Error_monad.trace_eval
       (fun function_parameter =&gt;
@@ -74035,7 +74050,7 @@ with parse_instr {bef : Set}
           let? ty := merge_comparable_types legacy exp got in
           Error_monad.ok (Eq, ty)))) in
   let log_stack {B C : Set}
-    (ctxt : Alpha_context.context) (loc : Z)
+    (ctxt : Alpha_context.context) (loc : int)
     (stack_ty : Script_typed_ir.stack_ty B) (aft : Script_typed_ir.stack_ty C)
     : Lwt.t (Error_monad.tzresult unit) :=
     match (type_logger, script_instr) with
@@ -74080,7 +74095,7 @@ with parse_instr {bef : Set}
     | Failed _ =&gt; Error_monad.__return (judgement, ctxt)
     end in
   let typed {B : Set}
-    (ctxt : Alpha_context.context) (loc : Z)
+    (ctxt : Alpha_context.context) (loc : int)
     (instr : Script_typed_ir.instr bef B) (aft : Script_typed_ir.stack_ty B)
     : Lwt.t (Error_monad.tzresult (judgement bef * Alpha_context.context)) :=
     let=? '_ := log_stack ctxt loc stack_ty aft in
@@ -74122,7 +74137,7 @@ with parse_instr {bef : Set}
       whole_stack), _) =&gt;
     let=? whole_n := Lwt.__return (parse_int32 n) in
     let fix make_proof_argument {tstk : Set}
-      (n : Z) (stk : Script_typed_ir.stack_ty tstk) {struct n}
+      (n : int) (stk : Script_typed_ir.stack_ty tstk) {struct n}
       : Lwt.t (Error_monad.tzresult (dropn_proof_argument tstk)) :=
       match (((|Compare.Int|).(Compare.S.op_eq) n 0), stk) with
       | (true, rest) =&gt;
@@ -74190,7 +74205,7 @@ with parse_instr {bef : Set}
     ((Micheline.Prim loc Alpha_context.Script.I_DIG (cons n []) result_annot,
       __stack_value), _) =&gt;
     let fix make_proof_argument {tstk : Set}
-      (n : Z) (stk : Script_typed_ir.stack_ty tstk) {struct n}
+      (n : int) (stk : Script_typed_ir.stack_ty tstk) {struct n}
       : Lwt.t (Error_monad.tzresult (dig_proof_argument tstk)) :=
       match (((|Compare.Int|).(Compare.S.op_eq) n 0), stk) with
       | (true, Script_typed_ir.Item_t v rest annot) =&gt;
@@ -74271,7 +74286,7 @@ with parse_instr {bef : Set}
         [loc, n, result_annot, x, whole_stack, stack_annot] in
     let=? whole_n := Lwt.__return (parse_int32 n) in
     let fix make_proof_argument {tstk x : Set}
-      (n : Z) (x : Script_typed_ir.ty x)
+      (n : int) (x : Script_typed_ir.ty x)
       (stack_annot : option Script_typed_ir.var_annot)
       (stk : Script_typed_ir.stack_ty tstk) {struct n}
       : Lwt.t (Error_monad.tzresult (dug_proof_argument tstk x)) :=
@@ -75520,7 +75535,7 @@ with parse_instr {bef : Set}
     ((Micheline.Prim loc Alpha_context.Script.I_DIP (cons n (cons code []))
       result_annot, __stack_value), true) =&gt;
     let fix make_proof_argument {tstk : Set}
-      (n : Z) (inner_tc_context : tc_context)
+      (n : int) (inner_tc_context : tc_context)
       (stk : Script_typed_ir.stack_ty tstk) {struct n}
       : Lwt.t (Error_monad.tzresult (dipn_proof_argument tstk)) :=
       match (((|Compare.Int|).(Compare.S.op_eq) n 0), stk) with
@@ -78125,7 +78140,7 @@ with unparse_code (ctxt : Alpha_context.context) (mode : unparsing_mode)
   : Alpha_context.Script.node -&gt;
   Lwt.t
     (Error_monad.tzresult
-      (Micheline.node Z Alpha_context.Script.prim * Alpha_context.context)) :=
+      (Micheline.node int Alpha_context.Script.prim * Alpha_context.context)) :=
   let legacy := true in
   fun function_parameter =&gt;
     match function_parameter with
@@ -79097,7 +79112,7 @@ Inductive unparsing_mode : Set :=
 | Readable : unparsing_mode.
 
 Definition type_logger : Set :=
-  Z -&gt; list (Alpha_context.Script.expr * Alpha_context.Script.annot) -&gt;
+  int -&gt; list (Alpha_context.Script.expr * Alpha_context.Script.annot) -&gt;
   list (Alpha_context.Script.expr * Alpha_context.Script.annot) -&gt; unit.
 
 Parameter empty_set : forall {a : Set},
@@ -79159,7 +79174,7 @@ Parameter ty_eq : forall {ta tb : Set},
     (eq (Script_typed_ir.ty ta) (Script_typed_ir.ty tb) * Alpha_context.context).
 
 Parameter compare_comparable : forall {a : Set},
-  Script_typed_ir.comparable_ty a -&gt; a -&gt; a -&gt; Z.
+  Script_typed_ir.comparable_ty a -&gt; a -&gt; a -&gt; int.
 
 Parameter parse_data : forall {a : Set},
   option type_logger -&gt; Alpha_context.context -&gt; bool -&gt; Script_typed_ir.ty a -&gt;
@@ -79281,7 +79296,7 @@ Parameter extract_big_map_diff : forall {a : Set},
     <h3>Script_repr</h3>
     <ul>
       <li>OCaml size: 233 lines</li>
-      <li>Coq size: 296 lines (+27% compared to&nbsp;OCaml)</li>
+      <li>Coq size: 297 lines (+27% compared to&nbsp;OCaml)</li>
     </ul>
   </div>
   <div class="col-md-6">
@@ -79604,28 +79619,28 @@ Definition encoding : Data_encoding.encoding t :=
         (Data_encoding.req None None &quot;code&quot; lazy_expr_encoding)
         (Data_encoding.req None None &quot;storage&quot; lazy_expr_encoding))).
 
-Definition int_node_size_of_numbits (n : Z) : Z * Z :=
+Definition int_node_size_of_numbits (n : int) : int * int :=
   (1, (Pervasives.op_plus 1 (Pervasives.op_div (Pervasives.op_plus n 63) 64))).
 
-Definition int_node_size (n : Z.t) : Z * Z :=
+Definition int_node_size (n : Z.t) : int * int :=
   int_node_size_of_numbits (Z.numbits n).
 
-Definition string_node_size_of_length (s : Z) : Z * Z :=
+Definition string_node_size_of_length (s : int) : int * int :=
   (1, (Pervasives.op_plus 1 (Pervasives.op_div (Pervasives.op_plus s 7) 8))).
 
-Definition string_node_size (s : string) : Z * Z :=
+Definition string_node_size (s : string) : int * int :=
   string_node_size_of_length (String.length s).
 
-Definition bytes_node_size_of_length (s : Z) : Z * Z :=
+Definition bytes_node_size_of_length (s : int) : int * int :=
   (2,
     (Pervasives.op_plus
       (Pervasives.op_plus 1 (Pervasives.op_div (Pervasives.op_plus s 7) 8)) 12)).
 
-Definition bytes_node_size (s : MBytes.t) : Z * Z :=
+Definition bytes_node_size (s : MBytes.t) : int * int :=
   bytes_node_size_of_length (MBytes.length s).
 
-Definition prim_node_size_nonrec_of_lengths (n_args : Z) (annots : list string)
-  : Z * Z :=
+Definition prim_node_size_nonrec_of_lengths
+  (n_args : int) (annots : list string) : int * int :=
   let annots_length :=
     List.fold_left
       (fun acc =&gt; fun s =&gt; Pervasives.op_plus acc (String.length s)) 0 annots in
@@ -79638,20 +79653,20 @@ Definition prim_node_size_nonrec_of_lengths (n_args : Z) (annots : list string)
         (Pervasives.op_div (Pervasives.op_plus annots_length 7) 8))).
 
 Definition prim_node_size_nonrec {A : Set}
-  (args : list A) (annots : list string) : Z * Z :=
+  (args : list A) (annots : list string) : int * int :=
   let n_args := List.length args in
   prim_node_size_nonrec_of_lengths n_args annots.
 
-Definition seq_node_size_nonrec_of_length (n_args : Z) : Z * Z :=
+Definition seq_node_size_nonrec_of_length (n_args : int) : int * int :=
   ((Pervasives.op_plus 1 n_args),
     (Pervasives.op_plus 2 (Pervasives.op_star 2 n_args))).
 
-Definition seq_node_size_nonrec {A : Set} (args : list A) : Z * Z :=
+Definition seq_node_size_nonrec {A : Set} (args : list A) : int * int :=
   let n_args := List.length args in
   seq_node_size_nonrec_of_length n_args.
 
 Fixpoint node_size {A B : Set} (node : Micheline.node A B) {struct node}
-  : Z * Z :=
+  : int * int :=
   match node with
   | Micheline.Int _ n =&gt; int_node_size n
   | Micheline.String _ s =&gt; string_node_size s
@@ -79675,7 +79690,7 @@ Fixpoint node_size {A B : Set} (node : Micheline.node A B) {struct node}
             (Pervasives.op_plus words nwords))) (seq_node_size_nonrec args) args
   end.
 
-Definition expr_size {A : Set} (expr : Micheline.canonical A) : Z * Z :=
+Definition expr_size {A : Set} (expr : Micheline.canonical A) : int * int :=
   node_size (Micheline.root expr).
 
 Definition traversal_cost {A B : Set} (node : Micheline.node A B)
@@ -79683,7 +79698,8 @@ Definition traversal_cost {A B : Set} (node : Micheline.node A B)
   let '(blocks, _words) := node_size node in
   Gas_limit_repr.step_cost blocks.
 
-Definition cost_of_size (function_parameter : Z * Z) : Gas_limit_repr.cost :=
+Definition cost_of_size (function_parameter : int * int)
+  : Gas_limit_repr.cost :=
   let '(blocks, words) := function_parameter in
   Gas_limit_repr.op_plusat
     (Gas_limit_repr.op_plusat
@@ -79698,33 +79714,33 @@ Definition node_cost {A B : Set} (node : Micheline.node A B)
 Definition int_node_cost (n : Z.t) : Gas_limit_repr.cost :=
   cost_of_size (int_node_size n).
 
-Definition int_node_cost_of_numbits (n : Z) : Gas_limit_repr.cost :=
+Definition int_node_cost_of_numbits (n : int) : Gas_limit_repr.cost :=
   cost_of_size (int_node_size_of_numbits n).
 
 Definition string_node_cost (s : string) : Gas_limit_repr.cost :=
   cost_of_size (string_node_size s).
 
-Definition string_node_cost_of_length (s : Z) : Gas_limit_repr.cost :=
+Definition string_node_cost_of_length (s : int) : Gas_limit_repr.cost :=
   cost_of_size (string_node_size_of_length s).
 
 Definition bytes_node_cost (s : MBytes.t) : Gas_limit_repr.cost :=
   cost_of_size (bytes_node_size s).
 
-Definition bytes_node_cost_of_length (s : Z) : Gas_limit_repr.cost :=
+Definition bytes_node_cost_of_length (s : int) : Gas_limit_repr.cost :=
   cost_of_size (bytes_node_size_of_length s).
 
 Definition prim_node_cost_nonrec {A : Set} (args : list A) (annot : list string)
   : Gas_limit_repr.cost := cost_of_size (prim_node_size_nonrec args annot).
 
-Definition prim_node_cost_nonrec_of_length (n_args : Z) (annot : list string)
+Definition prim_node_cost_nonrec_of_length (n_args : int) (annot : list string)
   : Gas_limit_repr.cost :=
   cost_of_size (prim_node_size_nonrec_of_lengths n_args annot).
 
 Definition seq_node_cost_nonrec {A : Set} (args : list A)
   : Gas_limit_repr.cost := cost_of_size (seq_node_size_nonrec args).
 
-Definition seq_node_cost_nonrec_of_length (n_args : Z) : Gas_limit_repr.cost :=
-  cost_of_size (seq_node_size_nonrec_of_length n_args).
+Definition seq_node_cost_nonrec_of_length (n_args : int)
+  : Gas_limit_repr.cost := cost_of_size (seq_node_size_nonrec_of_length n_args).
 
 Definition deserialized_cost {A : Set} (expr : Micheline.canonical A)
   : Gas_limit_repr.cost := cost_of_size (expr_size expr).
@@ -79991,23 +80007,23 @@ Parameter node_cost : node -&gt; Gas_limit_repr.cost.
 
 Parameter int_node_cost : Z.t -&gt; Gas_limit_repr.cost.
 
-Parameter int_node_cost_of_numbits : Z -&gt; Gas_limit_repr.cost.
+Parameter int_node_cost_of_numbits : int -&gt; Gas_limit_repr.cost.
 
 Parameter string_node_cost : string -&gt; Gas_limit_repr.cost.
 
-Parameter string_node_cost_of_length : Z -&gt; Gas_limit_repr.cost.
+Parameter string_node_cost_of_length : int -&gt; Gas_limit_repr.cost.
 
 Parameter bytes_node_cost : MBytes.t -&gt; Gas_limit_repr.cost.
 
-Parameter bytes_node_cost_of_length : Z -&gt; Gas_limit_repr.cost.
+Parameter bytes_node_cost_of_length : int -&gt; Gas_limit_repr.cost.
 
 Parameter prim_node_cost_nonrec : list expr -&gt; annot -&gt; Gas_limit_repr.cost.
 
-Parameter prim_node_cost_nonrec_of_length : Z -&gt; annot -&gt; Gas_limit_repr.cost.
+Parameter prim_node_cost_nonrec_of_length : int -&gt; annot -&gt; Gas_limit_repr.cost.
 
 Parameter seq_node_cost_nonrec : list expr -&gt; Gas_limit_repr.cost.
 
-Parameter seq_node_cost_nonrec_of_length : Z -&gt; Gas_limit_repr.cost.
+Parameter seq_node_cost_nonrec_of_length : int -&gt; Gas_limit_repr.cost.
 
 Parameter force_decode :
   lazy_expr -&gt; Error_monad.tzresult (expr * Gas_limit_repr.cost).
@@ -80032,7 +80048,7 @@ Parameter strip_annotations : node -&gt; node.
     <h3>Script_tc_errors</h3>
     <ul>
       <li>OCaml size: 162 lines</li>
-      <li>Coq size: 174 lines (+7% compared to&nbsp;OCaml)</li>
+      <li>Coq size: 175 lines (+8% compared to&nbsp;OCaml)</li>
     </ul>
   </div>
   <div class="col-md-6">
@@ -80239,7 +80255,8 @@ Inductive kind : Set :=
 Definition unparsed_stack_ty : Set :=
   list (Alpha_context.Script.expr * Alpha_context.Script.annot).
 
-Definition type_map : Set := list (Z * (unparsed_stack_ty * unparsed_stack_ty)).
+Definition type_map : Set :=
+  list (int * (unparsed_stack_ty * unparsed_stack_ty)).
 
 (* ❌ Structure item `typext` not handled. *)
 (* type_extension *)
@@ -81205,7 +81222,7 @@ Require Tezos.Time_repr.
 
 Definition t : Set := Z.t.
 
-Definition compare : Z.t -&gt; Z.t -&gt; Z := Z.compare.
+Definition compare : Z.t -&gt; Z.t -&gt; int := Z.compare.
 
 Definition of_int64 : int64 -&gt; Z.t := Z.of_int64.
 
@@ -81340,7 +81357,7 @@ Parameter t : Set.
 
 Parameter of_int64 : int64 -&gt; t.
 
-Parameter compare : t -&gt; t -&gt; Z.
+Parameter compare : t -&gt; t -&gt; int.
 
 Parameter to_notation : t -&gt; option string.
 
@@ -81369,7 +81386,7 @@ Parameter of_zint : Z.t -&gt; t.
     <h3>Script_typed_ir</h3>
     <ul>
       <li>OCaml size: 419 lines</li>
-      <li>Coq size: 425 lines (+1% compared to&nbsp;OCaml)</li>
+      <li>Coq size: 427 lines (+1% compared to&nbsp;OCaml)</li>
     </ul>
   </div>
   <div class="col-md-6">
@@ -81872,7 +81889,7 @@ Module Boxed_set.
     elt_ty : comparable_ty elt;
     OPS : S.SET.signature elt OPS_t;
     boxed : OPS.(S.SET.t);
-    size : Z;
+    size : int;
   }.
   Arguments signature : clear implicits.
 End Boxed_set.
@@ -81885,7 +81902,7 @@ Module Boxed_map.
     value := value;
     key_ty : comparable_ty key;
     OPS : S.MAP.signature key OPS_t;
-    boxed : OPS.(S.MAP.t) value * Z;
+    boxed : OPS.(S.MAP.t) value * int;
   }.
   Arguments signature : clear implicits.
 End Boxed_map.
@@ -82171,14 +82188,16 @@ with instr_gadt : Set :=
 | Self : forall {p : Set}, 'ty p -&gt; string -&gt; instr_gadt
 | Amount : instr_gadt
 | Dig : forall {aft bef rest x : Set},
-  Z -&gt; 'stack_prefix_preservation_witness (x * rest) rest bef aft -&gt; instr_gadt
+  int -&gt; 'stack_prefix_preservation_witness (x * rest) rest bef aft -&gt;
+  instr_gadt
 | Dug : forall {aft bef rest x : Set},
-  Z -&gt; 'stack_prefix_preservation_witness rest (x * rest) bef aft -&gt; instr_gadt
+  int -&gt; 'stack_prefix_preservation_witness rest (x * rest) bef aft -&gt;
+  instr_gadt
 | Dipn : forall {aft bef faft fbef : Set},
-  Z -&gt; 'stack_prefix_preservation_witness fbef faft bef aft -&gt;
+  int -&gt; 'stack_prefix_preservation_witness fbef faft bef aft -&gt;
   'descr fbef faft -&gt; instr_gadt
 | Dropn : forall {C bef rest : Set},
-  Z -&gt; 'stack_prefix_preservation_witness rest rest bef C -&gt; instr_gadt
+  int -&gt; 'stack_prefix_preservation_witness rest rest bef C -&gt; instr_gadt
 | ChainId : instr_gadt
 
 with stack_prefix_preservation_witness_gadt : Set :=
@@ -82681,7 +82700,7 @@ Parameter empty : seed.
 
 Parameter deterministic_seed : seed -&gt; seed.
 
-Parameter initial_seeds : Z -&gt; list seed.
+Parameter initial_seeds : int -&gt; list seed.
 
 Parameter nonce : Set.
 
@@ -84553,7 +84572,7 @@ Require Tezos.Voting_period_repr.
 Import Storage_functors.
 
 Definition Int :=
-  let t := Z in
+  let t := int in
   let encoding := Data_encoding.uint16 in
   existT (A := unit) (fun _ =&gt; _) tt
     {|
@@ -84577,11 +84596,11 @@ Definition Z_value :=
     |}.
 
 Definition Int_index :=
-  let t := Z in
+  let t := int in
   let path_length := 1 in
-  let to_path (c : Z) (l : list string) : list string :=
+  let to_path (c : int) (l : list string) : list string :=
     cons (Pervasives.string_of_int c) l in
-  let of_path (function_parameter : list string) : option Z :=
+  let of_path (function_parameter : list string) : option int :=
     match function_parameter with
     | ([] | cons _ (cons _ _)) =&gt; None
     | cons c [] =&gt; Pervasives.int_of_string_opt c
@@ -84949,7 +84968,7 @@ Module Contract.
         (contract :
           (|I|).(Storage_sigs.Non_iterable_indexed_carbonated_data_storage.key))
         (value : Script_repr.lazy_expr)
-        : Lwt.t (Error_monad.tzresult (Raw_context.t * Z)) :=
+        : Lwt.t (Error_monad.tzresult (Raw_context.t * int)) :=
         let=? ctxt := consume_serialize_gas ctxt value in
         (|I|).(Storage_sigs.Non_iterable_indexed_carbonated_data_storage.set)
           ctxt contract value in
@@ -84961,7 +84980,7 @@ Module Contract.
         (value_opt :
           option
             (|I|).(Storage_sigs.Non_iterable_indexed_carbonated_data_storage.value))
-        : Lwt.t (Error_monad.tzresult (Raw_context.t * Z * bool)) :=
+        : Lwt.t (Error_monad.tzresult (Raw_context.t * int * bool)) :=
         match value_opt with
         | None =&gt;
           (|I|).(Storage_sigs.Non_iterable_indexed_carbonated_data_storage.set_option)
@@ -84976,7 +84995,7 @@ Module Contract.
         (contract :
           (|I|).(Storage_sigs.Non_iterable_indexed_carbonated_data_storage.key))
         (value : Script_repr.lazy_expr)
-        : Lwt.t (Error_monad.tzresult (Raw_context.t * Z)) :=
+        : Lwt.t (Error_monad.tzresult (Raw_context.t * int)) :=
         let=? ctxt := consume_serialize_gas ctxt value in
         (|I|).(Storage_sigs.Non_iterable_indexed_carbonated_data_storage.init)
           ctxt contract value in
@@ -84985,7 +85004,7 @@ Module Contract.
         (contract :
           (|I|).(Storage_sigs.Non_iterable_indexed_carbonated_data_storage.key))
         (value : Script_repr.lazy_expr)
-        : Lwt.t (Error_monad.tzresult (Raw_context.t * Z * bool)) :=
+        : Lwt.t (Error_monad.tzresult (Raw_context.t * int * bool)) :=
         let=? ctxt := consume_serialize_gas ctxt value in
         (|I|).(Storage_sigs.Non_iterable_indexed_carbonated_data_storage.init_set)
           ctxt contract value in
@@ -85370,14 +85389,14 @@ Module Big_map.
       : (|I|).(Storage_sigs.Non_iterable_indexed_carbonated_data_storage.context)
       -&gt;
       (|I|).(Storage_sigs.Non_iterable_indexed_carbonated_data_storage.key) -&gt;
-      Lwt.t (Error_monad.tzresult (Raw_context.t * Z)) :=
+      Lwt.t (Error_monad.tzresult (Raw_context.t * int)) :=
       (|I|).(Storage_sigs.Non_iterable_indexed_carbonated_data_storage.delete).
     
     Definition remove
       : (|I|).(Storage_sigs.Non_iterable_indexed_carbonated_data_storage.context)
       -&gt;
       (|I|).(Storage_sigs.Non_iterable_indexed_carbonated_data_storage.key) -&gt;
-      Lwt.t (Error_monad.tzresult (Raw_context.t * Z * bool)) :=
+      Lwt.t (Error_monad.tzresult (Raw_context.t * int * bool)) :=
       (|I|).(Storage_sigs.Non_iterable_indexed_carbonated_data_storage.remove).
     
     Definition set
@@ -85385,7 +85404,7 @@ Module Big_map.
       -&gt;
       (|I|).(Storage_sigs.Non_iterable_indexed_carbonated_data_storage.key) -&gt;
       (|I|).(Storage_sigs.Non_iterable_indexed_carbonated_data_storage.value) -&gt;
-      Lwt.t (Error_monad.tzresult (Raw_context.t * Z)) :=
+      Lwt.t (Error_monad.tzresult (Raw_context.t * int)) :=
       (|I|).(Storage_sigs.Non_iterable_indexed_carbonated_data_storage.set).
     
     Definition set_option
@@ -85394,7 +85413,7 @@ Module Big_map.
       (|I|).(Storage_sigs.Non_iterable_indexed_carbonated_data_storage.key) -&gt;
       option
         (|I|).(Storage_sigs.Non_iterable_indexed_carbonated_data_storage.value)
-      -&gt; Lwt.t (Error_monad.tzresult (Raw_context.t * Z * bool)) :=
+      -&gt; Lwt.t (Error_monad.tzresult (Raw_context.t * int * bool)) :=
       (|I|).(Storage_sigs.Non_iterable_indexed_carbonated_data_storage.set_option).
     
     Definition init
@@ -85402,7 +85421,7 @@ Module Big_map.
       -&gt;
       (|I|).(Storage_sigs.Non_iterable_indexed_carbonated_data_storage.key) -&gt;
       (|I|).(Storage_sigs.Non_iterable_indexed_carbonated_data_storage.value) -&gt;
-      Lwt.t (Error_monad.tzresult (Raw_context.t * Z)) :=
+      Lwt.t (Error_monad.tzresult (Raw_context.t * int)) :=
       (|I|).(Storage_sigs.Non_iterable_indexed_carbonated_data_storage.init).
     
     Definition init_set
@@ -85410,7 +85429,7 @@ Module Big_map.
       -&gt;
       (|I|).(Storage_sigs.Non_iterable_indexed_carbonated_data_storage.key) -&gt;
       (|I|).(Storage_sigs.Non_iterable_indexed_carbonated_data_storage.value) -&gt;
-      Lwt.t (Error_monad.tzresult (Raw_context.t * Z * bool)) :=
+      Lwt.t (Error_monad.tzresult (Raw_context.t * int * bool)) :=
       (|I|).(Storage_sigs.Non_iterable_indexed_carbonated_data_storage.init_set).
     
     Definition consume_deserialize_gas
@@ -85900,15 +85919,15 @@ Module Roll.
         |}).
   
   Module Snapshoted_owner_index.
-    Definition t : Set := Cycle_repr.t * Z.
+    Definition t : Set := Cycle_repr.t * int.
     
-    Definition path_length : Z :=
+    Definition path_length : int :=
       Pervasives.op_plus
         (|Cycle_repr.Index|).(Storage_description.INDEX.path_length) 1.
     
     Definition to_path
       (function_parameter :
-        (|Cycle_repr.Index|).(Storage_description.INDEX.t) * Z)
+        (|Cycle_repr.Index|).(Storage_description.INDEX.t) * int)
       : list string -&gt; list string :=
       let '(c, n) := function_parameter in
       fun s =&gt;
@@ -85916,7 +85935,7 @@ Module Roll.
           (cons (Pervasives.string_of_int n) s).
     
     Definition of_path (l : list string)
-      : option ((|Cycle_repr.Index|).(Storage_description.INDEX.t) * Z) :=
+      : option ((|Cycle_repr.Index|).(Storage_description.INDEX.t) * int) :=
       match
         Misc.take (|Cycle_repr.Index|).(Storage_description.INDEX.path_length) l
         with
@@ -85930,7 +85949,7 @@ Module Roll.
         end
       end.
     
-    Definition ipath (a : Set) : Set := (a * Cycle_repr.t) * Z.
+    Definition ipath (a : Set) : Set := (a * Cycle_repr.t) * int.
     
     Definition left_args {A : Set}
       : Storage_description.args A Cycle_repr.cycle (A * Cycle_repr.cycle) :=
@@ -86914,20 +86933,20 @@ Require Tezos.Voting_period_repr.
 Import Storage_sigs.
 
 Module Block_priority.
-  Parameter get : Raw_context.t -&gt; Lwt.t (Error_monad.tzresult Z).
+  Parameter get : Raw_context.t -&gt; Lwt.t (Error_monad.tzresult int).
   
   Parameter set :
-    Raw_context.t -&gt; Z -&gt; Lwt.t (Error_monad.tzresult Raw_context.t).
+    Raw_context.t -&gt; int -&gt; Lwt.t (Error_monad.tzresult Raw_context.t).
   
   Parameter init :
-    Raw_context.t -&gt; Z -&gt; Lwt.t (Error_monad.tzresult Raw_context.t).
+    Raw_context.t -&gt; int -&gt; Lwt.t (Error_monad.tzresult Raw_context.t).
 End Block_priority.
 
 Module Roll.
   Parameter Owner :
     {_ : unit &amp;
-      Indexed_data_snapshotable_storage.signature (Cycle_repr.t * Z) Roll_repr.t
-        Raw_context.t (|Signature.Public_key|).(S.SPublic_key.t)}.
+      Indexed_data_snapshotable_storage.signature (Cycle_repr.t * int)
+        Roll_repr.t Raw_context.t (|Signature.Public_key|).(S.SPublic_key.t)}.
   
   Parameter clear : Raw_context.t -&gt; Lwt.t Raw_context.t.
   
@@ -86952,11 +86971,11 @@ Module Roll.
         (|Signature.Public_key_hash|).(S.SPublic_key_hash.t) Tez_repr.t}.
   
   Parameter Snapshot_for_cycle :
-    {_ : unit &amp; Indexed_data_storage.signature Raw_context.t Cycle_repr.t Z}.
+    {_ : unit &amp; Indexed_data_storage.signature Raw_context.t Cycle_repr.t int}.
   
   Parameter Last_for_snapshot :
     {_ : unit &amp;
-      Indexed_data_storage.signature (Raw_context.t * Cycle_repr.t) Z
+      Indexed_data_storage.signature (Raw_context.t * Cycle_repr.t) int
         Roll_repr.t}.
 End Roll.
 
@@ -87124,7 +87143,7 @@ Module Vote.
   Parameter Proposals_count :
     {_ : unit &amp;
       Indexed_data_storage.signature Raw_context.t
-        (|Signature.Public_key_hash|).(S.SPublic_key_hash.t) Z}.
+        (|Signature.Public_key_hash|).(S.SPublic_key_hash.t) int}.
   
   Parameter Ballots :
     {_ : unit &amp;
@@ -87200,7 +87219,7 @@ End Ramp_up.
     <h3>Storage_description</h3>
     <ul>
       <li>OCaml size: 353 lines</li>
-      <li>Coq size: 662 lines (+87% compared to&nbsp;OCaml)</li>
+      <li>Coq size: 663 lines (+87% compared to&nbsp;OCaml)</li>
     </ul>
   </div>
   <div class="col-md-6">
@@ -87706,7 +87725,7 @@ Inductive args_gadt : Set :=
 
 where &quot;'args&quot; := (fun (_ _ _ : Set) =&gt; args_gadt)
 and &quot;'args.One&quot; := (fun (t_a : Set) =&gt;
-  args.One_skeleton (RPC_arg.t t_a) (Data_encoding.t t_a) (t_a -&gt; t_a -&gt; Z)).
+  args.One_skeleton (RPC_arg.t t_a) (Data_encoding.t t_a) (t_a -&gt; t_a -&gt; int)).
 
 Module ConstructorRecordNotations_args_gadt.
   Module args.
@@ -87752,18 +87771,18 @@ Fixpoint pack {a b c : Set} (v : args a b c) (x : a) (y : b) {struct v} : c :=
   end.
 
 Fixpoint compare {a b c : Set} (function_parameter : args a b c)
-  {struct function_parameter} : b -&gt; b -&gt; Z :=
+  {struct function_parameter} : b -&gt; b -&gt; int :=
   match function_parameter with
   | One {| args.One.compare := compare' |} =&gt;
-    let compare' := obj_magic (b -&gt; b -&gt; Z) compare' in
-    obj_magic (b -&gt; b -&gt; Z) compare'
+    let compare' := obj_magic (b -&gt; b -&gt; int) compare' in
+    obj_magic (b -&gt; b -&gt; int) compare'
   | Pair l __r_value =&gt;
     let 'existT _ [__0, __1, __Pair_'inter_key] [l, __r_value] :=
       obj_magic_exists (Es := [Set ** Set ** Set])
         (fun '[__0, __1, __Pair_'inter_key] =&gt;
           [args a __0 __Pair_'inter_key ** args __Pair_'inter_key __1 c])
         [l, __r_value] in
-    obj_magic (b -&gt; b -&gt; Z)
+    obj_magic (b -&gt; b -&gt; int)
     (let compare_l := compare l in
     let compare_r := compare __r_value in
     fun function_parameter =&gt;
@@ -87946,12 +87965,12 @@ with pp_item {a : Set}
 Module INDEX.
   Record signature {t : Set} : Set := {
     t := t;
-    path_length : Z;
+    path_length : int;
     to_path : t -&gt; list string -&gt; list string;
     of_path : list string -&gt; option t;
     rpc_arg : RPC_arg.t t;
     encoding : Data_encoding.t t;
-    compare : t -&gt; t -&gt; Z;
+    compare : t -&gt; t -&gt; int;
   }.
   Arguments signature : clear implicits.
 End INDEX.
@@ -87973,7 +87992,7 @@ Inductive handler (key : Set) : Set :=
 
 where &quot;'handler.Handler&quot; := (fun (t_a t_key : Set) =&gt;
   handler.Handler_skeleton (Data_encoding.t t_a)
-    (t_key -&gt; Z -&gt; Lwt.t (Error_monad.tzresult t_a))).
+    (t_key -&gt; int -&gt; Lwt.t (Error_monad.tzresult t_a))).
 
 Module ConstructorRecordNotations_handler.
   Module handler.
@@ -88002,7 +88021,7 @@ Inductive opt_handler (key : Set) : Set :=
 
 where &quot;'opt_handler.Opt_handler&quot; := (fun (t_a t_key : Set) =&gt;
   opt_handler.Opt_handler_skeleton (Data_encoding.t t_a)
-    (t_key -&gt; Z -&gt; Lwt.t (Error_monad.tzresult (option t_a)))).
+    (t_key -&gt; int -&gt; Lwt.t (Error_monad.tzresult (option t_a)))).
 
 Module ConstructorRecordNotations_opt_handler.
   Module opt_handler.
@@ -88055,7 +88074,7 @@ Fixpoint combine_object {A : Set}
 
 Module query.
   Record record : Set := Build {
-    depth : Z }.
+    depth : int }.
   Definition with_depth depth (r : record) :=
     Build depth.
 End query.
@@ -88082,8 +88101,9 @@ Definition build_directory {key : Set} (dir : t key) : RPC_directory.t key :=
       existT (A := Set)
         (fun __Opt_handler_'a =&gt;
           [Data_encoding.t __Opt_handler_'a **
-            ikey -&gt; Z -&gt; Lwt.t (Error_monad.tzresult (option __Opt_handler_'a))])
-        _ [encoding, get] in
+            ikey -&gt; int -&gt;
+            Lwt.t (Error_monad.tzresult (option __Opt_handler_'a))]) _
+        [encoding, get] in
     let service := RPC_service.get_service None depth_query encoding path in
     Pervasives.op_coloneq rpc_dir
       (RPC_directory.register (Pervasives.op_exclamation rpc_dir) service
@@ -88413,7 +88433,7 @@ Inductive args_gadt : Set :=
 
 where &quot;'args&quot; := (fun (_ _ _ : Set) =&gt; args_gadt)
 and &quot;'args.One&quot; := (fun (t_a : Set) =&gt;
-  args.One_skeleton (RPC_arg.t t_a) (Data_encoding.t t_a) (t_a -&gt; t_a -&gt; Z)).
+  args.One_skeleton (RPC_arg.t t_a) (Data_encoding.t t_a) (t_a -&gt; t_a -&gt; int)).
 
 Module ConstructorRecordNotations_args_gadt.
   Module args.
@@ -88437,12 +88457,12 @@ Parameter unpack : forall {a key sub_key : Set},
 Module INDEX.
   Record signature {t : Set} : Set := {
     t := t;
-    path_length : Z;
+    path_length : int;
     to_path : t -&gt; list string -&gt; list string;
     of_path : list string -&gt; option t;
     rpc_arg : RPC_arg.t t;
     encoding : Data_encoding.t t;
-    compare : t -&gt; t -&gt; Z;
+    compare : t -&gt; t -&gt; int;
   }.
   Arguments signature : clear implicits.
 End INDEX.
@@ -89761,7 +89781,7 @@ Definition encode_len_value (__bytes_value : MBytes.t) : MBytes.t :=
   (Data_encoding.Binary.to_bytes_exn Data_encoding.int31) length.
 
 Definition decode_len_value (__key_value : list string) (len : MBytes.t)
-  : Lwt.t (Error_monad.tzresult Z) :=
+  : Lwt.t (Error_monad.tzresult int) :=
   match (Data_encoding.Binary.of_bytes Data_encoding.int31) len with
   | None =&gt; Error_monad.fail extensible_type_value
   | Some len =&gt; Error_monad.__return len
@@ -89994,7 +90014,7 @@ Definition Make_single_data_storage :=
 Module INDEX.
   Record signature {t : Set} {ipath : Set -&gt; Set} : Set := {
     t := t;
-    path_length : Z;
+    path_length : int;
     to_path : t -&gt; list string -&gt; list string;
     of_path : list string -&gt; option t;
     ipath := ipath;
@@ -90300,7 +90320,7 @@ Definition Make_indexed_carbonated_data_storage :=
               (Gas_limit_repr.read_bytes_cost Z.zero)) in
         let existing_size
           (c : (|C|).(Raw_context.T.context)) (i : (|I|).(INDEX.t))
-          : Lwt.t (Error_monad.tzresult (Z * bool)) :=
+          : Lwt.t (Error_monad.tzresult (int * bool)) :=
           let= function_parameter :=
             (|C|).(Raw_context.T.get_option) c (len_key i) in
           match function_parameter with
@@ -90377,7 +90397,7 @@ Definition Make_indexed_carbonated_data_storage :=
         let set
           (s : (|C|).(Raw_context.T.context)) (i : (|I|).(INDEX.t))
           (v : (|V|).(Storage_sigs.VALUE.t))
-          : Lwt.t (Error_monad.tzresult (Raw_context.root_context * Z)) :=
+          : Lwt.t (Error_monad.tzresult (Raw_context.root_context * int)) :=
           let=? '(prev_size, _) := existing_size s i in
           let=? '(s, __bytes_value) :=
             consume_serialize_write_gas (|C|).(Raw_context.T.set) s i v in
@@ -90390,7 +90410,7 @@ Definition Make_indexed_carbonated_data_storage :=
         let init
           (s : (|C|).(Raw_context.T.context)) (i : (|I|).(INDEX.t))
           (v : (|V|).(Storage_sigs.VALUE.t))
-          : Lwt.t (Error_monad.tzresult (Raw_context.root_context * Z)) :=
+          : Lwt.t (Error_monad.tzresult (Raw_context.root_context * int)) :=
           let=? '(s, __bytes_value) :=
             consume_serialize_write_gas (|C|).(Raw_context.T.init) s i v in
           let=? __t_value :=
@@ -90401,7 +90421,7 @@ Definition Make_indexed_carbonated_data_storage :=
         let init_set
           (s : (|C|).(Raw_context.T.context)) (i : (|I|).(INDEX.t))
           (v : (|V|).(Storage_sigs.VALUE.t))
-          : Lwt.t (Error_monad.tzresult (Raw_context.root_context * Z * bool)) :=
+          : Lwt.t (Error_monad.tzresult (Raw_context.root_context * int * bool)) :=
           let init_set
             (s : (|C|).(Raw_context.T.context)) (i : Raw_context.key)
             (v : Raw_context.value)
@@ -90417,7 +90437,7 @@ Definition Make_indexed_carbonated_data_storage :=
           Error_monad.__return
             (((|C|).(Raw_context.T.project) __t_value), size_diff, existed) in
         let remove (s : (|C|).(Raw_context.T.context)) (i : (|I|).(INDEX.t))
-          : Lwt.t (Error_monad.tzresult (Raw_context.root_context * Z * bool)) :=
+          : Lwt.t (Error_monad.tzresult (Raw_context.root_context * int * bool)) :=
           let remove (s : (|C|).(Raw_context.T.context)) (i : Raw_context.key)
             : Lwt.t (Error_monad.tzresult (|C|).(Raw_context.T.context)) :=
             Error_monad.op_gtgteq ((|C|).(Raw_context.T.remove) s i)
@@ -90428,7 +90448,7 @@ Definition Make_indexed_carbonated_data_storage :=
           Error_monad.__return
             (((|C|).(Raw_context.T.project) __t_value), prev_size, existed) in
         let delete (s : (|C|).(Raw_context.T.context)) (i : (|I|).(INDEX.t))
-          : Lwt.t (Error_monad.tzresult (Raw_context.root_context * Z)) :=
+          : Lwt.t (Error_monad.tzresult (Raw_context.root_context * int)) :=
           let=? '(prev_size, _) := existing_size s i in
           let=? s := consume_remove_gas (|C|).(Raw_context.T.delete) s i in
           let=? __t_value := (|C|).(Raw_context.T.delete) s (data_key i) in
@@ -90437,7 +90457,7 @@ Definition Make_indexed_carbonated_data_storage :=
         let set_option
           (s : (|C|).(Raw_context.T.context)) (i : (|I|).(INDEX.t))
           (v : option (|V|).(Storage_sigs.VALUE.t))
-          : Lwt.t (Error_monad.tzresult (Raw_context.root_context * Z * bool)) :=
+          : Lwt.t (Error_monad.tzresult (Raw_context.root_context * int * bool)) :=
           match v with
           | None =&gt; remove s i
           | Some v =&gt; init_set s i v
@@ -91201,7 +91221,7 @@ Definition Make_indexed_subcontext :=
                 ((|Raw_context|).(Raw_context.T.consume_gas) c
                   (Gas_limit_repr.read_bytes_cost Z.zero)) in
             let existing_size (c : (|Raw_context|).(Raw_context.T.context))
-              : Lwt.t (Error_monad.tzresult (Z * bool)) :=
+              : Lwt.t (Error_monad.tzresult (int * bool)) :=
               let= function_parameter :=
                 (|Raw_context|).(Raw_context.T.get_option) c len_name in
               match function_parameter with
@@ -91287,7 +91307,7 @@ Definition Make_indexed_subcontext :=
             let set
               (s : (|C|).(Raw_context.T.context)) (i : (|I|).(INDEX.t))
               (v : (|V|).(Storage_sigs.VALUE.t))
-              : Lwt.t (Error_monad.tzresult (Raw_context.root_context * Z)) :=
+              : Lwt.t (Error_monad.tzresult (Raw_context.root_context * int)) :=
               let=? '(prev_size, _) := existing_size (pack s i) in
               let=? '(c, __bytes_value) :=
                 consume_write_gas (|Raw_context|).(Raw_context.T.set) (pack s i)
@@ -91301,7 +91321,7 @@ Definition Make_indexed_subcontext :=
             let init
               (s : (|C|).(Raw_context.T.context)) (i : (|I|).(INDEX.t))
               (v : (|V|).(Storage_sigs.VALUE.t))
-              : Lwt.t (Error_monad.tzresult (Raw_context.root_context * Z)) :=
+              : Lwt.t (Error_monad.tzresult (Raw_context.root_context * int)) :=
               let=? '(c, __bytes_value) :=
                 consume_write_gas (|Raw_context|).(Raw_context.T.init)
                   (pack s i) v in
@@ -91315,7 +91335,7 @@ Definition Make_indexed_subcontext :=
               (s : (|C|).(Raw_context.T.context)) (i : (|I|).(INDEX.t))
               (v : (|V|).(Storage_sigs.VALUE.t))
               : Lwt.t
-                (Error_monad.tzresult (Raw_context.root_context * Z * bool)) :=
+                (Error_monad.tzresult (Raw_context.root_context * int * bool)) :=
               let init_set
                 (c : (|Raw_context|).(Raw_context.T.context))
                 (k : Raw_context.key) (v : Raw_context.value)
@@ -91335,7 +91355,7 @@ Definition Make_indexed_subcontext :=
               in
             let remove (s : (|C|).(Raw_context.T.context)) (i : (|I|).(INDEX.t))
               : Lwt.t
-                (Error_monad.tzresult (Raw_context.root_context * Z * bool)) :=
+                (Error_monad.tzresult (Raw_context.root_context * int * bool)) :=
               let remove
                 (c : (|Raw_context|).(Raw_context.T.context))
                 (k : Raw_context.key)
@@ -91351,7 +91371,7 @@ Definition Make_indexed_subcontext :=
                 (((|Raw_context|).(Raw_context.T.project) c), prev_size, existed)
               in
             let delete (s : (|C|).(Raw_context.T.context)) (i : (|I|).(INDEX.t))
-              : Lwt.t (Error_monad.tzresult (Raw_context.root_context * Z)) :=
+              : Lwt.t (Error_monad.tzresult (Raw_context.root_context * int)) :=
               let=? '(prev_size, _) := existing_size (pack s i) in
               let=? c :=
                 consume_remove_gas (|Raw_context|).(Raw_context.T.delete)
@@ -91363,7 +91383,7 @@ Definition Make_indexed_subcontext :=
               (s : (|C|).(Raw_context.T.context)) (i : (|I|).(INDEX.t))
               (v : option (|V|).(Storage_sigs.VALUE.t))
               : Lwt.t
-                (Error_monad.tzresult (Raw_context.root_context * Z * bool)) :=
+                (Error_monad.tzresult (Raw_context.root_context * int * bool)) :=
               match v with
               | None =&gt; remove s i
               | Some v =&gt; init_set s i v
@@ -91725,7 +91745,7 @@ Parameter Make_single_data_storage :
 Module INDEX.
   Record signature {t : Set} {ipath : Set -&gt; Set} : Set := {
     t := t;
-    path_length : Z;
+    path_length : int;
     to_path : t -&gt; list string -&gt; list string;
     of_path : list string -&gt; option t;
     ipath := ipath;
@@ -91808,7 +91828,7 @@ Parameter Wrap_indexed_data_storage :
     <h3>Storage_sigs</h3>
     <ul>
       <li>OCaml size: 422 lines</li>
-      <li>Coq size: 244 lines (-43% compared to&nbsp;OCaml)</li>
+      <li>Coq size: 249 lines (-41% compared to&nbsp;OCaml)</li>
     </ul>
   </div>
   <div class="col-md-6">
@@ -92288,16 +92308,19 @@ Module Single_carbonated_data_storage.
     get : context -&gt; Lwt.t (Error_monad.tzresult (Raw_context.t * value));
     get_option :
       context -&gt; Lwt.t (Error_monad.tzresult (Raw_context.t * option value));
-    init : context -&gt; value -&gt; Lwt.t (Error_monad.tzresult (Raw_context.t * Z));
-    set : context -&gt; value -&gt; Lwt.t (Error_monad.tzresult (Raw_context.t * Z));
+    init :
+      context -&gt; value -&gt; Lwt.t (Error_monad.tzresult (Raw_context.t * int));
+    set :
+      context -&gt; value -&gt; Lwt.t (Error_monad.tzresult (Raw_context.t * int));
     init_set :
       context -&gt; value -&gt;
-      Lwt.t (Error_monad.tzresult (Raw_context.t * Z * bool));
+      Lwt.t (Error_monad.tzresult (Raw_context.t * int * bool));
     set_option :
       context -&gt; option value -&gt;
-      Lwt.t (Error_monad.tzresult (Raw_context.t * Z * bool));
-    delete : context -&gt; Lwt.t (Error_monad.tzresult (Raw_context.t * Z));
-    remove : context -&gt; Lwt.t (Error_monad.tzresult (Raw_context.t * Z * bool));
+      Lwt.t (Error_monad.tzresult (Raw_context.t * int * bool));
+    delete : context -&gt; Lwt.t (Error_monad.tzresult (Raw_context.t * int));
+    remove :
+      context -&gt; Lwt.t (Error_monad.tzresult (Raw_context.t * int * bool));
   }.
   Arguments signature : clear implicits.
 End Single_carbonated_data_storage.
@@ -92338,19 +92361,21 @@ Module Non_iterable_indexed_carbonated_data_storage.
       Lwt.t (Error_monad.tzresult (Raw_context.t * option value));
     set :
       context -&gt; key -&gt; value -&gt;
-      Lwt.t (Error_monad.tzresult (Raw_context.t * Z));
+      Lwt.t (Error_monad.tzresult (Raw_context.t * int));
     init :
       context -&gt; key -&gt; value -&gt;
-      Lwt.t (Error_monad.tzresult (Raw_context.t * Z));
+      Lwt.t (Error_monad.tzresult (Raw_context.t * int));
     init_set :
       context -&gt; key -&gt; value -&gt;
-      Lwt.t (Error_monad.tzresult (Raw_context.t * Z * bool));
+      Lwt.t (Error_monad.tzresult (Raw_context.t * int * bool));
     set_option :
       context -&gt; key -&gt; option value -&gt;
-      Lwt.t (Error_monad.tzresult (Raw_context.t * Z * bool));
-    delete : context -&gt; key -&gt; Lwt.t (Error_monad.tzresult (Raw_context.t * Z));
+      Lwt.t (Error_monad.tzresult (Raw_context.t * int * bool));
+    delete :
+      context -&gt; key -&gt; Lwt.t (Error_monad.tzresult (Raw_context.t * int));
     remove :
-      context -&gt; key -&gt; Lwt.t (Error_monad.tzresult (Raw_context.t * Z * bool));
+      context -&gt; key -&gt;
+      Lwt.t (Error_monad.tzresult (Raw_context.t * int * bool));
   }.
   Arguments signature : clear implicits.
 End Non_iterable_indexed_carbonated_data_storage.
@@ -92754,7 +92779,7 @@ Definition of_mutez_exn : int64 -&gt; t :=
 
 Definition add_exn : t -&gt; t -&gt; t := (|Included_S|).(Qty_repr.S.add_exn).
 
-Definition mul_exn : t -&gt; Z -&gt; t := (|Included_S|).(Qty_repr.S.mul_exn).
+Definition mul_exn : t -&gt; int -&gt; t := (|Included_S|).(Qty_repr.S.mul_exn).
 
 Definition qty_encoding : Data_encoding.t t :=
   (|Included_S|).(Qty_repr.S.qty_encoding).
@@ -92773,7 +92798,7 @@ Definition op_gteq : t -&gt; t -&gt; bool := (|Included_S|).(Qty_repr.S.op_gteq)
 
 Definition op_gt : t -&gt; t -&gt; bool := (|Included_S|).(Qty_repr.S.op_gt).
 
-Definition compare : t -&gt; t -&gt; Z := (|Included_S|).(Qty_repr.S.compare).
+Definition compare : t -&gt; t -&gt; int := (|Included_S|).(Qty_repr.S.compare).
 
 Definition equal : t -&gt; t -&gt; bool := (|Included_S|).(Qty_repr.S.equal).
 
@@ -93014,7 +93039,7 @@ Parameter op_gteq : t -&gt; t -&gt; bool.
 
 Parameter op_gt : t -&gt; t -&gt; bool.
 
-Parameter compare : t -&gt; t -&gt; Z.
+Parameter compare : t -&gt; t -&gt; int.
 
 Parameter equal : t -&gt; t -&gt; bool.
 
@@ -93141,14 +93166,14 @@ Inductive ballot : Set :=
 | Pass : ballot.
 
 Definition ballot_encoding : Data_encoding.encoding ballot :=
-  let of_int8 (function_parameter : Z) : ballot :=
+  let of_int8 (function_parameter : int) : ballot :=
     match function_parameter with
     | 0 =&gt; Yay
     | 1 =&gt; Nay
     | 2 =&gt; Pass
     | _ =&gt; Pervasives.invalid_arg &quot;ballot_of_int8&quot;
     end in
-  let to_int8 (function_parameter : ballot) : Z :=
+  let to_int8 (function_parameter : ballot) : int :=
     match function_parameter with
     | Yay =&gt; 0
     | Nay =&gt; 1
@@ -93889,7 +93914,7 @@ Parameter record_proposal :
 
 Parameter recorded_proposal_count_for_delegate :
   Raw_context.t -&gt; (|Signature.Public_key_hash|).(S.SPublic_key_hash.t) -&gt;
-  Lwt.t (Error_monad.tzresult Z).
+  Lwt.t (Error_monad.tzresult int).
 
 Parameter get_proposals :
   Raw_context.t -&gt;
@@ -94337,7 +94362,7 @@ Definition op_gteq : voting_period -&gt; voting_period -&gt; bool :=
 Definition op_gt : voting_period -&gt; voting_period -&gt; bool :=
   (|Included_S|).(Compare.S.op_gt).
 
-Definition compare : voting_period -&gt; voting_period -&gt; Z :=
+Definition compare : voting_period -&gt; voting_period -&gt; int :=
   (|Included_S|).(Compare.S.compare).
 
 Definition equal : voting_period -&gt; voting_period -&gt; bool :=

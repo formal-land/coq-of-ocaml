@@ -16,7 +16,7 @@ Require Tezos.Time_repr.
 
 Definition t : Set := Z.t.
 
-Definition compare : Z.t -> Z.t -> Z := Z.compare.
+Definition compare : Z.t -> Z.t -> int := Z.compare.
 
 Definition of_int64 : int64 -> Z.t := Z.of_int64.
 

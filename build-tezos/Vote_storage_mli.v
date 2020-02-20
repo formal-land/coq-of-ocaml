@@ -22,7 +22,7 @@ Parameter record_proposal :
 
 Parameter recorded_proposal_count_for_delegate :
   Raw_context.t -> (|Signature.Public_key_hash|).(S.SPublic_key_hash.t) ->
-  Lwt.t (Error_monad.tzresult Z).
+  Lwt.t (Error_monad.tzresult int).
 
 Parameter get_proposals :
   Raw_context.t ->

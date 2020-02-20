@@ -171,9 +171,9 @@ Definition big_map_diff_encoding
   fun eta => arg None None eta)
     (Data_encoding.__list_value None big_map_diff_item_encoding).
 
-Definition big_map_key_cost : Z := 65.
+Definition big_map_key_cost : int := 65.
 
-Definition big_map_cost : Z := 33.
+Definition big_map_cost : int := 33.
 
 Definition update_script_big_map
   (c :
