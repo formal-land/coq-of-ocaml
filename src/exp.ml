@@ -30,7 +30,7 @@ type t =
   | Variable of MixedPath.t * string list
   | Tuple of t list (** A tuple of expressions. *)
   | Constructor of PathName.t * string list * t list
-    (** A constructor name, some implicits and a list of arguments. *)
+    (** A constructor name, some implicits, and a list of arguments. *)
   | Apply of t * t list (** An application. *)
   | Function of Name.t * t (** An argument name and a body. *)
   | LetVar of Name.t * Name.t list * t * t
@@ -60,6 +60,7 @@ type t =
     (** A functor. *)
   | TypeAnnotation of t * Type.t
     (** Annotate with a type. *)
+  | Assert of Type.t * t (** The assert keyword. *)
   | Error of string (** An error message for unhandled expressions. *)
   | ErrorArray of t list (** An error produced by an array of elements. *)
   | ErrorTyp of Type.t (** An error composed of a type. *)
@@ -206,8 +207,9 @@ let rec of_expression (typ_vars : Name.t Name.Map.t) (e : expression)
           "They are sent to a unit type."
         )
     | _ ->
-      let x = PathName.of_constructor_description constructor_description in
-      Monad.List.map (of_expression typ_vars) es >>= fun es ->
+      let x =
+        PathName.of_constructor_description false constructor_description in
+      (es |> Monad.List.map (of_expression typ_vars)) >>= fun es ->
       return (Constructor (x, implicits, es))
     end
   | Texp_variant (label, e) ->
@@ -236,7 +238,9 @@ let rec of_expression (typ_vars : Name.t Name.Map.t) (e : expression)
             return (Some (x, e))
       ) >>= fun fields ->
       begin match extended_expression with
-      | None -> return (Record fields)
+      | None ->
+        Type.of_typ_expr false typ_vars e.exp_type >>= fun (typ, _, _) ->
+        return (TypeAnnotation (Record fields, typ))
       | Some extended_expression ->
         of_expression typ_vars extended_expression >>= fun extended_e ->
         return (
@@ -348,10 +352,11 @@ let rec of_expression (typ_vars : Name.t Name.Map.t) (e : expression)
       (Error "let_exception")
       SideEffect
       "Let of exception is not handled"
-  | Texp_assert e ->
-    of_expression typ_vars e >>= fun e ->
+  | Texp_assert e' ->
+    Type.of_typ_expr false typ_vars e.exp_type >>= fun (typ, _, _) ->
+    of_expression typ_vars e' >>= fun e' ->
     error_message
-      (Apply (Error "assert", [e]))
+      (Assert (typ, e'))
       SideEffect
       "Assert instruction is not handled."
   | Texp_lazy e ->
@@ -1155,9 +1160,14 @@ let rec to_coq (paren : bool) (e : t) : SmartPrint.t =
     begin match single_let with
     | Some single_let -> single_let
     | None ->
+      let separator =
+        if List.length cases >= 5 then
+          newline
+        else
+          space in
       nest (
         !^ "match" ^^ to_coq false e ^^ !^ "with" ^^ newline ^^
-        separate space (cases |> List.map (fun (p, existential_cast, e) ->
+        separate separator (cases |> List.map (fun (p, existential_cast, e) ->
           nest (
             !^ "|" ^^ Pattern.to_coq false p ^^ !^ "=>" ^^
             to_coq_cast_existentials existential_cast e ^^ newline
@@ -1234,7 +1244,12 @@ let rec to_coq (paren : bool) (e : t) : SmartPrint.t =
       !^ "=>" ^^ to_coq false e
     )
   | TypeAnnotation (e, typ) ->
-    parens @@ nest (to_coq true e ^^ !^ ":" ^^ Type.to_coq None None typ)
+    parens @@ nest (to_coq true e ^^ nest (!^ ":" ^^ Type.to_coq None None typ))
+  | Assert (typ, e) ->
+    Pp.parens paren @@ nest (
+      !^ "assert" ^^ Type.to_coq None (Some Type.Context.Apply) typ ^^
+      to_coq true e
+    )
   | Error message -> !^ message
   | ErrorArray es -> OCaml.list (to_coq false) es
   | ErrorTyp typ -> Pp.parens paren @@ Type.to_coq None None typ

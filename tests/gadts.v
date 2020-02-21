@@ -17,44 +17,55 @@ Arguments Arg {_}.
 Reserved Notation "'foo".
 
 Inductive foo_gadt : Set :=
-| Bar : forall {a b c : Set}, a -> Z -> b -> c -> foo_gadt
+| Bar_gadt : forall {a b c : Set}, a -> Z -> b -> c -> foo_gadt
 | Other : Z -> foo_gadt
 
 where "'foo" := (fun (_ _ : Set) => foo_gadt).
 
 Definition foo := 'foo.
 
+Definition Bar {a b c : Set} : a -> Z -> b -> c -> foo b string := Bar_gadt
+  (a := a) (b := b) (c := c).
+
 Reserved Notation "'expr".
 
 Inductive expr_gadt : Set :=
-| Int : Z -> expr_gadt
-| String : string -> expr_gadt
-| Sum : expr_gadt -> expr_gadt -> expr_gadt
-| Pair : expr_gadt -> expr_gadt -> expr_gadt
+| Int_gadt : Z -> expr_gadt
+| String_gadt : string -> expr_gadt
+| Sum_gadt : expr_gadt -> expr_gadt -> expr_gadt
+| Pair_gadt : expr_gadt -> expr_gadt -> expr_gadt
 
 where "'expr" := (fun (_ : Set) => expr_gadt).
 
 Definition expr := 'expr.
 
+Definition Int : Z -> expr Z := Int_gadt.
+Definition String : string -> expr string := String_gadt.
+Definition Sum : expr Z -> expr Z -> expr Z := Sum_gadt.
+Definition Pair {a b : Set} : expr a -> expr b -> expr (a * b) := Pair_gadt.
+
 Fixpoint proj_int (e : expr Z) {struct e} : Z :=
   match e with
-  | Int n => n
-  | Sum e1 e2 => Z.add (proj_int e1) (proj_int e2)
+  | Int_gadt n => n
+  | Sum_gadt e1 e2 => Z.add (proj_int e1) (proj_int e2)
   | _ => 0
   end.
 
 Reserved Notation "'one_case".
 
 Inductive one_case_gadt : Set :=
-| SingleCase : one_case_gadt
-| Impossible : one_case_gadt
+| SingleCase_gadt : one_case_gadt
+| Impossible_gadt : one_case_gadt
 
 where "'one_case" := (fun (_ : Set) => one_case_gadt).
 
 Definition one_case := 'one_case.
 
+Definition SingleCase : one_case Z := SingleCase_gadt.
+Definition Impossible : one_case bool := Impossible_gadt.
+
 Definition x : Z :=
   match SingleCase with
-  | SingleCase => 0
+  | SingleCase_gadt => 0
   | _ => 1
   end.

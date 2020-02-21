@@ -23,10 +23,10 @@ Module SizedString.
 End SizedString.
 
 Definition r : SizedString.t :=
-  {| SizedString.t.name := "gre"; SizedString.t.size := 3 |}.
+  ({| SizedString.t.name := "gre"; SizedString.t.size := 3 |} : SizedString.t).
 
 Definition r' : SizedString.t :=
-  {| SizedString.t.name := "haha"; SizedString.t.size := 4 |}.
+  ({| SizedString.t.name := "haha"; SizedString.t.size := 4 |} : SizedString.t).
 
 Definition s : Z := Z.add r.(SizedString.t.size) r'.(SizedString.t.size).
 
@@ -55,7 +55,7 @@ Module Point.
   End t.
   Definition t := t.record.
   
-  Definition p : t := {| t.x := 5; t.y := (-3); t.z := 1 |}.
+  Definition p : t := ({| t.x := 5; t.y := (-3); t.z := 1 |} : t).
   
   Definition b : bool :=
     match p with
@@ -78,7 +78,8 @@ Module poly.
 End poly.
 Definition poly := poly.record.
 
-Definition p : poly Z bool := {| poly.first := 12; poly.second := false |}.
+Definition p : poly Z bool :=
+  ({| poly.first := 12; poly.second := false |} : poly Z bool).
 
 Module ConstructorWithRecord.
   Module t.
@@ -121,7 +122,7 @@ Module ConstructorWithRecord.
   | Bar : 'loc -> t
   
   with exi : Set :=
-  | Ex : forall {a : Set}, 'exi.Ex a -> exi
+  | Ex_gadt : forall {a : Set}, 'exi.Ex a -> exi
   
   where "'loc" := (loc_skeleton Z Z)
   and "'t.Foo" := (t.Foo_skeleton string Z)
@@ -139,11 +140,14 @@ Module ConstructorWithRecord.
   
   Definition loc := 'loc.
   
-  Definition l : loc := {| loc.x := 12; loc.y := 23 |}.
+  Definition Ex {a : Set} : exi.Ex a -> exi := Ex_gadt (a := a).
+  
+  Definition l : loc := ({| loc.x := 12; loc.y := 23 |} : loc).
   
   Definition l_with : loc := loc.with_x 41 l.
   
-  Definition foo : t := Foo {| t.Foo.name := "foo"; t.Foo.size := 12 |}.
+  Definition foo : t :=
+    Foo ({| t.Foo.name := "foo"; t.Foo.size := 12 |} : t.Foo).
   
   Definition f (x : t) : Z :=
     match x with
@@ -167,9 +171,9 @@ Module ConstructorWithPolymorphicRecord.
   Reserved Notation "'t.Foo".
   
   Inductive t (loc a : Set) : Set :=
-  | Foo : 't.Foo a loc -> t loc a
+  | Foo : 't.Foo loc a -> t loc a
   
-  where "'t.Foo" := (fun (t_a t_loc : Set) => t.Foo_skeleton t_loc t_a Z).
+  where "'t.Foo" := (fun (t_loc t_a : Set) => t.Foo_skeleton t_loc t_a Z).
   
   Module ConstructorRecordNotations_t.
     Module t.
@@ -181,5 +185,7 @@ Module ConstructorWithPolymorphicRecord.
   Arguments Foo {_ _}.
   
   Definition foo : t Z string :=
-    Foo {| t.Foo.location := 12; t.Foo.payload := "hi"; t.Foo.size := 23 |}.
+    Foo
+      ({| t.Foo.location := 12; t.Foo.payload := "hi"; t.Foo.size := 23 |}
+        : t.Foo Z string).
 End ConstructorWithPolymorphicRecord.

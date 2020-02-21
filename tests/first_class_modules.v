@@ -65,10 +65,10 @@ Inductive leaf : Set :=
 Reserved Notation "'comparable_struct".
 
 Inductive comparable_struct_gadt : Set :=
-| Int_key : option type_annot -> comparable_struct_gadt
-| String_key : option type_annot -> comparable_struct_gadt
-| Bool_key : option type_annot -> comparable_struct_gadt
-| Pair_key :
+| Int_key_gadt : option type_annot -> comparable_struct_gadt
+| String_key_gadt : option type_annot -> comparable_struct_gadt
+| Bool_key_gadt : option type_annot -> comparable_struct_gadt
+| Pair_key_gadt :
   comparable_struct_gadt * option field_annot ->
   comparable_struct_gadt * option field_annot -> option type_annot ->
   comparable_struct_gadt
@@ -76,6 +76,17 @@ Inductive comparable_struct_gadt : Set :=
 where "'comparable_struct" := (fun (_ _ : Set) => comparable_struct_gadt).
 
 Definition comparable_struct := 'comparable_struct.
+
+Definition Int_key {position : Set} :
+  option type_annot -> comparable_struct Z position := Int_key_gadt.
+Definition String_key {position : Set} :
+  option type_annot -> comparable_struct string position := String_key_gadt.
+Definition Bool_key {position : Set} :
+  option type_annot -> comparable_struct bool position := Bool_key_gadt.
+Definition Pair_key {a b position : Set} :
+  comparable_struct a leaf * option field_annot ->
+  comparable_struct b position * option field_annot -> option type_annot ->
+  comparable_struct (pair a b) comb := Pair_key_gadt.
 
 Definition comparable_ty (a : Set) : Set := comparable_struct a comb.
 

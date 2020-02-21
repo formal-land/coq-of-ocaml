@@ -37,7 +37,8 @@ let rec of_pattern (p : pattern) : t option Monad.t =
         NotSupported
         "Patterns of extensible types are not handled"
     | _ ->
-      let x = PathName.of_constructor_description constructor_description in
+      let x =
+        PathName.of_constructor_description true constructor_description in
       Monad.List.map of_pattern ps >>= fun patterns ->
       return (
         let patterns = Util.Option.all patterns in

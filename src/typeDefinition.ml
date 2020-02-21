@@ -148,8 +148,11 @@ module Constructors = struct
   (** [constructor_name]: forall [typ_vars], [param_typs] -> t [res_typ_params] *)
   type item = {
     constructor_name : Name.t;
+    generalized_typ : Type.t option;
+      (** The constructor full type in case of a GADT notation. *)
     param_typs : Type.t list; (** The parameters of the constructor. *)
-    res_typ_params : Type.t list; (** The type parameters of the result type of the constructor. *)
+    res_typ_params : Type.t list;
+      (** The type parameters of the result type of the constructor. *)
     typ_vars : Name.t list; (** The polymorphic type variables. *)
   }
 
@@ -158,9 +161,12 @@ module Constructors = struct
   module Single = struct
     type t = {
       constructor_name : Name.t;
+      generalized_typ : Type.t option;
+        (** The constructor full type in case of a GADT notation. *)
       param_typs : Type.t list; (** The parameters of the constructor. *)
       return_typ_params : Name.t option list option;
-        (** The return type, in case of GADT contructor *)
+        (** The return type, in case of GADT contructor, with some inference to
+            rule-out GADTs with only existential variables. *)
     }
 
     let of_ocaml_case
@@ -186,8 +192,18 @@ module Constructors = struct
         let record_fields = labeled_typs |> List.map ( fun { Types.ld_id; _ } ->
           Name.of_ident false ld_id
         ) in
+        (* We get the order of the type arguments from their order of
+          introduction in the record fields. *)
         let typ_args =
-          Name.Set.elements (Type.typ_args_of_typs record_params) in
+          List.fold_left
+            (fun typ_args new_typ_args ->
+              typ_args @
+              Name.Set.elements (
+                Name.Set.diff new_typ_args (Name.Set.of_list typ_args)
+              )
+            )
+            []
+            (List.map Type.typ_args record_params) in
         return (
           [
             Type.Apply (
@@ -223,9 +239,19 @@ module Constructors = struct
           named_typ_params_expecting_anything typs
         | Some _ -> None
         | None -> Some defined_typ_params in
+      begin match cd_res with
+      | None -> return None
+      | Some typ ->
+        Type.of_typ_expr true Name.Map.empty typ >>= fun (typ, _, _) ->
+        return (Some (List.fold_right
+          (fun typ_param typ -> Type.Arrow (typ_param, typ))
+          param_typs
+          typ))
+      end >>= fun generalized_typ ->
       return (
         {
           constructor_name;
+          generalized_typ;
           param_typs;
           return_typ_params;
         },
@@ -241,6 +267,7 @@ module Constructors = struct
       Type.of_typs_exprs true Name.Map.empty typs >>= fun (param_typs, _, _) ->
       return {
         constructor_name = Name.of_string false label;
+        generalized_typ = None;
         param_typs;
         return_typ_params = Some defined_typ_params;
       }
@@ -348,13 +375,14 @@ module Constructors = struct
       else
         check_if_not_gadt defined_typ_params single_constructors in
     let constructors = single_constructors |> List.map (
-      fun { Single.constructor_name; param_typs; _ } ->
+      fun { Single.constructor_name; generalized_typ; param_typs; _ } ->
         match merged_typ_params with
         | None ->
           let param_typs =
             param_typs |> List.map (subst_gadt_typ_constructor typ_name) in
           {
             constructor_name;
+            generalized_typ;
             param_typs;
             res_typ_params = [];
             typ_vars = Name.Set.elements (Type.typ_args_of_typs param_typs)
@@ -362,6 +390,7 @@ module Constructors = struct
         | Some merged_typ_params ->
           {
             constructor_name;
+            generalized_typ;
             param_typs;
             res_typ_params =
               List.map (fun name -> Type.Variable name)
@@ -425,6 +454,13 @@ module Inductive = struct
   let to_coq_record_skeletons (inductive : t) : SmartPrint.t list =
     inductive.records |> List.map (RecordSkeleton.to_coq true)
 
+  let constructor_name_if_generalized
+    (name : Name.t) (generalized_return_typ : Type.t option)
+    : Name.t =
+    match generalized_return_typ with
+    | None -> name
+    | Some _ -> Name.suffix_by_gadt name
+
   let to_coq_typs
     (subst : Type.Subst.t)
     (is_first : bool)
@@ -449,7 +485,17 @@ module Inductive = struct
         )
       ) ^^ !^ ":" ^^ Pp.set ^^ !^ ":=" ^-^
       separate empty (
-        constructors |> List.map (fun { Constructors.constructor_name; param_typs; res_typ_params; typ_vars } ->
+        constructors |> List.map (fun {
+            Constructors.constructor_name;
+            generalized_typ;
+            param_typs;
+            res_typ_params;
+            typ_vars;
+          } ->
+          let constructor_name =
+            constructor_name_if_generalized
+              constructor_name
+              generalized_typ in
           newline ^^ nest (
             !^ "|" ^^ Name.to_coq constructor_name ^^ !^ ":" ^^
             (match typ_vars with
@@ -567,7 +613,13 @@ module Inductive = struct
     match left_typ_args with
     | [] -> []
     | _ :: _ ->
-      constructors |> List.map (fun { Constructors.constructor_name; typ_vars; _ } ->
+      constructors |> List.map (fun {
+        Constructors.constructor_name; generalized_typ; typ_vars; _
+      } ->
+        let constructor_name =
+          constructor_name_if_generalized
+            constructor_name
+            generalized_typ in
         !^ "Arguments" ^^ Name.to_coq constructor_name ^^ braces (
           nest (
             separate space (
@@ -577,6 +629,42 @@ module Inductive = struct
           )
         ) ^-^ !^ "."
       )
+
+
+  let to_coq_typs_gadt_annotations (constructors : Constructors.t)
+    : SmartPrint.t list =
+    constructors |> Util.List.filter_map (fun {
+      Constructors.constructor_name;
+      generalized_typ;
+      typ_vars;
+      _
+    } ->
+      match generalized_typ with
+      | None -> None
+      | Some generalized_typ ->
+        let all_typ_vars = Name.Set.elements (Type.typ_args generalized_typ) in
+        Some (nest (
+          !^ "Definition" ^^ Name.to_coq constructor_name ^^
+          begin match all_typ_vars with
+          | [] -> empty
+          | _ :: _ ->
+            braces (
+              separate space (List.map Name.to_coq all_typ_vars) ^^ !^ ":" ^^ Pp.set
+            )
+          end ^^
+          !^ ":" ^^ Type.to_coq None None generalized_typ ^^ !^ ":=" ^^
+          separate space (
+            Name.to_coq (Name.suffix_by_gadt constructor_name) ::
+            List.map
+              (fun typ_var ->
+                parens (nest (
+                  Name.to_coq typ_var ^^ !^ ":=" ^^ Name.to_coq typ_var
+                ))
+              )
+              typ_vars
+          ) ^-^ !^ "."
+        ))
+    )
 
   let to_coq (inductive : t) : SmartPrint.t =
     let subst = {
@@ -616,6 +704,10 @@ module Inductive = struct
       List.concat (inductive.typs |> List.map (fun (_, left_typ_args, constructors) ->
         to_coq_typs_implicits left_typ_args constructors
       )) in
+    let gadt_annotations =
+      List.concat (inductive.typs |> List.map (fun (_, _, constructors) ->
+        to_coq_typs_gadt_annotations constructors
+      )) in
     nest (
       (match constructor_records with
       | [] -> empty
@@ -646,7 +738,10 @@ module Inductive = struct
       | _ :: _ -> newline ^^ newline ^^ separate newline notations_definitions) ^^
       (match implicit_arguments with
       | [] -> empty
-      | _ :: _ -> newline ^^ newline ^^ separate newline implicit_arguments)
+      | _ :: _ -> newline ^^ newline ^^ separate newline implicit_arguments) ^^
+      (match gadt_annotations with
+      | [] -> empty
+      | _ :: _ -> newline ^^ newline ^^ separate newline gadt_annotations)
     )
 end
 
