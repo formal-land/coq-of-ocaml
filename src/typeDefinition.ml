@@ -205,6 +205,7 @@ module Constructors = struct
             []
             (List.map Type.typ_args record_params) in
         return (
+
           [
             Type.Apply (
               MixedPath.PathName {
@@ -418,18 +419,36 @@ module Inductive = struct
     typs : (Name.t * Name.t option list * Constructors.t) list;
   }
 
-  let to_coq_constructor_records (inductive : t) : SmartPrint.t list =
-    inductive.constructor_records |> List.map (fun (name, records) ->
-      !^ "Module" ^^ Name.to_coq name ^-^ !^ "." ^^ newline ^^
-      indent (
-        separate
-          (newline ^^ newline)
-          (records |> List.map (fun (record, _, _) ->
-            RecordSkeleton.to_coq false record
+  let get_notation_module_name (inductive : t) : SmartPrint.t =
+    !^ "ConstructorRecordNotations_" ^-^
+    separate (!^ "_") (inductive.typs |> List.map (fun (name, _, _) ->
+      Name.to_coq name
+    ))
+
+  let to_coq_constructor_records (inductive : t) : SmartPrint.t option =
+    match inductive.constructor_records with
+    | [] -> None
+    | constructor_records ->
+      let notation_module_name = get_notation_module_name inductive in
+      Some (
+        !^ "Module" ^^ notation_module_name ^-^ !^ "." ^^ newline ^^
+        indent (
+          separate newline (
+            constructor_records |> List.map (fun (name, records) ->
+            !^ "Module" ^^ Name.to_coq name ^-^ !^ "." ^^ newline ^^
+            indent (
+              separate
+                (newline ^^ newline)
+                (records |> List.map (fun (record, _, _) ->
+                  RecordSkeleton.to_coq false record
+                ))
+            ) ^^ newline ^^
+            !^ "End" ^^ Name.to_coq name ^-^ !^ "."
           ))
-      ) ^^ newline ^^
-      !^ "End" ^^ Name.to_coq name ^-^ !^ "."
-    )
+        ) ^^ newline ^^
+        !^ "End" ^^ notation_module_name ^-^ !^ "." ^^ newline ^^
+        !^ "Import" ^^ notation_module_name ^-^ !^ "."
+      )
 
   let to_coq_notation_name (name : Name.t) : SmartPrint.t =
     !^ "\"'" ^-^ Name.to_coq name ^-^ !^ "\""
@@ -577,26 +596,23 @@ module Inductive = struct
     match inductive.constructor_records with
     | [] -> None
     | _ :: _ ->
-      let notation_module_name =
-        !^ "ConstructorRecordNotations_" ^-^
-        separate (!^ "_") (inductive.typs |> List.map (fun (name, _, _) ->
-          Name.to_coq name
-        )) in
+      let notation_module_name = get_notation_module_name inductive in
       Some (
-        !^ "Module" ^^ notation_module_name ^-^ !^ "." ^^ newline ^^
-        indent (separate newline (inductive.constructor_records |> List.map (fun (name, records) ->
+        separate newline (inductive.constructor_records |> List.map (fun (name, records) ->
           !^ "Module" ^^ Name.to_coq name ^-^ !^ "." ^^ newline ^^
-          indent (separate newline (records |> List.map
-            (fun ({ RecordSkeleton.module_name; _ }, _, _) ->
-              to_coq_notations_definition
-                module_name
-                (!^ "'" ^-^ Name.to_coq name ^-^ !^ "." ^-^ Name.to_coq module_name)
+          indent (
+            !^ "Include" ^^ notation_module_name ^-^ !^ "." ^-^
+              Name.to_coq name ^-^ !^ "." ^^ newline ^^
+            separate newline (records |> List.map
+              (fun ({ RecordSkeleton.module_name; _ }, _, _) ->
+                to_coq_notations_definition
+                  module_name
+                  (!^ "'" ^-^ Name.to_coq name ^-^ !^ "." ^-^ Name.to_coq module_name)
+              )
             )
-          )) ^^ newline ^^
+          ) ^^ newline ^^
           !^ "End" ^^ Name.to_coq name ^-^ !^ "."
-        ))) ^^ newline ^^
-        !^ "End" ^^ notation_module_name ^-^ !^ "." ^^ newline ^^
-        !^ "Import" ^^ notation_module_name ^-^ !^ "."
+        ))
       )
 
   let to_coq_notations_definitions (inductive : t) : SmartPrint.t list =
@@ -710,8 +726,8 @@ module Inductive = struct
       )) in
     nest (
       (match constructor_records with
-      | [] -> empty
-      | _ :: _ -> separate (newline ^^ newline) constructor_records ^^ newline ^^ newline) ^^
+      | None -> empty
+      | Some constructor_records -> constructor_records ^^ newline ^^ newline) ^^
       (match record_skeletons with
       | [] -> empty
       | _ :: _ -> separate (newline ^^ newline) record_skeletons ^^ newline ^^ newline) ^^
