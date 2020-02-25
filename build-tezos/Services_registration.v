@@ -43,20 +43,16 @@ Definition rpc_init (function_parameter : Updater.rpc_context)
   let=? context :=
     Alpha_context.prepare context level timestamp timestamp fitness in
   Error_monad.__return
-    {| rpc_context.block_hash := block_hash;
+    ({| rpc_context.block_hash := block_hash;
       rpc_context.block_header := block_header; rpc_context.context := context
-      |}.
+      |} : rpc_context).
 
 Definition rpc_services
   : Pervasives.ref (RPC_directory.t Updater.rpc_context) :=
   Pervasives.__ref_value RPC_directory.empty.
 
 Definition register0_fullctxt {A B C : Set}
-  (s :
-    RPC_service.t
-      ((* `DELETE *) unit + (* `GET *) unit + (* `PATCH *) unit +
-        (* `POST *) unit + (* `PUT *) unit) Updater.rpc_context
-      Updater.rpc_context A B C)
+  (s : RPC_service.t Updater.rpc_context Updater.rpc_context A B C)
   (f : rpc_context -> A -> B -> Lwt.t (Error_monad.tzresult C)) : unit :=
   Pervasives.op_coloneq rpc_services
     (RPC_directory.register (Pervasives.op_exclamation rpc_services) s
@@ -67,11 +63,7 @@ Definition register0_fullctxt {A B C : Set}
             f ctxt q i)).
 
 Definition opt_register0_fullctxt {A B C : Set}
-  (s :
-    RPC_service.t
-      ((* `DELETE *) unit + (* `GET *) unit + (* `PATCH *) unit +
-        (* `POST *) unit + (* `PUT *) unit) Updater.rpc_context
-      Updater.rpc_context A B C)
+  (s : RPC_service.t Updater.rpc_context Updater.rpc_context A B C)
   (f : rpc_context -> A -> B -> Lwt.t (Error_monad.tzresult (option C)))
   : unit :=
   Pervasives.op_coloneq rpc_services
@@ -83,11 +75,7 @@ Definition opt_register0_fullctxt {A B C : Set}
             f ctxt q i)).
 
 Definition register0 {A B C : Set}
-  (s :
-    RPC_service.t
-      ((* `DELETE *) unit + (* `GET *) unit + (* `PATCH *) unit +
-        (* `POST *) unit + (* `PUT *) unit) Updater.rpc_context
-      Updater.rpc_context A B C)
+  (s : RPC_service.t Updater.rpc_context Updater.rpc_context A B C)
   (f : Alpha_context.t -> A -> B -> Lwt.t (Error_monad.tzresult C)) : unit :=
   register0_fullctxt s
     (fun function_parameter =>
@@ -95,10 +83,7 @@ Definition register0 {A B C : Set}
       f context).
 
 Definition register0_noctxt {A B C D : Set}
-  (s :
-    RPC_service.t
-      ((* `DELETE *) unit + (* `GET *) unit + (* `PATCH *) unit +
-        (* `POST *) unit + (* `PUT *) unit) Updater.rpc_context A B C D)
+  (s : RPC_service.t Updater.rpc_context A B C D)
   (f : B -> C -> Lwt.t (Error_monad.tzresult D)) : unit :=
   Pervasives.op_coloneq rpc_services
     (RPC_directory.register (Pervasives.op_exclamation rpc_services) s
@@ -107,11 +92,7 @@ Definition register0_noctxt {A B C D : Set}
         fun q => fun i => f q i)).
 
 Definition register1_fullctxt {A B C D : Set}
-  (s :
-    RPC_service.t
-      ((* `DELETE *) unit + (* `GET *) unit + (* `PATCH *) unit +
-        (* `POST *) unit + (* `PUT *) unit) Updater.rpc_context
-      (Updater.rpc_context * A) B C D)
+  (s : RPC_service.t Updater.rpc_context (Updater.rpc_context * A) B C D)
   (f : rpc_context -> A -> B -> C -> Lwt.t (Error_monad.tzresult D)) : unit :=
   Pervasives.op_coloneq rpc_services
     (RPC_directory.register (Pervasives.op_exclamation rpc_services) s
@@ -123,11 +104,7 @@ Definition register1_fullctxt {A B C D : Set}
             f ctxt arg q i)).
 
 Definition register1 {A B C D : Set}
-  (s :
-    RPC_service.t
-      ((* `DELETE *) unit + (* `GET *) unit + (* `PATCH *) unit +
-        (* `POST *) unit + (* `PUT *) unit) Updater.rpc_context
-      (Updater.rpc_context * A) B C D)
+  (s : RPC_service.t Updater.rpc_context (Updater.rpc_context * A) B C D)
   (f : Alpha_context.t -> A -> B -> C -> Lwt.t (Error_monad.tzresult D))
   : unit :=
   register1_fullctxt s
@@ -136,10 +113,7 @@ Definition register1 {A B C D : Set}
       fun x => f context x).
 
 Definition register1_noctxt {A B C D E : Set}
-  (s :
-    RPC_service.t
-      ((* `DELETE *) unit + (* `GET *) unit + (* `PATCH *) unit +
-        (* `POST *) unit + (* `PUT *) unit) Updater.rpc_context (A * B) C D E)
+  (s : RPC_service.t Updater.rpc_context (A * B) C D E)
   (f : B -> C -> D -> Lwt.t (Error_monad.tzresult E)) : unit :=
   Pervasives.op_coloneq rpc_services
     (RPC_directory.register (Pervasives.op_exclamation rpc_services) s
@@ -148,11 +122,7 @@ Definition register1_noctxt {A B C D E : Set}
         fun q => fun i => f arg q i)).
 
 Definition register2_fullctxt {A B C D E : Set}
-  (s :
-    RPC_service.t
-      ((* `DELETE *) unit + (* `GET *) unit + (* `PATCH *) unit +
-        (* `POST *) unit + (* `PUT *) unit) Updater.rpc_context
-      ((Updater.rpc_context * A) * B) C D E)
+  (s : RPC_service.t Updater.rpc_context ((Updater.rpc_context * A) * B) C D E)
   (f : rpc_context -> A -> B -> C -> D -> Lwt.t (Error_monad.tzresult E))
   : unit :=
   Pervasives.op_coloneq rpc_services
@@ -165,11 +135,7 @@ Definition register2_fullctxt {A B C D E : Set}
             f ctxt arg1 arg2 q i)).
 
 Definition register2 {A B C D E : Set}
-  (s :
-    RPC_service.t
-      ((* `DELETE *) unit + (* `GET *) unit + (* `PATCH *) unit +
-        (* `POST *) unit + (* `PUT *) unit) Updater.rpc_context
-      ((Updater.rpc_context * A) * B) C D E)
+  (s : RPC_service.t Updater.rpc_context ((Updater.rpc_context * A) * B) C D E)
   (f : Alpha_context.t -> A -> B -> C -> D -> Lwt.t (Error_monad.tzresult E))
   : unit :=
   register2_fullctxt s
@@ -187,7 +153,7 @@ Definition get_rpc_services (function_parameter : unit)
         match function_parameter with
         | Pervasives.Error _ =>
           (* ❌ Assert instruction is not handled. *)
-          assert false
+          assert (Lwt.t Alpha_context.t) false
         | Pervasives.Ok c => Lwt.__return c.(rpc_context.context)
         end) (Storage_description.build_directory Alpha_context.description) in
   RPC_directory.register_dynamic_directory None

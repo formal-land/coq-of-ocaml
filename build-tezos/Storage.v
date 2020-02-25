@@ -26,7 +26,7 @@ Require Tezos.Script_expr_hash.
 Require Tezos.Script_repr.
 Require Tezos.Seed_repr.
 Require Tezos.Storage_description.
-Require Tezos.Storage_functors.
+Require Tezos.Storage_functors_mli. Module Storage_functors := Storage_functors_mli.
 Require Tezos.Storage_sigs.
 Require Tezos.Tez_repr.
 Require Tezos.Vote_repr.
@@ -69,21 +69,20 @@ Definition Int_index :=
     | cons c [] => Pervasives.int_of_string_opt c
     end in
   let ipath (a : Set) := a * t in
-  let args {A : Set} (function_parameter : unit)
-    : Storage_description.args A (|Compare.Int|).(Compare.S.t)
-      (A * (|Compare.Int|).(Compare.S.t)) :=
+  let args (function_parameter : unit) : Storage_description.args :=
     let '_ := function_parameter in
     Storage_description.One
-      {| Storage_description.args.One.rpc_arg := RPC_arg.__int_value;
+      ({| Storage_description.args.One.rpc_arg := RPC_arg.__int_value;
         Storage_description.args.One.encoding := Data_encoding.int31;
         Storage_description.args.One.compare :=
-          (|Compare.Int|).(Compare.S.compare) |} in
+          (|Compare.Int|).(Compare.S.compare) |}
+        : Storage_description.args.One (|Compare.Int|).(Compare.S.t)) in
   existT (A := unit) (fun _ => _) tt
     {|
       Storage_functors.INDEX.path_length := path_length;
       Storage_functors.INDEX.to_path := to_path;
       Storage_functors.INDEX.of_path := of_path;
-      Storage_functors.INDEX.args {_} := args
+      Storage_functors.INDEX.args := args
     |}.
 
 Definition Make_index :=
@@ -96,23 +95,24 @@ Definition Make_index :=
     let encoding := (|H|).(Storage_description.INDEX.encoding) in
     let compare := (|H|).(Storage_description.INDEX.compare) in
     let ipath (a : Set) := a * t in
-    let args {A : Set} (function_parameter : unit)
-      : Storage_description.args A t (A * t) :=
+    let args (function_parameter : unit) : Storage_description.args :=
       let '_ := function_parameter in
       Storage_description.One
-        {| Storage_description.args.One.rpc_arg := rpc_arg;
+        ({| Storage_description.args.One.rpc_arg := rpc_arg;
           Storage_description.args.One.encoding := encoding;
-          Storage_description.args.One.compare := compare |} in
+          Storage_description.args.One.compare := compare |}
+          : Storage_description.args.One t) in
     existT (A := unit) (fun _ => _) tt
       {|
         Storage_functors.INDEX.path_length := path_length;
         Storage_functors.INDEX.to_path := to_path;
         Storage_functors.INDEX.of_path := of_path;
-        Storage_functors.INDEX.args {_} := args
-      |}) :
-      {_ : unit &
-        INDEX.signature (|H|).(Storage_description.INDEX.t)
-          (fun (a : Set) => a * (|H|).(Storage_description.INDEX.t))}).
+        Storage_functors.INDEX.args := args
+      |})
+      :
+        {_ : unit &
+          INDEX.signature (|H|).(Storage_description.INDEX.t)
+            (fun (a : Set) => a * (|H|).(Storage_description.INDEX.t))}).
 
 Definition Block_priority :=
   (((Storage_functors.Make_single_data_storage
@@ -489,11 +489,12 @@ Module Contract.
             delete;
           Storage_sigs.Non_iterable_indexed_carbonated_data_storage.remove :=
             remove
-        |}) :
-        {_ : unit &
-          Storage_sigs.Non_iterable_indexed_carbonated_data_storage.signature
-            (|Raw_context|).(Raw_context.T.t) Contract_repr.t
-            Script_repr.lazy_expr}).
+        |})
+        :
+          {_ : unit &
+            Storage_sigs.Non_iterable_indexed_carbonated_data_storage.signature
+              (|Raw_context|).(Raw_context.T.t) Contract_repr.t
+              Script_repr.lazy_expr}).
   
   Definition Code :=
     Make_carbonated_map_expr
@@ -1217,10 +1218,11 @@ Module Cycle.
             let '(nonce_hash, delegate, rewards, fees) :=
               function_parameter in
             Unrevealed
-              {| unrevealed_nonce.nonce_hash := nonce_hash;
+              ({| unrevealed_nonce.nonce_hash := nonce_hash;
                 unrevealed_nonce.delegate := delegate;
                 unrevealed_nonce.rewards := rewards;
-                unrevealed_nonce.fees := fees |});
+                unrevealed_nonce.fees := fees |}
+                : unrevealed_nonce));
         Data_encoding.__case_value "Revealed" None (Data_encoding.Tag 1)
           Seed_repr.nonce_encoding
           (fun function_parameter =>
@@ -1414,26 +1416,22 @@ Module Roll.
     
     Definition ipath (a : Set) : Set := (a * Cycle_repr.t) * int.
     
-    Definition left_args {A : Set}
-      : Storage_description.args A Cycle_repr.cycle (A * Cycle_repr.cycle) :=
+    Definition left_args : Storage_description.args :=
       Storage_description.One
-        {| Storage_description.args.One.rpc_arg := Cycle_repr.rpc_arg;
+        ({| Storage_description.args.One.rpc_arg := Cycle_repr.rpc_arg;
           Storage_description.args.One.encoding := Cycle_repr.encoding;
-          Storage_description.args.One.compare := Cycle_repr.compare |}.
+          Storage_description.args.One.compare := Cycle_repr.compare |}
+          : Storage_description.args.One Cycle_repr.cycle).
     
-    Definition right_args {A : Set}
-      : Storage_description.args A (|Compare.Int|).(Compare.S.t)
-        (A * (|Compare.Int|).(Compare.S.t)) :=
+    Definition right_args : Storage_description.args :=
       Storage_description.One
-        {| Storage_description.args.One.rpc_arg := RPC_arg.__int_value;
+        ({| Storage_description.args.One.rpc_arg := RPC_arg.__int_value;
           Storage_description.args.One.encoding := Data_encoding.int31;
           Storage_description.args.One.compare :=
-            (|Compare.Int|).(Compare.S.compare) |}.
+            (|Compare.Int|).(Compare.S.compare) |}
+          : Storage_description.args.One (|Compare.Int|).(Compare.S.t)).
     
-    Definition args {A : Set} (function_parameter : unit)
-      : Storage_description.args A
-        (Cycle_repr.cycle * (|Compare.Int|).(Compare.S.t))
-        ((A * Cycle_repr.cycle) * (|Compare.Int|).(Compare.S.t)) :=
+    Definition args (function_parameter : unit) : Storage_description.args :=
       let '_ := function_parameter in
       Storage_description.Pair left_args right_args.
   End Snapshoted_owner_index.
@@ -1456,7 +1454,7 @@ Module Roll.
             Snapshoted_owner_index.path_length;
           Storage_functors.INDEX.to_path := Snapshoted_owner_index.to_path;
           Storage_functors.INDEX.of_path := Snapshoted_owner_index.of_path;
-          Storage_functors.INDEX.args {_} := Snapshoted_owner_index.args
+          Storage_functors.INDEX.args := Snapshoted_owner_index.args
         |}))
       (let functor_result :=
         Make_index (existT (A := Set) _ _ (|Roll_repr.Index|)) in

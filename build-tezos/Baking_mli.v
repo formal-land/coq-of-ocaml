@@ -47,7 +47,7 @@ Parameter endorsement_rights :
 
 Parameter check_endorsement_rights :
   Alpha_context.context -> (|Chain_id|).(S.HASH.t) ->
-  Alpha_context.Operation.t Alpha_context.Kind.endorsement ->
+  Alpha_context.Operation.t ->
   Lwt.t (Error_monad.tzresult (Alpha_context.public_key_hash * list int * bool)).
 
 Parameter baking_reward :

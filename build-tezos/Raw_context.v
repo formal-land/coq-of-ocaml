@@ -235,10 +235,10 @@ Definition record_endorsement
       k ctxt.(t.allowed_endorsements) with
   | None =>
     (* ❌ Assert instruction is not handled. *)
-    assert false
+    assert t false
   | Some (_, _, true) =>
     (* ❌ Assert instruction is not handled. *)
-    assert false
+    assert t false
   | Some (d, s, false) =>
     t.with_allowed_endorsements
       ((|Signature.Public_key_hash|).(S.SPublic_key_hash.Map).(S.INDEXES_Map.add)
@@ -256,7 +256,7 @@ Definition init_endorsements
     (|Signature.Public_key_hash|).(S.SPublic_key_hash.Map).(S.INDEXES_Map.is_empty)
       allowed_endorsements then
     (* ❌ Assert instruction is not handled. *)
-    assert false
+    assert t false
   else
     if
       (|Signature.Public_key_hash|).(S.SPublic_key_hash.Map).(S.INDEXES_Map.is_empty)
@@ -264,7 +264,7 @@ Definition init_endorsements
       t.with_allowed_endorsements allowed_endorsements ctxt
     else
       (* ❌ Assert instruction is not handled. *)
-      assert false.
+      assert t false.
 
 Definition allowed_endorsements (ctxt : t)
   : (|Signature.Public_key_hash|).(S.SPublic_key_hash.Map).(S.INDEXES_Map.t)
@@ -394,7 +394,8 @@ Definition set_gas_limit (ctxt : t) (remaining : Z.t) : t :=
   t.with_internal_gas Gas_limit_repr.internal_gas_zero
     (t.with_operation_gas
       (Gas_limit_repr.Limited
-        {| Gas_limit_repr.t.Limited.remaining := remaining |}) ctxt).
+        ({| Gas_limit_repr.t.Limited.remaining := remaining |}
+          : Gas_limit_repr.t.Limited)) ctxt).
 
 Definition set_gas_unlimited (ctxt : t) : t :=
   t.with_operation_gas Gas_limit_repr.Unaccounted ctxt.
@@ -430,7 +431,7 @@ Definition init_storage_space_to_pay (ctxt : t) : t :=
   match ctxt.(t.storage_space_to_pay) with
   | Some _ =>
     (* ❌ Assert instruction is not handled. *)
-    assert false
+    assert t false
   | None =>
     t.with_allocated_contracts (Some 0)
       (t.with_storage_space_to_pay (Some Z.zero) ctxt)
@@ -440,7 +441,7 @@ Definition update_storage_space_to_pay (ctxt : t) (n : Z.t) : t :=
   match ctxt.(t.storage_space_to_pay) with
   | None =>
     (* ❌ Assert instruction is not handled. *)
-    assert false
+    assert t false
   | Some storage_space_to_pay =>
     t.with_storage_space_to_pay (Some (Z.add n storage_space_to_pay)) ctxt
   end.
@@ -449,7 +450,7 @@ Definition update_allocated_contracts_count (ctxt : t) : t :=
   match ctxt.(t.allocated_contracts) with
   | None =>
     (* ❌ Assert instruction is not handled. *)
-    assert false
+    assert t false
   | Some allocated_contracts =>
     t.with_allocated_contracts (Some (Pervasives.succ allocated_contracts)) ctxt
   end.
@@ -458,7 +459,7 @@ Definition clear_storage_space_to_pay (ctxt : t) : t * Z.t * int :=
   match (ctxt.(t.storage_space_to_pay), ctxt.(t.allocated_contracts)) with
   | ((None, _) | (_, None)) =>
     (* ❌ Assert instruction is not handled. *)
-    assert false
+    assert (t * Z.t * int) false
   | (Some storage_space_to_pay, Some allocated_contracts) =>
     ((t.with_allocated_contracts None (t.with_storage_space_to_pay None ctxt)),
       storage_space_to_pay, allocated_contracts)
@@ -541,6 +542,7 @@ Definition pp_storage_error
             (CamlinternalFormatBasics.String_literal "'."
               CamlinternalFormatBasics.End_of_format)))
         "Found a context with an unexpected version '%s'.") version
+  
   | Missing_key __key_value Get =>
     Format.fprintf ppf
       (CamlinternalFormatBasics.Format
@@ -549,6 +551,7 @@ Definition pp_storage_error
             (CamlinternalFormatBasics.String_literal "'."
               CamlinternalFormatBasics.End_of_format))) "Missing key '%s'.")
       (String.concat "/" __key_value)
+  
   | Missing_key __key_value __Set =>
     Format.fprintf ppf
       (CamlinternalFormatBasics.Format
@@ -557,6 +560,7 @@ Definition pp_storage_error
             (CamlinternalFormatBasics.String_literal "'."
               CamlinternalFormatBasics.End_of_format)))
         "Cannot set undefined key '%s'.") (String.concat "/" __key_value)
+  
   | Missing_key __key_value Del =>
     Format.fprintf ppf
       (CamlinternalFormatBasics.Format
@@ -565,6 +569,7 @@ Definition pp_storage_error
             (CamlinternalFormatBasics.String_literal "'."
               CamlinternalFormatBasics.End_of_format)))
         "Cannot delete undefined key '%s'.") (String.concat "/" __key_value)
+  
   | Missing_key __key_value Copy =>
     Format.fprintf ppf
       (CamlinternalFormatBasics.Format
@@ -573,6 +578,7 @@ Definition pp_storage_error
             (CamlinternalFormatBasics.String_literal "'."
               CamlinternalFormatBasics.End_of_format)))
         "Cannot copy undefined key '%s'.") (String.concat "/" __key_value)
+  
   | Existing_key __key_value =>
     Format.fprintf ppf
       (CamlinternalFormatBasics.Format
@@ -582,6 +588,7 @@ Definition pp_storage_error
             (CamlinternalFormatBasics.String_literal "'."
               CamlinternalFormatBasics.End_of_format)))
         "Cannot initialize defined key '%s'.") (String.concat "/" __key_value)
+  
   | Corrupted_data __key_value =>
     Format.fprintf ppf
       (CamlinternalFormatBasics.Format
@@ -718,7 +725,7 @@ Definition prepare
       constants.(Constants_repr.parametric.blocks_per_voting_period)
       constants.(Constants_repr.parametric.blocks_per_commitment) level in
   Error_monad.__return
-    {| t.context := ctxt; t.constants := constants;
+    ({| t.context := ctxt; t.constants := constants;
       t.first_level := first_level; t.level := level;
       t.predecessor_timestamp := predecessor_timestamp;
       t.timestamp := timestamp; t.fitness := fitness;
@@ -735,7 +742,7 @@ Definition prepare
       t.storage_space_to_pay := None; t.allocated_contracts := None;
       t.origination_nonce := None; t.temporary_big_map := Z.sub Z.zero Z.one;
       t.internal_nonce := 0; t.internal_nonces_used := (|Int_set|).(S.SET.empty)
-      |}.
+      |} : t).
 
 Inductive previous_protocol : Set :=
 | Genesis : Parameters_repr.t -> previous_protocol

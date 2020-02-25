@@ -56,8 +56,8 @@ Definition info_encoding : Data_encoding.encoding info :=
         (balance, delegate, script, counter))
       (fun function_parameter =>
         let '(balance, delegate, script, counter) := function_parameter in
-        {| info.balance := balance; info.delegate := delegate;
-          info.counter := counter; info.script := script |}) in
+        ({| info.balance := balance; info.delegate := delegate;
+          info.counter := counter; info.script := script |} : info)) in
   fun eta => arg None eta)
     (Data_encoding.obj4
       (Data_encoding.req None None "balance" Alpha_context.Tez.encoding)
@@ -70,7 +70,7 @@ Module S.
   Import Data_encoding.
   
   Definition balance
-    : RPC_service.service (* `GET *) unit RPC_context.t
+    : RPC_service.service RPC_context.t
       (RPC_context.t * Alpha_context.Contract.contract) unit unit
       Alpha_context.Tez.t :=
     RPC_service.get_service (Some "Access the balance of a contract.")
@@ -80,7 +80,7 @@ Module S.
         "balance").
   
   Definition manager_key
-    : RPC_service.service (* `GET *) unit RPC_context.t
+    : RPC_service.service RPC_context.t
       (RPC_context.t * Alpha_context.Contract.contract) unit unit
       (option (|Signature.Public_key|).(S.SPublic_key.t)) :=
     RPC_service.get_service (Some "Access the manager of a contract.")
@@ -92,7 +92,7 @@ Module S.
         "manager_key").
   
   Definition delegate
-    : RPC_service.service (* `GET *) unit RPC_context.t
+    : RPC_service.service RPC_context.t
       (RPC_context.t * Alpha_context.Contract.contract) unit unit
       (|Signature.Public_key_hash|).(S.SPublic_key_hash.t) :=
     RPC_service.get_service (Some "Access the delegate of a contract, if any.")
@@ -103,7 +103,7 @@ Module S.
         "delegate").
   
   Definition counter
-    : RPC_service.service (* `GET *) unit RPC_context.t
+    : RPC_service.service RPC_context.t
       (RPC_context.t * Alpha_context.Contract.contract) unit unit Z.t :=
     RPC_service.get_service (Some "Access the counter of a contract, if any.")
       RPC_query.empty Data_encoding.z
@@ -112,7 +112,7 @@ Module S.
         "counter").
   
   Definition script
-    : RPC_service.service (* `GET *) unit RPC_context.t
+    : RPC_service.service RPC_context.t
       (RPC_context.t * Alpha_context.Contract.contract) unit unit
       Alpha_context.Script.t :=
     RPC_service.get_service (Some "Access the code and data of the contract.")
@@ -122,7 +122,7 @@ Module S.
         "script").
   
   Definition storage
-    : RPC_service.service (* `GET *) unit RPC_context.t
+    : RPC_service.service RPC_context.t
       (RPC_context.t * Alpha_context.Contract.contract) unit unit
       Alpha_context.Script.expr :=
     RPC_service.get_service (Some "Access the data of the contract.")
@@ -132,7 +132,7 @@ Module S.
         "storage").
   
   Definition entrypoint_type
-    : RPC_service.service (* `GET *) unit RPC_context.t
+    : RPC_service.service RPC_context.t
       ((RPC_context.t * Alpha_context.Contract.contract) * string) unit unit
       Alpha_context.Script.expr :=
     RPC_service.get_service
@@ -144,7 +144,7 @@ Module S.
           "entrypoints") RPC_arg.__string_value).
   
   Definition list_entrypoints
-    : RPC_service.service (* `GET *) unit RPC_context.t
+    : RPC_service.service RPC_context.t
       (RPC_context.t * Alpha_context.Contract.contract) unit unit
       (list (list Michelson_v1_primitives.prim) *
         list (string * Alpha_context.Script.expr)) :=
@@ -164,7 +164,7 @@ Module S.
         "entrypoints").
   
   Definition contract_big_map_get_opt
-    : RPC_service.service (* `POST *) unit RPC_context.t
+    : RPC_service.service RPC_context.t
       (RPC_context.t * Alpha_context.Contract.contract) unit
       (Alpha_context.Script.expr * Alpha_context.Script.expr)
       (option Alpha_context.Script.expr) :=
@@ -181,7 +181,7 @@ Module S.
         "big_map_get").
   
   Definition big_map_get
-    : RPC_service.service (* `GET *) unit RPC_context.t
+    : RPC_service.service RPC_context.t
       ((RPC_context.t * Alpha_context.Big_map.id) * Script_expr_hash.t) unit
       unit Alpha_context.Script.expr :=
     RPC_service.get_service
@@ -192,14 +192,14 @@ Module S.
         Script_expr_hash.rpc_arg).
   
   Definition __info_value
-    : RPC_service.service (* `GET *) unit RPC_context.t
+    : RPC_service.service RPC_context.t
       (RPC_context.t * Alpha_context.Contract.contract) unit unit info :=
     RPC_service.get_service (Some "Access the complete status of a contract.")
       RPC_query.empty info_encoding
       (RPC_path.op_divcolon custom_root Alpha_context.Contract.rpc_arg).
   
   Definition __list_value
-    : RPC_service.service (* `GET *) unit RPC_context.t RPC_context.t unit unit
+    : RPC_service.service RPC_context.t RPC_context.t unit unit
       (list Alpha_context.Contract.t) :=
     RPC_service.get_service
       (Some "All existing contracts (including non-empty default contracts).")
@@ -212,103 +212,63 @@ Definition register (function_parameter : unit) : unit := axiom.
 
 Definition __list_value {D E G I K L a b c i o q : Set}
   (ctxt :
-    (((RPC_service.t
-      ((* `DELETE *) unit + (* `GET *) unit + (* `PATCH *) unit +
-        (* `POST *) unit + (* `PUT *) unit) RPC_context.t RPC_context.t q i o ->
-    D -> q -> i -> Lwt.t (Error_monad.shell_tzresult o)) * (E * q * i * o)) *
-      (((RPC_service.t
-        ((* `DELETE *) unit + (* `GET *) unit + (* `PATCH *) unit +
-          (* `POST *) unit + (* `PUT *) unit) RPC_context.t (RPC_context.t * a)
-        q i o -> D -> a -> q -> i -> Lwt.t (Error_monad.shell_tzresult o)) *
-        (G * a * q * i * o)) *
-        (((RPC_service.t
-          ((* `DELETE *) unit + (* `GET *) unit + (* `PATCH *) unit +
-            (* `POST *) unit + (* `PUT *) unit) RPC_context.t
-          ((RPC_context.t * a) * b) q i o -> D -> a -> b -> q -> i ->
-        Lwt.t (Error_monad.shell_tzresult o)) * (I * a * b * q * i * o)) *
-          (((RPC_service.t
-            ((* `DELETE *) unit + (* `GET *) unit + (* `PATCH *) unit +
-              (* `POST *) unit + (* `PUT *) unit) RPC_context.t
-            (((RPC_context.t * a) * b) * c) q i o -> D -> a -> b -> c -> q ->
-          i -> Lwt.t (Error_monad.shell_tzresult o)) *
-            (K * a * b * c * q * i * o)) * L)))) * L * D) (block : D)
+    (((RPC_service.t RPC_context.t RPC_context.t q i o -> D -> q -> i ->
+    Lwt.t (Error_monad.shell_tzresult o)) * (E * q * i * o)) *
+      (((RPC_service.t RPC_context.t (RPC_context.t * a) q i o -> D -> a -> q ->
+      i -> Lwt.t (Error_monad.shell_tzresult o)) * (G * a * q * i * o)) *
+        (((RPC_service.t RPC_context.t ((RPC_context.t * a) * b) q i o -> D ->
+        a -> b -> q -> i -> Lwt.t (Error_monad.shell_tzresult o)) *
+          (I * a * b * q * i * o)) *
+          (((RPC_service.t RPC_context.t (((RPC_context.t * a) * b) * c) q i o
+          -> D -> a -> b -> c -> q -> i -> Lwt.t (Error_monad.shell_tzresult o))
+            * (K * a * b * c * q * i * o)) * L)))) * L * D) (block : D)
   : Lwt.t (Error_monad.shell_tzresult (list Alpha_context.Contract.t)) :=
   RPC_context.make_call0 S.__list_value ctxt block tt tt.
 
 Definition __info_value {D E G I K L a b c i o q : Set}
   (ctxt :
-    (((RPC_service.t
-      ((* `DELETE *) unit + (* `GET *) unit + (* `PATCH *) unit +
-        (* `POST *) unit + (* `PUT *) unit) RPC_context.t RPC_context.t q i o ->
-    D -> q -> i -> Lwt.t (Error_monad.shell_tzresult o)) * (E * q * i * o)) *
-      (((RPC_service.t
-        ((* `DELETE *) unit + (* `GET *) unit + (* `PATCH *) unit +
-          (* `POST *) unit + (* `PUT *) unit) RPC_context.t (RPC_context.t * a)
-        q i o -> D -> a -> q -> i -> Lwt.t (Error_monad.shell_tzresult o)) *
-        (G * a * q * i * o)) *
-        (((RPC_service.t
-          ((* `DELETE *) unit + (* `GET *) unit + (* `PATCH *) unit +
-            (* `POST *) unit + (* `PUT *) unit) RPC_context.t
-          ((RPC_context.t * a) * b) q i o -> D -> a -> b -> q -> i ->
-        Lwt.t (Error_monad.shell_tzresult o)) * (I * a * b * q * i * o)) *
-          (((RPC_service.t
-            ((* `DELETE *) unit + (* `GET *) unit + (* `PATCH *) unit +
-              (* `POST *) unit + (* `PUT *) unit) RPC_context.t
-            (((RPC_context.t * a) * b) * c) q i o -> D -> a -> b -> c -> q ->
-          i -> Lwt.t (Error_monad.shell_tzresult o)) *
-            (K * a * b * c * q * i * o)) * L)))) * L * D) (block : D)
+    (((RPC_service.t RPC_context.t RPC_context.t q i o -> D -> q -> i ->
+    Lwt.t (Error_monad.shell_tzresult o)) * (E * q * i * o)) *
+      (((RPC_service.t RPC_context.t (RPC_context.t * a) q i o -> D -> a -> q ->
+      i -> Lwt.t (Error_monad.shell_tzresult o)) * (G * a * q * i * o)) *
+        (((RPC_service.t RPC_context.t ((RPC_context.t * a) * b) q i o -> D ->
+        a -> b -> q -> i -> Lwt.t (Error_monad.shell_tzresult o)) *
+          (I * a * b * q * i * o)) *
+          (((RPC_service.t RPC_context.t (((RPC_context.t * a) * b) * c) q i o
+          -> D -> a -> b -> c -> q -> i -> Lwt.t (Error_monad.shell_tzresult o))
+            * (K * a * b * c * q * i * o)) * L)))) * L * D) (block : D)
   (contract : Alpha_context.Contract.contract)
   : Lwt.t (Error_monad.shell_tzresult info) :=
   RPC_context.make_call1 S.__info_value ctxt block contract tt tt.
 
 Definition balance {D E G I K L a b c i o q : Set}
   (ctxt :
-    (((RPC_service.t
-      ((* `DELETE *) unit + (* `GET *) unit + (* `PATCH *) unit +
-        (* `POST *) unit + (* `PUT *) unit) RPC_context.t RPC_context.t q i o ->
-    D -> q -> i -> Lwt.t (Error_monad.shell_tzresult o)) * (E * q * i * o)) *
-      (((RPC_service.t
-        ((* `DELETE *) unit + (* `GET *) unit + (* `PATCH *) unit +
-          (* `POST *) unit + (* `PUT *) unit) RPC_context.t (RPC_context.t * a)
-        q i o -> D -> a -> q -> i -> Lwt.t (Error_monad.shell_tzresult o)) *
-        (G * a * q * i * o)) *
-        (((RPC_service.t
-          ((* `DELETE *) unit + (* `GET *) unit + (* `PATCH *) unit +
-            (* `POST *) unit + (* `PUT *) unit) RPC_context.t
-          ((RPC_context.t * a) * b) q i o -> D -> a -> b -> q -> i ->
-        Lwt.t (Error_monad.shell_tzresult o)) * (I * a * b * q * i * o)) *
-          (((RPC_service.t
-            ((* `DELETE *) unit + (* `GET *) unit + (* `PATCH *) unit +
-              (* `POST *) unit + (* `PUT *) unit) RPC_context.t
-            (((RPC_context.t * a) * b) * c) q i o -> D -> a -> b -> c -> q ->
-          i -> Lwt.t (Error_monad.shell_tzresult o)) *
-            (K * a * b * c * q * i * o)) * L)))) * L * D) (block : D)
+    (((RPC_service.t RPC_context.t RPC_context.t q i o -> D -> q -> i ->
+    Lwt.t (Error_monad.shell_tzresult o)) * (E * q * i * o)) *
+      (((RPC_service.t RPC_context.t (RPC_context.t * a) q i o -> D -> a -> q ->
+      i -> Lwt.t (Error_monad.shell_tzresult o)) * (G * a * q * i * o)) *
+        (((RPC_service.t RPC_context.t ((RPC_context.t * a) * b) q i o -> D ->
+        a -> b -> q -> i -> Lwt.t (Error_monad.shell_tzresult o)) *
+          (I * a * b * q * i * o)) *
+          (((RPC_service.t RPC_context.t (((RPC_context.t * a) * b) * c) q i o
+          -> D -> a -> b -> c -> q -> i -> Lwt.t (Error_monad.shell_tzresult o))
+            * (K * a * b * c * q * i * o)) * L)))) * L * D) (block : D)
   (contract : Alpha_context.Contract.contract)
   : Lwt.t (Error_monad.shell_tzresult Alpha_context.Tez.t) :=
   RPC_context.make_call1 S.balance ctxt block contract tt tt.
 
 Definition manager_key {D E G I K L a b c i o q : Set}
   (ctxt :
-    (((RPC_service.t
-      ((* `DELETE *) unit + (* `GET *) unit + (* `PATCH *) unit +
-        (* `POST *) unit + (* `PUT *) unit) RPC_context.t RPC_context.t q i o ->
-    D -> q -> i -> Lwt.t (Error_monad.shell_tzresult o)) * (E * q * i * o)) *
-      (((RPC_service.t
-        ((* `DELETE *) unit + (* `GET *) unit + (* `PATCH *) unit +
-          (* `POST *) unit + (* `PUT *) unit) RPC_context.t (RPC_context.t * a)
-        q i o -> D -> a -> q -> i -> Lwt.t (Error_monad.shell_tzresult o)) *
-        (G * a * q * i * o)) *
-        (((RPC_service.t
-          ((* `DELETE *) unit + (* `GET *) unit + (* `PATCH *) unit +
-            (* `POST *) unit + (* `PUT *) unit) RPC_context.t
-          ((RPC_context.t * a) * b) q i o -> D -> a -> b -> q -> i ->
-        Lwt.t (Error_monad.shell_tzresult o)) * (I * a * b * q * i * o)) *
-          (((RPC_service.t
-            ((* `DELETE *) unit + (* `GET *) unit + (* `PATCH *) unit +
-              (* `POST *) unit + (* `PUT *) unit) RPC_context.t
-            (((RPC_context.t * a) * b) * c) q i o -> D -> a -> b -> c -> q ->
-          i -> Lwt.t (Error_monad.shell_tzresult o)) *
-            (K * a * b * c * q * i * o)) * L)))) * L * D) (block : D)
+    (((RPC_service.t RPC_context.t RPC_context.t q i o -> D -> q -> i ->
+    Lwt.t (Error_monad.shell_tzresult o)) * (E * q * i * o)) *
+      (((RPC_service.t RPC_context.t (RPC_context.t * a) q i o -> D -> a -> q ->
+      i -> Lwt.t (Error_monad.shell_tzresult o)) * (G * a * q * i * o)) *
+        (((RPC_service.t RPC_context.t ((RPC_context.t * a) * b) q i o -> D ->
+        a -> b -> q -> i -> Lwt.t (Error_monad.shell_tzresult o)) *
+          (I * a * b * q * i * o)) *
+          (((RPC_service.t RPC_context.t (((RPC_context.t * a) * b) * c) q i o
+          -> D -> a -> b -> c -> q -> i -> Lwt.t (Error_monad.shell_tzresult o))
+            * (K * a * b * c * q * i * o)) * L)))) * L * D) (block : D)
   (mgr : Alpha_context.public_key_hash)
   : Lwt.t
     (Error_monad.shell_tzresult
@@ -318,26 +278,16 @@ Definition manager_key {D E G I K L a b c i o q : Set}
 
 Definition delegate {D E G I K L a b c i o q : Set}
   (ctxt :
-    (((RPC_service.t
-      ((* `DELETE *) unit + (* `GET *) unit + (* `PATCH *) unit +
-        (* `POST *) unit + (* `PUT *) unit) RPC_context.t RPC_context.t q i o ->
-    D -> q -> i -> Lwt.t (Error_monad.shell_tzresult o)) * (E * q * i * o)) *
-      (((RPC_service.t
-        ((* `DELETE *) unit + (* `GET *) unit + (* `PATCH *) unit +
-          (* `POST *) unit + (* `PUT *) unit) RPC_context.t (RPC_context.t * a)
-        q i o -> D -> a -> q -> i -> Lwt.t (Error_monad.shell_tzresult o)) *
-        (G * a * q * i * o)) *
-        (((RPC_service.t
-          ((* `DELETE *) unit + (* `GET *) unit + (* `PATCH *) unit +
-            (* `POST *) unit + (* `PUT *) unit) RPC_context.t
-          ((RPC_context.t * a) * b) q i o -> D -> a -> b -> q -> i ->
-        Lwt.t (Error_monad.shell_tzresult o)) * (I * a * b * q * i * o)) *
-          (((RPC_service.t
-            ((* `DELETE *) unit + (* `GET *) unit + (* `PATCH *) unit +
-              (* `POST *) unit + (* `PUT *) unit) RPC_context.t
-            (((RPC_context.t * a) * b) * c) q i o -> D -> a -> b -> c -> q ->
-          i -> Lwt.t (Error_monad.shell_tzresult o)) *
-            (K * a * b * c * q * i * o)) * L)))) * L * D) (block : D)
+    (((RPC_service.t RPC_context.t RPC_context.t q i o -> D -> q -> i ->
+    Lwt.t (Error_monad.shell_tzresult o)) * (E * q * i * o)) *
+      (((RPC_service.t RPC_context.t (RPC_context.t * a) q i o -> D -> a -> q ->
+      i -> Lwt.t (Error_monad.shell_tzresult o)) * (G * a * q * i * o)) *
+        (((RPC_service.t RPC_context.t ((RPC_context.t * a) * b) q i o -> D ->
+        a -> b -> q -> i -> Lwt.t (Error_monad.shell_tzresult o)) *
+          (I * a * b * q * i * o)) *
+          (((RPC_service.t RPC_context.t (((RPC_context.t * a) * b) * c) q i o
+          -> D -> a -> b -> c -> q -> i -> Lwt.t (Error_monad.shell_tzresult o))
+            * (K * a * b * c * q * i * o)) * L)))) * L * D) (block : D)
   (contract : Alpha_context.Contract.contract)
   : Lwt.t
     (Error_monad.shell_tzresult
@@ -346,26 +296,16 @@ Definition delegate {D E G I K L a b c i o q : Set}
 
 Definition delegate_opt {D E G I K L a b c i o q : Set}
   (ctxt :
-    (((RPC_service.t
-      ((* `DELETE *) unit + (* `GET *) unit + (* `PATCH *) unit +
-        (* `POST *) unit + (* `PUT *) unit) RPC_context.t RPC_context.t q i o ->
-    D -> q -> i -> Lwt.t (Error_monad.shell_tzresult o)) * (E * q * i * o)) *
-      (((RPC_service.t
-        ((* `DELETE *) unit + (* `GET *) unit + (* `PATCH *) unit +
-          (* `POST *) unit + (* `PUT *) unit) RPC_context.t (RPC_context.t * a)
-        q i o -> D -> a -> q -> i -> Lwt.t (Error_monad.shell_tzresult o)) *
-        (G * a * q * i * o)) *
-        (((RPC_service.t
-          ((* `DELETE *) unit + (* `GET *) unit + (* `PATCH *) unit +
-            (* `POST *) unit + (* `PUT *) unit) RPC_context.t
-          ((RPC_context.t * a) * b) q i o -> D -> a -> b -> q -> i ->
-        Lwt.t (Error_monad.shell_tzresult o)) * (I * a * b * q * i * o)) *
-          (((RPC_service.t
-            ((* `DELETE *) unit + (* `GET *) unit + (* `PATCH *) unit +
-              (* `POST *) unit + (* `PUT *) unit) RPC_context.t
-            (((RPC_context.t * a) * b) * c) q i o -> D -> a -> b -> c -> q ->
-          i -> Lwt.t (Error_monad.shell_tzresult o)) *
-            (K * a * b * c * q * i * o)) * L)))) * L * D) (block : D)
+    (((RPC_service.t RPC_context.t RPC_context.t q i o -> D -> q -> i ->
+    Lwt.t (Error_monad.shell_tzresult o)) * (E * q * i * o)) *
+      (((RPC_service.t RPC_context.t (RPC_context.t * a) q i o -> D -> a -> q ->
+      i -> Lwt.t (Error_monad.shell_tzresult o)) * (G * a * q * i * o)) *
+        (((RPC_service.t RPC_context.t ((RPC_context.t * a) * b) q i o -> D ->
+        a -> b -> q -> i -> Lwt.t (Error_monad.shell_tzresult o)) *
+          (I * a * b * q * i * o)) *
+          (((RPC_service.t RPC_context.t (((RPC_context.t * a) * b) * c) q i o
+          -> D -> a -> b -> c -> q -> i -> Lwt.t (Error_monad.shell_tzresult o))
+            * (K * a * b * c * q * i * o)) * L)))) * L * D) (block : D)
   (contract : Alpha_context.Contract.contract)
   : Lwt.t
     (Error_monad.shell_tzresult
@@ -374,26 +314,16 @@ Definition delegate_opt {D E G I K L a b c i o q : Set}
 
 Definition counter {D E G I K L a b c i o q : Set}
   (ctxt :
-    (((RPC_service.t
-      ((* `DELETE *) unit + (* `GET *) unit + (* `PATCH *) unit +
-        (* `POST *) unit + (* `PUT *) unit) RPC_context.t RPC_context.t q i o ->
-    D -> q -> i -> Lwt.t (Error_monad.shell_tzresult o)) * (E * q * i * o)) *
-      (((RPC_service.t
-        ((* `DELETE *) unit + (* `GET *) unit + (* `PATCH *) unit +
-          (* `POST *) unit + (* `PUT *) unit) RPC_context.t (RPC_context.t * a)
-        q i o -> D -> a -> q -> i -> Lwt.t (Error_monad.shell_tzresult o)) *
-        (G * a * q * i * o)) *
-        (((RPC_service.t
-          ((* `DELETE *) unit + (* `GET *) unit + (* `PATCH *) unit +
-            (* `POST *) unit + (* `PUT *) unit) RPC_context.t
-          ((RPC_context.t * a) * b) q i o -> D -> a -> b -> q -> i ->
-        Lwt.t (Error_monad.shell_tzresult o)) * (I * a * b * q * i * o)) *
-          (((RPC_service.t
-            ((* `DELETE *) unit + (* `GET *) unit + (* `PATCH *) unit +
-              (* `POST *) unit + (* `PUT *) unit) RPC_context.t
-            (((RPC_context.t * a) * b) * c) q i o -> D -> a -> b -> c -> q ->
-          i -> Lwt.t (Error_monad.shell_tzresult o)) *
-            (K * a * b * c * q * i * o)) * L)))) * L * D) (block : D)
+    (((RPC_service.t RPC_context.t RPC_context.t q i o -> D -> q -> i ->
+    Lwt.t (Error_monad.shell_tzresult o)) * (E * q * i * o)) *
+      (((RPC_service.t RPC_context.t (RPC_context.t * a) q i o -> D -> a -> q ->
+      i -> Lwt.t (Error_monad.shell_tzresult o)) * (G * a * q * i * o)) *
+        (((RPC_service.t RPC_context.t ((RPC_context.t * a) * b) q i o -> D ->
+        a -> b -> q -> i -> Lwt.t (Error_monad.shell_tzresult o)) *
+          (I * a * b * q * i * o)) *
+          (((RPC_service.t RPC_context.t (((RPC_context.t * a) * b) * c) q i o
+          -> D -> a -> b -> c -> q -> i -> Lwt.t (Error_monad.shell_tzresult o))
+            * (K * a * b * c * q * i * o)) * L)))) * L * D) (block : D)
   (mgr : Alpha_context.public_key_hash)
   : Lwt.t (Error_monad.shell_tzresult Z.t) :=
   RPC_context.make_call1 S.counter ctxt block
@@ -401,130 +331,80 @@ Definition counter {D E G I K L a b c i o q : Set}
 
 Definition script {D E G I K L a b c i o q : Set}
   (ctxt :
-    (((RPC_service.t
-      ((* `DELETE *) unit + (* `GET *) unit + (* `PATCH *) unit +
-        (* `POST *) unit + (* `PUT *) unit) RPC_context.t RPC_context.t q i o ->
-    D -> q -> i -> Lwt.t (Error_monad.shell_tzresult o)) * (E * q * i * o)) *
-      (((RPC_service.t
-        ((* `DELETE *) unit + (* `GET *) unit + (* `PATCH *) unit +
-          (* `POST *) unit + (* `PUT *) unit) RPC_context.t (RPC_context.t * a)
-        q i o -> D -> a -> q -> i -> Lwt.t (Error_monad.shell_tzresult o)) *
-        (G * a * q * i * o)) *
-        (((RPC_service.t
-          ((* `DELETE *) unit + (* `GET *) unit + (* `PATCH *) unit +
-            (* `POST *) unit + (* `PUT *) unit) RPC_context.t
-          ((RPC_context.t * a) * b) q i o -> D -> a -> b -> q -> i ->
-        Lwt.t (Error_monad.shell_tzresult o)) * (I * a * b * q * i * o)) *
-          (((RPC_service.t
-            ((* `DELETE *) unit + (* `GET *) unit + (* `PATCH *) unit +
-              (* `POST *) unit + (* `PUT *) unit) RPC_context.t
-            (((RPC_context.t * a) * b) * c) q i o -> D -> a -> b -> c -> q ->
-          i -> Lwt.t (Error_monad.shell_tzresult o)) *
-            (K * a * b * c * q * i * o)) * L)))) * L * D) (block : D)
+    (((RPC_service.t RPC_context.t RPC_context.t q i o -> D -> q -> i ->
+    Lwt.t (Error_monad.shell_tzresult o)) * (E * q * i * o)) *
+      (((RPC_service.t RPC_context.t (RPC_context.t * a) q i o -> D -> a -> q ->
+      i -> Lwt.t (Error_monad.shell_tzresult o)) * (G * a * q * i * o)) *
+        (((RPC_service.t RPC_context.t ((RPC_context.t * a) * b) q i o -> D ->
+        a -> b -> q -> i -> Lwt.t (Error_monad.shell_tzresult o)) *
+          (I * a * b * q * i * o)) *
+          (((RPC_service.t RPC_context.t (((RPC_context.t * a) * b) * c) q i o
+          -> D -> a -> b -> c -> q -> i -> Lwt.t (Error_monad.shell_tzresult o))
+            * (K * a * b * c * q * i * o)) * L)))) * L * D) (block : D)
   (contract : Alpha_context.Contract.contract)
   : Lwt.t (Error_monad.shell_tzresult Alpha_context.Script.t) :=
   RPC_context.make_call1 S.script ctxt block contract tt tt.
 
 Definition script_opt {D E G I K L a b c i o q : Set}
   (ctxt :
-    (((RPC_service.t
-      ((* `DELETE *) unit + (* `GET *) unit + (* `PATCH *) unit +
-        (* `POST *) unit + (* `PUT *) unit) RPC_context.t RPC_context.t q i o ->
-    D -> q -> i -> Lwt.t (Error_monad.shell_tzresult o)) * (E * q * i * o)) *
-      (((RPC_service.t
-        ((* `DELETE *) unit + (* `GET *) unit + (* `PATCH *) unit +
-          (* `POST *) unit + (* `PUT *) unit) RPC_context.t (RPC_context.t * a)
-        q i o -> D -> a -> q -> i -> Lwt.t (Error_monad.shell_tzresult o)) *
-        (G * a * q * i * o)) *
-        (((RPC_service.t
-          ((* `DELETE *) unit + (* `GET *) unit + (* `PATCH *) unit +
-            (* `POST *) unit + (* `PUT *) unit) RPC_context.t
-          ((RPC_context.t * a) * b) q i o -> D -> a -> b -> q -> i ->
-        Lwt.t (Error_monad.shell_tzresult o)) * (I * a * b * q * i * o)) *
-          (((RPC_service.t
-            ((* `DELETE *) unit + (* `GET *) unit + (* `PATCH *) unit +
-              (* `POST *) unit + (* `PUT *) unit) RPC_context.t
-            (((RPC_context.t * a) * b) * c) q i o -> D -> a -> b -> c -> q ->
-          i -> Lwt.t (Error_monad.shell_tzresult o)) *
-            (K * a * b * c * q * i * o)) * L)))) * L * D) (block : D)
+    (((RPC_service.t RPC_context.t RPC_context.t q i o -> D -> q -> i ->
+    Lwt.t (Error_monad.shell_tzresult o)) * (E * q * i * o)) *
+      (((RPC_service.t RPC_context.t (RPC_context.t * a) q i o -> D -> a -> q ->
+      i -> Lwt.t (Error_monad.shell_tzresult o)) * (G * a * q * i * o)) *
+        (((RPC_service.t RPC_context.t ((RPC_context.t * a) * b) q i o -> D ->
+        a -> b -> q -> i -> Lwt.t (Error_monad.shell_tzresult o)) *
+          (I * a * b * q * i * o)) *
+          (((RPC_service.t RPC_context.t (((RPC_context.t * a) * b) * c) q i o
+          -> D -> a -> b -> c -> q -> i -> Lwt.t (Error_monad.shell_tzresult o))
+            * (K * a * b * c * q * i * o)) * L)))) * L * D) (block : D)
   (contract : Alpha_context.Contract.contract)
   : Lwt.t (Error_monad.shell_tzresult (option Alpha_context.Script.t)) :=
   RPC_context.make_opt_call1 S.script ctxt block contract tt tt.
 
 Definition storage {D E G I K L a b c i o q : Set}
   (ctxt :
-    (((RPC_service.t
-      ((* `DELETE *) unit + (* `GET *) unit + (* `PATCH *) unit +
-        (* `POST *) unit + (* `PUT *) unit) RPC_context.t RPC_context.t q i o ->
-    D -> q -> i -> Lwt.t (Error_monad.shell_tzresult o)) * (E * q * i * o)) *
-      (((RPC_service.t
-        ((* `DELETE *) unit + (* `GET *) unit + (* `PATCH *) unit +
-          (* `POST *) unit + (* `PUT *) unit) RPC_context.t (RPC_context.t * a)
-        q i o -> D -> a -> q -> i -> Lwt.t (Error_monad.shell_tzresult o)) *
-        (G * a * q * i * o)) *
-        (((RPC_service.t
-          ((* `DELETE *) unit + (* `GET *) unit + (* `PATCH *) unit +
-            (* `POST *) unit + (* `PUT *) unit) RPC_context.t
-          ((RPC_context.t * a) * b) q i o -> D -> a -> b -> q -> i ->
-        Lwt.t (Error_monad.shell_tzresult o)) * (I * a * b * q * i * o)) *
-          (((RPC_service.t
-            ((* `DELETE *) unit + (* `GET *) unit + (* `PATCH *) unit +
-              (* `POST *) unit + (* `PUT *) unit) RPC_context.t
-            (((RPC_context.t * a) * b) * c) q i o -> D -> a -> b -> c -> q ->
-          i -> Lwt.t (Error_monad.shell_tzresult o)) *
-            (K * a * b * c * q * i * o)) * L)))) * L * D) (block : D)
+    (((RPC_service.t RPC_context.t RPC_context.t q i o -> D -> q -> i ->
+    Lwt.t (Error_monad.shell_tzresult o)) * (E * q * i * o)) *
+      (((RPC_service.t RPC_context.t (RPC_context.t * a) q i o -> D -> a -> q ->
+      i -> Lwt.t (Error_monad.shell_tzresult o)) * (G * a * q * i * o)) *
+        (((RPC_service.t RPC_context.t ((RPC_context.t * a) * b) q i o -> D ->
+        a -> b -> q -> i -> Lwt.t (Error_monad.shell_tzresult o)) *
+          (I * a * b * q * i * o)) *
+          (((RPC_service.t RPC_context.t (((RPC_context.t * a) * b) * c) q i o
+          -> D -> a -> b -> c -> q -> i -> Lwt.t (Error_monad.shell_tzresult o))
+            * (K * a * b * c * q * i * o)) * L)))) * L * D) (block : D)
   (contract : Alpha_context.Contract.contract)
   : Lwt.t (Error_monad.shell_tzresult Alpha_context.Script.expr) :=
   RPC_context.make_call1 S.storage ctxt block contract tt tt.
 
 Definition entrypoint_type {D E G I K L a b c i o q : Set}
   (ctxt :
-    (((RPC_service.t
-      ((* `DELETE *) unit + (* `GET *) unit + (* `PATCH *) unit +
-        (* `POST *) unit + (* `PUT *) unit) RPC_context.t RPC_context.t q i o ->
-    D -> q -> i -> Lwt.t (Error_monad.shell_tzresult o)) * (E * q * i * o)) *
-      (((RPC_service.t
-        ((* `DELETE *) unit + (* `GET *) unit + (* `PATCH *) unit +
-          (* `POST *) unit + (* `PUT *) unit) RPC_context.t (RPC_context.t * a)
-        q i o -> D -> a -> q -> i -> Lwt.t (Error_monad.shell_tzresult o)) *
-        (G * a * q * i * o)) *
-        (((RPC_service.t
-          ((* `DELETE *) unit + (* `GET *) unit + (* `PATCH *) unit +
-            (* `POST *) unit + (* `PUT *) unit) RPC_context.t
-          ((RPC_context.t * a) * b) q i o -> D -> a -> b -> q -> i ->
-        Lwt.t (Error_monad.shell_tzresult o)) * (I * a * b * q * i * o)) *
-          (((RPC_service.t
-            ((* `DELETE *) unit + (* `GET *) unit + (* `PATCH *) unit +
-              (* `POST *) unit + (* `PUT *) unit) RPC_context.t
-            (((RPC_context.t * a) * b) * c) q i o -> D -> a -> b -> c -> q ->
-          i -> Lwt.t (Error_monad.shell_tzresult o)) *
-            (K * a * b * c * q * i * o)) * L)))) * L * D) (block : D)
+    (((RPC_service.t RPC_context.t RPC_context.t q i o -> D -> q -> i ->
+    Lwt.t (Error_monad.shell_tzresult o)) * (E * q * i * o)) *
+      (((RPC_service.t RPC_context.t (RPC_context.t * a) q i o -> D -> a -> q ->
+      i -> Lwt.t (Error_monad.shell_tzresult o)) * (G * a * q * i * o)) *
+        (((RPC_service.t RPC_context.t ((RPC_context.t * a) * b) q i o -> D ->
+        a -> b -> q -> i -> Lwt.t (Error_monad.shell_tzresult o)) *
+          (I * a * b * q * i * o)) *
+          (((RPC_service.t RPC_context.t (((RPC_context.t * a) * b) * c) q i o
+          -> D -> a -> b -> c -> q -> i -> Lwt.t (Error_monad.shell_tzresult o))
+            * (K * a * b * c * q * i * o)) * L)))) * L * D) (block : D)
   (contract : Alpha_context.Contract.contract) (entrypoint : string)
   : Lwt.t (Error_monad.shell_tzresult Alpha_context.Script.expr) :=
   RPC_context.make_call2 S.entrypoint_type ctxt block contract entrypoint tt tt.
 
 Definition list_entrypoints {D E G I K L a b c i o q : Set}
   (ctxt :
-    (((RPC_service.t
-      ((* `DELETE *) unit + (* `GET *) unit + (* `PATCH *) unit +
-        (* `POST *) unit + (* `PUT *) unit) RPC_context.t RPC_context.t q i o ->
-    D -> q -> i -> Lwt.t (Error_monad.shell_tzresult o)) * (E * q * i * o)) *
-      (((RPC_service.t
-        ((* `DELETE *) unit + (* `GET *) unit + (* `PATCH *) unit +
-          (* `POST *) unit + (* `PUT *) unit) RPC_context.t (RPC_context.t * a)
-        q i o -> D -> a -> q -> i -> Lwt.t (Error_monad.shell_tzresult o)) *
-        (G * a * q * i * o)) *
-        (((RPC_service.t
-          ((* `DELETE *) unit + (* `GET *) unit + (* `PATCH *) unit +
-            (* `POST *) unit + (* `PUT *) unit) RPC_context.t
-          ((RPC_context.t * a) * b) q i o -> D -> a -> b -> q -> i ->
-        Lwt.t (Error_monad.shell_tzresult o)) * (I * a * b * q * i * o)) *
-          (((RPC_service.t
-            ((* `DELETE *) unit + (* `GET *) unit + (* `PATCH *) unit +
-              (* `POST *) unit + (* `PUT *) unit) RPC_context.t
-            (((RPC_context.t * a) * b) * c) q i o -> D -> a -> b -> c -> q ->
-          i -> Lwt.t (Error_monad.shell_tzresult o)) *
-            (K * a * b * c * q * i * o)) * L)))) * L * D) (block : D)
+    (((RPC_service.t RPC_context.t RPC_context.t q i o -> D -> q -> i ->
+    Lwt.t (Error_monad.shell_tzresult o)) * (E * q * i * o)) *
+      (((RPC_service.t RPC_context.t (RPC_context.t * a) q i o -> D -> a -> q ->
+      i -> Lwt.t (Error_monad.shell_tzresult o)) * (G * a * q * i * o)) *
+        (((RPC_service.t RPC_context.t ((RPC_context.t * a) * b) q i o -> D ->
+        a -> b -> q -> i -> Lwt.t (Error_monad.shell_tzresult o)) *
+          (I * a * b * q * i * o)) *
+          (((RPC_service.t RPC_context.t (((RPC_context.t * a) * b) * c) q i o
+          -> D -> a -> b -> c -> q -> i -> Lwt.t (Error_monad.shell_tzresult o))
+            * (K * a * b * c * q * i * o)) * L)))) * L * D) (block : D)
   (contract : Alpha_context.Contract.contract)
   : Lwt.t
     (Error_monad.shell_tzresult
@@ -534,78 +414,48 @@ Definition list_entrypoints {D E G I K L a b c i o q : Set}
 
 Definition storage_opt {D E G I K L a b c i o q : Set}
   (ctxt :
-    (((RPC_service.t
-      ((* `DELETE *) unit + (* `GET *) unit + (* `PATCH *) unit +
-        (* `POST *) unit + (* `PUT *) unit) RPC_context.t RPC_context.t q i o ->
-    D -> q -> i -> Lwt.t (Error_monad.shell_tzresult o)) * (E * q * i * o)) *
-      (((RPC_service.t
-        ((* `DELETE *) unit + (* `GET *) unit + (* `PATCH *) unit +
-          (* `POST *) unit + (* `PUT *) unit) RPC_context.t (RPC_context.t * a)
-        q i o -> D -> a -> q -> i -> Lwt.t (Error_monad.shell_tzresult o)) *
-        (G * a * q * i * o)) *
-        (((RPC_service.t
-          ((* `DELETE *) unit + (* `GET *) unit + (* `PATCH *) unit +
-            (* `POST *) unit + (* `PUT *) unit) RPC_context.t
-          ((RPC_context.t * a) * b) q i o -> D -> a -> b -> q -> i ->
-        Lwt.t (Error_monad.shell_tzresult o)) * (I * a * b * q * i * o)) *
-          (((RPC_service.t
-            ((* `DELETE *) unit + (* `GET *) unit + (* `PATCH *) unit +
-              (* `POST *) unit + (* `PUT *) unit) RPC_context.t
-            (((RPC_context.t * a) * b) * c) q i o -> D -> a -> b -> c -> q ->
-          i -> Lwt.t (Error_monad.shell_tzresult o)) *
-            (K * a * b * c * q * i * o)) * L)))) * L * D) (block : D)
+    (((RPC_service.t RPC_context.t RPC_context.t q i o -> D -> q -> i ->
+    Lwt.t (Error_monad.shell_tzresult o)) * (E * q * i * o)) *
+      (((RPC_service.t RPC_context.t (RPC_context.t * a) q i o -> D -> a -> q ->
+      i -> Lwt.t (Error_monad.shell_tzresult o)) * (G * a * q * i * o)) *
+        (((RPC_service.t RPC_context.t ((RPC_context.t * a) * b) q i o -> D ->
+        a -> b -> q -> i -> Lwt.t (Error_monad.shell_tzresult o)) *
+          (I * a * b * q * i * o)) *
+          (((RPC_service.t RPC_context.t (((RPC_context.t * a) * b) * c) q i o
+          -> D -> a -> b -> c -> q -> i -> Lwt.t (Error_monad.shell_tzresult o))
+            * (K * a * b * c * q * i * o)) * L)))) * L * D) (block : D)
   (contract : Alpha_context.Contract.contract)
   : Lwt.t (Error_monad.shell_tzresult (option Alpha_context.Script.expr)) :=
   RPC_context.make_opt_call1 S.storage ctxt block contract tt tt.
 
 Definition big_map_get {D E G I K L a b c i o q : Set}
   (ctxt :
-    (((RPC_service.t
-      ((* `DELETE *) unit + (* `GET *) unit + (* `PATCH *) unit +
-        (* `POST *) unit + (* `PUT *) unit) RPC_context.t RPC_context.t q i o ->
-    D -> q -> i -> Lwt.t (Error_monad.shell_tzresult o)) * (E * q * i * o)) *
-      (((RPC_service.t
-        ((* `DELETE *) unit + (* `GET *) unit + (* `PATCH *) unit +
-          (* `POST *) unit + (* `PUT *) unit) RPC_context.t (RPC_context.t * a)
-        q i o -> D -> a -> q -> i -> Lwt.t (Error_monad.shell_tzresult o)) *
-        (G * a * q * i * o)) *
-        (((RPC_service.t
-          ((* `DELETE *) unit + (* `GET *) unit + (* `PATCH *) unit +
-            (* `POST *) unit + (* `PUT *) unit) RPC_context.t
-          ((RPC_context.t * a) * b) q i o -> D -> a -> b -> q -> i ->
-        Lwt.t (Error_monad.shell_tzresult o)) * (I * a * b * q * i * o)) *
-          (((RPC_service.t
-            ((* `DELETE *) unit + (* `GET *) unit + (* `PATCH *) unit +
-              (* `POST *) unit + (* `PUT *) unit) RPC_context.t
-            (((RPC_context.t * a) * b) * c) q i o -> D -> a -> b -> c -> q ->
-          i -> Lwt.t (Error_monad.shell_tzresult o)) *
-            (K * a * b * c * q * i * o)) * L)))) * L * D) (block : D)
+    (((RPC_service.t RPC_context.t RPC_context.t q i o -> D -> q -> i ->
+    Lwt.t (Error_monad.shell_tzresult o)) * (E * q * i * o)) *
+      (((RPC_service.t RPC_context.t (RPC_context.t * a) q i o -> D -> a -> q ->
+      i -> Lwt.t (Error_monad.shell_tzresult o)) * (G * a * q * i * o)) *
+        (((RPC_service.t RPC_context.t ((RPC_context.t * a) * b) q i o -> D ->
+        a -> b -> q -> i -> Lwt.t (Error_monad.shell_tzresult o)) *
+          (I * a * b * q * i * o)) *
+          (((RPC_service.t RPC_context.t (((RPC_context.t * a) * b) * c) q i o
+          -> D -> a -> b -> c -> q -> i -> Lwt.t (Error_monad.shell_tzresult o))
+            * (K * a * b * c * q * i * o)) * L)))) * L * D) (block : D)
   (id : Alpha_context.Big_map.id) (__key_value : Script_expr_hash.t)
   : Lwt.t (Error_monad.shell_tzresult Alpha_context.Script.expr) :=
   RPC_context.make_call2 S.big_map_get ctxt block id __key_value tt tt.
 
 Definition contract_big_map_get_opt {D E G I K L a b c i o q : Set}
   (ctxt :
-    (((RPC_service.t
-      ((* `DELETE *) unit + (* `GET *) unit + (* `PATCH *) unit +
-        (* `POST *) unit + (* `PUT *) unit) RPC_context.t RPC_context.t q i o ->
-    D -> q -> i -> Lwt.t (Error_monad.shell_tzresult o)) * (E * q * i * o)) *
-      (((RPC_service.t
-        ((* `DELETE *) unit + (* `GET *) unit + (* `PATCH *) unit +
-          (* `POST *) unit + (* `PUT *) unit) RPC_context.t (RPC_context.t * a)
-        q i o -> D -> a -> q -> i -> Lwt.t (Error_monad.shell_tzresult o)) *
-        (G * a * q * i * o)) *
-        (((RPC_service.t
-          ((* `DELETE *) unit + (* `GET *) unit + (* `PATCH *) unit +
-            (* `POST *) unit + (* `PUT *) unit) RPC_context.t
-          ((RPC_context.t * a) * b) q i o -> D -> a -> b -> q -> i ->
-        Lwt.t (Error_monad.shell_tzresult o)) * (I * a * b * q * i * o)) *
-          (((RPC_service.t
-            ((* `DELETE *) unit + (* `GET *) unit + (* `PATCH *) unit +
-              (* `POST *) unit + (* `PUT *) unit) RPC_context.t
-            (((RPC_context.t * a) * b) * c) q i o -> D -> a -> b -> c -> q ->
-          i -> Lwt.t (Error_monad.shell_tzresult o)) *
-            (K * a * b * c * q * i * o)) * L)))) * L * D) (block : D)
+    (((RPC_service.t RPC_context.t RPC_context.t q i o -> D -> q -> i ->
+    Lwt.t (Error_monad.shell_tzresult o)) * (E * q * i * o)) *
+      (((RPC_service.t RPC_context.t (RPC_context.t * a) q i o -> D -> a -> q ->
+      i -> Lwt.t (Error_monad.shell_tzresult o)) * (G * a * q * i * o)) *
+        (((RPC_service.t RPC_context.t ((RPC_context.t * a) * b) q i o -> D ->
+        a -> b -> q -> i -> Lwt.t (Error_monad.shell_tzresult o)) *
+          (I * a * b * q * i * o)) *
+          (((RPC_service.t RPC_context.t (((RPC_context.t * a) * b) * c) q i o
+          -> D -> a -> b -> c -> q -> i -> Lwt.t (Error_monad.shell_tzresult o))
+            * (K * a * b * c * q * i * o)) * L)))) * L * D) (block : D)
   (contract : Alpha_context.Contract.contract)
   (__key_value : Alpha_context.Script.expr * Alpha_context.Script.expr)
   : Lwt.t (Error_monad.shell_tzresult (option Alpha_context.Script.expr)) :=

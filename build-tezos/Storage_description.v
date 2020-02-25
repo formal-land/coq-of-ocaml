@@ -23,25 +23,28 @@ Definition StringMap :=
         Compare.COMPARABLE.compare := String.compare
       |}).
 
-Module description.
-  Module Value.
-    Record record {get encoding : Set} : Set := {
-      get : get;
-      encoding : encoding }.
-    Arguments record : clear implicits.
-  End Value.
-  Definition Value_skeleton := Value.record.
-  
-  Module IndexedDir.
-    Record record {arg arg_encoding list subdir : Set} : Set := {
-      arg : arg;
-      arg_encoding : arg_encoding;
-      list : list;
-      subdir : subdir }.
-    Arguments record : clear implicits.
-  End IndexedDir.
-  Definition IndexedDir_skeleton := IndexedDir.record.
-End description.
+Module ConstructorRecordNotations_description.
+  Module description.
+    Module Value.
+      Record record {get encoding : Set} : Set := {
+        get : get;
+        encoding : encoding }.
+      Arguments record : clear implicits.
+    End Value.
+    Definition Value_skeleton := Value.record.
+    
+    Module IndexedDir.
+      Record record {arg arg_encoding list subdir : Set} : Set := {
+        arg : arg;
+        arg_encoding : arg_encoding;
+        list : list;
+        subdir : subdir }.
+      Arguments record : clear implicits.
+    End IndexedDir.
+    Definition IndexedDir_skeleton := IndexedDir.record.
+  End description.
+End ConstructorRecordNotations_description.
+Import ConstructorRecordNotations_description.
 
 Reserved Notation "'description.Value".
 Reserved Notation "'description.IndexedDir".
@@ -62,13 +65,11 @@ and "'description.IndexedDir" := (fun (t_a t_key : Set) =>
   description.IndexedDir_skeleton (RPC_arg.t t_a) (Data_encoding.t t_a)
     (t_key -> Lwt.t (Error_monad.tzresult (list t_a))) ('t (t_key * t_a))).
 
-Module ConstructorRecordNotations_description.
-  Module description.
-    Definition Value := 'description.Value.
-    Definition IndexedDir := 'description.IndexedDir.
-  End description.
-End ConstructorRecordNotations_description.
-Import ConstructorRecordNotations_description.
+Module description.
+  Include ConstructorRecordNotations_description.description.
+  Definition Value := 'description.Value.
+  Definition IndexedDir := 'description.IndexedDir.
+End description.
 
 Definition t := 't.
 
@@ -81,13 +82,17 @@ Fixpoint register_named_subcontext {r : Set} (dir : t r) (names : list string)
   {struct dir} : t r :=
   match ((Pervasives.op_exclamation dir), names) with
   | (_, []) => dir
+  
   | (Value _, _) => Pervasives.invalid_arg ""
+  
   | (IndexedDir _, _) => Pervasives.invalid_arg ""
+  
   | (Empty, cons name names) =>
     let subdir := Pervasives.__ref_value Empty in
     (* ❌ Sequences of instructions are ignored (operator ";") *)
     (* ❌ instruction_sequence ";" *)
     register_named_subcontext subdir names
+  
   | (NamedDir map, cons name names) =>
     let subdir :=
       match (|StringMap|).(S.MAP.find_opt) name map with
@@ -101,95 +106,40 @@ Fixpoint register_named_subcontext {r : Set} (dir : t r) (names : list string)
     register_named_subcontext subdir names
   end.
 
-Module args.
-  Module One.
-    Record record {rpc_arg encoding compare : Set} : Set := {
-      rpc_arg : rpc_arg;
-      encoding : encoding;
-      compare : compare }.
-    Arguments record : clear implicits.
-  End One.
-  Definition One_skeleton := One.record.
-End args.
+Module ConstructorRecordNotations_args.
+  Module args.
+    Module One.
+      Record record {rpc_arg encoding compare : Set} : Set := {
+        rpc_arg : rpc_arg;
+        encoding : encoding;
+        compare : compare }.
+      Arguments record : clear implicits.
+    End One.
+    Definition One_skeleton := One.record.
+  End args.
+End ConstructorRecordNotations_args.
+Import ConstructorRecordNotations_args.
 
 Reserved Notation "'args.One".
-Reserved Notation "'args".
 
-Inductive args_gadt : Set :=
-| One : forall {a : Set}, 'args.One a -> args_gadt
-| Pair : args_gadt -> args_gadt -> args_gadt
+Inductive args : Set :=
+| One : forall {a : Set}, 'args.One a -> args
+| Pair : args -> args -> args
 
-where "'args" := (fun (_ _ _ : Set) => args_gadt)
-and "'args.One" := (fun (t_a : Set) =>
+where "'args.One" := (fun (t_a : Set) =>
   args.One_skeleton (RPC_arg.t t_a) (Data_encoding.t t_a) (t_a -> t_a -> int)).
 
-Module ConstructorRecordNotations_args_gadt.
-  Module args.
-    Definition One := 'args.One.
-  End args.
-End ConstructorRecordNotations_args_gadt.
-Import ConstructorRecordNotations_args_gadt.
+Module args.
+  Include ConstructorRecordNotations_args.args.
+  Definition One := 'args.One.
+End args.
 
-Definition args := 'args.
+Fixpoint unpack {a b c : Set} (v : args) (x : c) {struct v} : a * b := axiom.
 
-Fixpoint unpack {a b c : Set} (v : args a b c) (x : c) {struct v} : a * b :=
-  match v with
-  | One _ => obj_magic (a * b) x
-  | Pair l __r_value =>
-    let 'existT _ [__0, __1, __Pair_'inter_key] [l, __r_value] :=
-      obj_magic_exists (Es := [Set ** Set ** Set])
-        (fun '[__0, __1, __Pair_'inter_key] =>
-          [args a __0 __Pair_'inter_key ** args __Pair_'inter_key __1 c])
-        [l, __r_value] in
-    obj_magic (a * b)
-    (let unpack_l := unpack l in
-    let unpack_r := unpack __r_value in
-    let '(c, d) := unpack_r x in
-    let '(__b_value, __a_value) := unpack_l c in
-    (__b_value, (__a_value, d)))
-  end.
+Fixpoint pack {a b c : Set} (v : args) (x : a) (y : b) {struct v} : c := axiom.
 
-Fixpoint pack {a b c : Set} (v : args a b c) (x : a) (y : b) {struct v} : c :=
-  match (v, y) with
-  | (One _, _) => obj_magic c (x, y)
-  | (Pair l __r_value, _ as y) =>
-    let 'existT _ [__0, __1, __Pair_'inter_key] [l, __r_value, y] :=
-      obj_magic_exists (Es := [Set ** Set ** Set])
-        (fun '[__0, __1, __Pair_'inter_key] =>
-          [args a __0 __Pair_'inter_key ** args __Pair_'inter_key __1 c **
-            __0 * __1]) [l, __r_value, y] in
-    obj_magic c
-    (let pack_l := pack l in
-    let pack_r := pack __r_value in
-    let '(__a_value, d) := y in
-    let c := pack_l x __a_value in
-    pack_r c d)
-  end.
-
-Fixpoint compare {a b c : Set} (function_parameter : args a b c)
-  {struct function_parameter} : b -> b -> int :=
-  match function_parameter with
-  | One {| args.One.compare := compare' |} =>
-    let compare' := obj_magic (b -> b -> int) compare' in
-    obj_magic (b -> b -> int) compare'
-  | Pair l __r_value =>
-    let 'existT _ [__0, __1, __Pair_'inter_key] [l, __r_value] :=
-      obj_magic_exists (Es := [Set ** Set ** Set])
-        (fun '[__0, __1, __Pair_'inter_key] =>
-          [args a __0 __Pair_'inter_key ** args __Pair_'inter_key __1 c])
-        [l, __r_value] in
-    obj_magic (b -> b -> int)
-    (let compare_l := compare l in
-    let compare_r := compare __r_value in
-    fun function_parameter =>
-      let '(a1, b1) := function_parameter in
-      fun function_parameter =>
-        let '(a2, b2) := function_parameter in
-        match compare_l a1 a2 with
-        | 0 => compare_r b1 b2
-        | x => x
-        end)
-  end.
+Fixpoint compare {b : Set} (function_parameter : args)
+  {struct function_parameter} : b -> b -> int := axiom.
 
 Definition destutter {A B : Set} (equal : A -> A -> bool) (l : list (A * B))
   : list A :=
@@ -212,63 +162,7 @@ Definition destutter {A B : Set} (equal : A -> A -> bool) (l : list (A * B))
 
 Fixpoint register_indexed_subcontext {a b r : Set}
   (dir : t r) (__list_value : r -> Lwt.t (Error_monad.tzresult (list a)))
-  (path : args r a b) {struct dir} : t b :=
-  match (path, __list_value) with
-  | (Pair __left __right, _ as __list_value) =>
-    let 'existT _ [__0, __1, __Pair_'inter_key] [__left, __right, __list_value]
-      :=
-      obj_magic_exists (Es := [Set ** Set ** Set])
-        (fun '[__0, __1, __Pair_'inter_key] =>
-          [args r __0 __Pair_'inter_key ** args __Pair_'inter_key __1 b **
-            r -> Lwt.t (Error_monad.tzresult (list (__0 * __1)))])
-        [__left, __right, __list_value] in
-    obj_magic (t b)
-    (let compare_left := compare __left in
-    let equal_left (x : __0) (y : __0) : bool :=
-      (|Compare.Int|).(Compare.S.op_eq) (compare_left x y) 0 in
-    let list_left (__r_value : r) : Lwt.t (Error_monad.tzresult (list __0)) :=
-      let=? l := __list_value __r_value in
-      Error_monad.__return (destutter equal_left l) in
-    let list_right (__r_value : __Pair_'inter_key)
-      : Lwt.t (Error_monad.tzresult (list __1)) :=
-      let '(__a_value, k) := unpack __left __r_value in
-      let=? l := __list_value __a_value in
-      Error_monad.__return
-        (List.map Pervasives.snd
-          (List.filter
-            (fun function_parameter =>
-              let '(x, _) := function_parameter in
-              equal_left x k) l)) in
-    register_indexed_subcontext
-      (register_indexed_subcontext dir list_left __left) list_right __right)
-  | (One {| args.One.rpc_arg := arg; args.One.encoding := arg_encoding |}, _) =>
-    let '[arg, arg_encoding] :=
-      obj_magic [RPC_arg.t a ** Data_encoding.t a] [arg, arg_encoding] in
-    obj_magic (t b)
-    match Pervasives.op_exclamation dir with
-    | Value _ => Pervasives.invalid_arg ""
-    | NamedDir _ => Pervasives.invalid_arg ""
-    | Empty =>
-      let subdir := Pervasives.__ref_value Empty in
-      (* ❌ Sequences of instructions are ignored (operator ";") *)
-      (* ❌ instruction_sequence ";" *)
-      subdir
-    |
-      IndexedDir {|
-        description.IndexedDir.arg := inner_arg;
-          description.IndexedDir.subdir := subdir
-          |} =>
-      let 'existT _ __IndexedDir_'a [inner_arg, subdir] :=
-        existT (A := Set)
-          (fun __IndexedDir_'a =>
-            [RPC_arg.t __IndexedDir_'a ** t (r * __IndexedDir_'a)]) _
-          [inner_arg, subdir] in
-      match RPC_arg.__eq_value arg inner_arg with
-      | None => obj_magic (t b) ((Pervasives.invalid_arg (a := t b)) "")
-      | Some RPC_arg.Eq => obj_magic (t b) subdir
-      end
-    end
-  end.
+  (path : args) {struct dir} : t b := axiom.
 
 Definition register_value {a b : Set}
   (dir : t a) (get : a -> Lwt.t (Error_monad.tzresult (option b)))
@@ -277,8 +171,8 @@ Definition register_value {a b : Set}
   | Empty =>
     Pervasives.op_coloneq dir
       (Value
-        {| description.Value.get := get; description.Value.encoding := encoding
-          |})
+        ({| description.Value.get := get; description.Value.encoding := encoding
+          |} : description.Value b a))
   | _ => Pervasives.invalid_arg ""
   end.
 
@@ -315,8 +209,7 @@ Fixpoint pp {a : Set} (ppf : Format.formatter) (dir : t a) {struct ppf}
             (CamlinternalFormatBasics.Formatting_lit
               CamlinternalFormatBasics.Close_box
               CamlinternalFormatBasics.End_of_format))) "@[<v>%a@]")
-      (Format.pp_print_list None (pp_item (a := unit)))
-      ((|StringMap|).(S.MAP.bindings) map)
+      (Format.pp_print_list None pp_item) ((|StringMap|).(S.MAP.bindings) map)
   |
     IndexedDir {|
       description.IndexedDir.arg := arg;
@@ -356,7 +249,7 @@ with pp_item {a : Set}
               (CamlinternalFormatBasics.Formatting_lit
                 CamlinternalFormatBasics.Close_box
                 CamlinternalFormatBasics.End_of_format))))) "@[<v 2>%s@ %a@]")
-    name (pp (a := unit)) dir.
+    name pp dir.
 
 Module INDEX.
   Record signature {t : Set} : Set := {
@@ -371,15 +264,18 @@ Module INDEX.
   Arguments signature : clear implicits.
 End INDEX.
 
-Module handler.
-  Module Handler.
-    Record record {encoding get : Set} : Set := {
-      encoding : encoding;
-      get : get }.
-    Arguments record : clear implicits.
-  End Handler.
-  Definition Handler_skeleton := Handler.record.
-End handler.
+Module ConstructorRecordNotations_handler.
+  Module handler.
+    Module Handler.
+      Record record {encoding get : Set} : Set := {
+        encoding : encoding;
+        get : get }.
+      Arguments record : clear implicits.
+    End Handler.
+    Definition Handler_skeleton := Handler.record.
+  End handler.
+End ConstructorRecordNotations_handler.
+Import ConstructorRecordNotations_handler.
 
 Reserved Notation "'handler.Handler".
 
@@ -390,24 +286,25 @@ where "'handler.Handler" := (fun (t_a t_key : Set) =>
   handler.Handler_skeleton (Data_encoding.t t_a)
     (t_key -> int -> Lwt.t (Error_monad.tzresult t_a))).
 
-Module ConstructorRecordNotations_handler.
-  Module handler.
-    Definition Handler := 'handler.Handler.
-  End handler.
-End ConstructorRecordNotations_handler.
-Import ConstructorRecordNotations_handler.
+Module handler.
+  Include ConstructorRecordNotations_handler.handler.
+  Definition Handler := 'handler.Handler.
+End handler.
 
 Arguments Handler {_ _}.
 
-Module opt_handler.
-  Module Opt_handler.
-    Record record {encoding get : Set} : Set := {
-      encoding : encoding;
-      get : get }.
-    Arguments record : clear implicits.
-  End Opt_handler.
-  Definition Opt_handler_skeleton := Opt_handler.record.
-End opt_handler.
+Module ConstructorRecordNotations_opt_handler.
+  Module opt_handler.
+    Module Opt_handler.
+      Record record {encoding get : Set} : Set := {
+        encoding : encoding;
+        get : get }.
+      Arguments record : clear implicits.
+    End Opt_handler.
+    Definition Opt_handler_skeleton := Opt_handler.record.
+  End opt_handler.
+End ConstructorRecordNotations_opt_handler.
+Import ConstructorRecordNotations_opt_handler.
 
 Reserved Notation "'opt_handler.Opt_handler".
 
@@ -419,12 +316,10 @@ where "'opt_handler.Opt_handler" := (fun (t_a t_key : Set) =>
   opt_handler.Opt_handler_skeleton (Data_encoding.t t_a)
     (t_key -> int -> Lwt.t (Error_monad.tzresult (option t_a)))).
 
-Module ConstructorRecordNotations_opt_handler.
-  Module opt_handler.
-    Definition Opt_handler := 'opt_handler.Opt_handler.
-  End opt_handler.
-End ConstructorRecordNotations_opt_handler.
-Import ConstructorRecordNotations_opt_handler.
+Module opt_handler.
+  Include ConstructorRecordNotations_opt_handler.opt_handler.
+  Definition Opt_handler := 'opt_handler.Opt_handler.
+End opt_handler.
 
 Arguments Opt_handler {_ _}.
 
@@ -434,13 +329,13 @@ Fixpoint combine_object {A : Set}
   match function_parameter with
   | [] =>
     Handler
-      {| handler.Handler.encoding := Data_encoding.__unit_value;
+      ({| handler.Handler.encoding := Data_encoding.__unit_value;
         handler.Handler.get :=
           fun function_parameter =>
             let '_ := function_parameter in
             fun function_parameter =>
               let '_ := function_parameter in
-              Error_monad.return_unit |}
+              Error_monad.return_unit |} : handler.Handler unit _)
   | cons (name, Opt_handler __handler_value) fields =>
     let 'existT _ __Opt_handler_'a [name, __handler_value, fields] :=
       existT (A := Set)
@@ -452,7 +347,7 @@ Fixpoint combine_object {A : Set}
       existT (A := Set) (fun __Handler_'a => handler.Handler __Handler_'a A) _
         handlers in
     Handler
-      {|
+      ({|
         handler.Handler.encoding :=
           Data_encoding.merge_objs
             (Data_encoding.obj1
@@ -466,6 +361,7 @@ Fixpoint combine_object {A : Set}
               let=? v1 := __handler_value.(opt_handler.Opt_handler.get) k i in
               let=? v2 := handlers.(handler.Handler.get) k i in
               Error_monad.__return (v1, v2) |}
+        : handler.Handler (option __Opt_handler_'a * __Handler_'a) _)
   end.
 
 Module query.
@@ -479,7 +375,8 @@ Definition query := query.record.
 Definition depth_query : RPC_query.t query :=
   RPC_query.seal
     (RPC_query.op_pipeplus
-      (RPC_query.__query_value (fun depth => {| query.depth := depth |}))
+      (RPC_query.__query_value
+        (fun depth => ({| query.depth := depth |} : query)))
       (RPC_query.__field_value None "depth" RPC_arg.__int_value 0
         (fun __t_value => __t_value.(query.depth)))).
 
@@ -518,13 +415,13 @@ Definition build_directory {key : Set} (dir : t key) : RPC_directory.t key :=
     match Pervasives.op_exclamation dir with
     | Empty =>
       Opt_handler
-        {| opt_handler.Opt_handler.encoding := Data_encoding.__unit_value;
+        ({| opt_handler.Opt_handler.encoding := Data_encoding.__unit_value;
           opt_handler.Opt_handler.get :=
             fun function_parameter =>
               let '_ := function_parameter in
               fun function_parameter =>
                 let '_ := function_parameter in
-                Error_monad.return_none |}
+                Error_monad.return_none |} : opt_handler.Opt_handler unit ikey)
     |
       Value {|
         description.Value.get := get;
@@ -537,14 +434,14 @@ Definition build_directory {key : Set} (dir : t key) : RPC_directory.t key :=
               Data_encoding.t __Value_'a]) _ [get, encoding] in
       let __handler_value :=
         Opt_handler
-          {| opt_handler.Opt_handler.encoding := encoding;
+          ({| opt_handler.Opt_handler.encoding := encoding;
             opt_handler.Opt_handler.get :=
               fun k =>
                 fun i =>
                   if (|Compare.Int|).(Compare.S.op_lt) i 0 then
                     Error_monad.return_none
                   else
-                    get k |} in
+                    get k |} : opt_handler.Opt_handler __Value_'a ikey) in
       (* ❌ Sequences of instructions are ignored (operator ";") *)
       (* ❌ instruction_sequence ";" *)
       __handler_value
@@ -562,7 +459,7 @@ Definition build_directory {key : Set} (dir : t key) : RPC_directory.t key :=
           __handler_value in
       let __handler_value :=
         Opt_handler
-          {|
+          ({|
             opt_handler.Opt_handler.encoding :=
               __handler_value.(handler.Handler.encoding);
             opt_handler.Opt_handler.get :=
@@ -574,7 +471,8 @@ Definition build_directory {key : Set} (dir : t key) : RPC_directory.t key :=
                     let=? v :=
                       __handler_value.(handler.Handler.get) k
                         (Pervasives.op_minus i 1) in
-                    Error_monad.return_some v |} in
+                    Error_monad.return_some v |}
+            : opt_handler.Opt_handler __Handler_'a ikey) in
       (* ❌ Sequences of instructions are ignored (operator ";") *)
       (* ❌ instruction_sequence ";" *)
       __handler_value
@@ -649,11 +547,14 @@ Definition build_directory {key : Set} (dir : t key) : RPC_directory.t key :=
             Error_monad.return_some values in
       let __handler_value :=
         Opt_handler
-          {|
+          ({|
             opt_handler.Opt_handler.encoding :=
               Data_encoding.__list_value None
                 (Data_encoding.dynamic_size None encoding);
-            opt_handler.Opt_handler.get := get |} in
+            opt_handler.Opt_handler.get := get |}
+            :
+              opt_handler.Opt_handler
+                (list (__IndexedDir_'a * option __Opt_handler_'a1)) ikey) in
       (* ❌ Sequences of instructions are ignored (operator ";") *)
       (* ❌ instruction_sequence ";" *)
       __handler_value

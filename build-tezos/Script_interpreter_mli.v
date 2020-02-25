@@ -73,20 +73,14 @@ Module step_constants.
 End step_constants.
 Definition step_constants := step_constants.record.
 
-Reserved Notation "'stack".
+Inductive stack : Set :=
+| Item : forall {ty : Set}, ty -> stack -> stack
+| Empty : stack.
 
-Inductive stack_gadt : Set :=
-| Item : forall {ty : Set}, ty -> stack_gadt -> stack_gadt
-| Empty : stack_gadt
-
-where "'stack" := (fun (_ : Set) => stack_gadt).
-
-Definition stack := 'stack.
-
-Parameter step : forall {aft bef : Set},
+Parameter step :
   option (Pervasives.ref execution_trace) -> Alpha_context.context ->
-  step_constants -> Script_typed_ir.descr bef aft -> stack bef ->
-  Lwt.t (Error_monad.tzresult (stack aft * Alpha_context.context)).
+  step_constants -> Script_typed_ir.descr -> stack ->
+  Lwt.t (Error_monad.tzresult (stack * Alpha_context.context)).
 
 Parameter execute_wrapper :
   Alpha_context.t -> Script_ir_translator.unparsing_mode -> step_constants ->

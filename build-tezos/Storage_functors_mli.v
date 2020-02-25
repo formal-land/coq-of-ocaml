@@ -43,7 +43,7 @@ Module INDEX.
     to_path : t -> list string -> list string;
     of_path : list string -> option t;
     ipath := ipath;
-    args : forall {a : Set}, unit -> Storage_description.args a t (ipath a);
+    args : unit -> Storage_description.args;
   }.
   Arguments signature : clear implicits.
 End INDEX.

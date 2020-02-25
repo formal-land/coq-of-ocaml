@@ -16,72 +16,77 @@ Require Tezos.Nonce_hash.
 
 Import Alpha_context.
 
-Module contents_result.
-  Module Endorsement_result.
-    Record record {balance_updates delegate slots : Set} : Set := {
-      balance_updates : balance_updates;
-      delegate : delegate;
-      slots : slots }.
-    Arguments record : clear implicits.
-  End Endorsement_result.
-  Definition Endorsement_result_skeleton := Endorsement_result.record.
-  
-  Module Manager_operation_result.
-    Record record {balance_updates operation_result internal_operation_results :
-      Set} : Set := {
-      balance_updates : balance_updates;
-      operation_result : operation_result;
-      internal_operation_results : internal_operation_results }.
-    Arguments record : clear implicits.
-  End Manager_operation_result.
-  Definition Manager_operation_result_skeleton :=
-    Manager_operation_result.record.
-End contents_result.
-
-Module successful_manager_operation_result.
-  Module Reveal_result.
-    Record record {consumed_gas : Set} : Set := {
-      consumed_gas : consumed_gas }.
-    Arguments record : clear implicits.
-  End Reveal_result.
-  Definition Reveal_result_skeleton := Reveal_result.record.
-  
-  Module Transaction_result.
-    Record record {storage big_map_diff balance_updates originated_contracts
-      consumed_gas storage_size paid_storage_size_diff
-      allocated_destination_contract : Set} : Set := {
-      storage : storage;
-      big_map_diff : big_map_diff;
-      balance_updates : balance_updates;
-      originated_contracts : originated_contracts;
-      consumed_gas : consumed_gas;
-      storage_size : storage_size;
-      paid_storage_size_diff : paid_storage_size_diff;
-      allocated_destination_contract : allocated_destination_contract }.
-    Arguments record : clear implicits.
-  End Transaction_result.
-  Definition Transaction_result_skeleton := Transaction_result.record.
-  
-  Module Origination_result.
-    Record record {big_map_diff balance_updates originated_contracts
-      consumed_gas storage_size paid_storage_size_diff : Set} : Set := {
-      big_map_diff : big_map_diff;
-      balance_updates : balance_updates;
-      originated_contracts : originated_contracts;
-      consumed_gas : consumed_gas;
-      storage_size : storage_size;
-      paid_storage_size_diff : paid_storage_size_diff }.
-    Arguments record : clear implicits.
-  End Origination_result.
-  Definition Origination_result_skeleton := Origination_result.record.
-  
-  Module Delegation_result.
-    Record record {consumed_gas : Set} : Set := {
-      consumed_gas : consumed_gas }.
-    Arguments record : clear implicits.
-  End Delegation_result.
-  Definition Delegation_result_skeleton := Delegation_result.record.
-End successful_manager_operation_result.
+Module
+  ConstructorRecordNotations_packed_operation_metadata_contents_result_list_packed_contents_result_list_contents_result_packed_contents_result_manager_operation_result_successful_manager_operation_result_packed_successful_manager_operation_result_packed_internal_operation_result.
+  Module contents_result.
+    Module Endorsement_result.
+      Record record {balance_updates delegate slots : Set} : Set := {
+        balance_updates : balance_updates;
+        delegate : delegate;
+        slots : slots }.
+      Arguments record : clear implicits.
+    End Endorsement_result.
+    Definition Endorsement_result_skeleton := Endorsement_result.record.
+    
+    Module Manager_operation_result.
+      Record record {balance_updates operation_result internal_operation_results
+        : Set} : Set := {
+        balance_updates : balance_updates;
+        operation_result : operation_result;
+        internal_operation_results : internal_operation_results }.
+      Arguments record : clear implicits.
+    End Manager_operation_result.
+    Definition Manager_operation_result_skeleton :=
+      Manager_operation_result.record.
+  End contents_result.
+  Module successful_manager_operation_result.
+    Module Reveal_result.
+      Record record {consumed_gas : Set} : Set := {
+        consumed_gas : consumed_gas }.
+      Arguments record : clear implicits.
+    End Reveal_result.
+    Definition Reveal_result_skeleton := Reveal_result.record.
+    
+    Module Transaction_result.
+      Record record {storage big_map_diff balance_updates originated_contracts
+        consumed_gas storage_size paid_storage_size_diff
+        allocated_destination_contract : Set} : Set := {
+        storage : storage;
+        big_map_diff : big_map_diff;
+        balance_updates : balance_updates;
+        originated_contracts : originated_contracts;
+        consumed_gas : consumed_gas;
+        storage_size : storage_size;
+        paid_storage_size_diff : paid_storage_size_diff;
+        allocated_destination_contract : allocated_destination_contract }.
+      Arguments record : clear implicits.
+    End Transaction_result.
+    Definition Transaction_result_skeleton := Transaction_result.record.
+    
+    Module Origination_result.
+      Record record {big_map_diff balance_updates originated_contracts
+        consumed_gas storage_size paid_storage_size_diff : Set} : Set := {
+        big_map_diff : big_map_diff;
+        balance_updates : balance_updates;
+        originated_contracts : originated_contracts;
+        consumed_gas : consumed_gas;
+        storage_size : storage_size;
+        paid_storage_size_diff : paid_storage_size_diff }.
+      Arguments record : clear implicits.
+    End Origination_result.
+    Definition Origination_result_skeleton := Origination_result.record.
+    
+    Module Delegation_result.
+      Record record {consumed_gas : Set} : Set := {
+        consumed_gas : consumed_gas }.
+      Arguments record : clear implicits.
+    End Delegation_result.
+    Definition Delegation_result_skeleton := Delegation_result.record.
+  End successful_manager_operation_result.
+End
+  ConstructorRecordNotations_packed_operation_metadata_contents_result_list_packed_contents_result_list_contents_result_packed_contents_result_manager_operation_result_successful_manager_operation_result_packed_successful_manager_operation_result_packed_internal_operation_result.
+Import
+  ConstructorRecordNotations_packed_operation_metadata_contents_result_list_packed_contents_result_list_contents_result_packed_contents_result_manager_operation_result_successful_manager_operation_result_packed_successful_manager_operation_result_packed_internal_operation_result.
 
 Module operation_metadata.
   Record record {contents : Set} : Set := Build {
@@ -98,99 +103,80 @@ Reserved Notation "'successful_manager_operation_result.Reveal_result".
 Reserved Notation "'successful_manager_operation_result.Transaction_result".
 Reserved Notation "'successful_manager_operation_result.Origination_result".
 Reserved Notation "'successful_manager_operation_result.Delegation_result".
-Reserved Notation "'contents_result_list".
 Reserved Notation "'operation_metadata".
-Reserved Notation "'contents_result".
-Reserved Notation "'manager_operation_result".
-Reserved Notation "'successful_manager_operation_result".
 
 Inductive packed_operation_metadata : Set :=
-| Operation_metadata : forall {kind : Set},
-  'operation_metadata kind -> packed_operation_metadata
+| Operation_metadata : 'operation_metadata -> packed_operation_metadata
 | No_operation_metadata : packed_operation_metadata
 
-with contents_result_list_gadt : Set :=
-| Single_result : forall {kind : Set},
-  'contents_result kind -> contents_result_list_gadt
-| Cons_result : forall {kind : Set},
-  'contents_result (Alpha_context.Kind.manager kind) ->
-  contents_result_list_gadt -> contents_result_list_gadt
+with contents_result_list : Set :=
+| Single_result : contents_result -> contents_result_list
+| Cons_result : contents_result -> contents_result_list -> contents_result_list
 
 with packed_contents_result_list : Set :=
-| Contents_result_list : forall {kind : Set},
-  'contents_result_list kind -> packed_contents_result_list
+| Contents_result_list : contents_result_list -> packed_contents_result_list
 
-with contents_result_gadt : Set :=
-| Endorsement_result :
-  'contents_result.Endorsement_result -> contents_result_gadt
+with contents_result : Set :=
+| Endorsement_result : 'contents_result.Endorsement_result -> contents_result
 | Seed_nonce_revelation_result :
-  Alpha_context.Delegate.balance_updates -> contents_result_gadt
+  Alpha_context.Delegate.balance_updates -> contents_result
 | Double_endorsement_evidence_result :
-  Alpha_context.Delegate.balance_updates -> contents_result_gadt
+  Alpha_context.Delegate.balance_updates -> contents_result
 | Double_baking_evidence_result :
-  Alpha_context.Delegate.balance_updates -> contents_result_gadt
+  Alpha_context.Delegate.balance_updates -> contents_result
 | Activate_account_result :
-  Alpha_context.Delegate.balance_updates -> contents_result_gadt
-| Proposals_result : contents_result_gadt
-| Ballot_result : contents_result_gadt
-| Manager_operation_result : forall {kind : Set},
-  'contents_result.Manager_operation_result kind -> contents_result_gadt
+  Alpha_context.Delegate.balance_updates -> contents_result
+| Proposals_result : contents_result
+| Ballot_result : contents_result
+| Manager_operation_result :
+  'contents_result.Manager_operation_result -> contents_result
 
 with packed_contents_result : Set :=
-| Contents_result : forall {kind : Set},
-  'contents_result kind -> packed_contents_result
+| Contents_result : contents_result -> packed_contents_result
 
-with manager_operation_result_gadt : Set :=
-| Applied : forall {kind : Set},
-  'successful_manager_operation_result kind -> manager_operation_result_gadt
-| Backtracked : forall {kind : Set},
-  'successful_manager_operation_result kind ->
-  option (list Error_monad.__error) -> manager_operation_result_gadt
-| Failed : forall {kind : Set},
-  Alpha_context.Kind.manager kind -> list Error_monad.__error ->
-  manager_operation_result_gadt
-| Skipped : forall {kind : Set},
-  Alpha_context.Kind.manager kind -> manager_operation_result_gadt
+with manager_operation_result : Set :=
+| Applied : successful_manager_operation_result -> manager_operation_result
+| Backtracked :
+  successful_manager_operation_result -> option (list Error_monad.__error) ->
+  manager_operation_result
+| Failed :
+  Alpha_context.Kind.manager -> list Error_monad.__error ->
+  manager_operation_result
+| Skipped : Alpha_context.Kind.manager -> manager_operation_result
 
-with successful_manager_operation_result_gadt : Set :=
+with successful_manager_operation_result : Set :=
 | Reveal_result :
   'successful_manager_operation_result.Reveal_result ->
-  successful_manager_operation_result_gadt
+  successful_manager_operation_result
 | Transaction_result :
   'successful_manager_operation_result.Transaction_result ->
-  successful_manager_operation_result_gadt
+  successful_manager_operation_result
 | Origination_result :
   'successful_manager_operation_result.Origination_result ->
-  successful_manager_operation_result_gadt
+  successful_manager_operation_result
 | Delegation_result :
   'successful_manager_operation_result.Delegation_result ->
-  successful_manager_operation_result_gadt
+  successful_manager_operation_result
 
 with packed_successful_manager_operation_result : Set :=
-| Successful_manager_result : forall {kind : Set},
-  'successful_manager_operation_result kind ->
+| Successful_manager_result :
+  successful_manager_operation_result ->
   packed_successful_manager_operation_result
 
 with packed_internal_operation_result : Set :=
-| Internal_operation_result : forall {kind : Set},
-  Alpha_context.internal_operation kind -> 'manager_operation_result kind ->
+| Internal_operation_result :
+  Alpha_context.internal_operation -> manager_operation_result ->
   packed_internal_operation_result
 
-where "'contents_result_list" := (fun (_ : Set) => contents_result_list_gadt)
-and "'operation_metadata" := (fun (t_kind : Set) =>
-  operation_metadata_skeleton ('contents_result_list t_kind))
-and "'contents_result" := (fun (_ : Set) => contents_result_gadt)
-and "'manager_operation_result" := (fun (_ : Set) =>
-  manager_operation_result_gadt)
-and "'successful_manager_operation_result" := (fun (_ : Set) =>
-  successful_manager_operation_result_gadt)
+where "'operation_metadata" :=
+  (operation_metadata_skeleton contents_result_list)
 and "'contents_result.Endorsement_result" :=
   (contents_result.Endorsement_result_skeleton
     Alpha_context.Delegate.balance_updates
     (|Signature.Public_key_hash|).(S.SPublic_key_hash.t) (list int))
-and "'contents_result.Manager_operation_result" := (fun (t_kind : Set) =>
-  contents_result.Manager_operation_result_skeleton
-    Alpha_context.Delegate.balance_updates ('manager_operation_result t_kind)
+and "'contents_result.Manager_operation_result" :=
+  (contents_result.Manager_operation_result_skeleton
+    Alpha_context.Delegate.balance_updates manager_operation_result
     (list packed_internal_operation_result))
 and "'successful_manager_operation_result.Reveal_result" :=
   (successful_manager_operation_result.Reveal_result_skeleton Z.t)
@@ -208,34 +194,25 @@ and "'successful_manager_operation_result.Origination_result" :=
 and "'successful_manager_operation_result.Delegation_result" :=
   (successful_manager_operation_result.Delegation_result_skeleton Z.t).
 
-Module
-  ConstructorRecordNotations_packed_operation_metadata_contents_result_list_gadt_packed_contents_result_list_contents_result_gadt_packed_contents_result_manager_operation_result_gadt_successful_manager_operation_result_gadt_packed_successful_manager_operation_result_packed_internal_operation_result.
-  Module contents_result.
-    Definition Endorsement_result := 'contents_result.Endorsement_result.
-    Definition Manager_operation_result :=
-      'contents_result.Manager_operation_result.
-  End contents_result.
-  Module successful_manager_operation_result.
-    Definition Reveal_result :=
-      'successful_manager_operation_result.Reveal_result.
-    Definition Transaction_result :=
-      'successful_manager_operation_result.Transaction_result.
-    Definition Origination_result :=
-      'successful_manager_operation_result.Origination_result.
-    Definition Delegation_result :=
-      'successful_manager_operation_result.Delegation_result.
-  End successful_manager_operation_result.
-End
-  ConstructorRecordNotations_packed_operation_metadata_contents_result_list_gadt_packed_contents_result_list_contents_result_gadt_packed_contents_result_manager_operation_result_gadt_successful_manager_operation_result_gadt_packed_successful_manager_operation_result_packed_internal_operation_result.
-Import
-  ConstructorRecordNotations_packed_operation_metadata_contents_result_list_gadt_packed_contents_result_list_contents_result_gadt_packed_contents_result_manager_operation_result_gadt_successful_manager_operation_result_gadt_packed_successful_manager_operation_result_packed_internal_operation_result.
+Module contents_result.
+  Include ConstructorRecordNotations_packed_operation_metadata_contents_result_list_packed_contents_result_list_contents_result_packed_contents_result_manager_operation_result_successful_manager_operation_result_packed_successful_manager_operation_result_packed_internal_operation_result.contents_result.
+  Definition Endorsement_result := 'contents_result.Endorsement_result.
+  Definition Manager_operation_result :=
+    'contents_result.Manager_operation_result.
+End contents_result.
+Module successful_manager_operation_result.
+  Include ConstructorRecordNotations_packed_operation_metadata_contents_result_list_packed_contents_result_list_contents_result_packed_contents_result_manager_operation_result_successful_manager_operation_result_packed_successful_manager_operation_result_packed_internal_operation_result.successful_manager_operation_result.
+  Definition Reveal_result :=
+    'successful_manager_operation_result.Reveal_result.
+  Definition Transaction_result :=
+    'successful_manager_operation_result.Transaction_result.
+  Definition Origination_result :=
+    'successful_manager_operation_result.Origination_result.
+  Definition Delegation_result :=
+    'successful_manager_operation_result.Delegation_result.
+End successful_manager_operation_result.
 
-Definition contents_result_list := 'contents_result_list.
 Definition operation_metadata := 'operation_metadata.
-Definition contents_result := 'contents_result.
-Definition manager_operation_result := 'manager_operation_result.
-Definition successful_manager_operation_result :=
-  'successful_manager_operation_result.
 
 Parameter operation_metadata_encoding :
   Data_encoding.t packed_operation_metadata.
@@ -244,53 +221,36 @@ Parameter operation_data_and_metadata_encoding :
   Data_encoding.t
     (Alpha_context.Operation.packed_protocol_data * packed_operation_metadata).
 
-Reserved Notation "'contents_and_result_list".
-
-Inductive contents_and_result_list_gadt : Set :=
-| Single_and_result : forall {kind : Set},
-  Alpha_context.contents kind -> contents_result kind ->
-  contents_and_result_list_gadt
-| Cons_and_result : forall {kind : Set},
-  Alpha_context.contents (Alpha_context.Kind.manager kind) ->
-  contents_result (Alpha_context.Kind.manager kind) ->
-  contents_and_result_list_gadt -> contents_and_result_list_gadt
-
-where "'contents_and_result_list" := (fun (_ : Set) =>
-  contents_and_result_list_gadt).
-
-Definition contents_and_result_list := 'contents_and_result_list.
+Inductive contents_and_result_list : Set :=
+| Single_and_result :
+  Alpha_context.contents -> contents_result -> contents_and_result_list
+| Cons_and_result :
+  Alpha_context.contents -> contents_result -> contents_and_result_list ->
+  contents_and_result_list.
 
 Inductive packed_contents_and_result_list : Set :=
-| Contents_and_result_list : forall {kind : Set},
-  contents_and_result_list kind -> packed_contents_and_result_list.
+| Contents_and_result_list :
+  contents_and_result_list -> packed_contents_and_result_list.
 
 Parameter contents_and_result_list_encoding :
   Data_encoding.t packed_contents_and_result_list.
 
-Parameter pack_contents_list : forall {kind : Set},
-  Alpha_context.contents_list kind -> contents_result_list kind ->
-  contents_and_result_list kind.
+Parameter pack_contents_list :
+  Alpha_context.contents_list -> contents_result_list ->
+  contents_and_result_list.
 
-Parameter unpack_contents_list : forall {kind : Set},
-  contents_and_result_list kind ->
-  Alpha_context.contents_list kind * contents_result_list kind.
+Parameter unpack_contents_list :
+  contents_and_result_list -> Alpha_context.contents_list * contents_result_list.
 
 Parameter to_list : packed_contents_result_list -> list packed_contents_result.
 
 Parameter of_list : list packed_contents_result -> packed_contents_result_list.
 
-Reserved Notation "'eq".
+Inductive eq : Set :=
+| Eq : eq.
 
-Inductive eq_gadt : Set :=
-| Eq : eq_gadt
-
-where "'eq" := (fun (_ _ : Set) => eq_gadt).
-
-Definition eq := 'eq.
-
-Parameter kind_equal_list : forall {kind kind2 : Set},
-  Alpha_context.contents_list kind -> contents_result_list kind2 ->
-  option (eq kind kind2).
+Parameter kind_equal_list :
+  Alpha_context.contents_list -> contents_result_list -> option eq.
 
 Module block_metadata.
   Record record : Set := Build {

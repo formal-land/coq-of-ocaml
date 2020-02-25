@@ -35,46 +35,45 @@ Module Typecheck_costs := Michelson_v1_gas.Cost_of.Typechecking.
 Module Unparse_costs := Michelson_v1_gas.Cost_of.Unparse.
 
 Inductive ex_comparable_ty : Set :=
-| Ex_comparable_ty : forall {a : Set},
-  Script_typed_ir.comparable_ty a -> ex_comparable_ty.
+| Ex_comparable_ty : Script_typed_ir.comparable_ty -> ex_comparable_ty.
 
 Inductive ex_ty : Set :=
-| Ex_ty : forall {a : Set}, Script_typed_ir.ty a -> ex_ty.
+| Ex_ty : Script_typed_ir.ty -> ex_ty.
 
 Inductive ex_stack_ty : Set :=
-| Ex_stack_ty : forall {a : Set}, Script_typed_ir.stack_ty a -> ex_stack_ty.
+| Ex_stack_ty : Script_typed_ir.stack_ty -> ex_stack_ty.
 
-Module tc_context.
-  Module Toplevel.
-    Record record {storage_type param_type root_name
-      legacy_create_contract_literal : Set} : Set := {
-      storage_type : storage_type;
-      param_type : param_type;
-      root_name : root_name;
-      legacy_create_contract_literal : legacy_create_contract_literal }.
-    Arguments record : clear implicits.
-  End Toplevel.
-  Definition Toplevel_skeleton := Toplevel.record.
-End tc_context.
+Module ConstructorRecordNotations_tc_context.
+  Module tc_context.
+    Module Toplevel.
+      Record record {storage_type param_type root_name
+        legacy_create_contract_literal : Set} : Set := {
+        storage_type : storage_type;
+        param_type : param_type;
+        root_name : root_name;
+        legacy_create_contract_literal : legacy_create_contract_literal }.
+      Arguments record : clear implicits.
+    End Toplevel.
+    Definition Toplevel_skeleton := Toplevel.record.
+  End tc_context.
+End ConstructorRecordNotations_tc_context.
+Import ConstructorRecordNotations_tc_context.
 
 Reserved Notation "'tc_context.Toplevel".
 
 Inductive tc_context : Set :=
 | Lambda : tc_context
-| Dip : forall {a : Set}, Script_typed_ir.stack_ty a -> tc_context -> tc_context
-| Toplevel : forall {param sto : Set},
-  'tc_context.Toplevel param sto -> tc_context
+| Dip : Script_typed_ir.stack_ty -> tc_context -> tc_context
+| Toplevel : 'tc_context.Toplevel -> tc_context
 
-where "'tc_context.Toplevel" := (fun (t_param t_sto : Set) =>
-  tc_context.Toplevel_skeleton (Script_typed_ir.ty t_sto)
-    (Script_typed_ir.ty t_param) (option string) bool).
+where "'tc_context.Toplevel" :=
+  (tc_context.Toplevel_skeleton Script_typed_ir.ty Script_typed_ir.ty
+    (option string) bool).
 
-Module ConstructorRecordNotations_tc_context.
-  Module tc_context.
-    Definition Toplevel := 'tc_context.Toplevel.
-  End tc_context.
-End ConstructorRecordNotations_tc_context.
-Import ConstructorRecordNotations_tc_context.
+Module tc_context.
+  Include ConstructorRecordNotations_tc_context.tc_context.
+  Definition Toplevel := 'tc_context.Toplevel.
+End tc_context.
 
 Inductive unparsing_mode : Set :=
 | Optimized : unparsing_mode
@@ -84,111 +83,142 @@ Definition type_logger : Set :=
   int -> list (Alpha_context.Script.expr * Alpha_context.Script.annot) ->
   list (Alpha_context.Script.expr * Alpha_context.Script.annot) -> unit.
 
-Definition add_dip {A : Set}
-  (ty : Script_typed_ir.ty A) (annot : option Script_typed_ir.var_annot)
+Definition add_dip
+  (ty : Script_typed_ir.ty) (annot : option Script_typed_ir.var_annot)
   (prev : tc_context) : tc_context :=
   match prev with
   | (Lambda | Toplevel _) =>
     Dip (Script_typed_ir.Item_t ty Script_typed_ir.Empty_t annot) prev
   | Dip __stack_value _ =>
     let 'existT _ __Dip_'a __stack_value :=
-      existT (A := Set) (fun __Dip_'a => Script_typed_ir.stack_ty __Dip_'a) _
+      existT (A := Set) (fun __Dip_'a => Script_typed_ir.stack_ty) _
         __stack_value in
     Dip (Script_typed_ir.Item_t ty __stack_value annot) prev
   end.
 
-Fixpoint comparable_type_size {a t : Set}
-  (ty : Script_typed_ir.comparable_struct t a) {struct ty} : int :=
+Fixpoint comparable_type_size (ty : Script_typed_ir.comparable_struct)
+  {struct ty} : int :=
   match ty with
   | Script_typed_ir.Int_key _ => 1
+  
   | Script_typed_ir.Nat_key _ => 1
+  
   | Script_typed_ir.String_key _ => 1
+  
   | Script_typed_ir.Bytes_key _ => 1
+  
   | Script_typed_ir.Mutez_key _ => 1
+  
   | Script_typed_ir.Bool_key _ => 1
+  
   | Script_typed_ir.Key_hash_key _ => 1
+  
   | Script_typed_ir.Timestamp_key _ => 1
+  
   | Script_typed_ir.Address_key _ => 1
+  
   | Script_typed_ir.Pair_key _ (__t_value, _) _ =>
     let 'existT _ [__1, __Pair_key] __t_value :=
       existT (A := [Set ** Set])
-        (fun '[__1, __Pair_key] =>
-          Script_typed_ir.comparable_struct __1 __Pair_key) [_, _] __t_value in
+        (fun '[__1, __Pair_key] => Script_typed_ir.comparable_struct) [_, _]
+        __t_value in
     Pervasives.op_plus 1 (comparable_type_size __t_value)
   end.
 
-Fixpoint type_size {t : Set} (ty : Script_typed_ir.ty t) {struct ty} : int :=
+Fixpoint type_size (ty : Script_typed_ir.ty) {struct ty} : int :=
   match ty with
   | Script_typed_ir.Unit_t _ => 1
+  
   | Script_typed_ir.Int_t _ => 1
+  
   | Script_typed_ir.Nat_t _ => 1
+  
   | Script_typed_ir.Signature_t _ => 1
+  
   | Script_typed_ir.Bytes_t _ => 1
+  
   | Script_typed_ir.String_t _ => 1
+  
   | Script_typed_ir.Mutez_t _ => 1
+  
   | Script_typed_ir.Key_hash_t _ => 1
+  
   | Script_typed_ir.Key_t _ => 1
+  
   | Script_typed_ir.Timestamp_t _ => 1
+  
   | Script_typed_ir.Address_t _ => 1
+  
   | Script_typed_ir.Bool_t _ => 1
+  
   | Script_typed_ir.Operation_t _ => 1
+  
   | Script_typed_ir.Pair_t (l, _, _) (__r_value, _, _) _ _ =>
     let 'existT _ [__0, __1] [l, __r_value] :=
       existT (A := [Set ** Set])
-        (fun '[__0, __1] => [Script_typed_ir.ty __0 ** Script_typed_ir.ty __1])
-        [_, _] [l, __r_value] in
+        (fun '[__0, __1] => [Script_typed_ir.ty ** Script_typed_ir.ty]) [_, _]
+        [l, __r_value] in
     Pervasives.op_plus (Pervasives.op_plus 1 (type_size l))
       (type_size __r_value)
+  
   | Script_typed_ir.Union_t (l, _) (__r_value, _) _ _ =>
     let 'existT _ [__2, __3] [l, __r_value] :=
       existT (A := [Set ** Set])
-        (fun '[__2, __3] => [Script_typed_ir.ty __2 ** Script_typed_ir.ty __3])
-        [_, _] [l, __r_value] in
+        (fun '[__2, __3] => [Script_typed_ir.ty ** Script_typed_ir.ty]) [_, _]
+        [l, __r_value] in
     Pervasives.op_plus (Pervasives.op_plus 1 (type_size l))
       (type_size __r_value)
+  
   | Script_typed_ir.Lambda_t arg ret _ =>
     let 'existT _ [__4, __5] [arg, ret] :=
       existT (A := [Set ** Set])
-        (fun '[__4, __5] => [Script_typed_ir.ty __4 ** Script_typed_ir.ty __5])
-        [_, _] [arg, ret] in
+        (fun '[__4, __5] => [Script_typed_ir.ty ** Script_typed_ir.ty]) [_, _]
+        [arg, ret] in
     Pervasives.op_plus (Pervasives.op_plus 1 (type_size arg)) (type_size ret)
+  
   | Script_typed_ir.Option_t __t_value _ _ =>
     let 'existT _ __6 __t_value :=
-      existT (A := Set) (fun __6 => Script_typed_ir.ty __6) _ __t_value in
+      existT (A := Set) (fun __6 => Script_typed_ir.ty) _ __t_value in
     Pervasives.op_plus 1 (type_size __t_value)
+  
   | Script_typed_ir.List_t __t_value _ _ =>
     let 'existT _ __7 __t_value :=
-      existT (A := Set) (fun __7 => Script_typed_ir.ty __7) _ __t_value in
+      existT (A := Set) (fun __7 => Script_typed_ir.ty) _ __t_value in
     Pervasives.op_plus 1 (type_size __t_value)
+  
   | Script_typed_ir.Set_t k _ =>
     let 'existT _ __8 k :=
-      existT (A := Set) (fun __8 => Script_typed_ir.comparable_ty __8) _ k in
+      existT (A := Set) (fun __8 => Script_typed_ir.comparable_ty) _ k in
     Pervasives.op_plus 1 (comparable_type_size k)
+  
   | Script_typed_ir.Map_t k v _ _ =>
     let 'existT _ [__10, __9] [k, v] :=
       existT (A := [Set ** Set])
         (fun '[__10, __9] =>
-          [Script_typed_ir.comparable_ty __9 ** Script_typed_ir.ty __10]) [_, _]
-        [k, v] in
+          [Script_typed_ir.comparable_ty ** Script_typed_ir.ty]) [_, _] [k, v]
+      in
     Pervasives.op_plus (Pervasives.op_plus 1 (comparable_type_size k))
       (type_size v)
+  
   | Script_typed_ir.Big_map_t k v _ =>
     let 'existT _ [__11, __12] [k, v] :=
       existT (A := [Set ** Set])
         (fun '[__11, __12] =>
-          [Script_typed_ir.comparable_ty __11 ** Script_typed_ir.ty __12]) [_,
-        _] [k, v] in
+          [Script_typed_ir.comparable_ty ** Script_typed_ir.ty]) [_, _] [k, v]
+      in
     Pervasives.op_plus (Pervasives.op_plus 1 (comparable_type_size k))
       (type_size v)
+  
   | Script_typed_ir.Contract_t arg _ =>
     let 'existT _ __13 arg :=
-      existT (A := Set) (fun __13 => Script_typed_ir.ty __13) _ arg in
+      existT (A := Set) (fun __13 => Script_typed_ir.ty) _ arg in
     Pervasives.op_plus 1 (type_size arg)
+  
   | Script_typed_ir.Chain_id_t _ => 1
   end.
 
-Fixpoint type_size_of_stack_head {st : Set}
-  (__stack_value : Script_typed_ir.stack_ty st) (up_to : int)
+Fixpoint type_size_of_stack_head
+  (__stack_value : Script_typed_ir.stack_ty) (up_to : int)
   {struct __stack_value} : int :=
   match __stack_value with
   | Script_typed_ir.Empty_t => 0
@@ -196,7 +226,7 @@ Fixpoint type_size_of_stack_head {st : Set}
     let 'existT _ [__0, __1] [head, tail, _annot] :=
       existT (A := [Set ** Set])
         (fun '[__0, __1] =>
-          [Script_typed_ir.ty __0 ** Script_typed_ir.stack_ty __1 **
+          [Script_typed_ir.ty ** Script_typed_ir.stack_ty **
             option Script_typed_ir.var_annot]) [_, _] [head, tail, _annot] in
     if (|Compare.Int|).(Compare.S.op_gt) up_to 0 then
       (|Compare.Int|).(Compare.S.max) (type_size head)
@@ -205,135 +235,261 @@ Fixpoint type_size_of_stack_head {st : Set}
       0
   end.
 
-Definition number_of_generated_growing_types {a b : Set}
-  (function_parameter : Script_typed_ir.instr b a) : int :=
+Definition number_of_generated_growing_types
+  (function_parameter : Script_typed_ir.instr) : int :=
   match function_parameter with
   | Script_typed_ir.Drop => 0
+  
   | Script_typed_ir.Dup => 0
+  
   | Script_typed_ir.Swap => 0
+  
   | Script_typed_ir.Const _ => 1
+  
   | Script_typed_ir.Cons_pair => 1
+  
   | Script_typed_ir.Car => 0
+  
   | Script_typed_ir.Cdr => 0
+  
   | Script_typed_ir.Cons_some => 1
+  
   | Script_typed_ir.Cons_none _ => 1
+  
   | Script_typed_ir.If_none _ _ => 0
+  
   | Script_typed_ir.Left => 0
+  
   | Script_typed_ir.Right => 0
+  
   | Script_typed_ir.If_left _ _ => 0
+  
   | Script_typed_ir.Cons_list => 1
+  
   | Script_typed_ir.Nil => 1
+  
   | Script_typed_ir.If_cons _ _ => 0
+  
   | Script_typed_ir.List_map _ => 1
+  
   | Script_typed_ir.List_size => 0
+  
   | Script_typed_ir.List_iter _ => 1
+  
   | Script_typed_ir.Empty_set _ => 1
+  
   | Script_typed_ir.Set_iter _ => 0
+  
   | Script_typed_ir.Set_mem => 0
+  
   | Script_typed_ir.Set_update => 0
+  
   | Script_typed_ir.Set_size => 0
+  
   | Script_typed_ir.Empty_map _ _ => 1
+  
   | Script_typed_ir.Map_map _ => 1
+  
   | Script_typed_ir.Map_iter _ => 1
+  
   | Script_typed_ir.Map_mem => 0
+  
   | Script_typed_ir.Map_get => 0
+  
   | Script_typed_ir.Map_update => 0
+  
   | Script_typed_ir.Map_size => 0
+  
   | Script_typed_ir.Empty_big_map _ _ => 1
+  
   | Script_typed_ir.Big_map_get => 0
+  
   | Script_typed_ir.Big_map_update => 0
+  
   | Script_typed_ir.Big_map_mem => 0
+  
   | Script_typed_ir.Concat_string => 0
+  
   | Script_typed_ir.Concat_string_pair => 0
+  
   | Script_typed_ir.Slice_string => 0
+  
   | Script_typed_ir.String_size => 0
+  
   | Script_typed_ir.Concat_bytes => 0
+  
   | Script_typed_ir.Concat_bytes_pair => 0
+  
   | Script_typed_ir.Slice_bytes => 0
+  
   | Script_typed_ir.Bytes_size => 0
+  
   | Script_typed_ir.Add_seconds_to_timestamp => 0
+  
   | Script_typed_ir.Add_timestamp_to_seconds => 0
+  
   | Script_typed_ir.Sub_timestamp_seconds => 0
+  
   | Script_typed_ir.Diff_timestamps => 0
+  
   | Script_typed_ir.Add_tez => 0
+  
   | Script_typed_ir.Sub_tez => 0
+  
   | Script_typed_ir.Mul_teznat => 0
+  
   | Script_typed_ir.Mul_nattez => 0
+  
   | Script_typed_ir.Ediv_teznat => 0
+  
   | Script_typed_ir.Ediv_tez => 0
+  
   | Script_typed_ir.Or => 0
+  
   | Script_typed_ir.And => 0
+  
   | Script_typed_ir.Xor => 0
+  
   | Script_typed_ir.Not => 0
+  
   | Script_typed_ir.Is_nat => 0
+  
   | Script_typed_ir.Neg_nat => 0
+  
   | Script_typed_ir.Neg_int => 0
+  
   | Script_typed_ir.Abs_int => 0
+  
   | Script_typed_ir.Int_nat => 0
+  
   | Script_typed_ir.Add_intint => 0
+  
   | Script_typed_ir.Add_intnat => 0
+  
   | Script_typed_ir.Add_natint => 0
+  
   | Script_typed_ir.Add_natnat => 0
+  
   | Script_typed_ir.Sub_int => 0
+  
   | Script_typed_ir.Mul_intint => 0
+  
   | Script_typed_ir.Mul_intnat => 0
+  
   | Script_typed_ir.Mul_natint => 0
+  
   | Script_typed_ir.Mul_natnat => 0
+  
   | Script_typed_ir.Ediv_intint => 0
+  
   | Script_typed_ir.Ediv_intnat => 0
+  
   | Script_typed_ir.Ediv_natint => 0
+  
   | Script_typed_ir.Ediv_natnat => 0
+  
   | Script_typed_ir.Lsl_nat => 0
+  
   | Script_typed_ir.Lsr_nat => 0
+  
   | Script_typed_ir.Or_nat => 0
+  
   | Script_typed_ir.And_nat => 0
+  
   | Script_typed_ir.And_int_nat => 0
+  
   | Script_typed_ir.Xor_nat => 0
+  
   | Script_typed_ir.Not_nat => 0
+  
   | Script_typed_ir.Not_int => 0
+  
   | Script_typed_ir.Seq _ _ => 0
+  
   | Script_typed_ir.If _ _ => 0
+  
   | Script_typed_ir.Loop _ => 0
+  
   | Script_typed_ir.Loop_left _ => 0
+  
   | Script_typed_ir.Dip _ => 0
+  
   | Script_typed_ir.Exec => 0
+  
   | Script_typed_ir.Apply _ => 0
+  
   | Script_typed_ir.Lambda _ => 1
+  
   | Script_typed_ir.Failwith _ => 1
+  
   | Script_typed_ir.Nop => 0
+  
   | Script_typed_ir.Compare _ => 1
+  
   | Script_typed_ir.Eq => 0
+  
   | Script_typed_ir.Neq => 0
+  
   | Script_typed_ir.Lt => 0
+  
   | Script_typed_ir.Gt => 0
+  
   | Script_typed_ir.Le => 0
+  
   | Script_typed_ir.Ge => 0
+  
   | Script_typed_ir.Address => 0
+  
   | Script_typed_ir.Contract _ _ => 1
+  
   | Script_typed_ir.Transfer_tokens => 1
+  
   | Script_typed_ir.Create_account => 0
+  
   | Script_typed_ir.Implicit_account => 0
+  
   | Script_typed_ir.Create_contract _ _ _ _ => 1
+  
   | Script_typed_ir.Create_contract_2 _ _ _ _ => 1
+  
   | Script_typed_ir.Now => 0
+  
   | Script_typed_ir.Balance => 0
+  
   | Script_typed_ir.Check_signature => 0
+  
   | Script_typed_ir.Hash_key => 0
+  
   | Script_typed_ir.Blake2b => 0
+  
   | Script_typed_ir.Sha256 => 0
+  
   | Script_typed_ir.Sha512 => 0
+  
   | Script_typed_ir.Steps_to_quota => 0
+  
   | Script_typed_ir.Source => 0
+  
   | Script_typed_ir.Sender => 0
+  
   | Script_typed_ir.Self _ _ => 1
+  
   | Script_typed_ir.Amount => 0
+  
   | Script_typed_ir.Set_delegate => 0
+  
   | Script_typed_ir.Pack _ => 0
+  
   | Script_typed_ir.Unpack _ => 1
+  
   | Script_typed_ir.Dig _ _ => 0
+  
   | Script_typed_ir.Dug _ _ => 0
+  
   | Script_typed_ir.Dipn _ _ _ => 0
+  
   | Script_typed_ir.Dropn _ _ => 0
+  
   | Script_typed_ir.ChainId => 0
   end.
 
@@ -348,9 +504,13 @@ Definition kind {A B : Set} (function_parameter : Micheline.node A B)
   : Script_tc_errors.kind :=
   match function_parameter with
   | Micheline.Int _ _ => Script_tc_errors.Int_kind
+  
   | Micheline.String _ _ => Script_tc_errors.String_kind
+  
   | Micheline.Bytes _ _ => Script_tc_errors.Bytes_kind
+  
   | Micheline.Prim _ _ _ _ => Script_tc_errors.Prim_kind
+  
   | Micheline.Seq _ _ => Script_tc_errors.Seq_kind
   end.
 
@@ -431,9 +591,13 @@ Definition unexpected
   (exp_prims : list Alpha_context.Script.prim) : Error_monad.__error :=
   match expr with
   | Micheline.Int loc _ => extensible_type_value
+  
   | Micheline.String loc _ => extensible_type_value
+  
   | Micheline.Bytes loc _ => extensible_type_value
+  
   | Micheline.Seq loc _ => extensible_type_value
+  
   | Micheline.Prim loc name _ _ =>
     match ((namespace name), exp_ns) with
     |
@@ -468,21 +632,27 @@ Definition wrap_compare {A B : Set}
     else
       (-1).
 
-Fixpoint compare_comparable {a s : Set}
-  (kind : Script_typed_ir.comparable_struct a s) {struct kind}
-  : a -> a -> int :=
+Fixpoint compare_comparable {a : Set} (kind : Script_typed_ir.comparable_struct)
+  {struct kind} : a -> a -> int :=
   match kind with
   | Script_typed_ir.String_key _ =>
     wrap_compare (|Compare.String|).(Compare.S.compare)
+  
   | Script_typed_ir.Bool_key _ =>
     wrap_compare (|Compare.Bool|).(Compare.S.compare)
+  
   | Script_typed_ir.Mutez_key _ => wrap_compare Alpha_context.Tez.compare
+  
   | Script_typed_ir.Key_hash_key _ =>
     wrap_compare (|Signature.Public_key_hash|).(S.SPublic_key_hash.compare)
+  
   | Script_typed_ir.Int_key _ => wrap_compare Alpha_context.Script_int.compare
+  
   | Script_typed_ir.Nat_key _ => wrap_compare Alpha_context.Script_int.compare
+  
   | Script_typed_ir.Timestamp_key _ =>
     wrap_compare Alpha_context.Script_timestamp.compare
+  
   | Script_typed_ir.Address_key _ =>
     wrap_compare
       (fun function_parameter =>
@@ -494,14 +664,15 @@ Fixpoint compare_comparable {a s : Set}
             (|Compare.String|).(Compare.S.compare) ex ey
           else
             lres)
+  
   | Script_typed_ir.Bytes_key _ => wrap_compare MBytes.compare
+  
   | Script_typed_ir.Pair_key (tl, _) (tr, _) _ =>
     let 'existT _ [__0, __1, __Pair_key] [tl, tr] :=
       existT (A := [Set ** Set ** Set])
         (fun '[__0, __1, __Pair_key] =>
-          [Script_typed_ir.comparable_struct __0 Script_typed_ir.leaf **
-            Script_typed_ir.comparable_struct __1 __Pair_key]) [_, _, _]
-        [tl, tr] in
+          [Script_typed_ir.comparable_struct **
+            Script_typed_ir.comparable_struct]) [_, _, _] [tl, tr] in
     fun function_parameter =>
       let '(lx, rx) := function_parameter in
       fun function_parameter =>
@@ -513,7 +684,7 @@ Fixpoint compare_comparable {a s : Set}
           lres
   end.
 
-Definition empty_set {a : Set} (ty : Script_typed_ir.comparable_ty a)
+Definition empty_set {a : Set} (ty : Script_typed_ir.comparable_ty)
   : Script_typed_ir.set a :=
   let OPS :=
     __Set.Make
@@ -588,17 +759,17 @@ Definition set_fold {acc elt : Set}
     Box.(Script_typed_ir.Boxed_set.boxed).
 
 Definition set_size {elt : Set} (Box : Script_typed_ir.set elt)
-  : Alpha_context.Script_int.num Alpha_context.Script_int.n :=
+  : Alpha_context.Script_int.num :=
   let 'existS _ _ Box := Box in
   Alpha_context.Script_int.abs
     (Alpha_context.Script_int.of_int Box.(Script_typed_ir.Boxed_set.size)).
 
 Definition map_key_ty {a b : Set} (Box : Script_typed_ir.map a b)
-  : Script_typed_ir.comparable_ty a :=
+  : Script_typed_ir.comparable_ty :=
   let 'existS _ _ Box := Box in
   Box.(Script_typed_ir.Boxed_map.key_ty).
 
-Definition empty_map {a b : Set} (ty : Script_typed_ir.comparable_ty a)
+Definition empty_map {a b : Set} (ty : Script_typed_ir.comparable_ty)
   : Script_typed_ir.map a b :=
   let OPS :=
     Map.Make
@@ -701,32 +872,41 @@ Definition map_fold {acc key value : Set}
     (Pervasives.fst Box.(Script_typed_ir.Boxed_map.boxed)).
 
 Definition map_size {key value : Set} (Box : Script_typed_ir.map key value)
-  : Alpha_context.Script_int.num Alpha_context.Script_int.n :=
+  : Alpha_context.Script_int.num :=
   let 'existS _ _ Box := Box in
   Alpha_context.Script_int.abs
     (Alpha_context.Script_int.of_int
       (Pervasives.snd Box.(Script_typed_ir.Boxed_map.boxed))).
 
-Fixpoint ty_of_comparable_ty {a s : Set}
-  (function_parameter : Script_typed_ir.comparable_struct a s)
-  {struct function_parameter} : Script_typed_ir.ty a :=
+Fixpoint ty_of_comparable_ty
+  (function_parameter : Script_typed_ir.comparable_struct)
+  {struct function_parameter} : Script_typed_ir.ty :=
   match function_parameter with
   | Script_typed_ir.Int_key tname => Script_typed_ir.Int_t tname
+  
   | Script_typed_ir.Nat_key tname => Script_typed_ir.Nat_t tname
+  
   | Script_typed_ir.String_key tname => Script_typed_ir.String_t tname
+  
   | Script_typed_ir.Bytes_key tname => Script_typed_ir.Bytes_t tname
+  
   | Script_typed_ir.Mutez_key tname => Script_typed_ir.Mutez_t tname
+  
   | Script_typed_ir.Bool_key tname => Script_typed_ir.Bool_t tname
+  
   | Script_typed_ir.Key_hash_key tname => Script_typed_ir.Key_hash_t tname
+  
   | Script_typed_ir.Timestamp_key tname => Script_typed_ir.Timestamp_t tname
+  
   | Script_typed_ir.Address_key tname => Script_typed_ir.Address_t tname
+  
   | Script_typed_ir.Pair_key (l, al) (__r_value, ar) tname =>
     let 'existT _ [__0, __1, __Pair_key] [l, al, __r_value, ar, tname] :=
       existT (A := [Set ** Set ** Set])
         (fun '[__0, __1, __Pair_key] =>
-          [Script_typed_ir.comparable_struct __0 Script_typed_ir.leaf **
+          [Script_typed_ir.comparable_struct **
             option Script_typed_ir.field_annot **
-            Script_typed_ir.comparable_struct __1 __Pair_key **
+            Script_typed_ir.comparable_struct **
             option Script_typed_ir.field_annot **
             option Script_typed_ir.type_annot]) [_, _, _]
         [l, al, __r_value, ar, tname] in
@@ -734,27 +914,35 @@ Fixpoint ty_of_comparable_ty {a s : Set}
       ((ty_of_comparable_ty __r_value), ar, None) tname false
   end.
 
-Fixpoint comparable_ty_of_ty {a : Set}
-  (function_parameter : Script_typed_ir.ty a) {struct function_parameter}
-  : option (Script_typed_ir.comparable_ty a) :=
+Fixpoint comparable_ty_of_ty (function_parameter : Script_typed_ir.ty)
+  {struct function_parameter} : option Script_typed_ir.comparable_ty :=
   match function_parameter with
   | Script_typed_ir.Int_t tname => Some (Script_typed_ir.Int_key tname)
+  
   | Script_typed_ir.Nat_t tname => Some (Script_typed_ir.Nat_key tname)
+  
   | Script_typed_ir.String_t tname => Some (Script_typed_ir.String_key tname)
+  
   | Script_typed_ir.Bytes_t tname => Some (Script_typed_ir.Bytes_key tname)
+  
   | Script_typed_ir.Mutez_t tname => Some (Script_typed_ir.Mutez_key tname)
+  
   | Script_typed_ir.Bool_t tname => Some (Script_typed_ir.Bool_key tname)
+  
   | Script_typed_ir.Key_hash_t tname =>
     Some (Script_typed_ir.Key_hash_key tname)
+  
   | Script_typed_ir.Timestamp_t tname =>
     Some (Script_typed_ir.Timestamp_key tname)
+  
   | Script_typed_ir.Address_t tname => Some (Script_typed_ir.Address_key tname)
+  
   | Script_typed_ir.Pair_t (l, al, _) (__r_value, ar, _) pname _ =>
     let 'existT _ [__0, __1] [l, al, __r_value, ar, pname] :=
       existT (A := [Set ** Set])
         (fun '[__0, __1] =>
-          [Script_typed_ir.ty __0 ** option Script_typed_ir.field_annot **
-            Script_typed_ir.ty __1 ** option Script_typed_ir.field_annot **
+          [Script_typed_ir.ty ** option Script_typed_ir.field_annot **
+            Script_typed_ir.ty ** option Script_typed_ir.field_annot **
             option Script_typed_ir.type_annot]) [_, _]
         [l, al, __r_value, ar, pname] in
     match comparable_ty_of_ty __r_value with
@@ -762,45 +950,56 @@ Fixpoint comparable_ty_of_ty {a : Set}
     | Some rty =>
       match comparable_ty_of_ty l with
       | None => None
+      
       | Some (Script_typed_ir.Pair_key _ _ _) => None
+      
       | Some (Script_typed_ir.Int_key tname) =>
         Some
           (Script_typed_ir.Pair_key ((Script_typed_ir.Int_key tname), al)
             (rty, ar) pname)
+      
       | Some (Script_typed_ir.Nat_key tname) =>
         Some
           (Script_typed_ir.Pair_key ((Script_typed_ir.Nat_key tname), al)
             (rty, ar) pname)
+      
       | Some (Script_typed_ir.String_key tname) =>
         Some
           (Script_typed_ir.Pair_key ((Script_typed_ir.String_key tname), al)
             (rty, ar) pname)
+      
       | Some (Script_typed_ir.Bytes_key tname) =>
         Some
           (Script_typed_ir.Pair_key ((Script_typed_ir.Bytes_key tname), al)
             (rty, ar) pname)
+      
       | Some (Script_typed_ir.Mutez_key tname) =>
         Some
           (Script_typed_ir.Pair_key ((Script_typed_ir.Mutez_key tname), al)
             (rty, ar) pname)
+      
       | Some (Script_typed_ir.Bool_key tname) =>
         Some
           (Script_typed_ir.Pair_key ((Script_typed_ir.Bool_key tname), al)
             (rty, ar) pname)
+      
       | Some (Script_typed_ir.Key_hash_key tname) =>
         Some
           (Script_typed_ir.Pair_key ((Script_typed_ir.Key_hash_key tname), al)
             (rty, ar) pname)
+      
       | Some (Script_typed_ir.Timestamp_key tname) =>
         Some
           (Script_typed_ir.Pair_key ((Script_typed_ir.Timestamp_key tname), al)
             (rty, ar) pname)
+      
       | Some (Script_typed_ir.Address_key tname) =>
         Some
           (Script_typed_ir.Pair_key ((Script_typed_ir.Address_key tname), al)
             (rty, ar) pname)
       end
     end
+  
   | _ => None
   end.
 
@@ -817,44 +1016,53 @@ Definition add_field_annot {A B : Set}
   | expr => expr
   end.
 
-Fixpoint unparse_comparable_ty {a s : Set}
-  (function_parameter : Script_typed_ir.comparable_struct a s)
+Fixpoint unparse_comparable_ty
+  (function_parameter : Script_typed_ir.comparable_struct)
   {struct function_parameter} : Alpha_context.Script.node :=
   match function_parameter with
   | Script_typed_ir.Int_key tname =>
     Micheline.Prim (-1) Alpha_context.Script.T_int nil
       (Script_ir_annot.unparse_type_annot tname)
+  
   | Script_typed_ir.Nat_key tname =>
     Micheline.Prim (-1) Alpha_context.Script.T_nat nil
       (Script_ir_annot.unparse_type_annot tname)
+  
   | Script_typed_ir.String_key tname =>
     Micheline.Prim (-1) Alpha_context.Script.T_string nil
       (Script_ir_annot.unparse_type_annot tname)
+  
   | Script_typed_ir.Bytes_key tname =>
     Micheline.Prim (-1) Alpha_context.Script.T_bytes nil
       (Script_ir_annot.unparse_type_annot tname)
+  
   | Script_typed_ir.Mutez_key tname =>
     Micheline.Prim (-1) Alpha_context.Script.T_mutez nil
       (Script_ir_annot.unparse_type_annot tname)
+  
   | Script_typed_ir.Bool_key tname =>
     Micheline.Prim (-1) Alpha_context.Script.T_bool nil
       (Script_ir_annot.unparse_type_annot tname)
+  
   | Script_typed_ir.Key_hash_key tname =>
     Micheline.Prim (-1) Alpha_context.Script.T_key_hash nil
       (Script_ir_annot.unparse_type_annot tname)
+  
   | Script_typed_ir.Timestamp_key tname =>
     Micheline.Prim (-1) Alpha_context.Script.T_timestamp nil
       (Script_ir_annot.unparse_type_annot tname)
+  
   | Script_typed_ir.Address_key tname =>
     Micheline.Prim (-1) Alpha_context.Script.T_address nil
       (Script_ir_annot.unparse_type_annot tname)
+  
   | Script_typed_ir.Pair_key (l, al) (__r_value, ar) pname =>
     let 'existT _ [__0, __1, __Pair_key] [l, al, __r_value, ar, pname] :=
       existT (A := [Set ** Set ** Set])
         (fun '[__0, __1, __Pair_key] =>
-          [Script_typed_ir.comparable_struct __0 Script_typed_ir.leaf **
+          [Script_typed_ir.comparable_struct **
             option Script_typed_ir.field_annot **
-            Script_typed_ir.comparable_struct __1 __Pair_key **
+            Script_typed_ir.comparable_struct **
             option Script_typed_ir.field_annot **
             option Script_typed_ir.type_annot]) [_, _, _]
         [l, al, __r_value, ar, pname] in
@@ -864,14 +1072,14 @@ Fixpoint unparse_comparable_ty {a s : Set}
       (Script_ir_annot.unparse_type_annot pname)
   end.
 
-Fixpoint unparse_ty_no_lwt {a : Set}
-  (ctxt : Alpha_context.context) (ty : Script_typed_ir.ty a) {struct ctxt}
+Fixpoint unparse_ty_no_lwt
+  (ctxt : Alpha_context.context) (ty : Script_typed_ir.ty) {struct ctxt}
   : Error_monad.tzresult (Alpha_context.Script.node * Alpha_context.context) :=
   let? ctxt := Alpha_context.Gas.consume ctxt Unparse_costs.cycle in
-  let __return {B : Set}
+  let __return {A : Set}
     (ctxt : Alpha_context.context)
-    (function_parameter : B * list (Micheline.node int B) * Micheline.annot)
-    : Error_monad.tzresult (Micheline.node int B * Alpha_context.context) :=
+    (function_parameter : A * list (Micheline.node int A) * Micheline.annot)
+    : Error_monad.tzresult (Micheline.node int A * Alpha_context.context) :=
     let '(name, args, annot) := function_parameter in
     let __result_value := Micheline.Prim (-1) name args annot in
     let? ctxt :=
@@ -883,76 +1091,90 @@ Fixpoint unparse_ty_no_lwt {a : Set}
     __return ctxt
       (Alpha_context.Script.T_unit, nil,
         (Script_ir_annot.unparse_type_annot tname))
+  
   | Script_typed_ir.Int_t tname =>
     __return ctxt
       (Alpha_context.Script.T_int, nil,
         (Script_ir_annot.unparse_type_annot tname))
+  
   | Script_typed_ir.Nat_t tname =>
     __return ctxt
       (Alpha_context.Script.T_nat, nil,
         (Script_ir_annot.unparse_type_annot tname))
+  
   | Script_typed_ir.String_t tname =>
     __return ctxt
       (Alpha_context.Script.T_string, nil,
         (Script_ir_annot.unparse_type_annot tname))
+  
   | Script_typed_ir.Bytes_t tname =>
     __return ctxt
       (Alpha_context.Script.T_bytes, nil,
         (Script_ir_annot.unparse_type_annot tname))
+  
   | Script_typed_ir.Mutez_t tname =>
     __return ctxt
       (Alpha_context.Script.T_mutez, nil,
         (Script_ir_annot.unparse_type_annot tname))
+  
   | Script_typed_ir.Bool_t tname =>
     __return ctxt
       (Alpha_context.Script.T_bool, nil,
         (Script_ir_annot.unparse_type_annot tname))
+  
   | Script_typed_ir.Key_hash_t tname =>
     __return ctxt
       (Alpha_context.Script.T_key_hash, nil,
         (Script_ir_annot.unparse_type_annot tname))
+  
   | Script_typed_ir.Key_t tname =>
     __return ctxt
       (Alpha_context.Script.T_key, nil,
         (Script_ir_annot.unparse_type_annot tname))
+  
   | Script_typed_ir.Timestamp_t tname =>
     __return ctxt
       (Alpha_context.Script.T_timestamp, nil,
         (Script_ir_annot.unparse_type_annot tname))
+  
   | Script_typed_ir.Address_t tname =>
     __return ctxt
       (Alpha_context.Script.T_address, nil,
         (Script_ir_annot.unparse_type_annot tname))
+  
   | Script_typed_ir.Signature_t tname =>
     __return ctxt
       (Alpha_context.Script.T_signature, nil,
         (Script_ir_annot.unparse_type_annot tname))
+  
   | Script_typed_ir.Operation_t tname =>
     __return ctxt
       (Alpha_context.Script.T_operation, nil,
         (Script_ir_annot.unparse_type_annot tname))
+  
   | Script_typed_ir.Chain_id_t tname =>
     __return ctxt
       (Alpha_context.Script.T_chain_id, nil,
         (Script_ir_annot.unparse_type_annot tname))
+  
   | Script_typed_ir.Contract_t ut tname =>
     let 'existT _ __0 [ut, tname] :=
       existT (A := Set)
-        (fun __0 =>
-          [Script_typed_ir.ty __0 ** option Script_typed_ir.type_annot]) _
+        (fun __0 => [Script_typed_ir.ty ** option Script_typed_ir.type_annot]) _
         [ut, tname] in
     let? '(__t_value, ctxt) := unparse_ty_no_lwt ctxt ut in
     __return ctxt
       (Alpha_context.Script.T_contract, [ __t_value ],
         (Script_ir_annot.unparse_type_annot tname))
+  
   | Script_typed_ir.Pair_t (utl, l_field, l_var) (utr, r_field, r_var) tname _
     =>
     let 'existT _ [__1, __2] [utl, l_field, l_var, utr, r_field, r_var, tname]
       :=
       existT (A := [Set ** Set])
         (fun '[__1, __2] =>
-          [Script_typed_ir.ty __1 ** option Script_typed_ir.field_annot **
-            option Script_typed_ir.var_annot ** Script_typed_ir.ty __2 **
+          [Script_typed_ir.ty ** option Script_typed_ir.field_annot **
+            option Script_typed_ir.var_annot ** Script_typed_ir.ty **
             option Script_typed_ir.field_annot **
             option Script_typed_ir.var_annot **
             option Script_typed_ir.type_annot]) [_, _]
@@ -963,12 +1185,13 @@ Fixpoint unparse_ty_no_lwt {a : Set}
     let? '(utr, ctxt) := unparse_ty_no_lwt ctxt utr in
     let tr := add_field_annot r_field r_var utr in
     __return ctxt (Alpha_context.Script.T_pair, [ tl; tr ], annot)
+  
   | Script_typed_ir.Union_t (utl, l_field) (utr, r_field) tname _ =>
     let 'existT _ [__3, __4] [utl, l_field, utr, r_field, tname] :=
       existT (A := [Set ** Set])
         (fun '[__3, __4] =>
-          [Script_typed_ir.ty __3 ** option Script_typed_ir.field_annot **
-            Script_typed_ir.ty __4 ** option Script_typed_ir.field_annot **
+          [Script_typed_ir.ty ** option Script_typed_ir.field_annot **
+            Script_typed_ir.ty ** option Script_typed_ir.field_annot **
             option Script_typed_ir.type_annot]) [_, _]
         [utl, l_field, utr, r_field, tname] in
     let annot := Script_ir_annot.unparse_type_annot tname in
@@ -977,62 +1200,66 @@ Fixpoint unparse_ty_no_lwt {a : Set}
     let? '(utr, ctxt) := unparse_ty_no_lwt ctxt utr in
     let tr := add_field_annot r_field None utr in
     __return ctxt (Alpha_context.Script.T_or, [ tl; tr ], annot)
+  
   | Script_typed_ir.Lambda_t uta utr tname =>
     let 'existT _ [__5, __6] [uta, utr, tname] :=
       existT (A := [Set ** Set])
         (fun '[__5, __6] =>
-          [Script_typed_ir.ty __5 ** Script_typed_ir.ty __6 **
+          [Script_typed_ir.ty ** Script_typed_ir.ty **
             option Script_typed_ir.type_annot]) [_, _] [uta, utr, tname] in
     let? '(ta, ctxt) := unparse_ty_no_lwt ctxt uta in
     let? '(tr, ctxt) := unparse_ty_no_lwt ctxt utr in
     __return ctxt
       (Alpha_context.Script.T_lambda, [ ta; tr ],
         (Script_ir_annot.unparse_type_annot tname))
+  
   | Script_typed_ir.Option_t ut tname _ =>
     let 'existT _ __7 [ut, tname] :=
       existT (A := Set)
-        (fun __7 =>
-          [Script_typed_ir.ty __7 ** option Script_typed_ir.type_annot]) _
+        (fun __7 => [Script_typed_ir.ty ** option Script_typed_ir.type_annot]) _
         [ut, tname] in
     let annot := Script_ir_annot.unparse_type_annot tname in
     let? '(ut, ctxt) := unparse_ty_no_lwt ctxt ut in
     __return ctxt (Alpha_context.Script.T_option, [ ut ], annot)
+  
   | Script_typed_ir.List_t ut tname _ =>
     let 'existT _ __8 [ut, tname] :=
       existT (A := Set)
-        (fun __8 =>
-          [Script_typed_ir.ty __8 ** option Script_typed_ir.type_annot]) _
+        (fun __8 => [Script_typed_ir.ty ** option Script_typed_ir.type_annot]) _
         [ut, tname] in
     let? '(__t_value, ctxt) := unparse_ty_no_lwt ctxt ut in
     __return ctxt
       (Alpha_context.Script.T_list, [ __t_value ],
         (Script_ir_annot.unparse_type_annot tname))
+  
   | Script_typed_ir.Set_t ut tname =>
     let 'existT _ __9 [ut, tname] :=
       existT (A := Set)
         (fun __9 =>
-          [Script_typed_ir.comparable_ty __9 **
-            option Script_typed_ir.type_annot]) _ [ut, tname] in
+          [Script_typed_ir.comparable_ty ** option Script_typed_ir.type_annot])
+        _ [ut, tname] in
     let __t_value := unparse_comparable_ty ut in
     __return ctxt
       (Alpha_context.Script.T_set, [ __t_value ],
         (Script_ir_annot.unparse_type_annot tname))
+  
   | Script_typed_ir.Map_t uta utr tname _ =>
     let 'existT _ [__10, __11] [uta, utr, tname] :=
       existT (A := [Set ** Set])
         (fun '[__10, __11] =>
-          [Script_typed_ir.comparable_ty __10 ** Script_typed_ir.ty __11 **
+          [Script_typed_ir.comparable_ty ** Script_typed_ir.ty **
             option Script_typed_ir.type_annot]) [_, _] [uta, utr, tname] in
     let ta := unparse_comparable_ty uta in
     let? '(tr, ctxt) := unparse_ty_no_lwt ctxt utr in
     __return ctxt
       (Alpha_context.Script.T_map, [ ta; tr ],
         (Script_ir_annot.unparse_type_annot tname))
+  
   | Script_typed_ir.Big_map_t uta utr tname =>
     let 'existT _ [__12, __13] [uta, utr, tname] :=
       existT (A := [Set ** Set])
         (fun '[__12, __13] =>
-          [Script_typed_ir.comparable_ty __12 ** Script_typed_ir.ty __13 **
+          [Script_typed_ir.comparable_ty ** Script_typed_ir.ty **
             option Script_typed_ir.type_annot]) [_, _] [uta, utr, tname] in
     let ta := unparse_comparable_ty uta in
     let? '(tr, ctxt) := unparse_ty_no_lwt ctxt utr in
@@ -1041,8 +1268,7 @@ Fixpoint unparse_ty_no_lwt {a : Set}
         (Script_ir_annot.unparse_type_annot tname))
   end.
 
-Definition unparse_ty {A : Set}
-  (ctxt : Alpha_context.context) (ty : Script_typed_ir.ty A)
+Definition unparse_ty (ctxt : Alpha_context.context) (ty : Script_typed_ir.ty)
   : Lwt.t
     (Error_monad.tzresult (Alpha_context.Script.node * Alpha_context.context)) :=
   Lwt.__return (unparse_ty_no_lwt ctxt ty).
@@ -1060,8 +1286,8 @@ Fixpoint strip_var_annots {A B : Set} (function_parameter : Micheline.node A B)
     Micheline.Prim loc name (List.map strip_var_annots args) annots
   end.
 
-Definition serialize_ty_for_error {A : Set}
-  (ctxt : Alpha_context.context) (ty : Script_typed_ir.ty A)
+Definition serialize_ty_for_error
+  (ctxt : Alpha_context.context) (ty : Script_typed_ir.ty)
   : Error_monad.tzresult
     (Micheline.canonical Alpha_context.Script.prim * Alpha_context.context) :=
   Error_monad.op_gtpipequestion
@@ -1071,9 +1297,9 @@ Definition serialize_ty_for_error {A : Set}
       let '(ty, ctxt) := function_parameter in
       ((Micheline.strip_locations (strip_var_annots ty)), ctxt)).
 
-Fixpoint unparse_stack {a : Set}
-  (ctxt : Alpha_context.context)
-  (function_parameter : Script_typed_ir.stack_ty a) {struct ctxt}
+Fixpoint unparse_stack
+  (ctxt : Alpha_context.context) (function_parameter : Script_typed_ir.stack_ty)
+  {struct ctxt}
   : Lwt.t
     (Error_monad.tzresult
       (list (Alpha_context.Script.expr * Alpha_context.Script.annot) *
@@ -1084,7 +1310,7 @@ Fixpoint unparse_stack {a : Set}
     let 'existT _ [__0, __1] [ty, rest, annot] :=
       existT (A := [Set ** Set])
         (fun '[__0, __1] =>
-          [Script_typed_ir.ty __0 ** Script_typed_ir.stack_ty __1 **
+          [Script_typed_ir.ty ** Script_typed_ir.stack_ty **
             option Script_typed_ir.var_annot]) [_, _] [ty, rest, annot] in
     let=? '(uty, ctxt) := unparse_ty ctxt ty in
     let=? '(urest, ctxt) := unparse_stack ctxt rest in
@@ -1094,82 +1320,105 @@ Fixpoint unparse_stack {a : Set}
           (Script_ir_annot.unparse_var_annot annot)) urest), ctxt)
   end.
 
-Definition serialize_stack_for_error {A : Set}
-  (ctxt : Alpha_context.context) (stack_ty : Script_typed_ir.stack_ty A)
+Definition serialize_stack_for_error
+  (ctxt : Alpha_context.context) (stack_ty : Script_typed_ir.stack_ty)
   : Lwt.t
     (Error_monad.tzresult
       (list (Alpha_context.Script.expr * Alpha_context.Script.annot) *
         Alpha_context.context)) :=
   Error_monad.trace extensible_type_value (unparse_stack ctxt stack_ty).
 
-Definition name_of_ty {a : Set} (function_parameter : Script_typed_ir.ty a)
+Definition name_of_ty (function_parameter : Script_typed_ir.ty)
   : option Script_typed_ir.type_annot :=
   match function_parameter with
   | Script_typed_ir.Unit_t tname => tname
+  
   | Script_typed_ir.Int_t tname => tname
+  
   | Script_typed_ir.Nat_t tname => tname
+  
   | Script_typed_ir.String_t tname => tname
+  
   | Script_typed_ir.Bytes_t tname => tname
+  
   | Script_typed_ir.Mutez_t tname => tname
+  
   | Script_typed_ir.Bool_t tname => tname
+  
   | Script_typed_ir.Key_hash_t tname => tname
+  
   | Script_typed_ir.Key_t tname => tname
+  
   | Script_typed_ir.Timestamp_t tname => tname
+  
   | Script_typed_ir.Address_t tname => tname
+  
   | Script_typed_ir.Signature_t tname => tname
+  
   | Script_typed_ir.Operation_t tname => tname
+  
   | Script_typed_ir.Chain_id_t tname => tname
+  
   | Script_typed_ir.Contract_t _ tname => tname
+  
   | Script_typed_ir.Pair_t _ _ tname _ => tname
+  
   | Script_typed_ir.Union_t _ _ tname _ => tname
+  
   | Script_typed_ir.Lambda_t _ _ tname => tname
+  
   | Script_typed_ir.Option_t _ tname _ => tname
+  
   | Script_typed_ir.List_t _ tname _ => tname
+  
   | Script_typed_ir.Set_t _ tname => tname
+  
   | Script_typed_ir.Map_t _ _ tname _ => tname
+  
   | Script_typed_ir.Big_map_t _ _ tname => tname
   end.
 
-Reserved Notation "'eq".
+Inductive eq : Set :=
+| Eq : eq.
 
-Inductive eq_gadt : Set :=
-| Eq : eq_gadt
-
-where "'eq" := (fun (_ _ : Set) => eq_gadt).
-
-Definition eq := 'eq.
-
-Definition comparable_ty_eq {ta tb : Set}
-  (ctxt : Alpha_context.context) (ta : Script_typed_ir.comparable_ty ta)
-  (tb : Script_typed_ir.comparable_ty tb)
-  : Error_monad.tzresult
-    (eq (Script_typed_ir.comparable_ty ta) (Script_typed_ir.comparable_ty tb)) :=
+Definition comparable_ty_eq
+  (ctxt : Alpha_context.context) (ta : Script_typed_ir.comparable_ty)
+  (tb : Script_typed_ir.comparable_ty) : Error_monad.tzresult eq :=
   match (ta, tb) with
   | (Script_typed_ir.Int_key _, Script_typed_ir.Int_key _) => Pervasives.Ok Eq
+  
   | (Script_typed_ir.Nat_key _, Script_typed_ir.Nat_key _) => Pervasives.Ok Eq
+  
   | (Script_typed_ir.String_key _, Script_typed_ir.String_key _) =>
     Pervasives.Ok Eq
+  
   | (Script_typed_ir.Bytes_key _, Script_typed_ir.Bytes_key _) =>
     Pervasives.Ok Eq
+  
   | (Script_typed_ir.Mutez_key _, Script_typed_ir.Mutez_key _) =>
     Pervasives.Ok Eq
+  
   | (Script_typed_ir.Bool_key _, Script_typed_ir.Bool_key _) => Pervasives.Ok Eq
+  
   | (Script_typed_ir.Key_hash_key _, Script_typed_ir.Key_hash_key _) =>
     Pervasives.Ok Eq
+  
   | (Script_typed_ir.Timestamp_key _, Script_typed_ir.Timestamp_key _) =>
     Pervasives.Ok Eq
+  
   | (Script_typed_ir.Address_key _, Script_typed_ir.Address_key _) =>
     Pervasives.Ok Eq
+  
   | (_, _) =>
     let? '(ta, ctxt) := serialize_ty_for_error ctxt (ty_of_comparable_ty ta) in
     let? '(tb, _ctxt) := serialize_ty_for_error ctxt (ty_of_comparable_ty tb) in
     Error_monad.__error_value extensible_type_value
   end.
 
-Definition record_inconsistent {A B C : Set}
-  (ctxt : Alpha_context.context) (ta : Script_typed_ir.ty A)
-  (tb : Script_typed_ir.ty B)
-  : Error_monad.tzresult C -> Error_monad.tzresult C :=
+Definition record_inconsistent {A : Set}
+  (ctxt : Alpha_context.context) (ta : Script_typed_ir.ty)
+  (tb : Script_typed_ir.ty)
+  : Error_monad.tzresult A -> Error_monad.tzresult A :=
   Error_monad.record_trace_eval
     (fun function_parameter =>
       let '_ := function_parameter in
@@ -1179,10 +1428,10 @@ Definition record_inconsistent {A B C : Set}
           let '(tb, _ctxt) := function_parameter in
           extensible_type_value)).
 
-Definition record_inconsistent_type_annotations {A B C : Set}
+Definition record_inconsistent_type_annotations {A : Set}
   (ctxt : Alpha_context.context) (loc : Alpha_context.Script.location)
-  (ta : Script_typed_ir.ty A) (tb : Script_typed_ir.ty B)
-  : Error_monad.tzresult C -> Error_monad.tzresult C :=
+  (ta : Script_typed_ir.ty) (tb : Script_typed_ir.ty)
+  : Error_monad.tzresult A -> Error_monad.tzresult A :=
   Error_monad.record_trace_eval
     (fun function_parameter =>
       let '_ := function_parameter in
@@ -1192,17 +1441,12 @@ Definition record_inconsistent_type_annotations {A B C : Set}
           let '(tb, _ctxt) := function_parameter in
           extensible_type_value)).
 
-Fixpoint ty_eq {ta tb : Set}
-  (ctxt : Alpha_context.context) (ta : Script_typed_ir.ty ta)
-  (tb : Script_typed_ir.ty tb) {struct ctxt}
-  : Error_monad.tzresult
-    (eq (Script_typed_ir.ty ta) (Script_typed_ir.ty tb) * Alpha_context.context) :=
-  let ok
-    (__eq_value : eq (Script_typed_ir.ty ta) (Script_typed_ir.ty tb))
-    (ctxt : Alpha_context.context) (nb_args : int)
-    : Error_monad.tzresult
-      (eq (Script_typed_ir.ty ta) (Script_typed_ir.ty tb) *
-        Alpha_context.context) :=
+Fixpoint ty_eq
+  (ctxt : Alpha_context.context) (ta : Script_typed_ir.ty)
+  (tb : Script_typed_ir.ty) {struct ctxt}
+  : Error_monad.tzresult (eq * Alpha_context.context) :=
+  let ok (__eq_value : eq) (ctxt : Alpha_context.context) (nb_args : int)
+    : Error_monad.tzresult (eq * Alpha_context.context) :=
     let? ctxt :=
       Alpha_context.Gas.consume ctxt
         (Typecheck_costs.type_ (Pervasives.op_star 2 nb_args)) in
@@ -1210,138 +1454,152 @@ Fixpoint ty_eq {ta tb : Set}
   let? ctxt := Alpha_context.Gas.consume ctxt Typecheck_costs.cycle in
   match (ta, tb) with
   | (Script_typed_ir.Unit_t _, Script_typed_ir.Unit_t _) => ok Eq ctxt 0
+  
   | (Script_typed_ir.Int_t _, Script_typed_ir.Int_t _) => ok Eq ctxt 0
+  
   | (Script_typed_ir.Nat_t _, Script_typed_ir.Nat_t _) => ok Eq ctxt 0
+  
   | (Script_typed_ir.Key_t _, Script_typed_ir.Key_t _) => ok Eq ctxt 0
+  
   | (Script_typed_ir.Key_hash_t _, Script_typed_ir.Key_hash_t _) => ok Eq ctxt 0
+  
   | (Script_typed_ir.String_t _, Script_typed_ir.String_t _) => ok Eq ctxt 0
+  
   | (Script_typed_ir.Bytes_t _, Script_typed_ir.Bytes_t _) => ok Eq ctxt 0
+  
   | (Script_typed_ir.Signature_t _, Script_typed_ir.Signature_t _) =>
     ok Eq ctxt 0
+  
   | (Script_typed_ir.Mutez_t _, Script_typed_ir.Mutez_t _) => ok Eq ctxt 0
+  
   | (Script_typed_ir.Timestamp_t _, Script_typed_ir.Timestamp_t _) =>
     ok Eq ctxt 0
+  
   | (Script_typed_ir.Chain_id_t _, Script_typed_ir.Chain_id_t _) => ok Eq ctxt 0
+  
   | (Script_typed_ir.Address_t _, Script_typed_ir.Address_t _) => ok Eq ctxt 0
+  
   | (Script_typed_ir.Bool_t _, Script_typed_ir.Bool_t _) => ok Eq ctxt 0
+  
   | (Script_typed_ir.Operation_t _, Script_typed_ir.Operation_t _) =>
     ok Eq ctxt 0
+  
   | (Script_typed_ir.Map_t tal tar _ _, Script_typed_ir.Map_t tbl tbr _ _) =>
     let 'existT _ [__0, __1, __2, __3] [tal, tar, tbl, tbr] :=
       existT (A := [Set ** Set ** Set ** Set])
         (fun '[__0, __1, __2, __3] =>
-          [Script_typed_ir.comparable_ty __0 ** Script_typed_ir.ty __1 **
-            Script_typed_ir.comparable_ty __2 ** Script_typed_ir.ty __3]) [_, _,
-        _, _] [tal, tar, tbl, tbr] in
+          [Script_typed_ir.comparable_ty ** Script_typed_ir.ty **
+            Script_typed_ir.comparable_ty ** Script_typed_ir.ty]) [_, _, _, _]
+        [tal, tar, tbl, tbr] in
     (record_inconsistent ctxt ta tb)
       (let? 'Eq := comparable_ty_eq ctxt tal tbl in
       let? '(Eq, ctxt) := ty_eq ctxt tar tbr in
       ok Eq ctxt 2)
+  
   | (Script_typed_ir.Big_map_t tal tar _, Script_typed_ir.Big_map_t tbl tbr _)
     =>
     let 'existT _ [__4, __5, __6, __7] [tal, tar, tbl, tbr] :=
       existT (A := [Set ** Set ** Set ** Set])
         (fun '[__4, __5, __6, __7] =>
-          [Script_typed_ir.comparable_ty __4 ** Script_typed_ir.ty __5 **
-            Script_typed_ir.comparable_ty __6 ** Script_typed_ir.ty __7]) [_, _,
-        _, _] [tal, tar, tbl, tbr] in
+          [Script_typed_ir.comparable_ty ** Script_typed_ir.ty **
+            Script_typed_ir.comparable_ty ** Script_typed_ir.ty]) [_, _, _, _]
+        [tal, tar, tbl, tbr] in
     (record_inconsistent ctxt ta tb)
       (let? 'Eq := comparable_ty_eq ctxt tal tbl in
       let? '(Eq, ctxt) := ty_eq ctxt tar tbr in
       ok Eq ctxt 2)
+  
   | (Script_typed_ir.Set_t ea _, Script_typed_ir.Set_t eb _) =>
     let 'existT _ [__8, __9] [ea, eb] :=
       existT (A := [Set ** Set])
         (fun '[__8, __9] =>
-          [Script_typed_ir.comparable_ty __8 **
-            Script_typed_ir.comparable_ty __9]) [_, _] [ea, eb] in
+          [Script_typed_ir.comparable_ty ** Script_typed_ir.comparable_ty]) [_,
+        _] [ea, eb] in
     (record_inconsistent ctxt ta tb)
       (let? 'Eq := comparable_ty_eq ctxt ea eb in
       ok Eq ctxt 1)
+  
   |
     (Script_typed_ir.Pair_t (tal, _, _) (tar, _, _) _ _,
       Script_typed_ir.Pair_t (tbl, _, _) (tbr, _, _) _ _) =>
     let 'existT _ [__10, __11, __12, __13] [tal, tar, tbl, tbr] :=
       existT (A := [Set ** Set ** Set ** Set])
         (fun '[__10, __11, __12, __13] =>
-          [Script_typed_ir.ty __10 ** Script_typed_ir.ty __11 **
-            Script_typed_ir.ty __12 ** Script_typed_ir.ty __13]) [_, _, _, _]
-        [tal, tar, tbl, tbr] in
+          [Script_typed_ir.ty ** Script_typed_ir.ty ** Script_typed_ir.ty **
+            Script_typed_ir.ty]) [_, _, _, _] [tal, tar, tbl, tbr] in
     (record_inconsistent ctxt ta tb)
       (let? '(Eq, ctxt) := ty_eq ctxt tal tbl in
       let? '(Eq, ctxt) := ty_eq ctxt tar tbr in
       ok Eq ctxt 2)
+  
   |
     (Script_typed_ir.Union_t (tal, _) (tar, _) _ _,
       Script_typed_ir.Union_t (tbl, _) (tbr, _) _ _) =>
     let 'existT _ [__14, __15, __16, __17] [tal, tar, tbl, tbr] :=
       existT (A := [Set ** Set ** Set ** Set])
         (fun '[__14, __15, __16, __17] =>
-          [Script_typed_ir.ty __14 ** Script_typed_ir.ty __15 **
-            Script_typed_ir.ty __16 ** Script_typed_ir.ty __17]) [_, _, _, _]
-        [tal, tar, tbl, tbr] in
+          [Script_typed_ir.ty ** Script_typed_ir.ty ** Script_typed_ir.ty **
+            Script_typed_ir.ty]) [_, _, _, _] [tal, tar, tbl, tbr] in
     (record_inconsistent ctxt ta tb)
       (let? '(Eq, ctxt) := ty_eq ctxt tal tbl in
       let? '(Eq, ctxt) := ty_eq ctxt tar tbr in
       ok Eq ctxt 2)
+  
   | (Script_typed_ir.Lambda_t tal tar _, Script_typed_ir.Lambda_t tbl tbr _) =>
     let 'existT _ [__18, __19, __20, __21] [tal, tar, tbl, tbr] :=
       existT (A := [Set ** Set ** Set ** Set])
         (fun '[__18, __19, __20, __21] =>
-          [Script_typed_ir.ty __18 ** Script_typed_ir.ty __19 **
-            Script_typed_ir.ty __20 ** Script_typed_ir.ty __21]) [_, _, _, _]
-        [tal, tar, tbl, tbr] in
+          [Script_typed_ir.ty ** Script_typed_ir.ty ** Script_typed_ir.ty **
+            Script_typed_ir.ty]) [_, _, _, _] [tal, tar, tbl, tbr] in
     (record_inconsistent ctxt ta tb)
       (let? '(Eq, ctxt) := ty_eq ctxt tal tbl in
       let? '(Eq, ctxt) := ty_eq ctxt tar tbr in
       ok Eq ctxt 2)
+  
   | (Script_typed_ir.Contract_t tal _, Script_typed_ir.Contract_t tbl _) =>
     let 'existT _ [__22, __23] [tal, tbl] :=
       existT (A := [Set ** Set])
-        (fun '[__22, __23] =>
-          [Script_typed_ir.ty __22 ** Script_typed_ir.ty __23]) [_, _]
+        (fun '[__22, __23] => [Script_typed_ir.ty ** Script_typed_ir.ty]) [_, _]
         [tal, tbl] in
     (record_inconsistent ctxt ta tb)
       (let? '(Eq, ctxt) := ty_eq ctxt tal tbl in
       ok Eq ctxt 1)
+  
   | (Script_typed_ir.Option_t tva _ _, Script_typed_ir.Option_t tvb _ _) =>
     let 'existT _ [__24, __25] [tva, tvb] :=
       existT (A := [Set ** Set])
-        (fun '[__24, __25] =>
-          [Script_typed_ir.ty __24 ** Script_typed_ir.ty __25]) [_, _]
+        (fun '[__24, __25] => [Script_typed_ir.ty ** Script_typed_ir.ty]) [_, _]
         [tva, tvb] in
     (record_inconsistent ctxt ta tb)
       (let? '(Eq, ctxt) := ty_eq ctxt tva tvb in
       ok Eq ctxt 1)
+  
   | (Script_typed_ir.List_t tva _ _, Script_typed_ir.List_t tvb _ _) =>
     let 'existT _ [__26, __27] [tva, tvb] :=
       existT (A := [Set ** Set])
-        (fun '[__26, __27] =>
-          [Script_typed_ir.ty __26 ** Script_typed_ir.ty __27]) [_, _]
+        (fun '[__26, __27] => [Script_typed_ir.ty ** Script_typed_ir.ty]) [_, _]
         [tva, tvb] in
     (record_inconsistent ctxt ta tb)
       (let? '(Eq, ctxt) := ty_eq ctxt tva tvb in
       ok Eq ctxt 1)
+  
   | (_, _) =>
     let? '(ta, ctxt) := serialize_ty_for_error ctxt ta in
     let? '(tb, _ctxt) := serialize_ty_for_error ctxt tb in
     Error_monad.__error_value extensible_type_value
   end.
 
-Fixpoint stack_ty_eq {ta tb : Set}
-  (ctxt : Alpha_context.context) (lvl : int) (ta : Script_typed_ir.stack_ty ta)
-  (tb : Script_typed_ir.stack_ty tb) {struct ctxt}
-  : Error_monad.tzresult
-    (eq (Script_typed_ir.stack_ty ta) (Script_typed_ir.stack_ty tb) *
-      Alpha_context.context) :=
+Fixpoint stack_ty_eq
+  (ctxt : Alpha_context.context) (lvl : int) (ta : Script_typed_ir.stack_ty)
+  (tb : Script_typed_ir.stack_ty) {struct ctxt}
+  : Error_monad.tzresult (eq * Alpha_context.context) :=
   match (ta, tb) with
   | (Script_typed_ir.Item_t tva ra _, Script_typed_ir.Item_t tvb rb _) =>
     let 'existT _ [__0, __1, __2, __3] [tva, ra, tvb, rb] :=
       existT (A := [Set ** Set ** Set ** Set])
         (fun '[__0, __1, __2, __3] =>
-          [Script_typed_ir.ty __0 ** Script_typed_ir.stack_ty __1 **
-            Script_typed_ir.ty __2 ** Script_typed_ir.stack_ty __3]) [_, _, _,
-        _] [tva, ra, tvb, rb] in
+          [Script_typed_ir.ty ** Script_typed_ir.stack_ty ** Script_typed_ir.ty
+            ** Script_typed_ir.stack_ty]) [_, _, _, _] [tva, ra, tvb, rb] in
     let? '(Eq, ctxt) :=
       (Error_monad.record_trace extensible_type_value) (ty_eq ctxt tva tvb) in
     let? '(Eq, ctxt) := stack_ty_eq ctxt (Pervasives.op_plus lvl 1) ra rb in
@@ -1351,130 +1609,153 @@ Fixpoint stack_ty_eq {ta tb : Set}
   | (_, _) => Error_monad.__error_value extensible_type_value
   end.
 
-Definition merge_comparable_types {ta : Set}
-  (legacy : bool) (ta : Script_typed_ir.comparable_ty ta)
-  (tb : Script_typed_ir.comparable_ty ta)
-  : Error_monad.tzresult (Script_typed_ir.comparable_ty ta) :=
+Definition merge_comparable_types
+  (legacy : bool) (ta : Script_typed_ir.comparable_ty)
+  (tb : Script_typed_ir.comparable_ty)
+  : Error_monad.tzresult Script_typed_ir.comparable_ty :=
   match (ta, tb) with
   | (Script_typed_ir.Int_key annot_a, Script_typed_ir.Int_key annot_b) =>
     Error_monad.op_gtpipequestion
       (Script_ir_annot.merge_type_annot legacy annot_a annot_b)
       (fun annot => Script_typed_ir.Int_key annot)
+  
   | (Script_typed_ir.Nat_key annot_a, Script_typed_ir.Nat_key annot_b) =>
     Error_monad.op_gtpipequestion
       (Script_ir_annot.merge_type_annot legacy annot_a annot_b)
       (fun annot => Script_typed_ir.Nat_key annot)
+  
   | (Script_typed_ir.String_key annot_a, Script_typed_ir.String_key annot_b) =>
     Error_monad.op_gtpipequestion
       (Script_ir_annot.merge_type_annot legacy annot_a annot_b)
       (fun annot => Script_typed_ir.String_key annot)
+  
   | (Script_typed_ir.Bytes_key annot_a, Script_typed_ir.Bytes_key annot_b) =>
     Error_monad.op_gtpipequestion
       (Script_ir_annot.merge_type_annot legacy annot_a annot_b)
       (fun annot => Script_typed_ir.Bytes_key annot)
+  
   | (Script_typed_ir.Mutez_key annot_a, Script_typed_ir.Mutez_key annot_b) =>
     Error_monad.op_gtpipequestion
       (Script_ir_annot.merge_type_annot legacy annot_a annot_b)
       (fun annot => Script_typed_ir.Mutez_key annot)
+  
   | (Script_typed_ir.Bool_key annot_a, Script_typed_ir.Bool_key annot_b) =>
     Error_monad.op_gtpipequestion
       (Script_ir_annot.merge_type_annot legacy annot_a annot_b)
       (fun annot => Script_typed_ir.Bool_key annot)
+  
   | (Script_typed_ir.Key_hash_key annot_a, Script_typed_ir.Key_hash_key annot_b)
     =>
     Error_monad.op_gtpipequestion
       (Script_ir_annot.merge_type_annot legacy annot_a annot_b)
       (fun annot => Script_typed_ir.Key_hash_key annot)
+  
   |
     (Script_typed_ir.Timestamp_key annot_a,
       Script_typed_ir.Timestamp_key annot_b) =>
     Error_monad.op_gtpipequestion
       (Script_ir_annot.merge_type_annot legacy annot_a annot_b)
       (fun annot => Script_typed_ir.Timestamp_key annot)
+  
   | (Script_typed_ir.Address_key annot_a, Script_typed_ir.Address_key annot_b)
     =>
     Error_monad.op_gtpipequestion
       (Script_ir_annot.merge_type_annot legacy annot_a annot_b)
       (fun annot => Script_typed_ir.Address_key annot)
+  
   | (_, _) =>
     (* ❌ Assert instruction is not handled. *)
-    assert false
+    assert (Error_monad.tzresult Script_typed_ir.comparable_ty) false
   end.
 
-Definition merge_types {b : Set} (legacy : bool)
+Definition merge_types (legacy : bool)
   : Alpha_context.context -> Alpha_context.Script.location ->
-  Script_typed_ir.ty b -> Script_typed_ir.ty b ->
-  Error_monad.tzresult (Script_typed_ir.ty b * Alpha_context.context) :=
-  let fix help {a : Set}
-    (ctxt : Alpha_context.context) (ty1 : Script_typed_ir.ty a)
-    (ty2 : Script_typed_ir.ty a) {struct ctxt}
-    : Error_monad.tzresult (Script_typed_ir.ty a * Alpha_context.context) :=
+  Script_typed_ir.ty -> Script_typed_ir.ty ->
+  Error_monad.tzresult (Script_typed_ir.ty * Alpha_context.context) :=
+  let fix help
+    (ctxt : Alpha_context.context) (ty1 : Script_typed_ir.ty)
+    (ty2 : Script_typed_ir.ty) {struct ctxt}
+    : Error_monad.tzresult (Script_typed_ir.ty * Alpha_context.context) :=
     match (ty1, ty2) with
     | (Script_typed_ir.Unit_t tn1, Script_typed_ir.Unit_t tn2) =>
       Error_monad.op_gtpipequestion
         (Script_ir_annot.merge_type_annot legacy tn1 tn2)
         (fun tname => ((Script_typed_ir.Unit_t tname), ctxt))
+    
     | (Script_typed_ir.Int_t tn1, Script_typed_ir.Int_t tn2) =>
       Error_monad.op_gtpipequestion
         (Script_ir_annot.merge_type_annot legacy tn1 tn2)
         (fun tname => ((Script_typed_ir.Int_t tname), ctxt))
+    
     | (Script_typed_ir.Nat_t tn1, Script_typed_ir.Nat_t tn2) =>
       Error_monad.op_gtpipequestion
         (Script_ir_annot.merge_type_annot legacy tn1 tn2)
         (fun tname => ((Script_typed_ir.Nat_t tname), ctxt))
+    
     | (Script_typed_ir.Key_t tn1, Script_typed_ir.Key_t tn2) =>
       Error_monad.op_gtpipequestion
         (Script_ir_annot.merge_type_annot legacy tn1 tn2)
         (fun tname => ((Script_typed_ir.Key_t tname), ctxt))
+    
     | (Script_typed_ir.Key_hash_t tn1, Script_typed_ir.Key_hash_t tn2) =>
       Error_monad.op_gtpipequestion
         (Script_ir_annot.merge_type_annot legacy tn1 tn2)
         (fun tname => ((Script_typed_ir.Key_hash_t tname), ctxt))
+    
     | (Script_typed_ir.String_t tn1, Script_typed_ir.String_t tn2) =>
       Error_monad.op_gtpipequestion
         (Script_ir_annot.merge_type_annot legacy tn1 tn2)
         (fun tname => ((Script_typed_ir.String_t tname), ctxt))
+    
     | (Script_typed_ir.Bytes_t tn1, Script_typed_ir.Bytes_t tn2) =>
       Error_monad.op_gtpipequestion
         (Script_ir_annot.merge_type_annot legacy tn1 tn2)
         (fun tname => ((Script_typed_ir.Bytes_t tname), ctxt))
+    
     | (Script_typed_ir.Signature_t tn1, Script_typed_ir.Signature_t tn2) =>
       Error_monad.op_gtpipequestion
         (Script_ir_annot.merge_type_annot legacy tn1 tn2)
         (fun tname => ((Script_typed_ir.Signature_t tname), ctxt))
+    
     | (Script_typed_ir.Mutez_t tn1, Script_typed_ir.Mutez_t tn2) =>
       Error_monad.op_gtpipequestion
         (Script_ir_annot.merge_type_annot legacy tn1 tn2)
         (fun tname => ((Script_typed_ir.Mutez_t tname), ctxt))
+    
     | (Script_typed_ir.Timestamp_t tn1, Script_typed_ir.Timestamp_t tn2) =>
       Error_monad.op_gtpipequestion
         (Script_ir_annot.merge_type_annot legacy tn1 tn2)
         (fun tname => ((Script_typed_ir.Timestamp_t tname), ctxt))
+    
     | (Script_typed_ir.Address_t tn1, Script_typed_ir.Address_t tn2) =>
       Error_monad.op_gtpipequestion
         (Script_ir_annot.merge_type_annot legacy tn1 tn2)
         (fun tname => ((Script_typed_ir.Address_t tname), ctxt))
+    
     | (Script_typed_ir.Bool_t tn1, Script_typed_ir.Bool_t tn2) =>
       Error_monad.op_gtpipequestion
         (Script_ir_annot.merge_type_annot legacy tn1 tn2)
         (fun tname => ((Script_typed_ir.Bool_t tname), ctxt))
+    
     | (Script_typed_ir.Chain_id_t tn1, Script_typed_ir.Chain_id_t tn2) =>
       Error_monad.op_gtpipequestion
         (Script_ir_annot.merge_type_annot legacy tn1 tn2)
         (fun tname => ((Script_typed_ir.Chain_id_t tname), ctxt))
+    
     | (Script_typed_ir.Operation_t tn1, Script_typed_ir.Operation_t tn2) =>
       Error_monad.op_gtpipequestion
         (Script_ir_annot.merge_type_annot legacy tn1 tn2)
         (fun tname => ((Script_typed_ir.Operation_t tname), ctxt))
+    
     |
       (Script_typed_ir.Map_t tal tar tn1 has_big_map,
         Script_typed_ir.Map_t tbl tbr tn2 _) =>
       let 'existT _ [__0, __1] [tal, tar, tn1, has_big_map, tbl, tbr, tn2] :=
         existT (A := [Set ** Set])
           (fun '[__0, __1] =>
-            [Script_typed_ir.comparable_ty __0 ** Script_typed_ir.ty __1 **
+            [Script_typed_ir.comparable_ty ** Script_typed_ir.ty **
               option Script_typed_ir.type_annot ** bool **
-              Script_typed_ir.comparable_ty __0 ** Script_typed_ir.ty __1 **
+              Script_typed_ir.comparable_ty ** Script_typed_ir.ty **
               option Script_typed_ir.type_annot]) [_, _]
           [tal, tar, tn1, has_big_map, tbl, tbr, tn2] in
       let? tname := Script_ir_annot.merge_type_annot legacy tn1 tn2 in
@@ -1482,33 +1763,34 @@ Definition merge_types {b : Set} (legacy : bool)
       let? '(Eq, ctxt) := ty_eq ctxt tar value in
       Error_monad.op_gtpipequestion (merge_comparable_types legacy tal tbl)
         (fun tk => ((Script_typed_ir.Map_t tk value tname has_big_map), ctxt))
+    
     |
       (Script_typed_ir.Big_map_t tal tar tn1,
         Script_typed_ir.Big_map_t tbl tbr tn2) =>
       let 'existT _ [__2, __3] [tal, tar, tn1, tbl, tbr, tn2] :=
         existT (A := [Set ** Set])
           (fun '[__2, __3] =>
-            [Script_typed_ir.comparable_ty __2 ** Script_typed_ir.ty __3 **
-              option Script_typed_ir.type_annot **
-              Script_typed_ir.comparable_ty __2 ** Script_typed_ir.ty __3 **
-              option Script_typed_ir.type_annot]) [_, _]
-          [tal, tar, tn1, tbl, tbr, tn2] in
+            [Script_typed_ir.comparable_ty ** Script_typed_ir.ty **
+              option Script_typed_ir.type_annot ** Script_typed_ir.comparable_ty
+              ** Script_typed_ir.ty ** option Script_typed_ir.type_annot]) [_,
+          _] [tal, tar, tn1, tbl, tbr, tn2] in
       let? tname := Script_ir_annot.merge_type_annot legacy tn1 tn2 in
       let? '(value, ctxt) := help ctxt tar tbr in
       let? '(Eq, ctxt) := ty_eq ctxt tar value in
       Error_monad.op_gtpipequestion (merge_comparable_types legacy tal tbl)
         (fun tk => ((Script_typed_ir.Big_map_t tk value tname), ctxt))
+    
     | (Script_typed_ir.Set_t ea tn1, Script_typed_ir.Set_t eb tn2) =>
       let 'existT _ __4 [ea, tn1, eb, tn2] :=
         existT (A := Set)
           (fun __4 =>
-            [Script_typed_ir.comparable_ty __4 **
-              option Script_typed_ir.type_annot **
-              Script_typed_ir.comparable_ty __4 **
+            [Script_typed_ir.comparable_ty ** option Script_typed_ir.type_annot
+              ** Script_typed_ir.comparable_ty **
               option Script_typed_ir.type_annot]) _ [ea, tn1, eb, tn2] in
       let? tname := Script_ir_annot.merge_type_annot legacy tn1 tn2 in
       Error_monad.op_gtpipequestion (merge_comparable_types legacy ea eb)
         (fun e => ((Script_typed_ir.Set_t e tname), ctxt))
+    
     |
       (Script_typed_ir.Pair_t (tal, l_field1, l_var1) (tar, r_field1, r_var1)
         tn1 has_big_map,
@@ -1519,13 +1801,13 @@ Definition merge_types {b : Set} (legacy : bool)
           l_field2, l_var2, tbr, r_field2, r_var2, tn2] :=
         existT (A := [Set ** Set])
           (fun '[__5, __6] =>
-            [Script_typed_ir.ty __5 ** option Script_typed_ir.field_annot **
-              option Script_typed_ir.var_annot ** Script_typed_ir.ty __6 **
+            [Script_typed_ir.ty ** option Script_typed_ir.field_annot **
+              option Script_typed_ir.var_annot ** Script_typed_ir.ty **
               option Script_typed_ir.field_annot **
               option Script_typed_ir.var_annot **
-              option Script_typed_ir.type_annot ** bool **
-              Script_typed_ir.ty __5 ** option Script_typed_ir.field_annot **
-              option Script_typed_ir.var_annot ** Script_typed_ir.ty __6 **
+              option Script_typed_ir.type_annot ** bool ** Script_typed_ir.ty **
+              option Script_typed_ir.field_annot **
+              option Script_typed_ir.var_annot ** Script_typed_ir.ty **
               option Script_typed_ir.field_annot **
               option Script_typed_ir.var_annot **
               option Script_typed_ir.type_annot]) [_, _]
@@ -1544,6 +1826,7 @@ Definition merge_types {b : Set} (legacy : bool)
           let '(right_ty, ctxt) := function_parameter in
           ((Script_typed_ir.Pair_t (left_ty, l_field, l_var)
             (right_ty, r_field, r_var) tname has_big_map), ctxt))
+    
     |
       (Script_typed_ir.Union_t (tal, tal_annot) (tar, tar_annot) tn1 has_big_map,
         Script_typed_ir.Union_t (tbl, tbl_annot) (tbr, tbr_annot) tn2 _) =>
@@ -1552,11 +1835,11 @@ Definition merge_types {b : Set} (legacy : bool)
           tbr_annot, tn2] :=
         existT (A := [Set ** Set])
           (fun '[__7, __8] =>
-            [Script_typed_ir.ty __7 ** option Script_typed_ir.field_annot **
-              Script_typed_ir.ty __8 ** option Script_typed_ir.field_annot **
-              option Script_typed_ir.type_annot ** bool **
-              Script_typed_ir.ty __7 ** option Script_typed_ir.field_annot **
-              Script_typed_ir.ty __8 ** option Script_typed_ir.field_annot **
+            [Script_typed_ir.ty ** option Script_typed_ir.field_annot **
+              Script_typed_ir.ty ** option Script_typed_ir.field_annot **
+              option Script_typed_ir.type_annot ** bool ** Script_typed_ir.ty **
+              option Script_typed_ir.field_annot ** Script_typed_ir.ty **
+              option Script_typed_ir.field_annot **
               option Script_typed_ir.type_annot]) [_, _]
           [tal, tal_annot, tar, tar_annot, tn1, has_big_map, tbl, tbl_annot,
             tbr, tbr_annot, tn2] in
@@ -1571,68 +1854,72 @@ Definition merge_types {b : Set} (legacy : bool)
           let '(right_ty, ctxt) := function_parameter in
           ((Script_typed_ir.Union_t (left_ty, left_annot)
             (right_ty, right_annot) tname has_big_map), ctxt))
+    
     |
       (Script_typed_ir.Lambda_t tal tar tn1,
         Script_typed_ir.Lambda_t tbl tbr tn2) =>
       let 'existT _ [__10, __9] [tal, tar, tn1, tbl, tbr, tn2] :=
         existT (A := [Set ** Set])
           (fun '[__10, __9] =>
-            [Script_typed_ir.ty __9 ** Script_typed_ir.ty __10 **
-              option Script_typed_ir.type_annot ** Script_typed_ir.ty __9 **
-              Script_typed_ir.ty __10 ** option Script_typed_ir.type_annot]) [_,
-          _] [tal, tar, tn1, tbl, tbr, tn2] in
+            [Script_typed_ir.ty ** Script_typed_ir.ty **
+              option Script_typed_ir.type_annot ** Script_typed_ir.ty **
+              Script_typed_ir.ty ** option Script_typed_ir.type_annot]) [_, _]
+          [tal, tar, tn1, tbl, tbr, tn2] in
       let? tname := Script_ir_annot.merge_type_annot legacy tn1 tn2 in
       let? '(left_ty, ctxt) := help ctxt tal tbl in
       Error_monad.op_gtpipequestion (help ctxt tar tbr)
         (fun function_parameter =>
           let '(right_ty, ctxt) := function_parameter in
           ((Script_typed_ir.Lambda_t left_ty right_ty tname), ctxt))
+    
     | (Script_typed_ir.Contract_t tal tn1, Script_typed_ir.Contract_t tbl tn2)
       =>
       let 'existT _ __11 [tal, tn1, tbl, tn2] :=
         existT (A := Set)
           (fun __11 =>
-            [Script_typed_ir.ty __11 ** option Script_typed_ir.type_annot **
-              Script_typed_ir.ty __11 ** option Script_typed_ir.type_annot]) _
+            [Script_typed_ir.ty ** option Script_typed_ir.type_annot **
+              Script_typed_ir.ty ** option Script_typed_ir.type_annot]) _
           [tal, tn1, tbl, tn2] in
       let? tname := Script_ir_annot.merge_type_annot legacy tn1 tn2 in
       Error_monad.op_gtpipequestion (help ctxt tal tbl)
         (fun function_parameter =>
           let '(arg_ty, ctxt) := function_parameter in
           ((Script_typed_ir.Contract_t arg_ty tname), ctxt))
+    
     |
       (Script_typed_ir.Option_t tva tn1 has_big_map,
         Script_typed_ir.Option_t tvb tn2 _) =>
       let 'existT _ __12 [tva, tn1, has_big_map, tvb, tn2] :=
         existT (A := Set)
           (fun __12 =>
-            [Script_typed_ir.ty __12 ** option Script_typed_ir.type_annot **
-              bool ** Script_typed_ir.ty __12 **
-              option Script_typed_ir.type_annot]) _
+            [Script_typed_ir.ty ** option Script_typed_ir.type_annot ** bool **
+              Script_typed_ir.ty ** option Script_typed_ir.type_annot]) _
           [tva, tn1, has_big_map, tvb, tn2] in
       let? tname := Script_ir_annot.merge_type_annot legacy tn1 tn2 in
       Error_monad.op_gtpipequestion (help ctxt tva tvb)
         (fun function_parameter =>
           let '(ty, ctxt) := function_parameter in
           ((Script_typed_ir.Option_t ty tname has_big_map), ctxt))
+    
     |
       (Script_typed_ir.List_t tva tn1 has_big_map,
         Script_typed_ir.List_t tvb tn2 _) =>
       let 'existT _ __13 [tva, tn1, has_big_map, tvb, tn2] :=
         existT (A := Set)
           (fun __13 =>
-            [Script_typed_ir.ty __13 ** option Script_typed_ir.type_annot **
-              bool ** Script_typed_ir.ty __13 **
-              option Script_typed_ir.type_annot]) _
+            [Script_typed_ir.ty ** option Script_typed_ir.type_annot ** bool **
+              Script_typed_ir.ty ** option Script_typed_ir.type_annot]) _
           [tva, tn1, has_big_map, tvb, tn2] in
       let? tname := Script_ir_annot.merge_type_annot legacy tn1 tn2 in
       Error_monad.op_gtpipequestion (help ctxt tva tvb)
         (fun function_parameter =>
           let '(ty, ctxt) := function_parameter in
           ((Script_typed_ir.List_t ty tname has_big_map), ctxt))
+    
     | (_, _) =>
       (* ❌ Assert instruction is not handled. *)
-      assert false
+      assert (Error_monad.tzresult (Script_typed_ir.ty * Alpha_context.context))
+        false
     end in
   fun ctxt =>
     fun loc =>
@@ -1641,15 +1928,14 @@ Definition merge_types {b : Set} (legacy : bool)
           record_inconsistent_type_annotations ctxt loc ty1 ty2
             (help ctxt ty1 ty2).
 
-Definition merge_stacks {ta : Set}
-  (legacy : bool) (loc : Alpha_context.Script.location)
-  : Alpha_context.context -> Script_typed_ir.stack_ty ta ->
-  Script_typed_ir.stack_ty ta ->
-  Error_monad.tzresult (Script_typed_ir.stack_ty ta * Alpha_context.context) :=
-  let fix help {a : Set}
-    (ctxt : Alpha_context.context) (stack1 : Script_typed_ir.stack_ty a)
-    (stack2 : Script_typed_ir.stack_ty a) {struct ctxt}
-    : Error_monad.tzresult (Script_typed_ir.stack_ty a * Alpha_context.context) :=
+Definition merge_stacks (legacy : bool) (loc : Alpha_context.Script.location)
+  : Alpha_context.context -> Script_typed_ir.stack_ty ->
+  Script_typed_ir.stack_ty ->
+  Error_monad.tzresult (Script_typed_ir.stack_ty * Alpha_context.context) :=
+  let fix help
+    (ctxt : Alpha_context.context) (stack1 : Script_typed_ir.stack_ty)
+    (stack2 : Script_typed_ir.stack_ty) {struct ctxt}
+    : Error_monad.tzresult (Script_typed_ir.stack_ty * Alpha_context.context) :=
     match (stack1, stack2) with
     | (Script_typed_ir.Empty_t, Script_typed_ir.Empty_t) =>
       Error_monad.ok (Script_typed_ir.Empty_t, ctxt)
@@ -1659,10 +1945,10 @@ Definition merge_stacks {ta : Set}
       let 'existT _ [__0, __1] [ty1, rest1, annot1, ty2, rest2, annot2] :=
         existT (A := [Set ** Set])
           (fun '[__0, __1] =>
-            [Script_typed_ir.ty __0 ** Script_typed_ir.stack_ty __1 **
-              option Script_typed_ir.var_annot ** Script_typed_ir.ty __0 **
-              Script_typed_ir.stack_ty __1 ** option Script_typed_ir.var_annot])
-          [_, _] [ty1, rest1, annot1, ty2, rest2, annot2] in
+            [Script_typed_ir.ty ** Script_typed_ir.stack_ty **
+              option Script_typed_ir.var_annot ** Script_typed_ir.ty **
+              Script_typed_ir.stack_ty ** option Script_typed_ir.var_annot]) [_,
+          _] [ty1, rest1, annot1, ty2, rest2, annot2] in
       let annot := Script_ir_annot.merge_var_annot annot1 annot2 in
       let? '(ty, ctxt) := merge_types legacy ctxt loc ty1 ty2 in
       Error_monad.op_gtpipequestion (help ctxt rest1 rest2)
@@ -1672,78 +1958,98 @@ Definition merge_stacks {ta : Set}
     end in
   help.
 
-Definition has_big_map {t : Set} (function_parameter : Script_typed_ir.ty t)
-  : bool :=
+Definition has_big_map (function_parameter : Script_typed_ir.ty) : bool :=
   match function_parameter with
   | Script_typed_ir.Unit_t _ => false
+  
   | Script_typed_ir.Int_t _ => false
+  
   | Script_typed_ir.Nat_t _ => false
+  
   | Script_typed_ir.Signature_t _ => false
+  
   | Script_typed_ir.String_t _ => false
+  
   | Script_typed_ir.Bytes_t _ => false
+  
   | Script_typed_ir.Mutez_t _ => false
+  
   | Script_typed_ir.Key_hash_t _ => false
+  
   | Script_typed_ir.Key_t _ => false
+  
   | Script_typed_ir.Timestamp_t _ => false
+  
   | Script_typed_ir.Address_t _ => false
+  
   | Script_typed_ir.Bool_t _ => false
+  
   | Script_typed_ir.Lambda_t _ _ _ => false
+  
   | Script_typed_ir.Set_t _ _ => false
+  
   | Script_typed_ir.Big_map_t _ _ _ => true
+  
   | Script_typed_ir.Contract_t _ _ => false
+  
   | Script_typed_ir.Operation_t _ => false
+  
   | Script_typed_ir.Chain_id_t _ => false
+  
   | Script_typed_ir.Pair_t _ _ _ has_big_map => has_big_map
+  
   | Script_typed_ir.Union_t _ _ _ has_big_map => has_big_map
+  
   | Script_typed_ir.Option_t _ _ has_big_map => has_big_map
+  
   | Script_typed_ir.List_t _ _ has_big_map => has_big_map
+  
   | Script_typed_ir.Map_t _ _ _ has_big_map => has_big_map
   end.
 
-Module judgement.
-  Module Failed.
-    Record record {descr : Set} : Set := {
-      descr : descr }.
-    Arguments record : clear implicits.
-  End Failed.
-  Definition Failed_skeleton := Failed.record.
-End judgement.
-
-Reserved Notation "'judgement.Failed".
-
-Inductive judgement (bef : Set) : Set :=
-| Typed : forall {aft : Set}, Script_typed_ir.descr bef aft -> judgement bef
-| Failed : forall {aft : Set}, 'judgement.Failed aft bef -> judgement bef
-
-where "'judgement.Failed" := (fun (t_aft t_bef : Set) =>
-  judgement.Failed_skeleton
-    ((Script_typed_ir.stack_ty t_aft -> Script_typed_ir.descr t_bef t_aft) *
-      t_aft)).
-
 Module ConstructorRecordNotations_judgement.
   Module judgement.
-    Definition Failed := 'judgement.Failed.
+    Module Failed.
+      Record record {descr : Set} : Set := {
+        descr : descr }.
+      Arguments record : clear implicits.
+    End Failed.
+    Definition Failed_skeleton := Failed.record.
   End judgement.
 End ConstructorRecordNotations_judgement.
 Import ConstructorRecordNotations_judgement.
 
-Arguments Typed {_ _}.
+Reserved Notation "'judgement.Failed".
+
+Inductive judgement (bef : Set) : Set :=
+| Typed : Script_typed_ir.descr -> judgement bef
+| Failed : forall {aft : Set}, 'judgement.Failed aft -> judgement bef
+
+where "'judgement.Failed" := (fun (t_aft : Set) =>
+  judgement.Failed_skeleton
+    ((Script_typed_ir.stack_ty -> Script_typed_ir.descr) * t_aft)).
+
+Module judgement.
+  Include ConstructorRecordNotations_judgement.judgement.
+  Definition Failed := 'judgement.Failed.
+End judgement.
+
+Arguments Typed {_}.
 Arguments Failed {_ _}.
 
 Module branch.
-  Record record {t f b : Set} : Set := Build {
+  Record record : Set := Build {
     branch :
-      (Script_typed_ir.descr t r -> Script_typed_ir.descr f r ->
-      Script_typed_ir.descr b r) * r }.
-  Arguments record : clear implicits.
-  Definition with_branch {t_t t_f t_b} branch (r : record t_t t_f t_b) :=
-    Build t_t t_f t_b branch.
+      (Script_typed_ir.descr -> Script_typed_ir.descr -> Script_typed_ir.descr)
+        * r }.
+  Definition with_branch branch (r : record) :=
+    Build branch.
 End branch.
 Definition branch := branch.record.
 
 Definition merge_branches {a b bef : Set}
   (legacy : bool) (ctxt : Alpha_context.context) (loc : int) (btr : judgement a)
-  (bfr : judgement b) (function_parameter : branch a b bef)
+  (bfr : judgement b) (function_parameter : branch)
   : Lwt.t (Error_monad.tzresult (judgement bef * Alpha_context.context)) :=
   let '{| branch.branch := branch |} := function_parameter in
   match (btr, bfr) with
@@ -1753,10 +2059,8 @@ Definition merge_branches {a b bef : Set}
     let 'existT _ [__Typed_'aft, __Typed_'aft1] [aftbt, dbt, aftbf, dbf] :=
       existT (A := [Set ** Set])
         (fun '[__Typed_'aft, __Typed_'aft1] =>
-          [Script_typed_ir.stack_ty __Typed_'aft **
-            Script_typed_ir.descr a __Typed_'aft **
-            Script_typed_ir.stack_ty __Typed_'aft1 **
-            Script_typed_ir.descr b __Typed_'aft1]) [_, _]
+          [Script_typed_ir.stack_ty ** Script_typed_ir.descr **
+            Script_typed_ir.stack_ty ** Script_typed_ir.descr]) [_, _]
         [aftbt, dbt, aftbf, dbf] in
     let unmatched_branches (function_parameter : unit)
       : Lwt.t (Error_monad.tzresult Error_monad.__error) :=
@@ -1777,26 +2081,28 @@ Definition merge_branches {a b bef : Set}
   |
     (Failed {| judgement.Failed.descr := descrt |},
       Failed {| judgement.Failed.descr := descrf |}) =>
-    let __descr_value {D : Set} (ret : Script_typed_ir.stack_ty D)
-      : Script_typed_ir.descr bef D :=
+    let __descr_value (ret : Script_typed_ir.stack_ty)
+      : Script_typed_ir.descr :=
       branch (descrt ret) (descrf ret) in
     Error_monad.__return
-      ((Failed {| judgement.Failed.descr := __descr_value |}), ctxt)
+      ((Failed
+        ({| judgement.Failed.descr := __descr_value |} : judgement.Failed)),
+        ctxt)
   | (Typed dbt, Failed {| judgement.Failed.descr := descrf |}) =>
     let 'existT _ __Typed_'aft2 [dbt, descrf] :=
       existT (A := Set)
         (fun __Typed_'aft2 =>
-          [Script_typed_ir.descr a __Typed_'aft2 **
-            Script_typed_ir.stack_ty D -> Script_typed_ir.descr b D]) _
-        [dbt, descrf] in
+          [Script_typed_ir.descr **
+            Script_typed_ir.stack_ty -> Script_typed_ir.descr]) _ [dbt, descrf]
+      in
     Error_monad.__return
       ((Typed (branch dbt (descrf dbt.(Script_typed_ir.descr.aft)))), ctxt)
   | (Failed {| judgement.Failed.descr := descrt |}, Typed dbf) =>
     let 'existT _ __Typed_'aft3 [descrt, dbf] :=
       existT (A := Set)
         (fun __Typed_'aft3 =>
-          [Script_typed_ir.stack_ty D -> Script_typed_ir.descr a D **
-            Script_typed_ir.descr b __Typed_'aft3]) _ [descrt, dbf] in
+          [Script_typed_ir.stack_ty -> Script_typed_ir.descr **
+            Script_typed_ir.descr]) _ [descrt, dbf] in
     Error_monad.__return
       ((Typed (branch (descrt dbf.(Script_typed_ir.descr.aft)) dbf)), ctxt)
   end.
@@ -1810,34 +2116,43 @@ Fixpoint parse_comparable_ty
   | Micheline.Prim loc Alpha_context.Script.T_int [] annot =>
     Error_monad.op_gtpipequestion (Script_ir_annot.parse_type_annot loc annot)
       (fun tname => ((Ex_comparable_ty (Script_typed_ir.Int_key tname)), ctxt))
+  
   | Micheline.Prim loc Alpha_context.Script.T_nat [] annot =>
     Error_monad.op_gtpipequestion (Script_ir_annot.parse_type_annot loc annot)
       (fun tname => ((Ex_comparable_ty (Script_typed_ir.Nat_key tname)), ctxt))
+  
   | Micheline.Prim loc Alpha_context.Script.T_string [] annot =>
     Error_monad.op_gtpipequestion (Script_ir_annot.parse_type_annot loc annot)
       (fun tname =>
         ((Ex_comparable_ty (Script_typed_ir.String_key tname)), ctxt))
+  
   | Micheline.Prim loc Alpha_context.Script.T_bytes [] annot =>
     Error_monad.op_gtpipequestion (Script_ir_annot.parse_type_annot loc annot)
       (fun tname => ((Ex_comparable_ty (Script_typed_ir.Bytes_key tname)), ctxt))
+  
   | Micheline.Prim loc Alpha_context.Script.T_mutez [] annot =>
     Error_monad.op_gtpipequestion (Script_ir_annot.parse_type_annot loc annot)
       (fun tname => ((Ex_comparable_ty (Script_typed_ir.Mutez_key tname)), ctxt))
+  
   | Micheline.Prim loc Alpha_context.Script.T_bool [] annot =>
     Error_monad.op_gtpipequestion (Script_ir_annot.parse_type_annot loc annot)
       (fun tname => ((Ex_comparable_ty (Script_typed_ir.Bool_key tname)), ctxt))
+  
   | Micheline.Prim loc Alpha_context.Script.T_key_hash [] annot =>
     Error_monad.op_gtpipequestion (Script_ir_annot.parse_type_annot loc annot)
       (fun tname =>
         ((Ex_comparable_ty (Script_typed_ir.Key_hash_key tname)), ctxt))
+  
   | Micheline.Prim loc Alpha_context.Script.T_timestamp [] annot =>
     Error_monad.op_gtpipequestion (Script_ir_annot.parse_type_annot loc annot)
       (fun tname =>
         ((Ex_comparable_ty (Script_typed_ir.Timestamp_key tname)), ctxt))
+  
   | Micheline.Prim loc Alpha_context.Script.T_address [] annot =>
     Error_monad.op_gtpipequestion (Script_ir_annot.parse_type_annot loc annot)
       (fun tname =>
         ((Ex_comparable_ty (Script_typed_ir.Address_key tname)), ctxt))
+  
   |
     Micheline.Prim loc
       ((Alpha_context.Script.T_int | Alpha_context.Script.T_nat |
@@ -1845,6 +2160,7 @@ Fixpoint parse_comparable_ty
       Alpha_context.Script.T_bool | Alpha_context.Script.T_key |
       Alpha_context.Script.T_address | Alpha_context.Script.T_timestamp) as prim)
       l _ => Error_monad.__error_value extensible_type_value
+  
   |
     Micheline.Prim loc
       (Alpha_context.Script.T_pair | Alpha_context.Script.T_or |
@@ -1853,6 +2169,7 @@ Fixpoint parse_comparable_ty
       Alpha_context.Script.T_lambda | Alpha_context.Script.T_unit |
       Alpha_context.Script.T_signature | Alpha_context.Script.T_contract) _ _ =>
     Error_monad.__error_value extensible_type_value
+  
   | expr =>
     Error_monad.__error_value
       (unexpected expr nil Script_tc_errors.Type_namespace
@@ -1903,61 +2220,73 @@ with parse_ty
     Error_monad.op_gtpipequestion
       (Alpha_context.Gas.consume ctxt (Typecheck_costs.type_ 0))
       (fun ctxt => ((Ex_ty (Script_typed_ir.Unit_t ty_name)), ctxt))
+  
   | (Micheline.Prim loc Alpha_context.Script.T_int [] annot, _) =>
     let? ty_name := Script_ir_annot.parse_type_annot loc annot in
     Error_monad.op_gtpipequestion
       (Alpha_context.Gas.consume ctxt (Typecheck_costs.type_ 0))
       (fun ctxt => ((Ex_ty (Script_typed_ir.Int_t ty_name)), ctxt))
+  
   | (Micheline.Prim loc Alpha_context.Script.T_nat [] annot, _) =>
     let? ty_name := Script_ir_annot.parse_type_annot loc annot in
     Error_monad.op_gtpipequestion
       (Alpha_context.Gas.consume ctxt (Typecheck_costs.type_ 0))
       (fun ctxt => ((Ex_ty (Script_typed_ir.Nat_t ty_name)), ctxt))
+  
   | (Micheline.Prim loc Alpha_context.Script.T_string [] annot, _) =>
     let? ty_name := Script_ir_annot.parse_type_annot loc annot in
     Error_monad.op_gtpipequestion
       (Alpha_context.Gas.consume ctxt (Typecheck_costs.type_ 0))
       (fun ctxt => ((Ex_ty (Script_typed_ir.String_t ty_name)), ctxt))
+  
   | (Micheline.Prim loc Alpha_context.Script.T_bytes [] annot, _) =>
     let? ty_name := Script_ir_annot.parse_type_annot loc annot in
     Error_monad.op_gtpipequestion
       (Alpha_context.Gas.consume ctxt (Typecheck_costs.type_ 0))
       (fun ctxt => ((Ex_ty (Script_typed_ir.Bytes_t ty_name)), ctxt))
+  
   | (Micheline.Prim loc Alpha_context.Script.T_mutez [] annot, _) =>
     let? ty_name := Script_ir_annot.parse_type_annot loc annot in
     Error_monad.op_gtpipequestion
       (Alpha_context.Gas.consume ctxt (Typecheck_costs.type_ 0))
       (fun ctxt => ((Ex_ty (Script_typed_ir.Mutez_t ty_name)), ctxt))
+  
   | (Micheline.Prim loc Alpha_context.Script.T_bool [] annot, _) =>
     let? ty_name := Script_ir_annot.parse_type_annot loc annot in
     Error_monad.op_gtpipequestion
       (Alpha_context.Gas.consume ctxt (Typecheck_costs.type_ 0))
       (fun ctxt => ((Ex_ty (Script_typed_ir.Bool_t ty_name)), ctxt))
+  
   | (Micheline.Prim loc Alpha_context.Script.T_key [] annot, _) =>
     let? ty_name := Script_ir_annot.parse_type_annot loc annot in
     Error_monad.op_gtpipequestion
       (Alpha_context.Gas.consume ctxt (Typecheck_costs.type_ 0))
       (fun ctxt => ((Ex_ty (Script_typed_ir.Key_t ty_name)), ctxt))
+  
   | (Micheline.Prim loc Alpha_context.Script.T_key_hash [] annot, _) =>
     let? ty_name := Script_ir_annot.parse_type_annot loc annot in
     Error_monad.op_gtpipequestion
       (Alpha_context.Gas.consume ctxt (Typecheck_costs.type_ 0))
       (fun ctxt => ((Ex_ty (Script_typed_ir.Key_hash_t ty_name)), ctxt))
+  
   | (Micheline.Prim loc Alpha_context.Script.T_timestamp [] annot, _) =>
     let? ty_name := Script_ir_annot.parse_type_annot loc annot in
     Error_monad.op_gtpipequestion
       (Alpha_context.Gas.consume ctxt (Typecheck_costs.type_ 0))
       (fun ctxt => ((Ex_ty (Script_typed_ir.Timestamp_t ty_name)), ctxt))
+  
   | (Micheline.Prim loc Alpha_context.Script.T_address [] annot, _) =>
     let? ty_name := Script_ir_annot.parse_type_annot loc annot in
     Error_monad.op_gtpipequestion
       (Alpha_context.Gas.consume ctxt (Typecheck_costs.type_ 0))
       (fun ctxt => ((Ex_ty (Script_typed_ir.Address_t ty_name)), ctxt))
+  
   | (Micheline.Prim loc Alpha_context.Script.T_signature [] annot, _) =>
     let? ty_name := Script_ir_annot.parse_type_annot loc annot in
     Error_monad.op_gtpipequestion
       (Alpha_context.Gas.consume ctxt (Typecheck_costs.type_ 0))
       (fun ctxt => ((Ex_ty (Script_typed_ir.Signature_t ty_name)), ctxt))
+  
   | (Micheline.Prim loc Alpha_context.Script.T_operation [] annot, _) =>
     if allow_operation then
       let? ty_name := Script_ir_annot.parse_type_annot loc annot in
@@ -1966,19 +2295,20 @@ with parse_ty
         (fun ctxt => ((Ex_ty (Script_typed_ir.Operation_t ty_name)), ctxt))
     else
       Error_monad.__error_value extensible_type_value
+  
   | (Micheline.Prim loc Alpha_context.Script.T_chain_id [] annot, _) =>
     let? ty_name := Script_ir_annot.parse_type_annot loc annot in
     Error_monad.op_gtpipequestion
       (Alpha_context.Gas.consume ctxt (Typecheck_costs.type_ 0))
       (fun ctxt => ((Ex_ty (Script_typed_ir.Chain_id_t ty_name)), ctxt))
+  
   | (Micheline.Prim loc Alpha_context.Script.T_contract (cons utl []) annot, _)
     =>
     if allow_contract then
       let? '(Ex_ty tl, ctxt) := parse_parameter_ty ctxt legacy utl in
       let 'existT _ __Ex_ty_'a [tl, ctxt] :=
         existT (A := Set)
-          (fun __Ex_ty_'a =>
-            [Script_typed_ir.ty __Ex_ty_'a ** Alpha_context.context]) _
+          (fun __Ex_ty_'a => [Script_typed_ir.ty ** Alpha_context.context]) _
           [tl, ctxt] in
       let? ty_name := Script_ir_annot.parse_type_annot loc annot in
       Error_monad.op_gtpipequestion
@@ -1986,6 +2316,7 @@ with parse_ty
         (fun ctxt => ((Ex_ty (Script_typed_ir.Contract_t tl ty_name)), ctxt))
     else
       Error_monad.__error_value extensible_type_value
+  
   |
     (Micheline.Prim loc Alpha_context.Script.T_pair (cons utl (cons utr []))
       annot, _) =>
@@ -1995,15 +2326,13 @@ with parse_ty
       parse_ty ctxt legacy allow_big_map allow_operation allow_contract utl in
     let 'existT _ __Ex_ty_'a1 [tl, ctxt] :=
       existT (A := Set)
-        (fun __Ex_ty_'a1 =>
-          [Script_typed_ir.ty __Ex_ty_'a1 ** Alpha_context.context]) _
+        (fun __Ex_ty_'a1 => [Script_typed_ir.ty ** Alpha_context.context]) _
         [tl, ctxt] in
     let? '(Ex_ty tr, ctxt) :=
       parse_ty ctxt legacy allow_big_map allow_operation allow_contract utr in
     let 'existT _ __Ex_ty_'a2 [tr, ctxt] :=
       existT (A := Set)
-        (fun __Ex_ty_'a2 =>
-          [Script_typed_ir.ty __Ex_ty_'a2 ** Alpha_context.context]) _
+        (fun __Ex_ty_'a2 => [Script_typed_ir.ty ** Alpha_context.context]) _
         [tr, ctxt] in
     let? ty_name := Script_ir_annot.parse_type_annot loc annot in
     Error_monad.op_gtpipequestion
@@ -2013,6 +2342,7 @@ with parse_ty
           (Script_typed_ir.Pair_t (tl, left_field, None) (tr, right_field, None)
             ty_name (Pervasives.op_pipepipe (has_big_map tl) (has_big_map tr)))),
           ctxt))
+  
   |
     (Micheline.Prim loc Alpha_context.Script.T_or (cons utl (cons utr [])) annot,
       _) =>
@@ -2022,15 +2352,13 @@ with parse_ty
       parse_ty ctxt legacy allow_big_map allow_operation allow_contract utl in
     let 'existT _ __Ex_ty_'a3 [tl, ctxt] :=
       existT (A := Set)
-        (fun __Ex_ty_'a3 =>
-          [Script_typed_ir.ty __Ex_ty_'a3 ** Alpha_context.context]) _
+        (fun __Ex_ty_'a3 => [Script_typed_ir.ty ** Alpha_context.context]) _
         [tl, ctxt] in
     let? '(Ex_ty tr, ctxt) :=
       parse_ty ctxt legacy allow_big_map allow_operation allow_contract utr in
     let 'existT _ __Ex_ty_'a4 [tr, ctxt] :=
       existT (A := Set)
-        (fun __Ex_ty_'a4 =>
-          [Script_typed_ir.ty __Ex_ty_'a4 ** Alpha_context.context]) _
+        (fun __Ex_ty_'a4 => [Script_typed_ir.ty ** Alpha_context.context]) _
         [tr, ctxt] in
     let? ty_name := Script_ir_annot.parse_type_annot loc annot in
     Error_monad.op_gtpipequestion
@@ -2039,25 +2367,25 @@ with parse_ty
         ((Ex_ty
           (Script_typed_ir.Union_t (tl, left_constr) (tr, right_constr) ty_name
             (Pervasives.op_pipepipe (has_big_map tl) (has_big_map tr)))), ctxt))
+  
   |
     (Micheline.Prim loc Alpha_context.Script.T_lambda (cons uta (cons utr []))
       annot, _) =>
     let? '(Ex_ty ta, ctxt) := parse_any_ty ctxt legacy uta in
     let 'existT _ __Ex_ty_'a5 [ta, ctxt] :=
       existT (A := Set)
-        (fun __Ex_ty_'a5 =>
-          [Script_typed_ir.ty __Ex_ty_'a5 ** Alpha_context.context]) _
+        (fun __Ex_ty_'a5 => [Script_typed_ir.ty ** Alpha_context.context]) _
         [ta, ctxt] in
     let? '(Ex_ty tr, ctxt) := parse_any_ty ctxt legacy utr in
     let 'existT _ __Ex_ty_'a6 [tr, ctxt] :=
       existT (A := Set)
-        (fun __Ex_ty_'a6 =>
-          [Script_typed_ir.ty __Ex_ty_'a6 ** Alpha_context.context]) _
+        (fun __Ex_ty_'a6 => [Script_typed_ir.ty ** Alpha_context.context]) _
         [tr, ctxt] in
     let? ty_name := Script_ir_annot.parse_type_annot loc annot in
     Error_monad.op_gtpipequestion
       (Alpha_context.Gas.consume ctxt (Typecheck_costs.type_ 2))
       (fun ctxt => ((Ex_ty (Script_typed_ir.Lambda_t ta tr ty_name)), ctxt))
+  
   | (Micheline.Prim loc Alpha_context.Script.T_option (cons ut []) annot, _) =>
     let? '(ut, ty_name) :=
       if legacy then
@@ -2072,8 +2400,7 @@ with parse_ty
       parse_ty ctxt legacy allow_big_map allow_operation allow_contract ut in
     let 'existT _ __Ex_ty_'a7 [__t_value, ctxt] :=
       existT (A := Set)
-        (fun __Ex_ty_'a7 =>
-          [Script_typed_ir.ty __Ex_ty_'a7 ** Alpha_context.context]) _
+        (fun __Ex_ty_'a7 => [Script_typed_ir.ty ** Alpha_context.context]) _
         [__t_value, ctxt] in
     Error_monad.op_gtpipequestion
       (Alpha_context.Gas.consume ctxt (Typecheck_costs.type_ 2))
@@ -2081,13 +2408,13 @@ with parse_ty
         ((Ex_ty
           (Script_typed_ir.Option_t __t_value ty_name (has_big_map __t_value))),
           ctxt))
+  
   | (Micheline.Prim loc Alpha_context.Script.T_list (cons ut []) annot, _) =>
     let? '(Ex_ty __t_value, ctxt) :=
       parse_ty ctxt legacy allow_big_map allow_operation allow_contract ut in
     let 'existT _ __Ex_ty_'a8 [__t_value, ctxt] :=
       existT (A := Set)
-        (fun __Ex_ty_'a8 =>
-          [Script_typed_ir.ty __Ex_ty_'a8 ** Alpha_context.context]) _
+        (fun __Ex_ty_'a8 => [Script_typed_ir.ty ** Alpha_context.context]) _
         [__t_value, ctxt] in
     let? ty_name := Script_ir_annot.parse_type_annot loc annot in
     Error_monad.op_gtpipequestion
@@ -2096,17 +2423,19 @@ with parse_ty
         ((Ex_ty
           (Script_typed_ir.List_t __t_value ty_name (has_big_map __t_value))),
           ctxt))
+  
   | (Micheline.Prim loc Alpha_context.Script.T_set (cons ut []) annot, _) =>
     let? '(Ex_comparable_ty __t_value, ctxt) := parse_comparable_ty ctxt ut in
     let 'existT _ __Ex_comparable_ty_'a [__t_value, ctxt] :=
       existT (A := Set)
         (fun __Ex_comparable_ty_'a =>
-          [Script_typed_ir.comparable_ty __Ex_comparable_ty_'a **
-            Alpha_context.context]) _ [__t_value, ctxt] in
+          [Script_typed_ir.comparable_ty ** Alpha_context.context]) _
+        [__t_value, ctxt] in
     let? ty_name := Script_ir_annot.parse_type_annot loc annot in
     Error_monad.op_gtpipequestion
       (Alpha_context.Gas.consume ctxt (Typecheck_costs.type_ 1))
       (fun ctxt => ((Ex_ty (Script_typed_ir.Set_t __t_value ty_name)), ctxt))
+  
   |
     (Micheline.Prim loc Alpha_context.Script.T_map (cons uta (cons utr []))
       annot, _) =>
@@ -2114,27 +2443,29 @@ with parse_ty
     let 'existT _ __Ex_comparable_ty_'a1 [ta, ctxt] :=
       existT (A := Set)
         (fun __Ex_comparable_ty_'a1 =>
-          [Script_typed_ir.comparable_ty __Ex_comparable_ty_'a1 **
-            Alpha_context.context]) _ [ta, ctxt] in
+          [Script_typed_ir.comparable_ty ** Alpha_context.context]) _ [ta, ctxt]
+      in
     let? '(Ex_ty tr, ctxt) :=
       parse_ty ctxt legacy allow_big_map allow_operation allow_contract utr in
     let 'existT _ __Ex_ty_'a9 [tr, ctxt] :=
       existT (A := Set)
-        (fun __Ex_ty_'a9 =>
-          [Script_typed_ir.ty __Ex_ty_'a9 ** Alpha_context.context]) _
+        (fun __Ex_ty_'a9 => [Script_typed_ir.ty ** Alpha_context.context]) _
         [tr, ctxt] in
     let? ty_name := Script_ir_annot.parse_type_annot loc annot in
     Error_monad.op_gtpipequestion
       (Alpha_context.Gas.consume ctxt (Typecheck_costs.type_ 2))
       (fun ctxt =>
         ((Ex_ty (Script_typed_ir.Map_t ta tr ty_name (has_big_map tr))), ctxt))
+  
   | (Micheline.Prim loc Alpha_context.Script.T_big_map args annot, true) =>
     let? '(big_map_ty, ctxt) := parse_big_map_ty ctxt legacy loc args annot in
     Error_monad.op_gtpipequestion
       (Alpha_context.Gas.consume ctxt (Typecheck_costs.type_ 2))
       (fun ctxt => (big_map_ty, ctxt))
+  
   | (Micheline.Prim loc Alpha_context.Script.T_big_map _ _, _) =>
     Error_monad.__error_value extensible_type_value
+  
   |
     (Micheline.Prim loc
       ((Alpha_context.Script.T_unit | Alpha_context.Script.T_signature |
@@ -2144,16 +2475,19 @@ with parse_ty
       Alpha_context.Script.T_key | Alpha_context.Script.T_key_hash |
       Alpha_context.Script.T_timestamp | Alpha_context.Script.T_address) as prim)
       l _, _) => Error_monad.__error_value extensible_type_value
+  
   |
     (Micheline.Prim loc
       ((Alpha_context.Script.T_set | Alpha_context.Script.T_list |
       Alpha_context.Script.T_option | Alpha_context.Script.T_contract) as prim)
       l _, _) => Error_monad.__error_value extensible_type_value
+  
   |
     (Micheline.Prim loc
       ((Alpha_context.Script.T_pair | Alpha_context.Script.T_or |
       Alpha_context.Script.T_map | Alpha_context.Script.T_lambda) as prim) l _,
       _) => Error_monad.__error_value extensible_type_value
+  
   | (expr, _) =>
     Error_monad.__error_value
       (unexpected expr nil Script_tc_errors.Type_namespace
@@ -2197,13 +2531,12 @@ with parse_big_map_ty
     let 'existT _ __Ex_comparable_ty_'a2 [key_ty, ctxt] :=
       existT (A := Set)
         (fun __Ex_comparable_ty_'a2 =>
-          [Script_typed_ir.comparable_ty __Ex_comparable_ty_'a2 **
-            Alpha_context.context]) _ [key_ty, ctxt] in
+          [Script_typed_ir.comparable_ty ** Alpha_context.context]) _
+        [key_ty, ctxt] in
     let? '(Ex_ty value_ty, ctxt) := parse_packable_ty ctxt legacy value_ty in
     let 'existT _ __Ex_ty_'a10 [value_ty, ctxt] :=
       existT (A := Set)
-        (fun __Ex_ty_'a10 =>
-          [Script_typed_ir.ty __Ex_ty_'a10 ** Alpha_context.context]) _
+        (fun __Ex_ty_'a10 => [Script_typed_ir.ty ** Alpha_context.context]) _
         [value_ty, ctxt] in
     Error_monad.op_gtpipequestion
       (Script_ir_annot.parse_type_annot big_map_loc map_annot)
@@ -2249,15 +2582,13 @@ with parse_storage_ty
         parse_big_map_ty ctxt legacy big_map_loc args map_annot in
       let 'existT _ __Ex_ty_'a11 [big_map_ty, ctxt] :=
         existT (A := Set)
-          (fun __Ex_ty_'a11 =>
-            [Script_typed_ir.ty __Ex_ty_'a11 ** Alpha_context.context]) _
+          (fun __Ex_ty_'a11 => [Script_typed_ir.ty ** Alpha_context.context]) _
           [big_map_ty, ctxt] in
       let? '(Ex_ty remaining_storage, ctxt) :=
         parse_ty ctxt legacy true false legacy remaining_storage in
       let 'existT _ __Ex_ty_'a12 [remaining_storage, ctxt] :=
         existT (A := Set)
-          (fun __Ex_ty_'a12 =>
-            [Script_typed_ir.ty __Ex_ty_'a12 ** Alpha_context.context]) _
+          (fun __Ex_ty_'a12 => [Script_typed_ir.ty ** Alpha_context.context]) _
           [remaining_storage, ctxt] in
       let? '(ty_name, map_field, storage_field) :=
         Script_ir_annot.parse_composed_type_annot loc storage_annot in
@@ -2271,10 +2602,10 @@ with parse_storage_ty
   | (_, _) => parse_ty ctxt legacy true false legacy node
   end.
 
-Definition check_packable {A : Set}
+Definition check_packable
   (legacy : bool) (loc : Alpha_context.Script.location)
-  (root : Script_typed_ir.ty A) : Error_monad.tzresult unit :=
-  let fix check {t : Set} (function_parameter : Script_typed_ir.ty t)
+  (root : Script_typed_ir.ty) : Error_monad.tzresult unit :=
+  let fix check (function_parameter : Script_typed_ir.ty)
     {struct function_parameter} : Error_monad.tzresult unit :=
     match
       (function_parameter,
@@ -2284,94 +2615,115 @@ Definition check_packable {A : Set}
         end) with
     | (Script_typed_ir.Big_map_t _ _ _, _) =>
       Error_monad.__error_value extensible_type_value
+    
     | (Script_typed_ir.Operation_t _, _) =>
       Error_monad.__error_value extensible_type_value
+    
     | (Script_typed_ir.Unit_t _, _) => Error_monad.ok tt
+    
     | (Script_typed_ir.Int_t _, _) => Error_monad.ok tt
+    
     | (Script_typed_ir.Nat_t _, _) => Error_monad.ok tt
+    
     | (Script_typed_ir.Signature_t _, _) => Error_monad.ok tt
+    
     | (Script_typed_ir.String_t _, _) => Error_monad.ok tt
+    
     | (Script_typed_ir.Bytes_t _, _) => Error_monad.ok tt
+    
     | (Script_typed_ir.Mutez_t _, _) => Error_monad.ok tt
+    
     | (Script_typed_ir.Key_hash_t _, _) => Error_monad.ok tt
+    
     | (Script_typed_ir.Key_t _, _) => Error_monad.ok tt
+    
     | (Script_typed_ir.Timestamp_t _, _) => Error_monad.ok tt
+    
     | (Script_typed_ir.Address_t _, _) => Error_monad.ok tt
+    
     | (Script_typed_ir.Bool_t _, _) => Error_monad.ok tt
+    
     | (Script_typed_ir.Chain_id_t _, _) => Error_monad.ok tt
+    
     | (Script_typed_ir.Pair_t (l_ty, _, _) (r_ty, _, _) _ _, _) =>
       let 'existT _ [__2, __3] [l_ty, r_ty] :=
         existT (A := [Set ** Set])
-          (fun '[__2, __3] => [Script_typed_ir.ty __2 ** Script_typed_ir.ty __3])
-          [_, _] [l_ty, r_ty] in
+          (fun '[__2, __3] => [Script_typed_ir.ty ** Script_typed_ir.ty]) [_, _]
+          [l_ty, r_ty] in
       let? '_ := check l_ty in
       check r_ty
+    
     | (Script_typed_ir.Union_t (l_ty, _) (r_ty, _) _ _, _) =>
       let 'existT _ [__4, __5] [l_ty, r_ty] :=
         existT (A := [Set ** Set])
-          (fun '[__4, __5] => [Script_typed_ir.ty __4 ** Script_typed_ir.ty __5])
-          [_, _] [l_ty, r_ty] in
+          (fun '[__4, __5] => [Script_typed_ir.ty ** Script_typed_ir.ty]) [_, _]
+          [l_ty, r_ty] in
       let? '_ := check l_ty in
       check r_ty
+    
     | (Script_typed_ir.Option_t v_ty _ _, _) =>
       let 'existT _ __6 v_ty :=
-        existT (A := Set) (fun __6 => Script_typed_ir.ty __6) _ v_ty in
+        existT (A := Set) (fun __6 => Script_typed_ir.ty) _ v_ty in
       check v_ty
+    
     | (Script_typed_ir.List_t elt_ty _ _, _) =>
       let 'existT _ __7 elt_ty :=
-        existT (A := Set) (fun __7 => Script_typed_ir.ty __7) _ elt_ty in
+        existT (A := Set) (fun __7 => Script_typed_ir.ty) _ elt_ty in
       check elt_ty
+    
     | (Script_typed_ir.Set_t _ _, _) => Error_monad.ok tt
+    
     | (Script_typed_ir.Map_t _ elt_ty _ _, _) =>
       let 'existT _ __10 elt_ty :=
-        existT (A := Set) (fun __10 => Script_typed_ir.ty __10) _ elt_ty in
+        existT (A := Set) (fun __10 => Script_typed_ir.ty) _ elt_ty in
       check elt_ty
+    
     | (Script_typed_ir.Lambda_t _l_ty _r_ty _, _) =>
       let 'existT _ [__11, __12] [_l_ty, _r_ty] :=
         existT (A := [Set ** Set])
-          (fun '[__11, __12] =>
-            [Script_typed_ir.ty __11 ** Script_typed_ir.ty __12]) [_, _]
-          [_l_ty, _r_ty] in
+          (fun '[__11, __12] => [Script_typed_ir.ty ** Script_typed_ir.ty]) [_,
+          _] [_l_ty, _r_ty] in
       Error_monad.ok tt
+    
     | (Script_typed_ir.Contract_t _ _, true) => Error_monad.ok tt
+    
     | (Script_typed_ir.Contract_t _ _, _) =>
       Error_monad.__error_value extensible_type_value
     end in
   check root.
 
 Inductive ex_script : Set :=
-| Ex_script : forall {a c : Set}, Script_typed_ir.script a c -> ex_script.
+| Ex_script : forall {c : Set}, Script_typed_ir.script c -> ex_script.
 
 Inductive dig_proof_argument (bef : Set) : Set :=
-| Dig_proof_argument : forall {aft rest x : Set},
-  Script_typed_ir.stack_prefix_preservation_witness (x * rest) rest bef aft *
-    (Script_typed_ir.ty x * option Script_typed_ir.var_annot) *
-    Script_typed_ir.stack_ty aft -> dig_proof_argument bef.
+| Dig_proof_argument :
+  Script_typed_ir.stack_prefix_preservation_witness *
+    (Script_typed_ir.ty * option Script_typed_ir.var_annot) *
+    Script_typed_ir.stack_ty -> dig_proof_argument bef.
 
-Arguments Dig_proof_argument {_ _ _ _}.
+Arguments Dig_proof_argument {_}.
 
 Inductive dug_proof_argument (bef x : Set) : Set :=
-| Dug_proof_argument : forall {aft rest : Set},
-  Script_typed_ir.stack_prefix_preservation_witness rest (x * rest) bef aft *
-    unit * Script_typed_ir.stack_ty aft -> dug_proof_argument bef x.
+| Dug_proof_argument :
+  Script_typed_ir.stack_prefix_preservation_witness * unit *
+    Script_typed_ir.stack_ty -> dug_proof_argument bef x.
 
-Arguments Dug_proof_argument {_ _ _ _}.
+Arguments Dug_proof_argument {_ _}.
 
 Inductive dipn_proof_argument (bef : Set) : Set :=
-| Dipn_proof_argument : forall {aft faft fbef : Set},
-  Script_typed_ir.stack_prefix_preservation_witness fbef faft bef aft *
-    (Alpha_context.context * Script_typed_ir.descr fbef faft) *
-    Script_typed_ir.stack_ty aft -> dipn_proof_argument bef.
+| Dipn_proof_argument :
+  Script_typed_ir.stack_prefix_preservation_witness *
+    (Alpha_context.context * Script_typed_ir.descr) * Script_typed_ir.stack_ty
+  -> dipn_proof_argument bef.
 
-Arguments Dipn_proof_argument {_ _ _ _}.
+Arguments Dipn_proof_argument {_}.
 
 Inductive dropn_proof_argument (bef : Set) : Set :=
-| Dropn_proof_argument : forall {aft rest : Set},
-  Script_typed_ir.stack_prefix_preservation_witness rest rest bef aft *
-    Script_typed_ir.stack_ty rest * Script_typed_ir.stack_ty aft ->
-  dropn_proof_argument bef.
+| Dropn_proof_argument :
+  Script_typed_ir.stack_prefix_preservation_witness * Script_typed_ir.stack_ty *
+    Script_typed_ir.stack_ty -> dropn_proof_argument bef.
 
-Arguments Dropn_proof_argument {_ _ _}.
+Arguments Dropn_proof_argument {_}.
 
 Definition parse_var_annot
   (loc : int) (default : option (option Script_typed_ir.var_annot))
@@ -2424,23 +2776,23 @@ Definition parse_var_type_annot (loc : int) (annot : list string)
       (option Script_typed_ir.var_annot * option Script_typed_ir.type_annot)) :=
   Lwt.__return (Script_ir_annot.parse_var_type_annot loc annot).
 
-Definition find_entrypoint {A : Set}
-  (full : Script_typed_ir.ty A)
+Definition find_entrypoint
+  (full : Script_typed_ir.ty)
   (root_name : option (|Compare.String|).(Compare.S.t))
   (entrypoint : (|Compare.String|).(Compare.S.t))
   : Error_monad.tzresult
     ((Alpha_context.Script.node -> Alpha_context.Script.node) * ex_ty) :=
-  let fix find_entrypoint {t : Set}
-    (__t_value : Script_typed_ir.ty t) (entrypoint : string) {struct __t_value}
+  let fix find_entrypoint (__t_value : Script_typed_ir.ty) (entrypoint : string)
+    {struct __t_value}
     : (Alpha_context.Script.node -> Alpha_context.Script.node) * ex_ty :=
     match __t_value with
     | Script_typed_ir.Union_t (tl, al) (tr, ar) _ _ =>
       let 'existT _ [__0, __1] [tl, al, tr, ar] :=
         existT (A := [Set ** Set])
           (fun '[__0, __1] =>
-            [Script_typed_ir.ty __0 ** option Script_typed_ir.field_annot **
-              Script_typed_ir.ty __1 ** option Script_typed_ir.field_annot]) [_,
-          _] [tl, al, tr, ar] in
+            [Script_typed_ir.ty ** option Script_typed_ir.field_annot **
+              Script_typed_ir.ty ** option Script_typed_ir.field_annot]) [_, _]
+          [tl, al, tr, ar] in
       if
         match al with
         | None => false
@@ -2487,19 +2839,18 @@ Definition find_entrypoint {A : Set}
       try (Error_monad.ok (find_entrypoint full entrypoint))
     end.
 
-Definition find_entrypoint_for_type {A B : Set}
-  (full : Script_typed_ir.ty A) (expected : Script_typed_ir.ty B)
+Definition find_entrypoint_for_type
+  (full : Script_typed_ir.ty) (expected : Script_typed_ir.ty)
   (root_name : option (|Compare.String|).(Compare.S.t))
   (entrypoint : (|Compare.String|).(Compare.S.t)) (ctxt : Alpha_context.context)
-  : Error_monad.tzresult (Alpha_context.context * string * Script_typed_ir.ty B) :=
+  : Error_monad.tzresult (Alpha_context.context * string * Script_typed_ir.ty) :=
   match (entrypoint, root_name) with
   | ("default", Some "root") =>
     match find_entrypoint full root_name entrypoint with
     | (Pervasives.Error _) as err => err
     | Pervasives.Ok (_, Ex_ty ty) =>
       let 'existT _ __Ex_ty_'a ty :=
-        existT (A := Set) (fun __Ex_ty_'a => Script_typed_ir.ty __Ex_ty_'a) _ ty
-        in
+        existT (A := Set) (fun __Ex_ty_'a => Script_typed_ir.ty) _ ty in
       match ty_eq ctxt expected ty with
       | Pervasives.Ok (Eq, ctxt) => Error_monad.ok (ctxt, "default", ty)
       | Pervasives.Error _ =>
@@ -2510,8 +2861,7 @@ Definition find_entrypoint_for_type {A B : Set}
   | _ =>
     let? '(_, Ex_ty ty) := find_entrypoint full root_name entrypoint in
     let 'existT _ __Ex_ty_'a1 ty :=
-      existT (A := Set) (fun __Ex_ty_'a1 => Script_typed_ir.ty __Ex_ty_'a1) _ ty
-      in
+      existT (A := Set) (fun __Ex_ty_'a1 => Script_typed_ir.ty) _ ty in
     let? '(Eq, ctxt) := ty_eq ctxt expected ty in
     Error_monad.ok (ctxt, entrypoint, ty)
   end.
@@ -2529,14 +2879,14 @@ Definition Entrypoints :=
 (* ❌ The definition of exceptions is not handled. *)
 (* exception Too_long *)
 
-Definition well_formed_entrypoints {A : Set}
-  (full : Script_typed_ir.ty A) (root_name : option (|Entrypoints|).(S.SET.elt))
+Definition well_formed_entrypoints
+  (full : Script_typed_ir.ty) (root_name : option (|Entrypoints|).(S.SET.elt))
   : Error_monad.tzresult unit :=
-  let merge {B C : Set}
-    (path : list B) (annot : option Script_typed_ir.field_annot)
-    (ty : Script_typed_ir.ty C) (reachable : bool)
-    (function_parameter : option (list B) * (|Entrypoints|).(S.SET.t))
-    : option (list B) * (|Entrypoints|).(S.SET.t) :=
+  let merge {A : Set}
+    (path : list A) (annot : option Script_typed_ir.field_annot)
+    (ty : Script_typed_ir.ty) (reachable : bool)
+    (function_parameter : option (list A) * (|Entrypoints|).(S.SET.t))
+    : option (list A) * (|Entrypoints|).(S.SET.t) :=
     let '(first_unreachable, all) as acc := function_parameter in
     match annot with
     | (None | Some (Script_typed_ir.Field_annot "")) =>
@@ -2560,8 +2910,8 @@ Definition well_formed_entrypoints {A : Set}
         else
           (first_unreachable, ((|Entrypoints|).(S.SET.add) name all))
     end in
-  let fix check {t : Set}
-    (__t_value : Script_typed_ir.ty t) (path : list Alpha_context.Script.prim)
+  let fix check
+    (__t_value : Script_typed_ir.ty) (path : list Alpha_context.Script.prim)
     (reachable : bool)
     (acc : option (list Alpha_context.Script.prim) * (|Entrypoints|).(S.SET.t))
     {struct __t_value}
@@ -2571,9 +2921,9 @@ Definition well_formed_entrypoints {A : Set}
       let 'existT _ [__2, __3] [tl, al, tr, ar] :=
         existT (A := [Set ** Set])
           (fun '[__2, __3] =>
-            [Script_typed_ir.ty __2 ** option Script_typed_ir.field_annot **
-              Script_typed_ir.ty __3 ** option Script_typed_ir.field_annot]) [_,
-          _] [tl, al, tr, ar] in
+            [Script_typed_ir.ty ** option Script_typed_ir.field_annot **
+              Script_typed_ir.ty ** option Script_typed_ir.field_annot]) [_, _]
+          [tl, al, tr, ar] in
       let acc :=
         merge (cons Alpha_context.Script.D_Left path) al tl reachable acc in
       let acc :=
@@ -2609,7 +2959,7 @@ Definition well_formed_entrypoints {A : Set}
 
 Fixpoint parse_data {a : Set}
   (type_logger : option type_logger) (ctxt : Alpha_context.context)
-  (legacy : bool) (ty : Script_typed_ir.ty a)
+  (legacy : bool) (ty : Script_typed_ir.ty)
   (script_data : Alpha_context.Script.node) {struct type_logger}
   : Lwt.t (Error_monad.tzresult (a * Alpha_context.context)) :=
   let=? ctxt :=
@@ -2629,14 +2979,13 @@ Fixpoint parse_data {a : Set}
     (type_logger : option type_logger) (loc : Alpha_context.Script.location)
     (ctxt : Alpha_context.context)
     (expr : Micheline.node B Alpha_context.Script.prim)
-    (key_type : Script_typed_ir.comparable_ty C)
-    (value_type : Script_typed_ir.ty D)
+    (key_type : Script_typed_ir.comparable_ty) (value_type : Script_typed_ir.ty)
     (items :
       list
         (Micheline.node Alpha_context.Script.location Alpha_context.Script.prim))
-    (item_wrapper : D -> E)
+    (item_wrapper : C -> D)
     : Lwt.t
-      (Error_monad.tzresult (Script_typed_ir.map C E * Alpha_context.context)) :=
+      (Error_monad.tzresult (Script_typed_ir.map E D * Alpha_context.context)) :=
     let length := List.length items in
     Error_monad.op_gtgtpipequestion
       (traced
@@ -2700,15 +3049,18 @@ Fixpoint parse_data {a : Set}
       (Lwt.__return
         (Alpha_context.Gas.consume ctxt Typecheck_costs.__unit_value))
       (fun ctxt => (tt, ctxt))
+  
   |
     (Script_typed_ir.Unit_t _,
       Micheline.Prim loc Alpha_context.Script.D_Unit l _) =>
     traced (Error_monad.fail extensible_type_value)
+  
   | (Script_typed_ir.Unit_t _, expr) =>
     traced
       (Error_monad.fail
         (unexpected expr nil Script_tc_errors.Constant_namespace
           [ Alpha_context.Script.D_Unit ]))
+  
   |
     (Script_typed_ir.Bool_t _,
       Micheline.Prim loc Alpha_context.Script.D_True [] annot) =>
@@ -2721,6 +3073,7 @@ Fixpoint parse_data {a : Set}
       (Lwt.__return
         (Alpha_context.Gas.consume ctxt Typecheck_costs.__bool_value))
       (fun ctxt => (true, ctxt))
+  
   |
     (Script_typed_ir.Bool_t _,
       Micheline.Prim loc Alpha_context.Script.D_False [] annot) =>
@@ -2733,16 +3086,19 @@ Fixpoint parse_data {a : Set}
       (Lwt.__return
         (Alpha_context.Gas.consume ctxt Typecheck_costs.__bool_value))
       (fun ctxt => (false, ctxt))
+  
   |
     (Script_typed_ir.Bool_t _,
       Micheline.Prim loc
         ((Alpha_context.Script.D_True | Alpha_context.Script.D_False) as c) l _)
     => traced (Error_monad.fail extensible_type_value)
+  
   | (Script_typed_ir.Bool_t _, expr) =>
     traced
       (Error_monad.fail
         (unexpected expr nil Script_tc_errors.Constant_namespace
           [ Alpha_context.Script.D_True; Alpha_context.Script.D_False ]))
+  
   | (Script_typed_ir.String_t _, Micheline.String _ v) =>
     let=? ctxt :=
       Lwt.__return
@@ -2781,20 +3137,25 @@ Fixpoint parse_data {a : Set}
       Error_monad.__return (v, ctxt)
     else
       Error_monad.op_gtgteqquestion (__error_value tt) Error_monad.fail
+  
   | (Script_typed_ir.String_t _, expr) =>
     traced (Error_monad.fail extensible_type_value)
+  
   | (Script_typed_ir.Bytes_t _, Micheline.Bytes _ v) =>
     let=? ctxt :=
       Lwt.__return
         (Alpha_context.Gas.consume ctxt
           (Typecheck_costs.__string_value (MBytes.length v))) in
     Error_monad.__return (v, ctxt)
+  
   | (Script_typed_ir.Bytes_t _, expr) =>
     traced (Error_monad.fail extensible_type_value)
+  
   | (Script_typed_ir.Int_t _, Micheline.Int _ v) =>
     let=? ctxt :=
       Lwt.__return (Alpha_context.Gas.consume ctxt (Typecheck_costs.z v)) in
     Error_monad.__return ((Alpha_context.Script_int.of_zint v), ctxt)
+  
   | (Script_typed_ir.Nat_t _, Micheline.Int _ v) =>
     let=? ctxt :=
       Lwt.__return (Alpha_context.Gas.consume ctxt (Typecheck_costs.z v)) in
@@ -2806,10 +3167,13 @@ Fixpoint parse_data {a : Set}
       Error_monad.__return ((Alpha_context.Script_int.abs v), ctxt)
     else
       Error_monad.op_gtgteqquestion (__error_value tt) Error_monad.fail
+  
   | (Script_typed_ir.Int_t _, expr) =>
     traced (Error_monad.fail extensible_type_value)
+  
   | (Script_typed_ir.Nat_t _, expr) =>
     traced (Error_monad.fail extensible_type_value)
+  
   | (Script_typed_ir.Mutez_t _, Micheline.Int _ v) =>
     let=? ctxt :=
       Lwt.__return
@@ -2822,12 +3186,15 @@ Fixpoint parse_data {a : Set}
       | None => Pervasives.raise extensible_type_value
       | Some tez => Error_monad.__return (tez, ctxt)
       end
+  
   | (Script_typed_ir.Mutez_t _, expr) =>
     traced (Error_monad.fail extensible_type_value)
+  
   | (Script_typed_ir.Timestamp_t _, Micheline.Int _ v) =>
     let=? ctxt :=
       Lwt.__return (Alpha_context.Gas.consume ctxt (Typecheck_costs.z v)) in
     Error_monad.__return ((Alpha_context.Script_timestamp.of_zint v), ctxt)
+  
   | (Script_typed_ir.Timestamp_t _, Micheline.String _ s) =>
     let=? ctxt :=
       Lwt.__return
@@ -2836,8 +3203,10 @@ Fixpoint parse_data {a : Set}
     | Some v => Error_monad.__return (v, ctxt)
     | None => Error_monad.op_gtgteqquestion (__error_value tt) Error_monad.fail
     end
+  
   | (Script_typed_ir.Timestamp_t _, expr) =>
     traced (Error_monad.fail extensible_type_value)
+  
   | (Script_typed_ir.Key_t _, Micheline.Bytes _ __bytes_value) =>
     let=? ctxt :=
       Lwt.__return (Alpha_context.Gas.consume ctxt Typecheck_costs.__key_value)
@@ -2848,6 +3217,7 @@ Fixpoint parse_data {a : Set}
     | Some k => Error_monad.__return (k, ctxt)
     | None => Error_monad.op_gtgteqquestion (__error_value tt) Error_monad.fail
     end
+  
   | (Script_typed_ir.Key_t _, Micheline.String _ s) =>
     let=? ctxt :=
       Lwt.__return (Alpha_context.Gas.consume ctxt Typecheck_costs.__key_value)
@@ -2856,8 +3226,10 @@ Fixpoint parse_data {a : Set}
     | Some k => Error_monad.__return (k, ctxt)
     | None => Error_monad.op_gtgteqquestion (__error_value tt) Error_monad.fail
     end
+  
   | (Script_typed_ir.Key_t _, expr) =>
     traced (Error_monad.fail extensible_type_value)
+  
   | (Script_typed_ir.Key_hash_t _, Micheline.Bytes _ __bytes_value) =>
     let=? ctxt :=
       Lwt.__return (Alpha_context.Gas.consume ctxt Typecheck_costs.key_hash) in
@@ -2868,6 +3240,7 @@ Fixpoint parse_data {a : Set}
     | Some k => Error_monad.__return (k, ctxt)
     | None => Error_monad.op_gtgteqquestion (__error_value tt) Error_monad.fail
     end
+  
   | (Script_typed_ir.Key_hash_t _, Micheline.String _ s) =>
     let=? ctxt :=
       Lwt.__return (Alpha_context.Gas.consume ctxt Typecheck_costs.key_hash) in
@@ -2876,8 +3249,10 @@ Fixpoint parse_data {a : Set}
     | Some k => Error_monad.__return (k, ctxt)
     | None => Error_monad.op_gtgteqquestion (__error_value tt) Error_monad.fail
     end
+  
   | (Script_typed_ir.Key_hash_t _, expr) =>
     traced (Error_monad.fail extensible_type_value)
+  
   | (Script_typed_ir.Signature_t _, Micheline.Bytes _ __bytes_value) =>
     let=? ctxt :=
       Lwt.__return (Alpha_context.Gas.consume ctxt Typecheck_costs.signature) in
@@ -2885,6 +3260,7 @@ Fixpoint parse_data {a : Set}
     | Some k => Error_monad.__return (k, ctxt)
     | None => Error_monad.op_gtgteqquestion (__error_value tt) Error_monad.fail
     end
+  
   | (Script_typed_ir.Signature_t _, Micheline.String _ s) =>
     let=? ctxt :=
       Lwt.__return (Alpha_context.Gas.consume ctxt Typecheck_costs.signature) in
@@ -2892,11 +3268,14 @@ Fixpoint parse_data {a : Set}
     | Some s => Error_monad.__return (s, ctxt)
     | None => Error_monad.op_gtgteqquestion (__error_value tt) Error_monad.fail
     end
+  
   | (Script_typed_ir.Signature_t _, expr) =>
     traced (Error_monad.fail extensible_type_value)
+  
   | (Script_typed_ir.Operation_t _, _) =>
     (* ❌ Assert instruction is not handled. *)
-    assert false
+    assert (Lwt.t (Error_monad.tzresult (a * Alpha_context.context))) false
+  
   | (Script_typed_ir.Chain_id_t _, Micheline.Bytes _ __bytes_value) =>
     let=? ctxt :=
       Lwt.__return (Alpha_context.Gas.consume ctxt Typecheck_costs.chain_id) in
@@ -2906,6 +3285,7 @@ Fixpoint parse_data {a : Set}
     | Some k => Error_monad.__return (k, ctxt)
     | None => Error_monad.op_gtgteqquestion (__error_value tt) Error_monad.fail
     end
+  
   | (Script_typed_ir.Chain_id_t _, Micheline.String _ s) =>
     let=? ctxt :=
       Lwt.__return (Alpha_context.Gas.consume ctxt Typecheck_costs.chain_id) in
@@ -2913,8 +3293,10 @@ Fixpoint parse_data {a : Set}
     | Some s => Error_monad.__return (s, ctxt)
     | None => Error_monad.op_gtgteqquestion (__error_value tt) Error_monad.fail
     end
+  
   | (Script_typed_ir.Chain_id_t _, expr) =>
     traced (Error_monad.fail extensible_type_value)
+  
   | (Script_typed_ir.Address_t _, Micheline.Bytes loc __bytes_value) =>
     let=? ctxt :=
       Lwt.__return (Alpha_context.Gas.consume ctxt Typecheck_costs.contract) in
@@ -2935,6 +3317,7 @@ Fixpoint parse_data {a : Set}
         Error_monad.__return ((c, entrypoint), ctxt)
     | None => Error_monad.op_gtgteqquestion (__error_value tt) Error_monad.fail
     end
+  
   | (Script_typed_ir.Address_t _, Micheline.String loc s) =>
     let=? ctxt :=
       Lwt.__return (Alpha_context.Gas.consume ctxt Typecheck_costs.contract) in
@@ -2955,14 +3338,16 @@ Fixpoint parse_data {a : Set}
       end in
     let=? c := Lwt.__return (Alpha_context.Contract.of_b58check addr) in
     Error_monad.__return ((c, entrypoint), ctxt)
+  
   | (Script_typed_ir.Address_t _, expr) =>
     traced (Error_monad.fail extensible_type_value)
+  
   | (Script_typed_ir.Contract_t ty _, Micheline.Bytes loc __bytes_value) =>
     let 'existT _ __0 [ty, loc, __bytes_value] :=
       existT (A := Set)
         (fun __0 =>
-          [Script_typed_ir.ty __0 ** Alpha_context.Script.location ** MBytes.t])
-        _ [ty, loc, __bytes_value] in
+          [Script_typed_ir.ty ** Alpha_context.Script.location ** MBytes.t]) _
+        [ty, loc, __bytes_value] in
     let=? ctxt :=
       Lwt.__return (Alpha_context.Gas.consume ctxt Typecheck_costs.contract) in
     match
@@ -2984,11 +3369,12 @@ Fixpoint parse_data {a : Set}
         Error_monad.__return ((ty, (c, entrypoint)), ctxt)
     | None => Error_monad.op_gtgteqquestion (__error_value tt) Error_monad.fail
     end
+  
   | (Script_typed_ir.Contract_t ty _, Micheline.String loc s) =>
     let 'existT _ __1 [ty, loc, s] :=
       existT (A := Set)
         (fun __1 =>
-          [Script_typed_ir.ty __1 ** Alpha_context.Script.location ** string]) _
+          [Script_typed_ir.ty ** Alpha_context.Script.location ** string]) _
         [ty, loc, s] in
     let=? ctxt :=
       Lwt.__return (Alpha_context.Gas.consume ctxt Typecheck_costs.contract) in
@@ -3011,8 +3397,10 @@ Fixpoint parse_data {a : Set}
       in
     let=? '(ctxt, _) := parse_contract legacy ctxt loc ty c entrypoint in
     Error_monad.__return ((ty, (c, entrypoint)), ctxt)
+  
   | (Script_typed_ir.Contract_t _ _, expr) =>
     traced (Error_monad.fail extensible_type_value)
+  
   |
     (Script_typed_ir.Pair_t (ta, _, _) (tb, _, _) _ _,
       Micheline.Prim loc Alpha_context.Script.D_Pair (cons va (cons vb []))
@@ -3020,7 +3408,7 @@ Fixpoint parse_data {a : Set}
     let 'existT _ [__3, __4] [ta, tb, loc, va, vb, annot] :=
       existT (A := [Set ** Set])
         (fun '[__3, __4] =>
-          [Script_typed_ir.ty __3 ** Script_typed_ir.ty __4 **
+          [Script_typed_ir.ty ** Script_typed_ir.ty **
             Alpha_context.Script.location **
             Micheline.node Alpha_context.Script.location
               Alpha_context.Script.prim **
@@ -3037,22 +3425,25 @@ Fixpoint parse_data {a : Set}
     let=? '(va, ctxt) := traced (parse_data type_logger ctxt legacy ta va) in
     let=? '(vb, ctxt) := parse_data type_logger ctxt legacy tb vb in
     Error_monad.__return ((va, vb), ctxt)
+  
   |
     (Script_typed_ir.Pair_t _ _ _ _,
       Micheline.Prim loc Alpha_context.Script.D_Pair l _) =>
     Error_monad.fail extensible_type_value
+  
   | (Script_typed_ir.Pair_t _ _ _ _, expr) =>
     traced
       (Error_monad.fail
         (unexpected expr nil Script_tc_errors.Constant_namespace
           [ Alpha_context.Script.D_Pair ]))
+  
   |
     (Script_typed_ir.Union_t (tl, _) _ _ _,
       Micheline.Prim loc Alpha_context.Script.D_Left (cons v []) annot) =>
     let 'existT _ __9 [tl, loc, v, annot] :=
       existT (A := Set)
         (fun __9 =>
-          [Script_typed_ir.ty __9 ** Alpha_context.Script.location **
+          [Script_typed_ir.ty ** Alpha_context.Script.location **
             Micheline.node Alpha_context.Script.location
               Alpha_context.Script.prim ** Micheline.annot]) _
         [tl, loc, v, annot] in
@@ -3065,17 +3456,19 @@ Fixpoint parse_data {a : Set}
       Lwt.__return (Alpha_context.Gas.consume ctxt Typecheck_costs.union) in
     let=? '(v, ctxt) := traced (parse_data type_logger ctxt legacy tl v) in
     Error_monad.__return ((Script_typed_ir.L v), ctxt)
+  
   |
     (Script_typed_ir.Union_t _ _ _ _,
       Micheline.Prim loc Alpha_context.Script.D_Left l _) =>
     Error_monad.fail extensible_type_value
+  
   |
     (Script_typed_ir.Union_t _ (tr, _) _ _,
       Micheline.Prim loc Alpha_context.Script.D_Right (cons v []) annot) =>
     let 'existT _ __14 [tr, loc, v, annot] :=
       existT (A := Set)
         (fun __14 =>
-          [Script_typed_ir.ty __14 ** Alpha_context.Script.location **
+          [Script_typed_ir.ty ** Alpha_context.Script.location **
             Micheline.node Alpha_context.Script.location
               Alpha_context.Script.prim ** Micheline.annot]) _
         [tr, loc, v, annot] in
@@ -3084,22 +3477,25 @@ Fixpoint parse_data {a : Set}
       Lwt.__return (Alpha_context.Gas.consume ctxt Typecheck_costs.union) in
     let=? '(v, ctxt) := traced (parse_data type_logger ctxt legacy tr v) in
     Error_monad.__return ((Script_typed_ir.R v), ctxt)
+  
   |
     (Script_typed_ir.Union_t _ _ _ _,
       Micheline.Prim loc Alpha_context.Script.D_Right l _) =>
     Error_monad.fail extensible_type_value
+  
   | (Script_typed_ir.Union_t _ _ _ _, expr) =>
     traced
       (Error_monad.fail
         (unexpected expr nil Script_tc_errors.Constant_namespace
           [ Alpha_context.Script.D_Left; Alpha_context.Script.D_Right ]))
+  
   |
     (Script_typed_ir.Lambda_t ta tr _ty_name,
       (Micheline.Seq _loc _) as script_instr) =>
     let 'existT _ [__19, __20] [ta, tr, _ty_name, _loc, script_instr] :=
       existT (A := [Set ** Set])
         (fun '[__19, __20] =>
-          [Script_typed_ir.ty __19 ** Script_typed_ir.ty __20 **
+          [Script_typed_ir.ty ** Script_typed_ir.ty **
             option Script_typed_ir.type_annot ** Alpha_context.Script.location
             **
             Micheline.node Alpha_context.Script.location
@@ -3110,15 +3506,17 @@ Fixpoint parse_data {a : Set}
     traced
       (parse_returning type_logger Lambda ctxt legacy
         (ta, (Some (Script_typed_ir.Var_annot "@arg"))) tr script_instr)
+  
   | (Script_typed_ir.Lambda_t _ _ _, expr) =>
     traced (Error_monad.fail extensible_type_value)
+  
   |
     (Script_typed_ir.Option_t __t_value _ _,
       Micheline.Prim loc Alpha_context.Script.D_Some (cons v []) annot) =>
     let 'existT _ __23 [__t_value, loc, v, annot] :=
       existT (A := Set)
         (fun __23 =>
-          [Script_typed_ir.ty __23 ** Alpha_context.Script.location **
+          [Script_typed_ir.ty ** Alpha_context.Script.location **
             Micheline.node Alpha_context.Script.location
               Alpha_context.Script.prim ** Micheline.annot]) _
         [__t_value, loc, v, annot] in
@@ -3132,10 +3530,12 @@ Fixpoint parse_data {a : Set}
     let=? '(v, ctxt) := traced (parse_data type_logger ctxt legacy __t_value v)
       in
     Error_monad.__return ((Some v), ctxt)
+  
   |
     (Script_typed_ir.Option_t _ _ _,
       Micheline.Prim loc Alpha_context.Script.D_Some l _) =>
     Error_monad.fail extensible_type_value
+  
   |
     (Script_typed_ir.Option_t _ _ _,
       Micheline.Prim loc Alpha_context.Script.D_None [] annot) =>
@@ -3147,20 +3547,23 @@ Fixpoint parse_data {a : Set}
     let=? ctxt :=
       Lwt.__return (Alpha_context.Gas.consume ctxt Typecheck_costs.none) in
     Error_monad.__return (None, ctxt)
+  
   |
     (Script_typed_ir.Option_t _ _ _,
       Micheline.Prim loc Alpha_context.Script.D_None l _) =>
     Error_monad.fail extensible_type_value
+  
   | (Script_typed_ir.Option_t _ _ _, expr) =>
     traced
       (Error_monad.fail
         (unexpected expr nil Script_tc_errors.Constant_namespace
           [ Alpha_context.Script.D_Some; Alpha_context.Script.D_None ]))
+  
   | (Script_typed_ir.List_t __t_value _ty_name _, Micheline.Seq _loc items) =>
     let 'existT _ __28 [__t_value, _ty_name, _loc, items] :=
       existT (A := Set)
         (fun __28 =>
-          [Script_typed_ir.ty __28 ** option Script_typed_ir.type_annot **
+          [Script_typed_ir.ty ** option Script_typed_ir.type_annot **
             Alpha_context.Script.location **
             list
               (Micheline.node Alpha_context.Script.location
@@ -3177,16 +3580,17 @@ Fixpoint parse_data {a : Set}
             let=? '(v, ctxt) := parse_data type_logger ctxt legacy __t_value v
               in
             Error_monad.__return ((cons v rest), ctxt)) items (nil, ctxt))
+  
   | (Script_typed_ir.List_t _ _ _, expr) =>
     traced (Error_monad.fail extensible_type_value)
+  
   | (Script_typed_ir.Set_t __t_value _ty_name, (Micheline.Seq loc vs) as expr)
     =>
     let 'existT _ __30 [__t_value, _ty_name, loc, vs, expr] :=
       existT (A := Set)
         (fun __30 =>
-          [Script_typed_ir.comparable_ty __30 **
-            option Script_typed_ir.type_annot ** Alpha_context.Script.location
-            **
+          [Script_typed_ir.comparable_ty ** option Script_typed_ir.type_annot **
+            Alpha_context.Script.location **
             list
               (Micheline.node Alpha_context.Script.location
                 Alpha_context.Script.prim) **
@@ -3231,13 +3635,15 @@ Fixpoint parse_data {a : Set}
       (fun function_parameter =>
         let '(_, set, ctxt) := function_parameter in
         (set, ctxt))
+  
   | (Script_typed_ir.Set_t _ _, expr) =>
     traced (Error_monad.fail extensible_type_value)
+  
   | (Script_typed_ir.Map_t tk tv _ty_name _, (Micheline.Seq loc vs) as expr) =>
     let 'existT _ [__32, __33] [tk, tv, _ty_name, loc, vs, expr] :=
       existT (A := [Set ** Set])
         (fun '[__32, __33] =>
-          [Script_typed_ir.comparable_ty __32 ** Script_typed_ir.ty __33 **
+          [Script_typed_ir.comparable_ty ** Script_typed_ir.ty **
             option Script_typed_ir.type_annot ** Alpha_context.Script.location
             **
             list
@@ -3247,14 +3653,16 @@ Fixpoint parse_data {a : Set}
               Alpha_context.Script.prim]) [_, _]
         [tk, tv, _ty_name, loc, vs, expr] in
     parse_items type_logger loc ctxt expr tk tv vs (fun x => x)
+  
   | (Script_typed_ir.Map_t _ _ _ _, expr) =>
     traced (Error_monad.fail extensible_type_value)
+  
   | (Script_typed_ir.Big_map_t tk tv _ty_name, (Micheline.Seq loc vs) as expr)
     =>
     let 'existT _ [__36, __37] [tk, tv, _ty_name, loc, vs, expr] :=
       existT (A := [Set ** Set])
         (fun '[__36, __37] =>
-          [Script_typed_ir.comparable_ty __36 ** Script_typed_ir.ty __37 **
+          [Script_typed_ir.comparable_ty ** Script_typed_ir.ty **
             option Script_typed_ir.type_annot ** Alpha_context.Script.location
             **
             list
@@ -3267,15 +3675,17 @@ Fixpoint parse_data {a : Set}
       (parse_items type_logger loc ctxt expr tk tv vs (fun x => Some x))
       (fun function_parameter =>
         let '(diff, ctxt) := function_parameter in
-        ({| Script_typed_ir.big_map.id := None;
+        (({| Script_typed_ir.big_map.id := None;
           Script_typed_ir.big_map.diff := diff;
           Script_typed_ir.big_map.key_type := ty_of_comparable_ty tk;
-          Script_typed_ir.big_map.value_type := tv |}, ctxt))
+          Script_typed_ir.big_map.value_type := tv |}
+          : Script_typed_ir.big_map __36 __37), ctxt))
+  
   | (Script_typed_ir.Big_map_t tk tv _ty_name, Micheline.Int loc id) =>
     let 'existT _ [__38, __39] [tk, tv, _ty_name, loc, id] :=
       existT (A := [Set ** Set])
         (fun '[__38, __39] =>
-          [Script_typed_ir.comparable_ty __38 ** Script_typed_ir.ty __39 **
+          [Script_typed_ir.comparable_ty ** Script_typed_ir.ty **
             option Script_typed_ir.type_annot ** Alpha_context.Script.location
             ** Z.t]) [_, _] [tk, tv, _ty_name, loc, id] in
     let=? function_parameter := Alpha_context.Big_map.__exists ctxt id in
@@ -3288,49 +3698,47 @@ Fixpoint parse_data {a : Set}
         let 'existT _ __Ex_comparable_ty_'a [btk, ctxt] :=
           existT (A := Set)
             (fun __Ex_comparable_ty_'a =>
-              [Script_typed_ir.comparable_ty __Ex_comparable_ty_'a **
-                Alpha_context.context]) _ [btk, ctxt] in
+              [Script_typed_ir.comparable_ty ** Alpha_context.context]) _
+            [btk, ctxt] in
         let? '(Ex_ty btv, ctxt) :=
           parse_packable_ty ctxt legacy (Micheline.root btv) in
         let 'existT _ __Ex_ty_'a [btv, ctxt] :=
           existT (A := Set)
-            (fun __Ex_ty_'a =>
-              [Script_typed_ir.ty __Ex_ty_'a ** Alpha_context.context]) _
+            (fun __Ex_ty_'a => [Script_typed_ir.ty ** Alpha_context.context]) _
             [btv, ctxt] in
         let? 'Eq := comparable_ty_eq ctxt tk btk in
         let? '(Eq, ctxt) := ty_eq ctxt tv btv in
         Error_monad.ok
-          ({| Script_typed_ir.big_map.id := Some id;
+          (({| Script_typed_ir.big_map.id := Some id;
             Script_typed_ir.big_map.diff := empty_map tk;
             Script_typed_ir.big_map.key_type := ty_of_comparable_ty tk;
-            Script_typed_ir.big_map.value_type := tv |}, ctxt))
+            Script_typed_ir.big_map.value_type := tv |}
+            : Script_typed_ir.big_map __38 __39), ctxt))
     end
+  
   | (Script_typed_ir.Big_map_t _tk _tv _, expr) =>
     let 'existT _ [__40, __41] [_tk, _tv, expr] :=
       existT (A := [Set ** Set])
         (fun '[__40, __41] =>
-          [Script_typed_ir.comparable_ty __40 ** Script_typed_ir.ty __41 **
+          [Script_typed_ir.comparable_ty ** Script_typed_ir.ty **
             Alpha_context.Script.node]) [_, _] [_tk, _tv, expr] in
     traced (Error_monad.fail extensible_type_value)
   end
 
 with parse_comparable_data {a : Set}
   (type_logger : option type_logger) (ctxt : Alpha_context.context)
-  (ty : Script_typed_ir.comparable_ty a)
-  (script_data : Alpha_context.Script.node) {struct type_logger}
+  (ty : Script_typed_ir.comparable_ty) (script_data : Alpha_context.Script.node)
+  {struct type_logger}
   : Lwt.t (Error_monad.tzresult (a * Alpha_context.context)) :=
   parse_data type_logger ctxt false (ty_of_comparable_ty ty) script_data
 
-with parse_returning {arg ret : Set}
+with parse_returning
   (type_logger : option type_logger) (tc_context : tc_context)
   (ctxt : Alpha_context.context) (legacy : bool)
-  (function_parameter :
-    Script_typed_ir.ty arg * option Script_typed_ir.var_annot)
+  (function_parameter : Script_typed_ir.ty * option Script_typed_ir.var_annot)
   {struct type_logger}
-  : Script_typed_ir.ty ret -> Alpha_context.Script.node ->
-  Lwt.t
-    (Error_monad.tzresult
-      (Script_typed_ir.lambda arg ret * Alpha_context.context)) :=
+  : Script_typed_ir.ty -> Alpha_context.Script.node ->
+  Lwt.t (Error_monad.tzresult (Script_typed_ir.lambda * Alpha_context.context)) :=
   let '(arg, arg_annot) := function_parameter in
   fun ret =>
     fun script_instr =>
@@ -3350,11 +3758,9 @@ with parse_returning {arg ret : Set}
           [loc, ty, stack_ty, __descr_value, ctxt] :=
           existT (A := [Set ** Set])
             (fun '[__42, __Typed_'aft] =>
-              [Alpha_context.Script.location ** Script_typed_ir.ty __42 **
-                Script_typed_ir.stack_ty (__42 * Script_typed_ir.end_of_stack)
-                **
-                Script_typed_ir.descr (arg * Script_typed_ir.end_of_stack)
-                  __Typed_'aft ** Alpha_context.context]) [_, _]
+              [Alpha_context.Script.location ** Script_typed_ir.ty **
+                Script_typed_ir.stack_ty ** Script_typed_ir.descr **
+                Alpha_context.context]) [_, _]
             [loc, ty, stack_ty, __descr_value, ctxt] in
         Error_monad.trace_eval
           (fun function_parameter =>
@@ -3370,8 +3776,8 @@ with parse_returning {arg ret : Set}
           let=? '(_ret, ctxt) :=
             Lwt.__return (merge_types legacy ctxt loc ty ret) in
           Error_monad.__return
-            ({| Script_typed_ir.lambda.lam := (__descr_value, script_instr) |},
-              ctxt))
+            (({| Script_typed_ir.lambda.lam := (__descr_value, script_instr) |}
+              : Script_typed_ir.lambda), ctxt))
       |
         (Typed {|
           Script_typed_ir.descr.loc := loc;
@@ -3380,19 +3786,18 @@ with parse_returning {arg ret : Set}
         let 'existT _ __Typed_'aft1 [loc, stack_ty, ctxt] :=
           existT (A := Set)
             (fun __Typed_'aft1 =>
-              [Alpha_context.Script.location **
-                Script_typed_ir.stack_ty __Typed_'aft1 ** Alpha_context.context])
-            _ [loc, stack_ty, ctxt] in
+              [Alpha_context.Script.location ** Script_typed_ir.stack_ty **
+                Alpha_context.context]) _ [loc, stack_ty, ctxt] in
         let=? '(ret, ctxt) := Lwt.__return (serialize_ty_for_error ctxt ret) in
         let=? '(stack_ty, _ctxt) := serialize_stack_for_error ctxt stack_ty in
         Error_monad.fail extensible_type_value
       | (Failed {| judgement.Failed.descr := __descr_value |}, ctxt) =>
         Error_monad.__return
-          ({|
+          (({|
             Script_typed_ir.lambda.lam :=
               ((__descr_value
                 (Script_typed_ir.Item_t ret Script_typed_ir.Empty_t None)),
-                script_instr) |}, ctxt)
+                script_instr) |} : Script_typed_ir.lambda), ctxt)
       end
 
 with parse_int32
@@ -3420,7 +3825,7 @@ with parse_instr {bef : Set}
   (type_logger : option type_logger) (tc_context : tc_context)
   (ctxt : Alpha_context.context) (legacy : bool)
   (script_instr : Alpha_context.Script.node)
-  (stack_ty : Script_typed_ir.stack_ty bef) {struct type_logger}
+  (stack_ty : Script_typed_ir.stack_ty) {struct type_logger}
   : Lwt.t (Error_monad.tzresult (judgement bef * Alpha_context.context)) :=
   let _check_item {B : Set}
     (check : Error_monad.tzresult B) (loc : Alpha_context.Script.location)
@@ -3435,13 +3840,12 @@ with parse_instr {bef : Set}
             let '(stack_ty, _ctxt) := function_parameter in
             extensible_type_value)))
       ((Error_monad.trace extensible_type_value) (Lwt.__return check)) in
-  let check_item_ty {B C : Set}
-    (ctxt : Alpha_context.context) (exp : Script_typed_ir.ty B)
-    (got : Script_typed_ir.ty C) (loc : Alpha_context.Script.location)
+  let check_item_ty
+    (ctxt : Alpha_context.context) (exp : Script_typed_ir.ty)
+    (got : Script_typed_ir.ty) (loc : Alpha_context.Script.location)
     (name : Alpha_context.Script.prim) (n : int) (m : int)
     : Lwt.t
-      (Error_monad.tzresult
-        (eq B C * Script_typed_ir.ty B * Alpha_context.context)) :=
+      (Error_monad.tzresult (eq * Script_typed_ir.ty * Alpha_context.context)) :=
     (Error_monad.trace_eval
       (fun function_parameter =>
         let '_ := function_parameter in
@@ -3455,12 +3859,11 @@ with parse_instr {bef : Set}
           (let? '(Eq, ctxt) := ty_eq ctxt exp got in
           let? '(ty, ctxt) := merge_types legacy ctxt loc exp got in
           Error_monad.ok (Eq, ty, ctxt)))) in
-  let check_item_comparable_ty {B C : Set}
-    (exp : Script_typed_ir.comparable_ty B)
-    (got : Script_typed_ir.comparable_ty C)
+  let check_item_comparable_ty
+    (exp : Script_typed_ir.comparable_ty) (got : Script_typed_ir.comparable_ty)
     (loc : Alpha_context.Script.location) (name : Alpha_context.Script.prim)
     (n : int) (m : int)
-    : Lwt.t (Error_monad.tzresult (eq B C * Script_typed_ir.comparable_ty B)) :=
+    : Lwt.t (Error_monad.tzresult (eq * Script_typed_ir.comparable_ty)) :=
     (Error_monad.trace_eval
       (fun function_parameter =>
         let '_ := function_parameter in
@@ -3474,9 +3877,9 @@ with parse_instr {bef : Set}
           (let? 'Eq := comparable_ty_eq ctxt exp got in
           let? ty := merge_comparable_types legacy exp got in
           Error_monad.ok (Eq, ty)))) in
-  let log_stack {B C : Set}
+  let log_stack
     (ctxt : Alpha_context.context) (loc : int)
-    (stack_ty : Script_typed_ir.stack_ty B) (aft : Script_typed_ir.stack_ty C)
+    (stack_ty : Script_typed_ir.stack_ty) (aft : Script_typed_ir.stack_ty)
     : Lwt.t (Error_monad.tzresult unit) :=
     match (type_logger, script_instr) with
     |
@@ -3506,9 +3909,8 @@ with parse_instr {bef : Set}
       let 'existT _ __Typed_'aft2 [loc, aft, instr] :=
         existT (A := Set)
           (fun __Typed_'aft2 =>
-            [Alpha_context.Script.location **
-              Script_typed_ir.stack_ty __Typed_'aft2 **
-              Script_typed_ir.instr bef __Typed_'aft2]) _ [loc, aft, instr] in
+            [Alpha_context.Script.location ** Script_typed_ir.stack_ty **
+              Script_typed_ir.instr]) _ [loc, aft, instr] in
       let maximum_type_size :=
         Alpha_context.Constants.michelson_maximum_type_size ctxt in
       let type_size :=
@@ -3519,9 +3921,9 @@ with parse_instr {bef : Set}
         Error_monad.__return (judgement, ctxt)
     | Failed _ => Error_monad.__return (judgement, ctxt)
     end in
-  let typed {B : Set}
-    (ctxt : Alpha_context.context) (loc : int)
-    (instr : Script_typed_ir.instr bef B) (aft : Script_typed_ir.stack_ty B)
+  let typed
+    (ctxt : Alpha_context.context) (loc : int) (instr : Script_typed_ir.instr)
+    (aft : Script_typed_ir.stack_ty)
     : Lwt.t (Error_monad.tzresult (judgement bef * Alpha_context.context)) :=
     let=? '_ := log_stack ctxt loc stack_ty aft in
     let=? ctxt :=
@@ -3529,10 +3931,10 @@ with parse_instr {bef : Set}
         (Alpha_context.Gas.consume ctxt (Typecheck_costs.instr instr)) in
     __return ctxt
       (Typed
-        {| Script_typed_ir.descr.loc := loc;
+        ({| Script_typed_ir.descr.loc := loc;
           Script_typed_ir.descr.bef := stack_ty;
           Script_typed_ir.descr.aft := aft; Script_typed_ir.descr.instr := instr
-          |}) in
+          |} : Script_typed_ir.descr)) in
   let=? ctxt :=
     Lwt.__return (Alpha_context.Gas.consume ctxt Typecheck_costs.cycle) in
   match
@@ -3554,15 +3956,16 @@ with parse_instr {bef : Set}
       existT (A := Set)
         (fun __45 =>
           [Alpha_context.Script.location ** Micheline.annot **
-            Script_typed_ir.stack_ty __45]) _ [loc, annot, rest] in
+            Script_typed_ir.stack_ty]) _ [loc, annot, rest] in
     let=? '_ := Script_ir_annot.fail_unexpected_annot loc annot in
     typed ctxt loc Script_typed_ir.Drop rest
+  
   |
     ((Micheline.Prim loc Alpha_context.Script.I_DROP (cons n []) result_annot,
       whole_stack), _) =>
     let=? whole_n := Lwt.__return (parse_int32 n) in
     let fix make_proof_argument {tstk : Set}
-      (n : int) (stk : Script_typed_ir.stack_ty tstk) {struct n}
+      (n : int) (stk : Script_typed_ir.stack_ty) {struct n}
       : Lwt.t (Error_monad.tzresult (dropn_proof_argument tstk)) :=
       match (((|Compare.Int|).(Compare.S.op_eq) n 0), stk) with
       | (true, rest) =>
@@ -3571,7 +3974,7 @@ with parse_instr {bef : Set}
         let 'existT _ [__470, __471] [v, rest, annot] :=
           existT (A := [Set ** Set])
             (fun '[__470, __471] =>
-              [Script_typed_ir.ty __470 ** Script_typed_ir.stack_ty __471 **
+              [Script_typed_ir.ty ** Script_typed_ir.stack_ty **
                 option Script_typed_ir.var_annot]) [_, _] [v, rest, annot] in
         let=? 'Dropn_proof_argument (n', stack_after_drops, aft') :=
           make_proof_argument (Pervasives.op_minus n 1) rest in
@@ -3580,11 +3983,8 @@ with parse_instr {bef : Set}
           [n', stack_after_drops, aft'] :=
           existT (A := [Set ** Set])
             (fun '[__Dropn_proof_argument_'aft, __Dropn_proof_argument_'rest] =>
-              [Script_typed_ir.stack_prefix_preservation_witness
-                __Dropn_proof_argument_'rest __Dropn_proof_argument_'rest __471
-                __Dropn_proof_argument_'aft **
-                Script_typed_ir.stack_ty __Dropn_proof_argument_'rest **
-                Script_typed_ir.stack_ty __Dropn_proof_argument_'aft]) [_, _]
+              [Script_typed_ir.stack_prefix_preservation_witness **
+                Script_typed_ir.stack_ty ** Script_typed_ir.stack_ty]) [_, _]
             [n', stack_after_drops, aft'] in
         outer_return
           (Dropn_proof_argument
@@ -3602,16 +4002,15 @@ with parse_instr {bef : Set}
       [n', stack_after_drops, _aft] :=
       existT (A := [Set ** Set])
         (fun '[__Dropn_proof_argument_'aft1, __Dropn_proof_argument_'rest1] =>
-          [Script_typed_ir.stack_prefix_preservation_witness
-            __Dropn_proof_argument_'rest1 __Dropn_proof_argument_'rest1 bef
-            __Dropn_proof_argument_'aft1 **
-            Script_typed_ir.stack_ty __Dropn_proof_argument_'rest1 **
-            Script_typed_ir.stack_ty __Dropn_proof_argument_'aft1]) [_, _]
+          [Script_typed_ir.stack_prefix_preservation_witness **
+            Script_typed_ir.stack_ty ** Script_typed_ir.stack_ty]) [_, _]
         [n', stack_after_drops, _aft] in
     typed ctxt loc (Script_typed_ir.Dropn whole_n n') stack_after_drops
+  
   |
     ((Micheline.Prim loc Alpha_context.Script.I_DROP ((cons _ (cons _ _)) as l)
       _, _), _) => Error_monad.fail extensible_type_value
+  
   |
     ((Micheline.Prim loc Alpha_context.Script.I_DUP [] annot,
       Script_typed_ir.Item_t v rest stack_annot), _) =>
@@ -3619,25 +4018,26 @@ with parse_instr {bef : Set}
       existT (A := [Set ** Set])
         (fun '[__46, __47] =>
           [Alpha_context.Script.location ** Micheline.annot **
-            Script_typed_ir.ty __46 ** Script_typed_ir.stack_ty __47 **
+            Script_typed_ir.ty ** Script_typed_ir.stack_ty **
             option Script_typed_ir.var_annot]) [_, _]
         [loc, annot, v, rest, stack_annot] in
     let=? annot := parse_var_annot loc (Some stack_annot) annot in
     typed ctxt loc Script_typed_ir.Dup
       (Script_typed_ir.Item_t v (Script_typed_ir.Item_t v rest stack_annot)
         annot)
+  
   |
     ((Micheline.Prim loc Alpha_context.Script.I_DIG (cons n []) result_annot,
       __stack_value), _) =>
     let fix make_proof_argument {tstk : Set}
-      (n : int) (stk : Script_typed_ir.stack_ty tstk) {struct n}
+      (n : int) (stk : Script_typed_ir.stack_ty) {struct n}
       : Lwt.t (Error_monad.tzresult (dig_proof_argument tstk)) :=
       match (((|Compare.Int|).(Compare.S.op_eq) n 0), stk) with
       | (true, Script_typed_ir.Item_t v rest annot) =>
         let 'existT _ [__472, __473] [v, rest, annot] :=
           existT (A := [Set ** Set])
             (fun '[__472, __473] =>
-              [Script_typed_ir.ty __472 ** Script_typed_ir.stack_ty __473 **
+              [Script_typed_ir.ty ** Script_typed_ir.stack_ty **
                 option Script_typed_ir.var_annot]) [_, _] [v, rest, annot] in
         outer_return
           (Dig_proof_argument (Script_typed_ir.Rest, (v, annot), rest))
@@ -3645,7 +4045,7 @@ with parse_instr {bef : Set}
         let 'existT _ [__474, __475] [v, rest, annot] :=
           existT (A := [Set ** Set])
             (fun '[__474, __475] =>
-              [Script_typed_ir.ty __474 ** Script_typed_ir.stack_ty __475 **
+              [Script_typed_ir.ty ** Script_typed_ir.stack_ty **
                 option Script_typed_ir.var_annot]) [_, _] [v, rest, annot] in
         let=? 'Dig_proof_argument (n', (x, xv), aft') :=
           make_proof_argument (Pervasives.op_minus n 1) rest in
@@ -3656,13 +4056,9 @@ with parse_instr {bef : Set}
             (fun
               '[__Dig_proof_argument_'aft, __Dig_proof_argument_'rest,
                 __Dig_proof_argument_'x] =>
-              [Script_typed_ir.stack_prefix_preservation_witness
-                (__Dig_proof_argument_'x * __Dig_proof_argument_'rest)
-                __Dig_proof_argument_'rest __475 __Dig_proof_argument_'aft **
-                Script_typed_ir.ty __Dig_proof_argument_'x **
-                option Script_typed_ir.var_annot **
-                Script_typed_ir.stack_ty __Dig_proof_argument_'aft]) [_, _, _]
-            [n', x, xv, aft'] in
+              [Script_typed_ir.stack_prefix_preservation_witness **
+                Script_typed_ir.ty ** option Script_typed_ir.var_annot **
+                Script_typed_ir.stack_ty]) [_, _, _] [n', x, xv, aft'] in
         outer_return
           (Dig_proof_argument
             ((Script_typed_ir.Prefix n'), (x, xv),
@@ -3683,19 +4079,17 @@ with parse_instr {bef : Set}
         (fun
           '[__Dig_proof_argument_'aft1, __Dig_proof_argument_'rest1,
             __Dig_proof_argument_'x1] =>
-          [Script_typed_ir.stack_prefix_preservation_witness
-            (__Dig_proof_argument_'x1 * __Dig_proof_argument_'rest1)
-            __Dig_proof_argument_'rest1 bef __Dig_proof_argument_'aft1 **
-            Script_typed_ir.ty __Dig_proof_argument_'x1 **
-            option Script_typed_ir.var_annot **
-            Script_typed_ir.stack_ty __Dig_proof_argument_'aft1]) [_, _, _]
-        [n', x, stack_annot, aft] in
+          [Script_typed_ir.stack_prefix_preservation_witness **
+            Script_typed_ir.ty ** option Script_typed_ir.var_annot **
+            Script_typed_ir.stack_ty]) [_, _, _] [n', x, stack_annot, aft] in
     typed ctxt loc (Script_typed_ir.Dig n n')
       (Script_typed_ir.Item_t x aft stack_annot)
+  
   |
     ((Micheline.Prim loc Alpha_context.Script.I_DIG
       (([] | cons _ (cons _ _)) as l) _, _), _) =>
     Error_monad.fail extensible_type_value
+  
   |
     ((Micheline.Prim loc Alpha_context.Script.I_DUG (cons n []) result_annot,
       Script_typed_ir.Item_t x whole_stack stack_annot), _) =>
@@ -3705,15 +4099,14 @@ with parse_instr {bef : Set}
         (fun '[__48, __49] =>
           [Alpha_context.Script.location **
             Micheline.node Alpha_context.Script.location
-              Alpha_context.Script.prim ** Micheline.annot **
-            Script_typed_ir.ty __48 ** Script_typed_ir.stack_ty __49 **
-            option Script_typed_ir.var_annot]) [_, _]
-        [loc, n, result_annot, x, whole_stack, stack_annot] in
+              Alpha_context.Script.prim ** Micheline.annot ** Script_typed_ir.ty
+            ** Script_typed_ir.stack_ty ** option Script_typed_ir.var_annot])
+        [_, _] [loc, n, result_annot, x, whole_stack, stack_annot] in
     let=? whole_n := Lwt.__return (parse_int32 n) in
     let fix make_proof_argument {tstk x : Set}
-      (n : int) (x : Script_typed_ir.ty x)
+      (n : int) (x : Script_typed_ir.ty)
       (stack_annot : option Script_typed_ir.var_annot)
-      (stk : Script_typed_ir.stack_ty tstk) {struct n}
+      (stk : Script_typed_ir.stack_ty) {struct n}
       : Lwt.t (Error_monad.tzresult (dug_proof_argument tstk x)) :=
       match (((|Compare.Int|).(Compare.S.op_eq) n 0), stk) with
       | (true, rest) =>
@@ -3725,7 +4118,7 @@ with parse_instr {bef : Set}
         let 'existT _ [__476, __477] [v, rest, annot] :=
           existT (A := [Set ** Set])
             (fun '[__476, __477] =>
-              [Script_typed_ir.ty __476 ** Script_typed_ir.stack_ty __477 **
+              [Script_typed_ir.ty ** Script_typed_ir.stack_ty **
                 option Script_typed_ir.var_annot]) [_, _] [v, rest, annot] in
         let=? 'Dug_proof_argument (n', _, aft') :=
           make_proof_argument (Pervasives.op_minus n 1) x stack_annot rest in
@@ -3733,11 +4126,8 @@ with parse_instr {bef : Set}
           [n', aft'] :=
           existT (A := [Set ** Set])
             (fun '[__Dug_proof_argument_'aft, __Dug_proof_argument_'rest] =>
-              [Script_typed_ir.stack_prefix_preservation_witness
-                __Dug_proof_argument_'rest (x * __Dug_proof_argument_'rest)
-                __477 __Dug_proof_argument_'aft **
-                Script_typed_ir.stack_ty __Dug_proof_argument_'aft]) [_, _]
-            [n', aft'] in
+              [Script_typed_ir.stack_prefix_preservation_witness **
+                Script_typed_ir.stack_ty]) [_, _] [n', aft'] in
         outer_return
           (Dug_proof_argument
             ((Script_typed_ir.Prefix n'), tt,
@@ -3754,12 +4144,10 @@ with parse_instr {bef : Set}
       [n', aft] :=
       existT (A := [Set ** Set])
         (fun '[__Dug_proof_argument_'aft1, __Dug_proof_argument_'rest1] =>
-          [Script_typed_ir.stack_prefix_preservation_witness
-            __Dug_proof_argument_'rest1 (__48 * __Dug_proof_argument_'rest1)
-            __49 __Dug_proof_argument_'aft1 **
-            Script_typed_ir.stack_ty __Dug_proof_argument_'aft1]) [_, _]
-        [n', aft] in
+          [Script_typed_ir.stack_prefix_preservation_witness **
+            Script_typed_ir.stack_ty]) [_, _] [n', aft] in
     typed ctxt loc (Script_typed_ir.Dug whole_n n') aft
+  
   |
     ((Micheline.Prim loc Alpha_context.Script.I_DUG (cons _ []) result_annot,
       Script_typed_ir.Empty_t as __stack_value), _) =>
@@ -3767,10 +4155,12 @@ with parse_instr {bef : Set}
     let=? '(__stack_value, _ctxt) :=
       serialize_stack_for_error ctxt __stack_value in
     Error_monad.fail extensible_type_value
+  
   |
     ((Micheline.Prim loc Alpha_context.Script.I_DUG
       (([] | cons _ (cons _ _)) as l) _, _), _) =>
     Error_monad.fail extensible_type_value
+  
   |
     ((Micheline.Prim loc Alpha_context.Script.I_SWAP [] annot,
       Script_typed_ir.Item_t v (Script_typed_ir.Item_t w rest stack_annot)
@@ -3780,14 +4170,15 @@ with parse_instr {bef : Set}
       existT (A := [Set ** Set ** Set])
         (fun '[__50, __52, __53] =>
           [Alpha_context.Script.location ** Micheline.annot **
-            Script_typed_ir.ty __50 ** Script_typed_ir.ty __52 **
-            Script_typed_ir.stack_ty __53 ** option Script_typed_ir.var_annot **
+            Script_typed_ir.ty ** Script_typed_ir.ty ** Script_typed_ir.stack_ty
+            ** option Script_typed_ir.var_annot **
             option Script_typed_ir.var_annot]) [_, _, _]
         [loc, annot, v, w, rest, stack_annot, cur_top_annot] in
     let=? '_ := Script_ir_annot.fail_unexpected_annot loc annot in
     typed ctxt loc Script_typed_ir.Swap
       (Script_typed_ir.Item_t w (Script_typed_ir.Item_t v rest cur_top_annot)
         stack_annot)
+  
   |
     ((Micheline.Prim loc Alpha_context.Script.I_PUSH
       (cons __t_value (cons d [])) annot, __stack_value), _) =>
@@ -3796,12 +4187,12 @@ with parse_instr {bef : Set}
       Lwt.__return (parse_packable_ty ctxt legacy __t_value) in
     let 'existT _ __Ex_ty_'a1 [__t_value, ctxt] :=
       existT (A := Set)
-        (fun __Ex_ty_'a1 =>
-          [Script_typed_ir.ty __Ex_ty_'a1 ** Alpha_context.context]) _
+        (fun __Ex_ty_'a1 => [Script_typed_ir.ty ** Alpha_context.context]) _
         [__t_value, ctxt] in
     let=? '(v, ctxt) := parse_data type_logger ctxt legacy __t_value d in
     typed ctxt loc (Script_typed_ir.Const v)
       (Script_typed_ir.Item_t __t_value __stack_value annot)
+  
   |
     ((Micheline.Prim loc Alpha_context.Script.I_UNIT [] annot, __stack_value), _)
     =>
@@ -3809,6 +4200,7 @@ with parse_instr {bef : Set}
     typed ctxt loc (Script_typed_ir.Const tt)
       (Script_typed_ir.Item_t (Script_typed_ir.Unit_t ty_name) __stack_value
         annot)
+  
   |
     ((Micheline.Prim loc Alpha_context.Script.I_SOME [] annot,
       Script_typed_ir.Item_t __t_value rest _), _) =>
@@ -3816,13 +4208,14 @@ with parse_instr {bef : Set}
       existT (A := [Set ** Set])
         (fun '[__54, __55] =>
           [Alpha_context.Script.location ** Micheline.annot **
-            Script_typed_ir.ty __54 ** Script_typed_ir.stack_ty __55]) [_, _]
+            Script_typed_ir.ty ** Script_typed_ir.stack_ty]) [_, _]
         [loc, annot, __t_value, rest] in
     let=? '(annot, ty_name) := parse_var_type_annot loc annot in
     typed ctxt loc Script_typed_ir.Cons_some
       (Script_typed_ir.Item_t
         (Script_typed_ir.Option_t __t_value ty_name (has_big_map __t_value))
         rest annot)
+  
   |
     ((Micheline.Prim loc Alpha_context.Script.I_NONE (cons __t_value []) annot,
       __stack_value), _) =>
@@ -3830,14 +4223,14 @@ with parse_instr {bef : Set}
       Lwt.__return (parse_any_ty ctxt legacy __t_value) in
     let 'existT _ __Ex_ty_'a2 [__t_value, ctxt] :=
       existT (A := Set)
-        (fun __Ex_ty_'a2 =>
-          [Script_typed_ir.ty __Ex_ty_'a2 ** Alpha_context.context]) _
+        (fun __Ex_ty_'a2 => [Script_typed_ir.ty ** Alpha_context.context]) _
         [__t_value, ctxt] in
     let=? '(annot, ty_name) := parse_var_type_annot loc annot in
     typed ctxt loc (Script_typed_ir.Cons_none __t_value)
       (Script_typed_ir.Item_t
         (Script_typed_ir.Option_t __t_value ty_name (has_big_map __t_value))
         __stack_value annot)
+  
   |
     ((Micheline.Prim loc Alpha_context.Script.I_IF_NONE (cons bt (cons bf []))
       annot,
@@ -3851,10 +4244,9 @@ with parse_instr {bef : Set}
             Micheline.node Alpha_context.Script.location
               Alpha_context.Script.prim **
             Micheline.node Alpha_context.Script.location
-              Alpha_context.Script.prim ** Micheline.annot **
-            Script_typed_ir.ty __58 ** Script_typed_ir.stack_ty __57 **
-            option Script_typed_ir.var_annot **
-            Script_typed_ir.stack_ty (option __58 * __57)]) [_, _]
+              Alpha_context.Script.prim ** Micheline.annot ** Script_typed_ir.ty
+            ** Script_typed_ir.stack_ty ** option Script_typed_ir.var_annot **
+            Script_typed_ir.stack_ty]) [_, _]
         [loc, bt, bf, annot, __t_value, rest, option_annot, bef] in
     let=? '_ := check_kind [ Script_tc_errors.Seq_kind ] bt in
     let=? '_ := check_kind [ Script_tc_errors.Seq_kind ] bf in
@@ -3867,16 +4259,17 @@ with parse_instr {bef : Set}
     let=? '(bfr, ctxt) :=
       parse_instr type_logger tc_context ctxt legacy bf
         (Script_typed_ir.Item_t __t_value rest annot) in
-    let branch {B : Set}
-      (ibt : Script_typed_ir.descr __57 B)
-      (ibf : Script_typed_ir.descr (__58 * __57) B)
-      : Script_typed_ir.descr (option __58 * __57) B :=
-      {| Script_typed_ir.descr.loc := loc; Script_typed_ir.descr.bef := bef;
+    let branch (ibt : Script_typed_ir.descr) (ibf : Script_typed_ir.descr)
+      : Script_typed_ir.descr :=
+      ({| Script_typed_ir.descr.loc := loc; Script_typed_ir.descr.bef := bef;
         Script_typed_ir.descr.aft := ibt.(Script_typed_ir.descr.aft);
-        Script_typed_ir.descr.instr := Script_typed_ir.If_none ibt ibf |} in
+        Script_typed_ir.descr.instr := Script_typed_ir.If_none ibt ibf |}
+        : Script_typed_ir.descr) in
     let=? '(judgement, ctxt) :=
-      merge_branches legacy ctxt loc btr bfr {| branch.branch := branch |} in
+      merge_branches legacy ctxt loc btr bfr
+        ({| branch.branch := branch |} : branch) in
     __return ctxt judgement
+  
   |
     ((Micheline.Prim loc Alpha_context.Script.I_PAIR [] annot,
       Script_typed_ir.Item_t __a_value
@@ -3886,8 +4279,8 @@ with parse_instr {bef : Set}
       existT (A := [Set ** Set ** Set])
         (fun '[__59, __61, __62] =>
           [Alpha_context.Script.location ** Micheline.annot **
-            Script_typed_ir.ty __59 ** Script_typed_ir.ty __61 **
-            Script_typed_ir.stack_ty __62 ** option Script_typed_ir.var_annot **
+            Script_typed_ir.ty ** Script_typed_ir.ty ** Script_typed_ir.stack_ty
+            ** option Script_typed_ir.var_annot **
             option Script_typed_ir.var_annot]) [_, _, _]
         [loc, annot, __a_value, __b_value, rest, snd_annot, fst_annot] in
     let=? '(annot, ty_name, l_field, r_field) :=
@@ -3900,6 +4293,7 @@ with parse_instr {bef : Set}
           (__b_value, r_field, snd_annot) ty_name
           (Pervasives.op_pipepipe (has_big_map __a_value)
             (has_big_map __b_value))) rest annot)
+  
   |
     ((Micheline.Prim loc Alpha_context.Script.I_CAR [] annot,
       Script_typed_ir.Item_t
@@ -3911,8 +4305,8 @@ with parse_instr {bef : Set}
       existT (A := [Set ** Set])
         (fun '[__64, __65] =>
           [Alpha_context.Script.location ** Micheline.annot **
-            Script_typed_ir.ty __65 ** option Script_typed_ir.field_annot **
-            option Script_typed_ir.var_annot ** Script_typed_ir.stack_ty __64 **
+            Script_typed_ir.ty ** option Script_typed_ir.field_annot **
+            option Script_typed_ir.var_annot ** Script_typed_ir.stack_ty **
             option Script_typed_ir.var_annot]) [_, _]
         [loc, annot, __a_value, expected_field_annot, a_annot, rest, pair_annot]
       in
@@ -3925,6 +4319,7 @@ with parse_instr {bef : Set}
       in
     typed ctxt loc Script_typed_ir.Car
       (Script_typed_ir.Item_t __a_value rest annot)
+  
   |
     ((Micheline.Prim loc Alpha_context.Script.I_CDR [] annot,
       Script_typed_ir.Item_t
@@ -3936,8 +4331,8 @@ with parse_instr {bef : Set}
       existT (A := [Set ** Set])
         (fun '[__68, __70] =>
           [Alpha_context.Script.location ** Micheline.annot **
-            Script_typed_ir.ty __70 ** option Script_typed_ir.field_annot **
-            option Script_typed_ir.var_annot ** Script_typed_ir.stack_ty __68 **
+            Script_typed_ir.ty ** option Script_typed_ir.field_annot **
+            option Script_typed_ir.var_annot ** Script_typed_ir.stack_ty **
             option Script_typed_ir.var_annot]) [_, _]
         [loc, annot, __b_value, expected_field_annot, b_annot, rest, pair_annot]
       in
@@ -3950,6 +4345,7 @@ with parse_instr {bef : Set}
       in
     typed ctxt loc Script_typed_ir.Cdr
       (Script_typed_ir.Item_t __b_value rest annot)
+  
   |
     ((Micheline.Prim loc Alpha_context.Script.I_LEFT (cons tr []) annot,
       Script_typed_ir.Item_t tl rest stack_annot), _) =>
@@ -3958,15 +4354,13 @@ with parse_instr {bef : Set}
         (fun '[__71, __72] =>
           [Alpha_context.Script.location **
             Micheline.node Alpha_context.Script.location
-              Alpha_context.Script.prim ** Micheline.annot **
-            Script_typed_ir.ty __71 ** Script_typed_ir.stack_ty __72 **
-            option Script_typed_ir.var_annot]) [_, _]
-        [loc, tr, annot, tl, rest, stack_annot] in
+              Alpha_context.Script.prim ** Micheline.annot ** Script_typed_ir.ty
+            ** Script_typed_ir.stack_ty ** option Script_typed_ir.var_annot])
+        [_, _] [loc, tr, annot, tl, rest, stack_annot] in
     let=? '(Ex_ty tr, ctxt) := Lwt.__return (parse_any_ty ctxt legacy tr) in
     let 'existT _ __Ex_ty_'a3 [tr, ctxt] :=
       existT (A := Set)
-        (fun __Ex_ty_'a3 =>
-          [Script_typed_ir.ty __Ex_ty_'a3 ** Alpha_context.context]) _
+        (fun __Ex_ty_'a3 => [Script_typed_ir.ty ** Alpha_context.context]) _
         [tr, ctxt] in
     let=? '(annot, tname, l_field, r_field) :=
       parse_constr_annot loc
@@ -3975,6 +4369,7 @@ with parse_instr {bef : Set}
       (Script_typed_ir.Item_t
         (Script_typed_ir.Union_t (tl, l_field) (tr, r_field) tname
           (Pervasives.op_pipepipe (has_big_map tl) (has_big_map tr))) rest annot)
+  
   |
     ((Micheline.Prim loc Alpha_context.Script.I_RIGHT (cons tl []) annot,
       Script_typed_ir.Item_t tr rest stack_annot), _) =>
@@ -3983,15 +4378,13 @@ with parse_instr {bef : Set}
         (fun '[__73, __74] =>
           [Alpha_context.Script.location **
             Micheline.node Alpha_context.Script.location
-              Alpha_context.Script.prim ** Micheline.annot **
-            Script_typed_ir.ty __73 ** Script_typed_ir.stack_ty __74 **
-            option Script_typed_ir.var_annot]) [_, _]
-        [loc, tl, annot, tr, rest, stack_annot] in
+              Alpha_context.Script.prim ** Micheline.annot ** Script_typed_ir.ty
+            ** Script_typed_ir.stack_ty ** option Script_typed_ir.var_annot])
+        [_, _] [loc, tl, annot, tr, rest, stack_annot] in
     let=? '(Ex_ty tl, ctxt) := Lwt.__return (parse_any_ty ctxt legacy tl) in
     let 'existT _ __Ex_ty_'a4 [tl, ctxt] :=
       existT (A := Set)
-        (fun __Ex_ty_'a4 =>
-          [Script_typed_ir.ty __Ex_ty_'a4 ** Alpha_context.context]) _
+        (fun __Ex_ty_'a4 => [Script_typed_ir.ty ** Alpha_context.context]) _
         [tl, ctxt] in
     let=? '(annot, tname, l_field, r_field) :=
       parse_constr_annot loc None
@@ -4000,6 +4393,7 @@ with parse_instr {bef : Set}
       (Script_typed_ir.Item_t
         (Script_typed_ir.Union_t (tl, l_field) (tr, r_field) tname
           (Pervasives.op_pipepipe (has_big_map tl) (has_big_map tr))) rest annot)
+  
   |
     ((Micheline.Prim loc Alpha_context.Script.I_IF_LEFT (cons bt (cons bf []))
       annot,
@@ -4014,12 +4408,11 @@ with parse_instr {bef : Set}
             Micheline.node Alpha_context.Script.location
               Alpha_context.Script.prim **
             Micheline.node Alpha_context.Script.location
-              Alpha_context.Script.prim ** Micheline.annot **
-            Script_typed_ir.ty __77 ** option Script_typed_ir.field_annot **
-            Script_typed_ir.ty __78 ** option Script_typed_ir.field_annot **
-            Script_typed_ir.stack_ty __76 ** option Script_typed_ir.var_annot **
-            Script_typed_ir.stack_ty (Script_typed_ir.union __77 __78 * __76)])
-        [_, _, _]
+              Alpha_context.Script.prim ** Micheline.annot ** Script_typed_ir.ty
+            ** option Script_typed_ir.field_annot ** Script_typed_ir.ty **
+            option Script_typed_ir.field_annot ** Script_typed_ir.stack_ty **
+            option Script_typed_ir.var_annot ** Script_typed_ir.stack_ty]) [_,
+        _, _]
         [loc, bt, bf, annot, tl, l_field, tr, r_field, rest, union_annot, bef]
       in
     let=? '_ := check_kind [ Script_tc_errors.Seq_kind ] bt in
@@ -4037,16 +4430,17 @@ with parse_instr {bef : Set}
     let=? '(bfr, ctxt) :=
       parse_instr type_logger tc_context ctxt legacy bf
         (Script_typed_ir.Item_t tr rest right_annot) in
-    let branch {B : Set}
-      (ibt : Script_typed_ir.descr (__77 * __76) B)
-      (ibf : Script_typed_ir.descr (__78 * __76) B)
-      : Script_typed_ir.descr (Script_typed_ir.union __77 __78 * __76) B :=
-      {| Script_typed_ir.descr.loc := loc; Script_typed_ir.descr.bef := bef;
+    let branch (ibt : Script_typed_ir.descr) (ibf : Script_typed_ir.descr)
+      : Script_typed_ir.descr :=
+      ({| Script_typed_ir.descr.loc := loc; Script_typed_ir.descr.bef := bef;
         Script_typed_ir.descr.aft := ibt.(Script_typed_ir.descr.aft);
-        Script_typed_ir.descr.instr := Script_typed_ir.If_left ibt ibf |} in
+        Script_typed_ir.descr.instr := Script_typed_ir.If_left ibt ibf |}
+        : Script_typed_ir.descr) in
     let=? '(judgement, ctxt) :=
-      merge_branches legacy ctxt loc btr bfr {| branch.branch := branch |} in
+      merge_branches legacy ctxt loc btr bfr
+        ({| branch.branch := branch |} : branch) in
     __return ctxt judgement
+  
   |
     ((Micheline.Prim loc Alpha_context.Script.I_NIL (cons __t_value []) annot,
       __stack_value), _) =>
@@ -4054,14 +4448,14 @@ with parse_instr {bef : Set}
       Lwt.__return (parse_any_ty ctxt legacy __t_value) in
     let 'existT _ __Ex_ty_'a5 [__t_value, ctxt] :=
       existT (A := Set)
-        (fun __Ex_ty_'a5 =>
-          [Script_typed_ir.ty __Ex_ty_'a5 ** Alpha_context.context]) _
+        (fun __Ex_ty_'a5 => [Script_typed_ir.ty ** Alpha_context.context]) _
         [__t_value, ctxt] in
     let=? '(annot, ty_name) := parse_var_type_annot loc annot in
     typed ctxt loc Script_typed_ir.Nil
       (Script_typed_ir.Item_t
         (Script_typed_ir.List_t __t_value ty_name (has_big_map __t_value))
         __stack_value annot)
+  
   |
     ((Micheline.Prim loc Alpha_context.Script.I_CONS [] annot,
       Script_typed_ir.Item_t tv
@@ -4073,9 +4467,9 @@ with parse_instr {bef : Set}
       existT (A := [Set ** Set ** Set])
         (fun '[__79, __82, __83] =>
           [Alpha_context.Script.location ** Micheline.annot **
-            Script_typed_ir.ty __79 ** Script_typed_ir.ty __83 **
+            Script_typed_ir.ty ** Script_typed_ir.ty **
             option Script_typed_ir.type_annot ** bool **
-            Script_typed_ir.stack_ty __82]) [_, _, _]
+            Script_typed_ir.stack_ty]) [_, _, _]
         [loc, annot, tv, __t_value, ty_name, has_big_map, rest] in
     let=? '(Eq, __t_value, ctxt) :=
       check_item_ty ctxt tv __t_value loc Alpha_context.Script.I_CONS 1 2 in
@@ -4083,6 +4477,7 @@ with parse_instr {bef : Set}
     typed ctxt loc Script_typed_ir.Cons_list
       (Script_typed_ir.Item_t
         (Script_typed_ir.List_t __t_value ty_name has_big_map) rest annot)
+  
   |
     ((Micheline.Prim loc Alpha_context.Script.I_IF_CONS (cons bt (cons bf []))
       annot,
@@ -4098,10 +4493,10 @@ with parse_instr {bef : Set}
             Micheline.node Alpha_context.Script.location
               Alpha_context.Script.prim **
             Micheline.node Alpha_context.Script.location
-              Alpha_context.Script.prim ** Micheline.annot **
-            Script_typed_ir.ty __86 ** option Script_typed_ir.type_annot ** bool
-            ** Script_typed_ir.stack_ty __85 ** option Script_typed_ir.var_annot
-            ** Script_typed_ir.stack_ty (list __86 * __85)]) [_, _]
+              Alpha_context.Script.prim ** Micheline.annot ** Script_typed_ir.ty
+            ** option Script_typed_ir.type_annot ** bool **
+            Script_typed_ir.stack_ty ** option Script_typed_ir.var_annot **
+            Script_typed_ir.stack_ty]) [_, _]
         [loc, bt, bf, annot, __t_value, ty_name, has_big_map, rest, list_annot,
           bef] in
     let=? '_ := check_kind [ Script_tc_errors.Seq_kind ] bt in
@@ -4121,16 +4516,17 @@ with parse_instr {bef : Set}
           hd_annot) in
     let=? '(bfr, ctxt) := parse_instr type_logger tc_context ctxt legacy bf rest
       in
-    let branch {B : Set}
-      (ibt : Script_typed_ir.descr (__86 * (list __86 * __85)) B)
-      (ibf : Script_typed_ir.descr __85 B)
-      : Script_typed_ir.descr (list __86 * __85) B :=
-      {| Script_typed_ir.descr.loc := loc; Script_typed_ir.descr.bef := bef;
+    let branch (ibt : Script_typed_ir.descr) (ibf : Script_typed_ir.descr)
+      : Script_typed_ir.descr :=
+      ({| Script_typed_ir.descr.loc := loc; Script_typed_ir.descr.bef := bef;
         Script_typed_ir.descr.aft := ibt.(Script_typed_ir.descr.aft);
-        Script_typed_ir.descr.instr := Script_typed_ir.If_cons ibt ibf |} in
+        Script_typed_ir.descr.instr := Script_typed_ir.If_cons ibt ibf |}
+        : Script_typed_ir.descr) in
     let=? '(judgement, ctxt) :=
-      merge_branches legacy ctxt loc btr bfr {| branch.branch := branch |} in
+      merge_branches legacy ctxt loc btr bfr
+        ({| branch.branch := branch |} : branch) in
     __return ctxt judgement
+  
   |
     ((Micheline.Prim loc Alpha_context.Script.I_SIZE [] annot,
       Script_typed_ir.Item_t (Script_typed_ir.List_t _ _ _) rest _), _) =>
@@ -4138,10 +4534,11 @@ with parse_instr {bef : Set}
       existT (A := Set)
         (fun __88 =>
           [Alpha_context.Script.location ** Micheline.annot **
-            Script_typed_ir.stack_ty __88]) _ [loc, annot, rest] in
+            Script_typed_ir.stack_ty]) _ [loc, annot, rest] in
     let=? '(annot, tname) := parse_var_type_annot loc annot in
     typed ctxt loc Script_typed_ir.List_size
       (Script_typed_ir.Item_t (Script_typed_ir.Nat_t tname) rest annot)
+  
   |
     ((Micheline.Prim loc Alpha_context.Script.I_MAP (cons body []) annot,
       Script_typed_ir.Item_t (Script_typed_ir.List_t __elt_value _ _)
@@ -4152,10 +4549,9 @@ with parse_instr {bef : Set}
         (fun '[__91, __92] =>
           [Alpha_context.Script.location **
             Micheline.node Alpha_context.Script.location
-              Alpha_context.Script.prim ** Micheline.annot **
-            Script_typed_ir.ty __92 ** Script_typed_ir.stack_ty __91 **
-            option Script_typed_ir.var_annot]) [_, _]
-        [loc, body, annot, __elt_value, starting_rest, list_annot] in
+              Alpha_context.Script.prim ** Micheline.annot ** Script_typed_ir.ty
+            ** Script_typed_ir.stack_ty ** option Script_typed_ir.var_annot])
+        [_, _] [loc, body, annot, __elt_value, starting_rest, list_annot] in
     let=? '_ := check_kind [ Script_tc_errors.Seq_kind ] body in
     let=? '(ret_annot, list_ty_name) := parse_var_type_annot loc annot in
     let elt_annot :=
@@ -4172,9 +4568,8 @@ with parse_instr {bef : Set}
       let 'existT _ [__478, __479, __Typed_'aft3] [ret, rest, ibody] :=
         existT (A := [Set ** Set ** Set])
           (fun '[__478, __479, __Typed_'aft3] =>
-            [Script_typed_ir.ty __478 ** Script_typed_ir.stack_ty __479 **
-              Script_typed_ir.descr (__92 * __91) __Typed_'aft3]) [_, _, _]
-          [ret, rest, ibody] in
+            [Script_typed_ir.ty ** Script_typed_ir.stack_ty **
+              Script_typed_ir.descr]) [_, _, _] [ret, rest, ibody] in
       let invalid_map_body (function_parameter : unit)
         : Lwt.t (Error_monad.tzresult Error_monad.__error) :=
         let '_ := function_parameter in
@@ -4194,12 +4589,13 @@ with parse_instr {bef : Set}
             ret_annot))
     | Typed {| Script_typed_ir.descr.aft := aft |} =>
       let 'existT _ __Typed_'aft4 aft :=
-        existT (A := Set)
-          (fun __Typed_'aft4 => Script_typed_ir.stack_ty __Typed_'aft4) _ aft in
+        existT (A := Set) (fun __Typed_'aft4 => Script_typed_ir.stack_ty) _ aft
+        in
       let=? '(aft, _ctxt) := serialize_stack_for_error ctxt aft in
       Error_monad.fail extensible_type_value
     | Failed _ => Error_monad.fail extensible_type_value
     end
+  
   |
     ((Micheline.Prim loc Alpha_context.Script.I_ITER (cons body []) annot,
       Script_typed_ir.Item_t (Script_typed_ir.List_t __elt_value _ _) rest
@@ -4210,10 +4606,9 @@ with parse_instr {bef : Set}
         (fun '[__94, __95] =>
           [Alpha_context.Script.location **
             Micheline.node Alpha_context.Script.location
-              Alpha_context.Script.prim ** Micheline.annot **
-            Script_typed_ir.ty __95 ** Script_typed_ir.stack_ty __94 **
-            option Script_typed_ir.var_annot]) [_, _]
-        [loc, body, annot, __elt_value, rest, list_annot] in
+              Alpha_context.Script.prim ** Micheline.annot ** Script_typed_ir.ty
+            ** Script_typed_ir.stack_ty ** option Script_typed_ir.var_annot])
+        [_, _] [loc, body, annot, __elt_value, rest, list_annot] in
     let=? '_ := check_kind [ Script_tc_errors.Seq_kind ] body in
     let=? '_ := Script_ir_annot.fail_unexpected_annot loc annot in
     let elt_annot :=
@@ -4227,8 +4622,7 @@ with parse_instr {bef : Set}
       let 'existT _ __Typed_'aft5 [aft, ibody] :=
         existT (A := Set)
           (fun __Typed_'aft5 =>
-            [Script_typed_ir.stack_ty __Typed_'aft5 **
-              Script_typed_ir.descr (__95 * __94) __Typed_'aft5]) _ [aft, ibody]
+            [Script_typed_ir.stack_ty ** Script_typed_ir.descr]) _ [aft, ibody]
         in
       let invalid_iter_body (function_parameter : unit)
         : Lwt.t (Error_monad.tzresult Error_monad.__error) :=
@@ -4247,6 +4641,7 @@ with parse_instr {bef : Set}
     | Failed {| judgement.Failed.descr := __descr_value |} =>
       typed ctxt loc (Script_typed_ir.List_iter (__descr_value rest)) rest
     end
+  
   |
     ((Micheline.Prim loc Alpha_context.Script.I_EMPTY_SET (cons __t_value [])
       annot, rest), _) =>
@@ -4255,11 +4650,12 @@ with parse_instr {bef : Set}
     let 'existT _ __Ex_comparable_ty_'a1 [__t_value, ctxt] :=
       existT (A := Set)
         (fun __Ex_comparable_ty_'a1 =>
-          [Script_typed_ir.comparable_ty __Ex_comparable_ty_'a1 **
-            Alpha_context.context]) _ [__t_value, ctxt] in
+          [Script_typed_ir.comparable_ty ** Alpha_context.context]) _
+        [__t_value, ctxt] in
     let=? '(annot, tname) := parse_var_type_annot loc annot in
     typed ctxt loc (Script_typed_ir.Empty_set __t_value)
       (Script_typed_ir.Item_t (Script_typed_ir.Set_t __t_value tname) rest annot)
+  
   |
     ((Micheline.Prim loc Alpha_context.Script.I_ITER (cons body []) annot,
       Script_typed_ir.Item_t (Script_typed_ir.Set_t comp_elt _) rest set_annot),
@@ -4270,8 +4666,8 @@ with parse_instr {bef : Set}
           [Alpha_context.Script.location **
             Micheline.node Alpha_context.Script.location
               Alpha_context.Script.prim ** Micheline.annot **
-            Script_typed_ir.comparable_ty __98 ** Script_typed_ir.stack_ty __97
-            ** option Script_typed_ir.var_annot]) [_, _]
+            Script_typed_ir.comparable_ty ** Script_typed_ir.stack_ty **
+            option Script_typed_ir.var_annot]) [_, _]
         [loc, body, annot, comp_elt, rest, set_annot] in
     let=? '_ := check_kind [ Script_tc_errors.Seq_kind ] body in
     let=? '_ := Script_ir_annot.fail_unexpected_annot loc annot in
@@ -4287,8 +4683,7 @@ with parse_instr {bef : Set}
       let 'existT _ __Typed_'aft6 [aft, ibody] :=
         existT (A := Set)
           (fun __Typed_'aft6 =>
-            [Script_typed_ir.stack_ty __Typed_'aft6 **
-              Script_typed_ir.descr (__98 * __97) __Typed_'aft6]) _ [aft, ibody]
+            [Script_typed_ir.stack_ty ** Script_typed_ir.descr]) _ [aft, ibody]
         in
       let invalid_iter_body (function_parameter : unit)
         : Lwt.t (Error_monad.tzresult Error_monad.__error) :=
@@ -4307,6 +4702,7 @@ with parse_instr {bef : Set}
     | Failed {| judgement.Failed.descr := __descr_value |} =>
       typed ctxt loc (Script_typed_ir.Set_iter (__descr_value rest)) rest
     end
+  
   |
     ((Micheline.Prim loc Alpha_context.Script.I_MEM [] annot,
       Script_typed_ir.Item_t v
@@ -4316,8 +4712,8 @@ with parse_instr {bef : Set}
       existT (A := [Set ** Set ** Set])
         (fun '[__102, __103, __99] =>
           [Alpha_context.Script.location ** Micheline.annot **
-            Script_typed_ir.ty __99 ** Script_typed_ir.comparable_ty __103 **
-            Script_typed_ir.stack_ty __102]) [_, _, _]
+            Script_typed_ir.ty ** Script_typed_ir.comparable_ty **
+            Script_typed_ir.stack_ty]) [_, _, _]
         [loc, annot, v, __elt_value, rest] in
     let __elt_value := ty_of_comparable_ty __elt_value in
     let=? '(annot, tname) := parse_var_type_annot loc annot in
@@ -4325,6 +4721,7 @@ with parse_instr {bef : Set}
       check_item_ty ctxt __elt_value v loc Alpha_context.Script.I_MEM 1 2 in
     typed ctxt loc Script_typed_ir.Set_mem
       (Script_typed_ir.Item_t (Script_typed_ir.Bool_t tname) rest annot)
+  
   |
     ((Micheline.Prim loc Alpha_context.Script.I_UPDATE [] annot,
       Script_typed_ir.Item_t v
@@ -4336,9 +4733,9 @@ with parse_instr {bef : Set}
       existT (A := [Set ** Set ** Set])
         (fun '[__104, __109, __110] =>
           [Alpha_context.Script.location ** Micheline.annot **
-            Script_typed_ir.ty __104 ** Script_typed_ir.comparable_ty __110 **
-            option Script_typed_ir.type_annot ** Script_typed_ir.stack_ty __109
-            ** option Script_typed_ir.var_annot]) [_, _, _]
+            Script_typed_ir.ty ** Script_typed_ir.comparable_ty **
+            option Script_typed_ir.type_annot ** Script_typed_ir.stack_ty **
+            option Script_typed_ir.var_annot]) [_, _, _]
         [loc, annot, v, __elt_value, tname, rest, set_annot] in
     match comparable_ty_of_ty v with
     | None =>
@@ -4353,6 +4750,7 @@ with parse_instr {bef : Set}
         (Script_typed_ir.Item_t (Script_typed_ir.Set_t __elt_value tname) rest
           annot)
     end
+  
   |
     ((Micheline.Prim loc Alpha_context.Script.I_SIZE [] annot,
       Script_typed_ir.Item_t (Script_typed_ir.Set_t _ _) rest _), _) =>
@@ -4360,10 +4758,11 @@ with parse_instr {bef : Set}
       existT (A := Set)
         (fun __112 =>
           [Alpha_context.Script.location ** Micheline.annot **
-            Script_typed_ir.stack_ty __112]) _ [loc, annot, rest] in
+            Script_typed_ir.stack_ty]) _ [loc, annot, rest] in
     let=? annot := parse_var_annot loc None annot in
     typed ctxt loc Script_typed_ir.Set_size
       (Script_typed_ir.Item_t (Script_typed_ir.Nat_t None) rest annot)
+  
   |
     ((Micheline.Prim loc Alpha_context.Script.I_EMPTY_MAP (cons tk (cons tv []))
       annot, __stack_value), _) =>
@@ -4372,19 +4771,19 @@ with parse_instr {bef : Set}
     let 'existT _ __Ex_comparable_ty_'a2 [tk, ctxt] :=
       existT (A := Set)
         (fun __Ex_comparable_ty_'a2 =>
-          [Script_typed_ir.comparable_ty __Ex_comparable_ty_'a2 **
-            Alpha_context.context]) _ [tk, ctxt] in
+          [Script_typed_ir.comparable_ty ** Alpha_context.context]) _ [tk, ctxt]
+      in
     let=? '(Ex_ty tv, ctxt) := Lwt.__return (parse_any_ty ctxt legacy tv) in
     let 'existT _ __Ex_ty_'a6 [tv, ctxt] :=
       existT (A := Set)
-        (fun __Ex_ty_'a6 =>
-          [Script_typed_ir.ty __Ex_ty_'a6 ** Alpha_context.context]) _
+        (fun __Ex_ty_'a6 => [Script_typed_ir.ty ** Alpha_context.context]) _
         [tv, ctxt] in
     let=? '(annot, ty_name) := parse_var_type_annot loc annot in
     typed ctxt loc (Script_typed_ir.Empty_map tk tv)
       (Script_typed_ir.Item_t
         (Script_typed_ir.Map_t tk tv ty_name (has_big_map tv)) __stack_value
         annot)
+  
   |
     ((Micheline.Prim loc Alpha_context.Script.I_MAP (cons body []) annot,
       Script_typed_ir.Item_t (Script_typed_ir.Map_t ck __elt_value _ _)
@@ -4396,10 +4795,9 @@ with parse_instr {bef : Set}
           [Alpha_context.Script.location **
             Micheline.node Alpha_context.Script.location
               Alpha_context.Script.prim ** Micheline.annot **
-            Script_typed_ir.comparable_ty __116 ** Script_typed_ir.ty __117 **
-            Script_typed_ir.stack_ty __115 ** option Script_typed_ir.var_annot])
-        [_, _, _] [loc, body, annot, ck, __elt_value, starting_rest, _map_annot]
-      in
+            Script_typed_ir.comparable_ty ** Script_typed_ir.ty **
+            Script_typed_ir.stack_ty ** option Script_typed_ir.var_annot]) [_,
+        _, _] [loc, body, annot, ck, __elt_value, starting_rest, _map_annot] in
     let k := ty_of_comparable_ty ck in
     let=? '_ := check_kind [ Script_tc_errors.Seq_kind ] body in
     let=? '(ret_annot, ty_name) := parse_var_type_annot loc annot in
@@ -4420,9 +4818,8 @@ with parse_instr {bef : Set}
       let 'existT _ [__480, __481, __Typed_'aft7] [ret, rest, ibody] :=
         existT (A := [Set ** Set ** Set])
           (fun '[__480, __481, __Typed_'aft7] =>
-            [Script_typed_ir.ty __480 ** Script_typed_ir.stack_ty __481 **
-              Script_typed_ir.descr (Script_typed_ir.pair __116 __117 * __115)
-                __Typed_'aft7]) [_, _, _] [ret, rest, ibody] in
+            [Script_typed_ir.ty ** Script_typed_ir.stack_ty **
+              Script_typed_ir.descr]) [_, _, _] [ret, rest, ibody] in
       let invalid_map_body (function_parameter : unit)
         : Lwt.t (Error_monad.tzresult Error_monad.__error) :=
         let '_ := function_parameter in
@@ -4442,12 +4839,13 @@ with parse_instr {bef : Set}
             ret_annot))
     | Typed {| Script_typed_ir.descr.aft := aft |} =>
       let 'existT _ __Typed_'aft8 aft :=
-        existT (A := Set)
-          (fun __Typed_'aft8 => Script_typed_ir.stack_ty __Typed_'aft8) _ aft in
+        existT (A := Set) (fun __Typed_'aft8 => Script_typed_ir.stack_ty) _ aft
+        in
       let=? '(aft, _ctxt) := serialize_stack_for_error ctxt aft in
       Error_monad.fail extensible_type_value
     | Failed _ => Error_monad.fail extensible_type_value
     end
+  
   |
     ((Micheline.Prim loc Alpha_context.Script.I_ITER (cons body []) annot,
       Script_typed_ir.Item_t (Script_typed_ir.Map_t comp_elt element_ty _ _)
@@ -4459,9 +4857,9 @@ with parse_instr {bef : Set}
           [Alpha_context.Script.location **
             Micheline.node Alpha_context.Script.location
               Alpha_context.Script.prim ** Micheline.annot **
-            Script_typed_ir.comparable_ty __120 ** Script_typed_ir.ty __121 **
-            Script_typed_ir.stack_ty __119 ** option Script_typed_ir.var_annot])
-        [_, _, _] [loc, body, annot, comp_elt, element_ty, rest, _map_annot] in
+            Script_typed_ir.comparable_ty ** Script_typed_ir.ty **
+            Script_typed_ir.stack_ty ** option Script_typed_ir.var_annot]) [_,
+        _, _] [loc, body, annot, comp_elt, element_ty, rest, _map_annot] in
     let=? '_ := check_kind [ Script_tc_errors.Seq_kind ] body in
     let=? '_ := Script_ir_annot.fail_unexpected_annot loc annot in
     let k_name :=
@@ -4480,9 +4878,8 @@ with parse_instr {bef : Set}
       let 'existT _ __Typed_'aft9 [aft, ibody] :=
         existT (A := Set)
           (fun __Typed_'aft9 =>
-            [Script_typed_ir.stack_ty __Typed_'aft9 **
-              Script_typed_ir.descr (Script_typed_ir.pair __120 __121 * __119)
-                __Typed_'aft9]) _ [aft, ibody] in
+            [Script_typed_ir.stack_ty ** Script_typed_ir.descr]) _ [aft, ibody]
+        in
       let invalid_iter_body (function_parameter : unit)
         : Lwt.t (Error_monad.tzresult Error_monad.__error) :=
         let '_ := function_parameter in
@@ -4500,6 +4897,7 @@ with parse_instr {bef : Set}
     | Failed {| judgement.Failed.descr := __descr_value |} =>
       typed ctxt loc (Script_typed_ir.Map_iter (__descr_value rest)) rest
     end
+  
   |
     ((Micheline.Prim loc Alpha_context.Script.I_MEM [] annot,
       Script_typed_ir.Item_t vk
@@ -4509,15 +4907,15 @@ with parse_instr {bef : Set}
       existT (A := [Set ** Set ** Set])
         (fun '[__122, __125, __126] =>
           [Alpha_context.Script.location ** Micheline.annot **
-            Script_typed_ir.ty __122 ** Script_typed_ir.comparable_ty __126 **
-            Script_typed_ir.stack_ty __125]) [_, _, _]
-        [loc, annot, vk, ck, rest] in
+            Script_typed_ir.ty ** Script_typed_ir.comparable_ty **
+            Script_typed_ir.stack_ty]) [_, _, _] [loc, annot, vk, ck, rest] in
     let k := ty_of_comparable_ty ck in
     let=? '(Eq, _, ctxt) :=
       check_item_ty ctxt vk k loc Alpha_context.Script.I_MEM 1 2 in
     let=? annot := parse_var_annot loc None annot in
     typed ctxt loc Script_typed_ir.Map_mem
       (Script_typed_ir.Item_t (Script_typed_ir.Bool_t None) rest annot)
+  
   |
     ((Micheline.Prim loc Alpha_context.Script.I_GET [] annot,
       Script_typed_ir.Item_t vk
@@ -4528,9 +4926,9 @@ with parse_instr {bef : Set}
       existT (A := [Set ** Set ** Set ** Set])
         (fun '[__128, __131, __132, __133] =>
           [Alpha_context.Script.location ** Micheline.annot **
-            Script_typed_ir.ty __128 ** Script_typed_ir.comparable_ty __132 **
-            Script_typed_ir.ty __133 ** bool ** Script_typed_ir.stack_ty __131])
-        [_, _, _, _] [loc, annot, vk, ck, __elt_value, has_big_map, rest] in
+            Script_typed_ir.ty ** Script_typed_ir.comparable_ty **
+            Script_typed_ir.ty ** bool ** Script_typed_ir.stack_ty]) [_, _, _,
+        _] [loc, annot, vk, ck, __elt_value, has_big_map, rest] in
     let k := ty_of_comparable_ty ck in
     let=? '(Eq, _, ctxt) :=
       check_item_ty ctxt vk k loc Alpha_context.Script.I_GET 1 2 in
@@ -4538,6 +4936,7 @@ with parse_instr {bef : Set}
     typed ctxt loc Script_typed_ir.Map_get
       (Script_typed_ir.Item_t
         (Script_typed_ir.Option_t __elt_value None has_big_map) rest annot)
+  
   |
     ((Micheline.Prim loc Alpha_context.Script.I_UPDATE [] annot,
       Script_typed_ir.Item_t vk
@@ -4550,11 +4949,11 @@ with parse_instr {bef : Set}
       existT (A := [Set ** Set ** Set ** Set ** Set])
         (fun '[__134, __138, __140, __141, __142] =>
           [Alpha_context.Script.location ** Micheline.annot **
-            Script_typed_ir.ty __134 ** Script_typed_ir.ty __138 **
-            Script_typed_ir.comparable_ty __141 ** Script_typed_ir.ty __142 **
+            Script_typed_ir.ty ** Script_typed_ir.ty **
+            Script_typed_ir.comparable_ty ** Script_typed_ir.ty **
             option Script_typed_ir.type_annot ** bool **
-            Script_typed_ir.stack_ty __140 ** option Script_typed_ir.var_annot])
-        [_, _, _, _, _]
+            Script_typed_ir.stack_ty ** option Script_typed_ir.var_annot]) [_,
+        _, _, _, _]
         [loc, annot, vk, vv, ck, v, map_name, has_big_map, rest, map_annot] in
     let k := ty_of_comparable_ty ck in
     let=? '(Eq, _, ctxt) :=
@@ -4565,6 +4964,7 @@ with parse_instr {bef : Set}
     typed ctxt loc Script_typed_ir.Map_update
       (Script_typed_ir.Item_t (Script_typed_ir.Map_t ck v map_name has_big_map)
         rest annot)
+  
   |
     ((Micheline.Prim loc Alpha_context.Script.I_SIZE [] annot,
       Script_typed_ir.Item_t (Script_typed_ir.Map_t _ _ _ _) rest _), _) =>
@@ -4572,10 +4972,11 @@ with parse_instr {bef : Set}
       existT (A := Set)
         (fun __144 =>
           [Alpha_context.Script.location ** Micheline.annot **
-            Script_typed_ir.stack_ty __144]) _ [loc, annot, rest] in
+            Script_typed_ir.stack_ty]) _ [loc, annot, rest] in
     let=? annot := parse_var_annot loc None annot in
     typed ctxt loc Script_typed_ir.Map_size
       (Script_typed_ir.Item_t (Script_typed_ir.Nat_t None) rest annot)
+  
   |
     ((Micheline.Prim loc Alpha_context.Script.I_EMPTY_BIG_MAP
       (cons tk (cons tv [])) annot, __stack_value), _) =>
@@ -4584,19 +4985,19 @@ with parse_instr {bef : Set}
     let 'existT _ __Ex_comparable_ty_'a3 [tk, ctxt] :=
       existT (A := Set)
         (fun __Ex_comparable_ty_'a3 =>
-          [Script_typed_ir.comparable_ty __Ex_comparable_ty_'a3 **
-            Alpha_context.context]) _ [tk, ctxt] in
+          [Script_typed_ir.comparable_ty ** Alpha_context.context]) _ [tk, ctxt]
+      in
     let=? '(Ex_ty tv, ctxt) := Lwt.__return (parse_packable_ty ctxt legacy tv)
       in
     let 'existT _ __Ex_ty_'a7 [tv, ctxt] :=
       existT (A := Set)
-        (fun __Ex_ty_'a7 =>
-          [Script_typed_ir.ty __Ex_ty_'a7 ** Alpha_context.context]) _
+        (fun __Ex_ty_'a7 => [Script_typed_ir.ty ** Alpha_context.context]) _
         [tv, ctxt] in
     let=? '(annot, ty_name) := parse_var_type_annot loc annot in
     typed ctxt loc (Script_typed_ir.Empty_big_map tk tv)
       (Script_typed_ir.Item_t (Script_typed_ir.Big_map_t tk tv ty_name)
         __stack_value annot)
+  
   |
     ((Micheline.Prim loc Alpha_context.Script.I_MEM [] annot,
       Script_typed_ir.Item_t set_key
@@ -4606,8 +5007,8 @@ with parse_instr {bef : Set}
       existT (A := [Set ** Set ** Set])
         (fun '[__147, __150, __151] =>
           [Alpha_context.Script.location ** Micheline.annot **
-            Script_typed_ir.ty __147 ** Script_typed_ir.comparable_ty __151 **
-            Script_typed_ir.stack_ty __150]) [_, _, _]
+            Script_typed_ir.ty ** Script_typed_ir.comparable_ty **
+            Script_typed_ir.stack_ty]) [_, _, _]
         [loc, annot, set_key, map_key, rest] in
     let k := ty_of_comparable_ty map_key in
     let=? '(Eq, _, ctxt) :=
@@ -4615,6 +5016,7 @@ with parse_instr {bef : Set}
     let=? annot := parse_var_annot loc None annot in
     typed ctxt loc Script_typed_ir.Big_map_mem
       (Script_typed_ir.Item_t (Script_typed_ir.Bool_t None) rest annot)
+  
   |
     ((Micheline.Prim loc Alpha_context.Script.I_GET [] annot,
       Script_typed_ir.Item_t vk
@@ -4625,9 +5027,9 @@ with parse_instr {bef : Set}
       existT (A := [Set ** Set ** Set ** Set])
         (fun '[__153, __156, __157, __158] =>
           [Alpha_context.Script.location ** Micheline.annot **
-            Script_typed_ir.ty __153 ** Script_typed_ir.comparable_ty __157 **
-            Script_typed_ir.ty __158 ** Script_typed_ir.stack_ty __156]) [_, _,
-        _, _] [loc, annot, vk, ck, __elt_value, rest] in
+            Script_typed_ir.ty ** Script_typed_ir.comparable_ty **
+            Script_typed_ir.ty ** Script_typed_ir.stack_ty]) [_, _, _, _]
+        [loc, annot, vk, ck, __elt_value, rest] in
     let k := ty_of_comparable_ty ck in
     let=? '(Eq, _, ctxt) :=
       check_item_ty ctxt vk k loc Alpha_context.Script.I_GET 1 2 in
@@ -4636,6 +5038,7 @@ with parse_instr {bef : Set}
       (Script_typed_ir.Item_t
         (Script_typed_ir.Option_t __elt_value None (has_big_map __elt_value))
         rest annot)
+  
   |
     ((Micheline.Prim loc Alpha_context.Script.I_UPDATE [] annot,
       Script_typed_ir.Item_t set_key
@@ -4649,10 +5052,10 @@ with parse_instr {bef : Set}
       existT (A := [Set ** Set ** Set ** Set ** Set])
         (fun '[__159, __163, __165, __166, __167] =>
           [Alpha_context.Script.location ** Micheline.annot **
-            Script_typed_ir.ty __159 ** Script_typed_ir.ty __163 **
-            Script_typed_ir.comparable_ty __166 ** Script_typed_ir.ty __167 **
-            option Script_typed_ir.type_annot ** Script_typed_ir.stack_ty __165
-            ** option Script_typed_ir.var_annot]) [_, _, _, _, _]
+            Script_typed_ir.ty ** Script_typed_ir.ty **
+            Script_typed_ir.comparable_ty ** Script_typed_ir.ty **
+            option Script_typed_ir.type_annot ** Script_typed_ir.stack_ty **
+            option Script_typed_ir.var_annot]) [_, _, _, _, _]
         [loc, annot, set_key, set_value, map_key, map_value, map_name, rest,
           map_annot] in
     let k := ty_of_comparable_ty map_key in
@@ -4665,8 +5068,10 @@ with parse_instr {bef : Set}
     typed ctxt loc Script_typed_ir.Big_map_update
       (Script_typed_ir.Item_t
         (Script_typed_ir.Big_map_t map_key map_value map_name) rest annot)
+  
   | ((Micheline.Seq loc [], __stack_value), _) =>
     typed ctxt loc Script_typed_ir.Nop __stack_value
+  
   | ((Micheline.Seq loc (cons single []), __stack_value), _) =>
     let=? '(judgement, ctxt) :=
       parse_instr type_logger tc_context ctxt legacy single __stack_value in
@@ -4675,25 +5080,30 @@ with parse_instr {bef : Set}
       let 'existT _ __Typed_'aft10 [aft, instr] :=
         existT (A := Set)
           (fun __Typed_'aft10 =>
-            [Script_typed_ir.stack_ty __Typed_'aft10 **
-              Script_typed_ir.descr bef __Typed_'aft10]) _ [aft, instr] in
+            [Script_typed_ir.stack_ty ** Script_typed_ir.descr]) _ [aft, instr]
+        in
       let nop :=
-        {| Script_typed_ir.descr.loc := loc; Script_typed_ir.descr.bef := aft;
+        ({| Script_typed_ir.descr.loc := loc; Script_typed_ir.descr.bef := aft;
           Script_typed_ir.descr.aft := aft;
-          Script_typed_ir.descr.instr := Script_typed_ir.Nop |} in
+          Script_typed_ir.descr.instr := Script_typed_ir.Nop |}
+          : Script_typed_ir.descr) in
       typed ctxt loc (Script_typed_ir.Seq instr nop) aft
     | Failed {| judgement.Failed.descr := __descr_value |} =>
-      let __descr_value {B : Set} (aft : Script_typed_ir.stack_ty B)
-        : Script_typed_ir.descr bef B :=
+      let __descr_value (aft : Script_typed_ir.stack_ty)
+        : Script_typed_ir.descr :=
         let nop :=
-          {| Script_typed_ir.descr.loc := loc; Script_typed_ir.descr.bef := aft;
-            Script_typed_ir.descr.aft := aft;
-            Script_typed_ir.descr.instr := Script_typed_ir.Nop |} in
+          ({| Script_typed_ir.descr.loc := loc;
+            Script_typed_ir.descr.bef := aft; Script_typed_ir.descr.aft := aft;
+            Script_typed_ir.descr.instr := Script_typed_ir.Nop |}
+            : Script_typed_ir.descr) in
         let __descr_value := __descr_value aft in
         Script_typed_ir.descr.with_instr (Script_typed_ir.Seq __descr_value nop)
           __descr_value in
-      __return ctxt (Failed {| judgement.Failed.descr := __descr_value |})
+      __return ctxt
+        (Failed
+          ({| judgement.Failed.descr := __descr_value |} : judgement.Failed))
     end
+  
   | ((Micheline.Seq loc (cons hd tl), __stack_value), _) =>
     let=? '(judgement, ctxt) :=
       parse_instr type_logger tc_context ctxt legacy hd __stack_value in
@@ -4703,30 +5113,33 @@ with parse_instr {bef : Set}
       let 'existT _ __Typed_'aft11 [middle, ihd] :=
         existT (A := Set)
           (fun __Typed_'aft11 =>
-            [Script_typed_ir.stack_ty __Typed_'aft11 **
-              Script_typed_ir.descr bef __Typed_'aft11]) _ [middle, ihd] in
+            [Script_typed_ir.stack_ty ** Script_typed_ir.descr]) _ [middle, ihd]
+        in
       let=? '(judgement, ctxt) :=
         parse_instr type_logger tc_context ctxt legacy (Micheline.Seq (-1) tl)
           middle in
       match judgement with
       | Failed {| judgement.Failed.descr := __descr_value |} =>
-        let __descr_value {B : Set} (ret : Script_typed_ir.stack_ty B)
-          : Script_typed_ir.descr bef B :=
-          {| Script_typed_ir.descr.loc := loc;
+        let __descr_value (ret : Script_typed_ir.stack_ty)
+          : Script_typed_ir.descr :=
+          ({| Script_typed_ir.descr.loc := loc;
             Script_typed_ir.descr.bef := __stack_value;
             Script_typed_ir.descr.aft := ret;
             Script_typed_ir.descr.instr :=
-              Script_typed_ir.Seq ihd (__descr_value ret) |} in
-        __return ctxt (Failed {| judgement.Failed.descr := __descr_value |})
+              Script_typed_ir.Seq ihd (__descr_value ret) |}
+            : Script_typed_ir.descr) in
+        __return ctxt
+          (Failed
+            ({| judgement.Failed.descr := __descr_value |} : judgement.Failed))
       | Typed itl =>
         let 'existT _ __Typed_'aft12 itl :=
-          existT (A := Set)
-            (fun __Typed_'aft12 =>
-              Script_typed_ir.descr __Typed_'aft11 __Typed_'aft12) _ itl in
+          existT (A := Set) (fun __Typed_'aft12 => Script_typed_ir.descr) _ itl
+          in
         typed ctxt loc (Script_typed_ir.Seq ihd itl)
           itl.(Script_typed_ir.descr.aft)
       end
     end
+  
   |
     ((Micheline.Prim loc Alpha_context.Script.I_IF (cons bt (cons bf [])) annot,
       (Script_typed_ir.Item_t (Script_typed_ir.Bool_t _) rest _) as bef), _) =>
@@ -4738,8 +5151,7 @@ with parse_instr {bef : Set}
               Alpha_context.Script.prim **
             Micheline.node Alpha_context.Script.location
               Alpha_context.Script.prim ** Micheline.annot **
-            Script_typed_ir.stack_ty __169 **
-            Script_typed_ir.stack_ty (bool * __169)]) _
+            Script_typed_ir.stack_ty ** Script_typed_ir.stack_ty]) _
         [loc, bt, bf, annot, rest, bef] in
     let=? '_ := check_kind [ Script_tc_errors.Seq_kind ] bt in
     let=? '_ := check_kind [ Script_tc_errors.Seq_kind ] bf in
@@ -4748,16 +5160,17 @@ with parse_instr {bef : Set}
       in
     let=? '(bfr, ctxt) := parse_instr type_logger tc_context ctxt legacy bf rest
       in
-    let branch {B : Set}
-      (ibt : Script_typed_ir.descr __169 B)
-      (ibf : Script_typed_ir.descr __169 B)
-      : Script_typed_ir.descr (bool * __169) B :=
-      {| Script_typed_ir.descr.loc := loc; Script_typed_ir.descr.bef := bef;
+    let branch (ibt : Script_typed_ir.descr) (ibf : Script_typed_ir.descr)
+      : Script_typed_ir.descr :=
+      ({| Script_typed_ir.descr.loc := loc; Script_typed_ir.descr.bef := bef;
         Script_typed_ir.descr.aft := ibt.(Script_typed_ir.descr.aft);
-        Script_typed_ir.descr.instr := Script_typed_ir.If ibt ibf |} in
+        Script_typed_ir.descr.instr := Script_typed_ir.If ibt ibf |}
+        : Script_typed_ir.descr) in
     let=? '(judgement, ctxt) :=
-      merge_branches legacy ctxt loc btr bfr {| branch.branch := branch |} in
+      merge_branches legacy ctxt loc btr bfr
+        ({| branch.branch := branch |} : branch) in
     __return ctxt judgement
+  
   |
     ((Micheline.Prim loc Alpha_context.Script.I_LOOP (cons body []) annot,
       (Script_typed_ir.Item_t (Script_typed_ir.Bool_t _) rest _stack_annot) as
@@ -4768,8 +5181,8 @@ with parse_instr {bef : Set}
           [Alpha_context.Script.location **
             Micheline.node Alpha_context.Script.location
               Alpha_context.Script.prim ** Micheline.annot **
-            Script_typed_ir.stack_ty __171 ** option Script_typed_ir.var_annot
-            ** Script_typed_ir.stack_ty (bool * __171)]) _
+            Script_typed_ir.stack_ty ** option Script_typed_ir.var_annot **
+            Script_typed_ir.stack_ty]) _
         [loc, body, annot, rest, _stack_annot, __stack_value] in
     let=? '_ := check_kind [ Script_tc_errors.Seq_kind ] body in
     let=? '_ := Script_ir_annot.fail_unexpected_annot loc annot in
@@ -4778,9 +5191,8 @@ with parse_instr {bef : Set}
     match judgement with
     | Typed ibody =>
       let 'existT _ __Typed_'aft13 ibody :=
-        existT (A := Set)
-          (fun __Typed_'aft13 => Script_typed_ir.descr __171 __Typed_'aft13) _
-          ibody in
+        existT (A := Set) (fun __Typed_'aft13 => Script_typed_ir.descr) _ ibody
+        in
       let unmatched_branches (function_parameter : unit)
         : Lwt.t (Error_monad.tzresult Error_monad.__error) :=
         let '_ := function_parameter in
@@ -4805,6 +5217,7 @@ with parse_instr {bef : Set}
       let ibody := __descr_value __stack_value in
       typed ctxt loc (Script_typed_ir.Loop ibody) rest
     end
+  
   |
     ((Micheline.Prim loc Alpha_context.Script.I_LOOP_LEFT (cons body []) annot,
       (Script_typed_ir.Item_t
@@ -4816,12 +5229,10 @@ with parse_instr {bef : Set}
         (fun '[__173, __174, __175] =>
           [Alpha_context.Script.location **
             Micheline.node Alpha_context.Script.location
-              Alpha_context.Script.prim ** Micheline.annot **
-            Script_typed_ir.ty __174 ** option Script_typed_ir.field_annot **
-            Script_typed_ir.ty __175 ** Script_typed_ir.stack_ty __173 **
-            option Script_typed_ir.var_annot **
-            Script_typed_ir.stack_ty (Script_typed_ir.union __174 __175 * __173)])
-        [_, _, _]
+              Alpha_context.Script.prim ** Micheline.annot ** Script_typed_ir.ty
+            ** option Script_typed_ir.field_annot ** Script_typed_ir.ty **
+            Script_typed_ir.stack_ty ** option Script_typed_ir.var_annot **
+            Script_typed_ir.stack_ty]) [_, _, _]
         [loc, body, annot, tl, l_field, tr, rest, union_annot, __stack_value] in
     let=? '_ := check_kind [ Script_tc_errors.Seq_kind ] body in
     let=? annot := parse_var_annot loc None annot in
@@ -4834,9 +5245,8 @@ with parse_instr {bef : Set}
     match judgement with
     | Typed ibody =>
       let 'existT _ __Typed_'aft14 ibody :=
-        existT (A := Set)
-          (fun __Typed_'aft14 =>
-            Script_typed_ir.descr (__174 * __173) __Typed_'aft14) _ ibody in
+        existT (A := Set) (fun __Typed_'aft14 => Script_typed_ir.descr) _ ibody
+        in
       let unmatched_branches (function_parameter : unit)
         : Lwt.t (Error_monad.tzresult Error_monad.__error) :=
         let '_ := function_parameter in
@@ -4863,20 +5273,19 @@ with parse_instr {bef : Set}
       typed ctxt loc (Script_typed_ir.Loop_left ibody)
         (Script_typed_ir.Item_t tr rest annot)
     end
+  
   |
     ((Micheline.Prim loc Alpha_context.Script.I_LAMBDA
       (cons arg (cons ret (cons code []))) annot, __stack_value), _) =>
     let=? '(Ex_ty arg, ctxt) := Lwt.__return (parse_any_ty ctxt legacy arg) in
     let 'existT _ __Ex_ty_'a8 [arg, ctxt] :=
       existT (A := Set)
-        (fun __Ex_ty_'a8 =>
-          [Script_typed_ir.ty __Ex_ty_'a8 ** Alpha_context.context]) _
+        (fun __Ex_ty_'a8 => [Script_typed_ir.ty ** Alpha_context.context]) _
         [arg, ctxt] in
     let=? '(Ex_ty ret, ctxt) := Lwt.__return (parse_any_ty ctxt legacy ret) in
     let 'existT _ __Ex_ty_'a9 [ret, ctxt] :=
       existT (A := Set)
-        (fun __Ex_ty_'a9 =>
-          [Script_typed_ir.ty __Ex_ty_'a9 ** Alpha_context.context]) _
+        (fun __Ex_ty_'a9 => [Script_typed_ir.ty ** Alpha_context.context]) _
         [ret, ctxt] in
     let=? '_ := check_kind [ Script_tc_errors.Seq_kind ] code in
     let=? annot := parse_var_annot loc None annot in
@@ -4886,6 +5295,7 @@ with parse_instr {bef : Set}
     typed ctxt loc (Script_typed_ir.Lambda lambda)
       (Script_typed_ir.Item_t (Script_typed_ir.Lambda_t arg ret None)
         __stack_value annot)
+  
   |
     ((Micheline.Prim loc Alpha_context.Script.I_EXEC [] annot,
       Script_typed_ir.Item_t arg
@@ -4896,13 +5306,14 @@ with parse_instr {bef : Set}
       existT (A := [Set ** Set ** Set ** Set])
         (fun '[__176, __179, __180, __181] =>
           [Alpha_context.Script.location ** Micheline.annot **
-            Script_typed_ir.ty __176 ** Script_typed_ir.ty __180 **
-            Script_typed_ir.ty __181 ** Script_typed_ir.stack_ty __179]) [_, _,
-        _, _] [loc, annot, arg, param, ret, rest] in
+            Script_typed_ir.ty ** Script_typed_ir.ty ** Script_typed_ir.ty **
+            Script_typed_ir.stack_ty]) [_, _, _, _]
+        [loc, annot, arg, param, ret, rest] in
     let=? '(Eq, _, ctxt) :=
       check_item_ty ctxt arg param loc Alpha_context.Script.I_EXEC 1 2 in
     let=? annot := parse_var_annot loc None annot in
     typed ctxt loc Script_typed_ir.Exec (Script_typed_ir.Item_t ret rest annot)
+  
   |
     ((Micheline.Prim loc Alpha_context.Script.I_APPLY [] annot,
       Script_typed_ir.Item_t capture
@@ -4915,11 +5326,10 @@ with parse_instr {bef : Set}
       existT (A := [Set ** Set ** Set ** Set ** Set])
         (fun '[__182, __185, __187, __188, __189] =>
           [Alpha_context.Script.location ** Micheline.annot **
-            Script_typed_ir.ty __182 ** Script_typed_ir.ty __188 **
-            Script_typed_ir.ty __189 ** option Script_typed_ir.type_annot **
-            Script_typed_ir.ty __187 ** Script_typed_ir.stack_ty __185]) [_, _,
-        _, _, _] [loc, annot, capture, capture_ty, arg_ty, lam_annot, ret, rest]
-      in
+            Script_typed_ir.ty ** Script_typed_ir.ty ** Script_typed_ir.ty **
+            option Script_typed_ir.type_annot ** Script_typed_ir.ty **
+            Script_typed_ir.stack_ty]) [_, _, _, _, _]
+        [loc, annot, capture, capture_ty, arg_ty, lam_annot, ret, rest] in
     let=? '_ := Lwt.__return (check_packable false loc capture_ty) in
     let=? '(Eq, capture_ty, ctxt) :=
       check_item_ty ctxt capture capture_ty loc Alpha_context.Script.I_APPLY 1 2
@@ -4928,6 +5338,7 @@ with parse_instr {bef : Set}
     typed ctxt loc (Script_typed_ir.Apply capture_ty)
       (Script_typed_ir.Item_t (Script_typed_ir.Lambda_t arg_ty ret lam_annot)
         rest annot)
+  
   |
     ((Micheline.Prim loc Alpha_context.Script.I_DIP (cons code []) annot,
       Script_typed_ir.Item_t v rest stack_annot), _) =>
@@ -4936,10 +5347,9 @@ with parse_instr {bef : Set}
         (fun '[__190, __191] =>
           [Alpha_context.Script.location **
             Micheline.node Alpha_context.Script.location
-              Alpha_context.Script.prim ** Micheline.annot **
-            Script_typed_ir.ty __190 ** Script_typed_ir.stack_ty __191 **
-            option Script_typed_ir.var_annot]) [_, _]
-        [loc, code, annot, v, rest, stack_annot] in
+              Alpha_context.Script.prim ** Micheline.annot ** Script_typed_ir.ty
+            ** Script_typed_ir.stack_ty ** option Script_typed_ir.var_annot])
+        [_, _] [loc, code, annot, v, rest, stack_annot] in
     let=? '_ := Script_ir_annot.fail_unexpected_annot loc annot in
     let=? '_ := check_kind [ Script_tc_errors.Seq_kind ] code in
     let=? '(judgement, ctxt) :=
@@ -4948,21 +5358,20 @@ with parse_instr {bef : Set}
     match judgement with
     | Typed __descr_value =>
       let 'existT _ __Typed_'aft15 __descr_value :=
-        existT (A := Set)
-          (fun __Typed_'aft15 => Script_typed_ir.descr __191 __Typed_'aft15) _
+        existT (A := Set) (fun __Typed_'aft15 => Script_typed_ir.descr) _
           __descr_value in
       typed ctxt loc (Script_typed_ir.Dip __descr_value)
         (Script_typed_ir.Item_t v __descr_value.(Script_typed_ir.descr.aft)
           stack_annot)
     | Failed _ => Error_monad.fail extensible_type_value
     end
+  
   |
     ((Micheline.Prim loc Alpha_context.Script.I_DIP (cons n (cons code []))
       result_annot, __stack_value), true) =>
     let fix make_proof_argument {tstk : Set}
-      (n : int) (inner_tc_context : tc_context)
-      (stk : Script_typed_ir.stack_ty tstk) {struct n}
-      : Lwt.t (Error_monad.tzresult (dipn_proof_argument tstk)) :=
+      (n : int) (inner_tc_context : tc_context) (stk : Script_typed_ir.stack_ty)
+      {struct n} : Lwt.t (Error_monad.tzresult (dipn_proof_argument tstk)) :=
       match (((|Compare.Int|).(Compare.S.op_eq) n 0), stk) with
       | (true, rest) =>
         let=? '(judgement, ctxt) :=
@@ -4970,9 +5379,8 @@ with parse_instr {bef : Set}
         match judgement with
         | Typed __descr_value =>
           let 'existT _ __Typed_'aft16 __descr_value :=
-            existT (A := Set)
-              (fun __Typed_'aft16 => Script_typed_ir.descr tstk __Typed_'aft16)
-              _ __descr_value in
+            existT (A := Set) (fun __Typed_'aft16 => Script_typed_ir.descr) _
+              __descr_value in
           outer_return
             (Dipn_proof_argument
               (Script_typed_ir.Rest, (ctxt, __descr_value),
@@ -4983,7 +5391,7 @@ with parse_instr {bef : Set}
         let 'existT _ [__482, __483] [v, rest, annot] :=
           existT (A := [Set ** Set])
             (fun '[__482, __483] =>
-              [Script_typed_ir.ty __482 ** Script_typed_ir.stack_ty __483 **
+              [Script_typed_ir.ty ** Script_typed_ir.stack_ty **
                 option Script_typed_ir.var_annot]) [_, _] [v, rest, annot] in
         let=? 'Dipn_proof_argument (n', __descr_value, aft') :=
           make_proof_argument (Pervasives.op_minus n 1)
@@ -4995,14 +5403,10 @@ with parse_instr {bef : Set}
             (fun
               '[__Dipn_proof_argument_'aft, __Dipn_proof_argument_'faft,
                 __Dipn_proof_argument_'fbef] =>
-              [Script_typed_ir.stack_prefix_preservation_witness
-                __Dipn_proof_argument_'fbef __Dipn_proof_argument_'faft __483
-                __Dipn_proof_argument_'aft **
-                Alpha_context.context *
-                  Script_typed_ir.descr __Dipn_proof_argument_'fbef
-                    __Dipn_proof_argument_'faft **
-                Script_typed_ir.stack_ty __Dipn_proof_argument_'aft]) [_, _, _]
-            [n', __descr_value, aft'] in
+              [Script_typed_ir.stack_prefix_preservation_witness **
+                Alpha_context.context * Script_typed_ir.descr **
+                Script_typed_ir.stack_ty]) [_, _, _] [n', __descr_value, aft']
+          in
         outer_return
           (Dipn_proof_argument
             ((Script_typed_ir.Prefix n'), __descr_value,
@@ -5023,18 +5427,17 @@ with parse_instr {bef : Set}
         (fun
           '[__Dipn_proof_argument_'aft1, __Dipn_proof_argument_'faft1,
             __Dipn_proof_argument_'fbef1] =>
-          [Script_typed_ir.stack_prefix_preservation_witness
-            __Dipn_proof_argument_'fbef1 __Dipn_proof_argument_'faft1 bef
-            __Dipn_proof_argument_'aft1 ** Alpha_context.context **
-            Script_typed_ir.descr __Dipn_proof_argument_'fbef1
-              __Dipn_proof_argument_'faft1 **
-            Script_typed_ir.stack_ty __Dipn_proof_argument_'aft1]) [_, _, _]
+          [Script_typed_ir.stack_prefix_preservation_witness **
+            Alpha_context.context ** Script_typed_ir.descr **
+            Script_typed_ir.stack_ty]) [_, _, _]
         [n', new_ctxt, __descr_value, aft] in
     typed new_ctxt loc (Script_typed_ir.Dipn n n' __descr_value) aft
+  
   |
     ((Micheline.Prim loc Alpha_context.Script.I_DIP
       (([] | cons _ (cons _ (cons _ _))) as l) _, _), _) =>
     Error_monad.fail extensible_type_value
+  
   |
     ((Micheline.Prim loc Alpha_context.Script.I_FAILWITH [] annot,
       Script_typed_ir.Item_t v _rest _), _) =>
@@ -5042,16 +5445,19 @@ with parse_instr {bef : Set}
       existT (A := [Set ** Set])
         (fun '[__192, __193] =>
           [Alpha_context.Script.location ** Micheline.annot **
-            Script_typed_ir.ty __192 ** Script_typed_ir.stack_ty __193]) [_, _]
+            Script_typed_ir.ty ** Script_typed_ir.stack_ty]) [_, _]
         [loc, annot, v, _rest] in
     let=? '_ := Script_ir_annot.fail_unexpected_annot loc annot in
-    let __descr_value {B : Set} (aft : Script_typed_ir.stack_ty B)
-      : Script_typed_ir.descr bef B :=
-      {| Script_typed_ir.descr.loc := loc;
+    let __descr_value (aft : Script_typed_ir.stack_ty)
+      : Script_typed_ir.descr :=
+      ({| Script_typed_ir.descr.loc := loc;
         Script_typed_ir.descr.bef := stack_ty; Script_typed_ir.descr.aft := aft;
-        Script_typed_ir.descr.instr := Script_typed_ir.Failwith v |} in
+        Script_typed_ir.descr.instr := Script_typed_ir.Failwith v |}
+        : Script_typed_ir.descr) in
     let=? '_ := log_stack ctxt loc stack_ty Script_typed_ir.Empty_t in
-    __return ctxt (Failed {| judgement.Failed.descr := __descr_value |})
+    __return ctxt
+      (Failed ({| judgement.Failed.descr := __descr_value |} : judgement.Failed))
+  
   |
     ((Micheline.Prim loc Alpha_context.Script.I_ADD [] annot,
       Script_typed_ir.Item_t (Script_typed_ir.Timestamp_t tname)
@@ -5060,11 +5466,12 @@ with parse_instr {bef : Set}
       existT (A := Set)
         (fun __197 =>
           [Alpha_context.Script.location ** Micheline.annot **
-            option Script_typed_ir.type_annot ** Script_typed_ir.stack_ty __197])
-        _ [loc, annot, tname, rest] in
+            option Script_typed_ir.type_annot ** Script_typed_ir.stack_ty]) _
+        [loc, annot, tname, rest] in
     let=? annot := parse_var_annot loc None annot in
     typed ctxt loc Script_typed_ir.Add_timestamp_to_seconds
       (Script_typed_ir.Item_t (Script_typed_ir.Timestamp_t tname) rest annot)
+  
   |
     ((Micheline.Prim loc Alpha_context.Script.I_ADD [] annot,
       Script_typed_ir.Item_t (Script_typed_ir.Int_t _)
@@ -5074,11 +5481,12 @@ with parse_instr {bef : Set}
       existT (A := Set)
         (fun __201 =>
           [Alpha_context.Script.location ** Micheline.annot **
-            option Script_typed_ir.type_annot ** Script_typed_ir.stack_ty __201])
-        _ [loc, annot, tname, rest] in
+            option Script_typed_ir.type_annot ** Script_typed_ir.stack_ty]) _
+        [loc, annot, tname, rest] in
     let=? annot := parse_var_annot loc None annot in
     typed ctxt loc Script_typed_ir.Add_seconds_to_timestamp
       (Script_typed_ir.Item_t (Script_typed_ir.Timestamp_t tname) rest annot)
+  
   |
     ((Micheline.Prim loc Alpha_context.Script.I_SUB [] annot,
       Script_typed_ir.Item_t (Script_typed_ir.Timestamp_t tname)
@@ -5087,11 +5495,12 @@ with parse_instr {bef : Set}
       existT (A := Set)
         (fun __205 =>
           [Alpha_context.Script.location ** Micheline.annot **
-            option Script_typed_ir.type_annot ** Script_typed_ir.stack_ty __205])
-        _ [loc, annot, tname, rest] in
+            option Script_typed_ir.type_annot ** Script_typed_ir.stack_ty]) _
+        [loc, annot, tname, rest] in
     let=? annot := parse_var_annot loc None annot in
     typed ctxt loc Script_typed_ir.Sub_timestamp_seconds
       (Script_typed_ir.Item_t (Script_typed_ir.Timestamp_t tname) rest annot)
+  
   |
     ((Micheline.Prim loc Alpha_context.Script.I_SUB [] annot,
       Script_typed_ir.Item_t (Script_typed_ir.Timestamp_t tn1)
@@ -5102,13 +5511,14 @@ with parse_instr {bef : Set}
         (fun __209 =>
           [Alpha_context.Script.location ** Micheline.annot **
             option Script_typed_ir.type_annot **
-            option Script_typed_ir.type_annot ** Script_typed_ir.stack_ty __209])
-        _ [loc, annot, tn1, tn2, rest] in
+            option Script_typed_ir.type_annot ** Script_typed_ir.stack_ty]) _
+        [loc, annot, tn1, tn2, rest] in
     let=? annot := parse_var_annot loc None annot in
     let=? tname :=
       Lwt.__return (Script_ir_annot.merge_type_annot legacy tn1 tn2) in
     typed ctxt loc Script_typed_ir.Diff_timestamps
       (Script_typed_ir.Item_t (Script_typed_ir.Int_t tname) rest annot)
+  
   |
     ((Micheline.Prim loc Alpha_context.Script.I_CONCAT [] annot,
       Script_typed_ir.Item_t (Script_typed_ir.String_t tn1)
@@ -5118,13 +5528,14 @@ with parse_instr {bef : Set}
         (fun __213 =>
           [Alpha_context.Script.location ** Micheline.annot **
             option Script_typed_ir.type_annot **
-            option Script_typed_ir.type_annot ** Script_typed_ir.stack_ty __213])
-        _ [loc, annot, tn1, tn2, rest] in
+            option Script_typed_ir.type_annot ** Script_typed_ir.stack_ty]) _
+        [loc, annot, tn1, tn2, rest] in
     let=? annot := parse_var_annot loc None annot in
     let=? tname :=
       Lwt.__return (Script_ir_annot.merge_type_annot legacy tn1 tn2) in
     typed ctxt loc Script_typed_ir.Concat_string_pair
       (Script_typed_ir.Item_t (Script_typed_ir.String_t tname) rest annot)
+  
   |
     ((Micheline.Prim loc Alpha_context.Script.I_CONCAT [] annot,
       Script_typed_ir.Item_t
@@ -5134,12 +5545,13 @@ with parse_instr {bef : Set}
       existT (A := Set)
         (fun __215 =>
           [Alpha_context.Script.location ** Micheline.annot **
-            option Script_typed_ir.type_annot ** Script_typed_ir.stack_ty __215
-            ** option Script_typed_ir.var_annot]) _
+            option Script_typed_ir.type_annot ** Script_typed_ir.stack_ty **
+            option Script_typed_ir.var_annot]) _
         [loc, annot, tname, rest, list_annot] in
     let=? annot := parse_var_annot loc (Some list_annot) annot in
     typed ctxt loc Script_typed_ir.Concat_string
       (Script_typed_ir.Item_t (Script_typed_ir.String_t tname) rest annot)
+  
   |
     ((Micheline.Prim loc Alpha_context.Script.I_SLICE [] annot,
       Script_typed_ir.Item_t (Script_typed_ir.Nat_t _)
@@ -5150,8 +5562,8 @@ with parse_instr {bef : Set}
       existT (A := Set)
         (fun __222 =>
           [Alpha_context.Script.location ** Micheline.annot **
-            option Script_typed_ir.type_annot ** Script_typed_ir.stack_ty __222
-            ** option Script_typed_ir.var_annot]) _
+            option Script_typed_ir.type_annot ** Script_typed_ir.stack_ty **
+            option Script_typed_ir.var_annot]) _
         [loc, annot, tname, rest, string_annot] in
     let=? annot :=
       parse_var_annot loc
@@ -5162,6 +5574,7 @@ with parse_instr {bef : Set}
       (Script_typed_ir.Item_t
         (Script_typed_ir.Option_t (Script_typed_ir.String_t tname) None false)
         rest annot)
+  
   |
     ((Micheline.Prim loc Alpha_context.Script.I_SIZE [] annot,
       Script_typed_ir.Item_t (Script_typed_ir.String_t _) rest _), _) =>
@@ -5169,10 +5582,11 @@ with parse_instr {bef : Set}
       existT (A := Set)
         (fun __224 =>
           [Alpha_context.Script.location ** Micheline.annot **
-            Script_typed_ir.stack_ty __224]) _ [loc, annot, rest] in
+            Script_typed_ir.stack_ty]) _ [loc, annot, rest] in
     let=? annot := parse_var_annot loc None annot in
     typed ctxt loc Script_typed_ir.String_size
       (Script_typed_ir.Item_t (Script_typed_ir.Nat_t None) rest annot)
+  
   |
     ((Micheline.Prim loc Alpha_context.Script.I_CONCAT [] annot,
       Script_typed_ir.Item_t (Script_typed_ir.Bytes_t tn1)
@@ -5182,13 +5596,14 @@ with parse_instr {bef : Set}
         (fun __228 =>
           [Alpha_context.Script.location ** Micheline.annot **
             option Script_typed_ir.type_annot **
-            option Script_typed_ir.type_annot ** Script_typed_ir.stack_ty __228])
-        _ [loc, annot, tn1, tn2, rest] in
+            option Script_typed_ir.type_annot ** Script_typed_ir.stack_ty]) _
+        [loc, annot, tn1, tn2, rest] in
     let=? annot := parse_var_annot loc None annot in
     let=? tname :=
       Lwt.__return (Script_ir_annot.merge_type_annot legacy tn1 tn2) in
     typed ctxt loc Script_typed_ir.Concat_bytes_pair
       (Script_typed_ir.Item_t (Script_typed_ir.Bytes_t tname) rest annot)
+  
   |
     ((Micheline.Prim loc Alpha_context.Script.I_CONCAT [] annot,
       Script_typed_ir.Item_t
@@ -5198,12 +5613,13 @@ with parse_instr {bef : Set}
       existT (A := Set)
         (fun __230 =>
           [Alpha_context.Script.location ** Micheline.annot **
-            option Script_typed_ir.type_annot ** Script_typed_ir.stack_ty __230
-            ** option Script_typed_ir.var_annot]) _
+            option Script_typed_ir.type_annot ** Script_typed_ir.stack_ty **
+            option Script_typed_ir.var_annot]) _
         [loc, annot, tname, rest, list_annot] in
     let=? annot := parse_var_annot loc (Some list_annot) annot in
     typed ctxt loc Script_typed_ir.Concat_bytes
       (Script_typed_ir.Item_t (Script_typed_ir.Bytes_t tname) rest annot)
+  
   |
     ((Micheline.Prim loc Alpha_context.Script.I_SLICE [] annot,
       Script_typed_ir.Item_t (Script_typed_ir.Nat_t _)
@@ -5214,8 +5630,8 @@ with parse_instr {bef : Set}
       existT (A := Set)
         (fun __237 =>
           [Alpha_context.Script.location ** Micheline.annot **
-            option Script_typed_ir.type_annot ** Script_typed_ir.stack_ty __237
-            ** option Script_typed_ir.var_annot]) _
+            option Script_typed_ir.type_annot ** Script_typed_ir.stack_ty **
+            option Script_typed_ir.var_annot]) _
         [loc, annot, tname, rest, bytes_annot] in
     let=? annot :=
       parse_var_annot loc
@@ -5226,6 +5642,7 @@ with parse_instr {bef : Set}
       (Script_typed_ir.Item_t
         (Script_typed_ir.Option_t (Script_typed_ir.Bytes_t tname) None false)
         rest annot)
+  
   |
     ((Micheline.Prim loc Alpha_context.Script.I_SIZE [] annot,
       Script_typed_ir.Item_t (Script_typed_ir.Bytes_t _) rest _), _) =>
@@ -5233,10 +5650,11 @@ with parse_instr {bef : Set}
       existT (A := Set)
         (fun __239 =>
           [Alpha_context.Script.location ** Micheline.annot **
-            Script_typed_ir.stack_ty __239]) _ [loc, annot, rest] in
+            Script_typed_ir.stack_ty]) _ [loc, annot, rest] in
     let=? annot := parse_var_annot loc None annot in
     typed ctxt loc Script_typed_ir.Bytes_size
       (Script_typed_ir.Item_t (Script_typed_ir.Nat_t None) rest annot)
+  
   |
     ((Micheline.Prim loc Alpha_context.Script.I_ADD [] annot,
       Script_typed_ir.Item_t (Script_typed_ir.Mutez_t tn1)
@@ -5246,13 +5664,14 @@ with parse_instr {bef : Set}
         (fun __243 =>
           [Alpha_context.Script.location ** Micheline.annot **
             option Script_typed_ir.type_annot **
-            option Script_typed_ir.type_annot ** Script_typed_ir.stack_ty __243])
-        _ [loc, annot, tn1, tn2, rest] in
+            option Script_typed_ir.type_annot ** Script_typed_ir.stack_ty]) _
+        [loc, annot, tn1, tn2, rest] in
     let=? annot := parse_var_annot loc None annot in
     let=? tname :=
       Lwt.__return (Script_ir_annot.merge_type_annot legacy tn1 tn2) in
     typed ctxt loc Script_typed_ir.Add_tez
       (Script_typed_ir.Item_t (Script_typed_ir.Mutez_t tname) rest annot)
+  
   |
     ((Micheline.Prim loc Alpha_context.Script.I_SUB [] annot,
       Script_typed_ir.Item_t (Script_typed_ir.Mutez_t tn1)
@@ -5262,13 +5681,14 @@ with parse_instr {bef : Set}
         (fun __247 =>
           [Alpha_context.Script.location ** Micheline.annot **
             option Script_typed_ir.type_annot **
-            option Script_typed_ir.type_annot ** Script_typed_ir.stack_ty __247])
-        _ [loc, annot, tn1, tn2, rest] in
+            option Script_typed_ir.type_annot ** Script_typed_ir.stack_ty]) _
+        [loc, annot, tn1, tn2, rest] in
     let=? annot := parse_var_annot loc None annot in
     let=? tname :=
       Lwt.__return (Script_ir_annot.merge_type_annot legacy tn1 tn2) in
     typed ctxt loc Script_typed_ir.Sub_tez
       (Script_typed_ir.Item_t (Script_typed_ir.Mutez_t tname) rest annot)
+  
   |
     ((Micheline.Prim loc Alpha_context.Script.I_MUL [] annot,
       Script_typed_ir.Item_t (Script_typed_ir.Mutez_t tname)
@@ -5277,11 +5697,12 @@ with parse_instr {bef : Set}
       existT (A := Set)
         (fun __251 =>
           [Alpha_context.Script.location ** Micheline.annot **
-            option Script_typed_ir.type_annot ** Script_typed_ir.stack_ty __251])
-        _ [loc, annot, tname, rest] in
+            option Script_typed_ir.type_annot ** Script_typed_ir.stack_ty]) _
+        [loc, annot, tname, rest] in
     let=? annot := parse_var_annot loc None annot in
     typed ctxt loc Script_typed_ir.Mul_teznat
       (Script_typed_ir.Item_t (Script_typed_ir.Mutez_t tname) rest annot)
+  
   |
     ((Micheline.Prim loc Alpha_context.Script.I_MUL [] annot,
       Script_typed_ir.Item_t (Script_typed_ir.Nat_t _)
@@ -5291,11 +5712,12 @@ with parse_instr {bef : Set}
       existT (A := Set)
         (fun __255 =>
           [Alpha_context.Script.location ** Micheline.annot **
-            option Script_typed_ir.type_annot ** Script_typed_ir.stack_ty __255])
-        _ [loc, annot, tname, rest] in
+            option Script_typed_ir.type_annot ** Script_typed_ir.stack_ty]) _
+        [loc, annot, tname, rest] in
     let=? annot := parse_var_annot loc None annot in
     typed ctxt loc Script_typed_ir.Mul_nattez
       (Script_typed_ir.Item_t (Script_typed_ir.Mutez_t tname) rest annot)
+  
   |
     ((Micheline.Prim loc Alpha_context.Script.I_OR [] annot,
       Script_typed_ir.Item_t (Script_typed_ir.Bool_t tn1)
@@ -5305,13 +5727,14 @@ with parse_instr {bef : Set}
         (fun __259 =>
           [Alpha_context.Script.location ** Micheline.annot **
             option Script_typed_ir.type_annot **
-            option Script_typed_ir.type_annot ** Script_typed_ir.stack_ty __259])
-        _ [loc, annot, tn1, tn2, rest] in
+            option Script_typed_ir.type_annot ** Script_typed_ir.stack_ty]) _
+        [loc, annot, tn1, tn2, rest] in
     let=? annot := parse_var_annot loc None annot in
     let=? tname :=
       Lwt.__return (Script_ir_annot.merge_type_annot legacy tn1 tn2) in
     typed ctxt loc Script_typed_ir.Or
       (Script_typed_ir.Item_t (Script_typed_ir.Bool_t tname) rest annot)
+  
   |
     ((Micheline.Prim loc Alpha_context.Script.I_AND [] annot,
       Script_typed_ir.Item_t (Script_typed_ir.Bool_t tn1)
@@ -5321,13 +5744,14 @@ with parse_instr {bef : Set}
         (fun __263 =>
           [Alpha_context.Script.location ** Micheline.annot **
             option Script_typed_ir.type_annot **
-            option Script_typed_ir.type_annot ** Script_typed_ir.stack_ty __263])
-        _ [loc, annot, tn1, tn2, rest] in
+            option Script_typed_ir.type_annot ** Script_typed_ir.stack_ty]) _
+        [loc, annot, tn1, tn2, rest] in
     let=? annot := parse_var_annot loc None annot in
     let=? tname :=
       Lwt.__return (Script_ir_annot.merge_type_annot legacy tn1 tn2) in
     typed ctxt loc Script_typed_ir.And
       (Script_typed_ir.Item_t (Script_typed_ir.Bool_t tname) rest annot)
+  
   |
     ((Micheline.Prim loc Alpha_context.Script.I_XOR [] annot,
       Script_typed_ir.Item_t (Script_typed_ir.Bool_t tn1)
@@ -5337,13 +5761,14 @@ with parse_instr {bef : Set}
         (fun __267 =>
           [Alpha_context.Script.location ** Micheline.annot **
             option Script_typed_ir.type_annot **
-            option Script_typed_ir.type_annot ** Script_typed_ir.stack_ty __267])
-        _ [loc, annot, tn1, tn2, rest] in
+            option Script_typed_ir.type_annot ** Script_typed_ir.stack_ty]) _
+        [loc, annot, tn1, tn2, rest] in
     let=? annot := parse_var_annot loc None annot in
     let=? tname :=
       Lwt.__return (Script_ir_annot.merge_type_annot legacy tn1 tn2) in
     typed ctxt loc Script_typed_ir.Xor
       (Script_typed_ir.Item_t (Script_typed_ir.Bool_t tname) rest annot)
+  
   |
     ((Micheline.Prim loc Alpha_context.Script.I_NOT [] annot,
       Script_typed_ir.Item_t (Script_typed_ir.Bool_t tname) rest _), _) =>
@@ -5351,11 +5776,12 @@ with parse_instr {bef : Set}
       existT (A := Set)
         (fun __269 =>
           [Alpha_context.Script.location ** Micheline.annot **
-            option Script_typed_ir.type_annot ** Script_typed_ir.stack_ty __269])
-        _ [loc, annot, tname, rest] in
+            option Script_typed_ir.type_annot ** Script_typed_ir.stack_ty]) _
+        [loc, annot, tname, rest] in
     let=? annot := parse_var_annot loc None annot in
     typed ctxt loc Script_typed_ir.Not
       (Script_typed_ir.Item_t (Script_typed_ir.Bool_t tname) rest annot)
+  
   |
     ((Micheline.Prim loc Alpha_context.Script.I_ABS [] annot,
       Script_typed_ir.Item_t (Script_typed_ir.Int_t _) rest _), _) =>
@@ -5363,10 +5789,11 @@ with parse_instr {bef : Set}
       existT (A := Set)
         (fun __271 =>
           [Alpha_context.Script.location ** Micheline.annot **
-            Script_typed_ir.stack_ty __271]) _ [loc, annot, rest] in
+            Script_typed_ir.stack_ty]) _ [loc, annot, rest] in
     let=? annot := parse_var_annot loc None annot in
     typed ctxt loc Script_typed_ir.Abs_int
       (Script_typed_ir.Item_t (Script_typed_ir.Nat_t None) rest annot)
+  
   |
     ((Micheline.Prim loc Alpha_context.Script.I_ISNAT [] annot,
       Script_typed_ir.Item_t (Script_typed_ir.Int_t _) rest int_annot), _) =>
@@ -5374,13 +5801,14 @@ with parse_instr {bef : Set}
       existT (A := Set)
         (fun __273 =>
           [Alpha_context.Script.location ** Micheline.annot **
-            Script_typed_ir.stack_ty __273 ** option Script_typed_ir.var_annot])
-        _ [loc, annot, rest, int_annot] in
+            Script_typed_ir.stack_ty ** option Script_typed_ir.var_annot]) _
+        [loc, annot, rest, int_annot] in
     let=? annot := parse_var_annot loc (Some int_annot) annot in
     typed ctxt loc Script_typed_ir.Is_nat
       (Script_typed_ir.Item_t
         (Script_typed_ir.Option_t (Script_typed_ir.Nat_t None) None false) rest
         annot)
+  
   |
     ((Micheline.Prim loc Alpha_context.Script.I_INT [] annot,
       Script_typed_ir.Item_t (Script_typed_ir.Nat_t _) rest _), _) =>
@@ -5388,10 +5816,11 @@ with parse_instr {bef : Set}
       existT (A := Set)
         (fun __275 =>
           [Alpha_context.Script.location ** Micheline.annot **
-            Script_typed_ir.stack_ty __275]) _ [loc, annot, rest] in
+            Script_typed_ir.stack_ty]) _ [loc, annot, rest] in
     let=? annot := parse_var_annot loc None annot in
     typed ctxt loc Script_typed_ir.Int_nat
       (Script_typed_ir.Item_t (Script_typed_ir.Int_t None) rest annot)
+  
   |
     ((Micheline.Prim loc Alpha_context.Script.I_NEG [] annot,
       Script_typed_ir.Item_t (Script_typed_ir.Int_t tname) rest _), _) =>
@@ -5399,11 +5828,12 @@ with parse_instr {bef : Set}
       existT (A := Set)
         (fun __277 =>
           [Alpha_context.Script.location ** Micheline.annot **
-            option Script_typed_ir.type_annot ** Script_typed_ir.stack_ty __277])
-        _ [loc, annot, tname, rest] in
+            option Script_typed_ir.type_annot ** Script_typed_ir.stack_ty]) _
+        [loc, annot, tname, rest] in
     let=? annot := parse_var_annot loc None annot in
     typed ctxt loc Script_typed_ir.Neg_int
       (Script_typed_ir.Item_t (Script_typed_ir.Int_t tname) rest annot)
+  
   |
     ((Micheline.Prim loc Alpha_context.Script.I_NEG [] annot,
       Script_typed_ir.Item_t (Script_typed_ir.Nat_t _) rest _), _) =>
@@ -5411,10 +5841,11 @@ with parse_instr {bef : Set}
       existT (A := Set)
         (fun __279 =>
           [Alpha_context.Script.location ** Micheline.annot **
-            Script_typed_ir.stack_ty __279]) _ [loc, annot, rest] in
+            Script_typed_ir.stack_ty]) _ [loc, annot, rest] in
     let=? annot := parse_var_annot loc None annot in
     typed ctxt loc Script_typed_ir.Neg_nat
       (Script_typed_ir.Item_t (Script_typed_ir.Int_t None) rest annot)
+  
   |
     ((Micheline.Prim loc Alpha_context.Script.I_ADD [] annot,
       Script_typed_ir.Item_t (Script_typed_ir.Int_t tn1)
@@ -5424,13 +5855,14 @@ with parse_instr {bef : Set}
         (fun __283 =>
           [Alpha_context.Script.location ** Micheline.annot **
             option Script_typed_ir.type_annot **
-            option Script_typed_ir.type_annot ** Script_typed_ir.stack_ty __283])
-        _ [loc, annot, tn1, tn2, rest] in
+            option Script_typed_ir.type_annot ** Script_typed_ir.stack_ty]) _
+        [loc, annot, tn1, tn2, rest] in
     let=? annot := parse_var_annot loc None annot in
     let=? tname :=
       Lwt.__return (Script_ir_annot.merge_type_annot legacy tn1 tn2) in
     typed ctxt loc Script_typed_ir.Add_intint
       (Script_typed_ir.Item_t (Script_typed_ir.Int_t tname) rest annot)
+  
   |
     ((Micheline.Prim loc Alpha_context.Script.I_ADD [] annot,
       Script_typed_ir.Item_t (Script_typed_ir.Int_t tname)
@@ -5439,11 +5871,12 @@ with parse_instr {bef : Set}
       existT (A := Set)
         (fun __287 =>
           [Alpha_context.Script.location ** Micheline.annot **
-            option Script_typed_ir.type_annot ** Script_typed_ir.stack_ty __287])
-        _ [loc, annot, tname, rest] in
+            option Script_typed_ir.type_annot ** Script_typed_ir.stack_ty]) _
+        [loc, annot, tname, rest] in
     let=? annot := parse_var_annot loc None annot in
     typed ctxt loc Script_typed_ir.Add_intnat
       (Script_typed_ir.Item_t (Script_typed_ir.Int_t tname) rest annot)
+  
   |
     ((Micheline.Prim loc Alpha_context.Script.I_ADD [] annot,
       Script_typed_ir.Item_t (Script_typed_ir.Nat_t _)
@@ -5452,11 +5885,12 @@ with parse_instr {bef : Set}
       existT (A := Set)
         (fun __291 =>
           [Alpha_context.Script.location ** Micheline.annot **
-            option Script_typed_ir.type_annot ** Script_typed_ir.stack_ty __291])
-        _ [loc, annot, tname, rest] in
+            option Script_typed_ir.type_annot ** Script_typed_ir.stack_ty]) _
+        [loc, annot, tname, rest] in
     let=? annot := parse_var_annot loc None annot in
     typed ctxt loc Script_typed_ir.Add_natint
       (Script_typed_ir.Item_t (Script_typed_ir.Int_t tname) rest annot)
+  
   |
     ((Micheline.Prim loc Alpha_context.Script.I_ADD [] annot,
       Script_typed_ir.Item_t (Script_typed_ir.Nat_t tn1)
@@ -5466,13 +5900,14 @@ with parse_instr {bef : Set}
         (fun __295 =>
           [Alpha_context.Script.location ** Micheline.annot **
             option Script_typed_ir.type_annot **
-            option Script_typed_ir.type_annot ** Script_typed_ir.stack_ty __295])
-        _ [loc, annot, tn1, tn2, rest] in
+            option Script_typed_ir.type_annot ** Script_typed_ir.stack_ty]) _
+        [loc, annot, tn1, tn2, rest] in
     let=? annot := parse_var_annot loc None annot in
     let=? tname :=
       Lwt.__return (Script_ir_annot.merge_type_annot legacy tn1 tn2) in
     typed ctxt loc Script_typed_ir.Add_natnat
       (Script_typed_ir.Item_t (Script_typed_ir.Nat_t tname) rest annot)
+  
   |
     ((Micheline.Prim loc Alpha_context.Script.I_SUB [] annot,
       Script_typed_ir.Item_t (Script_typed_ir.Int_t tn1)
@@ -5482,13 +5917,14 @@ with parse_instr {bef : Set}
         (fun __299 =>
           [Alpha_context.Script.location ** Micheline.annot **
             option Script_typed_ir.type_annot **
-            option Script_typed_ir.type_annot ** Script_typed_ir.stack_ty __299])
-        _ [loc, annot, tn1, tn2, rest] in
+            option Script_typed_ir.type_annot ** Script_typed_ir.stack_ty]) _
+        [loc, annot, tn1, tn2, rest] in
     let=? annot := parse_var_annot loc None annot in
     let=? tname :=
       Lwt.__return (Script_ir_annot.merge_type_annot legacy tn1 tn2) in
     typed ctxt loc Script_typed_ir.Sub_int
       (Script_typed_ir.Item_t (Script_typed_ir.Int_t tname) rest annot)
+  
   |
     ((Micheline.Prim loc Alpha_context.Script.I_SUB [] annot,
       Script_typed_ir.Item_t (Script_typed_ir.Int_t tname)
@@ -5497,11 +5933,12 @@ with parse_instr {bef : Set}
       existT (A := Set)
         (fun __303 =>
           [Alpha_context.Script.location ** Micheline.annot **
-            option Script_typed_ir.type_annot ** Script_typed_ir.stack_ty __303])
-        _ [loc, annot, tname, rest] in
+            option Script_typed_ir.type_annot ** Script_typed_ir.stack_ty]) _
+        [loc, annot, tname, rest] in
     let=? annot := parse_var_annot loc None annot in
     typed ctxt loc Script_typed_ir.Sub_int
       (Script_typed_ir.Item_t (Script_typed_ir.Int_t tname) rest annot)
+  
   |
     ((Micheline.Prim loc Alpha_context.Script.I_SUB [] annot,
       Script_typed_ir.Item_t (Script_typed_ir.Nat_t _)
@@ -5510,11 +5947,12 @@ with parse_instr {bef : Set}
       existT (A := Set)
         (fun __307 =>
           [Alpha_context.Script.location ** Micheline.annot **
-            option Script_typed_ir.type_annot ** Script_typed_ir.stack_ty __307])
-        _ [loc, annot, tname, rest] in
+            option Script_typed_ir.type_annot ** Script_typed_ir.stack_ty]) _
+        [loc, annot, tname, rest] in
     let=? annot := parse_var_annot loc None annot in
     typed ctxt loc Script_typed_ir.Sub_int
       (Script_typed_ir.Item_t (Script_typed_ir.Int_t tname) rest annot)
+  
   |
     ((Micheline.Prim loc Alpha_context.Script.I_SUB [] annot,
       Script_typed_ir.Item_t (Script_typed_ir.Nat_t tn1)
@@ -5524,13 +5962,14 @@ with parse_instr {bef : Set}
         (fun __311 =>
           [Alpha_context.Script.location ** Micheline.annot **
             option Script_typed_ir.type_annot **
-            option Script_typed_ir.type_annot ** Script_typed_ir.stack_ty __311])
-        _ [loc, annot, tn1, tn2, rest] in
+            option Script_typed_ir.type_annot ** Script_typed_ir.stack_ty]) _
+        [loc, annot, tn1, tn2, rest] in
     let=? annot := parse_var_annot loc None annot in
     let=? _tname :=
       Lwt.__return (Script_ir_annot.merge_type_annot legacy tn1 tn2) in
     typed ctxt loc Script_typed_ir.Sub_int
       (Script_typed_ir.Item_t (Script_typed_ir.Int_t None) rest annot)
+  
   |
     ((Micheline.Prim loc Alpha_context.Script.I_MUL [] annot,
       Script_typed_ir.Item_t (Script_typed_ir.Int_t tn1)
@@ -5540,13 +5979,14 @@ with parse_instr {bef : Set}
         (fun __315 =>
           [Alpha_context.Script.location ** Micheline.annot **
             option Script_typed_ir.type_annot **
-            option Script_typed_ir.type_annot ** Script_typed_ir.stack_ty __315])
-        _ [loc, annot, tn1, tn2, rest] in
+            option Script_typed_ir.type_annot ** Script_typed_ir.stack_ty]) _
+        [loc, annot, tn1, tn2, rest] in
     let=? annot := parse_var_annot loc None annot in
     let=? tname :=
       Lwt.__return (Script_ir_annot.merge_type_annot legacy tn1 tn2) in
     typed ctxt loc Script_typed_ir.Mul_intint
       (Script_typed_ir.Item_t (Script_typed_ir.Int_t tname) rest annot)
+  
   |
     ((Micheline.Prim loc Alpha_context.Script.I_MUL [] annot,
       Script_typed_ir.Item_t (Script_typed_ir.Int_t tname)
@@ -5555,11 +5995,12 @@ with parse_instr {bef : Set}
       existT (A := Set)
         (fun __319 =>
           [Alpha_context.Script.location ** Micheline.annot **
-            option Script_typed_ir.type_annot ** Script_typed_ir.stack_ty __319])
-        _ [loc, annot, tname, rest] in
+            option Script_typed_ir.type_annot ** Script_typed_ir.stack_ty]) _
+        [loc, annot, tname, rest] in
     let=? annot := parse_var_annot loc None annot in
     typed ctxt loc Script_typed_ir.Mul_intnat
       (Script_typed_ir.Item_t (Script_typed_ir.Int_t tname) rest annot)
+  
   |
     ((Micheline.Prim loc Alpha_context.Script.I_MUL [] annot,
       Script_typed_ir.Item_t (Script_typed_ir.Nat_t _)
@@ -5568,11 +6009,12 @@ with parse_instr {bef : Set}
       existT (A := Set)
         (fun __323 =>
           [Alpha_context.Script.location ** Micheline.annot **
-            option Script_typed_ir.type_annot ** Script_typed_ir.stack_ty __323])
-        _ [loc, annot, tname, rest] in
+            option Script_typed_ir.type_annot ** Script_typed_ir.stack_ty]) _
+        [loc, annot, tname, rest] in
     let=? annot := parse_var_annot loc None annot in
     typed ctxt loc Script_typed_ir.Mul_natint
       (Script_typed_ir.Item_t (Script_typed_ir.Int_t tname) rest annot)
+  
   |
     ((Micheline.Prim loc Alpha_context.Script.I_MUL [] annot,
       Script_typed_ir.Item_t (Script_typed_ir.Nat_t tn1)
@@ -5582,13 +6024,14 @@ with parse_instr {bef : Set}
         (fun __327 =>
           [Alpha_context.Script.location ** Micheline.annot **
             option Script_typed_ir.type_annot **
-            option Script_typed_ir.type_annot ** Script_typed_ir.stack_ty __327])
-        _ [loc, annot, tn1, tn2, rest] in
+            option Script_typed_ir.type_annot ** Script_typed_ir.stack_ty]) _
+        [loc, annot, tn1, tn2, rest] in
     let=? annot := parse_var_annot loc None annot in
     let=? tname :=
       Lwt.__return (Script_ir_annot.merge_type_annot legacy tn1 tn2) in
     typed ctxt loc Script_typed_ir.Mul_natnat
       (Script_typed_ir.Item_t (Script_typed_ir.Nat_t tname) rest annot)
+  
   |
     ((Micheline.Prim loc Alpha_context.Script.I_EDIV [] annot,
       Script_typed_ir.Item_t (Script_typed_ir.Mutez_t tname)
@@ -5597,8 +6040,8 @@ with parse_instr {bef : Set}
       existT (A := Set)
         (fun __331 =>
           [Alpha_context.Script.location ** Micheline.annot **
-            option Script_typed_ir.type_annot ** Script_typed_ir.stack_ty __331])
-        _ [loc, annot, tname, rest] in
+            option Script_typed_ir.type_annot ** Script_typed_ir.stack_ty]) _
+        [loc, annot, tname, rest] in
     let=? annot := parse_var_annot loc None annot in
     typed ctxt loc Script_typed_ir.Ediv_teznat
       (Script_typed_ir.Item_t
@@ -5606,6 +6049,7 @@ with parse_instr {bef : Set}
           (Script_typed_ir.Pair_t ((Script_typed_ir.Mutez_t tname), None, None)
             ((Script_typed_ir.Mutez_t tname), None, None) None false) None false)
         rest annot)
+  
   |
     ((Micheline.Prim loc Alpha_context.Script.I_EDIV [] annot,
       Script_typed_ir.Item_t (Script_typed_ir.Mutez_t tn1)
@@ -5615,8 +6059,8 @@ with parse_instr {bef : Set}
         (fun __335 =>
           [Alpha_context.Script.location ** Micheline.annot **
             option Script_typed_ir.type_annot **
-            option Script_typed_ir.type_annot ** Script_typed_ir.stack_ty __335])
-        _ [loc, annot, tn1, tn2, rest] in
+            option Script_typed_ir.type_annot ** Script_typed_ir.stack_ty]) _
+        [loc, annot, tn1, tn2, rest] in
     let=? annot := parse_var_annot loc None annot in
     let=? tname :=
       Lwt.__return (Script_ir_annot.merge_type_annot legacy tn1 tn2) in
@@ -5626,6 +6070,7 @@ with parse_instr {bef : Set}
           (Script_typed_ir.Pair_t ((Script_typed_ir.Nat_t None), None, None)
             ((Script_typed_ir.Mutez_t tname), None, None) None false) None false)
         rest annot)
+  
   |
     ((Micheline.Prim loc Alpha_context.Script.I_EDIV [] annot,
       Script_typed_ir.Item_t (Script_typed_ir.Int_t tn1)
@@ -5635,8 +6080,8 @@ with parse_instr {bef : Set}
         (fun __339 =>
           [Alpha_context.Script.location ** Micheline.annot **
             option Script_typed_ir.type_annot **
-            option Script_typed_ir.type_annot ** Script_typed_ir.stack_ty __339])
-        _ [loc, annot, tn1, tn2, rest] in
+            option Script_typed_ir.type_annot ** Script_typed_ir.stack_ty]) _
+        [loc, annot, tn1, tn2, rest] in
     let=? annot := parse_var_annot loc None annot in
     let=? tname :=
       Lwt.__return (Script_ir_annot.merge_type_annot legacy tn1 tn2) in
@@ -5646,6 +6091,7 @@ with parse_instr {bef : Set}
           (Script_typed_ir.Pair_t ((Script_typed_ir.Int_t tname), None, None)
             ((Script_typed_ir.Nat_t None), None, None) None false) None false)
         rest annot)
+  
   |
     ((Micheline.Prim loc Alpha_context.Script.I_EDIV [] annot,
       Script_typed_ir.Item_t (Script_typed_ir.Int_t tname)
@@ -5654,8 +6100,8 @@ with parse_instr {bef : Set}
       existT (A := Set)
         (fun __343 =>
           [Alpha_context.Script.location ** Micheline.annot **
-            option Script_typed_ir.type_annot ** Script_typed_ir.stack_ty __343])
-        _ [loc, annot, tname, rest] in
+            option Script_typed_ir.type_annot ** Script_typed_ir.stack_ty]) _
+        [loc, annot, tname, rest] in
     let=? annot := parse_var_annot loc None annot in
     typed ctxt loc Script_typed_ir.Ediv_intnat
       (Script_typed_ir.Item_t
@@ -5663,6 +6109,7 @@ with parse_instr {bef : Set}
           (Script_typed_ir.Pair_t ((Script_typed_ir.Int_t tname), None, None)
             ((Script_typed_ir.Nat_t None), None, None) None false) None false)
         rest annot)
+  
   |
     ((Micheline.Prim loc Alpha_context.Script.I_EDIV [] annot,
       Script_typed_ir.Item_t (Script_typed_ir.Nat_t tname)
@@ -5671,8 +6118,8 @@ with parse_instr {bef : Set}
       existT (A := Set)
         (fun __347 =>
           [Alpha_context.Script.location ** Micheline.annot **
-            option Script_typed_ir.type_annot ** Script_typed_ir.stack_ty __347])
-        _ [loc, annot, tname, rest] in
+            option Script_typed_ir.type_annot ** Script_typed_ir.stack_ty]) _
+        [loc, annot, tname, rest] in
     let=? annot := parse_var_annot loc None annot in
     typed ctxt loc Script_typed_ir.Ediv_natint
       (Script_typed_ir.Item_t
@@ -5680,6 +6127,7 @@ with parse_instr {bef : Set}
           (Script_typed_ir.Pair_t ((Script_typed_ir.Int_t None), None, None)
             ((Script_typed_ir.Nat_t tname), None, None) None false) None false)
         rest annot)
+  
   |
     ((Micheline.Prim loc Alpha_context.Script.I_EDIV [] annot,
       Script_typed_ir.Item_t (Script_typed_ir.Nat_t tn1)
@@ -5689,8 +6137,8 @@ with parse_instr {bef : Set}
         (fun __351 =>
           [Alpha_context.Script.location ** Micheline.annot **
             option Script_typed_ir.type_annot **
-            option Script_typed_ir.type_annot ** Script_typed_ir.stack_ty __351])
-        _ [loc, annot, tn1, tn2, rest] in
+            option Script_typed_ir.type_annot ** Script_typed_ir.stack_ty]) _
+        [loc, annot, tn1, tn2, rest] in
     let=? annot := parse_var_annot loc None annot in
     let=? tname :=
       Lwt.__return (Script_ir_annot.merge_type_annot legacy tn1 tn2) in
@@ -5700,6 +6148,7 @@ with parse_instr {bef : Set}
           (Script_typed_ir.Pair_t ((Script_typed_ir.Nat_t tname), None, None)
             ((Script_typed_ir.Nat_t tname), None, None) None false) None false)
         rest annot)
+  
   |
     ((Micheline.Prim loc Alpha_context.Script.I_LSL [] annot,
       Script_typed_ir.Item_t (Script_typed_ir.Nat_t tn1)
@@ -5709,13 +6158,14 @@ with parse_instr {bef : Set}
         (fun __355 =>
           [Alpha_context.Script.location ** Micheline.annot **
             option Script_typed_ir.type_annot **
-            option Script_typed_ir.type_annot ** Script_typed_ir.stack_ty __355])
-        _ [loc, annot, tn1, tn2, rest] in
+            option Script_typed_ir.type_annot ** Script_typed_ir.stack_ty]) _
+        [loc, annot, tn1, tn2, rest] in
     let=? annot := parse_var_annot loc None annot in
     let=? tname :=
       Lwt.__return (Script_ir_annot.merge_type_annot legacy tn1 tn2) in
     typed ctxt loc Script_typed_ir.Lsl_nat
       (Script_typed_ir.Item_t (Script_typed_ir.Nat_t tname) rest annot)
+  
   |
     ((Micheline.Prim loc Alpha_context.Script.I_LSR [] annot,
       Script_typed_ir.Item_t (Script_typed_ir.Nat_t tn1)
@@ -5725,13 +6175,14 @@ with parse_instr {bef : Set}
         (fun __359 =>
           [Alpha_context.Script.location ** Micheline.annot **
             option Script_typed_ir.type_annot **
-            option Script_typed_ir.type_annot ** Script_typed_ir.stack_ty __359])
-        _ [loc, annot, tn1, tn2, rest] in
+            option Script_typed_ir.type_annot ** Script_typed_ir.stack_ty]) _
+        [loc, annot, tn1, tn2, rest] in
     let=? annot := parse_var_annot loc None annot in
     let=? tname :=
       Lwt.__return (Script_ir_annot.merge_type_annot legacy tn1 tn2) in
     typed ctxt loc Script_typed_ir.Lsr_nat
       (Script_typed_ir.Item_t (Script_typed_ir.Nat_t tname) rest annot)
+  
   |
     ((Micheline.Prim loc Alpha_context.Script.I_OR [] annot,
       Script_typed_ir.Item_t (Script_typed_ir.Nat_t tn1)
@@ -5741,13 +6192,14 @@ with parse_instr {bef : Set}
         (fun __363 =>
           [Alpha_context.Script.location ** Micheline.annot **
             option Script_typed_ir.type_annot **
-            option Script_typed_ir.type_annot ** Script_typed_ir.stack_ty __363])
-        _ [loc, annot, tn1, tn2, rest] in
+            option Script_typed_ir.type_annot ** Script_typed_ir.stack_ty]) _
+        [loc, annot, tn1, tn2, rest] in
     let=? annot := parse_var_annot loc None annot in
     let=? tname :=
       Lwt.__return (Script_ir_annot.merge_type_annot legacy tn1 tn2) in
     typed ctxt loc Script_typed_ir.Or_nat
       (Script_typed_ir.Item_t (Script_typed_ir.Nat_t tname) rest annot)
+  
   |
     ((Micheline.Prim loc Alpha_context.Script.I_AND [] annot,
       Script_typed_ir.Item_t (Script_typed_ir.Nat_t tn1)
@@ -5757,13 +6209,14 @@ with parse_instr {bef : Set}
         (fun __367 =>
           [Alpha_context.Script.location ** Micheline.annot **
             option Script_typed_ir.type_annot **
-            option Script_typed_ir.type_annot ** Script_typed_ir.stack_ty __367])
-        _ [loc, annot, tn1, tn2, rest] in
+            option Script_typed_ir.type_annot ** Script_typed_ir.stack_ty]) _
+        [loc, annot, tn1, tn2, rest] in
     let=? annot := parse_var_annot loc None annot in
     let=? tname :=
       Lwt.__return (Script_ir_annot.merge_type_annot legacy tn1 tn2) in
     typed ctxt loc Script_typed_ir.And_nat
       (Script_typed_ir.Item_t (Script_typed_ir.Nat_t tname) rest annot)
+  
   |
     ((Micheline.Prim loc Alpha_context.Script.I_AND [] annot,
       Script_typed_ir.Item_t (Script_typed_ir.Int_t _)
@@ -5772,11 +6225,12 @@ with parse_instr {bef : Set}
       existT (A := Set)
         (fun __371 =>
           [Alpha_context.Script.location ** Micheline.annot **
-            option Script_typed_ir.type_annot ** Script_typed_ir.stack_ty __371])
-        _ [loc, annot, tname, rest] in
+            option Script_typed_ir.type_annot ** Script_typed_ir.stack_ty]) _
+        [loc, annot, tname, rest] in
     let=? annot := parse_var_annot loc None annot in
     typed ctxt loc Script_typed_ir.And_int_nat
       (Script_typed_ir.Item_t (Script_typed_ir.Nat_t tname) rest annot)
+  
   |
     ((Micheline.Prim loc Alpha_context.Script.I_XOR [] annot,
       Script_typed_ir.Item_t (Script_typed_ir.Nat_t tn1)
@@ -5786,13 +6240,14 @@ with parse_instr {bef : Set}
         (fun __375 =>
           [Alpha_context.Script.location ** Micheline.annot **
             option Script_typed_ir.type_annot **
-            option Script_typed_ir.type_annot ** Script_typed_ir.stack_ty __375])
-        _ [loc, annot, tn1, tn2, rest] in
+            option Script_typed_ir.type_annot ** Script_typed_ir.stack_ty]) _
+        [loc, annot, tn1, tn2, rest] in
     let=? annot := parse_var_annot loc None annot in
     let=? tname :=
       Lwt.__return (Script_ir_annot.merge_type_annot legacy tn1 tn2) in
     typed ctxt loc Script_typed_ir.Xor_nat
       (Script_typed_ir.Item_t (Script_typed_ir.Nat_t tname) rest annot)
+  
   |
     ((Micheline.Prim loc Alpha_context.Script.I_NOT [] annot,
       Script_typed_ir.Item_t (Script_typed_ir.Int_t tname) rest _), _) =>
@@ -5800,11 +6255,12 @@ with parse_instr {bef : Set}
       existT (A := Set)
         (fun __377 =>
           [Alpha_context.Script.location ** Micheline.annot **
-            option Script_typed_ir.type_annot ** Script_typed_ir.stack_ty __377])
-        _ [loc, annot, tname, rest] in
+            option Script_typed_ir.type_annot ** Script_typed_ir.stack_ty]) _
+        [loc, annot, tname, rest] in
     let=? annot := parse_var_annot loc None annot in
     typed ctxt loc Script_typed_ir.Not_int
       (Script_typed_ir.Item_t (Script_typed_ir.Int_t tname) rest annot)
+  
   |
     ((Micheline.Prim loc Alpha_context.Script.I_NOT [] annot,
       Script_typed_ir.Item_t (Script_typed_ir.Nat_t _) rest _), _) =>
@@ -5812,10 +6268,11 @@ with parse_instr {bef : Set}
       existT (A := Set)
         (fun __379 =>
           [Alpha_context.Script.location ** Micheline.annot **
-            Script_typed_ir.stack_ty __379]) _ [loc, annot, rest] in
+            Script_typed_ir.stack_ty]) _ [loc, annot, rest] in
     let=? annot := parse_var_annot loc None annot in
     typed ctxt loc Script_typed_ir.Not_nat
       (Script_typed_ir.Item_t (Script_typed_ir.Int_t None) rest annot)
+  
   |
     ((Micheline.Prim loc Alpha_context.Script.I_COMPARE [] annot,
       Script_typed_ir.Item_t t1 (Script_typed_ir.Item_t t2 rest _) _), _) =>
@@ -5823,9 +6280,8 @@ with parse_instr {bef : Set}
       existT (A := [Set ** Set ** Set])
         (fun '[__380, __382, __383] =>
           [Alpha_context.Script.location ** Micheline.annot **
-            Script_typed_ir.ty __380 ** Script_typed_ir.ty __382 **
-            Script_typed_ir.stack_ty __383]) [_, _, _]
-        [loc, annot, t1, t2, rest] in
+            Script_typed_ir.ty ** Script_typed_ir.ty **
+            Script_typed_ir.stack_ty]) [_, _, _] [loc, annot, t1, t2, rest] in
     let=? annot := parse_var_annot loc None annot in
     let=? '(Eq, __t_value, ctxt) :=
       check_item_ty ctxt t1 t2 loc Alpha_context.Script.I_COMPARE 1 2 in
@@ -5838,6 +6294,7 @@ with parse_instr {bef : Set}
       typed ctxt loc (Script_typed_ir.Compare __key_value)
         (Script_typed_ir.Item_t (Script_typed_ir.Int_t None) rest annot)
     end
+  
   |
     ((Micheline.Prim loc Alpha_context.Script.I_EQ [] annot,
       Script_typed_ir.Item_t (Script_typed_ir.Int_t _) rest _), _) =>
@@ -5845,10 +6302,11 @@ with parse_instr {bef : Set}
       existT (A := Set)
         (fun __385 =>
           [Alpha_context.Script.location ** Micheline.annot **
-            Script_typed_ir.stack_ty __385]) _ [loc, annot, rest] in
+            Script_typed_ir.stack_ty]) _ [loc, annot, rest] in
     let=? annot := parse_var_annot loc None annot in
     typed ctxt loc Script_typed_ir.Eq
       (Script_typed_ir.Item_t (Script_typed_ir.Bool_t None) rest annot)
+  
   |
     ((Micheline.Prim loc Alpha_context.Script.I_NEQ [] annot,
       Script_typed_ir.Item_t (Script_typed_ir.Int_t _) rest _), _) =>
@@ -5856,10 +6314,11 @@ with parse_instr {bef : Set}
       existT (A := Set)
         (fun __387 =>
           [Alpha_context.Script.location ** Micheline.annot **
-            Script_typed_ir.stack_ty __387]) _ [loc, annot, rest] in
+            Script_typed_ir.stack_ty]) _ [loc, annot, rest] in
     let=? annot := parse_var_annot loc None annot in
     typed ctxt loc Script_typed_ir.Neq
       (Script_typed_ir.Item_t (Script_typed_ir.Bool_t None) rest annot)
+  
   |
     ((Micheline.Prim loc Alpha_context.Script.I_LT [] annot,
       Script_typed_ir.Item_t (Script_typed_ir.Int_t _) rest _), _) =>
@@ -5867,10 +6326,11 @@ with parse_instr {bef : Set}
       existT (A := Set)
         (fun __389 =>
           [Alpha_context.Script.location ** Micheline.annot **
-            Script_typed_ir.stack_ty __389]) _ [loc, annot, rest] in
+            Script_typed_ir.stack_ty]) _ [loc, annot, rest] in
     let=? annot := parse_var_annot loc None annot in
     typed ctxt loc Script_typed_ir.Lt
       (Script_typed_ir.Item_t (Script_typed_ir.Bool_t None) rest annot)
+  
   |
     ((Micheline.Prim loc Alpha_context.Script.I_GT [] annot,
       Script_typed_ir.Item_t (Script_typed_ir.Int_t _) rest _), _) =>
@@ -5878,10 +6338,11 @@ with parse_instr {bef : Set}
       existT (A := Set)
         (fun __391 =>
           [Alpha_context.Script.location ** Micheline.annot **
-            Script_typed_ir.stack_ty __391]) _ [loc, annot, rest] in
+            Script_typed_ir.stack_ty]) _ [loc, annot, rest] in
     let=? annot := parse_var_annot loc None annot in
     typed ctxt loc Script_typed_ir.Gt
       (Script_typed_ir.Item_t (Script_typed_ir.Bool_t None) rest annot)
+  
   |
     ((Micheline.Prim loc Alpha_context.Script.I_LE [] annot,
       Script_typed_ir.Item_t (Script_typed_ir.Int_t _) rest _), _) =>
@@ -5889,10 +6350,11 @@ with parse_instr {bef : Set}
       existT (A := Set)
         (fun __393 =>
           [Alpha_context.Script.location ** Micheline.annot **
-            Script_typed_ir.stack_ty __393]) _ [loc, annot, rest] in
+            Script_typed_ir.stack_ty]) _ [loc, annot, rest] in
     let=? annot := parse_var_annot loc None annot in
     typed ctxt loc Script_typed_ir.Le
       (Script_typed_ir.Item_t (Script_typed_ir.Bool_t None) rest annot)
+  
   |
     ((Micheline.Prim loc Alpha_context.Script.I_GE [] annot,
       Script_typed_ir.Item_t (Script_typed_ir.Int_t _) rest _), _) =>
@@ -5900,10 +6362,11 @@ with parse_instr {bef : Set}
       existT (A := Set)
         (fun __395 =>
           [Alpha_context.Script.location ** Micheline.annot **
-            Script_typed_ir.stack_ty __395]) _ [loc, annot, rest] in
+            Script_typed_ir.stack_ty]) _ [loc, annot, rest] in
     let=? annot := parse_var_annot loc None annot in
     typed ctxt loc Script_typed_ir.Ge
       (Script_typed_ir.Item_t (Script_typed_ir.Bool_t None) rest annot)
+  
   |
     ((Micheline.Prim loc Alpha_context.Script.I_CAST (cons cast_t []) annot,
       Script_typed_ir.Item_t __t_value __stack_value item_annot), _) =>
@@ -5913,23 +6376,22 @@ with parse_instr {bef : Set}
         (fun '[__396, __397] =>
           [Alpha_context.Script.location **
             Micheline.node Alpha_context.Script.location
-              Alpha_context.Script.prim ** Micheline.annot **
-            Script_typed_ir.ty __396 ** Script_typed_ir.stack_ty __397 **
-            option Script_typed_ir.var_annot]) [_, _]
-        [loc, cast_t, annot, __t_value, __stack_value, item_annot] in
+              Alpha_context.Script.prim ** Micheline.annot ** Script_typed_ir.ty
+            ** Script_typed_ir.stack_ty ** option Script_typed_ir.var_annot])
+        [_, _] [loc, cast_t, annot, __t_value, __stack_value, item_annot] in
     let=? annot := parse_var_annot loc (Some item_annot) annot in
     let=? '(Ex_ty cast_t, ctxt) :=
       Lwt.__return (parse_any_ty ctxt legacy cast_t) in
     let 'existT _ __Ex_ty_'a10 [cast_t, ctxt] :=
       existT (A := Set)
-        (fun __Ex_ty_'a10 =>
-          [Script_typed_ir.ty __Ex_ty_'a10 ** Alpha_context.context]) _
+        (fun __Ex_ty_'a10 => [Script_typed_ir.ty ** Alpha_context.context]) _
         [cast_t, ctxt] in
     let=? '(Eq, ctxt) := Lwt.__return (ty_eq ctxt cast_t __t_value) in
     let=? '(_, ctxt) :=
       Lwt.__return (merge_types legacy ctxt loc cast_t __t_value) in
     typed ctxt loc Script_typed_ir.Nop
       (Script_typed_ir.Item_t cast_t __stack_value annot)
+  
   |
     ((Micheline.Prim loc Alpha_context.Script.I_RENAME [] annot,
       Script_typed_ir.Item_t __t_value __stack_value _), _) =>
@@ -5937,11 +6399,12 @@ with parse_instr {bef : Set}
       existT (A := [Set ** Set])
         (fun '[__398, __399] =>
           [Alpha_context.Script.location ** Micheline.annot **
-            Script_typed_ir.ty __398 ** Script_typed_ir.stack_ty __399]) [_, _]
+            Script_typed_ir.ty ** Script_typed_ir.stack_ty]) [_, _]
         [loc, annot, __t_value, __stack_value] in
     let=? annot := parse_var_annot loc None annot in
     typed ctxt loc Script_typed_ir.Nop
       (Script_typed_ir.Item_t __t_value __stack_value annot)
+  
   |
     ((Micheline.Prim loc Alpha_context.Script.I_PACK [] annot,
       Script_typed_ir.Item_t __t_value rest unpacked_annot), _) =>
@@ -5950,7 +6413,7 @@ with parse_instr {bef : Set}
       existT (A := [Set ** Set])
         (fun '[__400, __401] =>
           [Alpha_context.Script.location ** Micheline.annot **
-            Script_typed_ir.ty __400 ** Script_typed_ir.stack_ty __401 **
+            Script_typed_ir.ty ** Script_typed_ir.stack_ty **
             option Script_typed_ir.var_annot]) [_, _]
         [loc, annot, __t_value, rest, unpacked_annot] in
     let=? '_ := Lwt.__return (check_packable true loc __t_value) in
@@ -5961,6 +6424,7 @@ with parse_instr {bef : Set}
             Script_ir_annot.default_pack_annot)) annot in
     typed ctxt loc (Script_typed_ir.Pack __t_value)
       (Script_typed_ir.Item_t (Script_typed_ir.Bytes_t None) rest annot)
+  
   |
     ((Micheline.Prim loc Alpha_context.Script.I_UNPACK (cons ty []) annot,
       Script_typed_ir.Item_t (Script_typed_ir.Bytes_t _) rest packed_annot), _)
@@ -5971,14 +6435,13 @@ with parse_instr {bef : Set}
           [Alpha_context.Script.location **
             Micheline.node Alpha_context.Script.location
               Alpha_context.Script.prim ** Micheline.annot **
-            Script_typed_ir.stack_ty __403 ** option Script_typed_ir.var_annot])
-        _ [loc, ty, annot, rest, packed_annot] in
+            Script_typed_ir.stack_ty ** option Script_typed_ir.var_annot]) _
+        [loc, ty, annot, rest, packed_annot] in
     let=? '(Ex_ty __t_value, ctxt) :=
       Lwt.__return (parse_packable_ty ctxt legacy ty) in
     let 'existT _ __Ex_ty_'a11 [__t_value, ctxt] :=
       existT (A := Set)
-        (fun __Ex_ty_'a11 =>
-          [Script_typed_ir.ty __Ex_ty_'a11 ** Alpha_context.context]) _
+        (fun __Ex_ty_'a11 => [Script_typed_ir.ty ** Alpha_context.context]) _
         [__t_value, ctxt] in
     let=? '(annot, ty_name) := parse_var_type_annot loc annot in
     let annot :=
@@ -5988,6 +6451,7 @@ with parse_instr {bef : Set}
     typed ctxt loc (Script_typed_ir.Unpack __t_value)
       (Script_typed_ir.Item_t (Script_typed_ir.Option_t __t_value ty_name false)
         rest annot)
+  
   |
     ((Micheline.Prim loc Alpha_context.Script.I_ADDRESS [] annot,
       Script_typed_ir.Item_t (Script_typed_ir.Contract_t _ _) rest
@@ -5996,8 +6460,8 @@ with parse_instr {bef : Set}
       existT (A := Set)
         (fun __405 =>
           [Alpha_context.Script.location ** Micheline.annot **
-            Script_typed_ir.stack_ty __405 ** option Script_typed_ir.var_annot])
-        _ [loc, annot, rest, contract_annot] in
+            Script_typed_ir.stack_ty ** option Script_typed_ir.var_annot]) _
+        [loc, annot, rest, contract_annot] in
     let=? annot :=
       parse_var_annot loc
         (Some
@@ -6005,6 +6469,7 @@ with parse_instr {bef : Set}
             Script_ir_annot.default_addr_annot)) annot in
     typed ctxt loc Script_typed_ir.Address
       (Script_typed_ir.Item_t (Script_typed_ir.Address_t None) rest annot)
+  
   |
     ((Micheline.Prim loc Alpha_context.Script.I_CONTRACT (cons ty []) annot,
       Script_typed_ir.Item_t (Script_typed_ir.Address_t _) rest addr_annot), _)
@@ -6015,14 +6480,13 @@ with parse_instr {bef : Set}
           [Alpha_context.Script.location **
             Micheline.node Alpha_context.Script.location
               Alpha_context.Script.prim ** Micheline.annot **
-            Script_typed_ir.stack_ty __408 ** option Script_typed_ir.var_annot])
-        _ [loc, ty, annot, rest, addr_annot] in
+            Script_typed_ir.stack_ty ** option Script_typed_ir.var_annot]) _
+        [loc, ty, annot, rest, addr_annot] in
     let=? '(Ex_ty __t_value, ctxt) :=
       Lwt.__return (parse_parameter_ty ctxt legacy ty) in
     let 'existT _ __Ex_ty_'a12 [__t_value, ctxt] :=
       existT (A := Set)
-        (fun __Ex_ty_'a12 =>
-          [Script_typed_ir.ty __Ex_ty_'a12 ** Alpha_context.context]) _
+        (fun __Ex_ty_'a12 => [Script_typed_ir.ty ** Alpha_context.context]) _
         [__t_value, ctxt] in
     let=? '(annot, entrypoint) :=
       parse_entrypoint_annot loc
@@ -6046,6 +6510,7 @@ with parse_instr {bef : Set}
       (Script_typed_ir.Item_t
         (Script_typed_ir.Option_t (Script_typed_ir.Contract_t __t_value None)
           None false) rest annot)
+  
   |
     ((Micheline.Prim loc Alpha_context.Script.I_TRANSFER_TOKENS [] annot,
       Script_typed_ir.Item_t __p_value
@@ -6056,8 +6521,8 @@ with parse_instr {bef : Set}
       existT (A := [Set ** Set ** Set])
         (fun '[__409, __414, __415] =>
           [Alpha_context.Script.location ** Micheline.annot **
-            Script_typed_ir.ty __409 ** Script_typed_ir.ty __415 **
-            Script_typed_ir.stack_ty __414]) [_, _, _]
+            Script_typed_ir.ty ** Script_typed_ir.ty **
+            Script_typed_ir.stack_ty]) [_, _, _]
         [loc, annot, __p_value, cp, rest] in
     let=? '(Eq, _, ctxt) :=
       check_item_ty ctxt __p_value cp loc Alpha_context.Script.I_TRANSFER_TOKENS
@@ -6065,6 +6530,7 @@ with parse_instr {bef : Set}
     let=? annot := parse_var_annot loc None annot in
     typed ctxt loc Script_typed_ir.Transfer_tokens
       (Script_typed_ir.Item_t (Script_typed_ir.Operation_t None) rest annot)
+  
   |
     ((Micheline.Prim loc Alpha_context.Script.I_SET_DELEGATE [] annot,
       Script_typed_ir.Item_t
@@ -6074,10 +6540,11 @@ with parse_instr {bef : Set}
       existT (A := Set)
         (fun __417 =>
           [Alpha_context.Script.location ** Micheline.annot **
-            Script_typed_ir.stack_ty __417]) _ [loc, annot, rest] in
+            Script_typed_ir.stack_ty]) _ [loc, annot, rest] in
     let=? annot := parse_var_annot loc None annot in
     typed ctxt loc Script_typed_ir.Set_delegate
       (Script_typed_ir.Item_t (Script_typed_ir.Operation_t None) rest annot)
+  
   |
     ((Micheline.Prim loc Alpha_context.Script.I_CREATE_ACCOUNT [] annot,
       Script_typed_ir.Item_t (Script_typed_ir.Key_hash_t _)
@@ -6090,7 +6557,7 @@ with parse_instr {bef : Set}
       existT (A := Set)
         (fun __427 =>
           [Alpha_context.Script.location ** Micheline.annot **
-            Script_typed_ir.stack_ty __427]) _ [loc, annot, rest] in
+            Script_typed_ir.stack_ty]) _ [loc, annot, rest] in
     if legacy then
       let=? '(op_annot, addr_annot) := parse_two_var_annot loc annot in
       typed ctxt loc Script_typed_ir.Create_account
@@ -6099,6 +6566,7 @@ with parse_instr {bef : Set}
             addr_annot) op_annot)
     else
       Error_monad.fail extensible_type_value
+  
   |
     ((Micheline.Prim loc Alpha_context.Script.I_IMPLICIT_ACCOUNT [] annot,
       Script_typed_ir.Item_t (Script_typed_ir.Key_hash_t _) rest _), _) =>
@@ -6106,12 +6574,13 @@ with parse_instr {bef : Set}
       existT (A := Set)
         (fun __429 =>
           [Alpha_context.Script.location ** Micheline.annot **
-            Script_typed_ir.stack_ty __429]) _ [loc, annot, rest] in
+            Script_typed_ir.stack_ty]) _ [loc, annot, rest] in
     let=? annot := parse_var_annot loc None annot in
     typed ctxt loc Script_typed_ir.Implicit_account
       (Script_typed_ir.Item_t
         (Script_typed_ir.Contract_t (Script_typed_ir.Unit_t None) None) rest
         annot)
+  
   |
     ((Micheline.Prim loc Alpha_context.Script.I_CREATE_CONTRACT
       (cons ((Micheline.Seq _ _) as code) []) annot,
@@ -6127,9 +6596,9 @@ with parse_instr {bef : Set}
         (fun '[__441, __442] =>
           [Alpha_context.Script.location **
             Micheline.node Alpha_context.Script.location
-              Alpha_context.Script.prim ** Micheline.annot **
-            Script_typed_ir.ty __441 ** Script_typed_ir.stack_ty __442]) [_, _]
-        [loc, code, annot, ginit, rest] in
+              Alpha_context.Script.prim ** Micheline.annot ** Script_typed_ir.ty
+            ** Script_typed_ir.stack_ty]) [_, _] [loc, code, annot, ginit, rest]
+      in
     if legacy then
       let=? '(op_annot, addr_annot) := parse_two_var_annot loc annot in
       let cannonical_code := Pervasives.fst (Micheline.extract_locations code)
@@ -6141,8 +6610,7 @@ with parse_instr {bef : Set}
           (Lwt.__return (parse_parameter_ty ctxt legacy arg_type)) in
       let 'existT _ __Ex_ty_'a13 [arg_type, ctxt] :=
         existT (A := Set)
-          (fun __Ex_ty_'a13 =>
-            [Script_typed_ir.ty __Ex_ty_'a13 ** Alpha_context.context]) _
+          (fun __Ex_ty_'a13 => [Script_typed_ir.ty ** Alpha_context.context]) _
           [arg_type, ctxt] in
       let=? '_ :=
         if legacy then
@@ -6154,8 +6622,7 @@ with parse_instr {bef : Set}
           (Lwt.__return (parse_storage_ty ctxt legacy storage_type)) in
       let 'existT _ __Ex_ty_'a14 [storage_type, ctxt] :=
         existT (A := Set)
-          (fun __Ex_ty_'a14 =>
-            [Script_typed_ir.ty __Ex_ty_'a14 ** Alpha_context.context]) _
+          (fun __Ex_ty_'a14 => [Script_typed_ir.ty ** Alpha_context.context]) _
           [storage_type, ctxt] in
       let arg_annot :=
         Script_ir_annot.default_annot Script_ir_annot.default_param_annot
@@ -6189,11 +6656,12 @@ with parse_instr {bef : Set}
         Error_monad.trace extensible_type_value
           (parse_returning type_logger
             (Toplevel
-              {| tc_context.Toplevel.storage_type := storage_type;
+              ({| tc_context.Toplevel.storage_type := storage_type;
                 tc_context.Toplevel.param_type := arg_type;
                 tc_context.Toplevel.root_name := root_name;
-                tc_context.Toplevel.legacy_create_contract_literal := true |})
-            ctxt legacy (arg_type_full, None) ret_type_full code_field) in
+                tc_context.Toplevel.legacy_create_contract_literal := true |}
+                : tc_context.Toplevel)) ctxt legacy (arg_type_full, None)
+            ret_type_full code_field) in
       let=? '(Eq, ctxt) := Lwt.__return (ty_eq ctxt arg arg_type_full) in
       let=? '(_, ctxt) :=
         Lwt.__return (merge_types legacy ctxt loc arg arg_type_full) in
@@ -6210,6 +6678,7 @@ with parse_instr {bef : Set}
             addr_annot) op_annot)
     else
       Error_monad.fail extensible_type_value
+  
   |
     ((Micheline.Prim loc Alpha_context.Script.I_CREATE_CONTRACT
       (cons ((Micheline.Seq _ _) as code) []) annot,
@@ -6222,9 +6691,9 @@ with parse_instr {bef : Set}
         (fun '[__448, __449] =>
           [Alpha_context.Script.location **
             Micheline.node Alpha_context.Script.location
-              Alpha_context.Script.prim ** Micheline.annot **
-            Script_typed_ir.ty __448 ** Script_typed_ir.stack_ty __449]) [_, _]
-        [loc, code, annot, ginit, rest] in
+              Alpha_context.Script.prim ** Micheline.annot ** Script_typed_ir.ty
+            ** Script_typed_ir.stack_ty]) [_, _] [loc, code, annot, ginit, rest]
+      in
     let=? '(op_annot, addr_annot) := parse_two_var_annot loc annot in
     let cannonical_code := Pervasives.fst (Micheline.extract_locations code) in
     let=? '(arg_type, storage_type, code_field, root_name) :=
@@ -6234,8 +6703,7 @@ with parse_instr {bef : Set}
         (Lwt.__return (parse_parameter_ty ctxt legacy arg_type)) in
     let 'existT _ __Ex_ty_'a15 [arg_type, ctxt] :=
       existT (A := Set)
-        (fun __Ex_ty_'a15 =>
-          [Script_typed_ir.ty __Ex_ty_'a15 ** Alpha_context.context]) _
+        (fun __Ex_ty_'a15 => [Script_typed_ir.ty ** Alpha_context.context]) _
         [arg_type, ctxt] in
     let=? '_ :=
       if legacy then
@@ -6247,8 +6715,7 @@ with parse_instr {bef : Set}
         (Lwt.__return (parse_storage_ty ctxt legacy storage_type)) in
     let 'existT _ __Ex_ty_'a16 [storage_type, ctxt] :=
       existT (A := Set)
-        (fun __Ex_ty_'a16 =>
-          [Script_typed_ir.ty __Ex_ty_'a16 ** Alpha_context.context]) _
+        (fun __Ex_ty_'a16 => [Script_typed_ir.ty ** Alpha_context.context]) _
         [storage_type, ctxt] in
     let arg_annot :=
       Script_ir_annot.default_annot Script_ir_annot.default_param_annot
@@ -6281,11 +6748,12 @@ with parse_instr {bef : Set}
       Error_monad.trace extensible_type_value
         (parse_returning type_logger
           (Toplevel
-            {| tc_context.Toplevel.storage_type := storage_type;
+            ({| tc_context.Toplevel.storage_type := storage_type;
               tc_context.Toplevel.param_type := arg_type;
               tc_context.Toplevel.root_name := root_name;
-              tc_context.Toplevel.legacy_create_contract_literal := false |})
-          ctxt legacy (arg_type_full, None) ret_type_full code_field) in
+              tc_context.Toplevel.legacy_create_contract_literal := false |}
+              : tc_context.Toplevel)) ctxt legacy (arg_type_full, None)
+          ret_type_full code_field) in
     let=? '(Eq, ctxt) := Lwt.__return (ty_eq ctxt arg arg_type_full) in
     let=? '(_, ctxt) :=
       Lwt.__return (merge_types legacy ctxt loc arg arg_type_full) in
@@ -6300,6 +6768,7 @@ with parse_instr {bef : Set}
       (Script_typed_ir.Item_t (Script_typed_ir.Operation_t None)
         (Script_typed_ir.Item_t (Script_typed_ir.Address_t None) rest addr_annot)
         op_annot)
+  
   | ((Micheline.Prim loc Alpha_context.Script.I_NOW [] annot, __stack_value), _)
     =>
     let=? annot :=
@@ -6307,6 +6776,7 @@ with parse_instr {bef : Set}
     typed ctxt loc Script_typed_ir.Now
       (Script_typed_ir.Item_t (Script_typed_ir.Timestamp_t None) __stack_value
         annot)
+  
   |
     ((Micheline.Prim loc Alpha_context.Script.I_AMOUNT [] annot, __stack_value),
       _) =>
@@ -6314,6 +6784,7 @@ with parse_instr {bef : Set}
       parse_var_annot loc (Some Script_ir_annot.default_amount_annot) annot in
     typed ctxt loc Script_typed_ir.Amount
       (Script_typed_ir.Item_t (Script_typed_ir.Mutez_t None) __stack_value annot)
+  
   |
     ((Micheline.Prim loc Alpha_context.Script.I_CHAIN_ID [] annot, __stack_value),
       _) =>
@@ -6321,6 +6792,7 @@ with parse_instr {bef : Set}
     typed ctxt loc Script_typed_ir.ChainId
       (Script_typed_ir.Item_t (Script_typed_ir.Chain_id_t None) __stack_value
         annot)
+  
   |
     ((Micheline.Prim loc Alpha_context.Script.I_BALANCE [] annot, __stack_value),
       _) =>
@@ -6328,6 +6800,7 @@ with parse_instr {bef : Set}
       parse_var_annot loc (Some Script_ir_annot.default_balance_annot) annot in
     typed ctxt loc Script_typed_ir.Balance
       (Script_typed_ir.Item_t (Script_typed_ir.Mutez_t None) __stack_value annot)
+  
   |
     ((Micheline.Prim loc Alpha_context.Script.I_HASH_KEY [] annot,
       Script_typed_ir.Item_t (Script_typed_ir.Key_t _) rest _), _) =>
@@ -6335,10 +6808,11 @@ with parse_instr {bef : Set}
       existT (A := Set)
         (fun __451 =>
           [Alpha_context.Script.location ** Micheline.annot **
-            Script_typed_ir.stack_ty __451]) _ [loc, annot, rest] in
+            Script_typed_ir.stack_ty]) _ [loc, annot, rest] in
     let=? annot := parse_var_annot loc None annot in
     typed ctxt loc Script_typed_ir.Hash_key
       (Script_typed_ir.Item_t (Script_typed_ir.Key_hash_t None) rest annot)
+  
   |
     ((Micheline.Prim loc Alpha_context.Script.I_CHECK_SIGNATURE [] annot,
       Script_typed_ir.Item_t (Script_typed_ir.Key_t _)
@@ -6349,10 +6823,11 @@ with parse_instr {bef : Set}
       existT (A := Set)
         (fun __457 =>
           [Alpha_context.Script.location ** Micheline.annot **
-            Script_typed_ir.stack_ty __457]) _ [loc, annot, rest] in
+            Script_typed_ir.stack_ty]) _ [loc, annot, rest] in
     let=? annot := parse_var_annot loc None annot in
     typed ctxt loc Script_typed_ir.Check_signature
       (Script_typed_ir.Item_t (Script_typed_ir.Bool_t None) rest annot)
+  
   |
     ((Micheline.Prim loc Alpha_context.Script.I_BLAKE2B [] annot,
       Script_typed_ir.Item_t (Script_typed_ir.Bytes_t _) rest _), _) =>
@@ -6360,10 +6835,11 @@ with parse_instr {bef : Set}
       existT (A := Set)
         (fun __459 =>
           [Alpha_context.Script.location ** Micheline.annot **
-            Script_typed_ir.stack_ty __459]) _ [loc, annot, rest] in
+            Script_typed_ir.stack_ty]) _ [loc, annot, rest] in
     let=? annot := parse_var_annot loc None annot in
     typed ctxt loc Script_typed_ir.Blake2b
       (Script_typed_ir.Item_t (Script_typed_ir.Bytes_t None) rest annot)
+  
   |
     ((Micheline.Prim loc Alpha_context.Script.I_SHA256 [] annot,
       Script_typed_ir.Item_t (Script_typed_ir.Bytes_t _) rest _), _) =>
@@ -6371,10 +6847,11 @@ with parse_instr {bef : Set}
       existT (A := Set)
         (fun __461 =>
           [Alpha_context.Script.location ** Micheline.annot **
-            Script_typed_ir.stack_ty __461]) _ [loc, annot, rest] in
+            Script_typed_ir.stack_ty]) _ [loc, annot, rest] in
     let=? annot := parse_var_annot loc None annot in
     typed ctxt loc Script_typed_ir.Sha256
       (Script_typed_ir.Item_t (Script_typed_ir.Bytes_t None) rest annot)
+  
   |
     ((Micheline.Prim loc Alpha_context.Script.I_SHA512 [] annot,
       Script_typed_ir.Item_t (Script_typed_ir.Bytes_t _) rest _), _) =>
@@ -6382,10 +6859,11 @@ with parse_instr {bef : Set}
       existT (A := Set)
         (fun __463 =>
           [Alpha_context.Script.location ** Micheline.annot **
-            Script_typed_ir.stack_ty __463]) _ [loc, annot, rest] in
+            Script_typed_ir.stack_ty]) _ [loc, annot, rest] in
     let=? annot := parse_var_annot loc None annot in
     typed ctxt loc Script_typed_ir.Sha512
       (Script_typed_ir.Item_t (Script_typed_ir.Bytes_t None) rest annot)
+  
   |
     ((Micheline.Prim loc Alpha_context.Script.I_STEPS_TO_QUOTA [] annot,
       __stack_value), _) =>
@@ -6396,6 +6874,7 @@ with parse_instr {bef : Set}
         (Script_typed_ir.Item_t (Script_typed_ir.Nat_t None) __stack_value annot)
     else
       Error_monad.fail extensible_type_value
+  
   |
     ((Micheline.Prim loc Alpha_context.Script.I_SOURCE [] annot, __stack_value),
       _) =>
@@ -6404,6 +6883,7 @@ with parse_instr {bef : Set}
     typed ctxt loc Script_typed_ir.Source
       (Script_typed_ir.Item_t (Script_typed_ir.Address_t None) __stack_value
         annot)
+  
   |
     ((Micheline.Prim loc Alpha_context.Script.I_SENDER [] annot, __stack_value),
       _) =>
@@ -6412,6 +6892,7 @@ with parse_instr {bef : Set}
     typed ctxt loc Script_typed_ir.Sender
       (Script_typed_ir.Item_t (Script_typed_ir.Address_t None) __stack_value
         annot)
+  
   |
     ((Micheline.Prim loc Alpha_context.Script.I_SELF [] annot, __stack_value), _)
     =>
@@ -6437,15 +6918,13 @@ with parse_instr {bef : Set}
             |} =>
         let 'existT _ __Toplevel_'param [param_type, root_name] :=
           existT (A := Set)
-            (fun __Toplevel_'param =>
-              [Script_typed_ir.ty __Toplevel_'param ** option string]) _
+            (fun __Toplevel_'param => [Script_typed_ir.ty ** option string]) _
             [param_type, root_name] in
         let=? '(_, Ex_ty param_type) :=
           Lwt.__return (find_entrypoint param_type root_name entrypoint) in
         let 'existT _ __Ex_ty_'a17 param_type :=
-          existT (A := Set)
-            (fun __Ex_ty_'a17 => Script_typed_ir.ty __Ex_ty_'a17) _ param_type
-          in
+          existT (A := Set) (fun __Ex_ty_'a17 => Script_typed_ir.ty) _
+            param_type in
         typed ctxt loc (Script_typed_ir.Self param_type entrypoint)
           (Script_typed_ir.Item_t (Script_typed_ir.Contract_t param_type None)
             __stack_value annot)
@@ -6456,14 +6935,14 @@ with parse_instr {bef : Set}
             tc_context.Toplevel.legacy_create_contract_literal := true
             |} =>
         let 'existT _ __Toplevel_'param1 param_type :=
-          existT (A := Set)
-            (fun __Toplevel_'param1 => Script_typed_ir.ty __Toplevel_'param1) _
+          existT (A := Set) (fun __Toplevel_'param1 => Script_typed_ir.ty) _
             param_type in
         typed ctxt loc (Script_typed_ir.Self param_type "default")
           (Script_typed_ir.Item_t (Script_typed_ir.Contract_t param_type None)
             __stack_value annot)
       end in
     get_toplevel_type tc_context
+  
   |
     ((Micheline.Prim loc
       ((Alpha_context.Script.I_DUP | Alpha_context.Script.I_SWAP |
@@ -6495,6 +6974,7 @@ with parse_instr {bef : Set}
       Alpha_context.Script.I_STEPS_TO_QUOTA | Alpha_context.Script.I_ADDRESS) as
         name) ((cons _ _) as l) _, _), _) =>
     Error_monad.fail extensible_type_value
+  
   |
     ((Micheline.Prim loc
       ((Alpha_context.Script.I_NONE | Alpha_context.Script.I_LEFT |
@@ -6504,6 +6984,7 @@ with parse_instr {bef : Set}
       Alpha_context.Script.I_LOOP | Alpha_context.Script.I_LOOP_LEFT |
       Alpha_context.Script.I_CONTRACT) as name) (([] | cons _ (cons _ _)) as l)
       _, _), _) => Error_monad.fail extensible_type_value
+  
   |
     ((Micheline.Prim loc
       ((Alpha_context.Script.I_PUSH | Alpha_context.Script.I_IF_NONE |
@@ -6511,10 +6992,12 @@ with parse_instr {bef : Set}
       Alpha_context.Script.I_EMPTY_MAP | Alpha_context.Script.I_IF) as name)
       (([] | cons _ [] | cons _ (cons _ (cons _ _))) as l) _, _), _) =>
     Error_monad.fail extensible_type_value
+  
   |
     ((Micheline.Prim loc Alpha_context.Script.I_LAMBDA
       (([] | cons _ [] | cons _ (cons _ (cons _ (cons _ _)))) as l) _, _), _) =>
     Error_monad.fail extensible_type_value
+  
   |
     ((Micheline.Prim loc
       ((Alpha_context.Script.I_ADD | Alpha_context.Script.I_SUB |
@@ -6527,11 +7010,12 @@ with parse_instr {bef : Set}
       existT (A := [Set ** Set])
         (fun '[__464, __466] =>
           [Alpha_context.Script.location ** Alpha_context.Script.prim **
-            Script_typed_ir.ty __464 ** Script_typed_ir.ty __466]) [_, _]
+            Script_typed_ir.ty ** Script_typed_ir.ty]) [_, _]
         [loc, name, ta, tb] in
     let=? '(ta, ctxt) := Lwt.__return (serialize_ty_for_error ctxt ta) in
     let=? '(tb, _ctxt) := Lwt.__return (serialize_ty_for_error ctxt tb) in
     Error_monad.fail extensible_type_value
+  
   |
     ((Micheline.Prim loc
       ((Alpha_context.Script.I_NEG | Alpha_context.Script.I_ABS |
@@ -6545,10 +7029,11 @@ with parse_instr {bef : Set}
       existT (A := Set)
         (fun __468 =>
           [Alpha_context.Script.location ** Alpha_context.Script.prim **
-            Script_typed_ir.ty __468]) _ [loc, name, __t_value] in
+            Script_typed_ir.ty]) _ [loc, name, __t_value] in
     let=? '(__t_value, _ctxt) :=
       Lwt.__return (serialize_ty_for_error ctxt __t_value) in
     Error_monad.fail extensible_type_value
+  
   |
     ((Micheline.Prim loc
       ((Alpha_context.Script.I_UPDATE | Alpha_context.Script.I_SLICE) as name)
@@ -6556,24 +7041,28 @@ with parse_instr {bef : Set}
     let=? '(__stack_value, _ctxt) :=
       serialize_stack_for_error ctxt __stack_value in
     Error_monad.fail extensible_type_value
+  
   |
     ((Micheline.Prim loc Alpha_context.Script.I_CREATE_CONTRACT _ _,
       __stack_value), _) =>
     let=? '(__stack_value, _ctxt) :=
       serialize_stack_for_error ctxt __stack_value in
     Error_monad.fail extensible_type_value
+  
   |
     ((Micheline.Prim loc Alpha_context.Script.I_CREATE_ACCOUNT [] _,
       __stack_value), _) =>
     let=? '(__stack_value, _ctxt) :=
       serialize_stack_for_error ctxt __stack_value in
     Error_monad.fail extensible_type_value
+  
   |
     ((Micheline.Prim loc Alpha_context.Script.I_TRANSFER_TOKENS [] _,
       __stack_value), _) =>
     let=? '(__stack_value, _ctxt) :=
       serialize_stack_for_error ctxt __stack_value in
     Error_monad.fail extensible_type_value
+  
   |
     ((Micheline.Prim loc
       ((Alpha_context.Script.I_DROP | Alpha_context.Script.I_DUP |
@@ -6594,6 +7083,7 @@ with parse_instr {bef : Set}
     let=? '(__stack_value, _ctxt) :=
       serialize_stack_for_error ctxt __stack_value in
     Error_monad.fail extensible_type_value
+  
   |
     ((Micheline.Prim loc
       ((Alpha_context.Script.I_SWAP | Alpha_context.Script.I_PAIR |
@@ -6608,6 +7098,7 @@ with parse_instr {bef : Set}
     let=? '(__stack_value, _ctxt) :=
       serialize_stack_for_error ctxt __stack_value in
     Error_monad.fail extensible_type_value
+  
   | ((expr, _), _) =>
     Error_monad.fail
       (unexpected expr [ Script_tc_errors.Seq_kind ]
@@ -6686,13 +7177,13 @@ with parse_instr {bef : Set}
         ])
   end
 
-with parse_contract {arg : Set}
+with parse_contract
   (legacy : bool) (ctxt : Alpha_context.context)
-  (loc : Alpha_context.Script.location) (arg : Script_typed_ir.ty arg)
+  (loc : Alpha_context.Script.location) (arg : Script_typed_ir.ty)
   (contract : Alpha_context.Contract.t) (entrypoint : string) {struct legacy}
   : Lwt.t
     (Error_monad.tzresult
-      (Alpha_context.context * Script_typed_ir.typed_contract arg)) :=
+      (Alpha_context.context * Script_typed_ir.typed_contract)) :=
   let=? ctxt :=
     Lwt.__return
       (Alpha_context.Gas.consume ctxt Typecheck_costs.contract_exists) in
@@ -6724,14 +7215,13 @@ with parse_contract {arg : Set}
         let? '(Ex_ty targ, ctxt) := parse_parameter_ty ctxt true arg_type in
         let 'existT _ __Ex_ty_'a18 [targ, ctxt] :=
           existT (A := Set)
-            (fun __Ex_ty_'a18 =>
-              [Script_typed_ir.ty __Ex_ty_'a18 ** Alpha_context.context]) _
-            [targ, ctxt] in
+            (fun __Ex_ty_'a18 => [Script_typed_ir.ty ** Alpha_context.context])
+            _ [targ, ctxt] in
         let __return
-          (ctxt : Alpha_context.context) (targ : Script_typed_ir.ty arg)
+          (ctxt : Alpha_context.context) (targ : Script_typed_ir.ty)
           (entrypoint : string)
           : Error_monad.tzresult
-            (Alpha_context.context * Script_typed_ir.typed_contract arg) :=
+            (Alpha_context.context * Script_typed_ir.typed_contract) :=
           let? '(arg, ctxt) := merge_types legacy ctxt loc targ arg in
           let contract := (arg, (contract, entrypoint)) in
           Error_monad.ok (ctxt, contract) in
@@ -6742,13 +7232,13 @@ with parse_contract {arg : Set}
     end
   end
 
-with parse_contract_for_script {arg : Set}
+with parse_contract_for_script
   (legacy : bool) (ctxt : Alpha_context.context)
-  (loc : Alpha_context.Script.location) (arg : Script_typed_ir.ty arg)
+  (loc : Alpha_context.Script.location) (arg : Script_typed_ir.ty)
   (contract : Alpha_context.Contract.t) (entrypoint : string) {struct legacy}
   : Lwt.t
     (Error_monad.tzresult
-      (Alpha_context.context * option (Script_typed_ir.typed_contract arg))) :=
+      (Alpha_context.context * option Script_typed_ir.typed_contract)) :=
   let=? ctxt :=
     Lwt.__return
       (Alpha_context.Gas.consume ctxt Typecheck_costs.contract_exists) in
@@ -6791,8 +7281,8 @@ with parse_contract_for_script {arg : Set}
             let 'existT _ __Ex_ty_'a19 [targ, ctxt] :=
               existT (A := Set)
                 (fun __Ex_ty_'a19 =>
-                  [Script_typed_ir.ty __Ex_ty_'a19 ** Alpha_context.context]) _
-                [targ, ctxt] in
+                  [Script_typed_ir.ty ** Alpha_context.context]) _ [targ, ctxt]
+              in
             match
               let? '(ctxt, entrypoint, targ) :=
                 find_entrypoint_for_type targ arg root_name entrypoint ctxt in
@@ -6819,10 +7309,14 @@ with parse_toplevel (legacy : bool) (toplevel : Alpha_context.Script.expr)
   (Error_monad.record_trace extensible_type_value)
     match Micheline.root toplevel with
     | Micheline.Int loc _ => Error_monad.__error_value extensible_type_value
+    
     | Micheline.String loc _ => Error_monad.__error_value extensible_type_value
+    
     | Micheline.Bytes loc _ => Error_monad.__error_value extensible_type_value
+    
     | Micheline.Prim loc _ _ _ =>
       Error_monad.__error_value extensible_type_value
+    
     | Micheline.Seq _ fields =>
       let fix find_fields
         (__p_value :
@@ -6859,14 +7353,19 @@ with parse_toplevel (legacy : bool) (toplevel : Alpha_context.Script.expr)
                 Micheline.annot)) :=
         match fields with
         | [] => Error_monad.ok (__p_value, s, c)
+        
         | cons (Micheline.Int loc _) _ =>
           Error_monad.__error_value extensible_type_value
+        
         | cons (Micheline.String loc _) _ =>
           Error_monad.__error_value extensible_type_value
+        
         | cons (Micheline.Bytes loc _) _ =>
           Error_monad.__error_value extensible_type_value
+        
         | cons (Micheline.Seq loc _) _ =>
           Error_monad.__error_value extensible_type_value
+        
         |
           cons
             (Micheline.Prim loc Alpha_context.Script.K_parameter (cons arg [])
@@ -6875,6 +7374,7 @@ with parse_toplevel (legacy : bool) (toplevel : Alpha_context.Script.expr)
           | None => find_fields (Some (arg, loc, annot)) s c rest
           | Some _ => Error_monad.__error_value extensible_type_value
           end
+        
         |
           cons
             (Micheline.Prim loc Alpha_context.Script.K_storage (cons arg [])
@@ -6883,6 +7383,7 @@ with parse_toplevel (legacy : bool) (toplevel : Alpha_context.Script.expr)
           | None => find_fields __p_value (Some (arg, loc, annot)) c rest
           | Some _ => Error_monad.__error_value extensible_type_value
           end
+        
         |
           cons
             (Micheline.Prim loc Alpha_context.Script.K_code (cons arg []) annot)
@@ -6891,6 +7392,7 @@ with parse_toplevel (legacy : bool) (toplevel : Alpha_context.Script.expr)
           | None => find_fields __p_value s (Some (arg, loc, annot)) rest
           | Some _ => Error_monad.__error_value extensible_type_value
           end
+        
         |
           cons
             (Micheline.Prim loc
@@ -6898,6 +7400,7 @@ with parse_toplevel (legacy : bool) (toplevel : Alpha_context.Script.expr)
               Alpha_context.Script.K_storage | Alpha_context.Script.K_code) as
                 name) args _) _ =>
           Error_monad.__error_value extensible_type_value
+        
         | cons (Micheline.Prim loc name _ _) _ =>
           let allowed :=
             [
@@ -6977,8 +7480,7 @@ Definition parse_script
       (Lwt.__return (parse_parameter_ty ctxt legacy arg_type)) in
   let 'existT _ __Ex_ty_'a [arg_type, ctxt] :=
     existT (A := Set)
-      (fun __Ex_ty_'a =>
-        [Script_typed_ir.ty __Ex_ty_'a ** Alpha_context.context]) _
+      (fun __Ex_ty_'a => [Script_typed_ir.ty ** Alpha_context.context]) _
       [arg_type, ctxt] in
   let=? '_ :=
     if legacy then
@@ -6990,8 +7492,7 @@ Definition parse_script
       (Lwt.__return (parse_storage_ty ctxt legacy storage_type)) in
   let 'existT _ __Ex_ty_'a1 [storage_type, ctxt] :=
     existT (A := Set)
-      (fun __Ex_ty_'a1 =>
-        [Script_typed_ir.ty __Ex_ty_'a1 ** Alpha_context.context]) _
+      (fun __Ex_ty_'a1 => [Script_typed_ir.ty ** Alpha_context.context]) _
       [storage_type, ctxt] in
   let arg_annot :=
     Script_ir_annot.default_annot Script_ir_annot.default_param_annot
@@ -7024,18 +7525,20 @@ Definition parse_script
     Error_monad.trace extensible_type_value
       (parse_returning type_logger
         (Toplevel
-          {| tc_context.Toplevel.storage_type := storage_type;
+          ({| tc_context.Toplevel.storage_type := storage_type;
             tc_context.Toplevel.param_type := arg_type;
             tc_context.Toplevel.root_name := root_name;
-            tc_context.Toplevel.legacy_create_contract_literal := false |}) ctxt
-        legacy (arg_type_full, None) ret_type_full code_field) in
+            tc_context.Toplevel.legacy_create_contract_literal := false |}
+            : tc_context.Toplevel)) ctxt legacy (arg_type_full, None)
+        ret_type_full code_field) in
   Error_monad.__return
     ((Ex_script
-      {| Script_typed_ir.script.code := code;
+      ({| Script_typed_ir.script.code := code;
         Script_typed_ir.script.arg_type := arg_type;
         Script_typed_ir.script.storage := storage;
         Script_typed_ir.script.storage_type := storage_type;
-        Script_typed_ir.script.root_name := root_name |}), ctxt).
+        Script_typed_ir.script.root_name := root_name |}
+        : Script_typed_ir.script __Ex_ty_'a1)), ctxt).
 
 Definition typecheck_code
   (ctxt : Alpha_context.context) (code : Alpha_context.Script.expr)
@@ -7050,8 +7553,7 @@ Definition typecheck_code
       (Lwt.__return (parse_parameter_ty ctxt legacy arg_type)) in
   let 'existT _ __Ex_ty_'a [arg_type, ctxt] :=
     existT (A := Set)
-      (fun __Ex_ty_'a =>
-        [Script_typed_ir.ty __Ex_ty_'a ** Alpha_context.context]) _
+      (fun __Ex_ty_'a => [Script_typed_ir.ty ** Alpha_context.context]) _
       [arg_type, ctxt] in
   let=? '_ :=
     if legacy then
@@ -7063,8 +7565,7 @@ Definition typecheck_code
       (Lwt.__return (parse_storage_ty ctxt legacy storage_type)) in
   let 'existT _ __Ex_ty_'a1 [storage_type, ctxt] :=
     existT (A := Set)
-      (fun __Ex_ty_'a1 =>
-        [Script_typed_ir.ty __Ex_ty_'a1 ** Alpha_context.context]) _
+      (fun __Ex_ty_'a1 => [Script_typed_ir.ty ** Alpha_context.context]) _
       [storage_type, ctxt] in
   let arg_annot :=
     Script_ir_annot.default_annot Script_ir_annot.default_param_annot
@@ -7091,11 +7592,12 @@ Definition typecheck_code
               Pervasives.op_coloneq type_map
                 (cons (loc, (bef, aft)) (Pervasives.op_exclamation type_map))))
       (Toplevel
-        {| tc_context.Toplevel.storage_type := storage_type;
+        ({| tc_context.Toplevel.storage_type := storage_type;
           tc_context.Toplevel.param_type := arg_type;
           tc_context.Toplevel.root_name := root_name;
-          tc_context.Toplevel.legacy_create_contract_literal := false |}) ctxt
-      legacy (arg_type_full, None) ret_type_full code_field in
+          tc_context.Toplevel.legacy_create_contract_literal := false |}
+          : tc_context.Toplevel)) ctxt legacy (arg_type_full, None)
+      ret_type_full code_field in
   let=? '({| Script_typed_ir.lambda.lam := _ |}, ctxt) :=
     Error_monad.trace extensible_type_value __result_value in
   Error_monad.__return ((Pervasives.op_exclamation type_map), ctxt).
@@ -7111,8 +7613,7 @@ Definition typecheck_data
       (Lwt.__return (parse_packable_ty ctxt legacy (Micheline.root exp_ty))) in
   let 'existT _ __Ex_ty_'a [exp_ty, ctxt] :=
     existT (A := Set)
-      (fun __Ex_ty_'a =>
-        [Script_typed_ir.ty __Ex_ty_'a ** Alpha_context.context]) _
+      (fun __Ex_ty_'a => [Script_typed_ir.ty ** Alpha_context.context]) _
       [exp_ty, ctxt] in
   let=? '(_, ctxt) :=
     Error_monad.trace_eval
@@ -7133,22 +7634,22 @@ Definition Entrypoints_map :=
         Compare.COMPARABLE.compare := String.compare
       |}).
 
-Definition list_entrypoints {A : Set}
-  (full : Script_typed_ir.ty A) (ctxt : Alpha_context.context)
+Definition list_entrypoints
+  (full : Script_typed_ir.ty) (ctxt : Alpha_context.context)
   (root_name : option (|Entrypoints_map|).(S.MAP.key))
   : Error_monad.tzresult
     (list (list Alpha_context.Script.prim) *
       (|Entrypoints_map|).(S.MAP.t)
         (list Alpha_context.Script.prim * Alpha_context.Script.node)) :=
-  let merge {B C : Set}
-    (path : list B) (annot : option Script_typed_ir.field_annot)
-    (ty : Script_typed_ir.ty C) (reachable : bool)
+  let merge {A : Set}
+    (path : list A) (annot : option Script_typed_ir.field_annot)
+    (ty : Script_typed_ir.ty) (reachable : bool)
     (function_parameter :
-      list (list B) *
-        (|Entrypoints_map|).(S.MAP.t) (list B * Alpha_context.Script.node))
+      list (list A) *
+        (|Entrypoints_map|).(S.MAP.t) (list A * Alpha_context.Script.node))
     : Error_monad.tzresult
-      (list (list B) *
-        (|Entrypoints_map|).(S.MAP.t) (list B * Alpha_context.Script.node)) :=
+      (list (list A) *
+        (|Entrypoints_map|).(S.MAP.t) (list A * Alpha_context.Script.node)) :=
     let '(unreachables, all) as acc := function_parameter in
     match annot with
     | (None | Some (Script_typed_ir.Field_annot "")) =>
@@ -7173,8 +7674,8 @@ Definition list_entrypoints {A : Set}
               ((|Entrypoints_map|).(S.MAP.add) name
                 ((List.rev path), unparsed_ty) all))
     end in
-  let fix fold_tree {t : Set}
-    (__t_value : Script_typed_ir.ty t) (path : list Alpha_context.Script.prim)
+  let fix fold_tree
+    (__t_value : Script_typed_ir.ty) (path : list Alpha_context.Script.prim)
     (reachable : bool)
     (acc :
       list (list Alpha_context.Script.prim) *
@@ -7190,9 +7691,9 @@ Definition list_entrypoints {A : Set}
       let 'existT _ [__2, __3] [tl, al, tr, ar] :=
         existT (A := [Set ** Set])
           (fun '[__2, __3] =>
-            [Script_typed_ir.ty __2 ** option Script_typed_ir.field_annot **
-              Script_typed_ir.ty __3 ** option Script_typed_ir.field_annot]) [_,
-          _] [tl, al, tr, ar] in
+            [Script_typed_ir.ty ** option Script_typed_ir.field_annot **
+              Script_typed_ir.ty ** option Script_typed_ir.field_annot]) [_, _]
+          [tl, al, tr, ar] in
       let? acc :=
         merge (cons Alpha_context.Script.D_Left path) al tl reachable acc in
       let? acc :=
@@ -7216,7 +7717,7 @@ Definition list_entrypoints {A : Set}
 
 Fixpoint unparse_data {a : Set}
   (ctxt : Alpha_context.context) (mode : unparsing_mode)
-  (ty : Script_typed_ir.ty a) (__a_value : a) {struct ctxt}
+  (ty : Script_typed_ir.ty) (__a_value : a) {struct ctxt}
   : Lwt.t
     (Error_monad.tzresult (Alpha_context.Script.node * Alpha_context.context)) :=
   let=? ctxt :=
@@ -7228,40 +7729,47 @@ Fixpoint unparse_data {a : Set}
       in
     Error_monad.__return
       ((Micheline.Prim (-1) Alpha_context.Script.D_Unit nil nil), ctxt)
+  
   | (Script_typed_ir.Int_t _, v) =>
     let=? ctxt :=
       Lwt.__return
         (Alpha_context.Gas.consume ctxt (Unparse_costs.__int_value v)) in
     Error_monad.__return
       ((Micheline.Int (-1) (Alpha_context.Script_int.to_zint v)), ctxt)
+  
   | (Script_typed_ir.Nat_t _, v) =>
     let=? ctxt :=
       Lwt.__return
         (Alpha_context.Gas.consume ctxt (Unparse_costs.__int_value v)) in
     Error_monad.__return
       ((Micheline.Int (-1) (Alpha_context.Script_int.to_zint v)), ctxt)
+  
   | (Script_typed_ir.String_t _, s) =>
     let=? ctxt :=
       Lwt.__return
         (Alpha_context.Gas.consume ctxt (Unparse_costs.__string_value s)) in
     Error_monad.__return ((Micheline.String (-1) s), ctxt)
+  
   | (Script_typed_ir.Bytes_t _, s) =>
     let=? ctxt :=
       Lwt.__return
         (Alpha_context.Gas.consume ctxt (Unparse_costs.__bytes_value s)) in
     Error_monad.__return ((Micheline.Bytes (-1) s), ctxt)
+  
   | (Script_typed_ir.Bool_t _, true) =>
     let=? ctxt :=
       Lwt.__return (Alpha_context.Gas.consume ctxt Unparse_costs.__bool_value)
       in
     Error_monad.__return
       ((Micheline.Prim (-1) Alpha_context.Script.D_True nil nil), ctxt)
+  
   | (Script_typed_ir.Bool_t _, false) =>
     let=? ctxt :=
       Lwt.__return (Alpha_context.Gas.consume ctxt Unparse_costs.__bool_value)
       in
     Error_monad.__return
       ((Micheline.Prim (-1) Alpha_context.Script.D_False nil nil), ctxt)
+  
   | (Script_typed_ir.Timestamp_t _, __t_value) =>
     let=? ctxt :=
       Lwt.__return
@@ -7280,6 +7788,7 @@ Fixpoint unparse_data {a : Set}
       | Some s => Error_monad.__return ((Micheline.String (-1) s), ctxt)
       end
     end
+  
   | (Script_typed_ir.Address_t _, (c, entrypoint)) =>
     let=? ctxt :=
       Lwt.__return (Alpha_context.Gas.consume ctxt Unparse_costs.contract) in
@@ -7305,6 +7814,7 @@ Fixpoint unparse_data {a : Set}
         end in
       Error_monad.__return ((Micheline.String (-1) notation), ctxt)
     end
+  
   | (Script_typed_ir.Contract_t _ _, (_, (c, entrypoint))) =>
     let=? ctxt :=
       Lwt.__return (Alpha_context.Gas.consume ctxt Unparse_costs.contract) in
@@ -7330,6 +7840,7 @@ Fixpoint unparse_data {a : Set}
         end in
       Error_monad.__return ((Micheline.String (-1) notation), ctxt)
     end
+  
   | (Script_typed_ir.Signature_t _, s) =>
     let=? ctxt :=
       Lwt.__return (Alpha_context.Gas.consume ctxt Unparse_costs.signature) in
@@ -7342,11 +7853,13 @@ Fixpoint unparse_data {a : Set}
       Error_monad.__return
         ((Micheline.String (-1) (Signature.to_b58check s)), ctxt)
     end
+  
   | (Script_typed_ir.Mutez_t _, v) =>
     let=? ctxt :=
       Lwt.__return (Alpha_context.Gas.consume ctxt Unparse_costs.tez) in
     Error_monad.__return
       ((Micheline.Int (-1) (Z.of_int64 (Alpha_context.Tez.to_mutez v))), ctxt)
+  
   | (Script_typed_ir.Key_t _, k) =>
     let=? ctxt :=
       Lwt.__return (Alpha_context.Gas.consume ctxt Unparse_costs.__key_value) in
@@ -7361,6 +7874,7 @@ Fixpoint unparse_data {a : Set}
         ((Micheline.String (-1)
           ((|Signature.Public_key|).(S.SPublic_key.to_b58check) k)), ctxt)
     end
+  
   | (Script_typed_ir.Key_hash_t _, k) =>
     let=? ctxt :=
       Lwt.__return (Alpha_context.Gas.consume ctxt Unparse_costs.key_hash) in
@@ -7376,6 +7890,7 @@ Fixpoint unparse_data {a : Set}
           ((|Signature.Public_key_hash|).(S.SPublic_key_hash.to_b58check) k)),
           ctxt)
     end
+  
   | (Script_typed_ir.Operation_t _, (op, _big_map_diff)) =>
     let __bytes_value :=
       Data_encoding.Binary.to_bytes_exn
@@ -7385,6 +7900,7 @@ Fixpoint unparse_data {a : Set}
         (Alpha_context.Gas.consume ctxt (Unparse_costs.operation __bytes_value))
       in
     Error_monad.__return ((Micheline.Bytes (-1) __bytes_value), ctxt)
+  
   | (Script_typed_ir.Chain_id_t _, chain_id) =>
     let __bytes_value :=
       Data_encoding.Binary.to_bytes_exn (|Chain_id|).(S.HASH.encoding) chain_id
@@ -7394,12 +7910,13 @@ Fixpoint unparse_data {a : Set}
         (Alpha_context.Gas.consume ctxt (Unparse_costs.chain_id __bytes_value))
       in
     Error_monad.__return ((Micheline.Bytes (-1) __bytes_value), ctxt)
+  
   | (Script_typed_ir.Pair_t (tl, _, _) (tr, _, _) _ _, (l, __r_value)) =>
     let 'existT _ [__1, __2] [tl, tr, l, __r_value] :=
       existT (A := [Set ** Set])
         (fun '[__1, __2] =>
-          [Script_typed_ir.ty __1 ** Script_typed_ir.ty __2 ** __1 ** __2]) [_,
-        _] [tl, tr, l, __r_value] in
+          [Script_typed_ir.ty ** Script_typed_ir.ty ** __1 ** __2]) [_, _]
+        [tl, tr, l, __r_value] in
     let=? ctxt :=
       Lwt.__return (Alpha_context.Gas.consume ctxt Unparse_costs.pair) in
     let=? '(l, ctxt) := unparse_data ctxt mode tl l in
@@ -7407,18 +7924,19 @@ Fixpoint unparse_data {a : Set}
     Error_monad.__return
       ((Micheline.Prim (-1) Alpha_context.Script.D_Pair [ l; __r_value ] nil),
         ctxt)
+  
   | (Script_typed_ir.Union_t (tl, _) _ _ _, Script_typed_ir.L l) =>
     let 'existT _ __3 [tl, l] :=
-      existT (A := Set) (fun __3 => [Script_typed_ir.ty __3 ** __3]) _ [tl, l]
-      in
+      existT (A := Set) (fun __3 => [Script_typed_ir.ty ** __3]) _ [tl, l] in
     let=? ctxt :=
       Lwt.__return (Alpha_context.Gas.consume ctxt Unparse_costs.union) in
     let=? '(l, ctxt) := unparse_data ctxt mode tl l in
     Error_monad.__return
       ((Micheline.Prim (-1) Alpha_context.Script.D_Left [ l ] nil), ctxt)
+  
   | (Script_typed_ir.Union_t _ (tr, _) _ _, Script_typed_ir.R __r_value) =>
     let 'existT _ __6 [tr, __r_value] :=
-      existT (A := Set) (fun __6 => [Script_typed_ir.ty __6 ** __6]) _
+      existT (A := Set) (fun __6 => [Script_typed_ir.ty ** __6]) _
         [tr, __r_value] in
     let=? ctxt :=
       Lwt.__return (Alpha_context.Gas.consume ctxt Unparse_costs.union) in
@@ -7426,23 +7944,26 @@ Fixpoint unparse_data {a : Set}
     Error_monad.__return
       ((Micheline.Prim (-1) Alpha_context.Script.D_Right [ __r_value ] nil),
         ctxt)
+  
   | (Script_typed_ir.Option_t __t_value _ _, Some v) =>
     let 'existT _ __7 [__t_value, v] :=
-      existT (A := Set) (fun __7 => [Script_typed_ir.ty __7 ** __7]) _
+      existT (A := Set) (fun __7 => [Script_typed_ir.ty ** __7]) _
         [__t_value, v] in
     let=? ctxt :=
       Lwt.__return (Alpha_context.Gas.consume ctxt Unparse_costs.some) in
     let=? '(v, ctxt) := unparse_data ctxt mode __t_value v in
     Error_monad.__return
       ((Micheline.Prim (-1) Alpha_context.Script.D_Some [ v ] nil), ctxt)
+  
   | (Script_typed_ir.Option_t _ _ _, None) =>
     let=? ctxt :=
       Lwt.__return (Alpha_context.Gas.consume ctxt Unparse_costs.none) in
     Error_monad.__return
       ((Micheline.Prim (-1) Alpha_context.Script.D_None nil nil), ctxt)
+  
   | (Script_typed_ir.List_t __t_value _ _, items) =>
     let 'existT _ __9 [__t_value, items] :=
-      existT (A := Set) (fun __9 => [Script_typed_ir.ty __9 ** a]) _
+      existT (A := Set) (fun __9 => [Script_typed_ir.ty ** a]) _
         [__t_value, items] in
     let=? '(items, ctxt) :=
       Error_monad.fold_left_s
@@ -7456,10 +7977,11 @@ Fixpoint unparse_data {a : Set}
               in
             Error_monad.__return ((cons unparsed l), ctxt)) (nil, ctxt) items in
     Error_monad.__return ((Micheline.Seq (-1) (List.rev items)), ctxt)
+  
   | (Script_typed_ir.Set_t __t_value _, set) =>
     let 'existT _ __10 [__t_value, set] :=
-      existT (A := Set) (fun __10 => [Script_typed_ir.comparable_ty __10 ** a])
-        _ [__t_value, set] in
+      existT (A := Set) (fun __10 => [Script_typed_ir.comparable_ty ** a]) _
+        [__t_value, set] in
     let __t_value := ty_of_comparable_ty __t_value in
     let=? '(items, ctxt) :=
       Error_monad.fold_left_s
@@ -7473,12 +7995,13 @@ Fixpoint unparse_data {a : Set}
             Error_monad.__return ((cons item l), ctxt)) (nil, ctxt)
         (set_fold (fun e => fun acc => cons e acc) set nil) in
     Error_monad.__return ((Micheline.Seq (-1) items), ctxt)
+  
   | (Script_typed_ir.Map_t kt vt _ _, map) =>
     let 'existT _ [__11, __12] [kt, vt, map] :=
       existT (A := [Set ** Set])
         (fun '[__11, __12] =>
-          [Script_typed_ir.comparable_ty __11 ** Script_typed_ir.ty __12 ** a])
-        [_, _] [kt, vt, map] in
+          [Script_typed_ir.comparable_ty ** Script_typed_ir.ty ** a]) [_, _]
+        [kt, vt, map] in
     let kt := ty_of_comparable_ty kt in
     let=? '(items, ctxt) :=
       Error_monad.fold_left_s
@@ -7497,6 +8020,7 @@ Fixpoint unparse_data {a : Set}
                   [ __key_value; value ] nil) l), ctxt)) (nil, ctxt)
         (map_fold (fun k => fun v => fun acc => cons (k, v) acc) map nil) in
     Error_monad.__return ((Micheline.Seq (-1) items), ctxt)
+  
   |
     (Script_typed_ir.Big_map_t kt vt _, {|
       Script_typed_ir.big_map.id := None;
@@ -7505,7 +8029,7 @@ Fixpoint unparse_data {a : Set}
     let 'existT _ [__13, __14] [kt, vt, Diff] :=
       existT (A := [Set ** Set])
         (fun '[__13, __14] =>
-          [Script_typed_ir.comparable_ty __13 ** Script_typed_ir.ty __14 **
+          [Script_typed_ir.comparable_ty ** Script_typed_ir.ty **
             Script_typed_ir.map __13 (option __14)]) [_, _] [kt, vt, Diff] in
     let 'existS _ _ Diff := Diff in
     let kt := ty_of_comparable_ty kt in
@@ -7534,6 +8058,7 @@ Fixpoint unparse_data {a : Set}
                 end) (Pervasives.fst Diff.(Script_typed_ir.Boxed_map.boxed)) nil)
       in
     Error_monad.__return ((Micheline.Seq (-1) items), ctxt)
+  
   |
     (Script_typed_ir.Big_map_t _kt _kv _, {|
       Script_typed_ir.big_map.id := Some id;
@@ -7542,9 +8067,9 @@ Fixpoint unparse_data {a : Set}
     let 'existT _ [__15, __16] [_kt, _kv, id, Diff] :=
       existT (A := [Set ** Set])
         (fun '[__15, __16] =>
-          [Script_typed_ir.comparable_ty __15 ** Script_typed_ir.ty __16 ** Z.t
-            ** Script_typed_ir.map __15 (option __16)]) [_, _]
-        [_kt, _kv, id, Diff] in
+          [Script_typed_ir.comparable_ty ** Script_typed_ir.ty ** Z.t **
+            Script_typed_ir.map __15 (option __16)]) [_, _] [_kt, _kv, id, Diff]
+      in
     let 'existS _ _ Diff := Diff in
     if
       (|Compare.Int|).(Compare.S.op_eq)
@@ -7553,7 +8078,12 @@ Fixpoint unparse_data {a : Set}
       Error_monad.__return ((Micheline.Int (-1) id), ctxt)
     else
       (* ❌ Assert instruction is not handled. *)
-      assert false
+      assert
+        (Lwt.t
+          (Error_monad.tzresult
+            (Micheline.node int Alpha_context.Script.prim *
+              Alpha_context.context))) false
+  
   |
     (Script_typed_ir.Lambda_t _ _ _, {|
       Script_typed_ir.lambda.lam := (_, original_code) |}) =>
@@ -7576,8 +8106,7 @@ with unparse_code (ctxt : Alpha_context.context) (mode : unparsing_mode)
         Lwt.__return (parse_packable_ty ctxt legacy ty) in
       let 'existT _ __Ex_ty_'a [__t_value, ctxt] :=
         existT (A := Set)
-          (fun __Ex_ty_'a =>
-            [Script_typed_ir.ty __Ex_ty_'a ** Alpha_context.context]) _
+          (fun __Ex_ty_'a => [Script_typed_ir.ty ** Alpha_context.context]) _
           [__t_value, ctxt] in
       let=? '(data, ctxt) := parse_data None ctxt legacy __t_value data in
       let=? '(data, ctxt) := unparse_data ctxt mode __t_value data in
@@ -7617,9 +8146,9 @@ with unparse_code (ctxt : Alpha_context.context) (mode : unparsing_mode)
       => Error_monad.__return (atom, ctxt)
     end.
 
-Definition unparse_script {A B : Set}
+Definition unparse_script {A : Set}
   (ctxt : Alpha_context.context) (mode : unparsing_mode)
-  (function_parameter : Script_typed_ir.script A B)
+  (function_parameter : Script_typed_ir.script A)
   : Lwt.t
     (Error_monad.tzresult (Alpha_context.Script.t * Alpha_context.context)) :=
   let '{|
@@ -7654,15 +8183,15 @@ Definition unparse_script {A B : Set}
         Alpha_context.Gas.consume ctxt (Unparse_costs.prim_cost 1 nil) in
       Alpha_context.Gas.consume ctxt (Unparse_costs.prim_cost 1 nil)) in
   Error_monad.__return
-    ({|
+    (({|
       Alpha_context.Script.t.code :=
         Alpha_context.Script.__lazy_expr_value (Micheline.strip_locations code);
       Alpha_context.Script.t.storage :=
         Alpha_context.Script.__lazy_expr_value
-          (Micheline.strip_locations storage) |}, ctxt).
+          (Micheline.strip_locations storage) |} : Alpha_context.Script.t), ctxt).
 
 Definition pack_data {A : Set}
-  (ctxt : Alpha_context.context) (typ : Script_typed_ir.ty A) (data : A)
+  (ctxt : Alpha_context.context) (typ : Script_typed_ir.ty) (data : A)
   : Lwt.t (Error_monad.tzresult (MBytes.t * Alpha_context.context)) :=
   let=? '(unparsed, ctxt) := unparse_data ctxt Optimized typ data in
   let __bytes_value :=
@@ -7681,7 +8210,7 @@ Definition pack_data {A : Set}
   Error_monad.__return (__bytes_value, ctxt).
 
 Definition hash_data {A : Set}
-  (ctxt : Alpha_context.context) (typ : Script_typed_ir.ty A) (data : A)
+  (ctxt : Alpha_context.context) (typ : Script_typed_ir.ty) (data : A)
   : Lwt.t (Error_monad.tzresult (Script_expr_hash.t * Alpha_context.context)) :=
   let=? '(__bytes_value, ctxt) := pack_data ctxt typ data in
   let=? ctxt :=
@@ -7693,12 +8222,12 @@ Definition hash_data {A : Set}
     ((Script_expr_hash.hash_bytes None [ __bytes_value ]), ctxt).
 
 Definition empty_big_map {A B : Set}
-  (tk : Script_typed_ir.comparable_ty A) (tv : Script_typed_ir.ty B)
+  (tk : Script_typed_ir.comparable_ty) (tv : Script_typed_ir.ty)
   : Script_typed_ir.big_map A B :=
-  {| Script_typed_ir.big_map.id := None;
+  ({| Script_typed_ir.big_map.id := None;
     Script_typed_ir.big_map.diff := empty_map tk;
     Script_typed_ir.big_map.key_type := ty_of_comparable_ty tk;
-    Script_typed_ir.big_map.value_type := tv |}.
+    Script_typed_ir.big_map.value_type := tv |} : Script_typed_ir.big_map _ _).
 
 Definition big_map_mem {A B : Set}
   (ctxt : Alpha_context.context) (__key_value : A)
@@ -7803,13 +8332,14 @@ Definition diff_of_big_map {A B : Set}
         (ctxt,
           [
             Alpha_context.Contract.Alloc
-              {|
+              ({|
                 Alpha_context.Contract.big_map_diff_item.Alloc.big_map :=
                   id;
                 Alpha_context.Contract.big_map_diff_item.Alloc.key_type :=
                   Micheline.strip_locations kt;
                 Alpha_context.Contract.big_map_diff_item.Alloc.value_type :=
                   Micheline.strip_locations kv |}
+                : Alpha_context.Contract.big_map_diff_item.Alloc)
           ], id)
     end in
   let pairs :=
@@ -7839,7 +8369,7 @@ Definition diff_of_big_map {A B : Set}
             end in
           let diff_item :=
             Alpha_context.Contract.Update
-              {|
+              ({|
                 Alpha_context.Contract.big_map_diff_item.Update.big_map :=
                   big_map;
                 Alpha_context.Contract.big_map_diff_item.Update.diff_key :=
@@ -7847,7 +8377,8 @@ Definition diff_of_big_map {A B : Set}
                 Alpha_context.Contract.big_map_diff_item.Update.diff_key_hash :=
                   diff_key_hash;
                 Alpha_context.Contract.big_map_diff_item.Update.diff_value :=
-                  diff_value |} in
+                  diff_value |}
+                : Alpha_context.Contract.big_map_diff_item.Update) in
           Error_monad.__return ((cons diff_item acc), ctxt)) (nil, ctxt) pairs
     in
   Error_monad.__return ((Pervasives.op_at init diff), big_map, ctxt).
@@ -7859,7 +8390,7 @@ Fixpoint extract_big_map_updates {a : Set}
     Lwt.t
       (Error_monad.tzresult (Alpha_context.context * Alpha_context.Big_map.id)))
   (mode : unparsing_mode) (ids : (|Ids|).(S.SET.t))
-  (acc : list Alpha_context.Contract.big_map_diff) (ty : Script_typed_ir.ty a)
+  (acc : list Alpha_context.Contract.big_map_diff) (ty : Script_typed_ir.ty)
   (x : a) {struct ctxt}
   : Lwt.t
     (Error_monad.tzresult
@@ -7876,12 +8407,13 @@ Fixpoint extract_big_map_updates {a : Set}
         (Script_typed_ir.big_map.with_id (Some id) map) in
     Error_monad.__return
       (ctxt, map, ((|Ids|).(S.SET.add) id ids), (cons diff acc))
+  
   | (Script_typed_ir.Pair_t (tyl, _, _) (tyr, _, _) _ true, (xl, xr)) =>
     let 'existT _ [__2, __3] [tyl, tyr, xl, xr] :=
       existT (A := [Set ** Set])
         (fun '[__2, __3] =>
-          [Script_typed_ir.ty __2 ** Script_typed_ir.ty __3 ** __2 ** __3]) [_,
-        _] [tyl, tyr, xl, xr] in
+          [Script_typed_ir.ty ** Script_typed_ir.ty ** __2 ** __3]) [_, _]
+        [tyl, tyr, xl, xr] in
     let=? ctxt :=
       Lwt.__return (Alpha_context.Gas.consume ctxt Typecheck_costs.cycle) in
     let=? '(ctxt, xl, ids, acc) :=
@@ -7889,36 +8421,37 @@ Fixpoint extract_big_map_updates {a : Set}
     let=? '(ctxt, xr, ids, acc) :=
       extract_big_map_updates ctxt fresh mode ids acc tyr xr in
     Error_monad.__return (ctxt, (xl, xr), ids, acc)
+  
   | (Script_typed_ir.Union_t (ty, _) (_, _) _ true, Script_typed_ir.L x) =>
     let 'existT _ __4 [ty, x] :=
-      existT (A := Set) (fun __4 => [Script_typed_ir.ty __4 ** __4]) _ [ty, x]
-      in
+      existT (A := Set) (fun __4 => [Script_typed_ir.ty ** __4]) _ [ty, x] in
     let=? ctxt :=
       Lwt.__return (Alpha_context.Gas.consume ctxt Typecheck_costs.cycle) in
     let=? '(ctxt, x, ids, acc) :=
       extract_big_map_updates ctxt fresh mode ids acc ty x in
     Error_monad.__return (ctxt, (Script_typed_ir.L x), ids, acc)
+  
   | (Script_typed_ir.Union_t (_, _) (ty, _) _ true, Script_typed_ir.R x) =>
     let 'existT _ __7 [ty, x] :=
-      existT (A := Set) (fun __7 => [Script_typed_ir.ty __7 ** __7]) _ [ty, x]
-      in
+      existT (A := Set) (fun __7 => [Script_typed_ir.ty ** __7]) _ [ty, x] in
     let=? ctxt :=
       Lwt.__return (Alpha_context.Gas.consume ctxt Typecheck_costs.cycle) in
     let=? '(ctxt, x, ids, acc) :=
       extract_big_map_updates ctxt fresh mode ids acc ty x in
     Error_monad.__return (ctxt, (Script_typed_ir.R x), ids, acc)
+  
   | (Script_typed_ir.Option_t ty _ true, Some x) =>
     let 'existT _ __8 [ty, x] :=
-      existT (A := Set) (fun __8 => [Script_typed_ir.ty __8 ** __8]) _ [ty, x]
-      in
+      existT (A := Set) (fun __8 => [Script_typed_ir.ty ** __8]) _ [ty, x] in
     let=? ctxt :=
       Lwt.__return (Alpha_context.Gas.consume ctxt Typecheck_costs.cycle) in
     let=? '(ctxt, x, ids, acc) :=
       extract_big_map_updates ctxt fresh mode ids acc ty x in
     Error_monad.__return (ctxt, (Some x), ids, acc)
+  
   | (Script_typed_ir.List_t ty _ true, l) =>
     let 'existT _ __9 [ty, l] :=
-      existT (A := Set) (fun __9 => [Script_typed_ir.ty __9 ** a]) _ [ty, l] in
+      existT (A := Set) (fun __9 => [Script_typed_ir.ty ** a]) _ [ty, l] in
     let=? '(ctxt, l, ids, acc) :=
       Error_monad.fold_left_s
         (fun function_parameter =>
@@ -7932,9 +8465,10 @@ Fixpoint extract_big_map_updates {a : Set}
             Error_monad.__return (ctxt, (cons x l), ids, acc))
         (ctxt, nil, ids, acc) l in
     Error_monad.__return (ctxt, (List.rev l), ids, acc)
+  
   | (Script_typed_ir.Map_t _ ty _ true, M as m) =>
     let 'existT _ __11 [ty, M, m] :=
-      existT (A := Set) (fun __11 => [Script_typed_ir.ty __11 ** a ** a]) _
+      existT (A := Set) (fun __11 => [Script_typed_ir.ty ** a ** a]) _
         [ty, M, m] in
     let 'existS _ _ M := M in
     let=? ctxt :=
@@ -7973,52 +8507,80 @@ Fixpoint extract_big_map_updates {a : Set}
         |} in
     Error_monad.__return
       (ctxt, (pack (existT (A := Set -> Set) _ _ (|M|))), ids, acc)
+  
   | (Script_typed_ir.Option_t _ _ true, None) =>
     Error_monad.__return (ctxt, None, ids, acc)
+  
   | (Script_typed_ir.List_t _ _ false, v) =>
     Error_monad.__return (ctxt, v, ids, acc)
+  
   | (Script_typed_ir.Map_t _ _ _ false, v) =>
     Error_monad.__return (ctxt, v, ids, acc)
+  
   | (Script_typed_ir.Option_t _ _ false, None) =>
     Error_monad.__return (ctxt, None, ids, acc)
+  
   | (Script_typed_ir.Pair_t _ _ _ false, v) =>
     Error_monad.__return (ctxt, v, ids, acc)
+  
   | (Script_typed_ir.Union_t _ _ _ false, v) =>
     Error_monad.__return (ctxt, v, ids, acc)
+  
   | (Script_typed_ir.Option_t _ _ false, v) =>
     Error_monad.__return (ctxt, v, ids, acc)
+  
   | (Script_typed_ir.Chain_id_t _, v) =>
     Error_monad.__return (ctxt, v, ids, acc)
+  
   | (Script_typed_ir.Set_t _ _, v) => Error_monad.__return (ctxt, v, ids, acc)
+  
   | (Script_typed_ir.Unit_t _, v) => Error_monad.__return (ctxt, v, ids, acc)
+  
   | (Script_typed_ir.Int_t _, v) => Error_monad.__return (ctxt, v, ids, acc)
+  
   | (Script_typed_ir.Nat_t _, v) => Error_monad.__return (ctxt, v, ids, acc)
+  
   | (Script_typed_ir.Signature_t _, v) =>
     Error_monad.__return (ctxt, v, ids, acc)
+  
   | (Script_typed_ir.String_t _, v) => Error_monad.__return (ctxt, v, ids, acc)
+  
   | (Script_typed_ir.Bytes_t _, v) => Error_monad.__return (ctxt, v, ids, acc)
+  
   | (Script_typed_ir.Mutez_t _, v) => Error_monad.__return (ctxt, v, ids, acc)
+  
   | (Script_typed_ir.Key_hash_t _, v) =>
     Error_monad.__return (ctxt, v, ids, acc)
+  
   | (Script_typed_ir.Key_t _, v) => Error_monad.__return (ctxt, v, ids, acc)
+  
   | (Script_typed_ir.Timestamp_t _, v) =>
     Error_monad.__return (ctxt, v, ids, acc)
+  
   | (Script_typed_ir.Address_t _, v) => Error_monad.__return (ctxt, v, ids, acc)
+  
   | (Script_typed_ir.Bool_t _, v) => Error_monad.__return (ctxt, v, ids, acc)
+  
   | (Script_typed_ir.Lambda_t _ _ _, v) =>
     Error_monad.__return (ctxt, v, ids, acc)
+  
   | (Script_typed_ir.Contract_t _ _, v) =>
     Error_monad.__return (ctxt, v, ids, acc)
+  
   | (Script_typed_ir.Operation_t _, _) =>
     (* ❌ Assert instruction is not handled. *)
-    assert false
+    assert
+      (Lwt.t
+        (Error_monad.tzresult
+          (Alpha_context.context * a * (|Ids|).(S.SET.t) *
+            list Alpha_context.Contract.big_map_diff))) false
   end.
 
 Definition collect_big_maps {A : Set}
-  (ctxt : Alpha_context.context) (ty : Script_typed_ir.ty A) (x : A)
+  (ctxt : Alpha_context.context) (ty : Script_typed_ir.ty) (x : A)
   : Lwt.t (Error_monad.tzresult ((|Ids|).(S.SET.t) * Alpha_context.context)) :=
   let fix collect {a : Set}
-    (ctxt : Alpha_context.context) (ty : Script_typed_ir.ty a) (x : a)
+    (ctxt : Alpha_context.context) (ty : Script_typed_ir.ty) (x : a)
     (acc : (|Ids|).(S.SET.t)) {struct ctxt}
     : Error_monad.tzresult ((|Ids|).(S.SET.t) * Alpha_context.context) :=
     match (ty, x) with
@@ -8027,42 +8589,43 @@ Definition collect_big_maps {A : Set}
         Script_typed_ir.big_map.id := Some id |}) =>
       let? ctxt := Alpha_context.Gas.consume ctxt Typecheck_costs.cycle in
       Error_monad.ok (((|Ids|).(S.SET.add) id acc), ctxt)
+    
     | (Script_typed_ir.Pair_t (tyl, _, _) (tyr, _, _) _ true, (xl, xr)) =>
       let 'existT _ [__2, __3] [tyl, tyr, xl, xr] :=
         existT (A := [Set ** Set])
           (fun '[__2, __3] =>
-            [Script_typed_ir.ty __2 ** Script_typed_ir.ty __3 ** __2 ** __3])
-          [_, _] [tyl, tyr, xl, xr] in
+            [Script_typed_ir.ty ** Script_typed_ir.ty ** __2 ** __3]) [_, _]
+          [tyl, tyr, xl, xr] in
       let? '(acc, ctxt) := collect ctxt tyl xl acc in
       collect ctxt tyr xr acc
+    
     | (Script_typed_ir.Union_t (ty, _) (_, _) _ true, Script_typed_ir.L x) =>
       let 'existT _ __4 [ty, x] :=
-        existT (A := Set) (fun __4 => [Script_typed_ir.ty __4 ** __4]) _ [ty, x]
-        in
+        existT (A := Set) (fun __4 => [Script_typed_ir.ty ** __4]) _ [ty, x] in
       collect ctxt ty x acc
+    
     | (Script_typed_ir.Union_t (_, _) (ty, _) _ true, Script_typed_ir.R x) =>
       let 'existT _ __7 [ty, x] :=
-        existT (A := Set) (fun __7 => [Script_typed_ir.ty __7 ** __7]) _ [ty, x]
-        in
+        existT (A := Set) (fun __7 => [Script_typed_ir.ty ** __7]) _ [ty, x] in
       collect ctxt ty x acc
+    
     | (Script_typed_ir.Option_t ty _ true, Some x) =>
       let 'existT _ __8 [ty, x] :=
-        existT (A := Set) (fun __8 => [Script_typed_ir.ty __8 ** __8]) _ [ty, x]
-        in
+        existT (A := Set) (fun __8 => [Script_typed_ir.ty ** __8]) _ [ty, x] in
       collect ctxt ty x acc
+    
     | (Script_typed_ir.List_t ty _ true, l) =>
       let 'existT _ __9 [ty, l] :=
-        existT (A := Set) (fun __9 => [Script_typed_ir.ty __9 ** a]) _ [ty, l]
-        in
+        existT (A := Set) (fun __9 => [Script_typed_ir.ty ** a]) _ [ty, l] in
       List.fold_left
         (fun acc =>
           fun x =>
             let? '(acc, ctxt) := acc in
             collect ctxt ty x acc) (Error_monad.ok (acc, ctxt)) l
+    
     | (Script_typed_ir.Map_t _ ty _ true, m) =>
       let 'existT _ __11 [ty, m] :=
-        existT (A := Set) (fun __11 => [Script_typed_ir.ty __11 ** a]) _ [ty, m]
-        in
+        existT (A := Set) (fun __11 => [Script_typed_ir.ty ** a]) _ [ty, m] in
       map_fold
         (fun function_parameter =>
           let '_ := function_parameter in
@@ -8070,41 +8633,66 @@ Definition collect_big_maps {A : Set}
             fun acc =>
               let? '(acc, ctxt) := acc in
               collect ctxt ty v acc) m (Error_monad.ok (acc, ctxt))
+    
     | (Script_typed_ir.List_t _ _ false, _) => Error_monad.ok (acc, ctxt)
+    
     | (Script_typed_ir.Map_t _ _ _ false, _) => Error_monad.ok (acc, ctxt)
+    
     |
       (Script_typed_ir.Big_map_t _ _ _, {| Script_typed_ir.big_map.id := None |})
       => Error_monad.ok (acc, ctxt)
+    
     | (Script_typed_ir.Option_t _ _ true, None) => Error_monad.ok (acc, ctxt)
+    
     | (Script_typed_ir.Option_t _ _ false, _) => Error_monad.ok (acc, ctxt)
+    
     | (Script_typed_ir.Union_t _ _ _ false, _) => Error_monad.ok (acc, ctxt)
+    
     | (Script_typed_ir.Pair_t _ _ _ false, _) => Error_monad.ok (acc, ctxt)
+    
     | (Script_typed_ir.Chain_id_t _, _) => Error_monad.ok (acc, ctxt)
+    
     | (Script_typed_ir.Set_t _ _, _) => Error_monad.ok (acc, ctxt)
+    
     | (Script_typed_ir.Unit_t _, _) => Error_monad.ok (acc, ctxt)
+    
     | (Script_typed_ir.Int_t _, _) => Error_monad.ok (acc, ctxt)
+    
     | (Script_typed_ir.Nat_t _, _) => Error_monad.ok (acc, ctxt)
+    
     | (Script_typed_ir.Signature_t _, _) => Error_monad.ok (acc, ctxt)
+    
     | (Script_typed_ir.String_t _, _) => Error_monad.ok (acc, ctxt)
+    
     | (Script_typed_ir.Bytes_t _, _) => Error_monad.ok (acc, ctxt)
+    
     | (Script_typed_ir.Mutez_t _, _) => Error_monad.ok (acc, ctxt)
+    
     | (Script_typed_ir.Key_hash_t _, _) => Error_monad.ok (acc, ctxt)
+    
     | (Script_typed_ir.Key_t _, _) => Error_monad.ok (acc, ctxt)
+    
     | (Script_typed_ir.Timestamp_t _, _) => Error_monad.ok (acc, ctxt)
+    
     | (Script_typed_ir.Address_t _, _) => Error_monad.ok (acc, ctxt)
+    
     | (Script_typed_ir.Bool_t _, _) => Error_monad.ok (acc, ctxt)
+    
     | (Script_typed_ir.Lambda_t _ _ _, _) => Error_monad.ok (acc, ctxt)
+    
     | (Script_typed_ir.Contract_t _ _, _) => Error_monad.ok (acc, ctxt)
+    
     | (Script_typed_ir.Operation_t _, _) =>
       (* ❌ Assert instruction is not handled. *)
-      assert false
+      assert (Error_monad.tzresult ((|Ids|).(S.SET.t) * Alpha_context.context))
+        false
     end in
   Lwt.__return (collect ctxt ty x no_big_map_id).
 
 Definition extract_big_map_diff {A : Set}
   (ctxt : Alpha_context.context) (mode : unparsing_mode) (temporary : bool)
   (to_duplicate : (|Ids|).(S.SET.t)) (to_update : (|Ids|).(S.SET.t))
-  (ty : Script_typed_ir.ty A) (v : A)
+  (ty : Script_typed_ir.ty) (v : A)
   : Lwt.t
     (Error_monad.tzresult
       (A * option (list Alpha_context.Contract.big_map_diff_item) *

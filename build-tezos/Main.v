@@ -42,16 +42,14 @@ Definition block_header_metadata_encoding
   Apply_results.block_metadata_encoding.
 
 Inductive operation_data : Set :=
-| Operation_data : forall {kind : Set},
-  Alpha_context.Operation.protocol_data kind -> operation_data.
+| Operation_data : Alpha_context.Operation.protocol_data -> operation_data.
 
 Definition operation_data_encoding
   : Data_encoding.t Alpha_context.Operation.packed_protocol_data :=
   Alpha_context.Operation.protocol_data_encoding.
 
 Inductive operation_receipt : Set :=
-| Operation_metadata : forall {kind : Set},
-  Apply_results.operation_metadata kind -> operation_receipt
+| Operation_metadata : Apply_results.operation_metadata -> operation_receipt
 | No_operation_metadata : operation_receipt.
 
 Definition operation_receipt_encoding
@@ -88,15 +86,15 @@ Definition validation_passes : list Updater.quota :=
   let max_anonymous_operations :=
     Pervasives.op_plus Alpha_context.Constants.max_revelations_per_block 100 in
   [
-    {| Updater.quota.max_size := Pervasives.op_star 32 1024;
-      Updater.quota.max_op := Some 32 |};
-    {| Updater.quota.max_size := Pervasives.op_star 32 1024;
-      Updater.quota.max_op := None |};
-    {|
+    ({| Updater.quota.max_size := Pervasives.op_star 32 1024;
+      Updater.quota.max_op := Some 32 |} : Updater.quota);
+    ({| Updater.quota.max_size := Pervasives.op_star 32 1024;
+      Updater.quota.max_op := None |} : Updater.quota);
+    ({|
       Updater.quota.max_size := Pervasives.op_star max_anonymous_operations 1024;
-      Updater.quota.max_op := Some max_anonymous_operations |};
-    {| Updater.quota.max_size := Pervasives.op_star 512 1024;
-      Updater.quota.max_op := None |}
+      Updater.quota.max_op := Some max_anonymous_operations |} : Updater.quota);
+    ({| Updater.quota.max_size := Pervasives.op_star 512 1024;
+      Updater.quota.max_op := None |} : Updater.quota)
   ].
 
 Definition rpc_services : RPC_directory.directory Updater.rpc_context :=
@@ -104,42 +102,45 @@ Definition rpc_services : RPC_directory.directory Updater.rpc_context :=
   (* ❌ instruction_sequence ";" *)
   Services_registration.get_rpc_services tt.
 
-Module validation_mode.
-  Module Application.
-    Record record {block_header baker block_delay : Set} : Set := {
-      block_header : block_header;
-      baker : baker;
-      block_delay : block_delay }.
-    Arguments record : clear implicits.
-  End Application.
-  Definition Application_skeleton := Application.record.
-  
-  Module Partial_application.
-    Record record {block_header baker block_delay : Set} : Set := {
-      block_header : block_header;
-      baker : baker;
-      block_delay : block_delay }.
-    Arguments record : clear implicits.
-  End Partial_application.
-  Definition Partial_application_skeleton := Partial_application.record.
-  
-  Module Partial_construction.
-    Record record {predecessor : Set} : Set := {
-      predecessor : predecessor }.
-    Arguments record : clear implicits.
-  End Partial_construction.
-  Definition Partial_construction_skeleton := Partial_construction.record.
-  
-  Module Full_construction.
-    Record record {predecessor protocol_data baker block_delay : Set} : Set := {
-      predecessor : predecessor;
-      protocol_data : protocol_data;
-      baker : baker;
-      block_delay : block_delay }.
-    Arguments record : clear implicits.
-  End Full_construction.
-  Definition Full_construction_skeleton := Full_construction.record.
-End validation_mode.
+Module ConstructorRecordNotations_validation_mode.
+  Module validation_mode.
+    Module Application.
+      Record record {block_header baker block_delay : Set} : Set := {
+        block_header : block_header;
+        baker : baker;
+        block_delay : block_delay }.
+      Arguments record : clear implicits.
+    End Application.
+    Definition Application_skeleton := Application.record.
+    
+    Module Partial_application.
+      Record record {block_header baker block_delay : Set} : Set := {
+        block_header : block_header;
+        baker : baker;
+        block_delay : block_delay }.
+      Arguments record : clear implicits.
+    End Partial_application.
+    Definition Partial_application_skeleton := Partial_application.record.
+    
+    Module Partial_construction.
+      Record record {predecessor : Set} : Set := {
+        predecessor : predecessor }.
+      Arguments record : clear implicits.
+    End Partial_construction.
+    Definition Partial_construction_skeleton := Partial_construction.record.
+    
+    Module Full_construction.
+      Record record {predecessor protocol_data baker block_delay : Set} : Set := {
+        predecessor : predecessor;
+        protocol_data : protocol_data;
+        baker : baker;
+        block_delay : block_delay }.
+      Arguments record : clear implicits.
+    End Full_construction.
+    Definition Full_construction_skeleton := Full_construction.record.
+  End validation_mode.
+End ConstructorRecordNotations_validation_mode.
+Import ConstructorRecordNotations_validation_mode.
 
 Reserved Notation "'validation_mode.Application".
 Reserved Notation "'validation_mode.Partial_application".
@@ -166,15 +167,13 @@ and "'validation_mode.Full_construction" :=
     Alpha_context.Block_header.contents Alpha_context.public_key_hash
     Alpha_context.Period.t).
 
-Module ConstructorRecordNotations_validation_mode.
-  Module validation_mode.
-    Definition Application := 'validation_mode.Application.
-    Definition Partial_application := 'validation_mode.Partial_application.
-    Definition Partial_construction := 'validation_mode.Partial_construction.
-    Definition Full_construction := 'validation_mode.Full_construction.
-  End validation_mode.
-End ConstructorRecordNotations_validation_mode.
-Import ConstructorRecordNotations_validation_mode.
+Module validation_mode.
+  Include ConstructorRecordNotations_validation_mode.validation_mode.
+  Definition Application := 'validation_mode.Application.
+  Definition Partial_application := 'validation_mode.Partial_application.
+  Definition Partial_construction := 'validation_mode.Partial_construction.
+  Definition Full_construction := 'validation_mode.Full_construction.
+End validation_mode.
 
 Module validation_state.
   Record record : Set := Build {
@@ -216,13 +215,15 @@ Definition begin_partial_application
     Apply.begin_application ctxt chain_id block_header predecessor_timestamp in
   let mode :=
     Partial_application
-      {| validation_mode.Partial_application.block_header := block_header;
+      ({| validation_mode.Partial_application.block_header := block_header;
         validation_mode.Partial_application.baker :=
           (|Signature.Public_key|).(S.SPublic_key.__hash_value) baker;
-        validation_mode.Partial_application.block_delay := block_delay |} in
+        validation_mode.Partial_application.block_delay := block_delay |}
+        : validation_mode.Partial_application) in
   Error_monad.__return
-    {| validation_state.mode := mode; validation_state.chain_id := chain_id;
-      validation_state.ctxt := ctxt; validation_state.op_count := 0 |}.
+    ({| validation_state.mode := mode; validation_state.chain_id := chain_id;
+      validation_state.ctxt := ctxt; validation_state.op_count := 0 |}
+      : validation_state).
 
 Definition begin_application
   (chain_id : (|Chain_id|).(S.HASH.t)) (ctxt : Context.t)
@@ -241,13 +242,15 @@ Definition begin_application
     Apply.begin_application ctxt chain_id block_header predecessor_timestamp in
   let mode :=
     Application
-      {| validation_mode.Application.block_header := block_header;
+      ({| validation_mode.Application.block_header := block_header;
         validation_mode.Application.baker :=
           (|Signature.Public_key|).(S.SPublic_key.__hash_value) baker;
-        validation_mode.Application.block_delay := block_delay |} in
+        validation_mode.Application.block_delay := block_delay |}
+        : validation_mode.Application) in
   Error_monad.__return
-    {| validation_state.mode := mode; validation_state.chain_id := chain_id;
-      validation_state.ctxt := ctxt; validation_state.op_count := 0 |}.
+    ({| validation_state.mode := mode; validation_state.chain_id := chain_id;
+      validation_state.ctxt := ctxt; validation_state.op_count := 0 |}
+      : validation_state).
 
 Definition begin_construction
   (chain_id : (|Chain_id|).(S.HASH.t)) (ctxt : Context.t)
@@ -267,8 +270,8 @@ Definition begin_construction
       let=? ctxt := Apply.begin_partial_construction ctxt in
       let mode :=
         Partial_construction
-          {| validation_mode.Partial_construction.predecessor := predecessor |}
-        in
+          ({| validation_mode.Partial_construction.predecessor := predecessor |}
+            : validation_mode.Partial_construction) in
       Error_monad.__return (mode, ctxt)
     | Some proto_header =>
       let=? '(ctxt, protocol_data, baker, block_delay) :=
@@ -278,15 +281,17 @@ Definition begin_construction
         let baker := (|Signature.Public_key|).(S.SPublic_key.__hash_value) baker
           in
         Full_construction
-          {| validation_mode.Full_construction.predecessor := predecessor;
+          ({| validation_mode.Full_construction.predecessor := predecessor;
             validation_mode.Full_construction.protocol_data := protocol_data;
             validation_mode.Full_construction.baker := baker;
-            validation_mode.Full_construction.block_delay := block_delay |} in
+            validation_mode.Full_construction.block_delay := block_delay |}
+            : validation_mode.Full_construction) in
       Error_monad.__return (mode, ctxt)
     end in
   Error_monad.__return
-    {| validation_state.mode := mode; validation_state.chain_id := chain_id;
-      validation_state.ctxt := ctxt; validation_state.op_count := 0 |}.
+    ({| validation_state.mode := mode; validation_state.chain_id := chain_id;
+      validation_state.ctxt := ctxt; validation_state.op_count := 0 |}
+      : validation_state).
 
 Definition apply_operation (function_parameter : validation_state)
   : Alpha_context.packed_operation ->
@@ -321,12 +326,12 @@ Definition apply_operation (function_parameter : validation_state)
       let 'existT _ __Operation_data_'kind [shell, protocol_data] :=
         existT (A := Set)
           (fun __Operation_data_'kind =>
-            [Operation.shell_header **
-              Alpha_context.Operation.protocol_data __Operation_data_'kind]) _
+            [Operation.shell_header ** Alpha_context.Operation.protocol_data]) _
           [shell, protocol_data] in
       let operation :=
-        {| Alpha_context.operation.shell := shell;
-          Alpha_context.operation.protocol_data := protocol_data |} in
+        ({| Alpha_context.operation.shell := shell;
+          Alpha_context.operation.protocol_data := protocol_data |}
+          : Alpha_context.operation) in
       let '(predecessor, baker) :=
         match mode with
         |
@@ -393,13 +398,14 @@ Definition finalize_block (function_parameter : validation_state)
     let ctxt := Alpha_context.finalize None ctxt in
     Error_monad.__return
       (ctxt,
-        {| Apply_results.block_metadata.baker := baker;
+        ({| Apply_results.block_metadata.baker := baker;
           Apply_results.block_metadata.level := level;
           Apply_results.block_metadata.voting_period_kind := voting_period_kind;
           Apply_results.block_metadata.nonce_hash := None;
           Apply_results.block_metadata.consumed_gas := Z.zero;
           Apply_results.block_metadata.deactivated := nil;
-          Apply_results.block_metadata.balance_updates := nil |})
+          Apply_results.block_metadata.balance_updates := nil |}
+          : Apply_results.block_metadata))
   |
     Partial_application {|
       validation_mode.Partial_application.block_header := block_header;
@@ -417,13 +423,14 @@ Definition finalize_block (function_parameter : validation_state)
     let ctxt := Alpha_context.finalize None ctxt in
     Error_monad.__return
       (ctxt,
-        {| Apply_results.block_metadata.baker := baker;
+        ({| Apply_results.block_metadata.baker := baker;
           Apply_results.block_metadata.level := level;
           Apply_results.block_metadata.voting_period_kind := voting_period_kind;
           Apply_results.block_metadata.nonce_hash := None;
           Apply_results.block_metadata.consumed_gas := Z.zero;
           Apply_results.block_metadata.deactivated := nil;
-          Apply_results.block_metadata.balance_updates := nil |})
+          Apply_results.block_metadata.balance_updates := nil |}
+          : Apply_results.block_metadata))
   |
     (Application {|
       validation_mode.Application.block_header := {|
@@ -482,91 +489,113 @@ Definition compare_operations
     op1.(Alpha_context.packed_operation.protocol_data) in
   let 'existT _ __Operation_data_'kind op1 :=
     existT (A := Set)
-      (fun __Operation_data_'kind =>
-        Alpha_context.protocol_data __Operation_data_'kind) _ op1 in
+      (fun __Operation_data_'kind => Alpha_context.protocol_data) _ op1 in
   let 'Alpha_context.Operation_data op2 :=
     op2.(Alpha_context.packed_operation.protocol_data) in
   let 'existT _ __Operation_data_'kind1 op2 :=
     existT (A := Set)
-      (fun __Operation_data_'kind1 =>
-        Alpha_context.protocol_data __Operation_data_'kind1) _ op2 in
+      (fun __Operation_data_'kind1 => Alpha_context.protocol_data) _ op2 in
   match
     (op1.(Alpha_context.protocol_data.contents),
       op2.(Alpha_context.protocol_data.contents)) with
   |
     (Alpha_context.Single (Alpha_context.Endorsement _),
       Alpha_context.Single (Alpha_context.Endorsement _)) => 0
+  
   | (_, Alpha_context.Single (Alpha_context.Endorsement _)) => 1
+  
   | (Alpha_context.Single (Alpha_context.Endorsement _), _) => (-1)
+  
   |
     (Alpha_context.Single (Alpha_context.Seed_nonce_revelation _),
       Alpha_context.Single (Alpha_context.Seed_nonce_revelation _)) => 0
+  
   | (_, Alpha_context.Single (Alpha_context.Seed_nonce_revelation _)) => 1
+  
   | (Alpha_context.Single (Alpha_context.Seed_nonce_revelation _), _) => (-1)
+  
   |
     (Alpha_context.Single (Alpha_context.Double_endorsement_evidence _),
       Alpha_context.Single (Alpha_context.Double_endorsement_evidence _)) => 0
+  
   | (_, Alpha_context.Single (Alpha_context.Double_endorsement_evidence _)) => 1
+  
   | (Alpha_context.Single (Alpha_context.Double_endorsement_evidence _), _) =>
     (-1)
+  
   |
     (Alpha_context.Single (Alpha_context.Double_baking_evidence _),
       Alpha_context.Single (Alpha_context.Double_baking_evidence _)) => 0
+  
   | (_, Alpha_context.Single (Alpha_context.Double_baking_evidence _)) => 1
+  
   | (Alpha_context.Single (Alpha_context.Double_baking_evidence _), _) => (-1)
+  
   |
     (Alpha_context.Single (Alpha_context.Activate_account _),
       Alpha_context.Single (Alpha_context.Activate_account _)) => 0
+  
   | (_, Alpha_context.Single (Alpha_context.Activate_account _)) => 1
+  
   | (Alpha_context.Single (Alpha_context.Activate_account _), _) => (-1)
+  
   |
     (Alpha_context.Single (Alpha_context.Proposals _),
       Alpha_context.Single (Alpha_context.Proposals _)) => 0
+  
   | (_, Alpha_context.Single (Alpha_context.Proposals _)) => 1
+  
   | (Alpha_context.Single (Alpha_context.Proposals _), _) => (-1)
+  
   |
     (Alpha_context.Single (Alpha_context.Ballot _),
       Alpha_context.Single (Alpha_context.Ballot _)) => 0
+  
   | (_, Alpha_context.Single (Alpha_context.Ballot _)) => 1
+  
   | (Alpha_context.Single (Alpha_context.Ballot _), _) => (-1)
+  
   |
     (Alpha_context.Single (Alpha_context.Manager_operation op1),
       Alpha_context.Single (Alpha_context.Manager_operation op2)) =>
     let 'existT _ [__0, __1] [op1, op2] :=
       existT (A := [Set ** Set])
         (fun '[__0, __1] =>
-          [Alpha_context.contents.Manager_operation __0 **
-            Alpha_context.contents.Manager_operation __1]) [_, _] [op1, op2] in
+          [Alpha_context.contents.Manager_operation **
+            Alpha_context.contents.Manager_operation]) [_, _] [op1, op2] in
     Z.compare op1.(Alpha_context.contents.Manager_operation.counter)
       op2.(Alpha_context.contents.Manager_operation.counter)
+  
   |
     (Alpha_context.Cons (Alpha_context.Manager_operation op1) _,
       Alpha_context.Single (Alpha_context.Manager_operation op2)) =>
     let 'existT _ [__2, __4] [op1, op2] :=
       existT (A := [Set ** Set])
         (fun '[__2, __4] =>
-          [Alpha_context.contents.Manager_operation __2 **
-            Alpha_context.contents.Manager_operation __4]) [_, _] [op1, op2] in
+          [Alpha_context.contents.Manager_operation **
+            Alpha_context.contents.Manager_operation]) [_, _] [op1, op2] in
     Z.compare op1.(Alpha_context.contents.Manager_operation.counter)
       op2.(Alpha_context.contents.Manager_operation.counter)
+  
   |
     (Alpha_context.Single (Alpha_context.Manager_operation op1),
       Alpha_context.Cons (Alpha_context.Manager_operation op2) _) =>
     let 'existT _ [__5, __6] [op1, op2] :=
       existT (A := [Set ** Set])
         (fun '[__5, __6] =>
-          [Alpha_context.contents.Manager_operation __5 **
-            Alpha_context.contents.Manager_operation __6]) [_, _] [op1, op2] in
+          [Alpha_context.contents.Manager_operation **
+            Alpha_context.contents.Manager_operation]) [_, _] [op1, op2] in
     Z.compare op1.(Alpha_context.contents.Manager_operation.counter)
       op2.(Alpha_context.contents.Manager_operation.counter)
+  
   |
     (Alpha_context.Cons (Alpha_context.Manager_operation op1) _,
       Alpha_context.Cons (Alpha_context.Manager_operation op2) _) =>
     let 'existT _ [__10, __8] [op1, op2] :=
       existT (A := [Set ** Set])
         (fun '[__10, __8] =>
-          [Alpha_context.contents.Manager_operation __8 **
-            Alpha_context.contents.Manager_operation __10]) [_, _] [op1, op2] in
+          [Alpha_context.contents.Manager_operation **
+            Alpha_context.contents.Manager_operation]) [_, _] [op1, op2] in
     Z.compare op1.(Alpha_context.contents.Manager_operation.counter)
       op2.(Alpha_context.contents.Manager_operation.counter)
   end.
@@ -586,8 +615,8 @@ Definition init (ctxt : Context.t) (block_header : Block_header.shell_header)
     let 'existT _ [__Ex_script_'a, __Ex_script_'b] [parsed_script, ctxt] :=
       existT (A := [Set ** Set])
         (fun '[__Ex_script_'a, __Ex_script_'b] =>
-          [Script_typed_ir.script __Ex_script_'a __Ex_script_'b **
-            Alpha_context.context]) [_, _] [parsed_script, ctxt] in
+          [Script_typed_ir.script __Ex_script_'b ** Alpha_context.context]) [_,
+        _] [parsed_script, ctxt] in
     let=? '(storage, big_map_diff, ctxt) :=
       Script_ir_translator.extract_big_map_diff ctxt
         Script_ir_translator.Optimized false Script_ir_translator.no_big_map_id

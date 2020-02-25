@@ -32,7 +32,7 @@ Module Cost_of.
     let bits := Z.numbits z in
     Pervasives.op_div (Pervasives.op_plus 7 bits) 8.
   
-  Definition int_bytes {a : Set} (z : Alpha_context.Script_int.num a) : int :=
+  Definition int_bytes (z : Alpha_context.Script_int.num) : int :=
     z_bytes (Alpha_context.Script_int.to_zint z).
   
   Definition timestamp_bytes (__t_value : Alpha_context.Script_timestamp.t)
@@ -40,37 +40,46 @@ Module Cost_of.
     let z := Alpha_context.Script_timestamp.to_zint __t_value in
     z_bytes z.
   
-  Fixpoint size_of_comparable {a b : Set}
-    (wit : Script_typed_ir.comparable_struct a b) (v : a) {struct wit} : int :=
+  Fixpoint size_of_comparable {a : Set}
+    (wit : Script_typed_ir.comparable_struct) (v : a) {struct wit} : int :=
     match (wit, v) with
     | (Script_typed_ir.Int_key _, _ as v) =>
-      let v := obj_magic (Script_int_repr.num Alpha_context.Script_int.z) v in
+      let v := obj_magic Script_int_repr.num v in
       obj_magic int (int_bytes v)
+    
     | (Script_typed_ir.Nat_key _, _ as v) =>
-      let v := obj_magic (Script_int_repr.num Alpha_context.Script_int.n) v in
+      let v := obj_magic Script_int_repr.num v in
       obj_magic int (int_bytes v)
+    
     | (Script_typed_ir.String_key _, _ as v) =>
       let v := obj_magic string v in
       obj_magic int (String.length v)
+    
     | (Script_typed_ir.Bytes_key _, _ as v) =>
       let v := obj_magic MBytes.t v in
       obj_magic int (MBytes.length v)
+    
     | (Script_typed_ir.Bool_key _, _) => obj_magic int 8
+    
     | (Script_typed_ir.Key_hash_key _, _) =>
       obj_magic int (|Signature.Public_key_hash|).(S.SPublic_key_hash.size)
+    
     | (Script_typed_ir.Timestamp_key _, _ as v) =>
       let v := obj_magic Alpha_context.Script_timestamp.t v in
       obj_magic int (timestamp_bytes v)
+    
     | (Script_typed_ir.Address_key _, _) =>
       obj_magic int (|Signature.Public_key_hash|).(S.SPublic_key_hash.size)
+    
     | (Script_typed_ir.Mutez_key _, _) => obj_magic int 8
+    
     | (Script_typed_ir.Pair_key (l, _) (__r_value, _) _, _ as v) =>
       let 'existT _ [__0, __1, __Pair_key] [l, __r_value, v] :=
         obj_magic_exists (Es := [Set ** Set ** Set])
           (fun '[__0, __1, __Pair_key] =>
-            [Script_typed_ir.comparable_struct __0 Script_typed_ir.leaf **
-              Script_typed_ir.comparable_struct __1 __Pair_key ** __0 * __1])
-          [l, __r_value, v] in
+            [Script_typed_ir.comparable_struct **
+              Script_typed_ir.comparable_struct ** __0 * __1]) [l, __r_value, v]
+        in
       obj_magic int
       (let '(lval, rval) := v in
       Pervasives.op_plus (size_of_comparable l lval)
@@ -181,8 +190,7 @@ Module Cost_of.
       : Alpha_context.Gas.cost :=
       let 'existS _ _ Box := Box in
       let elt_bytes :=
-        (size_of_comparable (b := unit)) Box.(Script_typed_ir.Boxed_set.elt_ty)
-          __elt_value in
+        size_of_comparable Box.(Script_typed_ir.Boxed_set.elt_ty) __elt_value in
       Alpha_context.Gas.atomic_step_cost
         (Pervasives.op_star
           (Pervasives.op_plus 1 (Pervasives.op_div elt_bytes 82))
@@ -195,8 +203,8 @@ Module Cost_of.
       fun Box =>
         let 'existS _ _ Box := Box in
         let elt_bytes :=
-          (size_of_comparable (b := unit))
-            Box.(Script_typed_ir.Boxed_set.elt_ty) __elt_value in
+          size_of_comparable Box.(Script_typed_ir.Boxed_set.elt_ty) __elt_value
+          in
         Alpha_context.Gas.atomic_step_cost
           (Pervasives.op_star
             (Pervasives.op_plus 1 (Pervasives.op_div elt_bytes 82))
@@ -220,8 +228,7 @@ Module Cost_of.
       let 'existS _ _ Box := Box in
       let map_card := Pervasives.snd Box.(Script_typed_ir.Boxed_map.boxed) in
       let key_bytes :=
-        (size_of_comparable (b := unit)) Box.(Script_typed_ir.Boxed_map.key_ty)
-          __key_value in
+        size_of_comparable Box.(Script_typed_ir.Boxed_map.key_ty) __key_value in
       Alpha_context.Gas.atomic_step_cost
         (Pervasives.op_star
           (Pervasives.op_plus 1 (Pervasives.op_div key_bytes 70))
@@ -239,8 +246,7 @@ Module Cost_of.
       let 'existS _ _ Box := Box in
       let map_card := Pervasives.snd Box.(Script_typed_ir.Boxed_map.boxed) in
       let key_bytes :=
-        (size_of_comparable (b := unit)) Box.(Script_typed_ir.Boxed_map.key_ty)
-          __key_value in
+        size_of_comparable Box.(Script_typed_ir.Boxed_map.key_ty) __key_value in
       Alpha_context.Gas.atomic_step_cost
         (Pervasives.op_star
           (Pervasives.op_plus 1 (Pervasives.op_div key_bytes 38))
@@ -249,17 +255,17 @@ Module Cost_of.
     Definition map_size : Alpha_context.Gas.cost :=
       Alpha_context.Gas.atomic_step_cost 10.
     
-    Definition add_timestamp {a : Set}
+    Definition add_timestamp
       (t1 : Alpha_context.Script_timestamp.t)
-      (t2 : Alpha_context.Script_int.num a) : Alpha_context.Gas.cost :=
+      (t2 : Alpha_context.Script_int.num) : Alpha_context.Gas.cost :=
       let bytes1 := timestamp_bytes t1 in
       let bytes2 := int_bytes t2 in
       Alpha_context.Gas.atomic_step_cost
         (Pervasives.op_plus 51
           (Pervasives.op_div ((|Compare.Int|).(Compare.S.max) bytes1 bytes2) 62)).
     
-    Definition sub_timestamp {A : Set}
-      : Alpha_context.Script_timestamp.t -> Alpha_context.Script_int.num A ->
+    Definition sub_timestamp
+      : Alpha_context.Script_timestamp.t -> Alpha_context.Script_int.num ->
       Alpha_context.Gas.cost := add_timestamp.
     
     Definition diff_timestamps
@@ -310,7 +316,7 @@ Module Cost_of.
       let '_ := function_parameter in
       Alpha_context.Gas.atomic_step_cost 10.
     
-    Definition abs {A : Set} (__int_value : Alpha_context.Script_int.num A)
+    Definition abs (__int_value : Alpha_context.Script_int.num)
       : Alpha_context.Gas.cost :=
       Alpha_context.Gas.atomic_step_cost
         (Pervasives.op_plus 61 (Pervasives.op_div (int_bytes __int_value) 70)).
@@ -318,24 +324,24 @@ Module Cost_of.
     Definition __int_value {A : Set} (_int : A) : Alpha_context.Gas.cost :=
       Alpha_context.Gas.free.
     
-    Definition neg {A : Set}
-      : Alpha_context.Script_int.num A -> Alpha_context.Gas.cost := abs.
+    Definition neg : Alpha_context.Script_int.num -> Alpha_context.Gas.cost :=
+      abs.
     
-    Definition add {A B : Set}
-      (i1 : Alpha_context.Script_int.num A)
-      (i2 : Alpha_context.Script_int.num B) : Alpha_context.Gas.cost :=
+    Definition add
+      (i1 : Alpha_context.Script_int.num) (i2 : Alpha_context.Script_int.num)
+      : Alpha_context.Gas.cost :=
       Alpha_context.Gas.atomic_step_cost
         (Pervasives.op_plus 51
           (Pervasives.op_div
             ((|Compare.Int|).(Compare.S.max) (int_bytes i1) (int_bytes i2)) 62)).
     
-    Definition sub {A B : Set}
-      : Alpha_context.Script_int.num A -> Alpha_context.Script_int.num B ->
+    Definition sub
+      : Alpha_context.Script_int.num -> Alpha_context.Script_int.num ->
       Alpha_context.Gas.cost := add.
     
-    Definition mul {A B : Set}
-      (i1 : Alpha_context.Script_int.num A)
-      (i2 : Alpha_context.Script_int.num B) : Alpha_context.Gas.cost :=
+    Definition mul
+      (i1 : Alpha_context.Script_int.num) (i2 : Alpha_context.Script_int.num)
+      : Alpha_context.Gas.cost :=
       let __bytes_value :=
         (|Compare.Int|).(Compare.S.max) (int_bytes i1) (int_bytes i2) in
       Alpha_context.Gas.atomic_step_cost
@@ -351,9 +357,9 @@ Module Cost_of.
       else
         0.
     
-    Definition div {A B : Set}
-      (i1 : Alpha_context.Script_int.num A)
-      (i2 : Alpha_context.Script_int.num B) : Alpha_context.Gas.cost :=
+    Definition div
+      (i1 : Alpha_context.Script_int.num) (i2 : Alpha_context.Script_int.num)
+      : Alpha_context.Gas.cost :=
       let bytes1 := int_bytes i1 in
       let bytes2 := int_bytes i2 in
       let cost :=
@@ -369,29 +375,29 @@ Module Cost_of.
     Definition shift_right {A B : Set} (_i : A) (_shift_bits : B)
       : Alpha_context.Gas.cost := Alpha_context.Gas.atomic_step_cost 30.
     
-    Definition logor {A B : Set}
-      (i1 : Alpha_context.Script_int.num A)
-      (i2 : Alpha_context.Script_int.num B) : Alpha_context.Gas.cost :=
+    Definition logor
+      (i1 : Alpha_context.Script_int.num) (i2 : Alpha_context.Script_int.num)
+      : Alpha_context.Gas.cost :=
       let bytes1 := int_bytes i1 in
       let bytes2 := int_bytes i2 in
       Alpha_context.Gas.atomic_step_cost
         (Pervasives.op_plus 51
           (Pervasives.op_div ((|Compare.Int|).(Compare.S.max) bytes1 bytes2) 70)).
     
-    Definition logand {A B : Set}
-      (i1 : Alpha_context.Script_int.num A)
-      (i2 : Alpha_context.Script_int.num B) : Alpha_context.Gas.cost :=
+    Definition logand
+      (i1 : Alpha_context.Script_int.num) (i2 : Alpha_context.Script_int.num)
+      : Alpha_context.Gas.cost :=
       let bytes1 := int_bytes i1 in
       let bytes2 := int_bytes i2 in
       Alpha_context.Gas.atomic_step_cost
         (Pervasives.op_plus 51
           (Pervasives.op_div ((|Compare.Int|).(Compare.S.min) bytes1 bytes2) 70)).
     
-    Definition logxor {A B : Set}
-      : Alpha_context.Script_int.num A -> Alpha_context.Script_int.num B ->
+    Definition logxor
+      : Alpha_context.Script_int.num -> Alpha_context.Script_int.num ->
       Alpha_context.Gas.cost := logor.
     
-    Definition lognot {A : Set} (i : Alpha_context.Script_int.num A)
+    Definition lognot (i : Alpha_context.Script_int.num)
       : Alpha_context.Gas.cost :=
       Alpha_context.Gas.atomic_step_cost
         (Pervasives.op_plus 51 (Pervasives.op_div (int_bytes i) 20)).
@@ -429,9 +435,9 @@ Module Cost_of.
         let '_ := function_parameter in
         Alpha_context.Gas.atomic_step_cost 30.
     
-    Definition compare_zint {A B : Set}
-      (i1 : Alpha_context.Script_int.num A)
-      (i2 : Alpha_context.Script_int.num B) : Alpha_context.Gas.cost :=
+    Definition compare_zint
+      (i1 : Alpha_context.Script_int.num) (i2 : Alpha_context.Script_int.num)
+      : Alpha_context.Gas.cost :=
       Alpha_context.Gas.atomic_step_cost
         (Pervasives.op_plus 51
           (Pervasives.op_div
@@ -571,53 +577,58 @@ Module Cost_of.
       Alpha_context.Gas.op_plusat (Alpha_context.Gas.alloc_cost 8)
         (Alpha_context.Gas.step_cost 1).
     
-    Fixpoint compare {a s : Set}
-      (ty : Script_typed_ir.comparable_struct a s) (x : a) (y : a) {struct ty}
+    Fixpoint compare {a : Set}
+      (ty : Script_typed_ir.comparable_struct) (x : a) (y : a) {struct ty}
       : Alpha_context.Gas.cost :=
       match (ty, x, y) with
       | (Script_typed_ir.Bool_key _, _ as x, _ as y) =>
         let '[x, y] := obj_magic [bool ** bool] [x, y] in
         obj_magic Alpha_context.Gas.cost (compare_bool x y)
+      
       | (Script_typed_ir.String_key _, _ as x, _ as y) =>
         let '[x, y] := obj_magic [string ** string] [x, y] in
         obj_magic Alpha_context.Gas.cost (compare_string x y)
+      
       | (Script_typed_ir.Bytes_key _, _ as x, _ as y) =>
         let '[x, y] := obj_magic [MBytes.t ** MBytes.t] [x, y] in
         obj_magic Alpha_context.Gas.cost (compare_bytes x y)
+      
       | (Script_typed_ir.Mutez_key _, x, y) =>
         let '[x, y] := obj_magic [a ** a] [x, y] in
         obj_magic Alpha_context.Gas.cost (compare_tez x y)
+      
       | (Script_typed_ir.Int_key _, _ as x, _ as y) =>
         let '[x, y] :=
-          obj_magic
-            [Script_int_repr.num Alpha_context.Script_int.z **
-              Script_int_repr.num Alpha_context.Script_int.z] [x, y] in
+          obj_magic [Script_int_repr.num ** Script_int_repr.num] [x, y] in
         obj_magic Alpha_context.Gas.cost (compare_zint x y)
+      
       | (Script_typed_ir.Nat_key _, _ as x, _ as y) =>
         let '[x, y] :=
-          obj_magic
-            [Script_int_repr.num Alpha_context.Script_int.n **
-              Script_int_repr.num Alpha_context.Script_int.n] [x, y] in
+          obj_magic [Script_int_repr.num ** Script_int_repr.num] [x, y] in
         obj_magic Alpha_context.Gas.cost (compare_zint x y)
+      
       | (Script_typed_ir.Key_hash_key _, x, y) =>
         let '[x, y] := obj_magic [a ** a] [x, y] in
         obj_magic Alpha_context.Gas.cost (compare_key_hash x y)
+      
       | (Script_typed_ir.Timestamp_key _, _ as x, _ as y) =>
         let '[x, y] :=
           obj_magic
             [Alpha_context.Script_timestamp.t **
               Alpha_context.Script_timestamp.t] [x, y] in
         obj_magic Alpha_context.Gas.cost (compare_timestamp x y)
+      
       | (Script_typed_ir.Address_key _, x, y) =>
         let '[x, y] := obj_magic [a ** a] [x, y] in
         obj_magic Alpha_context.Gas.cost (compare_address x y)
+      
       | (Script_typed_ir.Pair_key (tl, _) (tr, _) _, _ as x, _ as y) =>
         let 'existT _ [__0, __1, __Pair_key] [tl, tr, x, y] :=
           obj_magic_exists (Es := [Set ** Set ** Set])
             (fun '[__0, __1, __Pair_key] =>
-              [Script_typed_ir.comparable_struct __0 Script_typed_ir.leaf **
-                Script_typed_ir.comparable_struct __1 __Pair_key ** __0 * __1 **
-                __0 * __1]) [tl, tr, x, y] in
+              [Script_typed_ir.comparable_struct **
+                Script_typed_ir.comparable_struct ** __0 * __1 ** __0 * __1])
+            [tl, tr, x, y] in
         obj_magic Alpha_context.Gas.cost
         (let '(xl, xr) := x in
         let '(yl, yr) := y in
@@ -717,145 +728,270 @@ Module Cost_of.
     Definition type_ (nb_args : int) : Alpha_context.Gas.cost :=
       Alpha_context.Gas.alloc_cost (Pervasives.op_plus nb_args 1).
     
-    Definition instr {a b : Set} (i : Script_typed_ir.instr b a)
-      : Alpha_context.Gas.cost :=
+    Definition instr (i : Script_typed_ir.instr) : Alpha_context.Gas.cost :=
       Alpha_context.Gas.op_plusat (Alpha_context.Gas.alloc_cost 1)
         match i with
         | Script_typed_ir.Drop => Alpha_context.Gas.alloc_cost 0
+        
         | Script_typed_ir.Dup => Alpha_context.Gas.alloc_cost 1
+        
         | Script_typed_ir.Swap => Alpha_context.Gas.alloc_cost 0
+        
         | Script_typed_ir.Const _ => Alpha_context.Gas.alloc_cost 1
+        
         | Script_typed_ir.Cons_pair => Alpha_context.Gas.alloc_cost 2
+        
         | Script_typed_ir.Car => Alpha_context.Gas.alloc_cost 1
+        
         | Script_typed_ir.Cdr => Alpha_context.Gas.alloc_cost 1
+        
         | Script_typed_ir.Cons_some => Alpha_context.Gas.alloc_cost 2
+        
         | Script_typed_ir.Cons_none _ => Alpha_context.Gas.alloc_cost 3
+        
         | Script_typed_ir.If_none _ _ => Alpha_context.Gas.alloc_cost 2
+        
         | Script_typed_ir.Left => Alpha_context.Gas.alloc_cost 3
+        
         | Script_typed_ir.Right => Alpha_context.Gas.alloc_cost 3
+        
         | Script_typed_ir.If_left _ _ => Alpha_context.Gas.alloc_cost 2
+        
         | Script_typed_ir.Cons_list => Alpha_context.Gas.alloc_cost 1
+        
         | Script_typed_ir.Nil => Alpha_context.Gas.alloc_cost 1
+        
         | Script_typed_ir.If_cons _ _ => Alpha_context.Gas.alloc_cost 2
+        
         | Script_typed_ir.List_map _ => Alpha_context.Gas.alloc_cost 5
+        
         | Script_typed_ir.List_iter _ => Alpha_context.Gas.alloc_cost 4
+        
         | Script_typed_ir.List_size => Alpha_context.Gas.alloc_cost 1
+        
         | Script_typed_ir.Empty_set _ => Alpha_context.Gas.alloc_cost 1
+        
         | Script_typed_ir.Set_iter _ => Alpha_context.Gas.alloc_cost 4
+        
         | Script_typed_ir.Set_mem => Alpha_context.Gas.alloc_cost 1
+        
         | Script_typed_ir.Set_update => Alpha_context.Gas.alloc_cost 1
+        
         | Script_typed_ir.Set_size => Alpha_context.Gas.alloc_cost 1
+        
         | Script_typed_ir.Empty_map _ _ => Alpha_context.Gas.alloc_cost 2
+        
         | Script_typed_ir.Map_map _ => Alpha_context.Gas.alloc_cost 5
+        
         | Script_typed_ir.Map_iter _ => Alpha_context.Gas.alloc_cost 4
+        
         | Script_typed_ir.Map_mem => Alpha_context.Gas.alloc_cost 1
+        
         | Script_typed_ir.Map_get => Alpha_context.Gas.alloc_cost 1
+        
         | Script_typed_ir.Map_update => Alpha_context.Gas.alloc_cost 1
+        
         | Script_typed_ir.Map_size => Alpha_context.Gas.alloc_cost 1
+        
         | Script_typed_ir.Empty_big_map _ _ => Alpha_context.Gas.alloc_cost 2
+        
         | Script_typed_ir.Big_map_mem => Alpha_context.Gas.alloc_cost 1
+        
         | Script_typed_ir.Big_map_get => Alpha_context.Gas.alloc_cost 1
+        
         | Script_typed_ir.Big_map_update => Alpha_context.Gas.alloc_cost 1
+        
         | Script_typed_ir.Concat_string => Alpha_context.Gas.alloc_cost 1
+        
         | Script_typed_ir.Concat_string_pair => Alpha_context.Gas.alloc_cost 1
+        
         | Script_typed_ir.Concat_bytes => Alpha_context.Gas.alloc_cost 1
+        
         | Script_typed_ir.Concat_bytes_pair => Alpha_context.Gas.alloc_cost 1
+        
         | Script_typed_ir.Slice_string => Alpha_context.Gas.alloc_cost 1
+        
         | Script_typed_ir.Slice_bytes => Alpha_context.Gas.alloc_cost 1
+        
         | Script_typed_ir.String_size => Alpha_context.Gas.alloc_cost 1
+        
         | Script_typed_ir.Bytes_size => Alpha_context.Gas.alloc_cost 1
+        
         | Script_typed_ir.Add_seconds_to_timestamp =>
           Alpha_context.Gas.alloc_cost 1
+        
         | Script_typed_ir.Add_timestamp_to_seconds =>
           Alpha_context.Gas.alloc_cost 1
+        
         | Script_typed_ir.Sub_timestamp_seconds =>
           Alpha_context.Gas.alloc_cost 1
+        
         | Script_typed_ir.Diff_timestamps => Alpha_context.Gas.alloc_cost 1
+        
         | Script_typed_ir.Add_tez => Alpha_context.Gas.alloc_cost 1
+        
         | Script_typed_ir.Sub_tez => Alpha_context.Gas.alloc_cost 1
+        
         | Script_typed_ir.Mul_teznat => Alpha_context.Gas.alloc_cost 1
+        
         | Script_typed_ir.Mul_nattez => Alpha_context.Gas.alloc_cost 1
+        
         | Script_typed_ir.Ediv_teznat => Alpha_context.Gas.alloc_cost 1
+        
         | Script_typed_ir.Ediv_tez => Alpha_context.Gas.alloc_cost 1
+        
         | Script_typed_ir.Or => Alpha_context.Gas.alloc_cost 1
+        
         | Script_typed_ir.And => Alpha_context.Gas.alloc_cost 1
+        
         | Script_typed_ir.Xor => Alpha_context.Gas.alloc_cost 1
+        
         | Script_typed_ir.Not => Alpha_context.Gas.alloc_cost 1
+        
         | Script_typed_ir.Is_nat => Alpha_context.Gas.alloc_cost 1
+        
         | Script_typed_ir.Neg_nat => Alpha_context.Gas.alloc_cost 1
+        
         | Script_typed_ir.Neg_int => Alpha_context.Gas.alloc_cost 1
+        
         | Script_typed_ir.Abs_int => Alpha_context.Gas.alloc_cost 1
+        
         | Script_typed_ir.Int_nat => Alpha_context.Gas.alloc_cost 1
+        
         | Script_typed_ir.Add_intint => Alpha_context.Gas.alloc_cost 1
+        
         | Script_typed_ir.Add_intnat => Alpha_context.Gas.alloc_cost 1
+        
         | Script_typed_ir.Add_natint => Alpha_context.Gas.alloc_cost 1
+        
         | Script_typed_ir.Add_natnat => Alpha_context.Gas.alloc_cost 1
+        
         | Script_typed_ir.Sub_int => Alpha_context.Gas.alloc_cost 1
+        
         | Script_typed_ir.Mul_intint => Alpha_context.Gas.alloc_cost 1
+        
         | Script_typed_ir.Mul_intnat => Alpha_context.Gas.alloc_cost 1
+        
         | Script_typed_ir.Mul_natint => Alpha_context.Gas.alloc_cost 1
+        
         | Script_typed_ir.Mul_natnat => Alpha_context.Gas.alloc_cost 1
+        
         | Script_typed_ir.Ediv_intint => Alpha_context.Gas.alloc_cost 1
+        
         | Script_typed_ir.Ediv_intnat => Alpha_context.Gas.alloc_cost 1
+        
         | Script_typed_ir.Ediv_natint => Alpha_context.Gas.alloc_cost 1
+        
         | Script_typed_ir.Ediv_natnat => Alpha_context.Gas.alloc_cost 1
+        
         | Script_typed_ir.Lsl_nat => Alpha_context.Gas.alloc_cost 1
+        
         | Script_typed_ir.Lsr_nat => Alpha_context.Gas.alloc_cost 1
+        
         | Script_typed_ir.Or_nat => Alpha_context.Gas.alloc_cost 1
+        
         | Script_typed_ir.And_nat => Alpha_context.Gas.alloc_cost 1
+        
         | Script_typed_ir.And_int_nat => Alpha_context.Gas.alloc_cost 1
+        
         | Script_typed_ir.Xor_nat => Alpha_context.Gas.alloc_cost 1
+        
         | Script_typed_ir.Not_nat => Alpha_context.Gas.alloc_cost 1
+        
         | Script_typed_ir.Not_int => Alpha_context.Gas.alloc_cost 1
+        
         | Script_typed_ir.Seq _ _ => Alpha_context.Gas.alloc_cost 8
+        
         | Script_typed_ir.If _ _ => Alpha_context.Gas.alloc_cost 8
+        
         | Script_typed_ir.Loop _ => Alpha_context.Gas.alloc_cost 4
+        
         | Script_typed_ir.Loop_left _ => Alpha_context.Gas.alloc_cost 5
+        
         | Script_typed_ir.Dip _ => Alpha_context.Gas.alloc_cost 4
+        
         | Script_typed_ir.Exec => Alpha_context.Gas.alloc_cost 1
+        
         | Script_typed_ir.Apply _ => Alpha_context.Gas.alloc_cost 1
+        
         | Script_typed_ir.Lambda _ => Alpha_context.Gas.alloc_cost 2
+        
         | Script_typed_ir.Failwith _ => Alpha_context.Gas.alloc_cost 1
+        
         | Script_typed_ir.Nop => Alpha_context.Gas.alloc_cost 0
+        
         | Script_typed_ir.Compare _ => Alpha_context.Gas.alloc_cost 1
+        
         | Script_typed_ir.Eq => Alpha_context.Gas.alloc_cost 1
+        
         | Script_typed_ir.Neq => Alpha_context.Gas.alloc_cost 1
+        
         | Script_typed_ir.Lt => Alpha_context.Gas.alloc_cost 1
+        
         | Script_typed_ir.Gt => Alpha_context.Gas.alloc_cost 1
+        
         | Script_typed_ir.Le => Alpha_context.Gas.alloc_cost 1
+        
         | Script_typed_ir.Ge => Alpha_context.Gas.alloc_cost 1
+        
         | Script_typed_ir.Address => Alpha_context.Gas.alloc_cost 1
+        
         | Script_typed_ir.Contract _ _ => Alpha_context.Gas.alloc_cost 2
+        
         | Script_typed_ir.Transfer_tokens => Alpha_context.Gas.alloc_cost 1
+        
         | Script_typed_ir.Create_account => Alpha_context.Gas.alloc_cost 2
+        
         | Script_typed_ir.Implicit_account => Alpha_context.Gas.alloc_cost 1
+        
         | Script_typed_ir.Create_contract _ _ _ _ =>
           Alpha_context.Gas.alloc_cost 8
+        
         | Script_typed_ir.Create_contract_2 _ _ _ _ =>
           Alpha_context.Gas.alloc_cost 7
+        
         | Script_typed_ir.Set_delegate => Alpha_context.Gas.alloc_cost 1
+        
         | Script_typed_ir.Now => Alpha_context.Gas.alloc_cost 1
+        
         | Script_typed_ir.Balance => Alpha_context.Gas.alloc_cost 1
+        
         | Script_typed_ir.Check_signature => Alpha_context.Gas.alloc_cost 1
+        
         | Script_typed_ir.Hash_key => Alpha_context.Gas.alloc_cost 1
+        
         | Script_typed_ir.Pack _ => Alpha_context.Gas.alloc_cost 2
+        
         | Script_typed_ir.Unpack _ => Alpha_context.Gas.alloc_cost 2
+        
         | Script_typed_ir.Blake2b => Alpha_context.Gas.alloc_cost 1
+        
         | Script_typed_ir.Sha256 => Alpha_context.Gas.alloc_cost 1
+        
         | Script_typed_ir.Sha512 => Alpha_context.Gas.alloc_cost 1
+        
         | Script_typed_ir.Steps_to_quota => Alpha_context.Gas.alloc_cost 1
+        
         | Script_typed_ir.Source => Alpha_context.Gas.alloc_cost 1
+        
         | Script_typed_ir.Sender => Alpha_context.Gas.alloc_cost 1
+        
         | Script_typed_ir.Self _ _ => Alpha_context.Gas.alloc_cost 2
+        
         | Script_typed_ir.Amount => Alpha_context.Gas.alloc_cost 1
+        
         | Script_typed_ir.Dig n _ =>
           Alpha_context.Gas.op_starat n (Alpha_context.Gas.alloc_cost 1)
+        
         | Script_typed_ir.Dug n _ =>
           Alpha_context.Gas.op_starat n (Alpha_context.Gas.alloc_cost 1)
+        
         | Script_typed_ir.Dipn n _ _ =>
           Alpha_context.Gas.op_starat n (Alpha_context.Gas.alloc_cost 1)
+        
         | Script_typed_ir.Dropn n _ =>
           Alpha_context.Gas.op_starat n (Alpha_context.Gas.alloc_cost 1)
+        
         | Script_typed_ir.ChainId => Alpha_context.Gas.alloc_cost 1
         end.
   End Typechecking.
@@ -886,7 +1022,7 @@ Module Cost_of.
     Definition z (i : Z.t) : Alpha_context.Gas.cost :=
       Alpha_context.Script.int_node_cost i.
     
-    Definition __int_value {A : Set} (i : Alpha_context.Script_int.num A)
+    Definition __int_value (i : Alpha_context.Script_int.num)
       : Alpha_context.Gas.cost :=
       Alpha_context.Script.int_node_cost (Alpha_context.Script_int.to_zint i).
     
@@ -895,7 +1031,7 @@ Module Cost_of.
     
     Definition timestamp (x : Alpha_context.Script_timestamp.t)
       : Alpha_context.Gas.cost :=
-      (__int_value (A := unit))
+      __int_value
         (Alpha_context.Script_int.of_zint
           (Alpha_context.Script_timestamp.to_zint x)).
     

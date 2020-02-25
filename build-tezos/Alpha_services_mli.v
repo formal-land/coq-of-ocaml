@@ -23,26 +23,16 @@ Import Alpha_context.
 
 Module Seed.
   Parameter get : forall {E F H J K a b c i o q : Set},
-    (((RPC_service.t
-      ((* `PUT *) unit + (* `GET *) unit + (* `DELETE *) unit + (* `POST *) unit
-        + (* `PATCH *) unit) RPC_context.t RPC_context.t q i o -> a -> q -> i ->
+    (((RPC_service.t RPC_context.t RPC_context.t q i o -> a -> q -> i ->
     Lwt.t (Error_monad.shell_tzresult o)) * (E * q * i * o)) *
-      (((RPC_service.t
-        ((* `PUT *) unit + (* `GET *) unit + (* `DELETE *) unit +
-          (* `POST *) unit + (* `PATCH *) unit) RPC_context.t
-        (RPC_context.t * a) q i o -> a -> a -> q -> i ->
-      Lwt.t (Error_monad.shell_tzresult o)) * (F * a * q * i * o)) *
-        (((RPC_service.t
-          ((* `PUT *) unit + (* `GET *) unit + (* `DELETE *) unit +
-            (* `POST *) unit + (* `PATCH *) unit) RPC_context.t
-          ((RPC_context.t * a) * b) q i o -> a -> a -> b -> q -> i ->
-        Lwt.t (Error_monad.shell_tzresult o)) * (H * a * b * q * i * o)) *
-          (((RPC_service.t
-            ((* `PUT *) unit + (* `GET *) unit + (* `DELETE *) unit +
-              (* `POST *) unit + (* `PATCH *) unit) RPC_context.t
-            (((RPC_context.t * a) * b) * c) q i o -> a -> a -> b -> c -> q ->
-          i -> Lwt.t (Error_monad.shell_tzresult o)) *
-            (J * a * b * c * q * i * o)) * K)))) * K * a -> a ->
+      (((RPC_service.t RPC_context.t (RPC_context.t * a) q i o -> a -> a -> q ->
+      i -> Lwt.t (Error_monad.shell_tzresult o)) * (F * a * q * i * o)) *
+        (((RPC_service.t RPC_context.t ((RPC_context.t * a) * b) q i o -> a ->
+        a -> b -> q -> i -> Lwt.t (Error_monad.shell_tzresult o)) *
+          (H * a * b * q * i * o)) *
+          (((RPC_service.t RPC_context.t (((RPC_context.t * a) * b) * c) q i o
+          -> a -> a -> b -> c -> q -> i -> Lwt.t (Error_monad.shell_tzresult o))
+            * (J * a * b * c * q * i * o)) * K)))) * K * a -> a ->
     Lwt.t (Error_monad.shell_tzresult Alpha_context.Seed.seed).
 End Seed.
 
@@ -53,26 +43,16 @@ Module Nonce.
   | Forgotten : info.
   
   Parameter get : forall {E F H J K a b c i o q : Set},
-    (((RPC_service.t
-      ((* `PUT *) unit + (* `GET *) unit + (* `DELETE *) unit + (* `POST *) unit
-        + (* `PATCH *) unit) RPC_context.t RPC_context.t q i o -> a -> q -> i ->
+    (((RPC_service.t RPC_context.t RPC_context.t q i o -> a -> q -> i ->
     Lwt.t (Error_monad.shell_tzresult o)) * (E * q * i * o)) *
-      (((RPC_service.t
-        ((* `PUT *) unit + (* `GET *) unit + (* `DELETE *) unit +
-          (* `POST *) unit + (* `PATCH *) unit) RPC_context.t
-        (RPC_context.t * a) q i o -> a -> a -> q -> i ->
-      Lwt.t (Error_monad.shell_tzresult o)) * (F * a * q * i * o)) *
-        (((RPC_service.t
-          ((* `PUT *) unit + (* `GET *) unit + (* `DELETE *) unit +
-            (* `POST *) unit + (* `PATCH *) unit) RPC_context.t
-          ((RPC_context.t * a) * b) q i o -> a -> a -> b -> q -> i ->
-        Lwt.t (Error_monad.shell_tzresult o)) * (H * a * b * q * i * o)) *
-          (((RPC_service.t
-            ((* `PUT *) unit + (* `GET *) unit + (* `DELETE *) unit +
-              (* `POST *) unit + (* `PATCH *) unit) RPC_context.t
-            (((RPC_context.t * a) * b) * c) q i o -> a -> a -> b -> c -> q ->
-          i -> Lwt.t (Error_monad.shell_tzresult o)) *
-            (J * a * b * c * q * i * o)) * K)))) * K * a -> a ->
+      (((RPC_service.t RPC_context.t (RPC_context.t * a) q i o -> a -> a -> q ->
+      i -> Lwt.t (Error_monad.shell_tzresult o)) * (F * a * q * i * o)) *
+        (((RPC_service.t RPC_context.t ((RPC_context.t * a) * b) q i o -> a ->
+        a -> b -> q -> i -> Lwt.t (Error_monad.shell_tzresult o)) *
+          (H * a * b * q * i * o)) *
+          (((RPC_service.t RPC_context.t (((RPC_context.t * a) * b) * c) q i o
+          -> a -> a -> b -> c -> q -> i -> Lwt.t (Error_monad.shell_tzresult o))
+            * (J * a * b * c * q * i * o)) * K)))) * K * a -> a ->
     Alpha_context.Raw_level.t -> Lwt.t (Error_monad.shell_tzresult info).
 End Nonce.
 

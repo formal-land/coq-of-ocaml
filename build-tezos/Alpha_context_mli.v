@@ -345,14 +345,17 @@ Module Cycle.
 End Cycle.
 
 Module Gas.
-  Module t.
-    Module Limited.
-      Record record {remaining : Set} : Set := {
-        remaining : remaining }.
-      Arguments record : clear implicits.
-    End Limited.
-    Definition Limited_skeleton := Limited.record.
-  End t.
+  Module ConstructorRecordNotations_t.
+    Module t.
+      Module Limited.
+        Record record {remaining : Set} : Set := {
+          remaining : remaining }.
+        Arguments record : clear implicits.
+      End Limited.
+      Definition Limited_skeleton := Limited.record.
+    End t.
+  End ConstructorRecordNotations_t.
+  Import ConstructorRecordNotations_t.
   
   Reserved Notation "'t.Limited".
   
@@ -362,12 +365,10 @@ Module Gas.
   
   where "'t.Limited" := (t.Limited_skeleton Z.t).
   
-  Module ConstructorRecordNotations_t.
-    Module t.
-      Definition Limited := 't.Limited.
-    End t.
-  End ConstructorRecordNotations_t.
-  Import ConstructorRecordNotations_t.
+  Module t.
+    Include ConstructorRecordNotations_t.t.
+    Definition Limited := 't.Limited.
+  End t.
   
   Parameter encoding : Data_encoding.encoding t.
   
@@ -441,11 +442,11 @@ Module Script_timestamp.
   
   Parameter of_string : string -> option t.
   
-  Parameter diff : t -> t -> Script_int.num Script_int.z.
+  Parameter diff : t -> t -> Script_int.num.
   
-  Parameter add_delta : t -> Script_int.num Script_int.z -> t.
+  Parameter add_delta : t -> Script_int.num -> t.
   
-  Parameter sub_delta : t -> Script_int.num Script_int.z -> t.
+  Parameter sub_delta : t -> Script_int.num -> t.
   
   Parameter now : context -> t.
   
@@ -1542,26 +1543,29 @@ Module Contract.
   Parameter originated_from_current_nonce :
     context -> context -> Lwt.t (Error_monad.tzresult (list contract)).
   
-  Module big_map_diff_item.
-    Module Update.
-      Record record {big_map diff_key diff_key_hash diff_value : Set} : Set := {
-        big_map : big_map;
-        diff_key : diff_key;
-        diff_key_hash : diff_key_hash;
-        diff_value : diff_value }.
-      Arguments record : clear implicits.
-    End Update.
-    Definition Update_skeleton := Update.record.
-    
-    Module Alloc.
-      Record record {big_map key_type value_type : Set} : Set := {
-        big_map : big_map;
-        key_type : key_type;
-        value_type : value_type }.
-      Arguments record : clear implicits.
-    End Alloc.
-    Definition Alloc_skeleton := Alloc.record.
-  End big_map_diff_item.
+  Module ConstructorRecordNotations_big_map_diff_item.
+    Module big_map_diff_item.
+      Module Update.
+        Record record {big_map diff_key diff_key_hash diff_value : Set} : Set := {
+          big_map : big_map;
+          diff_key : diff_key;
+          diff_key_hash : diff_key_hash;
+          diff_value : diff_value }.
+        Arguments record : clear implicits.
+      End Update.
+      Definition Update_skeleton := Update.record.
+      
+      Module Alloc.
+        Record record {big_map key_type value_type : Set} : Set := {
+          big_map : big_map;
+          key_type : key_type;
+          value_type : value_type }.
+        Arguments record : clear implicits.
+      End Alloc.
+      Definition Alloc_skeleton := Alloc.record.
+    End big_map_diff_item.
+  End ConstructorRecordNotations_big_map_diff_item.
+  Import ConstructorRecordNotations_big_map_diff_item.
   
   Reserved Notation "'big_map_diff_item.Update".
   Reserved Notation "'big_map_diff_item.Alloc".
@@ -1578,13 +1582,11 @@ Module Contract.
   and "'big_map_diff_item.Alloc" :=
     (big_map_diff_item.Alloc_skeleton Big_map.id Script.expr Script.expr).
   
-  Module ConstructorRecordNotations_big_map_diff_item.
-    Module big_map_diff_item.
-      Definition Update := 'big_map_diff_item.Update.
-      Definition Alloc := 'big_map_diff_item.Alloc.
-    End big_map_diff_item.
-  End ConstructorRecordNotations_big_map_diff_item.
-  Import ConstructorRecordNotations_big_map_diff_item.
+  Module big_map_diff_item.
+    Include ConstructorRecordNotations_big_map_diff_item.big_map_diff_item.
+    Definition Update := 'big_map_diff_item.Update.
+    Definition Alloc := 'big_map_diff_item.Alloc.
+  End big_map_diff_item.
   
   Definition big_map_diff : Set := list big_map_diff_item.
   
@@ -1919,114 +1921,110 @@ Module Kind.
   Inductive delegation : Set :=
   | Delegation_kind : delegation.
   
-  Reserved Notation "'manager".
-  
-  Inductive manager_gadt : Set :=
-  | Reveal_manager_kind : manager_gadt
-  | Transaction_manager_kind : manager_gadt
-  | Origination_manager_kind : manager_gadt
-  | Delegation_manager_kind : manager_gadt
-  
-  where "'manager" := (fun (_ : Set) => manager_gadt).
-  
-  Definition manager := 'manager.
+  Inductive manager : Set :=
+  | Reveal_manager_kind : manager
+  | Transaction_manager_kind : manager
+  | Origination_manager_kind : manager
+  | Delegation_manager_kind : manager.
 End Kind.
 
-Module contents.
-  Module Endorsement.
-    Record record {level : Set} : Set := {
-      level : level }.
-    Arguments record : clear implicits.
-  End Endorsement.
-  Definition Endorsement_skeleton := Endorsement.record.
-  
-  Module Seed_nonce_revelation.
-    Record record {level nonce : Set} : Set := {
-      level : level;
-      nonce : nonce }.
-    Arguments record : clear implicits.
-  End Seed_nonce_revelation.
-  Definition Seed_nonce_revelation_skeleton := Seed_nonce_revelation.record.
-  
-  Module Double_endorsement_evidence.
-    Record record {op1 op2 : Set} : Set := {
-      op1 : op1;
-      op2 : op2 }.
-    Arguments record : clear implicits.
-  End Double_endorsement_evidence.
-  Definition Double_endorsement_evidence_skeleton :=
-    Double_endorsement_evidence.record.
-  
-  Module Double_baking_evidence.
-    Record record {bh1 bh2 : Set} : Set := {
-      bh1 : bh1;
-      bh2 : bh2 }.
-    Arguments record : clear implicits.
-  End Double_baking_evidence.
-  Definition Double_baking_evidence_skeleton := Double_baking_evidence.record.
-  
-  Module Activate_account.
-    Record record {id activation_code : Set} : Set := {
-      id : id;
-      activation_code : activation_code }.
-    Arguments record : clear implicits.
-  End Activate_account.
-  Definition Activate_account_skeleton := Activate_account.record.
-  
-  Module Proposals.
-    Record record {source period proposals : Set} : Set := {
-      source : source;
-      period : period;
-      proposals : proposals }.
-    Arguments record : clear implicits.
-  End Proposals.
-  Definition Proposals_skeleton := Proposals.record.
-  
-  Module Ballot.
-    Record record {source period proposal ballot : Set} : Set := {
-      source : source;
-      period : period;
-      proposal : proposal;
-      ballot : ballot }.
-    Arguments record : clear implicits.
-  End Ballot.
-  Definition Ballot_skeleton := Ballot.record.
-  
-  Module Manager_operation.
-    Record record {source fee counter operation gas_limit storage_limit : Set} :
-      Set := {
-      source : source;
-      fee : fee;
-      counter : counter;
-      operation : operation;
-      gas_limit : gas_limit;
-      storage_limit : storage_limit }.
-    Arguments record : clear implicits.
-  End Manager_operation.
-  Definition Manager_operation_skeleton := Manager_operation.record.
-End contents.
-
-Module manager_operation.
-  Module Transaction.
-    Record record {amount parameters entrypoint destination : Set} : Set := {
-      amount : amount;
-      parameters : parameters;
-      entrypoint : entrypoint;
-      destination : destination }.
-    Arguments record : clear implicits.
-  End Transaction.
-  Definition Transaction_skeleton := Transaction.record.
-  
-  Module Origination.
-    Record record {delegate script credit preorigination : Set} : Set := {
-      delegate : delegate;
-      script : script;
-      credit : credit;
-      preorigination : preorigination }.
-    Arguments record : clear implicits.
-  End Origination.
-  Definition Origination_skeleton := Origination.record.
-End manager_operation.
+Module ConstructorRecordNotations_contents_list_contents_manager_operation.
+  Module contents.
+    Module Endorsement.
+      Record record {level : Set} : Set := {
+        level : level }.
+      Arguments record : clear implicits.
+    End Endorsement.
+    Definition Endorsement_skeleton := Endorsement.record.
+    
+    Module Seed_nonce_revelation.
+      Record record {level nonce : Set} : Set := {
+        level : level;
+        nonce : nonce }.
+      Arguments record : clear implicits.
+    End Seed_nonce_revelation.
+    Definition Seed_nonce_revelation_skeleton := Seed_nonce_revelation.record.
+    
+    Module Double_endorsement_evidence.
+      Record record {op1 op2 : Set} : Set := {
+        op1 : op1;
+        op2 : op2 }.
+      Arguments record : clear implicits.
+    End Double_endorsement_evidence.
+    Definition Double_endorsement_evidence_skeleton :=
+      Double_endorsement_evidence.record.
+    
+    Module Double_baking_evidence.
+      Record record {bh1 bh2 : Set} : Set := {
+        bh1 : bh1;
+        bh2 : bh2 }.
+      Arguments record : clear implicits.
+    End Double_baking_evidence.
+    Definition Double_baking_evidence_skeleton := Double_baking_evidence.record.
+    
+    Module Activate_account.
+      Record record {id activation_code : Set} : Set := {
+        id : id;
+        activation_code : activation_code }.
+      Arguments record : clear implicits.
+    End Activate_account.
+    Definition Activate_account_skeleton := Activate_account.record.
+    
+    Module Proposals.
+      Record record {source period proposals : Set} : Set := {
+        source : source;
+        period : period;
+        proposals : proposals }.
+      Arguments record : clear implicits.
+    End Proposals.
+    Definition Proposals_skeleton := Proposals.record.
+    
+    Module Ballot.
+      Record record {source period proposal ballot : Set} : Set := {
+        source : source;
+        period : period;
+        proposal : proposal;
+        ballot : ballot }.
+      Arguments record : clear implicits.
+    End Ballot.
+    Definition Ballot_skeleton := Ballot.record.
+    
+    Module Manager_operation.
+      Record record {source fee counter operation gas_limit storage_limit : Set} :
+        Set := {
+        source : source;
+        fee : fee;
+        counter : counter;
+        operation : operation;
+        gas_limit : gas_limit;
+        storage_limit : storage_limit }.
+      Arguments record : clear implicits.
+    End Manager_operation.
+    Definition Manager_operation_skeleton := Manager_operation.record.
+  End contents.
+  Module manager_operation.
+    Module Transaction.
+      Record record {amount parameters entrypoint destination : Set} : Set := {
+        amount : amount;
+        parameters : parameters;
+        entrypoint : entrypoint;
+        destination : destination }.
+      Arguments record : clear implicits.
+    End Transaction.
+    Definition Transaction_skeleton := Transaction.record.
+    
+    Module Origination.
+      Record record {delegate script credit preorigination : Set} : Set := {
+        delegate : delegate;
+        script : script;
+        credit : credit;
+        preorigination : preorigination }.
+      Arguments record : clear implicits.
+    End Origination.
+    Definition Origination_skeleton := Origination.record.
+  End manager_operation.
+End ConstructorRecordNotations_contents_list_contents_manager_operation.
+Import ConstructorRecordNotations_contents_list_contents_manager_operation.
 
 Module operation.
   Record record {shell protocol_data : Set} : Set := Build {
@@ -2066,52 +2064,42 @@ Reserved Notation "'contents.Ballot".
 Reserved Notation "'contents.Manager_operation".
 Reserved Notation "'manager_operation.Transaction".
 Reserved Notation "'manager_operation.Origination".
-Reserved Notation "'contents_list".
 Reserved Notation "'protocol_data".
 Reserved Notation "'operation".
-Reserved Notation "'contents".
-Reserved Notation "'manager_operation".
 Reserved Notation "'counter".
 
-Inductive contents_list_gadt : Set :=
-| Single : forall {kind : Set}, 'contents kind -> contents_list_gadt
-| Cons : forall {kind : Set},
-  'contents (Kind.manager kind) -> contents_list_gadt -> contents_list_gadt
+Inductive contents_list : Set :=
+| Single : contents -> contents_list
+| Cons : contents -> contents_list -> contents_list
 
-with contents_gadt : Set :=
-| Endorsement : 'contents.Endorsement -> contents_gadt
-| Seed_nonce_revelation : 'contents.Seed_nonce_revelation -> contents_gadt
+with contents : Set :=
+| Endorsement : 'contents.Endorsement -> contents
+| Seed_nonce_revelation : 'contents.Seed_nonce_revelation -> contents
 | Double_endorsement_evidence :
-  'contents.Double_endorsement_evidence -> contents_gadt
-| Double_baking_evidence : 'contents.Double_baking_evidence -> contents_gadt
-| Activate_account : 'contents.Activate_account -> contents_gadt
-| Proposals : 'contents.Proposals -> contents_gadt
-| Ballot : 'contents.Ballot -> contents_gadt
-| Manager_operation : forall {kind : Set},
-  'contents.Manager_operation kind -> contents_gadt
+  'contents.Double_endorsement_evidence -> contents
+| Double_baking_evidence : 'contents.Double_baking_evidence -> contents
+| Activate_account : 'contents.Activate_account -> contents
+| Proposals : 'contents.Proposals -> contents
+| Ballot : 'contents.Ballot -> contents
+| Manager_operation : 'contents.Manager_operation -> contents
 
-with manager_operation_gadt : Set :=
-| Reveal : (|Signature.Public_key|).(S.SPublic_key.t) -> manager_operation_gadt
-| Transaction : 'manager_operation.Transaction -> manager_operation_gadt
-| Origination : 'manager_operation.Origination -> manager_operation_gadt
+with manager_operation : Set :=
+| Reveal : (|Signature.Public_key|).(S.SPublic_key.t) -> manager_operation
+| Transaction : 'manager_operation.Transaction -> manager_operation
+| Origination : 'manager_operation.Origination -> manager_operation
 | Delegation :
   option (|Signature.Public_key_hash|).(S.SPublic_key_hash.t) ->
-  manager_operation_gadt
+  manager_operation
 
-where "'contents_list" := (fun (_ : Set) => contents_list_gadt)
-and "'protocol_data" := (fun (t_kind : Set) =>
-  protocol_data_skeleton ('contents_list t_kind) (option Signature.t))
-and "'operation" := (fun (t_kind : Set) =>
-  operation_skeleton Operation.shell_header ('protocol_data t_kind))
-and "'contents" := (fun (_ : Set) => contents_gadt)
-and "'manager_operation" := (fun (_ : Set) => manager_operation_gadt)
+where "'protocol_data" :=
+  (protocol_data_skeleton contents_list (option Signature.t))
+and "'operation" := (operation_skeleton Operation.shell_header 'protocol_data)
 and "'counter" := (Z.t)
 and "'contents.Endorsement" := (contents.Endorsement_skeleton Raw_level.t)
 and "'contents.Seed_nonce_revelation" :=
   (contents.Seed_nonce_revelation_skeleton Raw_level.t Nonce.t)
 and "'contents.Double_endorsement_evidence" :=
-  (contents.Double_endorsement_evidence_skeleton ('operation Kind.endorsement)
-    ('operation Kind.endorsement))
+  (contents.Double_endorsement_evidence_skeleton 'operation 'operation)
 and "'contents.Double_baking_evidence" :=
   (contents.Double_baking_evidence_skeleton Block_header.t Block_header.t)
 and "'contents.Activate_account" :=
@@ -2125,10 +2113,10 @@ and "'contents.Proposals" :=
 and "'contents.Ballot" :=
   (contents.Ballot_skeleton (|Signature.Public_key_hash|).(S.SPublic_key_hash.t)
     Voting_period.t (|Protocol_hash|).(S.HASH.t) Vote.ballot)
-and "'contents.Manager_operation" := (fun (t_kind : Set) =>
-  contents.Manager_operation_skeleton
+and "'contents.Manager_operation" :=
+  (contents.Manager_operation_skeleton
     (|Signature.Public_key_hash|).(S.SPublic_key_hash.t) Tez.tez 'counter
-    ('manager_operation t_kind) Z.t Z.t)
+    manager_operation Z.t Z.t)
 and "'manager_operation.Transaction" :=
   (manager_operation.Transaction_skeleton Tez.tez Script.lazy_expr string
     Contract.contract)
@@ -2137,64 +2125,53 @@ and "'manager_operation.Origination" :=
     (option (|Signature.Public_key_hash|).(S.SPublic_key_hash.t)) Script.t
     Tez.tez (option Contract.t)).
 
-Module
-  ConstructorRecordNotations_contents_list_gadt_contents_gadt_manager_operation_gadt.
-  Module contents.
-    Definition Endorsement := 'contents.Endorsement.
-    Definition Seed_nonce_revelation := 'contents.Seed_nonce_revelation.
-    Definition Double_endorsement_evidence :=
-      'contents.Double_endorsement_evidence.
-    Definition Double_baking_evidence := 'contents.Double_baking_evidence.
-    Definition Activate_account := 'contents.Activate_account.
-    Definition Proposals := 'contents.Proposals.
-    Definition Ballot := 'contents.Ballot.
-    Definition Manager_operation := 'contents.Manager_operation.
-  End contents.
-  Module manager_operation.
-    Definition Transaction := 'manager_operation.Transaction.
-    Definition Origination := 'manager_operation.Origination.
-  End manager_operation.
-End
-  ConstructorRecordNotations_contents_list_gadt_contents_gadt_manager_operation_gadt.
-Import
-  ConstructorRecordNotations_contents_list_gadt_contents_gadt_manager_operation_gadt.
+Module contents.
+  Include ConstructorRecordNotations_contents_list_contents_manager_operation.contents.
+  Definition Endorsement := 'contents.Endorsement.
+  Definition Seed_nonce_revelation := 'contents.Seed_nonce_revelation.
+  Definition Double_endorsement_evidence :=
+    'contents.Double_endorsement_evidence.
+  Definition Double_baking_evidence := 'contents.Double_baking_evidence.
+  Definition Activate_account := 'contents.Activate_account.
+  Definition Proposals := 'contents.Proposals.
+  Definition Ballot := 'contents.Ballot.
+  Definition Manager_operation := 'contents.Manager_operation.
+End contents.
+Module manager_operation.
+  Include ConstructorRecordNotations_contents_list_contents_manager_operation.manager_operation.
+  Definition Transaction := 'manager_operation.Transaction.
+  Definition Origination := 'manager_operation.Origination.
+End manager_operation.
 
-Definition contents_list := 'contents_list.
 Definition protocol_data := 'protocol_data.
 Definition operation := 'operation.
-Definition contents := 'contents.
-Definition manager_operation := 'manager_operation.
 Definition counter := 'counter.
 
 Module internal_operation.
-  Record record {kind : Set} : Set := Build {
+  Record record : Set := Build {
     source : Contract.contract;
-    operation : manager_operation kind;
+    operation : manager_operation;
     nonce : int }.
-  Arguments record : clear implicits.
-  Definition with_source {t_kind} source (r : record t_kind) :=
-    Build t_kind source r.(operation) r.(nonce).
-  Definition with_operation {t_kind} operation (r : record t_kind) :=
-    Build t_kind r.(source) operation r.(nonce).
-  Definition with_nonce {t_kind} nonce (r : record t_kind) :=
-    Build t_kind r.(source) r.(operation) nonce.
+  Definition with_source source (r : record) :=
+    Build source r.(operation) r.(nonce).
+  Definition with_operation operation (r : record) :=
+    Build r.(source) operation r.(nonce).
+  Definition with_nonce nonce (r : record) :=
+    Build r.(source) r.(operation) nonce.
 End internal_operation.
 Definition internal_operation := internal_operation.record.
 
 Inductive packed_manager_operation : Set :=
-| Manager : forall {kind : Set},
-  manager_operation kind -> packed_manager_operation.
+| Manager : manager_operation -> packed_manager_operation.
 
 Inductive packed_contents : Set :=
-| Contents : forall {kind : Set}, contents kind -> packed_contents.
+| Contents : contents -> packed_contents.
 
 Inductive packed_contents_list : Set :=
-| Contents_list : forall {kind : Set},
-  contents_list kind -> packed_contents_list.
+| Contents_list : contents_list -> packed_contents_list.
 
 Inductive packed_protocol_data : Set :=
-| Operation_data : forall {kind : Set},
-  protocol_data kind -> packed_protocol_data.
+| Operation_data : protocol_data -> packed_protocol_data.
 
 Module packed_operation.
   Record record : Set := Build {
@@ -2208,11 +2185,9 @@ End packed_operation.
 Definition packed_operation := packed_operation.record.
 
 Inductive packed_internal_operation : Set :=
-| Internal_operation : forall {kind : Set},
-  internal_operation kind -> packed_internal_operation.
+| Internal_operation : internal_operation -> packed_internal_operation.
 
-Parameter manager_kind : forall {kind : Set},
-  manager_operation kind -> Kind.manager kind.
+Parameter manager_kind : manager_operation -> Kind.manager.
 
 Module Fees.
   Parameter origination_burn :
@@ -2237,13 +2212,13 @@ Module Fees.
 End Fees.
 
 Module Operation.
-  Definition contents (kind : Set) : Set := contents kind.
+  Definition contents : Set := contents.
   
   Definition packed_contents : Set := packed_contents.
   
   Parameter contents_encoding : Data_encoding.t packed_contents.
   
-  Definition protocol_data (kind : Set) : Set := protocol_data kind.
+  Definition protocol_data : Set := protocol_data.
   
   Definition packed_protocol_data : Set := packed_protocol_data.
   
@@ -2268,14 +2243,13 @@ Module Operation.
   Parameter contents_list_encoding : Data_encoding.t packed_contents_list.
   
   Module t.
-    Record record {kind : Set} : Set := Build {
+    Record record : Set := Build {
       shell : Operation.shell_header;
-      protocol_data : protocol_data kind }.
-    Arguments record : clear implicits.
-    Definition with_shell {t_kind} shell (r : record t_kind) :=
-      Build t_kind shell r.(protocol_data).
-    Definition with_protocol_data {t_kind} protocol_data (r : record t_kind) :=
-      Build t_kind r.(shell) protocol_data.
+      protocol_data : protocol_data }.
+    Definition with_shell shell (r : record) :=
+      Build shell r.(protocol_data).
+    Definition with_protocol_data protocol_data (r : record) :=
+      Build r.(shell) protocol_data.
   End t.
   Definition t := t.record.
   
@@ -2283,10 +2257,9 @@ Module Operation.
   
   Parameter encoding : Data_encoding.t packed.
   
-  Parameter __raw_value : forall {A : Set}, operation A -> raw.
+  Parameter __raw_value : operation -> raw.
   
-  Parameter __hash_value : forall {A : Set},
-    operation A -> (|Operation_hash|).(S.HASH.t).
+  Parameter __hash_value : operation -> (|Operation_hash|).(S.HASH.t).
   
   Parameter hash_raw : raw -> (|Operation_hash|).(S.HASH.t).
   
@@ -2298,62 +2271,55 @@ Module Operation.
   
   (* extensible_type_definition `error` *)
   
-  Parameter check_signature : forall {A : Set},
-    public_key -> (|Chain_id|).(S.HASH.t) -> operation A ->
+  Parameter check_signature :
+    public_key -> (|Chain_id|).(S.HASH.t) -> operation ->
     Lwt.t (Error_monad.tzresult unit).
   
-  Parameter check_signature_sync : forall {A : Set},
-    public_key -> (|Chain_id|).(S.HASH.t) -> operation A ->
+  Parameter check_signature_sync :
+    public_key -> (|Chain_id|).(S.HASH.t) -> operation ->
     Error_monad.tzresult unit.
   
   Parameter internal_operation_encoding :
     Data_encoding.t packed_internal_operation.
   
-  Parameter pack : forall {kind : Set}, operation kind -> packed_operation.
+  Parameter pack : operation -> packed_operation.
   
-  Reserved Notation "'eq".
+  Inductive eq : Set :=
+  | Eq : eq.
   
-  Inductive eq_gadt : Set :=
-  | Eq : eq_gadt
-  
-  where "'eq" := (fun (_ _ : Set) => eq_gadt).
-  
-  Definition eq := 'eq.
-  
-  Parameter equal : forall {a b : Set},
-    operation a -> operation b -> option (eq a b).
+  Parameter equal : operation -> operation -> option eq.
   
   Module Encoding.
-    Module case.
-      Module Case.
-        Record record {tag name encoding select proj inj : Set} : Set := {
-          tag : tag;
-          name : name;
-          encoding : encoding;
-          select : select;
-          proj : proj;
-          inj : inj }.
-        Arguments record : clear implicits.
-      End Case.
-      Definition Case_skeleton := Case.record.
-    End case.
+    Module ConstructorRecordNotations_case.
+      Module case.
+        Module Case.
+          Record record {tag name encoding select proj inj : Set} : Set := {
+            tag : tag;
+            name : name;
+            encoding : encoding;
+            select : select;
+            proj : proj;
+            inj : inj }.
+          Arguments record : clear implicits.
+        End Case.
+        Definition Case_skeleton := Case.record.
+      End case.
+    End ConstructorRecordNotations_case.
+    Import ConstructorRecordNotations_case.
     
     Reserved Notation "'case.Case".
     
     Inductive case (b : Set) : Set :=
-    | Case : forall {a : Set}, 'case.Case a b -> case b
+    | Case : forall {a : Set}, 'case.Case a -> case b
     
-    where "'case.Case" := (fun (t_a t_b : Set) =>
+    where "'case.Case" := (fun (t_a : Set) =>
       case.Case_skeleton int string (Data_encoding.t t_a)
-        (packed_contents -> option (contents t_b)) (contents t_b -> t_a)
-        (t_a -> contents t_b)).
+        (packed_contents -> option contents) (contents -> t_a) (t_a -> contents)).
     
-    Module ConstructorRecordNotations_case.
-      Module case.
-        Definition Case := 'case.Case.
-      End case.
-    End ConstructorRecordNotations_case.
-    Import ConstructorRecordNotations_case.
+    Module case.
+      Include ConstructorRecordNotations_case.case.
+      Definition Case := 'case.Case.
+    End case.
     
     Arguments Case {_ _}.
     
@@ -2372,57 +2338,54 @@ Module Operation.
     
     Parameter ballot_case : case Kind.ballot.
     
-    Parameter reveal_case : case (Kind.manager Kind.reveal).
+    Parameter reveal_case : case Kind.manager.
     
-    Parameter transaction_case : case (Kind.manager Kind.transaction).
+    Parameter transaction_case : case Kind.manager.
     
-    Parameter origination_case : case (Kind.manager Kind.origination).
+    Parameter origination_case : case Kind.manager.
     
-    Parameter delegation_case : case (Kind.manager Kind.delegation).
+    Parameter delegation_case : case Kind.manager.
     
     Module Manager_operations.
-      Module case.
-        Module MCase.
-          Record record {tag name encoding select proj inj : Set} : Set := {
-            tag : tag;
-            name : name;
-            encoding : encoding;
-            select : select;
-            proj : proj;
-            inj : inj }.
-          Arguments record : clear implicits.
-        End MCase.
-        Definition MCase_skeleton := MCase.record.
-      End case.
+      Module ConstructorRecordNotations_case.
+        Module case.
+          Module MCase.
+            Record record {tag name encoding select proj inj : Set} : Set := {
+              tag : tag;
+              name : name;
+              encoding : encoding;
+              select : select;
+              proj : proj;
+              inj : inj }.
+            Arguments record : clear implicits.
+          End MCase.
+          Definition MCase_skeleton := MCase.record.
+        End case.
+      End ConstructorRecordNotations_case.
+      Import ConstructorRecordNotations_case.
       
       Reserved Notation "'case.MCase".
-      Reserved Notation "'case".
       
-      Inductive case_gadt : Set :=
-      | MCase : forall {a kind : Set}, 'case.MCase a kind -> case_gadt
+      Inductive case : Set :=
+      | MCase : forall {a : Set}, 'case.MCase a -> case
       
-      where "'case" := (fun (_ : Set) => case_gadt)
-      and "'case.MCase" := (fun (t_a t_kind : Set) =>
+      where "'case.MCase" := (fun (t_a : Set) =>
         case.MCase_skeleton int string (Data_encoding.t t_a)
-          (packed_manager_operation -> option (manager_operation t_kind))
-          (manager_operation t_kind -> t_a) (t_a -> manager_operation t_kind)).
+          (packed_manager_operation -> option manager_operation)
+          (manager_operation -> t_a) (t_a -> manager_operation)).
       
-      Module ConstructorRecordNotations_case_gadt.
-        Module case.
-          Definition MCase := 'case.MCase.
-        End case.
-      End ConstructorRecordNotations_case_gadt.
-      Import ConstructorRecordNotations_case_gadt.
+      Module case.
+        Include ConstructorRecordNotations_case.case.
+        Definition MCase := 'case.MCase.
+      End case.
       
-      Definition case := 'case.
+      Parameter reveal_case : case.
       
-      Parameter reveal_case : case Kind.reveal.
+      Parameter transaction_case : case.
       
-      Parameter transaction_case : case Kind.transaction.
+      Parameter origination_case : case.
       
-      Parameter origination_case : case Kind.origination.
-      
-      Parameter delegation_case : case Kind.delegation.
+      Parameter delegation_case : case.
     End Manager_operations.
   End Encoding.
   

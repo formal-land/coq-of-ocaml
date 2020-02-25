@@ -73,26 +73,29 @@ Parameter get_storage :
   Raw_context.t -> Contract_repr.t ->
   Lwt.t (Error_monad.tzresult (Raw_context.t * option Script_repr.expr)).
 
-Module big_map_diff_item.
-  Module Update.
-    Record record {big_map diff_key diff_key_hash diff_value : Set} : Set := {
-      big_map : big_map;
-      diff_key : diff_key;
-      diff_key_hash : diff_key_hash;
-      diff_value : diff_value }.
-    Arguments record : clear implicits.
-  End Update.
-  Definition Update_skeleton := Update.record.
-  
-  Module Alloc.
-    Record record {big_map key_type value_type : Set} : Set := {
-      big_map : big_map;
-      key_type : key_type;
-      value_type : value_type }.
-    Arguments record : clear implicits.
-  End Alloc.
-  Definition Alloc_skeleton := Alloc.record.
-End big_map_diff_item.
+Module ConstructorRecordNotations_big_map_diff_item.
+  Module big_map_diff_item.
+    Module Update.
+      Record record {big_map diff_key diff_key_hash diff_value : Set} : Set := {
+        big_map : big_map;
+        diff_key : diff_key;
+        diff_key_hash : diff_key_hash;
+        diff_value : diff_value }.
+      Arguments record : clear implicits.
+    End Update.
+    Definition Update_skeleton := Update.record.
+    
+    Module Alloc.
+      Record record {big_map key_type value_type : Set} : Set := {
+        big_map : big_map;
+        key_type : key_type;
+        value_type : value_type }.
+      Arguments record : clear implicits.
+    End Alloc.
+    Definition Alloc_skeleton := Alloc.record.
+  End big_map_diff_item.
+End ConstructorRecordNotations_big_map_diff_item.
+Import ConstructorRecordNotations_big_map_diff_item.
 
 Reserved Notation "'big_map_diff_item.Update".
 Reserved Notation "'big_map_diff_item.Alloc".
@@ -109,13 +112,11 @@ where "'big_map_diff_item.Update" :=
 and "'big_map_diff_item.Alloc" :=
   (big_map_diff_item.Alloc_skeleton Z.t Script_repr.expr Script_repr.expr).
 
-Module ConstructorRecordNotations_big_map_diff_item.
-  Module big_map_diff_item.
-    Definition Update := 'big_map_diff_item.Update.
-    Definition Alloc := 'big_map_diff_item.Alloc.
-  End big_map_diff_item.
-End ConstructorRecordNotations_big_map_diff_item.
-Import ConstructorRecordNotations_big_map_diff_item.
+Module big_map_diff_item.
+  Include ConstructorRecordNotations_big_map_diff_item.big_map_diff_item.
+  Definition Update := 'big_map_diff_item.Update.
+  Definition Alloc := 'big_map_diff_item.Alloc.
+End big_map_diff_item.
 
 Definition big_map_diff : Set := list big_map_diff_item.
 

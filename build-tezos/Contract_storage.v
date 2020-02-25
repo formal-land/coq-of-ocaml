@@ -33,26 +33,29 @@ Require Tezos.Tez_repr.
 Definition failwith {A : Set} (msg : string) : Lwt.t (Error_monad.tzresult A) :=
   Error_monad.fail extensible_type_value.
 
-Module big_map_diff_item.
-  Module Update.
-    Record record {big_map diff_key diff_key_hash diff_value : Set} : Set := {
-      big_map : big_map;
-      diff_key : diff_key;
-      diff_key_hash : diff_key_hash;
-      diff_value : diff_value }.
-    Arguments record : clear implicits.
-  End Update.
-  Definition Update_skeleton := Update.record.
-  
-  Module Alloc.
-    Record record {big_map key_type value_type : Set} : Set := {
-      big_map : big_map;
-      key_type : key_type;
-      value_type : value_type }.
-    Arguments record : clear implicits.
-  End Alloc.
-  Definition Alloc_skeleton := Alloc.record.
-End big_map_diff_item.
+Module ConstructorRecordNotations_big_map_diff_item.
+  Module big_map_diff_item.
+    Module Update.
+      Record record {big_map diff_key diff_key_hash diff_value : Set} : Set := {
+        big_map : big_map;
+        diff_key : diff_key;
+        diff_key_hash : diff_key_hash;
+        diff_value : diff_value }.
+      Arguments record : clear implicits.
+    End Update.
+    Definition Update_skeleton := Update.record.
+    
+    Module Alloc.
+      Record record {big_map key_type value_type : Set} : Set := {
+        big_map : big_map;
+        key_type : key_type;
+        value_type : value_type }.
+      Arguments record : clear implicits.
+    End Alloc.
+    Definition Alloc_skeleton := Alloc.record.
+  End big_map_diff_item.
+End ConstructorRecordNotations_big_map_diff_item.
+Import ConstructorRecordNotations_big_map_diff_item.
 
 Reserved Notation "'big_map_diff_item.Update".
 Reserved Notation "'big_map_diff_item.Alloc".
@@ -69,13 +72,11 @@ where "'big_map_diff_item.Update" :=
 and "'big_map_diff_item.Alloc" :=
   (big_map_diff_item.Alloc_skeleton Z.t Script_repr.expr Script_repr.expr).
 
-Module ConstructorRecordNotations_big_map_diff_item.
-  Module big_map_diff_item.
-    Definition Update := 'big_map_diff_item.Update.
-    Definition Alloc := 'big_map_diff_item.Alloc.
-  End big_map_diff_item.
-End ConstructorRecordNotations_big_map_diff_item.
-Import ConstructorRecordNotations_big_map_diff_item.
+Module big_map_diff_item.
+  Include ConstructorRecordNotations_big_map_diff_item.big_map_diff_item.
+  Definition Update := 'big_map_diff_item.Update.
+  Definition Alloc := 'big_map_diff_item.Alloc.
+End big_map_diff_item.
 
 Definition big_map_diff : Set := list big_map_diff_item.
 
@@ -108,10 +109,11 @@ Definition big_map_diff_item_encoding
           let '(_, big_map, diff_key_hash, diff_key, diff_value) :=
             function_parameter in
           Update
-            {| big_map_diff_item.Update.big_map := big_map;
+            ({| big_map_diff_item.Update.big_map := big_map;
               big_map_diff_item.Update.diff_key := diff_key;
               big_map_diff_item.Update.diff_key_hash := diff_key_hash;
-              big_map_diff_item.Update.diff_value := diff_value |});
+              big_map_diff_item.Update.diff_value := diff_value |}
+              : big_map_diff_item.Update));
       Data_encoding.__case_value "remove" None (Data_encoding.Tag 1)
         (Data_encoding.obj2
           (Data_encoding.req None None "action"
@@ -160,9 +162,10 @@ Definition big_map_diff_item_encoding
         (fun function_parameter =>
           let '(_, big_map, key_type, value_type) := function_parameter in
           Alloc
-            {| big_map_diff_item.Alloc.big_map := big_map;
+            ({| big_map_diff_item.Alloc.big_map := big_map;
               big_map_diff_item.Alloc.key_type := key_type;
-              big_map_diff_item.Alloc.value_type := value_type |})
+              big_map_diff_item.Alloc.value_type := value_type |}
+              : big_map_diff_item.Alloc))
     ].
 
 Definition big_map_diff_encoding
@@ -201,6 +204,7 @@ Definition update_script_big_map
             else
               Error_monad.__return
                 (c, (Z.sub (Z.sub total size) (Z.of_int big_map_cost)))
+          
           | Copy from to_ =>
             let=? c := Storage.Big_map.copy c from to_ in
             if (|Compare.Z|).(Compare.S.op_lt) to_ Z.zero then
@@ -211,6 +215,7 @@ Definition update_script_big_map
                   c from in
               Error_monad.__return
                 (c, (Z.add (Z.add total size) (Z.of_int big_map_cost)))
+          
           |
             Alloc {|
               big_map_diff_item.Alloc.big_map := big_map;
@@ -236,6 +241,7 @@ Definition update_script_big_map
               Error_monad.__return (c, total)
             else
               Error_monad.__return (c, (Z.add total (Z.of_int big_map_cost)))
+          
           |
             Update {|
               big_map_diff_item.Update.big_map := big_map;
@@ -260,6 +266,7 @@ Definition update_script_big_map
               Error_monad.__return (c, total)
             else
               Error_monad.__return (c, (Z.sub total (Z.of_int freed)))
+          
           |
             Update {|
               big_map_diff_item.Update.big_map := big_map;
@@ -539,7 +546,9 @@ Definition get_script
   | (Some code, Some storage) =>
     Error_monad.__return
       (c,
-        (Some {| Script_repr.t.code := code; Script_repr.t.storage := storage |}))
+        (Some
+          ({| Script_repr.t.code := code; Script_repr.t.storage := storage |}
+            : Script_repr.t)))
   | ((None, Some _) | (Some _, None)) => failwith "get_script"
   end.
 

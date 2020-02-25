@@ -91,36 +91,34 @@ Module Cost_of.
     Parameter set_mem : forall {a : Set},
       a -> Script_typed_ir.set a -> Alpha_context.Gas.cost.
     
-    Parameter mul : forall {a b : Set},
-      Alpha_context.Script_int.num a -> Alpha_context.Script_int.num b ->
+    Parameter mul :
+      Alpha_context.Script_int.num -> Alpha_context.Script_int.num ->
       Alpha_context.Gas.cost.
     
-    Parameter div : forall {a b : Set},
-      Alpha_context.Script_int.num a -> Alpha_context.Script_int.num b ->
+    Parameter div :
+      Alpha_context.Script_int.num -> Alpha_context.Script_int.num ->
       Alpha_context.Gas.cost.
     
-    Parameter add : forall {a b : Set},
-      Alpha_context.Script_int.num a -> Alpha_context.Script_int.num b ->
+    Parameter add :
+      Alpha_context.Script_int.num -> Alpha_context.Script_int.num ->
       Alpha_context.Gas.cost.
     
-    Parameter sub : forall {a b : Set},
-      Alpha_context.Script_int.num a -> Alpha_context.Script_int.num b ->
+    Parameter sub :
+      Alpha_context.Script_int.num -> Alpha_context.Script_int.num ->
       Alpha_context.Gas.cost.
     
-    Parameter abs : forall {a : Set},
-      Alpha_context.Script_int.num a -> Alpha_context.Gas.cost.
+    Parameter abs : Alpha_context.Script_int.num -> Alpha_context.Gas.cost.
     
-    Parameter neg : forall {a : Set},
-      Alpha_context.Script_int.num a -> Alpha_context.Gas.cost.
+    Parameter neg : Alpha_context.Script_int.num -> Alpha_context.Gas.cost.
     
     Parameter __int_value : forall {a : Set}, a -> Alpha_context.Gas.cost.
     
-    Parameter add_timestamp : forall {a : Set},
-      Alpha_context.Script_timestamp.t -> Alpha_context.Script_int.num a ->
+    Parameter add_timestamp :
+      Alpha_context.Script_timestamp.t -> Alpha_context.Script_int.num ->
       Alpha_context.Gas.cost.
     
-    Parameter sub_timestamp : forall {a : Set},
-      Alpha_context.Script_timestamp.t -> Alpha_context.Script_int.num a ->
+    Parameter sub_timestamp :
+      Alpha_context.Script_timestamp.t -> Alpha_context.Script_int.num ->
       Alpha_context.Gas.cost.
     
     Parameter diff_timestamps :
@@ -139,27 +137,26 @@ Module Cost_of.
     
     Parameter int64_to_z : Alpha_context.Gas.cost.
     
-    Parameter logor : forall {a b : Set},
-      Alpha_context.Script_int.num a -> Alpha_context.Script_int.num b ->
+    Parameter logor :
+      Alpha_context.Script_int.num -> Alpha_context.Script_int.num ->
       Alpha_context.Gas.cost.
     
-    Parameter logand : forall {a b : Set},
-      Alpha_context.Script_int.num a -> Alpha_context.Script_int.num b ->
+    Parameter logand :
+      Alpha_context.Script_int.num -> Alpha_context.Script_int.num ->
       Alpha_context.Gas.cost.
     
-    Parameter logxor : forall {a b : Set},
-      Alpha_context.Script_int.num a -> Alpha_context.Script_int.num b ->
+    Parameter logxor :
+      Alpha_context.Script_int.num -> Alpha_context.Script_int.num ->
       Alpha_context.Gas.cost.
     
-    Parameter lognot : forall {a : Set},
-      Alpha_context.Script_int.num a -> Alpha_context.Gas.cost.
+    Parameter lognot : Alpha_context.Script_int.num -> Alpha_context.Gas.cost.
     
-    Parameter shift_left : forall {a b : Set},
-      Alpha_context.Script_int.num a -> Alpha_context.Script_int.num b ->
+    Parameter shift_left :
+      Alpha_context.Script_int.num -> Alpha_context.Script_int.num ->
       Alpha_context.Gas.cost.
     
-    Parameter shift_right : forall {a b : Set},
-      Alpha_context.Script_int.num a -> Alpha_context.Script_int.num b ->
+    Parameter shift_right :
+      Alpha_context.Script_int.num -> Alpha_context.Script_int.num ->
       Alpha_context.Gas.cost.
     
     Parameter exec : Alpha_context.Gas.cost.
@@ -212,7 +209,7 @@ Module Cost_of.
     Parameter wrap : Alpha_context.Gas.cost.
     
     Parameter compare : forall {a : Set},
-      Script_typed_ir.comparable_ty a -> a -> a -> Alpha_context.Gas.cost.
+      Script_typed_ir.comparable_ty -> a -> a -> Alpha_context.Gas.cost.
     
     Parameter apply : Alpha_context.Gas.cost.
   End Interpreter.
@@ -276,8 +273,7 @@ Module Cost_of.
     
     Parameter type_ : int -> Alpha_context.Gas.cost.
     
-    Parameter instr : forall {a b : Set},
-      Script_typed_ir.instr a b -> Alpha_context.Gas.cost.
+    Parameter instr : Script_typed_ir.instr -> Alpha_context.Gas.cost.
   End Typechecking.
   
   Module Unparse.
@@ -294,8 +290,8 @@ Module Cost_of.
     
     Parameter z : Z.t -> Alpha_context.Gas.cost.
     
-    Parameter __int_value : forall {a : Set},
-      Alpha_context.Script_int.num a -> Alpha_context.Gas.cost.
+    Parameter __int_value :
+      Alpha_context.Script_int.num -> Alpha_context.Gas.cost.
     
     Parameter tez : Alpha_context.Gas.cost.
     

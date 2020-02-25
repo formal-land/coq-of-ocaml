@@ -209,7 +209,7 @@ Definition endorsement_rights
 
 Definition check_endorsement_rights
   (ctxt : Alpha_context.context) (chain_id : (|Chain_id|).(S.HASH.t))
-  (op : Alpha_context.Operation.t Alpha_context.Kind.endorsement)
+  (op : Alpha_context.Operation.t)
   : Lwt.t
     (Error_monad.tzresult
       ((|Signature.Public_key_hash|).(S.SPublic_key_hash.Map).(S.INDEXES_Map.key)
@@ -297,11 +297,12 @@ Definition check_header_proof_of_work_stamp
   (stamp_threshold : (|Compare.Uint64|).(Compare.S.t)) : bool :=
   let __hash_value :=
     Alpha_context.Block_header.__hash_value
-      {| Alpha_context.Block_header.t.shell := shell;
+      ({| Alpha_context.Block_header.t.shell := shell;
         Alpha_context.Block_header.t.protocol_data :=
-          {| Alpha_context.Block_header.protocol_data.contents := contents;
+          ({| Alpha_context.Block_header.protocol_data.contents := contents;
             Alpha_context.Block_header.protocol_data.signature := Signature.zero
-            |} |} in
+            |} : Alpha_context.Block_header.protocol_data) |}
+        : Alpha_context.Block_header.block_header) in
   check_hash __hash_value stamp_threshold.
 
 Definition check_proof_of_work_stamp

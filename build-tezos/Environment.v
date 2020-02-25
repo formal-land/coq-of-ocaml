@@ -743,7 +743,7 @@ Module Type Z_type.
   Parameter numbits : t -> int.
 End Z_type.
 
-Module Z : Z_type.
+Module Z.
   Definition t := Z.
   Definition zero := 0.
   Definition one := 1.
@@ -772,6 +772,8 @@ Module Z : Z_type.
   Parameter compare : t -> t -> int.
   Parameter numbits : t -> int.
 End Z.
+
+Module Z_check : Z_type := Z.
 
 Module Lwt.
   Parameter t : forall (a : Set), Set.
@@ -1512,16 +1514,10 @@ Module RPC_arg.
   
   Parameter like : forall {a : Set}, arg a -> option string -> string -> arg a.
   
-  Reserved Notation "'eq".
+  Inductive eq : Set :=
+  | Eq : eq.
   
-  Inductive eq_gadt : Set :=
-  | Eq : eq_gadt
-  
-  where "'eq" := (fun (_ _ : Set) => eq_gadt).
-  
-  Definition eq := 'eq.
-  
-  Parameter __eq_value : forall {a b : Set}, arg a -> arg b -> option (eq a b).
+  Parameter __eq_value : forall {a b : Set}, arg a -> arg b -> option eq.
 End RPC_arg.
 
 Module RPC_path.
@@ -1603,36 +1599,33 @@ Module RPC_service.
   Parameter t : forall
     (expected_type_variable prefix params query input output : Set), Set.
   
-  Definition service (expected_type_variable prefix params query input output :
-    Set) : Set :=
+  Definition service (prefix params query input output : Set) : Set :=
     t
       ((* `PUT *) unit + (* `GET *) unit + (* `DELETE *) unit + (* `POST *) unit
         + (* `PATCH *) unit) prefix params query input output.
   
   Parameter get_service : forall {output params prefix query : Set},
     option string -> RPC_query.t query -> Data_encoding.t output ->
-    RPC_path.t prefix params ->
-    service (* `GET *) unit prefix params query unit output.
+    RPC_path.t prefix params -> service prefix params query unit output.
   
   Parameter post_service : forall {input output params prefix query : Set},
     option string -> RPC_query.t query -> Data_encoding.t input ->
     Data_encoding.t output -> RPC_path.t prefix params ->
-    service (* `POST *) unit prefix params query input output.
+    service prefix params query input output.
   
   Parameter delete_service : forall {output params prefix query : Set},
     option string -> RPC_query.t query -> Data_encoding.t output ->
-    RPC_path.t prefix params ->
-    service (* `DELETE *) unit prefix params query unit output.
+    RPC_path.t prefix params -> service prefix params query unit output.
   
   Parameter patch_service : forall {input output params prefix query : Set},
     option string -> RPC_query.t query -> Data_encoding.t input ->
     Data_encoding.t output -> RPC_path.t prefix params ->
-    service (* `PATCH *) unit prefix params query input output.
+    service prefix params query input output.
   
   Parameter put_service : forall {input output params prefix query : Set},
     option string -> RPC_query.t query -> Data_encoding.t input ->
     Data_encoding.t output -> RPC_path.t prefix params ->
-    service (* `PUT *) unit prefix params query input output.
+    service prefix params query input output.
 End RPC_service.
 
 Module RPC_answer.

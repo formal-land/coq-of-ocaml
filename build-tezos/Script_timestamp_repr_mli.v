@@ -29,11 +29,11 @@ Parameter to_string : t -> string.
 
 Parameter of_string : string -> option t.
 
-Parameter diff : t -> t -> Script_int_repr.num Script_int_repr.z.
+Parameter diff : t -> t -> Script_int_repr.num.
 
-Parameter add_delta : t -> Script_int_repr.num Script_int_repr.z -> t.
+Parameter add_delta : t -> Script_int_repr.num -> t.
 
-Parameter sub_delta : t -> Script_int_repr.num Script_int_repr.z -> t.
+Parameter sub_delta : t -> Script_int_repr.num -> t.
 
 Parameter to_zint : t -> Z.t.
 

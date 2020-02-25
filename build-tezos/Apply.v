@@ -89,16 +89,15 @@ Import Alpha_context.
 
 Import Apply_results.
 
-Definition apply_manager_operation_content {kind : Set}
+Definition apply_manager_operation_content
   (ctxt : Alpha_context.t) (mode : Script_ir_translator.unparsing_mode)
   (payer : Alpha_context.Contract.t) (source : Alpha_context.Contract.t)
   (chain_id : (|Chain_id|).(S.HASH.t)) (internal : bool)
-  (operation : Alpha_context.manager_operation kind)
+  (operation : Alpha_context.manager_operation)
   : Lwt.t
     (Error_monad.tzresult
-      (Alpha_context.context *
-        Apply_results.successful_manager_operation_result kind *
-        list Alpha_context.packed_internal_operation)) :=
+      (Alpha_context.context * Apply_results.successful_manager_operation_result
+        * list Alpha_context.packed_internal_operation)) :=
   let before_operation := ctxt in
   let=? '_ := Alpha_context.Contract.must_exist ctxt source in
   let=? ctxt :=
@@ -110,9 +109,11 @@ Definition apply_manager_operation_content {kind : Set}
     Error_monad.__return
       (ctxt,
         (Apply_results.Reveal_result
-          {|
+          ({|
             Apply_results.successful_manager_operation_result.Reveal_result.consumed_gas :=
-              Alpha_context.Gas.consumed before_operation ctxt |}), nil)
+              Alpha_context.Gas.consumed before_operation ctxt |}
+            : Apply_results.successful_manager_operation_result.Reveal_result)),
+        nil)
   |
     Alpha_context.Transaction {|
       Alpha_context.manager_operation.Transaction.amount := amount;
@@ -162,7 +163,7 @@ Definition apply_manager_operation_content {kind : Set}
         end in
       let __result_value :=
         Apply_results.Transaction_result
-          {|
+          ({|
             Apply_results.successful_manager_operation_result.Transaction_result.storage :=
               None;
             Apply_results.successful_manager_operation_result.Transaction_result.big_map_diff :=
@@ -185,7 +186,10 @@ Definition apply_manager_operation_content {kind : Set}
             Apply_results.successful_manager_operation_result.Transaction_result.paid_storage_size_diff :=
               Z.zero;
             Apply_results.successful_manager_operation_result.Transaction_result.allocated_destination_contract :=
-              allocated_destination_contract |} in
+              allocated_destination_contract |}
+            :
+              Apply_results.successful_manager_operation_result.Transaction_result)
+        in
       Error_monad.__return (ctxt, __result_value, nil)
     | Some script =>
       let=? '(parameter, ctxt) :=
@@ -194,11 +198,12 @@ Definition apply_manager_operation_content {kind : Set}
       let=? ctxt := Lwt.__return (Alpha_context.Gas.consume ctxt cost_parameter)
         in
       let step_constants :=
-        {| Script_interpreter.step_constants.source := source;
+        ({| Script_interpreter.step_constants.source := source;
           Script_interpreter.step_constants.payer := payer;
           Script_interpreter.step_constants.self := destination;
           Script_interpreter.step_constants.amount := amount;
-          Script_interpreter.step_constants.chain_id := chain_id |} in
+          Script_interpreter.step_constants.chain_id := chain_id |}
+          : Script_interpreter.step_constants) in
       let=? '{|
         Script_interpreter.execution_result.ctxt := ctxt;
           Script_interpreter.execution_result.storage := storage;
@@ -217,7 +222,7 @@ Definition apply_manager_operation_content {kind : Set}
           ctxt in
       let __result_value :=
         Apply_results.Transaction_result
-          {|
+          ({|
             Apply_results.successful_manager_operation_result.Transaction_result.storage :=
               Some storage;
             Apply_results.successful_manager_operation_result.Transaction_result.big_map_diff :=
@@ -241,7 +246,10 @@ Definition apply_manager_operation_content {kind : Set}
             Apply_results.successful_manager_operation_result.Transaction_result.paid_storage_size_diff :=
               paid_storage_size_diff;
             Apply_results.successful_manager_operation_result.Transaction_result.allocated_destination_contract :=
-              allocated_destination_contract |} in
+              allocated_destination_contract |}
+            :
+              Apply_results.successful_manager_operation_result.Transaction_result)
+        in
       Error_monad.__return (ctxt, __result_value, operations)
     end
   |
@@ -271,8 +279,8 @@ Definition apply_manager_operation_content {kind : Set}
     let 'existT _ [__Ex_script_'a, __Ex_script_'b] [parsed_script, ctxt] :=
       existT (A := [Set ** Set])
         (fun '[__Ex_script_'a, __Ex_script_'b] =>
-          [Script_typed_ir.script __Ex_script_'a __Ex_script_'b **
-            Alpha_context.context]) [_, _] [parsed_script, ctxt] in
+          [Script_typed_ir.script __Ex_script_'b ** Alpha_context.context]) [_,
+        _] [parsed_script, ctxt] in
     let=? '(to_duplicate, ctxt) :=
       Script_ir_translator.collect_big_maps ctxt
         parsed_script.(Script_typed_ir.script.storage_type)
@@ -308,7 +316,7 @@ Definition apply_manager_operation_content {kind : Set}
       Alpha_context.Fees.record_paid_storage_space ctxt contract in
     let __result_value :=
       Apply_results.Origination_result
-        {|
+        ({|
           Apply_results.successful_manager_operation_result.Origination_result.big_map_diff :=
             big_map_diff;
           Apply_results.successful_manager_operation_result.Origination_result.balance_updates :=
@@ -330,16 +338,21 @@ Definition apply_manager_operation_content {kind : Set}
           Apply_results.successful_manager_operation_result.Origination_result.storage_size :=
             size;
           Apply_results.successful_manager_operation_result.Origination_result.paid_storage_size_diff :=
-            paid_storage_size_diff |} in
+            paid_storage_size_diff |}
+          : Apply_results.successful_manager_operation_result.Origination_result)
+      in
     Error_monad.__return (ctxt, __result_value, nil)
   | Alpha_context.Delegation delegate =>
     let=? ctxt := Alpha_context.Delegate.set ctxt source delegate in
     Error_monad.__return
       (ctxt,
         (Apply_results.Delegation_result
-          {|
+          ({|
             Apply_results.successful_manager_operation_result.Delegation_result.consumed_gas :=
-              Alpha_context.Gas.consumed before_operation ctxt |}), nil)
+              Alpha_context.Gas.consumed before_operation ctxt |}
+            :
+              Apply_results.successful_manager_operation_result.Delegation_result)),
+        nil)
   end.
 
 Definition apply_internal_manager_operations
@@ -370,9 +383,8 @@ Definition apply_internal_manager_operations
         [source, operation, __nonce_value, op, rest] :=
         existT (A := Set)
           (fun __Internal_operation_'kind =>
-            [Alpha_context.Contract.contract **
-              Alpha_context.manager_operation __Internal_operation_'kind ** int
-              ** Alpha_context.internal_operation __Internal_operation_'kind **
+            [Alpha_context.Contract.contract ** Alpha_context.manager_operation
+              ** int ** Alpha_context.internal_operation **
               list Alpha_context.packed_internal_operation]) _
           [source, operation, __nonce_value, op, rest] in
       let= function_parameter :=
@@ -396,8 +408,7 @@ Definition apply_internal_manager_operations
               let 'existT _ __Internal_operation_'kind1 op :=
                 existT (A := Set)
                   (fun __Internal_operation_'kind1 =>
-                    Alpha_context.internal_operation __Internal_operation_'kind1)
-                  _ op in
+                    Alpha_context.internal_operation) _ op in
               Apply_results.Internal_operation_result op
                 (Apply_results.Skipped
                   (Alpha_context.manager_kind
@@ -415,10 +426,9 @@ Definition apply_internal_manager_operations
     end in
   apply ctxt nil ops.
 
-Definition precheck_manager_contents {A B : Set}
+Definition precheck_manager_contents
   (ctxt : Alpha_context.context) (chain_id : (|Chain_id|).(S.HASH.t))
-  (raw_operation : Alpha_context.operation A)
-  (op : Alpha_context.contents (Alpha_context.Kind.manager B))
+  (raw_operation : Alpha_context.operation) (op : Alpha_context.contents)
   : Lwt.t (Error_monad.tzresult Alpha_context.context) :=
   let
     'Alpha_context.Manager_operation {|
@@ -493,13 +503,12 @@ Definition precheck_manager_contents {A B : Set}
   let=? ctxt := Alpha_context.add_fees ctxt fee in
   Error_monad.__return ctxt.
 
-Definition apply_manager_contents {A : Set}
+Definition apply_manager_contents
   (ctxt : Alpha_context.context) (mode : Script_ir_translator.unparsing_mode)
-  (chain_id : (|Chain_id|).(S.HASH.t))
-  (op : Alpha_context.contents (Alpha_context.Kind.manager A))
+  (chain_id : (|Chain_id|).(S.HASH.t)) (op : Alpha_context.contents)
   : Lwt.t
     (((* `Failure *) unit + (* `Success *) Alpha_context.context) *
-      Apply_results.manager_operation_result A *
+      Apply_results.manager_operation_result *
       list Apply_results.packed_internal_operation_result) :=
   let
     'Alpha_context.Manager_operation {|
@@ -545,26 +554,25 @@ Definition apply_manager_contents {A : Set}
         nil)
   end.
 
-Definition skipped_operation_result {kind : Set}
-  (operation : Alpha_context.manager_operation kind)
-  : Apply_results.manager_operation_result kind :=
+Definition skipped_operation_result
+  (operation : Alpha_context.manager_operation)
+  : Apply_results.manager_operation_result :=
   match operation with
   | Alpha_context.Reveal _ =>
     Apply_results.Applied
       (Apply_results.Reveal_result
-        {|
+        ({|
           Apply_results.successful_manager_operation_result.Reveal_result.consumed_gas :=
-            Z.zero |})
+            Z.zero |}
+          : Apply_results.successful_manager_operation_result.Reveal_result))
   | _ => Apply_results.Skipped (Alpha_context.manager_kind operation)
   end.
 
-Fixpoint mark_skipped {kind : Set}
+Fixpoint mark_skipped
   (baker : (|Signature.Public_key_hash|).(S.SPublic_key_hash.t))
   (level : Alpha_context.Level.t)
-  (function_parameter :
-    Alpha_context.contents_list (Alpha_context.Kind.manager kind))
-  {struct baker}
-  : Apply_results.contents_result_list (Alpha_context.Kind.manager kind) :=
+  (function_parameter : Alpha_context.contents_list) {struct baker}
+  : Apply_results.contents_result_list :=
   match function_parameter with
   |
     Alpha_context.Single
@@ -576,7 +584,7 @@ Fixpoint mark_skipped {kind : Set}
     let source := Alpha_context.Contract.implicit_contract source in
     Apply_results.Single_result
       (Apply_results.Manager_operation_result
-        {|
+        ({|
           Apply_results.contents_result.Manager_operation_result.balance_updates :=
             Alpha_context.Delegate.cleanup_balance_updates
               [
@@ -589,7 +597,7 @@ Fixpoint mark_skipped {kind : Set}
           Apply_results.contents_result.Manager_operation_result.operation_result :=
             skipped_operation_result operation;
           Apply_results.contents_result.Manager_operation_result.internal_operation_results :=
-            nil |})
+            nil |} : Apply_results.contents_result.Manager_operation_result))
   |
     Alpha_context.Cons
       (Alpha_context.Manager_operation {|
@@ -601,13 +609,13 @@ Fixpoint mark_skipped {kind : Set}
       existT (A := [Set ** Set])
         (fun '[__0, __1] =>
           [(|Signature.Public_key_hash|).(S.SPublic_key_hash.t) **
-            Alpha_context.Tez.tez ** Alpha_context.manager_operation __0 **
-            Alpha_context.contents_list (Alpha_context.Kind.manager __1)]) [_,
-        _] [source, fee, operation, rest] in
+            Alpha_context.Tez.tez ** Alpha_context.manager_operation **
+            Alpha_context.contents_list]) [_, _] [source, fee, operation, rest]
+      in
     let source := Alpha_context.Contract.implicit_contract source in
     Apply_results.Cons_result
       (Apply_results.Manager_operation_result
-        {|
+        ({|
           Apply_results.contents_result.Manager_operation_result.balance_updates :=
             Alpha_context.Delegate.cleanup_balance_updates
               [
@@ -620,14 +628,15 @@ Fixpoint mark_skipped {kind : Set}
           Apply_results.contents_result.Manager_operation_result.operation_result :=
             skipped_operation_result operation;
           Apply_results.contents_result.Manager_operation_result.internal_operation_results :=
-            nil |}) (mark_skipped baker level rest)
+            nil |} : Apply_results.contents_result.Manager_operation_result))
+      (mark_skipped baker level rest)
   end.
 
-Fixpoint precheck_manager_contents_list {A kind : Set}
+Fixpoint precheck_manager_contents_list
   (ctxt : Alpha_context.t) (chain_id : (|Chain_id|).(S.HASH.t))
-  (raw_operation : Alpha_context.Operation.t A)
-  (contents_list : Alpha_context.contents_list (Alpha_context.Kind.manager kind))
-  {struct ctxt} : Lwt.t (Error_monad.tzresult Alpha_context.context) :=
+  (raw_operation : Alpha_context.Operation.t)
+  (contents_list : Alpha_context.contents_list) {struct ctxt}
+  : Lwt.t (Error_monad.tzresult Alpha_context.context) :=
   match contents_list with
   | Alpha_context.Single ((Alpha_context.Manager_operation _) as op) =>
     precheck_manager_contents ctxt chain_id raw_operation op
@@ -635,21 +644,19 @@ Fixpoint precheck_manager_contents_list {A kind : Set}
     let 'existT _ [__0, __1] [op, rest] :=
       existT (A := [Set ** Set])
         (fun '[__0, __1] =>
-          [Alpha_context.contents (Alpha_context.Kind.manager __0) **
-            Alpha_context.contents_list (Alpha_context.Kind.manager __1)]) [_,
-        _] [op, rest] in
+          [Alpha_context.contents ** Alpha_context.contents_list]) [_, _]
+        [op, rest] in
     let=? ctxt := precheck_manager_contents ctxt chain_id raw_operation op in
     precheck_manager_contents_list ctxt chain_id raw_operation rest
   end.
 
-Fixpoint apply_manager_contents_list_rec {kind : Set}
+Fixpoint apply_manager_contents_list_rec
   (ctxt : Alpha_context.t) (mode : Script_ir_translator.unparsing_mode)
   (baker : Alpha_context.public_key_hash) (chain_id : (|Chain_id|).(S.HASH.t))
-  (contents_list : Alpha_context.contents_list (Alpha_context.Kind.manager kind))
-  {struct ctxt}
+  (contents_list : Alpha_context.contents_list) {struct ctxt}
   : Lwt.t
     (((* `Failure *) unit + (* `Success *) Alpha_context.context) *
-      Apply_results.contents_result_list (Alpha_context.Kind.manager kind)) :=
+      Apply_results.contents_result_list) :=
   let level := Alpha_context.Level.current ctxt in
   match contents_list with
   |
@@ -663,7 +670,7 @@ Fixpoint apply_manager_contents_list_rec {kind : Set}
       apply_manager_contents ctxt mode chain_id op in
     let __result_value :=
       Apply_results.Manager_operation_result
-        {|
+        ({|
           Apply_results.contents_result.Manager_operation_result.balance_updates :=
             Alpha_context.Delegate.cleanup_balance_updates
               [
@@ -676,7 +683,8 @@ Fixpoint apply_manager_contents_list_rec {kind : Set}
           Apply_results.contents_result.Manager_operation_result.operation_result :=
             operation_result;
           Apply_results.contents_result.Manager_operation_result.internal_operation_results :=
-            internal_operation_results |} in
+            internal_operation_results |}
+          : Apply_results.contents_result.Manager_operation_result) in
     Lwt.__return (ctxt_result, (Apply_results.Single_result __result_value))
   |
     Alpha_context.Cons
@@ -688,17 +696,15 @@ Fixpoint apply_manager_contents_list_rec {kind : Set}
       existT (A := [Set ** Set])
         (fun '[__0, __1] =>
           [(|Signature.Public_key_hash|).(S.SPublic_key_hash.t) **
-            Alpha_context.Tez.tez **
-            Alpha_context.contents (Alpha_context.Kind.manager __0) **
-            Alpha_context.contents_list (Alpha_context.Kind.manager __1)]) [_,
-        _] [source, fee, op, rest] in
+            Alpha_context.Tez.tez ** Alpha_context.contents **
+            Alpha_context.contents_list]) [_, _] [source, fee, op, rest] in
     let source := Alpha_context.Contract.implicit_contract source in
     let= function_parameter := apply_manager_contents ctxt mode chain_id op in
     match function_parameter with
     | (Failure, operation_result, internal_operation_results) =>
       let __result_value :=
         Apply_results.Manager_operation_result
-          {|
+          ({|
             Apply_results.contents_result.Manager_operation_result.balance_updates :=
               Alpha_context.Delegate.cleanup_balance_updates
                 [
@@ -711,7 +717,8 @@ Fixpoint apply_manager_contents_list_rec {kind : Set}
             Apply_results.contents_result.Manager_operation_result.operation_result :=
               operation_result;
             Apply_results.contents_result.Manager_operation_result.internal_operation_results :=
-              internal_operation_results |} in
+              internal_operation_results |}
+            : Apply_results.contents_result.Manager_operation_result) in
       Lwt.__return
         (Failure,
           (Apply_results.Cons_result __result_value
@@ -719,7 +726,7 @@ Fixpoint apply_manager_contents_list_rec {kind : Set}
     | (Success ctxt, operation_result, internal_operation_results) =>
       let __result_value :=
         Apply_results.Manager_operation_result
-          {|
+          ({|
             Apply_results.contents_result.Manager_operation_result.balance_updates :=
               Alpha_context.Delegate.cleanup_balance_updates
                 [
@@ -732,7 +739,8 @@ Fixpoint apply_manager_contents_list_rec {kind : Set}
             Apply_results.contents_result.Manager_operation_result.operation_result :=
               operation_result;
             Apply_results.contents_result.Manager_operation_result.internal_operation_results :=
-              internal_operation_results |} in
+              internal_operation_results |}
+            : Apply_results.contents_result.Manager_operation_result) in
       let= '(ctxt_result, results) :=
         apply_manager_contents_list_rec ctxt mode baker chain_id rest in
       Lwt.__return
@@ -740,19 +748,16 @@ Fixpoint apply_manager_contents_list_rec {kind : Set}
     end
   end.
 
-Definition mark_backtracked {A : Set}
-  (results : Apply_results.contents_result_list (Alpha_context.Kind.manager A))
-  : Apply_results.contents_result_list (Alpha_context.Kind.manager A) :=
-  let fix mark_contents_list {kind : Set}
-    (function_parameter :
-      Apply_results.contents_result_list (Alpha_context.Kind.manager kind))
-    {struct function_parameter}
-    : Apply_results.contents_result_list (Alpha_context.Kind.manager kind) :=
+Definition mark_backtracked (results : Apply_results.contents_result_list)
+  : Apply_results.contents_result_list :=
+  let fix mark_contents_list
+    (function_parameter : Apply_results.contents_result_list)
+    {struct function_parameter} : Apply_results.contents_result_list :=
     match function_parameter with
     | Apply_results.Single_result (Apply_results.Manager_operation_result op) =>
       Apply_results.Single_result
         (Apply_results.Manager_operation_result
-          {|
+          ({|
             Apply_results.contents_result.Manager_operation_result.balance_updates :=
               op.(Apply_results.contents_result.Manager_operation_result.balance_updates);
             Apply_results.contents_result.Manager_operation_result.operation_result :=
@@ -761,18 +766,17 @@ Definition mark_backtracked {A : Set}
             Apply_results.contents_result.Manager_operation_result.internal_operation_results :=
               List.map mark_internal_operation_results
                 op.(Apply_results.contents_result.Manager_operation_result.internal_operation_results)
-            |})
+            |} : Apply_results.contents_result.Manager_operation_result))
     | Apply_results.Cons_result (Apply_results.Manager_operation_result op) rest
       =>
       let 'existT _ [__0, __1] [op, rest] :=
         existT (A := [Set ** Set])
           (fun '[__0, __1] =>
-            [Apply_results.contents_result.Manager_operation_result __0 **
-              Apply_results.contents_result_list
-                (Alpha_context.Kind.manager __1)]) [_, _] [op, rest] in
+            [Apply_results.contents_result.Manager_operation_result **
+              Apply_results.contents_result_list]) [_, _] [op, rest] in
       Apply_results.Cons_result
         (Apply_results.Manager_operation_result
-          {|
+          ({|
             Apply_results.contents_result.Manager_operation_result.balance_updates :=
               op.(Apply_results.contents_result.Manager_operation_result.balance_updates);
             Apply_results.contents_result.Manager_operation_result.operation_result :=
@@ -781,7 +785,8 @@ Definition mark_backtracked {A : Set}
             Apply_results.contents_result.Manager_operation_result.internal_operation_results :=
               List.map mark_internal_operation_results
                 op.(Apply_results.contents_result.Manager_operation_result.internal_operation_results)
-            |}) (mark_contents_list rest)
+            |} : Apply_results.contents_result.Manager_operation_result))
+        (mark_contents_list rest)
     end
   with mark_internal_operation_results
     (function_parameter : Apply_results.packed_internal_operation_result)
@@ -792,14 +797,13 @@ Definition mark_backtracked {A : Set}
     let 'existT _ __Internal_operation_result_'kind [kind, __result_value] :=
       existT (A := Set)
         (fun __Internal_operation_result_'kind =>
-          [Alpha_context.internal_operation __Internal_operation_result_'kind **
-            Apply_results.manager_operation_result
-              __Internal_operation_result_'kind]) _ [kind, __result_value] in
+          [Alpha_context.internal_operation **
+            Apply_results.manager_operation_result]) _ [kind, __result_value] in
     Apply_results.Internal_operation_result kind
       (mark_manager_operation_result __result_value)
-  with mark_manager_operation_result {kind : Set}
-    (function_parameter : Apply_results.manager_operation_result kind)
-    {struct function_parameter} : Apply_results.manager_operation_result kind :=
+  with mark_manager_operation_result
+    (function_parameter : Apply_results.manager_operation_result)
+    {struct function_parameter} : Apply_results.manager_operation_result :=
     match function_parameter with
     |
       (Apply_results.Failed _ _ | Apply_results.Skipped _ |
@@ -811,13 +815,11 @@ Definition mark_backtracked {A : Set}
     end in
   mark_contents_list results.
 
-Definition apply_manager_contents_list {A : Set}
+Definition apply_manager_contents_list
   (ctxt : Alpha_context.t) (mode : Script_ir_translator.unparsing_mode)
   (baker : Alpha_context.public_key_hash) (chain_id : (|Chain_id|).(S.HASH.t))
-  (contents_list : Alpha_context.contents_list (Alpha_context.Kind.manager A))
-  : Lwt.t
-    (Alpha_context.t *
-      Apply_results.contents_result_list (Alpha_context.Kind.manager A)) :=
+  (contents_list : Alpha_context.contents_list)
+  : Lwt.t (Alpha_context.t * Apply_results.contents_result_list) :=
   let= '(ctxt_result, results) :=
     apply_manager_contents_list_rec ctxt mode baker chain_id contents_list in
   match ctxt_result with
@@ -827,16 +829,16 @@ Definition apply_manager_contents_list {A : Set}
     Lwt.__return (ctxt, results)
   end.
 
-Definition apply_contents_list {A : Set}
+Definition apply_contents_list
   (ctxt : Alpha_context.context) (chain_id : (|Chain_id|).(S.HASH.t))
   (mode : Script_ir_translator.unparsing_mode)
   (pred_block : (|Block_hash|).(S.HASH.t))
   (baker : (|Signature.Public_key_hash|).(S.SPublic_key_hash.t))
-  (operation : Alpha_context.operation A)
-  (contents_list : Alpha_context.contents_list A)
+  (operation : Alpha_context.operation)
+  (contents_list : Alpha_context.contents_list)
   : Lwt.t
     (Error_monad.tzresult
-      (Alpha_context.context * Apply_results.contents_result_list A)) :=
+      (Alpha_context.context * Apply_results.contents_result_list)) :=
   match contents_list with
   |
     Alpha_context.Single
@@ -877,7 +879,7 @@ Definition apply_contents_list {A : Set}
         (ctxt,
           (Apply_results.Single_result
             (Apply_results.Endorsement_result
-              {|
+              ({|
                 Apply_results.contents_result.Endorsement_result.balance_updates :=
                   Alpha_context.Delegate.cleanup_balance_updates
                     [
@@ -898,7 +900,8 @@ Definition apply_contents_list {A : Set}
                 Apply_results.contents_result.Endorsement_result.delegate :=
                   delegate;
                 Apply_results.contents_result.Endorsement_result.slots := slots
-                |})))
+                |} : Apply_results.contents_result.Endorsement_result))))
+  
   |
     Alpha_context.Single
       (Alpha_context.Seed_nonce_revelation {|
@@ -920,6 +923,7 @@ Definition apply_contents_list {A : Set}
                 (Alpha_context.Delegate.Credited
                   seed_nonce_revelation_tip))
             ])))
+  
   |
     Alpha_context.Single
       (Alpha_context.Double_endorsement_evidence {|
@@ -1015,6 +1019,7 @@ Definition apply_contents_list {A : Set}
                 ]))))
     | ((_, _), _) => Error_monad.fail extensible_type_value
     end
+  
   |
     Alpha_context.Single
       (Alpha_context.Double_baking_evidence {|
@@ -1107,6 +1112,7 @@ Definition apply_contents_list {A : Set}
                 ((Alpha_context.Delegate.Rewards baker current_cycle),
                   (Alpha_context.Delegate.Credited reward))
               ]))))
+  
   |
     Alpha_context.Single
       (Alpha_context.Activate_account {|
@@ -1134,6 +1140,7 @@ Definition apply_contents_list {A : Set}
                   (Alpha_context.Delegate.Credited amount))
               ])))
     end
+  
   |
     Alpha_context.Single
       (Alpha_context.Proposals {|
@@ -1153,6 +1160,7 @@ Definition apply_contents_list {A : Set}
     let=? ctxt := Amendment.record_proposals ctxt source proposals in
     Error_monad.__return
       (ctxt, (Apply_results.Single_result Apply_results.Proposals_result))
+  
   |
     Alpha_context.Single
       (Alpha_context.Ballot {|
@@ -1173,37 +1181,35 @@ Definition apply_contents_list {A : Set}
     let=? ctxt := Amendment.record_ballot ctxt source proposal ballot in
     Error_monad.__return
       (ctxt, (Apply_results.Single_result Apply_results.Ballot_result))
+  
   | (Alpha_context.Single (Alpha_context.Manager_operation _)) as op =>
     let 'existT _ __0 op :=
-      existT (A := Set)
-        (fun __0 => Alpha_context.contents_list (Alpha_context.Kind.manager __0))
-        _ op in
+      existT (A := Set) (fun __0 => Alpha_context.contents_list) _ op in
     let=? ctxt := precheck_manager_contents_list ctxt chain_id operation op in
     let= '(ctxt, __result_value) :=
       apply_manager_contents_list ctxt mode baker chain_id op in
     Error_monad.__return (ctxt, __result_value)
+  
   | (Alpha_context.Cons (Alpha_context.Manager_operation _) _) as op =>
     let 'existT _ [__1, __2] op :=
       existT (A := [Set ** Set])
-        (fun '[__1, __2] =>
-          Alpha_context.contents_list (Alpha_context.Kind.manager (__1 * __2)))
-        [_, _] op in
+        (fun '[__1, __2] => Alpha_context.contents_list) [_, _] op in
     let=? ctxt := precheck_manager_contents_list ctxt chain_id operation op in
     let= '(ctxt, __result_value) :=
       apply_manager_contents_list ctxt mode baker chain_id op in
     Error_monad.__return (ctxt, __result_value)
   end.
 
-Definition apply_operation {A : Set}
+Definition apply_operation
   (ctxt : Alpha_context.context) (chain_id : (|Chain_id|).(S.HASH.t))
   (mode : Script_ir_translator.unparsing_mode)
   (pred_block : (|Block_hash|).(S.HASH.t))
   (baker : (|Signature.Public_key_hash|).(S.SPublic_key_hash.t))
   (__hash_value : (|Operation_hash|).(S.HASH.t))
-  (operation : Alpha_context.operation A)
+  (operation : Alpha_context.operation)
   : Lwt.t
     (Error_monad.tzresult
-      (Alpha_context.context * Apply_results.operation_metadata A)) :=
+      (Alpha_context.context * Apply_results.operation_metadata)) :=
   let ctxt := Alpha_context.Contract.init_origination_nonce ctxt __hash_value in
   let=? '(ctxt, __result_value) :=
     apply_contents_list ctxt chain_id mode pred_block baker operation
@@ -1212,7 +1218,9 @@ Definition apply_operation {A : Set}
   let ctxt := Alpha_context.Gas.set_unlimited ctxt in
   let ctxt := Alpha_context.Contract.unset_origination_nonce ctxt in
   Error_monad.__return
-    (ctxt, {| Apply_results.operation_metadata.contents := __result_value |}).
+    (ctxt,
+      ({| Apply_results.operation_metadata.contents := __result_value |}
+        : Apply_results.operation_metadata)).
 
 Definition may_snapshot_roll (ctxt : Alpha_context.context)
   : Lwt.t (Error_monad.tzresult Alpha_context.context) :=
@@ -1261,7 +1269,11 @@ Definition begin_full_construction
   match Alpha_context.Level.pred ctxt (Alpha_context.Level.current ctxt) with
   | None =>
     (* ❌ Assert instruction is not handled. *)
-    assert false
+    assert
+      (Lwt.t
+        (Error_monad.tzresult
+          (Alpha_context.context * Alpha_context.Block_header.contents *
+            Alpha_context.public_key * Alpha_context.Period.t))) false
   | Some pred_level =>
     let=? rights := Baking.endorsement_rights ctxt pred_level in
     let ctxt := Alpha_context.init_endorsements ctxt rights in
@@ -1274,7 +1286,7 @@ Definition begin_partial_construction (ctxt : Alpha_context.context)
   match Alpha_context.Level.pred ctxt (Alpha_context.Level.current ctxt) with
   | None =>
     (* ❌ Assert instruction is not handled. *)
-    assert false
+    assert (Lwt.t (Error_monad.tzresult Alpha_context.context)) false
   | Some pred_level =>
     let=? rights := Baking.endorsement_rights ctxt pred_level in
     let ctxt := Alpha_context.init_endorsements ctxt rights in
@@ -1315,7 +1327,11 @@ Definition begin_application
   match Alpha_context.Level.pred ctxt (Alpha_context.Level.current ctxt) with
   | None =>
     (* ❌ Assert instruction is not handled. *)
-    assert false
+    assert
+      (Lwt.t
+        (Error_monad.tzresult
+          (Alpha_context.context * Alpha_context.public_key *
+            Alpha_context.Period.t))) false
   | Some pred_level =>
     let=? rights := Baking.endorsement_rights ctxt pred_level in
     let ctxt := Alpha_context.init_endorsements ctxt rights in
@@ -1370,10 +1386,11 @@ Definition finalize_application
     | None => Error_monad.__return ctxt
     | Some nonce_hash =>
       Alpha_context.Nonce.record_hash ctxt
-        {| Alpha_context.Nonce.unrevealed.nonce_hash := nonce_hash;
+        ({| Alpha_context.Nonce.unrevealed.nonce_hash := nonce_hash;
           Alpha_context.Nonce.unrevealed.delegate := delegate;
           Alpha_context.Nonce.unrevealed.rewards := rewards;
           Alpha_context.Nonce.unrevealed.fees := fees |}
+          : Alpha_context.Nonce.unrevealed)
     end in
   let=? ctxt := may_snapshot_roll ctxt in
   let=? '(ctxt, balance_updates, deactivated) := may_start_new_cycle ctxt in
@@ -1397,12 +1414,13 @@ Definition finalize_application
       (Alpha_context.Gas.block_level ctxt) in
   let=? voting_period_kind := Alpha_context.Vote.get_current_period_kind ctxt in
   let receipt :=
-    {| Apply_results.block_metadata.baker := delegate;
+    ({| Apply_results.block_metadata.baker := delegate;
       Apply_results.block_metadata.level := Alpha_context.Level.current ctxt;
       Apply_results.block_metadata.voting_period_kind := voting_period_kind;
       Apply_results.block_metadata.nonce_hash :=
         protocol_data.(Alpha_context.Block_header.contents.seed_nonce_hash);
       Apply_results.block_metadata.consumed_gas := consumed_gas;
       Apply_results.block_metadata.deactivated := deactivated;
-      Apply_results.block_metadata.balance_updates := balance_updates |} in
+      Apply_results.block_metadata.balance_updates := balance_updates |}
+      : Apply_results.block_metadata) in
   Error_monad.__return (ctxt, receipt).

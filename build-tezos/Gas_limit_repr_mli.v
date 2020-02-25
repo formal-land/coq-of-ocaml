@@ -12,14 +12,17 @@ Unset Guard Checking.
 Require Import Tezos.Environment.
 Import Environment.Notations.
 
-Module t.
-  Module Limited.
-    Record record {remaining : Set} : Set := {
-      remaining : remaining }.
-    Arguments record : clear implicits.
-  End Limited.
-  Definition Limited_skeleton := Limited.record.
-End t.
+Module ConstructorRecordNotations_t.
+  Module t.
+    Module Limited.
+      Record record {remaining : Set} : Set := {
+        remaining : remaining }.
+      Arguments record : clear implicits.
+    End Limited.
+    Definition Limited_skeleton := Limited.record.
+  End t.
+End ConstructorRecordNotations_t.
+Import ConstructorRecordNotations_t.
 
 Reserved Notation "'t.Limited".
 
@@ -29,12 +32,10 @@ Inductive t : Set :=
 
 where "'t.Limited" := (t.Limited_skeleton Z.t).
 
-Module ConstructorRecordNotations_t.
-  Module t.
-    Definition Limited := 't.Limited.
-  End t.
-End ConstructorRecordNotations_t.
-Import ConstructorRecordNotations_t.
+Module t.
+  Include ConstructorRecordNotations_t.t.
+  Definition Limited := 't.Limited.
+End t.
 
 Parameter internal_gas : Set.
 

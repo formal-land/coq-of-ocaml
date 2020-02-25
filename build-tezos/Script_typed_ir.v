@@ -43,33 +43,27 @@ Inductive comb : Set :=
 Inductive leaf : Set :=
 | Leaf : leaf.
 
-Reserved Notation "'comparable_struct".
-
-Inductive comparable_struct_gadt : Set :=
-| Int_key : option type_annot -> comparable_struct_gadt
-| Nat_key : option type_annot -> comparable_struct_gadt
-| String_key : option type_annot -> comparable_struct_gadt
-| Bytes_key : option type_annot -> comparable_struct_gadt
-| Mutez_key : option type_annot -> comparable_struct_gadt
-| Bool_key : option type_annot -> comparable_struct_gadt
-| Key_hash_key : option type_annot -> comparable_struct_gadt
-| Timestamp_key : option type_annot -> comparable_struct_gadt
-| Address_key : option type_annot -> comparable_struct_gadt
+Inductive comparable_struct : Set :=
+| Int_key : option type_annot -> comparable_struct
+| Nat_key : option type_annot -> comparable_struct
+| String_key : option type_annot -> comparable_struct
+| Bytes_key : option type_annot -> comparable_struct
+| Mutez_key : option type_annot -> comparable_struct
+| Bool_key : option type_annot -> comparable_struct
+| Key_hash_key : option type_annot -> comparable_struct
+| Timestamp_key : option type_annot -> comparable_struct
+| Address_key : option type_annot -> comparable_struct
 | Pair_key :
-  comparable_struct_gadt * option field_annot ->
-  comparable_struct_gadt * option field_annot -> option type_annot ->
-  comparable_struct_gadt
+  comparable_struct * option field_annot ->
+  comparable_struct * option field_annot -> option type_annot ->
+  comparable_struct.
 
-where "'comparable_struct" := (fun (_ _ : Set) => comparable_struct_gadt).
-
-Definition comparable_struct := 'comparable_struct.
-
-Definition comparable_ty (a : Set) : Set := comparable_struct a comb.
+Definition comparable_ty : Set := comparable_struct.
 
 Module Boxed_set.
   Record signature {elt OPS_t : Set} : Set := {
     elt := elt;
-    elt_ty : comparable_ty elt;
+    elt_ty : comparable_ty;
     OPS : S.SET.signature elt OPS_t;
     boxed : OPS.(S.SET.t);
     size : int;
@@ -83,7 +77,7 @@ Module Boxed_map.
   Record signature {key value : Set} {OPS_t : Set -> Set} : Set := {
     key := key;
     value := value;
-    key_ty : comparable_ty key;
+    key_ty : comparable_ty;
     OPS : S.MAP.signature key OPS_t;
     boxed : OPS.(S.MAP.t) value * int;
   }.
@@ -190,235 +184,192 @@ End big_map.
 Definition big_map_skeleton := big_map.record.
 
 Reserved Notation "'end_of_stack".
-Reserved Notation "'ty".
-Reserved Notation "'stack_ty".
 Reserved Notation "'typed_contract".
 Reserved Notation "'big_map".
-Reserved Notation "'instr".
-Reserved Notation "'stack_prefix_preservation_witness".
 Reserved Notation "'descr".
 Reserved Notation "'lambda".
 Reserved Notation "'script".
 
-Inductive ty_gadt : Set :=
-| Unit_t : option type_annot -> ty_gadt
-| Int_t : option type_annot -> ty_gadt
-| Nat_t : option type_annot -> ty_gadt
-| Signature_t : option type_annot -> ty_gadt
-| String_t : option type_annot -> ty_gadt
-| Bytes_t : option type_annot -> ty_gadt
-| Mutez_t : option type_annot -> ty_gadt
-| Key_hash_t : option type_annot -> ty_gadt
-| Key_t : option type_annot -> ty_gadt
-| Timestamp_t : option type_annot -> ty_gadt
-| Address_t : option type_annot -> ty_gadt
-| Bool_t : option type_annot -> ty_gadt
+Inductive ty : Set :=
+| Unit_t : option type_annot -> ty
+| Int_t : option type_annot -> ty
+| Nat_t : option type_annot -> ty
+| Signature_t : option type_annot -> ty
+| String_t : option type_annot -> ty
+| Bytes_t : option type_annot -> ty
+| Mutez_t : option type_annot -> ty
+| Key_hash_t : option type_annot -> ty
+| Key_t : option type_annot -> ty
+| Timestamp_t : option type_annot -> ty
+| Address_t : option type_annot -> ty
+| Bool_t : option type_annot -> ty
 | Pair_t :
-  ty_gadt * option field_annot * option var_annot ->
-  ty_gadt * option field_annot * option var_annot -> option type_annot ->
-  bool -> ty_gadt
+  ty * option field_annot * option var_annot ->
+  ty * option field_annot * option var_annot -> option type_annot -> bool -> ty
 | Union_t :
-  ty_gadt * option field_annot -> ty_gadt * option field_annot ->
-  option type_annot -> bool -> ty_gadt
-| Lambda_t : ty_gadt -> ty_gadt -> option type_annot -> ty_gadt
-| Option_t : ty_gadt -> option type_annot -> bool -> ty_gadt
-| List_t : ty_gadt -> option type_annot -> bool -> ty_gadt
-| Set_t : forall {v : Set}, comparable_ty v -> option type_annot -> ty_gadt
-| Map_t : forall {k : Set},
-  comparable_ty k -> ty_gadt -> option type_annot -> bool -> ty_gadt
-| Big_map_t : forall {k : Set},
-  comparable_ty k -> ty_gadt -> option type_annot -> ty_gadt
-| Contract_t : ty_gadt -> option type_annot -> ty_gadt
-| Operation_t : option type_annot -> ty_gadt
-| Chain_id_t : option type_annot -> ty_gadt
+  ty * option field_annot -> ty * option field_annot -> option type_annot ->
+  bool -> ty
+| Lambda_t : ty -> ty -> option type_annot -> ty
+| Option_t : ty -> option type_annot -> bool -> ty
+| List_t : ty -> option type_annot -> bool -> ty
+| Set_t : comparable_ty -> option type_annot -> ty
+| Map_t : comparable_ty -> ty -> option type_annot -> bool -> ty
+| Big_map_t : comparable_ty -> ty -> option type_annot -> ty
+| Contract_t : ty -> option type_annot -> ty
+| Operation_t : option type_annot -> ty
+| Chain_id_t : option type_annot -> ty
 
-with stack_ty_gadt : Set :=
-| Item_t : forall {ty : Set},
-  'ty ty -> stack_ty_gadt -> option var_annot -> stack_ty_gadt
-| Empty_t : stack_ty_gadt
+with stack_ty : Set :=
+| Item_t : ty -> stack_ty -> option var_annot -> stack_ty
+| Empty_t : stack_ty
 
-with instr_gadt : Set :=
-| Drop : instr_gadt
-| Dup : instr_gadt
-| Swap : instr_gadt
-| Const : forall {ty : Set}, ty -> instr_gadt
-| Cons_pair : instr_gadt
-| Car : instr_gadt
-| Cdr : instr_gadt
-| Cons_some : instr_gadt
-| Cons_none : forall {a : Set}, 'ty a -> instr_gadt
-| If_none : forall {a aft bef : Set},
-  'descr bef aft -> 'descr (a * bef) aft -> instr_gadt
-| Left : instr_gadt
-| Right : instr_gadt
-| If_left : forall {aft bef l r : Set},
-  'descr (l * bef) aft -> 'descr (r * bef) aft -> instr_gadt
-| Cons_list : instr_gadt
-| Nil : instr_gadt
-| If_cons : forall {a aft bef : Set},
-  'descr (a * (list a * bef)) aft -> 'descr bef aft -> instr_gadt
-| List_map : forall {a b rest : Set}, 'descr (a * rest) (b * rest) -> instr_gadt
-| List_iter : forall {a rest : Set}, 'descr (a * rest) rest -> instr_gadt
-| List_size : instr_gadt
-| Empty_set : forall {a : Set}, comparable_ty a -> instr_gadt
-| Set_iter : forall {a rest : Set}, 'descr (a * rest) rest -> instr_gadt
-| Set_mem : instr_gadt
-| Set_update : instr_gadt
-| Set_size : instr_gadt
-| Empty_map : forall {a v : Set}, comparable_ty a -> 'ty v -> instr_gadt
-| Map_map : forall {a r rest v : Set},
-  'descr ((a * v) * rest) (r * rest) -> instr_gadt
-| Map_iter : forall {a rest v : Set}, 'descr ((a * v) * rest) rest -> instr_gadt
-| Map_mem : instr_gadt
-| Map_get : instr_gadt
-| Map_update : instr_gadt
-| Map_size : instr_gadt
-| Empty_big_map : forall {a v : Set}, comparable_ty a -> 'ty v -> instr_gadt
-| Big_map_mem : instr_gadt
-| Big_map_get : instr_gadt
-| Big_map_update : instr_gadt
-| Concat_string : instr_gadt
-| Concat_string_pair : instr_gadt
-| Slice_string : instr_gadt
-| String_size : instr_gadt
-| Concat_bytes : instr_gadt
-| Concat_bytes_pair : instr_gadt
-| Slice_bytes : instr_gadt
-| Bytes_size : instr_gadt
-| Add_seconds_to_timestamp : instr_gadt
-| Add_timestamp_to_seconds : instr_gadt
-| Sub_timestamp_seconds : instr_gadt
-| Diff_timestamps : instr_gadt
-| Add_tez : instr_gadt
-| Sub_tez : instr_gadt
-| Mul_teznat : instr_gadt
-| Mul_nattez : instr_gadt
-| Ediv_teznat : instr_gadt
-| Ediv_tez : instr_gadt
-| Or : instr_gadt
-| And : instr_gadt
-| Xor : instr_gadt
-| Not : instr_gadt
-| Is_nat : instr_gadt
-| Neg_nat : instr_gadt
-| Neg_int : instr_gadt
-| Abs_int : instr_gadt
-| Int_nat : instr_gadt
-| Add_intint : instr_gadt
-| Add_intnat : instr_gadt
-| Add_natint : instr_gadt
-| Add_natnat : instr_gadt
-| Sub_int : instr_gadt
-| Mul_intint : instr_gadt
-| Mul_intnat : instr_gadt
-| Mul_natint : instr_gadt
-| Mul_natnat : instr_gadt
-| Ediv_intint : instr_gadt
-| Ediv_intnat : instr_gadt
-| Ediv_natint : instr_gadt
-| Ediv_natnat : instr_gadt
-| Lsl_nat : instr_gadt
-| Lsr_nat : instr_gadt
-| Or_nat : instr_gadt
-| And_nat : instr_gadt
-| And_int_nat : instr_gadt
-| Xor_nat : instr_gadt
-| Not_nat : instr_gadt
-| Not_int : instr_gadt
-| Seq : forall {aft bef trans : Set},
-  'descr bef trans -> 'descr trans aft -> instr_gadt
-| If : forall {aft bef : Set}, 'descr bef aft -> 'descr bef aft -> instr_gadt
-| Loop : forall {rest : Set}, 'descr rest (bool * rest) -> instr_gadt
-| Loop_left : forall {a b rest : Set},
-  'descr (a * rest) (union a b * rest) -> instr_gadt
-| Dip : forall {aft bef : Set}, 'descr bef aft -> instr_gadt
-| Exec : instr_gadt
-| Apply : forall {arg : Set}, 'ty arg -> instr_gadt
-| Lambda : forall {arg ret : Set}, 'lambda arg ret -> instr_gadt
-| Failwith : forall {a : Set}, 'ty a -> instr_gadt
-| Nop : instr_gadt
-| Compare : forall {a : Set}, comparable_ty a -> instr_gadt
-| Eq : instr_gadt
-| Neq : instr_gadt
-| Lt : instr_gadt
-| Gt : instr_gadt
-| Le : instr_gadt
-| Ge : instr_gadt
-| Address : instr_gadt
-| Contract : forall {p : Set}, 'ty p -> string -> instr_gadt
-| Transfer_tokens : instr_gadt
-| Create_account : instr_gadt
-| Implicit_account : instr_gadt
-| Create_contract : forall {g p : Set},
-  'ty g -> 'ty p -> 'lambda (p * g) (list operation * g) -> option string ->
-  instr_gadt
-| Create_contract_2 : forall {g p : Set},
-  'ty g -> 'ty p -> 'lambda (p * g) (list operation * g) -> option string ->
-  instr_gadt
-| Set_delegate : instr_gadt
-| Now : instr_gadt
-| Balance : instr_gadt
-| Check_signature : instr_gadt
-| Hash_key : instr_gadt
-| Pack : forall {a : Set}, 'ty a -> instr_gadt
-| Unpack : forall {a : Set}, 'ty a -> instr_gadt
-| Blake2b : instr_gadt
-| Sha256 : instr_gadt
-| Sha512 : instr_gadt
-| Steps_to_quota : instr_gadt
-| Source : instr_gadt
-| Sender : instr_gadt
-| Self : forall {p : Set}, 'ty p -> string -> instr_gadt
-| Amount : instr_gadt
-| Dig : forall {aft bef rest x : Set},
-  int -> 'stack_prefix_preservation_witness (x * rest) rest bef aft ->
-  instr_gadt
-| Dug : forall {aft bef rest x : Set},
-  int -> 'stack_prefix_preservation_witness rest (x * rest) bef aft ->
-  instr_gadt
-| Dipn : forall {aft bef faft fbef : Set},
-  int -> 'stack_prefix_preservation_witness fbef faft bef aft ->
-  'descr fbef faft -> instr_gadt
-| Dropn : forall {C bef rest : Set},
-  int -> 'stack_prefix_preservation_witness rest rest bef C -> instr_gadt
-| ChainId : instr_gadt
+with instr : Set :=
+| Drop : instr
+| Dup : instr
+| Swap : instr
+| Const : forall {ty_ : Set}, ty_ -> instr
+| Cons_pair : instr
+| Car : instr
+| Cdr : instr
+| Cons_some : instr
+| Cons_none : ty -> instr
+| If_none : 'descr -> 'descr -> instr
+| Left : instr
+| Right : instr
+| If_left : 'descr -> 'descr -> instr
+| Cons_list : instr
+| Nil : instr
+| If_cons : 'descr -> 'descr -> instr
+| List_map : 'descr -> instr
+| List_iter : 'descr -> instr
+| List_size : instr
+| Empty_set : comparable_ty -> instr
+| Set_iter : 'descr -> instr
+| Set_mem : instr
+| Set_update : instr
+| Set_size : instr
+| Empty_map : comparable_ty -> ty -> instr
+| Map_map : 'descr -> instr
+| Map_iter : 'descr -> instr
+| Map_mem : instr
+| Map_get : instr
+| Map_update : instr
+| Map_size : instr
+| Empty_big_map : comparable_ty -> ty -> instr
+| Big_map_mem : instr
+| Big_map_get : instr
+| Big_map_update : instr
+| Concat_string : instr
+| Concat_string_pair : instr
+| Slice_string : instr
+| String_size : instr
+| Concat_bytes : instr
+| Concat_bytes_pair : instr
+| Slice_bytes : instr
+| Bytes_size : instr
+| Add_seconds_to_timestamp : instr
+| Add_timestamp_to_seconds : instr
+| Sub_timestamp_seconds : instr
+| Diff_timestamps : instr
+| Add_tez : instr
+| Sub_tez : instr
+| Mul_teznat : instr
+| Mul_nattez : instr
+| Ediv_teznat : instr
+| Ediv_tez : instr
+| Or : instr
+| And : instr
+| Xor : instr
+| Not : instr
+| Is_nat : instr
+| Neg_nat : instr
+| Neg_int : instr
+| Abs_int : instr
+| Int_nat : instr
+| Add_intint : instr
+| Add_intnat : instr
+| Add_natint : instr
+| Add_natnat : instr
+| Sub_int : instr
+| Mul_intint : instr
+| Mul_intnat : instr
+| Mul_natint : instr
+| Mul_natnat : instr
+| Ediv_intint : instr
+| Ediv_intnat : instr
+| Ediv_natint : instr
+| Ediv_natnat : instr
+| Lsl_nat : instr
+| Lsr_nat : instr
+| Or_nat : instr
+| And_nat : instr
+| And_int_nat : instr
+| Xor_nat : instr
+| Not_nat : instr
+| Not_int : instr
+| Seq : 'descr -> 'descr -> instr
+| If : 'descr -> 'descr -> instr
+| Loop : 'descr -> instr
+| Loop_left : 'descr -> instr
+| Dip : 'descr -> instr
+| Exec : instr
+| Apply : ty -> instr
+| Lambda : 'lambda -> instr
+| Failwith : ty -> instr
+| Nop : instr
+| Compare : comparable_ty -> instr
+| Eq : instr
+| Neq : instr
+| Lt : instr
+| Gt : instr
+| Le : instr
+| Ge : instr
+| Address : instr
+| Contract : ty -> string -> instr
+| Transfer_tokens : instr
+| Create_account : instr
+| Implicit_account : instr
+| Create_contract : ty -> ty -> 'lambda -> option string -> instr
+| Create_contract_2 : ty -> ty -> 'lambda -> option string -> instr
+| Set_delegate : instr
+| Now : instr
+| Balance : instr
+| Check_signature : instr
+| Hash_key : instr
+| Pack : ty -> instr
+| Unpack : ty -> instr
+| Blake2b : instr
+| Sha256 : instr
+| Sha512 : instr
+| Steps_to_quota : instr
+| Source : instr
+| Sender : instr
+| Self : ty -> string -> instr
+| Amount : instr
+| Dig : int -> stack_prefix_preservation_witness -> instr
+| Dug : int -> stack_prefix_preservation_witness -> instr
+| Dipn : int -> stack_prefix_preservation_witness -> 'descr -> instr
+| Dropn : int -> stack_prefix_preservation_witness -> instr
+| ChainId : instr
 
-with stack_prefix_preservation_witness_gadt : Set :=
+with stack_prefix_preservation_witness : Set :=
 | Prefix :
-  stack_prefix_preservation_witness_gadt ->
-  stack_prefix_preservation_witness_gadt
-| Rest : stack_prefix_preservation_witness_gadt
+  stack_prefix_preservation_witness -> stack_prefix_preservation_witness
+| Rest : stack_prefix_preservation_witness
 
 where "'end_of_stack" := (unit)
-and "'ty" := (fun (_ : Set) => ty_gadt)
-and "'stack_ty" := (fun (_ : Set) => stack_ty_gadt)
-and "'typed_contract" := (fun (t_arg : Set) => 'ty t_arg * address)
+and "'typed_contract" := (ty * address)
 and "'big_map" := (fun (t_key t_value : Set) =>
-  big_map_skeleton (option Z.t) (map t_key (option t_value)) ('ty t_key)
-    ('ty t_value))
-and "'instr" := (fun (_ _ : Set) => instr_gadt)
-and "'stack_prefix_preservation_witness" := (fun (_ _ _ _ : Set) =>
-  stack_prefix_preservation_witness_gadt)
-and "'descr" := (fun (t_bef t_aft : Set) =>
-  descr_skeleton Alpha_context.Script.location ('stack_ty t_bef)
-    ('stack_ty t_aft) ('instr t_bef t_aft))
-and "'lambda" := (fun (t_arg t_ret : Set) =>
-  lambda_skeleton
-    ('descr (t_arg * 'end_of_stack) (t_ret * 'end_of_stack) *
-      Alpha_context.Script.node))
-and "'script" := (fun (t_arg t_storage : Set) =>
-  script_skeleton
-    ('lambda (pair t_arg t_storage) (pair (list operation) t_storage))
-    ('ty t_arg) t_storage ('ty t_storage) (option string)).
+  big_map_skeleton (option Z.t) (map t_key (option t_value)) ty ty)
+and "'descr" :=
+  (descr_skeleton Alpha_context.Script.location stack_ty stack_ty instr)
+and "'lambda" := (lambda_skeleton ('descr * Alpha_context.Script.node))
+and "'script" := (fun (t_storage : Set) =>
+  script_skeleton 'lambda ty t_storage ty (option string)).
 
 Definition end_of_stack := 'end_of_stack.
-Definition ty := 'ty.
-Definition stack_ty := 'stack_ty.
 Definition typed_contract := 'typed_contract.
 Definition big_map := 'big_map.
-Definition instr := 'instr.
-Definition stack_prefix_preservation_witness :=
-  'stack_prefix_preservation_witness.
 Definition descr := 'descr.
 Definition lambda := 'lambda.
 Definition script := 'script.

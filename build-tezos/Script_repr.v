@@ -69,7 +69,7 @@ Definition encoding : Data_encoding.encoding t :=
         (code, storage))
       (fun function_parameter =>
         let '(code, storage) := function_parameter in
-        {| t.code := code; t.storage := storage |}) None
+        ({| t.code := code; t.storage := storage |} : t)) None
       (Data_encoding.obj2
         (Data_encoding.req None None "code" lazy_expr_encoding)
         (Data_encoding.req None None "storage" lazy_expr_encoding))).
@@ -124,8 +124,11 @@ Fixpoint node_size {A B : Set} (node : Micheline.node A B) {struct node}
   : int * int :=
   match node with
   | Micheline.Int _ n => int_node_size n
+  
   | Micheline.String _ s => string_node_size s
+  
   | Micheline.Bytes _ s => bytes_node_size s
+  
   | Micheline.Prim _ _ args annot =>
     List.fold_left
       (fun function_parameter =>
@@ -135,6 +138,7 @@ Fixpoint node_size {A B : Set} (node : Micheline.node A B) {struct node}
           ((Pervasives.op_plus blocks nblocks),
             (Pervasives.op_plus words nwords)))
       (prim_node_size_nonrec args annot) args
+  
   | Micheline.Seq _ args =>
     List.fold_left
       (fun function_parameter =>

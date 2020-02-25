@@ -58,7 +58,7 @@ Definition previous (ctxt : Raw_context.context) : Level_repr.level :=
   match pred ctxt l with
   | None =>
     (* ❌ Assert instruction is not handled. *)
-    assert false
+    assert Level_repr.level false
   | Some __p_value => __p_value
   end.
 
@@ -77,7 +77,7 @@ Definition last_level_in_cycle
   match pred ctxt (first_level_in_cycle ctxt (Cycle_repr.succ c)) with
   | None =>
     (* ❌ Assert instruction is not handled. *)
-    assert false
+    assert Level_repr.level false
   | Some x => x
   end.
 

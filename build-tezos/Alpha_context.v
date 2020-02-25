@@ -89,14 +89,13 @@ Include Operation_repr.
 
 Module Operation.
   Module t.
-    Record record {kind : Set} : Set := Build {
+    Record record : Set := Build {
       shell : Operation.shell_header;
-      protocol_data : protocol_data kind }.
-    Arguments record : clear implicits.
-    Definition with_shell {t_kind} shell (r : record t_kind) :=
-      Build t_kind shell r.(protocol_data).
-    Definition with_protocol_data {t_kind} protocol_data (r : record t_kind) :=
-      Build t_kind r.(shell) protocol_data.
+      protocol_data : protocol_data }.
+    Definition with_shell shell (r : record) :=
+      Build shell r.(protocol_data).
+    Definition with_protocol_data protocol_data (r : record) :=
+      Build r.(shell) protocol_data.
   End t.
   Definition t := t.record.
   
@@ -393,12 +392,13 @@ Definition finalize (message : option string) (c : Raw_context.context)
   : Updater.validation_result :=
   let fitness := Fitness.from_int64 (Fitness.current c) in
   let context := Raw_context.recover c in
-  {| Updater.validation_result.context := context;
+  ({| Updater.validation_result.context := context;
     Updater.validation_result.fitness := fitness;
     Updater.validation_result.message := message;
     Updater.validation_result.max_operations_ttl := 60;
     Updater.validation_result.last_allowed_fork_level :=
-      Raw_level.to_int32 (Level.last_allowed_fork_level c) |}.
+      Raw_level.to_int32 (Level.last_allowed_fork_level c) |}
+    : Updater.validation_result).
 
 Definition activate
   : Raw_context.context -> (|Protocol_hash|).(S.HASH.t) -> Lwt.t Raw_context.t :=

@@ -298,10 +298,11 @@ Definition Make_single_data_storage :=
               Storage_sigs.Single_data_storage.set_option := set_option;
               Storage_sigs.Single_data_storage.delete := delete;
               Storage_sigs.Single_data_storage.remove := remove
-            |}) :
-            {_ : unit &
-              Single_data_storage.signature (|C|).(Raw_context.T.t)
-                (|V|).(Storage_sigs.VALUE.t)}).
+            |})
+            :
+              {_ : unit &
+                Single_data_storage.signature (|C|).(Raw_context.T.t)
+                  (|V|).(Storage_sigs.VALUE.t)}).
 
 Module INDEX.
   Record signature {t : Set} {ipath : Set -> Set} : Set := {
@@ -310,7 +311,7 @@ Module INDEX.
     to_path : t -> list string -> list string;
     of_path : list string -> option t;
     ipath := ipath;
-    args : forall {a : Set}, unit -> Storage_description.args a t (ipath a);
+    args : unit -> Storage_description.args;
   }.
   Arguments signature : clear implicits.
 End INDEX.
@@ -337,21 +338,20 @@ Definition Pair :=
           end
         end in
       let ipath (a : Set) := (|I2|).(INDEX.ipath) ((|I1|).(INDEX.ipath) a) in
-      let args {A : Set} (function_parameter : unit)
-        : Storage_description.args A ((|I1|).(INDEX.t) * (|I2|).(INDEX.t))
-          ((|I2|).(INDEX.ipath) ((|I1|).(INDEX.ipath) A)) :=
+      let args (function_parameter : unit) : Storage_description.args :=
         let '_ := function_parameter in
-        Storage_description.Pair (((|I1|).(INDEX.args) (a := A)) tt)
-          (((|I2|).(INDEX.args) (a := A)) tt) in
+        Storage_description.Pair ((|I1|).(INDEX.args) tt)
+          ((|I2|).(INDEX.args) tt) in
       existT (A := Set -> Set) _ _
         {|
           INDEX.path_length := path_length;
           INDEX.to_path := to_path;
           INDEX.of_path := of_path;
-          INDEX.args {_} := args
-        |}) :
-        {ipath : _ &
-          INDEX.signature ((|I1|).(INDEX.t) * (|I2|).(INDEX.t)) ipath}).
+          INDEX.args := args
+        |})
+        :
+          {ipath : _ &
+            INDEX.signature ((|I1|).(INDEX.t) * (|I2|).(INDEX.t)) ipath}).
 
 Definition Make_data_set_storage :=
   fun (C : {t : _ & Raw_context.T.signature t}) =>
@@ -401,7 +401,7 @@ Definition Make_data_set_storage :=
                     match (|I|).(INDEX.of_path) file with
                     | None =>
                       (* ❌ Assert instruction is not handled. *)
-                      assert false
+                      assert (Lwt.t _) false
                     | Some __p_value => f __p_value acc
                     end
                   end)
@@ -428,9 +428,10 @@ Definition Make_data_set_storage :=
           Storage_sigs.Data_set_storage.elements := elements;
           Storage_sigs.Data_set_storage.fold {_} := fold;
           Storage_sigs.Data_set_storage.clear := clear
-        |}) :
-        {_ : unit &
-          Data_set_storage.signature (|C|).(Raw_context.T.t) (|I|).(INDEX.t)}).
+        |})
+        :
+          {_ : unit &
+            Data_set_storage.signature (|C|).(Raw_context.T.t) (|I|).(INDEX.t)}).
 
 Definition Make_indexed_data_storage :=
   fun (C : {t : _ & Raw_context.T.signature t}) =>
@@ -532,7 +533,7 @@ Definition Make_indexed_data_storage :=
                       match (|I|).(INDEX.of_path) file with
                       | None =>
                         (* ❌ Assert instruction is not handled. *)
-                        assert false
+                        assert (Lwt.t _) false
                       | Some path => f path acc
                       end
                     end)
@@ -584,10 +585,11 @@ Definition Make_indexed_data_storage :=
             Storage_sigs.Indexed_data_storage.bindings := bindings;
             Storage_sigs.Indexed_data_storage.fold {_} := fold;
             Storage_sigs.Indexed_data_storage.fold_keys {_} := fold_keys
-          |}) :
-          {_ : unit &
-            Indexed_data_storage.signature (|C|).(Raw_context.T.t)
-              (|I|).(INDEX.t) (|V|).(Storage_sigs.VALUE.t)}).
+          |})
+          :
+            {_ : unit &
+              Indexed_data_storage.signature (|C|).(Raw_context.T.t)
+                (|I|).(INDEX.t) (|V|).(Storage_sigs.VALUE.t)}).
 
 Definition Make_indexed_carbonated_data_storage :=
   fun (C : {t : _ & Raw_context.T.signature t}) =>
@@ -785,12 +787,12 @@ Definition Make_indexed_carbonated_data_storage :=
                         match (|I|).(INDEX.of_path) file with
                         | None =>
                           (* ❌ Assert instruction is not handled. *)
-                          assert false
+                          assert (Lwt.t _) false
                         | Some path => f path acc
                         end
                       | (_, _, _) =>
                         (* ❌ Assert instruction is not handled. *)
-                        assert false
+                        assert (Lwt.t _) false
                       end
                     end)
             else
@@ -826,11 +828,12 @@ Definition Make_indexed_carbonated_data_storage :=
               delete;
             Storage_sigs.Non_iterable_indexed_carbonated_data_storage.remove :=
               remove
-          |}) :
-          {_ : unit &
-            Non_iterable_indexed_carbonated_data_storage.signature
-              (|C|).(Raw_context.T.t) (|I|).(INDEX.t)
-              (|V|).(Storage_sigs.VALUE.t)}).
+          |})
+          :
+            {_ : unit &
+              Non_iterable_indexed_carbonated_data_storage.signature
+                (|C|).(Raw_context.T.t) (|I|).(INDEX.t)
+                (|V|).(Storage_sigs.VALUE.t)}).
 
 Definition Make_indexed_data_snapshotable_storage :=
   fun (C : {t : _ & Raw_context.T.signature t}) =>
@@ -956,11 +959,12 @@ Definition Make_indexed_data_snapshotable_storage :=
                 __snapshot_value;
               Storage_sigs.Indexed_data_snapshotable_storage.delete_snapshot :=
                 delete_snapshot
-            |}) :
-            {_ : unit &
-              Indexed_data_snapshotable_storage.signature
-                (|Snapshot_index|).(INDEX.t) (|I|).(INDEX.t)
-                (|C|).(Raw_context.T.t) (|V|).(Storage_sigs.VALUE.t)}).
+            |})
+            :
+              {_ : unit &
+                Indexed_data_snapshotable_storage.signature
+                  (|Snapshot_index|).(INDEX.t) (|I|).(INDEX.t)
+                  (|C|).(Raw_context.T.t) (|V|).(Storage_sigs.VALUE.t)}).
 
 Definition Make_indexed_subcontext :=
   fun (C : {t : _ & Raw_context.T.signature t}) =>
@@ -983,7 +987,7 @@ Definition Make_indexed_subcontext :=
             match (|I|).(INDEX.of_path) path with
             | None =>
               (* ❌ Assert instruction is not handled. *)
-              assert false
+              assert (Lwt.t _) false
             | Some path => f path acc
             end
           else
@@ -1212,9 +1216,10 @@ Definition Make_indexed_subcontext :=
             match (|I|).(INDEX.of_path) prefix with
             | None =>
               (* ❌ Assert instruction is not handled. *)
-              assert false
+              assert (Lwt.t (list (|I|).(INDEX.t))) false
             | Some path => Lwt.__return [ path ]
             end
+          
           | ([], _, _) =>
             let= prefixes := __list_value __t_value prefix in
             Error_monad.op_gtpipeeq
@@ -1224,6 +1229,7 @@ Definition Make_indexed_subcontext :=
                   | (Context.Key prefix | Context.Dir prefix) =>
                     loop (Pervasives.op_plus i 1) prefix nil
                   end) prefixes) List.flatten
+          
           | (cons d [], _, true) =>
             (* ❌ Sequences of instructions are ignored (operator ";") *)
             (* ❌ instruction_sequence ";" *)
@@ -1238,6 +1244,7 @@ Definition Make_indexed_subcontext :=
                     | Some _ => loop (Pervasives.op_plus i 1) prefix nil
                     end
                   end) prefixes) List.flatten
+          
           | (cons "" ds, _, _) =>
             let= prefixes := __list_value __t_value prefix in
             Error_monad.op_gtpipeeq
@@ -1247,6 +1254,7 @@ Definition Make_indexed_subcontext :=
                   | (Context.Key prefix | Context.Dir prefix) =>
                     loop (Pervasives.op_plus i 1) prefix ds
                   end) prefixes) List.flatten
+          
           | (cons d ds, _, _) =>
             (* ❌ Sequences of instructions are ignored (operator ";") *)
             (* ❌ instruction_sequence ";" *)
@@ -1489,10 +1497,11 @@ Definition Make_indexed_subcontext :=
                 Storage_sigs.Indexed_data_storage.bindings := bindings;
                 Storage_sigs.Indexed_data_storage.fold {_} := fold;
                 Storage_sigs.Indexed_data_storage.fold_keys {_} := fold_keys
-              |}) :
-              {_ : unit &
-                Indexed_data_storage.signature t key
-                  (|V|).(Storage_sigs.VALUE.t)}) in
+              |})
+              :
+                {_ : unit &
+                  Indexed_data_storage.signature t key
+                    (|V|).(Storage_sigs.VALUE.t)}) in
       let Make_carbonated_map :=
         fun (N : {_ : unit & NAME.signature}) =>
           fun (V : {t : _ & VALUE.signature t}) =>
@@ -1703,10 +1712,11 @@ Definition Make_indexed_subcontext :=
                   delete;
                 Storage_sigs.Non_iterable_indexed_carbonated_data_storage.remove :=
                   remove
-              |}) :
-              {_ : unit &
-                Non_iterable_indexed_carbonated_data_storage.signature t key
-                  (|V|).(Storage_sigs.VALUE.t)}) in
+              |})
+              :
+                {_ : unit &
+                  Non_iterable_indexed_carbonated_data_storage.signature t key
+                    (|V|).(Storage_sigs.VALUE.t)}) in
       existT (A := unit) (fun _ => _) tt
         {|
           Storage_sigs.Indexed_raw_context.clear := clear;
@@ -1720,10 +1730,11 @@ Definition Make_indexed_subcontext :=
           Storage_sigs.Indexed_raw_context.Make_carbonated_map :=
             Make_carbonated_map;
           Storage_sigs.Indexed_raw_context.Raw_context := (|Raw_context|)
-        |}) :
-        {_ : unit &
-          Indexed_raw_context.signature (|C|).(Raw_context.T.t) (|I|).(INDEX.t)
-            (fun (a : Set) => (|I|).(INDEX.ipath) a)}).
+        |})
+        :
+          {_ : unit &
+            Indexed_raw_context.signature (|C|).(Raw_context.T.t)
+              (|I|).(INDEX.t) (fun (a : Set) => (|I|).(INDEX.ipath) a)}).
 
 Module WRAPPER.
   Record signature {t key : Set} : Set := {
@@ -1861,8 +1872,9 @@ Definition Wrap_indexed_data_storage :=
           Storage_sigs.Indexed_data_storage.bindings := bindings;
           Storage_sigs.Indexed_data_storage.fold {_} := fold;
           Storage_sigs.Indexed_data_storage.fold_keys {_} := fold_keys
-        |}) :
-        {_ : unit &
-          Indexed_data_storage.signature
-            (|C|).(Storage_sigs.Indexed_data_storage.t) (|K|).(WRAPPER.t)
-            (|C|).(Storage_sigs.Indexed_data_storage.value)}).
+        |})
+        :
+          {_ : unit &
+            Indexed_data_storage.signature
+              (|C|).(Storage_sigs.Indexed_data_storage.t) (|K|).(WRAPPER.t)
+              (|C|).(Storage_sigs.Indexed_data_storage.value)}).

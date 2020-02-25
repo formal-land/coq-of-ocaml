@@ -29,46 +29,40 @@ Parameter register_value : forall {a key : Set},
 Parameter register_named_subcontext : forall {key : Set},
   t key -> list string -> t key.
 
-Module args.
-  Module One.
-    Record record {rpc_arg encoding compare : Set} : Set := {
-      rpc_arg : rpc_arg;
-      encoding : encoding;
-      compare : compare }.
-    Arguments record : clear implicits.
-  End One.
-  Definition One_skeleton := One.record.
-End args.
+Module ConstructorRecordNotations_args.
+  Module args.
+    Module One.
+      Record record {rpc_arg encoding compare : Set} : Set := {
+        rpc_arg : rpc_arg;
+        encoding : encoding;
+        compare : compare }.
+      Arguments record : clear implicits.
+    End One.
+    Definition One_skeleton := One.record.
+  End args.
+End ConstructorRecordNotations_args.
+Import ConstructorRecordNotations_args.
 
 Reserved Notation "'args.One".
-Reserved Notation "'args".
 
-Inductive args_gadt : Set :=
-| One : forall {a : Set}, 'args.One a -> args_gadt
-| Pair : args_gadt -> args_gadt -> args_gadt
+Inductive args : Set :=
+| One : forall {a : Set}, 'args.One a -> args
+| Pair : args -> args -> args
 
-where "'args" := (fun (_ _ _ : Set) => args_gadt)
-and "'args.One" := (fun (t_a : Set) =>
+where "'args.One" := (fun (t_a : Set) =>
   args.One_skeleton (RPC_arg.t t_a) (Data_encoding.t t_a) (t_a -> t_a -> int)).
 
-Module ConstructorRecordNotations_args_gadt.
-  Module args.
-    Definition One := 'args.One.
-  End args.
-End ConstructorRecordNotations_args_gadt.
-Import ConstructorRecordNotations_args_gadt.
-
-Definition args := 'args.
+Module args.
+  Include ConstructorRecordNotations_args.args.
+  Definition One := 'args.One.
+End args.
 
 Parameter register_indexed_subcontext : forall {arg key sub_key : Set},
-  t key -> (key -> Lwt.t (Error_monad.tzresult (list arg))) ->
-  args key arg sub_key -> t sub_key.
+  t key -> (key -> Lwt.t (Error_monad.tzresult (list arg))) -> args -> t sub_key.
 
-Parameter pack : forall {a key sub_key : Set},
-  args key a sub_key -> key -> a -> sub_key.
+Parameter pack : forall {a key sub_key : Set}, args -> key -> a -> sub_key.
 
-Parameter unpack : forall {a key sub_key : Set},
-  args key a sub_key -> sub_key -> key * a.
+Parameter unpack : forall {a key sub_key : Set}, args -> sub_key -> key * a.
 
 Module INDEX.
   Record signature {t : Set} : Set := {

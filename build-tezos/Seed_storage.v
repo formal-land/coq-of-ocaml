@@ -36,7 +36,10 @@ Definition compute_for_cycle
   match Cycle_repr.pred cycle with
   | None =>
     (* ❌ Assert instruction is not handled. *)
-    assert false
+    assert
+      (Lwt.t
+        (Error_monad.tzresult
+          (Raw_context.t * list Storage.Seed.unrevealed_nonce))) false
   | Some previous_cycle =>
     let levels := Level_storage.levels_with_commitments_in_cycle c revealed in
     let combine

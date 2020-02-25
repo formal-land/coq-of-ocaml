@@ -74,11 +74,12 @@ Definition fixed_encoding : Data_encoding.encoding fixed :=
         '(proof_of_work_nonce_size, nonce_length, max_revelations_per_block,
           max_operation_data_length, max_proposals_per_delegate) :=
         function_parameter in
-      {| fixed.proof_of_work_nonce_size := proof_of_work_nonce_size;
+      ({| fixed.proof_of_work_nonce_size := proof_of_work_nonce_size;
         fixed.nonce_length := nonce_length;
         fixed.max_revelations_per_block := max_revelations_per_block;
         fixed.max_operation_data_length := max_operation_data_length;
-        fixed.max_proposals_per_delegate := max_proposals_per_delegate |}) None
+        fixed.max_proposals_per_delegate := max_proposals_per_delegate |}
+        : fixed)) None
     (Data_encoding.obj5
       (Data_encoding.req None None "proof_of_work_nonce_size"
         Data_encoding.uint8)
@@ -91,11 +92,11 @@ Definition fixed_encoding : Data_encoding.encoding fixed :=
         Data_encoding.uint8)).
 
 Definition __fixed_value : fixed :=
-  {| fixed.proof_of_work_nonce_size := proof_of_work_nonce_size;
+  ({| fixed.proof_of_work_nonce_size := proof_of_work_nonce_size;
     fixed.nonce_length := nonce_length;
     fixed.max_revelations_per_block := max_revelations_per_block;
     fixed.max_operation_data_length := max_operation_data_length;
-    fixed.max_proposals_per_delegate := max_proposals_per_delegate |}.
+    fixed.max_proposals_per_delegate := max_proposals_per_delegate |} : fixed).
 
 Module parametric.
   Record record : Set := Build {
@@ -508,7 +509,7 @@ Definition parametric_encoding : Data_encoding.encoding parametric :=
               hard_storage_limit_per_operation, test_chain_duration, quorum_min,
               quorum_max, min_proposal_quorum, initial_endorsers,
               delay_per_missing_endorsement))) := function_parameter in
-      {| parametric.preserved_cycles := preserved_cycles;
+      ({| parametric.preserved_cycles := preserved_cycles;
         parametric.blocks_per_cycle := blocks_per_cycle;
         parametric.blocks_per_commitment := blocks_per_commitment;
         parametric.blocks_per_roll_snapshot := blocks_per_roll_snapshot;
@@ -535,7 +536,7 @@ Definition parametric_encoding : Data_encoding.encoding parametric :=
         parametric.min_proposal_quorum := min_proposal_quorum;
         parametric.initial_endorsers := initial_endorsers;
         parametric.delay_per_missing_endorsement :=
-          delay_per_missing_endorsement |}) None
+          delay_per_missing_endorsement |} : parametric)) None
     (Data_encoding.merge_objs
       (Data_encoding.obj9
         (Data_encoding.req None None "preserved_cycles" Data_encoding.uint8)
@@ -602,5 +603,5 @@ Definition encoding : Data_encoding.encoding t :=
       (__fixed_value, __parametric_value))
     (fun function_parameter =>
       let '(__fixed_value, __parametric_value) := function_parameter in
-      {| t.fixed := __fixed_value; t.parametric := __parametric_value |}) None
-    (Data_encoding.merge_objs fixed_encoding parametric_encoding).
+      ({| t.fixed := __fixed_value; t.parametric := __parametric_value |} : t))
+    None (Data_encoding.merge_objs fixed_encoding parametric_encoding).

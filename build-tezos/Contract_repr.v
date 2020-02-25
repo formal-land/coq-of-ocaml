@@ -128,8 +128,9 @@ Definition origination_nonce_encoding
         (operation_hash, origination_index))
       (fun function_parameter =>
         let '(operation_hash, origination_index) := function_parameter in
-        {| origination_nonce.operation_hash := operation_hash;
-          origination_nonce.origination_index := origination_index |}) in
+        ({| origination_nonce.operation_hash := operation_hash;
+          origination_nonce.origination_index := origination_index |}
+          : origination_nonce)) in
   fun eta => arg None eta)
     (Data_encoding.obj2
       (Data_encoding.req None None "operation"
@@ -173,10 +174,10 @@ Definition originated_contracts (function_parameter : origination_nonce)
 
 Definition initial_origination_nonce
   (operation_hash : (|Operation_hash|).(S.HASH.t)) : origination_nonce :=
-  {| origination_nonce.operation_hash := operation_hash;
+  ({| origination_nonce.operation_hash := operation_hash;
     origination_nonce.origination_index :=
       (* ❌ Constant of type int32 is converted to int *)
-      0 |}.
+      0 |} : origination_nonce).
 
 Definition incr_origination_nonce (__nonce_value : origination_nonce)
   : origination_nonce :=

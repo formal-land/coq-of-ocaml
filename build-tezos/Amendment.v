@@ -175,7 +175,7 @@ Fixpoint longer_than {A : Set} (l : list A) (n : (|Compare.Int|).(Compare.S.t))
   {struct l} : bool :=
   if (|Compare.Int|).(Compare.S.op_lt) n 0 then
     (* ❌ Assert instruction is not handled. *)
-    assert false
+    assert bool false
   else
     match l with
     | [] => false

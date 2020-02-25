@@ -29,8 +29,8 @@ Module Seed.
     Import Data_encoding.
     
     Definition __seed_value
-      : RPC_service.service (* `POST *) unit Updater.rpc_context
-        Updater.rpc_context unit unit Alpha_context.Seed.seed :=
+      : RPC_service.service Updater.rpc_context Updater.rpc_context unit unit
+        Alpha_context.Seed.seed :=
       RPC_service.post_service
         (Some "Seed of the cycle to which the block belongs.") RPC_query.empty
         Data_encoding.empty Alpha_context.Seed.seed_encoding
@@ -42,27 +42,17 @@ Module Seed.
   
   Definition get {D E G I K L a b c i o q : Set}
     (ctxt :
-      (((RPC_service.t
-        ((* `DELETE *) unit + (* `GET *) unit + (* `PATCH *) unit +
-          (* `POST *) unit + (* `PUT *) unit) RPC_context.t RPC_context.t q i o
-      -> D -> q -> i -> Lwt.t (Error_monad.shell_tzresult o)) * (E * q * i * o))
-        *
-        (((RPC_service.t
-          ((* `DELETE *) unit + (* `GET *) unit + (* `PATCH *) unit +
-            (* `POST *) unit + (* `PUT *) unit) RPC_context.t
-          (RPC_context.t * a) q i o -> D -> a -> q -> i ->
-        Lwt.t (Error_monad.shell_tzresult o)) * (G * a * q * i * o)) *
-          (((RPC_service.t
-            ((* `DELETE *) unit + (* `GET *) unit + (* `PATCH *) unit +
-              (* `POST *) unit + (* `PUT *) unit) RPC_context.t
-            ((RPC_context.t * a) * b) q i o -> D -> a -> b -> q -> i ->
-          Lwt.t (Error_monad.shell_tzresult o)) * (I * a * b * q * i * o)) *
-            (((RPC_service.t
-              ((* `DELETE *) unit + (* `GET *) unit + (* `PATCH *) unit +
-                (* `POST *) unit + (* `PUT *) unit) RPC_context.t
-              (((RPC_context.t * a) * b) * c) q i o -> D -> a -> b -> c -> q ->
-            i -> Lwt.t (Error_monad.shell_tzresult o)) *
-              (K * a * b * c * q * i * o)) * L)))) * L * D) (block : D)
+      (((RPC_service.t RPC_context.t RPC_context.t q i o -> D -> q -> i ->
+      Lwt.t (Error_monad.shell_tzresult o)) * (E * q * i * o)) *
+        (((RPC_service.t RPC_context.t (RPC_context.t * a) q i o -> D -> a ->
+        q -> i -> Lwt.t (Error_monad.shell_tzresult o)) * (G * a * q * i * o)) *
+          (((RPC_service.t RPC_context.t ((RPC_context.t * a) * b) q i o -> D ->
+          a -> b -> q -> i -> Lwt.t (Error_monad.shell_tzresult o)) *
+            (I * a * b * q * i * o)) *
+            (((RPC_service.t RPC_context.t (((RPC_context.t * a) * b) * c) q i o
+            -> D -> a -> b -> c -> q -> i ->
+            Lwt.t (Error_monad.shell_tzresult o)) * (K * a * b * c * q * i * o))
+              * L)))) * L * D) (block : D)
     : Lwt.t (Error_monad.shell_tzresult Alpha_context.Seed.seed) :=
     RPC_context.make_call0 S.__seed_value ctxt block tt tt.
 End Seed.
@@ -107,7 +97,7 @@ Module Nonce.
   
   Module S.
     Definition get
-      : RPC_service.service (* `GET *) unit Updater.rpc_context
+      : RPC_service.service Updater.rpc_context
         (Updater.rpc_context * Alpha_context.Raw_level.raw_level) unit unit info :=
       RPC_service.get_service (Some "Info about the nonce of a previous block.")
         RPC_query.empty info_encoding
@@ -140,27 +130,17 @@ Module Nonce.
   
   Definition get {D E G I K L a b c i o q : Set}
     (ctxt :
-      (((RPC_service.t
-        ((* `DELETE *) unit + (* `GET *) unit + (* `PATCH *) unit +
-          (* `POST *) unit + (* `PUT *) unit) RPC_context.t RPC_context.t q i o
-      -> D -> q -> i -> Lwt.t (Error_monad.shell_tzresult o)) * (E * q * i * o))
-        *
-        (((RPC_service.t
-          ((* `DELETE *) unit + (* `GET *) unit + (* `PATCH *) unit +
-            (* `POST *) unit + (* `PUT *) unit) RPC_context.t
-          (RPC_context.t * a) q i o -> D -> a -> q -> i ->
-        Lwt.t (Error_monad.shell_tzresult o)) * (G * a * q * i * o)) *
-          (((RPC_service.t
-            ((* `DELETE *) unit + (* `GET *) unit + (* `PATCH *) unit +
-              (* `POST *) unit + (* `PUT *) unit) RPC_context.t
-            ((RPC_context.t * a) * b) q i o -> D -> a -> b -> q -> i ->
-          Lwt.t (Error_monad.shell_tzresult o)) * (I * a * b * q * i * o)) *
-            (((RPC_service.t
-              ((* `DELETE *) unit + (* `GET *) unit + (* `PATCH *) unit +
-                (* `POST *) unit + (* `PUT *) unit) RPC_context.t
-              (((RPC_context.t * a) * b) * c) q i o -> D -> a -> b -> c -> q ->
-            i -> Lwt.t (Error_monad.shell_tzresult o)) *
-              (K * a * b * c * q * i * o)) * L)))) * L * D) (block : D)
+      (((RPC_service.t RPC_context.t RPC_context.t q i o -> D -> q -> i ->
+      Lwt.t (Error_monad.shell_tzresult o)) * (E * q * i * o)) *
+        (((RPC_service.t RPC_context.t (RPC_context.t * a) q i o -> D -> a ->
+        q -> i -> Lwt.t (Error_monad.shell_tzresult o)) * (G * a * q * i * o)) *
+          (((RPC_service.t RPC_context.t ((RPC_context.t * a) * b) q i o -> D ->
+          a -> b -> q -> i -> Lwt.t (Error_monad.shell_tzresult o)) *
+            (I * a * b * q * i * o)) *
+            (((RPC_service.t RPC_context.t (((RPC_context.t * a) * b) * c) q i o
+            -> D -> a -> b -> c -> q -> i ->
+            Lwt.t (Error_monad.shell_tzresult o)) * (K * a * b * c * q * i * o))
+              * L)))) * L * D) (block : D)
     (level : Alpha_context.Raw_level.raw_level)
     : Lwt.t (Error_monad.shell_tzresult info) :=
     RPC_context.make_call1 S.get ctxt block level tt tt.

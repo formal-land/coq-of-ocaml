@@ -12,7 +12,7 @@ Unset Guard Checking.
 Require Import Tezos.Environment.
 Import Environment.Notations.
 
-Parameter num : forall (t : Set), Set.
+Parameter num : Set.
 
 Inductive n : Set :=
 | Natural_tag : n.
@@ -20,62 +20,62 @@ Inductive n : Set :=
 Inductive z : Set :=
 | Integer_tag : z.
 
-Parameter zero_n : num n.
+Parameter zero_n : num.
 
-Parameter zero : num z.
+Parameter zero : num.
 
-Parameter compare : forall {a : Set}, num a -> num a -> int.
+Parameter compare : num -> num -> int.
 
-Parameter to_string : forall {A : Set}, num A -> string.
+Parameter to_string : num -> string.
 
-Parameter of_string : string -> option (num z).
+Parameter of_string : string -> option num.
 
-Parameter to_int64 : forall {A : Set}, num A -> option int64.
+Parameter to_int64 : num -> option int64.
 
-Parameter of_int64 : int64 -> num z.
+Parameter of_int64 : int64 -> num.
 
-Parameter to_int : forall {A : Set}, num A -> option int.
+Parameter to_int : num -> option int.
 
-Parameter of_int : int -> num z.
+Parameter of_int : int -> num.
 
-Parameter of_zint : Z.t -> num z.
+Parameter of_zint : Z.t -> num.
 
-Parameter to_zint : forall {a : Set}, num a -> Z.t.
+Parameter to_zint : num -> Z.t.
 
-Parameter add_n : num n -> num n -> num n.
+Parameter add_n : num -> num -> num.
 
-Parameter mul_n : num n -> num n -> num n.
+Parameter mul_n : num -> num -> num.
 
-Parameter ediv_n : num n -> num n -> option (num n * num n).
+Parameter ediv_n : num -> num -> option (num * num).
 
-Parameter add : forall {A B : Set}, num A -> num B -> num z.
+Parameter add : num -> num -> num.
 
-Parameter sub : forall {A B : Set}, num A -> num B -> num z.
+Parameter sub : num -> num -> num.
 
-Parameter mul : forall {A B : Set}, num A -> num B -> num z.
+Parameter mul : num -> num -> num.
 
-Parameter ediv : forall {A B : Set}, num A -> num B -> option (num z * num n).
+Parameter ediv : num -> num -> option (num * num).
 
-Parameter abs : num z -> num n.
+Parameter abs : num -> num.
 
-Parameter is_nat : num z -> option (num n).
+Parameter is_nat : num -> option num.
 
-Parameter neg : forall {A : Set}, num A -> num z.
+Parameter neg : num -> num.
 
-Parameter __int_value : num n -> num z.
+Parameter __int_value : num -> num.
 
-Parameter lognot : forall {A : Set}, num A -> num z.
+Parameter lognot : num -> num.
 
-Parameter shift_left_n : num n -> num n -> option (num n).
+Parameter shift_left_n : num -> num -> option num.
 
-Parameter shift_right_n : num n -> num n -> option (num n).
+Parameter shift_right_n : num -> num -> option num.
 
-Parameter shift_left : forall {a : Set}, num a -> num n -> option (num a).
+Parameter shift_left : num -> num -> option num.
 
-Parameter shift_right : forall {a : Set}, num a -> num n -> option (num a).
+Parameter shift_right : num -> num -> option num.
 
-Parameter logor : forall {a : Set}, num a -> num a -> num a.
+Parameter logor : num -> num -> num.
 
-Parameter logand : forall {A : Set}, num A -> num n -> num n.
+Parameter logand : num -> num -> num.
 
-Parameter logxor : num n -> num n -> num n.
+Parameter logxor : num -> num -> num.

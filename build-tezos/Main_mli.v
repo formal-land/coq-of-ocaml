@@ -14,42 +14,45 @@ Import Environment.Notations.
 Require Tezos.Alpha_context.
 Require Tezos.Apply_results_mli. Module Apply_results := Apply_results_mli.
 
-Module validation_mode.
-  Module Application.
-    Record record {block_header baker block_delay : Set} : Set := {
-      block_header : block_header;
-      baker : baker;
-      block_delay : block_delay }.
-    Arguments record : clear implicits.
-  End Application.
-  Definition Application_skeleton := Application.record.
-  
-  Module Partial_application.
-    Record record {block_header baker block_delay : Set} : Set := {
-      block_header : block_header;
-      baker : baker;
-      block_delay : block_delay }.
-    Arguments record : clear implicits.
-  End Partial_application.
-  Definition Partial_application_skeleton := Partial_application.record.
-  
-  Module Partial_construction.
-    Record record {predecessor : Set} : Set := {
-      predecessor : predecessor }.
-    Arguments record : clear implicits.
-  End Partial_construction.
-  Definition Partial_construction_skeleton := Partial_construction.record.
-  
-  Module Full_construction.
-    Record record {predecessor protocol_data baker block_delay : Set} : Set := {
-      predecessor : predecessor;
-      protocol_data : protocol_data;
-      baker : baker;
-      block_delay : block_delay }.
-    Arguments record : clear implicits.
-  End Full_construction.
-  Definition Full_construction_skeleton := Full_construction.record.
-End validation_mode.
+Module ConstructorRecordNotations_validation_mode.
+  Module validation_mode.
+    Module Application.
+      Record record {block_header baker block_delay : Set} : Set := {
+        block_header : block_header;
+        baker : baker;
+        block_delay : block_delay }.
+      Arguments record : clear implicits.
+    End Application.
+    Definition Application_skeleton := Application.record.
+    
+    Module Partial_application.
+      Record record {block_header baker block_delay : Set} : Set := {
+        block_header : block_header;
+        baker : baker;
+        block_delay : block_delay }.
+      Arguments record : clear implicits.
+    End Partial_application.
+    Definition Partial_application_skeleton := Partial_application.record.
+    
+    Module Partial_construction.
+      Record record {predecessor : Set} : Set := {
+        predecessor : predecessor }.
+      Arguments record : clear implicits.
+    End Partial_construction.
+    Definition Partial_construction_skeleton := Partial_construction.record.
+    
+    Module Full_construction.
+      Record record {predecessor protocol_data baker block_delay : Set} : Set := {
+        predecessor : predecessor;
+        protocol_data : protocol_data;
+        baker : baker;
+        block_delay : block_delay }.
+      Arguments record : clear implicits.
+    End Full_construction.
+    Definition Full_construction_skeleton := Full_construction.record.
+  End validation_mode.
+End ConstructorRecordNotations_validation_mode.
+Import ConstructorRecordNotations_validation_mode.
 
 Reserved Notation "'validation_mode.Application".
 Reserved Notation "'validation_mode.Partial_application".
@@ -76,15 +79,13 @@ and "'validation_mode.Full_construction" :=
     Alpha_context.Block_header.contents Alpha_context.public_key_hash
     Alpha_context.Period.t).
 
-Module ConstructorRecordNotations_validation_mode.
-  Module validation_mode.
-    Definition Application := 'validation_mode.Application.
-    Definition Partial_application := 'validation_mode.Partial_application.
-    Definition Partial_construction := 'validation_mode.Partial_construction.
-    Definition Full_construction := 'validation_mode.Full_construction.
-  End validation_mode.
-End ConstructorRecordNotations_validation_mode.
-Import ConstructorRecordNotations_validation_mode.
+Module validation_mode.
+  Include ConstructorRecordNotations_validation_mode.validation_mode.
+  Definition Application := 'validation_mode.Application.
+  Definition Partial_application := 'validation_mode.Partial_application.
+  Definition Partial_construction := 'validation_mode.Partial_construction.
+  Definition Full_construction := 'validation_mode.Full_construction.
+End validation_mode.
 
 Module validation_state.
   Record record : Set := Build {
