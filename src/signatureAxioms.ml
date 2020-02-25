@@ -200,8 +200,12 @@ let rec of_signature (signature : Typedtree.signature) : t Monad.t =
         NotSupported
         "Recursive module signatures are not handled"
     | Tsig_type (_, typs) ->
+      (* Because types may be recursive, so we need the types to already be in
+         the environment. This is useful for example for the detection of
+         phantom types. *)
+      set_env final_env (
       TypeDefinition.of_ocaml typs >>= fun typ_definition ->
-      return [TypDefinition typ_definition]
+      return [TypDefinition typ_definition])
     | Tsig_typext { tyext_path; _ } ->
       raise
         [Error ("extensible_type_definition `" ^ Path.last tyext_path ^ "`")]

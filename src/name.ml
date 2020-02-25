@@ -113,10 +113,6 @@ let prefix_by_with (name : t) : t =
   let Make name = name in
   Make ("with_" ^ name)
 
-let suffix_by_gadt (name : t) : t =
-  let Make name = name in
-  Make (name ^ "_gadt")
-
 let suffix_by_skeleton (name : t) : t =
   let Make name = name in
   Make (name ^ "_skeleton")

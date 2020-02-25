@@ -256,23 +256,16 @@ let of_path_and_name_with_convert (path : Path.t) (name : Name.t) : t =
   convert (of_name (List.rev path) base)
 
 let of_constructor_description
-  (is_in_pattern : bool)
   (constructor_description : Types.constructor_description)
   : t =
   match constructor_description with
   | {
       cstr_name;
       cstr_res = { desc = Tconstr (path, _, _); _ };
-      cstr_generalized;
       _
     } ->
     let { path; _ } = of_path_without_convert false path in
     let base = Name.of_string false cstr_name in
-    let base =
-      if cstr_generalized && is_in_pattern then
-        Name.suffix_by_gadt base
-      else
-        base in
     convert { path; base }
   | _ -> failwith "Unexpected constructor description without a type constructor"
 

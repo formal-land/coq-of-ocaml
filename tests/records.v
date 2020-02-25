@@ -124,7 +124,7 @@ Module ConstructorWithRecord.
   | Bar : 'loc -> t
   
   with exi : Set :=
-  | Ex_gadt : forall {a : Set}, 'exi.Ex a -> exi
+  | Ex : forall {a : Set}, 'exi.Ex a -> exi
   
   where "'loc" := (loc_skeleton Z Z)
   and "'t.Foo" := (t.Foo_skeleton string Z)
@@ -140,8 +140,6 @@ Module ConstructorWithRecord.
   End exi.
   
   Definition loc := 'loc.
-  
-  Definition Ex {a : Set} : exi.Ex a -> exi := Ex_gadt (a := a).
   
   Definition l : loc := ({| loc.x := 12; loc.y := 23 |} : loc).
   

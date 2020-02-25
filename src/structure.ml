@@ -84,7 +84,8 @@ let top_level_evaluation_error : t list Monad.t =
 
 (** Import an OCaml structure. *)
 let rec of_structure (structure : structure) : t list Monad.t =
-  let of_structure_item (item : structure_item) : t list Monad.t =
+  let of_structure_item (item : structure_item) (final_env : Env.t)
+    : t list Monad.t =
     set_env item.str_env (
     set_loc (Loc.of_location item.str_loc) (
     match item.str_desc with
@@ -109,8 +110,12 @@ let rec of_structure (structure : structure) : t list Monad.t =
       ) >>= fun def ->
       return [Value def]
     | Tstr_type (_, typs) ->
+      (* Because types may be recursive, so we need the types to already be in
+         the environment. This is useful for example for the detection of
+         phantom types. *)
+      set_env final_env (
       TypeDefinition.of_ocaml typs >>= fun def ->
-      return [TypeDefinition def]
+      return [TypeDefinition def])
     | Tstr_exception { ext_id; _ } ->
       error_message (Error ("exception " ^ Ident.name ext_id)) SideEffect (
         "The definition of exceptions is not handled.\n\n" ^
@@ -303,7 +308,15 @@ let rec of_structure (structure : structure) : t list Monad.t =
         )
     (* We ignore attribute fields. *)
     | Tstr_attribute _ -> return [])) in
-  structure.str_items |> Monad.List.flatten_map of_structure_item
+  Monad.List.fold_right
+    (fun structure_item (structure, final_env) ->
+      let env = structure_item.str_env in
+      of_structure_item structure_item final_env >>= fun structure_item ->
+      return (structure_item @ structure, env)
+    )
+    structure.str_items
+    ([], structure.str_final_env) >>= fun (structure, _) ->
+  return structure
 
 (** Pretty-print a structure to Coq. *)
 let rec to_coq (defs : t list) : SmartPrint.t =

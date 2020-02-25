@@ -22,6 +22,119 @@ let type_exprs_of_row_field (row_field : Types.row_field)
   | Reither (_, typs, _, _) -> typs
   | Rabsent -> []
 
+let filter_typ_params_in_valid_set
+  (typ_params : TypeIsGadt.TypParams.t) (valid_set : Name.Set.t) : bool list =
+  typ_params |> List.map (function
+    | None -> false
+    | Some typ_param -> Name.Set.mem typ_param valid_set
+  )
+
+let rec non_phantom_typs (path : Path.t) (typs : Types.type_expr list)
+  : Types.type_expr list Monad.t =
+  get_env >>= fun env ->
+  begin match Env.find_type path env with
+  | typ_declaration ->
+    TypeIsGadt.named_typ_params_expecting_variables
+      typ_declaration.type_params >>= fun typ_params ->
+    Attribute.of_attributes typ_declaration.type_attributes >>= fun typ_attributes ->
+    begin match typ_declaration.type_kind with
+    | Type_abstract ->
+      begin match typ_declaration.type_manifest with
+      | None -> return None
+      (* Specific case for inductives defined with polymorphic variants. *)
+      | Some { desc = Tvariant _; _ } ->
+        return (Some (typ_params |> List.map (function
+          | None -> false
+          | Some _ -> true
+        )))
+      | Some typ ->
+        non_phantom_vars_of_typ typ >>= fun non_phantom_typ_vars ->
+        return (Some (
+          filter_typ_params_in_valid_set typ_params non_phantom_typ_vars
+        ))
+      end
+    | Type_record (labels, _) ->
+      let typs = List.map (fun label -> label.ld_type) labels in
+      non_phantom_vars_of_typs typs >>= fun non_phantom_typ_vars ->
+      return (Some (
+        filter_typ_params_in_valid_set typ_params non_phantom_typ_vars
+      ))
+    | Type_variant constructors ->
+      let is_not_gadt =
+        let constructors_return_typ_params =
+          constructors |> List.map (fun constructor ->
+            TypeIsGadt.get_return_typ_params typ_params constructor.cd_res
+          ) in
+        not (Attribute.has_force_gadt typ_attributes) && 
+        match TypeIsGadt.check_if_not_gadt typ_params constructors_return_typ_params with
+        | None -> false
+        | Some _ -> true in
+      return (Some (typ_params |> List.map (fun _ -> is_not_gadt)))
+    | Type_open -> return None
+    end
+  | exception Not_found -> return None
+  end >>= fun non_phantom_typs_shape ->
+  let typs =
+    match non_phantom_typs_shape with
+    | None -> typs
+    | Some non_phantom_typs_shape ->
+      List.rev @@ List.fold_left2
+        (fun typs is_non_phantom typ ->
+          if is_non_phantom then
+            typ :: typs
+          else
+            typs
+        )
+        [] non_phantom_typs_shape typs in
+  return typs
+
+and non_phantom_vars_of_typ (typ : Types.type_expr) : Name.Set.t Monad.t =
+  match typ.desc with
+  | Tvar x | Tunivar x ->
+    begin match x with
+    | None -> return Name.Set.empty
+    | Some x -> return (Name.Set.singleton (Name.of_string false x))
+    end
+  | Tconstr (path, typs, _) ->
+    non_phantom_typs path typs >>= fun typs ->
+    non_phantom_vars_of_typs typs
+  | Tarrow (_, typ1, typ2, _) -> non_phantom_vars_of_typs [typ1; typ2]
+  | Ttuple typs | Tpackage (_, _, typs) ->
+    non_phantom_vars_of_typs typs
+  | Tlink typ | Tsubst typ -> non_phantom_vars_of_typ typ
+  | Tobject (typ, params) ->
+    let param_typs =
+      match !params with
+      | None -> []
+      | Some (_, param_typs) -> param_typs in
+      non_phantom_vars_of_typs (typ :: param_typs)
+  | Tfield (_, _, typ1, typ2) -> non_phantom_vars_of_typs [typ1; typ2]
+  | Tnil -> return Name.Set.empty
+  | Tvariant _ ->
+    (* We return an empty set to prevent a potential stack-overflow. Moreover,
+       one should note that for the case of type synonyms which are polymorphic
+       variants we directly consider this definition like an inductive
+       definition in the phantom types analysis. *)
+    return Name.Set.empty
+  | Tpoly (typ, typ_args) ->
+    TypeIsGadt.named_typ_params_expecting_variables typ_args >>= fun typ_args ->
+    let typ_args =
+      typ_args |>
+      Util.List.filter_map (fun x -> x) |>
+      Name.Set.of_list in
+    non_phantom_vars_of_typ typ >>= fun non_phantom_vars ->
+    return (Name.Set.diff non_phantom_vars typ_args)
+
+and non_phantom_vars_of_typs (typs : Types.type_expr list) 
+  : Name.Set.t Monad.t =
+  Monad.List.fold_left
+    (fun typ_vars typ ->
+      non_phantom_vars_of_typ typ >>= fun new_typ_vars ->
+      return (Name.Set.union typ_vars new_typ_vars)
+    )
+    Name.Set.empty
+    typs
+
 (** Import an OCaml type. Add to the environment all the new free type variables. *)
 let rec of_typ_expr
   (with_free_vars: bool)
@@ -58,6 +171,7 @@ let rec of_typ_expr
     of_typs_exprs with_free_vars typ_vars typs >>= fun (typs, typ_vars, new_typ_vars) ->
     return (Tuple typs, typ_vars, new_typ_vars)
   | Tconstr (path, typs, _) ->
+    non_phantom_typs path typs >>= fun typs ->
     of_typs_exprs with_free_vars typ_vars typs >>= fun (typs, typ_vars, new_typ_vars) ->
     MixedPath.of_path false path None >>= fun mixed_path ->
     return (Apply (mixed_path, typs), typ_vars, new_typ_vars)
@@ -160,10 +274,6 @@ and of_typs_exprs
   ) >>= fun (typs, typ_vars, new_typ_vars) ->
   return (List.rev typs, typ_vars, new_typ_vars)
 
-let of_type_expr_without_free_vars (typ : Types.type_expr) : t Monad.t =
-  of_typ_expr false Name.Map.empty typ >>= fun (typ, _, _) ->
-  return typ
-
 let rec of_type_expr_variable (typ : Types.type_expr) : Name.t Monad.t =
   match typ.desc with
   | Tvar (Some x) | Tunivar (Some x) -> return (Name.of_string false x)
@@ -172,7 +282,11 @@ let rec of_type_expr_variable (typ : Types.type_expr) : Name.t Monad.t =
     raise
       (Name.of_string false "expected_variable")
       NotSupported
-      "Only type variables are supported as parameters"
+      "Only type variables are supported as parameters."
+
+let of_type_expr_without_free_vars (typ : Types.type_expr) : t Monad.t =
+  of_typ_expr false Name.Map.empty typ >>= fun (typ, _, _) ->
+  return typ
 
 (** We do not generate error messages for this function. Indeed, if there are
     errors for the following types, they should be noticed elsewhere (by the

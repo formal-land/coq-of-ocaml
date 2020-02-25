@@ -208,7 +208,7 @@ let rec of_expression (typ_vars : Name.t Name.Map.t) (e : expression)
         )
     | _ ->
       let x =
-        PathName.of_constructor_description false constructor_description in
+        PathName.of_constructor_description constructor_description in
       (es |> Monad.List.map (of_expression typ_vars)) >>= fun es ->
       return (Constructor (x, implicits, es))
     end
