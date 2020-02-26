@@ -16,7 +16,7 @@
     <![endif]-->
   </head>
   <body>
-    <div class="container-fluid">
+    <div class="container-fluid" style="overflow: hidden;">
       <div class="navbar navbar-default" role="navigation">
         <div class="container-fluid">
           <div class="navbar-header">
@@ -52,7 +52,7 @@
       </small>
     </h2>
     <p>These are the sources of the <a href="https://gitlab.com/tezos/tezos/tree/master/src/proto_alpha/lib_protocol">protocol</a> of <a href="https://tezos.com/">Tezos</a> imported to <a href="https://coq.inria.fr/">Coq</a> by the current development version of <a href="https://github.com/clarus/coq-of-ocaml">coq-of-ocaml</a>. Tezos is a crypto-currency with smart-contracts and an upgradable protocol.</p>
-    <blockquote class="blockquote"><p class="mb-0" style="font-size: 16px;">(2020-02-20) We continue the import of the code to Coq, waiting for advices from <a href="https://gitlab.com/rafoo_">Raphaël</a> on the proofs of the interpreter.</p></blockquote>
+    <blockquote class="blockquote"><p class="mb-0" style="font-size: 16px;">(2020-02-26) We continue the proofs of the interpreter and update the generated code if necessary. Holding ground around the interpreter.</p></blockquote>
 
     <p>We show the original&nbsp;<a href="https://ocaml.org/">OCaml</a> code on the left and the imported&nbsp;<a href="https://coq.inria.fr/">Coq</a> code on the right. The imported code does not necessarily compile. Warnings reported on the&nbsp;OCaml side are due to either various incompleteness in our tool, or to side-effects in the source code. Go on the <a href="https://gitter.im/clarus/coq-of-ocaml">Gitter chat</a> for more information. Work currently made at <a href="https://www.nomadic-labs.com/">Nomadic Labs</a>.</p>
     <p>To install the latest development version of <a href="https://clarus.github.io/coq-of-ocaml/">coq-of-ocaml</a> with <a href="https://opam.ocaml.org/">opam</a>:</p>
@@ -111,6 +111,7 @@ opam pin add https://github.com/clarus/coq-of-ocaml.git#master</code></pre>
           29028,
           29028,
           25014,
+          25014,
         ],
         generated: [
           47563,
@@ -155,6 +156,7 @@ opam pin add https://github.com/clarus/coq-of-ocaml.git#master</code></pre>
           49288,
           49288,
           49288,
+          48552,
           48552,
         ],
         labels: [
@@ -201,6 +203,7 @@ opam pin add https://github.com/clarus/coq-of-ocaml.git#master</code></pre>
           "02-23",
           "02-24",
           "02-25",
+          "02-26",
         ]
       }
 ;
