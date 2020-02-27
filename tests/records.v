@@ -23,10 +23,10 @@ Module SizedString.
 End SizedString.
 
 Definition r : SizedString.t :=
-  ({| SizedString.t.name := "gre"; SizedString.t.size := 3 |} : SizedString.t).
+  {| SizedString.t.name := "gre"; SizedString.t.size := 3 |}.
 
 Definition r' : SizedString.t :=
-  ({| SizedString.t.name := "haha"; SizedString.t.size := 4 |} : SizedString.t).
+  {| SizedString.t.name := "haha"; SizedString.t.size := 4 |}.
 
 Definition s : Z := Z.add r.(SizedString.t.size) r'.(SizedString.t.size).
 
@@ -55,7 +55,7 @@ Module Point.
   End t.
   Definition t := t.record.
   
-  Definition p : t := ({| t.x := 5; t.y := (-3); t.z := 1 |} : t).
+  Definition p : t := {| t.x := 5; t.y := (-3); t.z := 1 |}.
   
   Definition b : bool :=
     match p with
@@ -78,8 +78,7 @@ Module poly.
 End poly.
 Definition poly := poly.record.
 
-Definition p : poly Z bool :=
-  ({| poly.first := 12; poly.second := false |} : poly Z bool).
+Definition p : poly Z bool := {| poly.first := 12; poly.second := false |}.
 
 Module ConstructorWithRecord.
   Module ConstructorRecordNotations_t_exi.
@@ -141,12 +140,11 @@ Module ConstructorWithRecord.
   
   Definition loc := 'loc.
   
-  Definition l : loc := ({| loc.x := 12; loc.y := 23 |} : loc).
+  Definition l : loc := {| loc.x := 12; loc.y := 23 |}.
   
   Definition l_with : loc := loc.with_x 41 l.
   
-  Definition foo : t :=
-    Foo ({| t.Foo.name := "foo"; t.Foo.size := 12 |} : t.Foo).
+  Definition foo : t := Foo {| t.Foo.name := "foo"; t.Foo.size := 12 |}.
   
   Definition f (x : t) : Z :=
     match x with
@@ -185,7 +183,5 @@ Module ConstructorWithPolymorphicRecord.
   Arguments Foo {_ _}.
   
   Definition foo : t Z string :=
-    Foo
-      ({| t.Foo.location := 12; t.Foo.payload := "hi"; t.Foo.size := 23 |}
-        : t.Foo Z string).
+    Foo {| t.Foo.location := 12; t.Foo.payload := "hi"; t.Foo.size := 23 |}.
 End ConstructorWithPolymorphicRecord.

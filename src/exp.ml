@@ -238,9 +238,7 @@ let rec of_expression (typ_vars : Name.t Name.Map.t) (e : expression)
             return (Some (x, e))
       ) >>= fun fields ->
       begin match extended_expression with
-      | None ->
-        Type.of_typ_expr false typ_vars e.exp_type >>= fun (typ, _, _) ->
-        return (TypeAnnotation (Record fields, typ))
+      | None -> return (Record fields)
       | Some extended_expression ->
         of_expression typ_vars extended_expression >>= fun extended_e ->
         return (
