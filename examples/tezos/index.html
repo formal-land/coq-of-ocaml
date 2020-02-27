@@ -59,7 +59,7 @@
     <pre><code>opam repo add coq-released https://coq.inria.fr/opam/released
 opam pin add https://github.com/clarus/coq-of-ocaml.git#master</code></pre>
     <ul>
-      <li>OCaml size: 36025 lines</li>
+      <li>OCaml size: 36034 lines</li>
       <li>Coq size: 48552 lines (+34% compared to&nbsp;OCaml)</li>
       <li>Warnings from coq-of-ocaml: 4336</li>
     </ul>
@@ -112,6 +112,7 @@ opam pin add https://github.com/clarus/coq-of-ocaml.git#master</code></pre>
           29028,
           25014,
           25014,
+          25014,
         ],
         generated: [
           47563,
@@ -156,6 +157,7 @@ opam pin add https://github.com/clarus/coq-of-ocaml.git#master</code></pre>
           49288,
           49288,
           49288,
+          48552,
           48552,
           48552,
         ],
@@ -204,6 +206,7 @@ opam pin add https://github.com/clarus/coq-of-ocaml.git#master</code></pre>
           "02-24",
           "02-25",
           "02-26",
+          "02-27",
         ]
       }
 ;
@@ -47884,8 +47887,8 @@ Parameter encoding : Data_encoding.encoding t.
   <div style="margin: 20px;">
     <h3>Michelson_v1_gas</h3>
     <ul>
-      <li>OCaml size: 779 lines</li>
-      <li>Coq size: 1081 lines (+38% compared to&nbsp;OCaml)</li>
+      <li>OCaml size: 767 lines</li>
+      <li>Coq size: 1081 lines (+40% compared to&nbsp;OCaml)</li>
     </ul>
   </div>
   <div class="col-md-6">
@@ -48025,16 +48028,12 @@ module Cost_of = struct
 
     let set_mem : type elt. elt -&gt; elt Script_typed_ir.set -&gt; cost =
      fun elt (module Box) -&gt;
-      let elt_bytes =
-        (size_of_comparable) Box.elt_ty elt
-      in
+      let elt_bytes = size_of_comparable Box.elt_ty elt in
       atomic_step_cost ((1 + (elt_bytes / 82)) * log2 Box.size)
 
     let set_update : type elt. elt -&gt; bool -&gt; elt Script_typed_ir.set -&gt; cost =
      fun elt _ (module Box) -&gt;
-      let elt_bytes =
-        (size_of_comparable) Box.elt_ty elt
-      in
+      let elt_bytes = size_of_comparable Box.elt_ty elt in
       atomic_step_cost ((1 + (elt_bytes / 82)) * log2 Box.size)
 
     let set_size = atomic_step_cost 10
@@ -48051,9 +48050,7 @@ module Cost_of = struct
         type key value. key -&gt; (key, value) Script_typed_ir.map -&gt; cost =
      fun key (module Box) -&gt;
       let map_card = snd Box.boxed in
-      let key_bytes =
-        (size_of_comparable) Box.key_ty key
-      in
+      let key_bytes = size_of_comparable Box.key_ty key in
       atomic_step_cost ((1 + (key_bytes / 70)) * log2 map_card)
 
     let map_mem = map_access
@@ -48065,9 +48062,7 @@ module Cost_of = struct
         key -&gt; value option -&gt; (key, value) Script_typed_ir.map -&gt; cost =
      fun key _value (module Box) -&gt;
       let map_card = snd Box.boxed in
-      let key_bytes =
-        (size_of_comparable) Box.key_ty key
-      in
+      let key_bytes = size_of_comparable Box.key_ty key in
       atomic_step_cost ((1 + (key_bytes / 38)) * log2 map_card)
 
     let map_size = atomic_step_cost 10
@@ -48255,11 +48250,9 @@ module Cost_of = struct
           compare_bytes x y
       | (Mutez_key _, x, y) -&gt;
           compare_tez x y
-      | (Int_key _, (x : Script_int_repr.num), (y : Script_int_repr.num))
-        -&gt;
+      | (Int_key _, (x : Script_int_repr.num), (y : Script_int_repr.num)) -&gt;
           compare_zint x y
-      | (Nat_key _, (x : Script_int_repr.num), (y : Script_int_repr.num))
-        -&gt;
+      | (Nat_key _, (x : Script_int_repr.num), (y : Script_int_repr.num)) -&gt;
           compare_zint x y
       | (Key_hash_key _, x, y) -&gt;
           compare_key_hash x y
@@ -48631,9 +48624,7 @@ module Cost_of = struct
 
     let tez = Script.int_node_cost_of_numbits 60 (* int64 bound *)
 
-    let timestamp x =
-      Script_timestamp.to_zint x |&gt; Script_int.of_zint
-      |&gt; int
+    let timestamp x = Script_timestamp.to_zint x |&gt; Script_int.of_zint |&gt; int
 
     let operation bytes = Script.bytes_node_cost bytes
 
@@ -63515,8 +63506,8 @@ Parameter logxor : num -&gt; num -&gt; num.
   <div style="margin: 20px;">
     <h3>Script_interpreter</h3>
     <ul>
-      <li>OCaml size: 1591 lines</li>
-      <li>Coq size: 2482 lines (+56% compared to&nbsp;OCaml)</li>
+      <li>OCaml size: 1625 lines</li>
+      <li>Coq size: 2482 lines (+52% compared to&nbsp;OCaml)</li>
     </ul>
   </div>
   <div class="col-md-6">
@@ -64015,8 +64006,10 @@ Alternative: use a monad to sequence side-effects.">log := (descr.loc, Gas.level
       loop ctxt l init &gt;&gt;=? fun (res, ctxt) -&gt; logged_return (res, ctxt)
   (* sets *)
   | (Empty_set t, rest, _) -&gt;
-      Lwt.return (Gas.consume ctxt (Interp_costs.empty_set))
-      &gt;&gt;=? fun ctxt -&gt; logged_return (Item ((empty_set[@coq_implicit &quot;(a := unit)&quot;]) t, rest), ctxt)
+      Lwt.return (Gas.consume ctxt Interp_costs.empty_set)
+      &gt;&gt;=? fun ctxt -&gt;
+      logged_return
+        (Item ((empty_set [@coq_implicit &quot;(a := unit)&quot;]) t, rest), ctxt)
   | (Set_iter body, Item (set, init), _) -&gt;
       Lwt.return (Gas.consume ctxt (Interp_costs.set_to_list set))
       &gt;&gt;=? fun ctxt -&gt;
@@ -64055,7 +64048,8 @@ Alternative: use a monad to sequence side-effects.">log := (descr.loc, Gas.level
       Lwt.return (Gas.consume ctxt Interp_costs.empty_map)
       &gt;&gt;=? fun ctxt -&gt;
       logged_return
-        (Item ((empty_map [@coq_implicit &quot;(a := unit) (b := unit)&quot;]) t, rest), ctxt)
+        ( Item ((empty_map [@coq_implicit &quot;(a := unit) (b := unit)&quot;]) t, rest),
+          ctxt )
   | (Map_map body, Item (map, rest), _) -&gt;
       Lwt.return (Gas.consume ctxt (Interp_costs.map_to_list map))
       &gt;&gt;=? fun ctxt -&gt;
@@ -64111,10 +64105,16 @@ Alternative: use a monad to sequence side-effects.">log := (descr.loc, Gas.level
         ctxt
   (* Big map operations *)
   | (Empty_big_map (tk, tv), rest, _) -&gt;
-      Lwt.return (Gas.consume ctxt (Interp_costs.empty_map))
+      Lwt.return (Gas.consume ctxt Interp_costs.empty_map)
       &gt;&gt;=? fun ctxt -&gt;
       logged_return
-        (Item ((Script_ir_translator.empty_big_map[@coq_implicit &quot;(a := unit) (b := unit)&quot;]) tk tv, rest), ctxt)
+        ( Item
+            ( (Script_ir_translator.empty_big_map [@coq_implicit
+                                                    &quot;(a := unit) (b := unit)&quot;])
+                tk
+                tv,
+              rest ),
+          ctxt )
   | (Big_map_mem, Item (key, Item (map, rest)), _) -&gt;
       Lwt.return (Gas.consume ctxt (Interp_costs.map_mem key map.diff))
       &gt;&gt;=? fun ctxt -&gt;
@@ -64518,7 +64518,8 @@ They are sent to a unit type.">(Overflow (loc, get_log log))</abbr>
       Lwt.return (Gas.consume ctxt Interp_costs.exec)
       &gt;&gt;=? fun ctxt -&gt;
       interp ?log ctxt step_constants lam arg
-      &gt;&gt;=? fun (res, ctxt) -&gt; logged_return ((Item (res, rest)[@coq_implicit &quot;(ty := unit)&quot;]), ctxt)
+      &gt;&gt;=? fun (res, ctxt) -&gt;
+      logged_return ((Item (res, rest) [@coq_implicit &quot;(ty := unit)&quot;]), ctxt)
   | (Apply capture_ty, Item (capture, Item (lam, rest)), _) -&gt; (
       Lwt.return (Gas.consume ctxt Interp_costs.apply)
       &gt;&gt;=? fun ctxt -&gt;
@@ -64540,7 +64541,7 @@ They are sent to a unit type.">(Overflow (loc, get_log log))</abbr>
                 loc = descr.loc;
                 bef = arg_stack_ty;
                 aft = Item_t (capture_ty, arg_stack_ty, None);
-                instr = (Const capture);
+                instr = Const capture;
               }
               : (_, _) descr )
           in
@@ -64548,7 +64549,7 @@ They are sent to a unit type.">(Overflow (loc, get_log log))</abbr>
             ( {
                 loc = descr.loc;
                 bef = Item_t (capture_ty, arg_stack_ty, None);
-                aft = (Item_t (full_arg_ty, Empty_t, None));
+                aft = Item_t (full_arg_ty, Empty_t, None);
                 instr = Cons_pair;
               }
               : (_, _) descr )
@@ -64591,7 +64592,7 @@ They are sent to a unit type.">(Overflow (loc, get_log log))</abbr>
 They are sent to a unit type.">Cannot_serialize_failure</abbr> (unparse_data ctxt Optimized tv v)
       &gt;&gt;=? fun (v, _ctxt) -&gt;
       let v = Micheline.strip_locations v in
-      (fail[@coq_implicit &quot;(a := unit)&quot;]) <abbr class="mark-warning" title="Values of extensible types are ignored.
+      (fail [@coq_implicit &quot;(a := unit)&quot;]) <abbr class="mark-warning" title="Values of extensible types are ignored.
 
 They are sent to a unit type.">(Reject (loc, v, get_log log))</abbr>
   | (Nop, stack, _) -&gt;
@@ -64652,19 +64653,28 @@ They are sent to a unit type.">(Reject (loc, v, get_log log))</abbr>
         match Data_encoding.Binary.of_bytes Script.expr_encoding bytes with
         | None -&gt;
             Lwt.return (Gas.consume ctxt (Interp_costs.unpack_failed bytes))
-            &gt;&gt;=? fun ctxt -&gt; logged_return (Item (None[@coq_implicit &quot;(A := unit)&quot;], rest), ctxt)
+            &gt;&gt;=? fun ctxt -&gt;
+            logged_return
+              (Item ((None [@coq_implicit &quot;(A := unit)&quot;]), rest), ctxt)
         | Some expr -&gt; (
             Lwt.return (Gas.consume ctxt (Script.deserialized_cost expr))
             &gt;&gt;=? fun ctxt -&gt;
-            (parse_data[@coq_implicit &quot;(a := unit)&quot;]) ctxt ~legacy:false t (Micheline.root expr)
+            (parse_data [@coq_implicit &quot;(a := unit)&quot;])
+              ctxt
+              ~legacy:false
+              t
+              (Micheline.root expr)
             &gt;&gt;= function
             | Ok (value, ctxt) -&gt;
                 logged_return (Item (Some value, rest), ctxt)
             | Error _ignored -&gt;
                 Lwt.return
                   (Gas.consume ctxt (Interp_costs.unpack_failed bytes))
-                &gt;&gt;=? fun ctxt -&gt; logged_return (Item (None[@coq_implicit &quot;(A := unit)&quot;], rest), ctxt) )
-      else logged_return (Item (None[@coq_implicit &quot;(A := unit)&quot;], rest), ctxt)
+                &gt;&gt;=? fun ctxt -&gt;
+                logged_return
+                  (Item ((None [@coq_implicit &quot;(A := unit)&quot;]), rest), ctxt) )
+      else
+        logged_return (Item ((None [@coq_implicit &quot;(A := unit)&quot;]), rest), ctxt)
   (* protocol *)
   | (Address, Item (pair, rest), _) -&gt;
       let (_, address) = pair in
@@ -64686,7 +64696,8 @@ They are sent to a unit type.">(Reject (loc, v, get_log log))</abbr>
           &gt;&gt;=? fun (ctxt, maybe_contract) -&gt;
           logged_return (Item (maybe_contract, rest), ctxt)
       | _ -&gt;
-          logged_return (Item (None [@coq_implicit &quot;(A := unit)&quot;], rest), ctxt) )
+          logged_return
+            (Item ((None [@coq_implicit &quot;(A := unit)&quot;]), rest), ctxt) )
   | (Transfer_tokens, Item (p, Item (amount, Item (triple, rest))), _) -&gt;
       let (tp, (destination, entrypoint)) = triple in
       Lwt.return (Gas.consume ctxt Interp_costs.transfer)
@@ -64750,7 +64761,7 @@ They are sent to a unit type.">(Reject (loc, v, get_log log))</abbr>
         ( Item
             ( ( Internal_operation
                   {source = step_constants.self; operation; nonce},
-                None[@coq_implicit &quot;(A := unit)&quot;] ),
+                (None [@coq_implicit &quot;(A := unit)&quot;]) ),
               Item ((contract, &quot;default&quot;), rest) ),
           ctxt )
   | (Implicit_account, Item (key, rest), _) -&gt;
@@ -64911,7 +64922,7 @@ They are sent to a unit type.">(Reject (loc, v, get_log log))</abbr>
         ( Item
             ( ( Internal_operation
                   {source = step_constants.self; operation; nonce},
-                None[@coq_implicit &quot;(A := unit)&quot;] ),
+                (None [@coq_implicit &quot;(A := unit)&quot;]) ),
               rest ),
           ctxt )
   | (Balance, rest, _) -&gt;
@@ -65026,23 +65037,23 @@ and interp :
   let stack = Item (arg, Empty) in
   match[@coq_match_gadt] lam with
   | {lam = (code, _)} -&gt;
-    ( match log with
-    | None -&gt;
-        return_unit
-    | Some log -&gt;
-        trace <abbr class="mark-warning" title="Values of extensible types are ignored.
+      ( match log with
+      | None -&gt;
+          return_unit
+      | Some log -&gt;
+          trace <abbr class="mark-warning" title="Values of extensible types are ignored.
 
 They are sent to a unit type.">Cannot_serialize_log</abbr> (unparse_stack ctxt (stack, code.bef))
-        &gt;&gt;=? fun stack -&gt;
-        <abbr class="mark-warning" title="Sequences of instructions are ignored (operator &quot;;&quot;)
+          &gt;&gt;=? fun stack -&gt;
+          <abbr class="mark-warning" title="Sequences of instructions are ignored (operator &quot;;&quot;)
 
 Alternative: use a monad to sequence side-effects.">log := (code.loc, Gas.level ctxt, stack) :: !log</abbr> ;
-        return_unit )
-    &gt;&gt;=? fun () -&gt;
-    step ?log ctxt step_constants code stack
-    &gt;&gt;=? fun [@coq_match_gadt] [@coq_match_with_default] (Item (ret, Empty), ctxt)
-            -&gt;
-    return (ret, ctxt)
+          return_unit )
+      &gt;&gt;=? fun () -&gt;
+      step ?log ctxt step_constants code stack
+      &gt;&gt;=? fun [@coq_match_gadt] [@coq_match_with_default] ( Item (ret, Empty),
+                                                             ctxt ) -&gt;
+      return (ret, ctxt)
 
 (* ---- contract handling ---------------------------------------------------*)
 let execute ?log ctxt mode step_constants ~entrypoint unparsed_script arg :
@@ -65074,7 +65085,10 @@ They are sent to a unit type.">(Bad_contract_parameter step_constants.self)</abb
   &gt;&gt;=? fun (arg, ctxt) -&gt;
   Script.force_decode_in_context ctxt unparsed_script.code
   &gt;&gt;=? fun (script_code, ctxt) -&gt;
-  (Script_ir_translator.collect_big_maps [@coq_implicit &quot;(a := unit)&quot;]) ctxt arg_type arg
+  (Script_ir_translator.collect_big_maps [@coq_implicit &quot;(a := unit)&quot;])
+    ctxt
+    arg_type
+    arg
   &gt;&gt;=? fun (to_duplicate, ctxt) -&gt;
   Script_ir_translator.collect_big_maps ctxt storage_type storage
   &gt;&gt;=? fun (to_update, ctxt) -&gt;
@@ -65082,7 +65096,12 @@ They are sent to a unit type.">(Bad_contract_parameter step_constants.self)</abb
     <abbr class="mark-warning" title="Values of extensible types are ignored.
 
 They are sent to a unit type.">(Runtime_contract_error (step_constants.self, script_code))</abbr>
-    ((interp[@coq_implicit &quot;(r := list Script_typed_ir.operation * unit)&quot;]) ?log ctxt step_constants code (arg, storage))
+    ((interp [@coq_implicit &quot;(r := list Script_typed_ir.operation * unit)&quot;])
+       ?log
+       ctxt
+       step_constants
+       code
+       (arg, storage))
   &gt;&gt;=? fun ((ops, storage), ctxt) -&gt;
   Script_ir_translator.extract_big_map_diff
     ctxt
@@ -65093,9 +65112,15 @@ They are sent to a unit type.">(Runtime_contract_error (step_constants.self, scr
     storage_type
     storage
   &gt;&gt;=? fun (storage, big_map_diff, ctxt) -&gt;
-  trace <abbr class="mark-warning" title="Values of extensible types are ignored.
+  trace
+    <abbr class="mark-warning" title="Values of extensible types are ignored.
 
-They are sent to a unit type.">Cannot_serialize_storage</abbr> ((unparse_data[@coq_implicit &quot;(a := unit)&quot;]) ctxt mode storage_type storage)
+They are sent to a unit type.">Cannot_serialize_storage</abbr>
+    ((unparse_data [@coq_implicit &quot;(a := unit)&quot;])
+       ctxt
+       mode
+       storage_type
+       storage)
   &gt;&gt;=? fun (storage, ctxt) -&gt;
   let (ops, op_diffs) = List.split ops in
   let big_map_diff =
@@ -69474,7 +69499,7 @@ Parameter parse_var_type_annot :
   <div style="margin: 20px;">
     <h3>Script_ir_translator</h3>
     <ul>
-      <li>OCaml size: 5996 lines</li>
+      <li>OCaml size: 5995 lines</li>
       <li>Coq size: 8723 lines (+45% compared to&nbsp;OCaml)</li>
     </ul>
   </div>
@@ -70236,8 +70261,7 @@ let map_fold :
     (key -&gt; value -&gt; acc -&gt; acc) -&gt; (key, value) map -&gt; acc -&gt; acc =
  fun f (module Box) -&gt; Box.OPS.fold f (fst Box.boxed)
 
-let map_size : type key value. (key, value) map -&gt; Script_int.num
-    =
+let map_size : type key value. (key, value) map -&gt; Script_int.num =
  fun (module Box) -&gt; Script_int.(abs (of_int (snd Box.boxed)))
 
 (* ---- Unparsing (Typed IR -&gt; Untyped expressions) of types -----------------*)
@@ -87241,8 +87265,8 @@ Parameter of_zint : Z.t -&gt; t.
   <div style="margin: 20px;">
     <h3>Script_typed_ir</h3>
     <ul>
-      <li>OCaml size: 419 lines</li>
-      <li>Coq size: 378 lines (-10% compared to&nbsp;OCaml)</li>
+      <li>OCaml size: 407 lines</li>
+      <li>Coq size: 378 lines (-8% compared to&nbsp;OCaml)</li>
     </ul>
   </div>
   <div class="col-md-6">
@@ -87488,21 +87512,13 @@ and ('bef, 'aft) instr =
   | Bytes_size : (MBytes.t * 'rest, num * 'rest) instr
   (* timestamp operations *)
   | Add_seconds_to_timestamp
-      : ( num * (Script_timestamp.t * 'rest),
-          Script_timestamp.t * 'rest )
-        instr
+      : (num * (Script_timestamp.t * 'rest), Script_timestamp.t * 'rest) instr
   | Add_timestamp_to_seconds
-      : ( Script_timestamp.t * (num * 'rest),
-          Script_timestamp.t * 'rest )
-        instr
+      : (Script_timestamp.t * (num * 'rest), Script_timestamp.t * 'rest) instr
   | Sub_timestamp_seconds
-      : ( Script_timestamp.t * (num * 'rest),
-          Script_timestamp.t * 'rest )
-        instr
+      : (Script_timestamp.t * (num * 'rest), Script_timestamp.t * 'rest) instr
   | Diff_timestamps
-      : ( Script_timestamp.t * (Script_timestamp.t * 'rest),
-          num * 'rest )
-        instr
+      : (Script_timestamp.t * (Script_timestamp.t * 'rest), num * 'rest) instr
   (* tez operations *)
   | Add_tez : (Tez.t * (Tez.t * 'rest), Tez.t * 'rest) instr
   | Sub_tez : (Tez.t * (Tez.t * 'rest), Tez.t * 'rest) instr
@@ -87532,14 +87548,10 @@ and ('bef, 'aft) instr =
   | Mul_intnat : (num * (num * 'rest), num * 'rest) instr
   | Mul_natint : (num * (num * 'rest), num * 'rest) instr
   | Mul_natnat : (num * (num * 'rest), num * 'rest) instr
-  | Ediv_intint
-      : (num * (num * 'rest), (num, num) pair option * 'rest) instr
-  | Ediv_intnat
-      : (num * (num * 'rest), (num, num) pair option * 'rest) instr
-  | Ediv_natint
-      : (num * (num * 'rest), (num, num) pair option * 'rest) instr
-  | Ediv_natnat
-      : (num * (num * 'rest), (num, num) pair option * 'rest) instr
+  | Ediv_intint : (num * (num * 'rest), (num, num) pair option * 'rest) instr
+  | Ediv_intnat : (num * (num * 'rest), (num, num) pair option * 'rest) instr
+  | Ediv_natint : (num * (num * 'rest), (num, num) pair option * 'rest) instr
+  | Ediv_natnat : (num * (num * 'rest), (num, num) pair option * 'rest) instr
   | Lsl_nat : (num * (num * 'rest), num * 'rest) instr
   | Lsr_nat : (num * (num * 'rest), num * 'rest) instr
   | Or_nat : (num * (num * 'rest), num * 'rest) instr

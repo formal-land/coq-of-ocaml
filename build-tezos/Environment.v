@@ -775,7 +775,7 @@ End Z.
 
 Module Z_check : Z_type := Z.
 
-Module Lwt.
+Module Type Lwt_type.
   Parameter t : forall (a : Set), Set.
   
   Parameter __return : forall {a : Set}, a -> t a.
@@ -805,7 +805,27 @@ Module Lwt.
   Parameter join : list (t unit) -> t unit.
   
   Parameter op_ltandgt : t unit -> t unit -> t unit.
+End Lwt_type.
+
+Module Lwt.
+  Definition t (a : Set) : Set := a.
+  Definition __return {a : Set} (x : a) : t a := x.
+  Definition bind {a b : Set} (x : t a) (f : a -> t b) : t b := f x.
+  Definition op_gtgteq {a b : Set} : t a -> (a -> t b) -> t b := bind.
+  Definition op_eqltlt {a b : Set} (f : a -> t b) (x : t a) : t b := f x.
+  Definition map {a b : Set} (f : a -> b) (x : t a) : t b := f x.
+  Definition op_gtpipeeq {a b : Set} (x : t a) (f : a -> b) : t b := f x.
+  Definition op_eqpipelt {a b : Set} : (a -> b) -> t a -> t b := map.
+  Definition return_unit : t unit := tt.
+  Definition return_none {a : Set} : t (option a) := None.
+  Definition return_nil {a : Set} : t (list a) := [].
+  Definition return_true : t bool := true.
+  Definition return_false : t bool := false.
+  Parameter join : list (t unit) -> t unit.
+  Parameter op_ltandgt : t unit -> t unit -> t unit.
 End Lwt.
+
+Module Lwt_check : Lwt_type := Lwt.
 
 Module Lwt_list.
   Parameter map_s : forall {a b : Set},
@@ -1239,7 +1259,7 @@ Module Data_encoding.
   Parameter check_size : forall {a : Set}, int -> encoding a -> encoding a.
 End Data_encoding.
 
-Module Error_monad.
+Module Type Error_monad_type.
   Inductive error_category : Set :=
   | Permanent : error_category
   | Temporary : error_category
@@ -1377,7 +1397,162 @@ Module Error_monad.
   
   Definition shell_tzresult (a : Set) : Set :=
     Pervasives.result a (list shell_error).
+End Error_monad_type.
+
+Module Error_monad.
+  Inductive error_category : Set :=
+  | Permanent : error_category
+  | Temporary : error_category
+  | Branch : error_category.
+  
+  Definition __error : Set := extensible_type.
+  
+  Parameter pp : Format.formatter -> __error -> unit.
+  
+  Parameter error_encoding : Data_encoding.t __error.
+  
+  Parameter json_of_error : __error -> Data_encoding.json.
+  
+  Parameter error_of_json : Data_encoding.json -> __error.
+  
+  Module error_info.
+    Record record : Set := Build {
+      category : error_category;
+      id : string;
+      title : string;
+      description : string;
+      schema : Data_encoding.json_schema }.
+    Definition with_category category (r : record) :=
+      Build category r.(id) r.(title) r.(description) r.(schema).
+    Definition with_id id (r : record) :=
+      Build r.(category) id r.(title) r.(description) r.(schema).
+    Definition with_title title (r : record) :=
+      Build r.(category) r.(id) title r.(description) r.(schema).
+    Definition with_description description (r : record) :=
+      Build r.(category) r.(id) r.(title) description r.(schema).
+    Definition with_schema schema (r : record) :=
+      Build r.(category) r.(id) r.(title) r.(description) schema.
+  End error_info.
+  Definition error_info := error_info.record.
+  
+  Parameter pp_info : Format.formatter -> error_info -> unit.
+  
+  Parameter get_registered_errors : unit -> list error_info.
+  
+  Parameter register_error_kind : forall {err : Set},
+    error_category -> string -> string -> string ->
+    option (Format.formatter -> err -> unit) -> Data_encoding.t err ->
+    (__error -> option err) -> (err -> __error) -> unit.
+  
+  Parameter classify_errors : list __error -> error_category.
+  
+  Definition tzresult (a : Set) : Set := Pervasives.result a (list __error).
+  
+  Parameter result_encoding : forall {a : Set},
+    Data_encoding.t a -> Data_encoding.encoding (tzresult a).
+  
+  Definition ok {a : Set} (x : a) : tzresult a := Pervasives.Ok x.
+  
+  Definition __return {a : Set} (x : a) : Lwt.t (tzresult a) :=
+    Lwt.__return (ok x).
+  
+  Parameter return_unit : Lwt.t (tzresult unit).
+  
+  Parameter return_none : forall {a : Set}, Lwt.t (tzresult (option a)).
+  
+  Parameter return_some : forall {a : Set}, a -> Lwt.t (tzresult (option a)).
+  
+  Parameter return_nil : forall {a : Set}, Lwt.t (tzresult (list a)).
+  
+  Parameter return_true : Lwt.t (tzresult bool).
+  
+  Parameter return_false : Lwt.t (tzresult bool).
+  
+  Parameter __error_value : forall {a : Set}, __error -> tzresult a.
+  
+  Parameter fail : forall {a : Set}, __error -> Lwt.t (tzresult a).
+  
+  Definition op_gtgtquestion {a b : Set}
+    : tzresult a -> (a -> tzresult b) -> tzresult b :=
+    fun x f =>
+    match x with
+    | Pervasives.Ok x => f x
+    | Pervasives.Error error => Pervasives.Error error
+    end.
+  
+  Definition op_gtgteqquestion {a b : Set}
+    : Lwt.t (tzresult a) -> (a -> Lwt.t (tzresult b)) -> Lwt.t (tzresult b) :=
+    fun x f =>
+    Lwt.bind x (fun x =>
+      match x with
+      | Pervasives.Ok x => f x
+      | Pervasives.Error error => Lwt.__return (Pervasives.Error error)
+      end
+    ).
+  
+  Parameter op_gtgteq : forall {a b : Set},
+    Lwt.t a -> (a -> Lwt.t b) -> Lwt.t b.
+  
+  Parameter op_gtpipeeq : forall {a b : Set}, Lwt.t a -> (a -> b) -> Lwt.t b.
+  
+  Parameter op_gtgtpipequestion : forall {a b : Set},
+    Lwt.t (tzresult a) -> (a -> b) -> Lwt.t (tzresult b).
+  
+  Parameter op_gtpipequestion : forall {a b : Set},
+    tzresult a -> (a -> b) -> tzresult b.
+  
+  Parameter record_trace : forall {a : Set},
+    __error -> tzresult a -> tzresult a.
+  
+  Parameter trace : forall {b : Set},
+    __error -> Lwt.t (tzresult b) -> Lwt.t (tzresult b).
+  
+  Parameter record_trace_eval : forall {a : Set},
+    (unit -> tzresult __error) -> tzresult a -> tzresult a.
+  
+  Parameter trace_eval : forall {b : Set},
+    (unit -> Lwt.t (tzresult __error)) -> Lwt.t (tzresult b) ->
+    Lwt.t (tzresult b).
+  
+  Parameter fail_unless : bool -> __error -> Lwt.t (tzresult unit).
+  
+  Parameter fail_when : bool -> __error -> Lwt.t (tzresult unit).
+  
+  Parameter iter_s : forall {a : Set},
+    (a -> Lwt.t (tzresult unit)) -> list a -> Lwt.t (tzresult unit).
+  
+  Parameter iter_p : forall {a : Set},
+    (a -> Lwt.t (tzresult unit)) -> list a -> Lwt.t (tzresult unit).
+  
+  Parameter map_s : forall {a b : Set},
+    (a -> Lwt.t (tzresult b)) -> list a -> Lwt.t (tzresult (list b)).
+  
+  Parameter map_p : forall {a b : Set},
+    (a -> Lwt.t (tzresult b)) -> list a -> Lwt.t (tzresult (list b)).
+  
+  Parameter map2 : forall {a b c : Set},
+    (a -> b -> tzresult c) -> list a -> list b -> tzresult (list c).
+  
+  Parameter map2_s : forall {a b c : Set},
+    (a -> b -> Lwt.t (tzresult c)) -> list a -> list b ->
+    Lwt.t (tzresult (list c)).
+  
+  Parameter filter_map_s : forall {a b : Set},
+    (a -> Lwt.t (tzresult (option b))) -> list a -> Lwt.t (tzresult (list b)).
+  
+  Parameter fold_left_s : forall {a b : Set},
+    (a -> b -> Lwt.t (tzresult a)) -> a -> list b -> Lwt.t (tzresult a).
+  
+  Parameter fold_right_s : forall {a b : Set},
+    (a -> b -> Lwt.t (tzresult b)) -> list a -> b -> Lwt.t (tzresult b).
+  
+  Parameter shell_error : Set.
+  
+  Definition shell_tzresult (a : Set) : Set :=
+    Pervasives.result a (list shell_error).
 End Error_monad.
+
+Module Error_monad_check : Error_monad_type := Error_monad.
 
 Import Error_monad.
 
