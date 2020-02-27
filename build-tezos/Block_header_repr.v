@@ -77,10 +77,9 @@ Definition contents_encoding : Data_encoding.encoding contents :=
       (fun function_parameter =>
         let '(priority, proof_of_work_nonce, seed_nonce_hash) :=
           function_parameter in
-        ({| contents.priority := priority;
+        {| contents.priority := priority;
           contents.seed_nonce_hash := seed_nonce_hash;
-          contents.proof_of_work_nonce := proof_of_work_nonce |} : contents))
-      None
+          contents.proof_of_work_nonce := proof_of_work_nonce |}) None
       (Data_encoding.obj3
         (Data_encoding.req None None "priority" Data_encoding.uint16)
         (Data_encoding.req None None "proof_of_work_nonce"
@@ -100,8 +99,8 @@ Definition protocol_data_encoding : Data_encoding.encoding protocol_data :=
         (contents, signature))
       (fun function_parameter =>
         let '(contents, signature) := function_parameter in
-        ({| protocol_data.contents := contents;
-          protocol_data.signature := signature |} : protocol_data)) None
+        {| protocol_data.contents := contents;
+          protocol_data.signature := signature |}) None
       (Data_encoding.merge_objs contents_encoding
         (Data_encoding.obj1
           (Data_encoding.req None None "signature" Signature.encoding)))).
@@ -111,8 +110,8 @@ Definition __raw_value (function_parameter : t) : Block_header.t :=
     function_parameter in
   let protocol_data :=
     Data_encoding.Binary.to_bytes_exn protocol_data_encoding protocol_data in
-  ({| Block_header.t.shell := shell;
-    Block_header.t.protocol_data := protocol_data |} : Block_header.t).
+  {| Block_header.t.shell := shell;
+    Block_header.t.protocol_data := protocol_data |}.
 
 Definition unsigned_encoding
   : Data_encoding.encoding (Block_header.shell_header * contents) :=
@@ -128,13 +127,13 @@ Definition encoding : Data_encoding.encoding t :=
         (shell, protocol_data))
       (fun function_parameter =>
         let '(shell, protocol_data) := function_parameter in
-        ({| t.shell := shell; t.protocol_data := protocol_data |} : t)) None
+        {| t.shell := shell; t.protocol_data := protocol_data |}) None
       (Data_encoding.merge_objs Block_header.shell_header_encoding
         protocol_data_encoding)).
 
 Definition max_header_length : int :=
   let fake_shell :=
-    ({|
+    {|
       Block_header.shell_header.level :=
         (* ❌ Constant of type int32 is converted to int *)
         0; Block_header.shell_header.proto_level := 0;
@@ -149,17 +148,16 @@ Definition max_header_length : int :=
         Fitness_repr.from_int64
           (* ❌ Constant of type int64 is converted to int *)
           0; Block_header.shell_header.context := (|Context_hash|).(S.HASH.zero)
-      |} : Block_header.shell_header) in
+      |} in
   let fake_contents :=
-    ({| contents.priority := 0;
-      contents.seed_nonce_hash := Some Nonce_hash.zero;
+    {| contents.priority := 0; contents.seed_nonce_hash := Some Nonce_hash.zero;
       contents.proof_of_work_nonce :=
-        MBytes.create Constants_repr.proof_of_work_nonce_size |} : contents) in
+        MBytes.create Constants_repr.proof_of_work_nonce_size |} in
   Data_encoding.Binary.length encoding
-    ({| t.shell := fake_shell;
+    {| t.shell := fake_shell;
       t.protocol_data :=
-        ({| protocol_data.contents := fake_contents;
-          protocol_data.signature := Signature.zero |} : protocol_data) |} : t).
+        {| protocol_data.contents := fake_contents;
+          protocol_data.signature := Signature.zero |} |}.
 
 Definition hash_raw : Block_header.t -> (|Block_hash|).(S.HASH.t) :=
   Block_header.__hash_value.
@@ -168,7 +166,7 @@ Definition __hash_value (function_parameter : t) : (|Block_hash|).(S.HASH.t) :=
   let '{| t.shell := shell; t.protocol_data := protocol_data |} :=
     function_parameter in
   Block_header.__hash_value
-    ({| Block_header.t.shell := shell;
+    {| Block_header.t.shell := shell;
       Block_header.t.protocol_data :=
         Data_encoding.Binary.to_bytes_exn protocol_data_encoding protocol_data
-      |} : Block_header.t).
+      |}.

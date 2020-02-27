@@ -171,8 +171,8 @@ Definition register_value {a b : Set}
   | Empty =>
     Pervasives.op_coloneq dir
       (Value
-        ({| description.Value.get := get; description.Value.encoding := encoding
-          |} : description.Value b a))
+        {| description.Value.get := get; description.Value.encoding := encoding
+          |})
   | _ => Pervasives.invalid_arg ""
   end.
 
@@ -329,13 +329,13 @@ Fixpoint combine_object {A : Set}
   match function_parameter with
   | [] =>
     Handler
-      ({| handler.Handler.encoding := Data_encoding.__unit_value;
+      {| handler.Handler.encoding := Data_encoding.__unit_value;
         handler.Handler.get :=
           fun function_parameter =>
             let '_ := function_parameter in
             fun function_parameter =>
               let '_ := function_parameter in
-              Error_monad.return_unit |} : handler.Handler unit _)
+              Error_monad.return_unit |}
   | cons (name, Opt_handler __handler_value) fields =>
     let 'existT _ __Opt_handler_'a [name, __handler_value, fields] :=
       existT (A := Set)
@@ -347,7 +347,7 @@ Fixpoint combine_object {A : Set}
       existT (A := Set) (fun __Handler_'a => handler.Handler __Handler_'a A) _
         handlers in
     Handler
-      ({|
+      {|
         handler.Handler.encoding :=
           Data_encoding.merge_objs
             (Data_encoding.obj1
@@ -361,7 +361,6 @@ Fixpoint combine_object {A : Set}
               let=? v1 := __handler_value.(opt_handler.Opt_handler.get) k i in
               let=? v2 := handlers.(handler.Handler.get) k i in
               Error_monad.__return (v1, v2) |}
-        : handler.Handler (option __Opt_handler_'a * __Handler_'a) _)
   end.
 
 Module query.
@@ -375,8 +374,7 @@ Definition query := query.record.
 Definition depth_query : RPC_query.t query :=
   RPC_query.seal
     (RPC_query.op_pipeplus
-      (RPC_query.__query_value
-        (fun depth => ({| query.depth := depth |} : query)))
+      (RPC_query.__query_value (fun depth => {| query.depth := depth |}))
       (RPC_query.__field_value None "depth" RPC_arg.__int_value 0
         (fun __t_value => __t_value.(query.depth)))).
 
@@ -415,13 +413,13 @@ Definition build_directory {key : Set} (dir : t key) : RPC_directory.t key :=
     match Pervasives.op_exclamation dir with
     | Empty =>
       Opt_handler
-        ({| opt_handler.Opt_handler.encoding := Data_encoding.__unit_value;
+        {| opt_handler.Opt_handler.encoding := Data_encoding.__unit_value;
           opt_handler.Opt_handler.get :=
             fun function_parameter =>
               let '_ := function_parameter in
               fun function_parameter =>
                 let '_ := function_parameter in
-                Error_monad.return_none |} : opt_handler.Opt_handler unit ikey)
+                Error_monad.return_none |}
     |
       Value {|
         description.Value.get := get;
@@ -434,14 +432,14 @@ Definition build_directory {key : Set} (dir : t key) : RPC_directory.t key :=
               Data_encoding.t __Value_'a]) _ [get, encoding] in
       let __handler_value :=
         Opt_handler
-          ({| opt_handler.Opt_handler.encoding := encoding;
+          {| opt_handler.Opt_handler.encoding := encoding;
             opt_handler.Opt_handler.get :=
               fun k =>
                 fun i =>
                   if (|Compare.Int|).(Compare.S.op_lt) i 0 then
                     Error_monad.return_none
                   else
-                    get k |} : opt_handler.Opt_handler __Value_'a ikey) in
+                    get k |} in
       (* ❌ Sequences of instructions are ignored (operator ";") *)
       (* ❌ instruction_sequence ";" *)
       __handler_value
@@ -459,7 +457,7 @@ Definition build_directory {key : Set} (dir : t key) : RPC_directory.t key :=
           __handler_value in
       let __handler_value :=
         Opt_handler
-          ({|
+          {|
             opt_handler.Opt_handler.encoding :=
               __handler_value.(handler.Handler.encoding);
             opt_handler.Opt_handler.get :=
@@ -471,8 +469,7 @@ Definition build_directory {key : Set} (dir : t key) : RPC_directory.t key :=
                     let=? v :=
                       __handler_value.(handler.Handler.get) k
                         (Pervasives.op_minus i 1) in
-                    Error_monad.return_some v |}
-            : opt_handler.Opt_handler __Handler_'a ikey) in
+                    Error_monad.return_some v |} in
       (* ❌ Sequences of instructions are ignored (operator ";") *)
       (* ❌ instruction_sequence ";" *)
       __handler_value
@@ -547,14 +544,11 @@ Definition build_directory {key : Set} (dir : t key) : RPC_directory.t key :=
             Error_monad.return_some values in
       let __handler_value :=
         Opt_handler
-          ({|
+          {|
             opt_handler.Opt_handler.encoding :=
               Data_encoding.__list_value None
                 (Data_encoding.dynamic_size None encoding);
-            opt_handler.Opt_handler.get := get |}
-            :
-              opt_handler.Opt_handler
-                (list (__IndexedDir_'a * option __Opt_handler_'a1)) ikey) in
+            opt_handler.Opt_handler.get := get |} in
       (* ❌ Sequences of instructions are ignored (operator ";") *)
       (* ❌ instruction_sequence ";" *)
       __handler_value

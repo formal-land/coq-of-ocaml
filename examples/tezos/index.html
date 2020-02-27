@@ -60,8 +60,8 @@
 opam pin add https://github.com/clarus/coq-of-ocaml.git#master</code></pre>
     <ul>
       <li>OCaml size: 36034 lines</li>
-      <li>Coq size: 48552 lines (+34% compared to&nbsp;OCaml)</li>
-      <li>Warnings from coq-of-ocaml: 4336</li>
+      <li>Coq size: 48348 lines (+34% compared to&nbsp;OCaml)</li>
+      <li>Warnings from coq-of-ocaml: 4330</li>
     </ul>
     
       <canvas id="chart" width="400" height="400"></canvas>
@@ -112,7 +112,7 @@ opam pin add https://github.com/clarus/coq-of-ocaml.git#master</code></pre>
           29028,
           25014,
           25014,
-          25014,
+          24981,
         ],
         generated: [
           47563,
@@ -159,7 +159,7 @@ opam pin add https://github.com/clarus/coq-of-ocaml.git#master</code></pre>
           49288,
           48552,
           48552,
-          48552,
+          48348,
         ],
         labels: [
           "01-14",
@@ -256,7 +256,7 @@ opam pin add https://github.com/clarus/coq-of-ocaml.git#master</code></pre>
       </li>
       
       <li>
-        <a href="#apply_results.ml">apply_results.ml</a>&nbsp;<span class="label label-warning">10</span>
+        <a href="#apply_results.ml">apply_results.ml</a>&nbsp;<span class="label label-warning">8</span>
       </li>
       
       <li>
@@ -592,7 +592,7 @@ opam pin add https://github.com/clarus/coq-of-ocaml.git#master</code></pre>
       </li>
       
       <li>
-        <a href="#script_ir_translator.ml">script_ir_translator.ml</a>&nbsp;<span class="label label-warning">184</span>
+        <a href="#script_ir_translator.ml">script_ir_translator.ml</a>&nbsp;<span class="label label-warning">182</span>
       </li>
       
       <li>
@@ -660,7 +660,7 @@ opam pin add https://github.com/clarus/coq-of-ocaml.git#master</code></pre>
       </li>
       
       <li>
-        <a href="#storage_description.ml">storage_description.ml</a>&nbsp;<span class="label label-warning">15</span>
+        <a href="#storage_description.ml">storage_description.ml</a>&nbsp;<span class="label label-warning">13</span>
       </li>
       
       <li>
@@ -739,7 +739,7 @@ opam pin add https://github.com/clarus/coq-of-ocaml.git#master</code></pre>
     <h3>Alpha_context</h3>
     <ul>
       <li>OCaml size: 279 lines</li>
-      <li>Coq size: 470 lines (+68% compared to&nbsp;OCaml)</li>
+      <li>Coq size: 469 lines (+68% compared to&nbsp;OCaml)</li>
     </ul>
   </div>
   <div class="col-md-6">
@@ -1422,13 +1422,12 @@ Definition finalize (message : option string) (c : Raw_context.context)
   : Updater.validation_result :=
   let fitness := Fitness.from_int64 (Fitness.current c) in
   let context := Raw_context.recover c in
-  ({| Updater.validation_result.context := context;
+  {| Updater.validation_result.context := context;
     Updater.validation_result.fitness := fitness;
     Updater.validation_result.message := message;
     Updater.validation_result.max_operations_ttl := 60;
     Updater.validation_result.last_allowed_fork_level :=
-      Raw_level.to_int32 (Level.last_allowed_fork_level c) |}
-    : Updater.validation_result).
+      Raw_level.to_int32 (Level.last_allowed_fork_level c) |}.
 
 Definition activate
   : Raw_context.context -&gt; (|Protocol_hash|).(S.HASH.t) -&gt; Lwt.t Raw_context.t :=
@@ -7068,7 +7067,7 @@ Parameter record_ballot :
     <h3>Apply</h3>
     <ul>
       <li>OCaml size: 1487 lines</li>
-      <li>Coq size: 1426 lines (-5% compared to&nbsp;OCaml)</li>
+      <li>Coq size: 1402 lines (-6% compared to&nbsp;OCaml)</li>
     </ul>
   </div>
   <div class="col-md-6">
@@ -8754,11 +8753,9 @@ Definition apply_manager_operation_content
     Error_monad.__return
       (ctxt,
         (Apply_results.Reveal_result
-          ({|
+          {|
             Apply_results.successful_manager_operation_result.Reveal_result.consumed_gas :=
-              Alpha_context.Gas.consumed before_operation ctxt |}
-            : Apply_results.successful_manager_operation_result.Reveal_result)),
-        nil)
+              Alpha_context.Gas.consumed before_operation ctxt |}), nil)
   |
     Alpha_context.Transaction {|
       Alpha_context.manager_operation.Transaction.amount := amount;
@@ -8808,7 +8805,7 @@ Definition apply_manager_operation_content
         end in
       let __result_value :=
         Apply_results.Transaction_result
-          ({|
+          {|
             Apply_results.successful_manager_operation_result.Transaction_result.storage :=
               None;
             Apply_results.successful_manager_operation_result.Transaction_result.big_map_diff :=
@@ -8831,10 +8828,7 @@ Definition apply_manager_operation_content
             Apply_results.successful_manager_operation_result.Transaction_result.paid_storage_size_diff :=
               Z.zero;
             Apply_results.successful_manager_operation_result.Transaction_result.allocated_destination_contract :=
-              allocated_destination_contract |}
-            :
-              Apply_results.successful_manager_operation_result.Transaction_result)
-        in
+              allocated_destination_contract |} in
       Error_monad.__return (ctxt, __result_value, nil)
     | Some script =&gt;
       let=? '(parameter, ctxt) :=
@@ -8843,12 +8837,11 @@ Definition apply_manager_operation_content
       let=? ctxt := Lwt.__return (Alpha_context.Gas.consume ctxt cost_parameter)
         in
       let step_constants :=
-        ({| Script_interpreter.step_constants.source := source;
+        {| Script_interpreter.step_constants.source := source;
           Script_interpreter.step_constants.payer := payer;
           Script_interpreter.step_constants.self := destination;
           Script_interpreter.step_constants.amount := amount;
-          Script_interpreter.step_constants.chain_id := chain_id |}
-          : Script_interpreter.step_constants) in
+          Script_interpreter.step_constants.chain_id := chain_id |} in
       let=? '{|
         Script_interpreter.execution_result.ctxt := ctxt;
           Script_interpreter.execution_result.storage := storage;
@@ -8867,7 +8860,7 @@ Definition apply_manager_operation_content
           ctxt in
       let __result_value :=
         Apply_results.Transaction_result
-          ({|
+          {|
             Apply_results.successful_manager_operation_result.Transaction_result.storage :=
               Some storage;
             Apply_results.successful_manager_operation_result.Transaction_result.big_map_diff :=
@@ -8891,10 +8884,7 @@ Definition apply_manager_operation_content
             Apply_results.successful_manager_operation_result.Transaction_result.paid_storage_size_diff :=
               paid_storage_size_diff;
             Apply_results.successful_manager_operation_result.Transaction_result.allocated_destination_contract :=
-              allocated_destination_contract |}
-            :
-              Apply_results.successful_manager_operation_result.Transaction_result)
-        in
+              allocated_destination_contract |} in
       Error_monad.__return (ctxt, __result_value, operations)
     end
   |
@@ -8961,7 +8951,7 @@ Definition apply_manager_operation_content
       Alpha_context.Fees.record_paid_storage_space ctxt contract in
     let __result_value :=
       Apply_results.Origination_result
-        ({|
+        {|
           Apply_results.successful_manager_operation_result.Origination_result.big_map_diff :=
             big_map_diff;
           Apply_results.successful_manager_operation_result.Origination_result.balance_updates :=
@@ -8983,21 +8973,16 @@ Definition apply_manager_operation_content
           Apply_results.successful_manager_operation_result.Origination_result.storage_size :=
             size;
           Apply_results.successful_manager_operation_result.Origination_result.paid_storage_size_diff :=
-            paid_storage_size_diff |}
-          : Apply_results.successful_manager_operation_result.Origination_result)
-      in
+            paid_storage_size_diff |} in
     Error_monad.__return (ctxt, __result_value, nil)
   | Alpha_context.Delegation delegate =&gt;
     let=? ctxt := Alpha_context.Delegate.set ctxt source delegate in
     Error_monad.__return
       (ctxt,
         (Apply_results.Delegation_result
-          ({|
+          {|
             Apply_results.successful_manager_operation_result.Delegation_result.consumed_gas :=
-              Alpha_context.Gas.consumed before_operation ctxt |}
-            :
-              Apply_results.successful_manager_operation_result.Delegation_result)),
-        nil)
+              Alpha_context.Gas.consumed before_operation ctxt |}), nil)
   end.
 
 Definition apply_internal_manager_operations
@@ -9206,10 +9191,9 @@ Definition skipped_operation_result
   | Alpha_context.Reveal _ =&gt;
     Apply_results.Applied
       (Apply_results.Reveal_result
-        ({|
+        {|
           Apply_results.successful_manager_operation_result.Reveal_result.consumed_gas :=
-            Z.zero |}
-          : Apply_results.successful_manager_operation_result.Reveal_result))
+            Z.zero |})
   | _ =&gt; Apply_results.Skipped (Alpha_context.manager_kind operation)
   end.
 
@@ -9229,7 +9213,7 @@ Fixpoint mark_skipped
     let source := Alpha_context.Contract.implicit_contract source in
     Apply_results.Single_result
       (Apply_results.Manager_operation_result
-        ({|
+        {|
           Apply_results.contents_result.Manager_operation_result.balance_updates :=
             Alpha_context.Delegate.cleanup_balance_updates
               [
@@ -9242,7 +9226,7 @@ Fixpoint mark_skipped
           Apply_results.contents_result.Manager_operation_result.operation_result :=
             skipped_operation_result operation;
           Apply_results.contents_result.Manager_operation_result.internal_operation_results :=
-            nil |} : Apply_results.contents_result.Manager_operation_result))
+            nil |})
   |
     Alpha_context.Cons
       (Alpha_context.Manager_operation {|
@@ -9260,7 +9244,7 @@ Fixpoint mark_skipped
     let source := Alpha_context.Contract.implicit_contract source in
     Apply_results.Cons_result
       (Apply_results.Manager_operation_result
-        ({|
+        {|
           Apply_results.contents_result.Manager_operation_result.balance_updates :=
             Alpha_context.Delegate.cleanup_balance_updates
               [
@@ -9273,8 +9257,7 @@ Fixpoint mark_skipped
           Apply_results.contents_result.Manager_operation_result.operation_result :=
             skipped_operation_result operation;
           Apply_results.contents_result.Manager_operation_result.internal_operation_results :=
-            nil |} : Apply_results.contents_result.Manager_operation_result))
-      (mark_skipped baker level rest)
+            nil |}) (mark_skipped baker level rest)
   end.
 
 Fixpoint precheck_manager_contents_list
@@ -9315,7 +9298,7 @@ Fixpoint apply_manager_contents_list_rec
       apply_manager_contents ctxt mode chain_id op in
     let __result_value :=
       Apply_results.Manager_operation_result
-        ({|
+        {|
           Apply_results.contents_result.Manager_operation_result.balance_updates :=
             Alpha_context.Delegate.cleanup_balance_updates
               [
@@ -9328,8 +9311,7 @@ Fixpoint apply_manager_contents_list_rec
           Apply_results.contents_result.Manager_operation_result.operation_result :=
             operation_result;
           Apply_results.contents_result.Manager_operation_result.internal_operation_results :=
-            internal_operation_results |}
-          : Apply_results.contents_result.Manager_operation_result) in
+            internal_operation_results |} in
     Lwt.__return (ctxt_result, (Apply_results.Single_result __result_value))
   |
     Alpha_context.Cons
@@ -9349,7 +9331,7 @@ Fixpoint apply_manager_contents_list_rec
     | (Failure, operation_result, internal_operation_results) =&gt;
       let __result_value :=
         Apply_results.Manager_operation_result
-          ({|
+          {|
             Apply_results.contents_result.Manager_operation_result.balance_updates :=
               Alpha_context.Delegate.cleanup_balance_updates
                 [
@@ -9362,8 +9344,7 @@ Fixpoint apply_manager_contents_list_rec
             Apply_results.contents_result.Manager_operation_result.operation_result :=
               operation_result;
             Apply_results.contents_result.Manager_operation_result.internal_operation_results :=
-              internal_operation_results |}
-            : Apply_results.contents_result.Manager_operation_result) in
+              internal_operation_results |} in
       Lwt.__return
         (Failure,
           (Apply_results.Cons_result __result_value
@@ -9371,7 +9352,7 @@ Fixpoint apply_manager_contents_list_rec
     | (Success ctxt, operation_result, internal_operation_results) =&gt;
       let __result_value :=
         Apply_results.Manager_operation_result
-          ({|
+          {|
             Apply_results.contents_result.Manager_operation_result.balance_updates :=
               Alpha_context.Delegate.cleanup_balance_updates
                 [
@@ -9384,8 +9365,7 @@ Fixpoint apply_manager_contents_list_rec
             Apply_results.contents_result.Manager_operation_result.operation_result :=
               operation_result;
             Apply_results.contents_result.Manager_operation_result.internal_operation_results :=
-              internal_operation_results |}
-            : Apply_results.contents_result.Manager_operation_result) in
+              internal_operation_results |} in
       let= '(ctxt_result, results) :=
         apply_manager_contents_list_rec ctxt mode baker chain_id rest in
       Lwt.__return
@@ -9402,7 +9382,7 @@ Definition mark_backtracked (results : Apply_results.contents_result_list)
     | Apply_results.Single_result (Apply_results.Manager_operation_result op) =&gt;
       Apply_results.Single_result
         (Apply_results.Manager_operation_result
-          ({|
+          {|
             Apply_results.contents_result.Manager_operation_result.balance_updates :=
               op.(Apply_results.contents_result.Manager_operation_result.balance_updates);
             Apply_results.contents_result.Manager_operation_result.operation_result :=
@@ -9411,7 +9391,7 @@ Definition mark_backtracked (results : Apply_results.contents_result_list)
             Apply_results.contents_result.Manager_operation_result.internal_operation_results :=
               List.map mark_internal_operation_results
                 op.(Apply_results.contents_result.Manager_operation_result.internal_operation_results)
-            |} : Apply_results.contents_result.Manager_operation_result))
+            |})
     | Apply_results.Cons_result (Apply_results.Manager_operation_result op) rest
       =&gt;
       let 'existT _ [__0, __1] [op, rest] :=
@@ -9421,7 +9401,7 @@ Definition mark_backtracked (results : Apply_results.contents_result_list)
               Apply_results.contents_result_list]) [_, _] [op, rest] in
       Apply_results.Cons_result
         (Apply_results.Manager_operation_result
-          ({|
+          {|
             Apply_results.contents_result.Manager_operation_result.balance_updates :=
               op.(Apply_results.contents_result.Manager_operation_result.balance_updates);
             Apply_results.contents_result.Manager_operation_result.operation_result :=
@@ -9430,8 +9410,7 @@ Definition mark_backtracked (results : Apply_results.contents_result_list)
             Apply_results.contents_result.Manager_operation_result.internal_operation_results :=
               List.map mark_internal_operation_results
                 op.(Apply_results.contents_result.Manager_operation_result.internal_operation_results)
-            |} : Apply_results.contents_result.Manager_operation_result))
-        (mark_contents_list rest)
+            |}) (mark_contents_list rest)
     end
   with mark_internal_operation_results
     (function_parameter : Apply_results.packed_internal_operation_result)
@@ -9524,7 +9503,7 @@ Definition apply_contents_list
         (ctxt,
           (Apply_results.Single_result
             (Apply_results.Endorsement_result
-              ({|
+              {|
                 Apply_results.contents_result.Endorsement_result.balance_updates :=
                   Alpha_context.Delegate.cleanup_balance_updates
                     [
@@ -9545,7 +9524,7 @@ Definition apply_contents_list
                 Apply_results.contents_result.Endorsement_result.delegate :=
                   delegate;
                 Apply_results.contents_result.Endorsement_result.slots := slots
-                |} : Apply_results.contents_result.Endorsement_result))))
+                |})))
   
   |
     Alpha_context.Single
@@ -9863,9 +9842,7 @@ Definition apply_operation
   let ctxt := Alpha_context.Gas.set_unlimited ctxt in
   let ctxt := Alpha_context.Contract.unset_origination_nonce ctxt in
   Error_monad.__return
-    (ctxt,
-      ({| Apply_results.operation_metadata.contents := __result_value |}
-        : Apply_results.operation_metadata)).
+    (ctxt, {| Apply_results.operation_metadata.contents := __result_value |}).
 
 Definition may_snapshot_roll (ctxt : Alpha_context.context)
   : Lwt.t (Error_monad.tzresult Alpha_context.context) :=
@@ -10031,11 +10008,10 @@ Definition finalize_application
     | None =&gt; Error_monad.__return ctxt
     | Some nonce_hash =&gt;
       Alpha_context.Nonce.record_hash ctxt
-        ({| Alpha_context.Nonce.unrevealed.nonce_hash := nonce_hash;
+        {| Alpha_context.Nonce.unrevealed.nonce_hash := nonce_hash;
           Alpha_context.Nonce.unrevealed.delegate := delegate;
           Alpha_context.Nonce.unrevealed.rewards := rewards;
           Alpha_context.Nonce.unrevealed.fees := fees |}
-          : Alpha_context.Nonce.unrevealed)
     end in
   let=? ctxt := may_snapshot_roll ctxt in
   let=? '(ctxt, balance_updates, deactivated) := may_start_new_cycle ctxt in
@@ -10059,15 +10035,14 @@ Definition finalize_application
       (Alpha_context.Gas.block_level ctxt) in
   let=? voting_period_kind := Alpha_context.Vote.get_current_period_kind ctxt in
   let receipt :=
-    ({| Apply_results.block_metadata.baker := delegate;
+    {| Apply_results.block_metadata.baker := delegate;
       Apply_results.block_metadata.level := Alpha_context.Level.current ctxt;
       Apply_results.block_metadata.voting_period_kind := voting_period_kind;
       Apply_results.block_metadata.nonce_hash :=
         protocol_data.(Alpha_context.Block_header.contents.seed_nonce_hash);
       Apply_results.block_metadata.consumed_gas := consumed_gas;
       Apply_results.block_metadata.deactivated := deactivated;
-      Apply_results.block_metadata.balance_updates := balance_updates |}
-      : Apply_results.block_metadata) in
+      Apply_results.block_metadata.balance_updates := balance_updates |} in
   Error_monad.__return (ctxt, receipt).
 </pre>
   </div>
@@ -10079,11 +10054,11 @@ Definition finalize_application
     <h3>Apply_results</h3>
     <ul>
       <li>OCaml size: 1187 lines</li>
-      <li>Coq size: 2105 lines (+77% compared to&nbsp;OCaml)</li>
+      <li>Coq size: 2074 lines (+74% compared to&nbsp;OCaml)</li>
     </ul>
   </div>
   <div class="col-md-6">
-    <a href="#apply_results.ml"><code>apply_results.ml</code></a>&nbsp;<span class="label label-warning">10 warnings</span>
+    <a href="#apply_results.ml"><code>apply_results.ml</code></a>&nbsp;<span class="label label-warning">8 warnings</span>
     
     <pre>(*****************************************************************************)
 (*                                                                           *)
@@ -10251,11 +10226,7 @@ module Manager_result = struct
                        Some (((), errs), proj o) ))
                (fun (((), errs), x) -&gt; Backtracked (inj x, errs)) ]
     in
-    MCase <abbr class="mark-warning" title="The placeholders `_` in types are not handled
-
-——————————
-
-The placeholders `_` in types are not handled">{op_case; encoding; kind; iselect; select; proj; inj; t}</abbr>
+    MCase {op_case; encoding; kind; iselect; select; proj; inj; t}
 
   let reveal_case =
     make
@@ -11575,10 +11546,10 @@ Module Manager_result.
                 Backtracked (inj x) errs)
           ]) in
     MCase
-      ({| case.MCase.op_case := op_case; case.MCase.encoding := encoding;
+      {| case.MCase.op_case := op_case; case.MCase.encoding := encoding;
         case.MCase.kind := kind; case.MCase.iselect := iselect;
         case.MCase.select := select; case.MCase.proj := proj;
-        case.MCase.inj := inj; case.MCase.t := __t_value |} : case.MCase _ _).
+        case.MCase.inj := inj; case.MCase.t := __t_value |}.
   
   Definition reveal_case : case Alpha_context.Kind.reveal :=
     make Alpha_context.Operation.Encoding.Manager_operations.reveal_case
@@ -11614,10 +11585,9 @@ Module Manager_result.
         consumed_gas)
       (fun consumed_gas =&gt;
         Reveal_result
-          ({|
+          {|
             successful_manager_operation_result.Reveal_result.consumed_gas :=
-              consumed_gas |}
-            : successful_manager_operation_result.Reveal_result)).
+              consumed_gas |}).
   
   Definition transaction_case : case Alpha_context.Kind.transaction :=
     make Alpha_context.Operation.Encoding.Manager_operations.transaction_case
@@ -11686,7 +11656,7 @@ Module Manager_result.
             consumed_gas, storage_size, paid_storage_size_diff,
             allocated_destination_contract) := function_parameter in
         Transaction_result
-          ({|
+          {|
             successful_manager_operation_result.Transaction_result.storage :=
               storage;
             successful_manager_operation_result.Transaction_result.big_map_diff :=
@@ -11702,8 +11672,7 @@ Module Manager_result.
             successful_manager_operation_result.Transaction_result.paid_storage_size_diff :=
               paid_storage_size_diff;
             successful_manager_operation_result.Transaction_result.allocated_destination_contract :=
-              allocated_destination_contract |}
-            : successful_manager_operation_result.Transaction_result)).
+              allocated_destination_contract |}).
   
   Definition origination_case : case Alpha_context.Kind.origination :=
     make Alpha_context.Operation.Encoding.Manager_operations.origination_case
@@ -11762,7 +11731,7 @@ Module Manager_result.
           '(big_map_diff, balance_updates, originated_contracts, consumed_gas,
             storage_size, paid_storage_size_diff) := function_parameter in
         Origination_result
-          ({|
+          {|
             successful_manager_operation_result.Origination_result.big_map_diff :=
               big_map_diff;
             successful_manager_operation_result.Origination_result.balance_updates :=
@@ -11774,8 +11743,7 @@ Module Manager_result.
             successful_manager_operation_result.Origination_result.storage_size :=
               storage_size;
             successful_manager_operation_result.Origination_result.paid_storage_size_diff :=
-              paid_storage_size_diff |}
-            : successful_manager_operation_result.Origination_result)).
+              paid_storage_size_diff |}).
   
   Definition delegation_case : case Alpha_context.Kind.delegation :=
     make Alpha_context.Operation.Encoding.Manager_operations.delegation_case
@@ -11812,10 +11780,9 @@ Module Manager_result.
         consumed_gas)
       (fun consumed_gas =&gt;
         Delegation_result
-          ({|
+          {|
             successful_manager_operation_result.Delegation_result.consumed_gas :=
-              consumed_gas |}
-            : successful_manager_operation_result.Delegation_result)).
+              consumed_gas |}).
 End Manager_result.
 
 Definition internal_operation_result_encoding
@@ -11864,11 +11831,11 @@ Definition internal_operation_result_encoding
       (fun function_parameter =&gt;
         let '((_, source, __nonce_value), (op, res)) := function_parameter in
         let op :=
-          ({| Alpha_context.internal_operation.source := source;
+          {| Alpha_context.internal_operation.source := source;
             Alpha_context.internal_operation.operation :=
               op_case.(Alpha_context.Operation.Encoding.Manager_operations.case.MCase.inj)
                 op; Alpha_context.internal_operation.nonce := __nonce_value |}
-            : Alpha_context.internal_operation) in
+          in
         Internal_operation_result op res) in
   (let arg := Data_encoding.def &quot;operation.alpha.internal_operation_result&quot; in
   fun eta =&gt; arg None None eta)
@@ -12036,8 +12003,7 @@ Module Encoding.
   
   Definition endorsement_case : case Alpha_context.Kind.endorsement :=
     Case
-      ({|
-        case.Case.op_case := Alpha_context.Operation.Encoding.endorsement_case;
+      {| case.Case.op_case := Alpha_context.Operation.Encoding.endorsement_case;
         case.Case.encoding :=
           Data_encoding.obj3
             (Data_encoding.req None None &quot;balance_updates&quot;
@@ -12076,21 +12042,16 @@ Module Encoding.
           fun function_parameter =&gt;
             let '(balance_updates, delegate, slots) := function_parameter in
             Endorsement_result
-              ({|
+              {|
                 contents_result.Endorsement_result.balance_updates :=
                   balance_updates;
                 contents_result.Endorsement_result.delegate := delegate;
-                contents_result.Endorsement_result.slots := slots |}
-                : contents_result.Endorsement_result) |}
-        :
-          case.Case Alpha_context.Kind.endorsement
-            (Alpha_context.Delegate.balance_updates *
-              (|Signature.Public_key_hash|).(S.SPublic_key_hash.t) * list int)).
+                contents_result.Endorsement_result.slots := slots |} |}.
   
   Definition seed_nonce_revelation_case
     : case Alpha_context.Kind.seed_nonce_revelation :=
     Case
-      ({|
+      {|
         case.Case.op_case :=
           Alpha_context.Operation.Encoding.seed_nonce_revelation_case;
         case.Case.encoding :=
@@ -12120,15 +12081,12 @@ Module Encoding.
         case.Case.proj :=
           fun function_parameter =&gt;
             let 'Seed_nonce_revelation_result bus := function_parameter in
-            bus; case.Case.inj := fun bus =&gt; Seed_nonce_revelation_result bus |}
-        :
-          case.Case Alpha_context.Kind.seed_nonce_revelation
-            Alpha_context.Delegate.balance_updates).
+            bus; case.Case.inj := fun bus =&gt; Seed_nonce_revelation_result bus |}.
   
   Definition double_endorsement_evidence_case
     : case Alpha_context.Kind.double_endorsement_evidence :=
     Case
-      ({|
+      {|
         case.Case.op_case :=
           Alpha_context.Operation.Encoding.double_endorsement_evidence_case;
         case.Case.encoding :=
@@ -12159,15 +12117,12 @@ Module Encoding.
           fun function_parameter =&gt;
             let 'Double_endorsement_evidence_result bus := function_parameter in
             bus;
-        case.Case.inj := fun bus =&gt; Double_endorsement_evidence_result bus |}
-        :
-          case.Case Alpha_context.Kind.double_endorsement_evidence
-            Alpha_context.Delegate.balance_updates).
+        case.Case.inj := fun bus =&gt; Double_endorsement_evidence_result bus |}.
   
   Definition double_baking_evidence_case
     : case Alpha_context.Kind.double_baking_evidence :=
     Case
-      ({|
+      {|
         case.Case.op_case :=
           Alpha_context.Operation.Encoding.double_baking_evidence_case;
         case.Case.encoding :=
@@ -12198,14 +12153,11 @@ Module Encoding.
           fun function_parameter =&gt;
             let 'Double_baking_evidence_result bus := function_parameter in
             bus; case.Case.inj := fun bus =&gt; Double_baking_evidence_result bus
-        |}
-        :
-          case.Case Alpha_context.Kind.double_baking_evidence
-            Alpha_context.Delegate.balance_updates).
+        |}.
   
   Definition activate_account_case : case Alpha_context.Kind.activate_account :=
     Case
-      ({|
+      {|
         case.Case.op_case :=
           Alpha_context.Operation.Encoding.activate_account_case;
         case.Case.encoding :=
@@ -12233,14 +12185,11 @@ Module Encoding.
         case.Case.proj :=
           fun function_parameter =&gt;
             let 'Activate_account_result bus := function_parameter in
-            bus; case.Case.inj := fun bus =&gt; Activate_account_result bus |}
-        :
-          case.Case Alpha_context.Kind.activate_account
-            Alpha_context.Delegate.balance_updates).
+            bus; case.Case.inj := fun bus =&gt; Activate_account_result bus |}.
   
   Definition proposals_case : case Alpha_context.Kind.proposals :=
     Case
-      ({| case.Case.op_case := Alpha_context.Operation.Encoding.proposals_case;
+      {| case.Case.op_case := Alpha_context.Operation.Encoding.proposals_case;
         case.Case.encoding := Data_encoding.empty;
         case.Case.select :=
           fun function_parameter =&gt;
@@ -12266,11 +12215,11 @@ Module Encoding.
         case.Case.inj :=
           fun function_parameter =&gt;
             let '_ := function_parameter in
-            Proposals_result |} : case.Case Alpha_context.Kind.proposals unit).
+            Proposals_result |}.
   
   Definition ballot_case : case Alpha_context.Kind.ballot :=
     Case
-      ({| case.Case.op_case := Alpha_context.Operation.Encoding.ballot_case;
+      {| case.Case.op_case := Alpha_context.Operation.Encoding.ballot_case;
         case.Case.encoding := Data_encoding.empty;
         case.Case.select :=
           fun function_parameter =&gt;
@@ -12296,7 +12245,7 @@ Module Encoding.
         case.Case.inj :=
           fun function_parameter =&gt;
             let '_ := function_parameter in
-            Ballot_result |} : case.Case Alpha_context.Kind.ballot unit).
+            Ballot_result |}.
   
   Definition make_manager_case {A : Set}
     (function_parameter :
@@ -12318,8 +12267,7 @@ Module Encoding.
           res_case in
       fun mselect =&gt;
         Case
-          ({|
-            case.Case.op_case := Alpha_context.Operation.Encoding.Case op_case;
+          {| case.Case.op_case := Alpha_context.Operation.Encoding.Case op_case;
             case.Case.encoding :=
               Data_encoding.obj3
                 (Data_encoding.req None None &quot;balance_updates&quot;
@@ -12455,18 +12403,13 @@ Module Encoding.
               fun function_parameter =&gt;
                 let '(bus, __r_value, rs) := function_parameter in
                 Manager_operation_result
-                  ({|
+                  {|
                     contents_result.Manager_operation_result.balance_updates :=
                       bus;
                     contents_result.Manager_operation_result.operation_result :=
                       __r_value;
                     contents_result.Manager_operation_result.internal_operation_results :=
-                      rs |} : contents_result.Manager_operation_result kind) |}
-            :
-              case.Case Alpha_context.Kind.manager
-                (Alpha_context.Delegate.balance_updates *
-                  manager_operation_result kind *
-                  list packed_internal_operation_result)).
+                      rs |} |}.
   
   Definition reveal_case : case Alpha_context.Kind.manager :=
     make_manager_case Alpha_context.Operation.Encoding.reveal_case
@@ -12826,8 +12769,7 @@ Definition operation_metadata_encoding
                 (fun __Contents_result_list_'kind =&gt;
                   contents_result_list) _ contents in
             Operation_metadata
-              ({| operation_metadata.contents := contents |}
-                : operation_metadata));
+              {| operation_metadata.contents := contents |});
         Data_encoding.__case_value &quot;No_operation_metadata&quot; None
           (Data_encoding.Tag 1) Data_encoding.empty
           (fun function_parameter =&gt;
@@ -13264,14 +13206,14 @@ Definition operation_data_and_metadata_encoding
             let '(op_contents, res_contents) :=
               unpack_contents_list contents in
             ((Alpha_context.Operation_data
-              ({|
+              {|
                 Alpha_context.protocol_data.contents :=
                   op_contents;
                 Alpha_context.protocol_data.signature :=
-                  signature |} : Alpha_context.protocol_data)),
+                  signature |}),
               (Operation_metadata
-                ({| operation_metadata.contents := res_contents
-                  |} : operation_metadata))));
+                {| operation_metadata.contents := res_contents
+                  |})));
         Data_encoding.__case_value &quot;Operation_without_metadata&quot; None
           (Data_encoding.Tag 1)
           (Data_encoding.obj2
@@ -13304,10 +13246,9 @@ Definition operation_data_and_metadata_encoding
                     option Signature.t]) _
                 [contents, signature] in
             ((Alpha_context.Operation_data
-              ({| Alpha_context.protocol_data.contents := contents;
+              {| Alpha_context.protocol_data.contents := contents;
                 Alpha_context.protocol_data.signature :=
-                  signature |} : Alpha_context.protocol_data)),
-              No_operation_metadata))
+                  signature |}), No_operation_metadata))
       ]).
 
 Module block_metadata.
@@ -13363,13 +13304,12 @@ Definition block_metadata_encoding : Data_encoding.encoding block_metadata :=
         let
           '(baker, level, voting_period_kind, nonce_hash, consumed_gas,
             deactivated, balance_updates) := function_parameter in
-        ({| block_metadata.baker := baker; block_metadata.level := level;
+        {| block_metadata.baker := baker; block_metadata.level := level;
           block_metadata.voting_period_kind := voting_period_kind;
           block_metadata.nonce_hash := nonce_hash;
           block_metadata.consumed_gas := consumed_gas;
           block_metadata.deactivated := deactivated;
-          block_metadata.balance_updates := balance_updates |} : block_metadata))
-      None
+          block_metadata.balance_updates := balance_updates |}) None
       (Data_encoding.obj7
         (Data_encoding.req None None &quot;baker&quot;
           (|Signature.Public_key_hash|).(S.SPublic_key_hash.encoding))
@@ -13894,7 +13834,7 @@ Parameter block_metadata_encoding : Data_encoding.encoding block_metadata.
     <h3>Baking</h3>
     <ul>
       <li>OCaml size: 399 lines</li>
-      <li>Coq size: 419 lines (+5% compared to&nbsp;OCaml)</li>
+      <li>Coq size: 418 lines (+4% compared to&nbsp;OCaml)</li>
     </ul>
   </div>
   <div class="col-md-6">
@@ -14618,12 +14558,11 @@ Definition check_header_proof_of_work_stamp
   (stamp_threshold : (|Compare.Uint64|).(Compare.S.t)) : bool :=
   let __hash_value :=
     Alpha_context.Block_header.__hash_value
-      ({| Alpha_context.Block_header.t.shell := shell;
+      {| Alpha_context.Block_header.t.shell := shell;
         Alpha_context.Block_header.t.protocol_data :=
-          ({| Alpha_context.Block_header.protocol_data.contents := contents;
+          {| Alpha_context.Block_header.protocol_data.contents := contents;
             Alpha_context.Block_header.protocol_data.signature := Signature.zero
-            |} : Alpha_context.Block_header.protocol_data) |}
-        : Alpha_context.Block_header.block_header) in
+            |} |} in
   check_hash __hash_value stamp_threshold.
 
 Definition check_proof_of_work_stamp
@@ -15408,7 +15347,7 @@ Parameter Index : {_ : unit &amp; Storage_description.INDEX.signature t}.
     <h3>Block_header_repr</h3>
     <ul>
       <li>OCaml size: 131 lines</li>
-      <li>Coq size: 174 lines (+32% compared to&nbsp;OCaml)</li>
+      <li>Coq size: 172 lines (+31% compared to&nbsp;OCaml)</li>
     </ul>
   </div>
   <div class="col-md-6">
@@ -15628,10 +15567,9 @@ Definition contents_encoding : Data_encoding.encoding contents :=
       (fun function_parameter =&gt;
         let '(priority, proof_of_work_nonce, seed_nonce_hash) :=
           function_parameter in
-        ({| contents.priority := priority;
+        {| contents.priority := priority;
           contents.seed_nonce_hash := seed_nonce_hash;
-          contents.proof_of_work_nonce := proof_of_work_nonce |} : contents))
-      None
+          contents.proof_of_work_nonce := proof_of_work_nonce |}) None
       (Data_encoding.obj3
         (Data_encoding.req None None &quot;priority&quot; Data_encoding.uint16)
         (Data_encoding.req None None &quot;proof_of_work_nonce&quot;
@@ -15651,8 +15589,8 @@ Definition protocol_data_encoding : Data_encoding.encoding protocol_data :=
         (contents, signature))
       (fun function_parameter =&gt;
         let '(contents, signature) := function_parameter in
-        ({| protocol_data.contents := contents;
-          protocol_data.signature := signature |} : protocol_data)) None
+        {| protocol_data.contents := contents;
+          protocol_data.signature := signature |}) None
       (Data_encoding.merge_objs contents_encoding
         (Data_encoding.obj1
           (Data_encoding.req None None &quot;signature&quot; Signature.encoding)))).
@@ -15662,8 +15600,8 @@ Definition __raw_value (function_parameter : t) : Block_header.t :=
     function_parameter in
   let protocol_data :=
     Data_encoding.Binary.to_bytes_exn protocol_data_encoding protocol_data in
-  ({| Block_header.t.shell := shell;
-    Block_header.t.protocol_data := protocol_data |} : Block_header.t).
+  {| Block_header.t.shell := shell;
+    Block_header.t.protocol_data := protocol_data |}.
 
 Definition unsigned_encoding
   : Data_encoding.encoding (Block_header.shell_header * contents) :=
@@ -15679,13 +15617,13 @@ Definition encoding : Data_encoding.encoding t :=
         (shell, protocol_data))
       (fun function_parameter =&gt;
         let '(shell, protocol_data) := function_parameter in
-        ({| t.shell := shell; t.protocol_data := protocol_data |} : t)) None
+        {| t.shell := shell; t.protocol_data := protocol_data |}) None
       (Data_encoding.merge_objs Block_header.shell_header_encoding
         protocol_data_encoding)).
 
 Definition max_header_length : int :=
   let fake_shell :=
-    ({|
+    {|
       Block_header.shell_header.level :=
         (* ❌ Constant of type int32 is converted to int *)
         0; Block_header.shell_header.proto_level := 0;
@@ -15700,17 +15638,16 @@ Definition max_header_length : int :=
         Fitness_repr.from_int64
           (* ❌ Constant of type int64 is converted to int *)
           0; Block_header.shell_header.context := (|Context_hash|).(S.HASH.zero)
-      |} : Block_header.shell_header) in
+      |} in
   let fake_contents :=
-    ({| contents.priority := 0;
-      contents.seed_nonce_hash := Some Nonce_hash.zero;
+    {| contents.priority := 0; contents.seed_nonce_hash := Some Nonce_hash.zero;
       contents.proof_of_work_nonce :=
-        MBytes.create Constants_repr.proof_of_work_nonce_size |} : contents) in
+        MBytes.create Constants_repr.proof_of_work_nonce_size |} in
   Data_encoding.Binary.length encoding
-    ({| t.shell := fake_shell;
+    {| t.shell := fake_shell;
       t.protocol_data :=
-        ({| protocol_data.contents := fake_contents;
-          protocol_data.signature := Signature.zero |} : protocol_data) |} : t).
+        {| protocol_data.contents := fake_contents;
+          protocol_data.signature := Signature.zero |} |}.
 
 Definition hash_raw : Block_header.t -&gt; (|Block_hash|).(S.HASH.t) :=
   Block_header.__hash_value.
@@ -15719,10 +15656,10 @@ Definition __hash_value (function_parameter : t) : (|Block_hash|).(S.HASH.t) :=
   let '{| t.shell := shell; t.protocol_data := protocol_data |} :=
     function_parameter in
   Block_header.__hash_value
-    ({| Block_header.t.shell := shell;
+    {| Block_header.t.shell := shell;
       Block_header.t.protocol_data :=
         Data_encoding.Binary.to_bytes_exn protocol_data_encoding protocol_data
-      |} : Block_header.t).
+      |}.
 </pre>
   </div>
 </div>
@@ -16432,8 +16369,8 @@ Definition encoding : Data_encoding.encoding t :=
       (blinded_public_key_hash, amount))
     (fun function_parameter =&gt;
       let '(blinded_public_key_hash, amount) := function_parameter in
-      ({| t.blinded_public_key_hash := blinded_public_key_hash;
-        t.amount := amount |} : t)) None
+      {| t.blinded_public_key_hash := blinded_public_key_hash;
+        t.amount := amount |}) None
     (Data_encoding.tup2 Blinded_public_key_hash.encoding Tez_repr.encoding).
 
 Definition not_first_class_module : unit := tt.
@@ -16721,7 +16658,7 @@ Parameter delete :
     <h3>Constants_repr</h3>
     <ul>
       <li>OCaml size: 238 lines</li>
-      <li>Coq size: 607 lines (+155% compared to&nbsp;OCaml)</li>
+      <li>Coq size: 606 lines (+154% compared to&nbsp;OCaml)</li>
     </ul>
   </div>
   <div class="col-md-6">
@@ -17045,12 +16982,11 @@ Definition fixed_encoding : Data_encoding.encoding fixed :=
         '(proof_of_work_nonce_size, nonce_length, max_revelations_per_block,
           max_operation_data_length, max_proposals_per_delegate) :=
         function_parameter in
-      ({| fixed.proof_of_work_nonce_size := proof_of_work_nonce_size;
+      {| fixed.proof_of_work_nonce_size := proof_of_work_nonce_size;
         fixed.nonce_length := nonce_length;
         fixed.max_revelations_per_block := max_revelations_per_block;
         fixed.max_operation_data_length := max_operation_data_length;
-        fixed.max_proposals_per_delegate := max_proposals_per_delegate |}
-        : fixed)) None
+        fixed.max_proposals_per_delegate := max_proposals_per_delegate |}) None
     (Data_encoding.obj5
       (Data_encoding.req None None &quot;proof_of_work_nonce_size&quot;
         Data_encoding.uint8)
@@ -17063,11 +16999,11 @@ Definition fixed_encoding : Data_encoding.encoding fixed :=
         Data_encoding.uint8)).
 
 Definition __fixed_value : fixed :=
-  ({| fixed.proof_of_work_nonce_size := proof_of_work_nonce_size;
+  {| fixed.proof_of_work_nonce_size := proof_of_work_nonce_size;
     fixed.nonce_length := nonce_length;
     fixed.max_revelations_per_block := max_revelations_per_block;
     fixed.max_operation_data_length := max_operation_data_length;
-    fixed.max_proposals_per_delegate := max_proposals_per_delegate |} : fixed).
+    fixed.max_proposals_per_delegate := max_proposals_per_delegate |}.
 
 Module parametric.
   Record record : Set := Build {
@@ -17480,7 +17416,7 @@ Definition parametric_encoding : Data_encoding.encoding parametric :=
               hard_storage_limit_per_operation, test_chain_duration, quorum_min,
               quorum_max, min_proposal_quorum, initial_endorsers,
               delay_per_missing_endorsement))) := function_parameter in
-      ({| parametric.preserved_cycles := preserved_cycles;
+      {| parametric.preserved_cycles := preserved_cycles;
         parametric.blocks_per_cycle := blocks_per_cycle;
         parametric.blocks_per_commitment := blocks_per_commitment;
         parametric.blocks_per_roll_snapshot := blocks_per_roll_snapshot;
@@ -17507,7 +17443,7 @@ Definition parametric_encoding : Data_encoding.encoding parametric :=
         parametric.min_proposal_quorum := min_proposal_quorum;
         parametric.initial_endorsers := initial_endorsers;
         parametric.delay_per_missing_endorsement :=
-          delay_per_missing_endorsement |} : parametric)) None
+          delay_per_missing_endorsement |}) None
     (Data_encoding.merge_objs
       (Data_encoding.obj9
         (Data_encoding.req None None &quot;preserved_cycles&quot; Data_encoding.uint8)
@@ -17574,8 +17510,8 @@ Definition encoding : Data_encoding.encoding t :=
       (__fixed_value, __parametric_value))
     (fun function_parameter =&gt;
       let '(__fixed_value, __parametric_value) := function_parameter in
-      ({| t.fixed := __fixed_value; t.parametric := __parametric_value |} : t))
-    None (Data_encoding.merge_objs fixed_encoding parametric_encoding).
+      {| t.fixed := __fixed_value; t.parametric := __parametric_value |}) None
+    (Data_encoding.merge_objs fixed_encoding parametric_encoding).
 </pre>
   </div>
 </div>
@@ -17586,7 +17522,7 @@ Definition encoding : Data_encoding.encoding t :=
     <h3>Constants_services</h3>
     <ul>
       <li>OCaml size: 60 lines</li>
-      <li>Coq size: 86 lines (+43% compared to&nbsp;OCaml)</li>
+      <li>Coq size: 85 lines (+41% compared to&nbsp;OCaml)</li>
     </ul>
   </div>
   <div class="col-md-6">
@@ -17932,12 +17868,11 @@ Definition register (function_parameter : unit) : unit :=
         fun function_parameter =&gt;
           let '_ := function_parameter in
           Error_monad.__return
-            ({|
+            {|
               Alpha_context.Constants.t.fixed :=
                 Alpha_context.Constants.__fixed_value;
               Alpha_context.Constants.t.parametric :=
-                Alpha_context.Constants.__parametric_value ctxt |}
-              : Alpha_context.Constants.t)).
+                Alpha_context.Constants.__parametric_value ctxt |}).
 
 Definition errors {D E G I K L a b c i o q : Set}
   (ctxt :
@@ -18714,7 +18649,7 @@ Definition path_length := (|Blake2BModule|).(S.HASH.path_length).
     <h3>Contract_repr</h3>
     <ul>
       <li>OCaml size: 232 lines</li>
-      <li>Coq size: 250 lines (+7% compared to&nbsp;OCaml)</li>
+      <li>Coq size: 249 lines (+7% compared to&nbsp;OCaml)</li>
     </ul>
   </div>
   <div class="col-md-6">
@@ -19102,9 +19037,8 @@ Definition origination_nonce_encoding
         (operation_hash, origination_index))
       (fun function_parameter =&gt;
         let '(operation_hash, origination_index) := function_parameter in
-        ({| origination_nonce.operation_hash := operation_hash;
-          origination_nonce.origination_index := origination_index |}
-          : origination_nonce)) in
+        {| origination_nonce.operation_hash := operation_hash;
+          origination_nonce.origination_index := origination_index |}) in
   fun eta =&gt; arg None eta)
     (Data_encoding.obj2
       (Data_encoding.req None None &quot;operation&quot;
@@ -19148,10 +19082,10 @@ Definition originated_contracts (function_parameter : origination_nonce)
 
 Definition initial_origination_nonce
   (operation_hash : (|Operation_hash|).(S.HASH.t)) : origination_nonce :=
-  ({| origination_nonce.operation_hash := operation_hash;
+  {| origination_nonce.operation_hash := operation_hash;
     origination_nonce.origination_index :=
       (* ❌ Constant of type int32 is converted to int *)
-      0 |} : origination_nonce).
+      0 |}.
 
 Definition incr_origination_nonce (__nonce_value : origination_nonce)
   : origination_nonce :=
@@ -21602,8 +21536,8 @@ Definition info_encoding : Data_encoding.encoding info :=
         (balance, delegate, script, counter))
       (fun function_parameter =&gt;
         let '(balance, delegate, script, counter) := function_parameter in
-        ({| info.balance := balance; info.delegate := delegate;
-          info.counter := counter; info.script := script |} : info)) in
+        {| info.balance := balance; info.delegate := delegate;
+          info.counter := counter; info.script := script |}) in
   fun eta =&gt; arg None eta)
     (Data_encoding.obj4
       (Data_encoding.req None None &quot;balance&quot; Alpha_context.Tez.encoding)
@@ -23847,7 +23781,7 @@ Parameter register : unit -&gt; unit.
     <h3>Contract_storage</h3>
     <ul>
       <li>OCaml size: 733 lines</li>
-      <li>Coq size: 796 lines (+8% compared to&nbsp;OCaml)</li>
+      <li>Coq size: 792 lines (+8% compared to&nbsp;OCaml)</li>
     </ul>
   </div>
   <div class="col-md-6">
@@ -24729,11 +24663,10 @@ Definition big_map_diff_item_encoding
           let '(_, big_map, diff_key_hash, diff_key, diff_value) :=
             function_parameter in
           Update
-            ({| big_map_diff_item.Update.big_map := big_map;
+            {| big_map_diff_item.Update.big_map := big_map;
               big_map_diff_item.Update.diff_key := diff_key;
               big_map_diff_item.Update.diff_key_hash := diff_key_hash;
-              big_map_diff_item.Update.diff_value := diff_value |}
-              : big_map_diff_item.Update));
+              big_map_diff_item.Update.diff_value := diff_value |});
       Data_encoding.__case_value &quot;remove&quot; None (Data_encoding.Tag 1)
         (Data_encoding.obj2
           (Data_encoding.req None None &quot;action&quot;
@@ -24782,10 +24715,9 @@ Definition big_map_diff_item_encoding
         (fun function_parameter =&gt;
           let '(_, big_map, key_type, value_type) := function_parameter in
           Alloc
-            ({| big_map_diff_item.Alloc.big_map := big_map;
+            {| big_map_diff_item.Alloc.big_map := big_map;
               big_map_diff_item.Alloc.key_type := key_type;
-              big_map_diff_item.Alloc.value_type := value_type |}
-              : big_map_diff_item.Alloc))
+              big_map_diff_item.Alloc.value_type := value_type |})
     ].
 
 Definition big_map_diff_encoding
@@ -25166,9 +25098,7 @@ Definition get_script
   | (Some code, Some storage) =&gt;
     Error_monad.__return
       (c,
-        (Some
-          ({| Script_repr.t.code := code; Script_repr.t.storage := storage |}
-            : Script_repr.t)))
+        (Some {| Script_repr.t.code := code; Script_repr.t.storage := storage |}))
   | ((None, Some _) | (Some _, None)) =&gt; failwith &quot;get_script&quot;
   end.
 
@@ -26161,7 +26091,7 @@ Parameter Index : {_ : unit &amp; Storage_description.INDEX.signature cycle}.
     <h3>Delegate_services</h3>
     <ul>
       <li>OCaml size: 697 lines</li>
-      <li>Coq size: 1193 lines (+71% compared to&nbsp;OCaml)</li>
+      <li>Coq size: 1186 lines (+70% compared to&nbsp;OCaml)</li>
     </ul>
   </div>
   <div class="col-md-6">
@@ -28666,14 +28596,13 @@ Definition info_encoding : Data_encoding.encoding info :=
         '(balance, __frozen_balance_value, frozen_balance_by_cycle,
           staking_balance, delegated_contracts, delegated_balance, deactivated,
           grace_period) := function_parameter in
-      ({| info.balance := balance;
-        info.frozen_balance := __frozen_balance_value;
+      {| info.balance := balance; info.frozen_balance := __frozen_balance_value;
         info.frozen_balance_by_cycle := frozen_balance_by_cycle;
         info.staking_balance := staking_balance;
         info.delegated_contracts := delegated_contracts;
         info.delegated_balance := delegated_balance;
-        info.deactivated := deactivated; info.grace_period := grace_period |}
-        : info)) None
+        info.deactivated := deactivated; info.grace_period := grace_period |})
+    None
     (Data_encoding.obj8
       (Data_encoding.req None None &quot;balance&quot; Alpha_context.Tez.encoding)
       (Data_encoding.req None None &quot;frozen_balance&quot; Alpha_context.Tez.encoding)
@@ -28711,8 +28640,8 @@ Module S.
           (RPC_query.__query_value
             (fun active =&gt;
               fun inactive =&gt;
-                ({| list_query.active := active; list_query.inactive := inactive
-                  |} : list_query)))
+                {| list_query.active := active; list_query.inactive := inactive
+                  |}))
           (RPC_query.flag None &quot;active&quot;
             (fun __t_value =&gt; __t_value.(list_query.active))))
         (RPC_query.flag None &quot;inactive&quot;
@@ -28888,8 +28817,8 @@ Definition __list_value {D E G I K L a b c i o q : Set}
     fun function_parameter =&gt;
       let '_ := function_parameter in
       RPC_context.make_call0 S.list_delegate ctxt block
-        ({| S.list_query.active := active; S.list_query.inactive := inactive |}
-          : S.list_query) tt.
+        {| S.list_query.active := active; S.list_query.inactive := inactive |}
+        tt.
 
 Definition __info_value {D E G I K L a b c i o q : Set}
   (ctxt :
@@ -29096,8 +29025,8 @@ Module Baking_rights.
         (level, delegate, priority, timestamp))
       (fun function_parameter =&gt;
         let '(level, delegate, priority, timestamp) := function_parameter in
-        ({| t.level := level; t.delegate := delegate; t.priority := priority;
-          t.timestamp := timestamp |} : t)) None
+        {| t.level := level; t.delegate := delegate; t.priority := priority;
+          t.timestamp := timestamp |}) None
       (Data_encoding.obj4
         (Data_encoding.req None None &quot;level&quot; Alpha_context.Raw_level.encoding)
         (Data_encoding.req None None &quot;delegate&quot;
@@ -29147,12 +29076,11 @@ Module Baking_rights.
                         fun delegates =&gt;
                           fun max_priority =&gt;
                             fun all =&gt;
-                              ({| baking_rights_query.levels := levels;
+                              {| baking_rights_query.levels := levels;
                                 baking_rights_query.cycles := cycles;
                                 baking_rights_query.delegates := delegates;
                                 baking_rights_query.max_priority := max_priority;
-                                baking_rights_query.all := all |}
-                                : baking_rights_query)))
+                                baking_rights_query.all := all |}))
                   (RPC_query.multi_field None &quot;level&quot;
                     Alpha_context.Raw_level.rpc_arg
                     (fun __t_value =&gt; __t_value.(baking_rights_query.levels))))
@@ -29202,9 +29130,9 @@ Module Baking_rights.
           end in
         let acc :=
           cons
-            ({| t.level := level.(Alpha_context.Level.t.level);
+            {| t.level := level.(Alpha_context.Level.t.level);
               t.delegate := delegate; t.priority := priority;
-              t.timestamp := timestamp |} : t) acc in
+              t.timestamp := timestamp |} acc in
         let=? l := next tt in
         loop l acc (Pervasives.op_plus priority 1) in
     loop contract_list nil 0.
@@ -29309,12 +29237,11 @@ Module Baking_rights.
           fun max_priority =&gt;
             fun block =&gt;
               RPC_context.make_call0 S.baking_rights ctxt block
-                ({| S.baking_rights_query.levels := levels;
+                {| S.baking_rights_query.levels := levels;
                   S.baking_rights_query.cycles := cycles;
                   S.baking_rights_query.delegates := delegates;
                   S.baking_rights_query.max_priority := max_priority;
-                  S.baking_rights_query.all := all |} : S.baking_rights_query)
-                tt.
+                  S.baking_rights_query.all := all |} tt.
 End Baking_rights.
 
 Module Endorsing_rights.
@@ -29347,8 +29274,8 @@ Module Endorsing_rights.
         (level, delegate, slots, estimated_time))
       (fun function_parameter =&gt;
         let '(level, delegate, slots, estimated_time) := function_parameter in
-        ({| t.level := level; t.delegate := delegate; t.slots := slots;
-          t.estimated_time := estimated_time |} : t)) None
+        {| t.level := level; t.delegate := delegate; t.slots := slots;
+          t.estimated_time := estimated_time |}) None
       (Data_encoding.obj4
         (Data_encoding.req None None &quot;level&quot; Alpha_context.Raw_level.encoding)
         (Data_encoding.req None None &quot;delegate&quot;
@@ -29389,10 +29316,9 @@ Module Endorsing_rights.
                 (fun levels =&gt;
                   fun cycles =&gt;
                     fun delegates =&gt;
-                      ({| endorsing_rights_query.levels := levels;
+                      {| endorsing_rights_query.levels := levels;
                         endorsing_rights_query.cycles := cycles;
-                        endorsing_rights_query.delegates := delegates |}
-                        : endorsing_rights_query)))
+                        endorsing_rights_query.delegates := delegates |}))
               (RPC_query.multi_field None &quot;level&quot;
                 Alpha_context.Raw_level.rpc_arg
                 (fun __t_value =&gt; __t_value.(endorsing_rights_query.levels))))
@@ -29425,9 +29351,9 @@ Module Endorsing_rights.
             let '(_, slots, _) := function_parameter in
             fun acc =&gt;
               cons
-                ({| t.level := level.(Alpha_context.Level.t.level);
+                {| t.level := level.(Alpha_context.Level.t.level);
                   t.delegate := delegate; t.slots := slots;
-                  t.estimated_time := estimated_time |} : t) acc) rights nil).
+                  t.estimated_time := estimated_time |} acc) rights nil).
   
   Definition register (function_parameter : unit) : unit :=
     let '_ := function_parameter in
@@ -29490,10 +29416,9 @@ Module Endorsing_rights.
           end in
         fun block =&gt;
           RPC_context.make_call0 S.endorsing_rights ctxt block
-            ({| S.endorsing_rights_query.levels := levels;
+            {| S.endorsing_rights_query.levels := levels;
               S.endorsing_rights_query.cycles := cycles;
-              S.endorsing_rights_query.delegates := delegates |}
-              : S.endorsing_rights_query) tt.
+              S.endorsing_rights_query.delegates := delegates |} tt.
 End Endorsing_rights.
 
 Module Endorsing_power.
@@ -29512,11 +29437,10 @@ Module Endorsing_power.
     | Alpha_context.Single (Alpha_context.Endorsement _) =&gt;
       let=? '(_, slots, _) :=
         Baking.check_endorsement_rights ctxt chain_id
-          ({|
+          {|
             Alpha_context.operation.shell :=
               operation.(Alpha_context.packed_operation.shell);
-            Alpha_context.operation.protocol_data := data |}
-            : Alpha_context.Operation.t) in
+            Alpha_context.operation.protocol_data := data |} in
       Error_monad.__return (List.length slots)
     | _ =&gt; Pervasives.failwith &quot;Operation is not an endorsement&quot;
     end.
@@ -29584,7 +29508,7 @@ Module Required_endorsements.
       RPC_query.seal
         (RPC_query.op_pipeplus
           (RPC_query.__query_value
-            (fun block_delay =&gt; ({| t.block_delay := block_delay |} : t)))
+            (fun block_delay =&gt; {| t.block_delay := block_delay |}))
           (RPC_query.__field_value None &quot;block_delay&quot;
             Alpha_context.Period.rpc_arg Alpha_context.Period.zero
             (fun __t_value =&gt; __t_value.(t.block_delay)))).
@@ -29624,7 +29548,7 @@ Module Required_endorsements.
     (block_delay : Alpha_context.Period.t)
     : Lwt.t (Error_monad.shell_tzresult int) :=
     RPC_context.make_call0 S.required_endorsements ctxt block
-      ({| S.t.block_delay := block_delay |} : S.t) tt.
+      {| S.t.block_delay := block_delay |} tt.
 End Required_endorsements.
 
 Module Minimal_valid_time.
@@ -29652,8 +29576,8 @@ Module Minimal_valid_time.
             (RPC_query.__query_value
               (fun priority =&gt;
                 fun endorsing_power =&gt;
-                  ({| t.priority := priority;
-                    t.endorsing_power := endorsing_power |} : t)))
+                  {| t.priority := priority;
+                    t.endorsing_power := endorsing_power |}))
             (RPC_query.__field_value None &quot;priority&quot; RPC_arg.__int_value 0
               (fun __t_value =&gt; __t_value.(t.priority))))
           (RPC_query.__field_value None &quot;endorsing_power&quot; RPC_arg.__int_value 0
@@ -29697,8 +29621,7 @@ Module Minimal_valid_time.
               * L)))) * L * D) (block : D) (priority : int)
     (endorsing_power : int) : Lwt.t (Error_monad.shell_tzresult Time.t) :=
     RPC_context.make_call0 S.minimal_valid_time ctxt block
-      ({| S.t.priority := priority; S.t.endorsing_power := endorsing_power |}
-        : S.t) tt.
+      {| S.t.priority := priority; S.t.endorsing_power := endorsing_power |} tt.
 End Minimal_valid_time.
 
 Definition register (function_parameter : unit) : unit :=
@@ -32726,8 +32649,8 @@ Definition frozen_balance_encoding : Data_encoding.encoding frozen_balance :=
       (deposit, fees, rewards))
     (fun function_parameter =&gt;
       let '(deposit, fees, rewards) := function_parameter in
-      ({| frozen_balance.deposit := deposit; frozen_balance.fees := fees;
-        frozen_balance.rewards := rewards |} : frozen_balance)) None
+      {| frozen_balance.deposit := deposit; frozen_balance.fees := fees;
+        frozen_balance.rewards := rewards |}) None
     (Data_encoding.obj3
       (Data_encoding.req None None &quot;deposit&quot; Tez_repr.encoding)
       (Data_encoding.req None None &quot;fees&quot; Tez_repr.encoding)
@@ -33246,8 +33169,8 @@ Definition punish
       (ctxt, contract) cycle in
   Error_monad.__return
     (ctxt,
-      ({| frozen_balance.deposit := deposit; frozen_balance.fees := fees;
-        frozen_balance.rewards := rewards |} : frozen_balance)).
+      {| frozen_balance.deposit := deposit; frozen_balance.fees := fees;
+        frozen_balance.rewards := rewards |}).
 
 Definition has_frozen_balance
   (ctxt : Raw_context.t)
@@ -33283,9 +33206,9 @@ Definition frozen_balance_by_cycle_encoding
         frozen_balance_encoding)).
 
 Definition empty_frozen_balance : frozen_balance :=
-  ({| frozen_balance.deposit := Tez_repr.zero;
+  {| frozen_balance.deposit := Tez_repr.zero;
     frozen_balance.fees := Tez_repr.zero;
-    frozen_balance.rewards := Tez_repr.zero |} : frozen_balance).
+    frozen_balance.rewards := Tez_repr.zero |}.
 
 Definition frozen_balance_by_cycle
   (ctxt : Raw_context.t)
@@ -34396,7 +34319,7 @@ Definition increase (op_staroptstar : option int)
     <h3>Gas_limit_repr</h3>
     <ul>
       <li>OCaml size: 260 lines</li>
-      <li>Coq size: 312 lines (+20% compared to&nbsp;OCaml)</li>
+      <li>Coq size: 309 lines (+18% compared to&nbsp;OCaml)</li>
     </ul>
   </div>
   <div class="col-md-6">
@@ -34750,8 +34673,7 @@ Definition encoding : Data_encoding.encoding t :=
           | Limited {| t.Limited.remaining := remaining |} =&gt; Some remaining
           | _ =&gt; None
           end)
-        (fun remaining =&gt;
-          Limited ({| t.Limited.remaining := remaining |} : t.Limited));
+        (fun remaining =&gt; Limited {| t.Limited.remaining := remaining |});
       Data_encoding.__case_value &quot;Unaccounted&quot; None (Data_encoding.Tag 1)
         (Data_encoding.constant &quot;unaccounted&quot;)
         (fun function_parameter =&gt;
@@ -34795,10 +34717,10 @@ Definition cost_encoding : Data_encoding.encoding cost :=
     (fun function_parameter =&gt;
       let '(allocations, steps, reads, writes, bytes_read, bytes_written) :=
         function_parameter in
-      ({| cost.allocations := allocations; cost.steps := steps;
+      {| cost.allocations := allocations; cost.steps := steps;
         cost.reads := reads; cost.writes := writes;
-        cost.bytes_read := bytes_read; cost.bytes_written := bytes_written |}
-        : cost)) None
+        cost.bytes_read := bytes_read; cost.bytes_written := bytes_written |})
+    None
     (Data_encoding.obj6
       (Data_encoding.req None None &quot;allocations&quot; Data_encoding.z)
       (Data_encoding.req None None &quot;steps&quot; Data_encoding.z)
@@ -34905,8 +34827,7 @@ Definition consume_raw
           Error_monad.__error_value extensible_type_value
         else
           Error_monad.ok
-            (block_remaining,
-              (Limited ({| t.Limited.remaining := remaining |} : t.Limited)),
+            (block_remaining, (Limited {| t.Limited.remaining := remaining |}),
               rest)
     else
       Error_monad.ok (block_gas, operation_gas, total_internal_gas)
@@ -34924,9 +34845,9 @@ Definition check_enough_raw
 Definition internal_gas_zero : internal_gas := Z.zero.
 
 Definition alloc_cost (n : int) : cost :=
-  ({| cost.allocations := scale (Z.of_int (Pervasives.op_plus n 1));
+  {| cost.allocations := scale (Z.of_int (Pervasives.op_plus n 1));
     cost.steps := Z.zero; cost.reads := Z.zero; cost.writes := Z.zero;
-    cost.bytes_read := Z.zero; cost.bytes_written := Z.zero |} : cost).
+    cost.bytes_read := Z.zero; cost.bytes_written := Z.zero |}.
 
 Definition alloc_bytes_cost (n : int) : cost :=
   alloc_cost (Pervasives.op_div (Pervasives.op_plus n 7) 8).
@@ -34935,47 +34856,46 @@ Definition alloc_bits_cost (n : int) : cost :=
   alloc_cost (Pervasives.op_div (Pervasives.op_plus n 63) 64).
 
 Definition atomic_step_cost (n : int) : cost :=
-  ({| cost.allocations := Z.zero;
+  {| cost.allocations := Z.zero;
     cost.steps := Z.of_int (Pervasives.op_star 2 n); cost.reads := Z.zero;
     cost.writes := Z.zero; cost.bytes_read := Z.zero;
-    cost.bytes_written := Z.zero |} : cost).
+    cost.bytes_written := Z.zero |}.
 
 Definition step_cost (n : int) : cost :=
-  ({| cost.allocations := Z.zero; cost.steps := scale (Z.of_int n);
+  {| cost.allocations := Z.zero; cost.steps := scale (Z.of_int n);
     cost.reads := Z.zero; cost.writes := Z.zero; cost.bytes_read := Z.zero;
-    cost.bytes_written := Z.zero |} : cost).
+    cost.bytes_written := Z.zero |}.
 
 Definition free : cost :=
-  ({| cost.allocations := Z.zero; cost.steps := Z.zero; cost.reads := Z.zero;
+  {| cost.allocations := Z.zero; cost.steps := Z.zero; cost.reads := Z.zero;
     cost.writes := Z.zero; cost.bytes_read := Z.zero;
-    cost.bytes_written := Z.zero |} : cost).
+    cost.bytes_written := Z.zero |}.
 
 Definition read_bytes_cost (n : Z.t) : cost :=
-  ({| cost.allocations := Z.zero; cost.steps := Z.zero;
+  {| cost.allocations := Z.zero; cost.steps := Z.zero;
     cost.reads := scale Z.one; cost.writes := Z.zero;
-    cost.bytes_read := scale n; cost.bytes_written := Z.zero |} : cost).
+    cost.bytes_read := scale n; cost.bytes_written := Z.zero |}.
 
 Definition write_bytes_cost (n : Z.t) : cost :=
-  ({| cost.allocations := Z.zero; cost.steps := Z.zero; cost.reads := Z.zero;
+  {| cost.allocations := Z.zero; cost.steps := Z.zero; cost.reads := Z.zero;
     cost.writes := Z.one; cost.bytes_read := Z.zero;
-    cost.bytes_written := scale n |} : cost).
+    cost.bytes_written := scale n |}.
 
 Definition op_plusat (x : cost) (y : cost) : cost :=
-  ({| cost.allocations := Z.add x.(cost.allocations) y.(cost.allocations);
+  {| cost.allocations := Z.add x.(cost.allocations) y.(cost.allocations);
     cost.steps := Z.add x.(cost.steps) y.(cost.steps);
     cost.reads := Z.add x.(cost.reads) y.(cost.reads);
     cost.writes := Z.add x.(cost.writes) y.(cost.writes);
     cost.bytes_read := Z.add x.(cost.bytes_read) y.(cost.bytes_read);
-    cost.bytes_written := Z.add x.(cost.bytes_written) y.(cost.bytes_written) |}
-    : cost).
+    cost.bytes_written := Z.add x.(cost.bytes_written) y.(cost.bytes_written) |}.
 
 Definition op_starat (x : int) (y : cost) : cost :=
-  ({| cost.allocations := Z.mul (Z.of_int x) y.(cost.allocations);
+  {| cost.allocations := Z.mul (Z.of_int x) y.(cost.allocations);
     cost.steps := Z.mul (Z.of_int x) y.(cost.steps);
     cost.reads := Z.mul (Z.of_int x) y.(cost.reads);
     cost.writes := Z.mul (Z.of_int x) y.(cost.writes);
     cost.bytes_read := Z.mul (Z.of_int x) y.(cost.bytes_read);
-    cost.bytes_written := Z.mul (Z.of_int x) y.(cost.bytes_written) |} : cost).
+    cost.bytes_written := Z.mul (Z.of_int x) y.(cost.bytes_written) |}.
 
 Definition alloc_mbytes_cost (n : int) : cost :=
   op_plusat (alloc_cost 12) (alloc_bytes_cost n).
@@ -35168,7 +35088,7 @@ Parameter op_plusat : cost -&gt; cost -&gt; cost.
     <h3>Helpers_services</h3>
     <ul>
       <li>OCaml size: 890 lines</li>
-      <li>Coq size: 1163 lines (+30% compared to&nbsp;OCaml)</li>
+      <li>Coq size: 1150 lines (+29% compared to&nbsp;OCaml)</li>
     </ul>
   </div>
   <div class="col-md-6">
@@ -38761,11 +38681,10 @@ Definition parse_operation (op : Alpha_context.Operation.raw)
       op.(Alpha_context.Operation.raw.proto) with
   | Some protocol_data =&gt;
     Error_monad.ok
-      ({|
+      {|
         Alpha_context.packed_operation.shell :=
           op.(Alpha_context.Operation.raw.shell);
         Alpha_context.packed_operation.protocol_data := protocol_data |}
-        : Alpha_context.packed_operation)
   | None =&gt; Error_monad.__error_value extensible_type_value
   end.
 
@@ -39264,11 +39183,11 @@ Module Forge.
           Error_monad.__return
             (Data_encoding.Binary.to_bytes_exn
               Alpha_context.Block_header.contents_encoding
-              ({| Alpha_context.Block_header.contents.priority := priority;
+              {| Alpha_context.Block_header.contents.priority := priority;
                 Alpha_context.Block_header.contents.seed_nonce_hash :=
                   seed_nonce_hash;
                 Alpha_context.Block_header.contents.proof_of_work_nonce :=
-                  proof_of_work_nonce |} : Alpha_context.Block_header.contents))).
+                  proof_of_work_nonce |})).
   
   Module Manager.
     Definition operations {D E G I K L a b c i o q : Set}
@@ -39307,7 +39226,7 @@ Module Forge.
                   operation in
               Alpha_context.Contents
                 (Alpha_context.Manager_operation
-                  ({| Alpha_context.contents.Manager_operation.source := source;
+                  {| Alpha_context.contents.Manager_operation.source := source;
                     Alpha_context.contents.Manager_operation.fee := fee;
                     Alpha_context.contents.Manager_operation.counter := counter;
                     Alpha_context.contents.Manager_operation.operation :=
@@ -39315,8 +39234,7 @@ Module Forge.
                     Alpha_context.contents.Manager_operation.gas_limit :=
                       gas_limit;
                     Alpha_context.contents.Manager_operation.storage_limit :=
-                      storage_limit |}
-                    : Alpha_context.contents.Manager_operation))) operations in
+                      storage_limit |})) operations in
         let ops :=
           match (sourcePubKey, revealed) with
           | ((None, _) | (_, Some _)) =&gt; ops
@@ -39325,7 +39243,7 @@ Module Forge.
             cons
               (Alpha_context.Contents
                 (Alpha_context.Manager_operation
-                  ({| Alpha_context.contents.Manager_operation.source := source;
+                  {| Alpha_context.contents.Manager_operation.source := source;
                     Alpha_context.contents.Manager_operation.fee := fee;
                     Alpha_context.contents.Manager_operation.counter := counter;
                     Alpha_context.contents.Manager_operation.operation :=
@@ -39333,12 +39251,11 @@ Module Forge.
                     Alpha_context.contents.Manager_operation.gas_limit :=
                       gas_limit;
                     Alpha_context.contents.Manager_operation.storage_limit :=
-                      storage_limit |}
-                    : Alpha_context.contents.Manager_operation))) ops
+                      storage_limit |})) ops
           end in
         RPC_context.make_call0 S.operations ctxt block tt
-          (({| Operation.shell_header.branch := branch |}
-            : Operation.shell_header), (Alpha_context.Operation.of_list ops))
+          ({| Operation.shell_header.branch := branch |},
+            (Alpha_context.Operation.of_list ops))
       end.
     
     Definition reveal {D E G I K L a b c i o q : Set}
@@ -39407,7 +39324,7 @@ Module Forge.
                   [
                     Alpha_context.Manager
                       (Alpha_context.Transaction
-                        ({|
+                        {|
                           Alpha_context.manager_operation.Transaction.amount :=
                             amount;
                           Alpha_context.manager_operation.Transaction.parameters :=
@@ -39416,9 +39333,7 @@ Module Forge.
                             entrypoint;
                           Alpha_context.manager_operation.Transaction.destination :=
                             destination
-                          |}
-                          :
-                            Alpha_context.manager_operation.Transaction))
+                          |})
                   ].
     
     Definition origination {D E G I K L a b c i o q : Set}
@@ -39450,7 +39365,7 @@ Module Forge.
         [
           Alpha_context.Manager
             (Alpha_context.Origination
-              ({|
+              {|
                 Alpha_context.manager_operation.Origination.delegate :=
                   delegatePubKey;
                 Alpha_context.manager_operation.Origination.script :=
@@ -39458,8 +39373,7 @@ Module Forge.
                 Alpha_context.manager_operation.Origination.credit :=
                   balance;
                 Alpha_context.manager_operation.Origination.preorigination :=
-                  None |}
-                : Alpha_context.manager_operation.Origination))
+                  None |})
         ].
     
     Definition delegation {D E G I K L a b c i o q : Set}
@@ -39502,7 +39416,7 @@ Module Forge.
     (operation : Alpha_context.contents)
     : Lwt.t (Error_monad.shell_tzresult MBytes.t) :=
     RPC_context.make_call0 S.operations ctxt block tt
-      (({| Operation.shell_header.branch := branch |} : Operation.shell_header),
+      ({| Operation.shell_header.branch := branch |},
         (Alpha_context.Contents_list (Alpha_context.Single operation))).
   
   Definition endorsement {D E G I K L a b c i o q : Set}
@@ -39523,8 +39437,7 @@ Module Forge.
     let '_ := function_parameter in
     operation ctxt __b_value branch
       (Alpha_context.Endorsement
-        ({| Alpha_context.contents.Endorsement.level := level |}
-          : Alpha_context.contents.Endorsement)).
+        {| Alpha_context.contents.Endorsement.level := level |}).
   
   Definition proposals {D E G I K L a b c i o q : Set}
     (ctxt :
@@ -39547,10 +39460,9 @@ Module Forge.
     let '_ := function_parameter in
     operation ctxt __b_value branch
       (Alpha_context.Proposals
-        ({| Alpha_context.contents.Proposals.source := source;
+        {| Alpha_context.contents.Proposals.source := source;
           Alpha_context.contents.Proposals.period := period;
-          Alpha_context.contents.Proposals.proposals := proposals |}
-          : Alpha_context.contents.Proposals)).
+          Alpha_context.contents.Proposals.proposals := proposals |}).
   
   Definition ballot {D E G I K L a b c i o q : Set}
     (ctxt :
@@ -39574,11 +39486,10 @@ Module Forge.
     let '_ := function_parameter in
     operation ctxt __b_value branch
       (Alpha_context.Ballot
-        ({| Alpha_context.contents.Ballot.source := source;
+        {| Alpha_context.contents.Ballot.source := source;
           Alpha_context.contents.Ballot.period := period;
           Alpha_context.contents.Ballot.proposal := proposal;
-          Alpha_context.contents.Ballot.ballot := ballot |}
-          : Alpha_context.contents.Ballot)).
+          Alpha_context.contents.Ballot.ballot := ballot |}).
   
   Definition seed_nonce_revelation {D E G I K L a b c i o q : Set}
     (ctxt :
@@ -39598,9 +39509,8 @@ Module Forge.
     let '_ := function_parameter in
     operation ctxt block branch
       (Alpha_context.Seed_nonce_revelation
-        ({| Alpha_context.contents.Seed_nonce_revelation.level := level;
-          Alpha_context.contents.Seed_nonce_revelation.nonce := __nonce_value |}
-          : Alpha_context.contents.Seed_nonce_revelation)).
+        {| Alpha_context.contents.Seed_nonce_revelation.level := level;
+          Alpha_context.contents.Seed_nonce_revelation.nonce := __nonce_value |}).
   
   Definition double_baking_evidence {D E G I K L a b c i o q : Set}
     (ctxt :
@@ -39620,9 +39530,8 @@ Module Forge.
     let '_ := function_parameter in
     operation ctxt block branch
       (Alpha_context.Double_baking_evidence
-        ({| Alpha_context.contents.Double_baking_evidence.bh1 := bh1;
-          Alpha_context.contents.Double_baking_evidence.bh2 := bh2 |}
-          : Alpha_context.contents.Double_baking_evidence)).
+        {| Alpha_context.contents.Double_baking_evidence.bh1 := bh1;
+          Alpha_context.contents.Double_baking_evidence.bh2 := bh2 |}).
   
   Definition double_endorsement_evidence {D E G I K L a b c i o q : Set}
     (ctxt :
@@ -39642,9 +39551,8 @@ Module Forge.
     let '_ := function_parameter in
     operation ctxt block branch
       (Alpha_context.Double_endorsement_evidence
-        ({| Alpha_context.contents.Double_endorsement_evidence.op1 := op1;
-          Alpha_context.contents.Double_endorsement_evidence.op2 := op2 |}
-          : Alpha_context.contents.Double_endorsement_evidence)).
+        {| Alpha_context.contents.Double_endorsement_evidence.op1 := op1;
+          Alpha_context.contents.Double_endorsement_evidence.op2 := op2 |}).
   
   Definition empty_proof_of_work_nonce : MBytes.t :=
     MBytes.of_string
@@ -39761,9 +39669,8 @@ Module Parse.
     : Lwt.t
       (Error_monad.shell_tzresult Alpha_context.Block_header.protocol_data) :=
     RPC_context.make_call0 S.block ctxt block tt
-      ({| Block_header.t.shell := shell;
-        Block_header.t.protocol_data := protocol_data |}
-        : Alpha_context.Block_header.raw).
+      {| Block_header.t.shell := shell;
+        Block_header.t.protocol_data := protocol_data |}.
 End Parse.
 
 Module S.
@@ -39781,7 +39688,7 @@ Module S.
     RPC_query.seal
       (RPC_query.op_pipeplus
         (RPC_query.__query_value
-          (fun offset =&gt; ({| level_query.offset := offset |} : level_query)))
+          (fun offset =&gt; {| level_query.offset := offset |}))
         (RPC_query.__field_value None &quot;offset&quot; RPC_arg.__int32_value
           (* ❌ Constant of type int32 is converted to int *)
           0 (fun __t_value =&gt; __t_value.(level_query.offset)))).
@@ -39856,7 +39763,7 @@ Definition current_level {D E G I K L a b c i o q : Set}
     end in
   fun block =&gt;
     RPC_context.make_call0 S.current_level ctxt block
-      ({| S.level_query.offset := offset |} : S.level_query) tt.
+      {| S.level_query.offset := offset |} tt.
 
 Definition levels_in_current_cycle {D E G I K L a b c i o q : Set}
   (ctxt :
@@ -39884,7 +39791,7 @@ Definition levels_in_current_cycle {D E G I K L a b c i o q : Set}
     end in
   fun block =&gt;
     RPC_context.make_call0 S.levels_in_current_cycle ctxt block
-      ({| S.level_query.offset := offset |} : S.level_query) tt.
+      {| S.level_query.offset := offset |} tt.
 </pre>
   </div>
 </div>
@@ -45355,7 +45262,7 @@ Parameter add_root_entrypoint :
     <h3>Level_repr</h3>
     <ul>
       <li>OCaml size: 187 lines</li>
-      <li>Coq size: 213 lines (+13% compared to&nbsp;OCaml)</li>
+      <li>Coq size: 212 lines (+13% compared to&nbsp;OCaml)</li>
     </ul>
   </div>
   <div class="col-md-6">
@@ -45686,11 +45593,10 @@ Definition encoding : Data_encoding.encoding t :=
       let
         '(level, level_position, cycle, cycle_position, voting_period,
           voting_period_position, expected_commitment) := function_parameter in
-      ({| t.level := level; t.level_position := level_position;
-        t.cycle := cycle; t.cycle_position := cycle_position;
-        t.voting_period := voting_period;
+      {| t.level := level; t.level_position := level_position; t.cycle := cycle;
+        t.cycle_position := cycle_position; t.voting_period := voting_period;
         t.voting_period_position := voting_period_position;
-        t.expected_commitment := expected_commitment |} : t)) None
+        t.expected_commitment := expected_commitment |}) None
     (Data_encoding.obj7
       (Data_encoding.req None
         (Some
@@ -45722,7 +45628,7 @@ Definition encoding : Data_encoding.encoding t :=
         &quot;expected_commitment&quot; Data_encoding.__bool_value)).
 
 Definition root_level (first_level : Raw_level_repr.t) : t :=
-  ({| t.level := first_level;
+  {| t.level := first_level;
     t.level_position :=
       (* ❌ Constant of type int32 is converted to int *)
       0; t.cycle := Cycle_repr.root;
@@ -45731,7 +45637,7 @@ Definition root_level (first_level : Raw_level_repr.t) : t :=
       0; t.voting_period := Voting_period_repr.root;
     t.voting_period_position :=
       (* ❌ Constant of type int32 is converted to int *)
-      0; t.expected_commitment := false |} : t).
+      0; t.expected_commitment := false |}.
 
 Definition from_raw_level
   (first_level : Raw_level_repr.raw_level) (blocks_per_cycle : int32)
@@ -45755,10 +45661,10 @@ Definition from_raw_level
     (|Compare.Int32|).(Compare.S.op_eq)
       (Int32.rem cycle_position blocks_per_commitment)
       (Int32.pred blocks_per_commitment) in
-  ({| t.level := level; t.level_position := level_position; t.cycle := cycle;
+  {| t.level := level; t.level_position := level_position; t.cycle := cycle;
     t.cycle_position := cycle_position; t.voting_period := voting_period;
     t.voting_period_position := voting_period_position;
-    t.expected_commitment := expected_commitment |} : t).
+    t.expected_commitment := expected_commitment |}.
 
 Definition diff (function_parameter : t) : t -&gt; int32 :=
   let '{| t.level := l1 |} := function_parameter in
@@ -46352,7 +46258,7 @@ Parameter last_allowed_fork_level : Raw_context.t -&gt; Raw_level_repr.t.
     <h3>Main</h3>
     <ul>
       <li>OCaml size: 380 lines</li>
-      <li>Coq size: 637 lines (+67% compared to&nbsp;OCaml)</li>
+      <li>Coq size: 628 lines (+65% compared to&nbsp;OCaml)</li>
     </ul>
   </div>
   <div class="col-md-6">
@@ -46832,15 +46738,15 @@ Definition validation_passes : list Updater.quota :=
   let max_anonymous_operations :=
     Pervasives.op_plus Alpha_context.Constants.max_revelations_per_block 100 in
   [
-    ({| Updater.quota.max_size := Pervasives.op_star 32 1024;
-      Updater.quota.max_op := Some 32 |} : Updater.quota);
-    ({| Updater.quota.max_size := Pervasives.op_star 32 1024;
-      Updater.quota.max_op := None |} : Updater.quota);
-    ({|
+    {| Updater.quota.max_size := Pervasives.op_star 32 1024;
+      Updater.quota.max_op := Some 32 |};
+    {| Updater.quota.max_size := Pervasives.op_star 32 1024;
+      Updater.quota.max_op := None |};
+    {|
       Updater.quota.max_size := Pervasives.op_star max_anonymous_operations 1024;
-      Updater.quota.max_op := Some max_anonymous_operations |} : Updater.quota);
-    ({| Updater.quota.max_size := Pervasives.op_star 512 1024;
-      Updater.quota.max_op := None |} : Updater.quota)
+      Updater.quota.max_op := Some max_anonymous_operations |};
+    {| Updater.quota.max_size := Pervasives.op_star 512 1024;
+      Updater.quota.max_op := None |}
   ].
 
 Definition rpc_services : RPC_directory.directory Updater.rpc_context :=
@@ -46961,15 +46867,13 @@ Definition begin_partial_application
     Apply.begin_application ctxt chain_id block_header predecessor_timestamp in
   let mode :=
     Partial_application
-      ({| validation_mode.Partial_application.block_header := block_header;
+      {| validation_mode.Partial_application.block_header := block_header;
         validation_mode.Partial_application.baker :=
           (|Signature.Public_key|).(S.SPublic_key.__hash_value) baker;
-        validation_mode.Partial_application.block_delay := block_delay |}
-        : validation_mode.Partial_application) in
+        validation_mode.Partial_application.block_delay := block_delay |} in
   Error_monad.__return
-    ({| validation_state.mode := mode; validation_state.chain_id := chain_id;
-      validation_state.ctxt := ctxt; validation_state.op_count := 0 |}
-      : validation_state).
+    {| validation_state.mode := mode; validation_state.chain_id := chain_id;
+      validation_state.ctxt := ctxt; validation_state.op_count := 0 |}.
 
 Definition begin_application
   (chain_id : (|Chain_id|).(S.HASH.t)) (ctxt : Context.t)
@@ -46988,15 +46892,13 @@ Definition begin_application
     Apply.begin_application ctxt chain_id block_header predecessor_timestamp in
   let mode :=
     Application
-      ({| validation_mode.Application.block_header := block_header;
+      {| validation_mode.Application.block_header := block_header;
         validation_mode.Application.baker :=
           (|Signature.Public_key|).(S.SPublic_key.__hash_value) baker;
-        validation_mode.Application.block_delay := block_delay |}
-        : validation_mode.Application) in
+        validation_mode.Application.block_delay := block_delay |} in
   Error_monad.__return
-    ({| validation_state.mode := mode; validation_state.chain_id := chain_id;
-      validation_state.ctxt := ctxt; validation_state.op_count := 0 |}
-      : validation_state).
+    {| validation_state.mode := mode; validation_state.chain_id := chain_id;
+      validation_state.ctxt := ctxt; validation_state.op_count := 0 |}.
 
 Definition begin_construction
   (chain_id : (|Chain_id|).(S.HASH.t)) (ctxt : Context.t)
@@ -47016,8 +46918,8 @@ Definition begin_construction
       let=? ctxt := Apply.begin_partial_construction ctxt in
       let mode :=
         Partial_construction
-          ({| validation_mode.Partial_construction.predecessor := predecessor |}
-            : validation_mode.Partial_construction) in
+          {| validation_mode.Partial_construction.predecessor := predecessor |}
+        in
       Error_monad.__return (mode, ctxt)
     | Some proto_header =&gt;
       let=? '(ctxt, protocol_data, baker, block_delay) :=
@@ -47027,17 +46929,15 @@ Definition begin_construction
         let baker := (|Signature.Public_key|).(S.SPublic_key.__hash_value) baker
           in
         Full_construction
-          ({| validation_mode.Full_construction.predecessor := predecessor;
+          {| validation_mode.Full_construction.predecessor := predecessor;
             validation_mode.Full_construction.protocol_data := protocol_data;
             validation_mode.Full_construction.baker := baker;
-            validation_mode.Full_construction.block_delay := block_delay |}
-            : validation_mode.Full_construction) in
+            validation_mode.Full_construction.block_delay := block_delay |} in
       Error_monad.__return (mode, ctxt)
     end in
   Error_monad.__return
-    ({| validation_state.mode := mode; validation_state.chain_id := chain_id;
-      validation_state.ctxt := ctxt; validation_state.op_count := 0 |}
-      : validation_state).
+    {| validation_state.mode := mode; validation_state.chain_id := chain_id;
+      validation_state.ctxt := ctxt; validation_state.op_count := 0 |}.
 
 Definition apply_operation (function_parameter : validation_state)
   : Alpha_context.packed_operation -&gt;
@@ -47075,9 +46975,8 @@ Definition apply_operation (function_parameter : validation_state)
             [Operation.shell_header ** Alpha_context.Operation.protocol_data]) _
           [shell, protocol_data] in
       let operation :=
-        ({| Alpha_context.operation.shell := shell;
-          Alpha_context.operation.protocol_data := protocol_data |}
-          : Alpha_context.operation) in
+        {| Alpha_context.operation.shell := shell;
+          Alpha_context.operation.protocol_data := protocol_data |} in
       let '(predecessor, baker) :=
         match mode with
         |
@@ -47144,14 +47043,13 @@ Definition finalize_block (function_parameter : validation_state)
     let ctxt := Alpha_context.finalize None ctxt in
     Error_monad.__return
       (ctxt,
-        ({| Apply_results.block_metadata.baker := baker;
+        {| Apply_results.block_metadata.baker := baker;
           Apply_results.block_metadata.level := level;
           Apply_results.block_metadata.voting_period_kind := voting_period_kind;
           Apply_results.block_metadata.nonce_hash := None;
           Apply_results.block_metadata.consumed_gas := Z.zero;
           Apply_results.block_metadata.deactivated := nil;
-          Apply_results.block_metadata.balance_updates := nil |}
-          : Apply_results.block_metadata))
+          Apply_results.block_metadata.balance_updates := nil |})
   |
     Partial_application {|
       validation_mode.Partial_application.block_header := block_header;
@@ -47169,14 +47067,13 @@ Definition finalize_block (function_parameter : validation_state)
     let ctxt := Alpha_context.finalize None ctxt in
     Error_monad.__return
       (ctxt,
-        ({| Apply_results.block_metadata.baker := baker;
+        {| Apply_results.block_metadata.baker := baker;
           Apply_results.block_metadata.level := level;
           Apply_results.block_metadata.voting_period_kind := voting_period_kind;
           Apply_results.block_metadata.nonce_hash := None;
           Apply_results.block_metadata.consumed_gas := Z.zero;
           Apply_results.block_metadata.deactivated := nil;
-          Apply_results.block_metadata.balance_updates := nil |}
-          : Apply_results.block_metadata))
+          Apply_results.block_metadata.balance_updates := nil |})
   |
     (Application {|
       validation_mode.Application.block_header := {|
@@ -53487,7 +53384,7 @@ Parameter check_hash : nonce -&gt; Nonce_hash.t -&gt; bool.
     <h3>Operation_repr</h3>
     <ul>
       <li>OCaml size: 858 lines</li>
-      <li>Coq size: 1474 lines (+71% compared to&nbsp;OCaml)</li>
+      <li>Coq size: 1422 lines (+65% compared to&nbsp;OCaml)</li>
     </ul>
   </div>
   <div class="col-md-6">
@@ -54707,9 +54604,8 @@ Definition pack (function_parameter : operation) : packed_operation :=
   let '{|
     operation.shell := shell; operation.protocol_data := protocol_data |} :=
     function_parameter in
-  ({| packed_operation.shell := shell;
-    packed_operation.protocol_data := Operation_data protocol_data |}
-    : packed_operation).
+  {| packed_operation.shell := shell;
+    packed_operation.protocol_data := Operation_data protocol_data |}.
 
 Inductive packed_internal_operation : Set :=
 | Internal_operation : internal_operation -&gt; packed_internal_operation.
@@ -54817,7 +54713,7 @@ Module Encoding.
     
     Definition reveal_case : case Kind.reveal :=
       MCase
-        ({| case.MCase.tag := 0; case.MCase.name := &quot;reveal&quot;;
+        {| case.MCase.tag := 0; case.MCase.name := &quot;reveal&quot;;
           case.MCase.encoding :=
             Data_encoding.obj1
               (Data_encoding.req None None &quot;public_key&quot;
@@ -54831,8 +54727,7 @@ Module Encoding.
           case.MCase.proj :=
             fun function_parameter =&gt;
               let 'Reveal pkh := function_parameter in
-              pkh; case.MCase.inj := fun pkh =&gt; Reveal pkh |}
-          : case.MCase (|Signature.Public_key|).(S.SPublic_key.t)).
+              pkh; case.MCase.inj := fun pkh =&gt; Reveal pkh |}.
     
     Definition entrypoint_encoding
       : Data_encoding.encoding (|Compare.String|).(Compare.S.t) :=
@@ -54864,7 +54759,7 @@ Module Encoding.
     
     Definition transaction_case : case Kind.transaction :=
       MCase
-        ({| case.MCase.tag := 1; case.MCase.name := &quot;transaction&quot;;
+        {| case.MCase.tag := 1; case.MCase.name := &quot;transaction&quot;;
           case.MCase.encoding :=
             Data_encoding.obj3
               (Data_encoding.req None None &quot;amount&quot; Tez_repr.encoding)
@@ -54908,20 +54803,14 @@ Module Encoding.
                 | Some (entrypoint, value) =&gt; (entrypoint, value)
                 end in
               Transaction
-                ({| manager_operation.Transaction.amount := amount;
+                {| manager_operation.Transaction.amount := amount;
                   manager_operation.Transaction.parameters := parameters;
                   manager_operation.Transaction.entrypoint := entrypoint;
-                  manager_operation.Transaction.destination := destination |}
-                  : manager_operation.Transaction) |}
-          :
-            case.MCase
-              (Tez_repr.t * Contract_repr.contract *
-                option
-                  ((|Compare.String|).(Compare.S.t) * Script_repr.lazy_expr))).
+                  manager_operation.Transaction.destination := destination |} |}.
     
     Definition origination_case : case Kind.origination :=
       MCase
-        ({| case.MCase.tag := 2; case.MCase.name := &quot;origination&quot;;
+        {| case.MCase.tag := 2; case.MCase.name := &quot;origination&quot;;
           case.MCase.encoding :=
             Data_encoding.obj3
               (Data_encoding.req None None &quot;balance&quot; Tez_repr.encoding)
@@ -54948,20 +54837,14 @@ Module Encoding.
             fun function_parameter =&gt;
               let '(credit, delegate, script) := function_parameter in
               Origination
-                ({| manager_operation.Origination.delegate := delegate;
+                {| manager_operation.Origination.delegate := delegate;
                   manager_operation.Origination.script := script;
                   manager_operation.Origination.credit := credit;
-                  manager_operation.Origination.preorigination := None |}
-                  : manager_operation.Origination) |}
-          :
-            case.MCase
-              (Tez_repr.t *
-                option (|Signature.Public_key_hash|).(S.SPublic_key_hash.t) *
-                Script_repr.t)).
+                  manager_operation.Origination.preorigination := None |} |}.
     
     Definition delegation_case : case Kind.delegation :=
       MCase
-        ({| case.MCase.tag := 3; case.MCase.name := &quot;delegation&quot;;
+        {| case.MCase.tag := 3; case.MCase.name := &quot;delegation&quot;;
           case.MCase.encoding :=
             Data_encoding.obj1
               (Data_encoding.opt None None &quot;delegate&quot;
@@ -54976,10 +54859,7 @@ Module Encoding.
             fun function_parameter =&gt;
               let 'Delegation __key_value := function_parameter in
               __key_value;
-          case.MCase.inj := fun __key_value =&gt; Delegation __key_value |}
-          :
-            case.MCase
-              (option (|Signature.Public_key_hash|).(S.SPublic_key_hash.t))).
+          case.MCase.inj := fun __key_value =&gt; Delegation __key_value |}.
     
     Definition encoding : Data_encoding.encoding packed_manager_operation :=
       let make {A : Set} (function_parameter : case A)
@@ -55056,7 +54936,7 @@ Module Encoding.
   
   Definition endorsement_case : case Kind.endorsement :=
     Case
-      ({| case.Case.tag := 0; case.Case.name := &quot;endorsement&quot;;
+      {| case.Case.tag := 0; case.Case.name := &quot;endorsement&quot;;
         case.Case.encoding := endorsement_encoding;
         case.Case.select :=
           fun function_parameter =&gt;
@@ -55070,10 +54950,7 @@ Module Encoding.
               function_parameter in
             level;
         case.Case.inj :=
-          fun level =&gt;
-            Endorsement
-              ({| contents.Endorsement.level := level |} : contents.Endorsement)
-        |} : case.Case Raw_level_repr.raw_level).
+          fun level =&gt; Endorsement {| contents.Endorsement.level := level |} |}.
   
   Definition endorsement_encoding : Data_encoding.encoding operation :=
     let make {A : Set} (function_parameter : case A)
@@ -55113,11 +54990,10 @@ Module Encoding.
           (shell, (contents, signature)))
         (fun function_parameter =&gt;
           let '(shell, (contents, signature)) := function_parameter in
-          ({| operation.shell := shell;
+          {| operation.shell := shell;
             operation.protocol_data :=
-              ({| protocol_data.contents := contents;
-                protocol_data.signature := signature |} : protocol_data) |}
-            : operation)) None
+              {| protocol_data.contents := contents;
+                protocol_data.signature := signature |} |}) None
         (Data_encoding.merge_objs Operation.shell_header_encoding
           (Data_encoding.obj2
             (Data_encoding.req None None &quot;operations&quot;
@@ -55130,7 +55006,7 @@ Module Encoding.
   
   Definition seed_nonce_revelation_case : case Kind.seed_nonce_revelation :=
     Case
-      ({| case.Case.tag := 1; case.Case.name := &quot;seed_nonce_revelation&quot;;
+      {| case.Case.tag := 1; case.Case.name := &quot;seed_nonce_revelation&quot;;
         case.Case.encoding :=
           Data_encoding.obj2
             (Data_encoding.req None None &quot;level&quot; Raw_level_repr.encoding)
@@ -55153,15 +55029,13 @@ Module Encoding.
           fun function_parameter =&gt;
             let '(level, __nonce_value) := function_parameter in
             Seed_nonce_revelation
-              ({| contents.Seed_nonce_revelation.level := level;
-                contents.Seed_nonce_revelation.nonce := __nonce_value |}
-                : contents.Seed_nonce_revelation) |}
-        : case.Case (Raw_level_repr.raw_level * Seed_repr.nonce)).
+              {| contents.Seed_nonce_revelation.level := level;
+                contents.Seed_nonce_revelation.nonce := __nonce_value |} |}.
   
   Definition double_endorsement_evidence_case
     : case Kind.double_endorsement_evidence :=
     Case
-      ({| case.Case.tag := 2; case.Case.name := &quot;double_endorsement_evidence&quot;;
+      {| case.Case.tag := 2; case.Case.name := &quot;double_endorsement_evidence&quot;;
         case.Case.encoding :=
           Data_encoding.obj2
             (Data_encoding.req None None &quot;op1&quot;
@@ -55186,14 +55060,12 @@ Module Encoding.
           fun function_parameter =&gt;
             let '(op1, op2) := function_parameter in
             Double_endorsement_evidence
-              ({| contents.Double_endorsement_evidence.op1 := op1;
-                contents.Double_endorsement_evidence.op2 := op2 |}
-                : contents.Double_endorsement_evidence) |}
-        : case.Case (operation * operation)).
+              {| contents.Double_endorsement_evidence.op1 := op1;
+                contents.Double_endorsement_evidence.op2 := op2 |} |}.
   
   Definition double_baking_evidence_case : case Kind.double_baking_evidence :=
     Case
-      ({| case.Case.tag := 3; case.Case.name := &quot;double_baking_evidence&quot;;
+      {| case.Case.tag := 3; case.Case.name := &quot;double_baking_evidence&quot;;
         case.Case.encoding :=
           Data_encoding.obj2
             (Data_encoding.req None None &quot;bh1&quot;
@@ -55218,16 +55090,12 @@ Module Encoding.
           fun function_parameter =&gt;
             let '(bh1, bh2) := function_parameter in
             Double_baking_evidence
-              ({| contents.Double_baking_evidence.bh1 := bh1;
-                contents.Double_baking_evidence.bh2 := bh2 |}
-                : contents.Double_baking_evidence) |}
-        :
-          case.Case
-            (Block_header_repr.block_header * Block_header_repr.block_header)).
+              {| contents.Double_baking_evidence.bh1 := bh1;
+                contents.Double_baking_evidence.bh2 := bh2 |} |}.
   
   Definition activate_account_case : case Kind.activate_account :=
     Case
-      ({| case.Case.tag := 4; case.Case.name := &quot;activate_account&quot;;
+      {| case.Case.tag := 4; case.Case.name := &quot;activate_account&quot;;
         case.Case.encoding :=
           Data_encoding.obj2
             (Data_encoding.req None None &quot;pkh&quot;
@@ -55252,17 +55120,13 @@ Module Encoding.
           fun function_parameter =&gt;
             let '(id, activation_code) := function_parameter in
             Activate_account
-              ({| contents.Activate_account.id := id;
+              {| contents.Activate_account.id := id;
                 contents.Activate_account.activation_code := activation_code |}
-                : contents.Activate_account) |}
-        :
-          case.Case
-            ((|Ed25519|).(S.SIGNATURE.Public_key_hash).(S.SPublic_key_hash.t) *
-              Blinded_public_key_hash.activation_code)).
+        |}.
   
   Definition proposals_case : case Kind.proposals :=
     Case
-      ({| case.Case.tag := 5; case.Case.name := &quot;proposals&quot;;
+      {| case.Case.tag := 5; case.Case.name := &quot;proposals&quot;;
         case.Case.encoding :=
           Data_encoding.obj3
             (Data_encoding.req None None &quot;source&quot;
@@ -55290,19 +55154,13 @@ Module Encoding.
           fun function_parameter =&gt;
             let '(source, period, proposals) := function_parameter in
             Proposals
-              ({| contents.Proposals.source := source;
+              {| contents.Proposals.source := source;
                 contents.Proposals.period := period;
-                contents.Proposals.proposals := proposals |}
-                : contents.Proposals) |}
-        :
-          case.Case
-            ((|Signature.Public_key_hash|).(S.SPublic_key_hash.t) *
-              Voting_period_repr.voting_period *
-              list (|Protocol_hash|).(S.HASH.t))).
+                contents.Proposals.proposals := proposals |} |}.
   
   Definition ballot_case : case Kind.ballot :=
     Case
-      ({| case.Case.tag := 6; case.Case.name := &quot;ballot&quot;;
+      {| case.Case.tag := 6; case.Case.name := &quot;ballot&quot;;
         case.Case.encoding :=
           Data_encoding.obj4
             (Data_encoding.req None None &quot;source&quot;
@@ -55331,15 +55189,10 @@ Module Encoding.
           fun function_parameter =&gt;
             let '(source, period, proposal, ballot) := function_parameter in
             Ballot
-              ({| contents.Ballot.source := source;
+              {| contents.Ballot.source := source;
                 contents.Ballot.period := period;
                 contents.Ballot.proposal := proposal;
-                contents.Ballot.ballot := ballot |} : contents.Ballot) |}
-        :
-          case.Case
-            ((|Signature.Public_key_hash|).(S.SPublic_key_hash.t) *
-              Voting_period_repr.voting_period * (|Protocol_hash|).(S.HASH.t) *
-              Vote_repr.ballot)).
+                contents.Ballot.ballot := ballot |} |}.
   
   Definition manager_encoding
     : Data_encoding.encoding
@@ -55377,13 +55230,12 @@ Module Encoding.
       in
     fun operation =&gt;
       Manager_operation
-        ({| contents.Manager_operation.source := source;
+        {| contents.Manager_operation.source := source;
           contents.Manager_operation.fee := fee;
           contents.Manager_operation.counter := counter;
           contents.Manager_operation.operation := operation;
           contents.Manager_operation.gas_limit := gas_limit;
-          contents.Manager_operation.storage_limit := storage_limit |}
-          : contents.Manager_operation).
+          contents.Manager_operation.storage_limit := storage_limit |}.
   
   Definition make_manager_case {A : Set}
     (tag : int) (function_parameter : Manager_operations.case A)
@@ -55393,7 +55245,7 @@ Module Encoding.
       existT (A := Set)
         (fun __MCase_'a =&gt; Manager_operations.case.MCase __MCase_'a) _ mcase in
     Case
-      ({| case.Case.tag := tag;
+      {| case.Case.tag := tag;
         case.Case.name := mcase.(Manager_operations.case.MCase.name);
         case.Case.encoding :=
           Data_encoding.merge_objs manager_encoding
@@ -55432,11 +55284,7 @@ Module Encoding.
         case.Case.inj :=
           fun function_parameter =&gt;
             let '(op, contents) := function_parameter in
-            rebuild op (mcase.(Manager_operations.case.MCase.inj) contents) |}
-        :
-          case.Case
-            ((Signature.public_key_hash * Tez_repr.tez * counter * Z.t * Z.t) *
-              __MCase_'a)).
+            rebuild op (mcase.(Manager_operations.case.MCase.inj) contents) |}.
   
   Definition reveal_case : case Kind.manager :=
     make_manager_case 107 Manager_operations.reveal_case.
@@ -55536,8 +55384,8 @@ Module Encoding.
                 [contents_list ** option Signature.t]) _ [contents, signature]
             in
           Operation_data
-            ({| protocol_data.contents := contents;
-              protocol_data.signature := signature |} : protocol_data)) None
+            {| protocol_data.contents := contents;
+              protocol_data.signature := signature |}) None
         (Data_encoding.obj2
           (Data_encoding.req None None &quot;contents&quot; contents_list_encoding)
           (Data_encoding.req None None &quot;signature&quot; optional_signature_encoding))).
@@ -55552,9 +55400,8 @@ Module Encoding.
         (shell, protocol_data))
       (fun function_parameter =&gt;
         let '(shell, protocol_data) := function_parameter in
-        ({| packed_operation.shell := shell;
-          packed_operation.protocol_data := protocol_data |} : packed_operation))
-      None
+        {| packed_operation.shell := shell;
+          packed_operation.protocol_data := protocol_data |}) None
       (Data_encoding.merge_objs Operation.shell_header_encoding
         protocol_data_encoding).
   
@@ -55594,10 +55441,9 @@ Module Encoding.
                 [Contract_repr.contract ** int ** manager_operation]) _
               [source, __nonce_value, operation] in
           Internal_operation
-            ({| internal_operation.source := source;
+            {| internal_operation.source := source;
               internal_operation.operation := operation;
-              internal_operation.nonce := __nonce_value |} : internal_operation))
-        None
+              internal_operation.nonce := __nonce_value |}) None
         (Data_encoding.merge_objs
           (Data_encoding.obj2
             (Data_encoding.req None None &quot;source&quot; Contract_repr.encoding)
@@ -55634,7 +55480,7 @@ Definition __raw_value (function_parameter : operation) : Operation.t :=
   let proto :=
     Data_encoding.Binary.to_bytes_exn protocol_data_encoding
       (Operation_data protocol_data) in
-  ({| Operation.t.shell := shell; Operation.t.proto := proto |} : Operation.t).
+  {| Operation.t.shell := shell; Operation.t.proto := proto |}.
 
 Definition acceptable_passes (op : packed_operation) : list int :=
   let 'Operation_data protocol_data := op.(packed_operation.protocol_data) in
@@ -55724,15 +55570,14 @@ Definition __hash_value (o : operation) : (|Operation_hash|).(S.HASH.t) :=
     Data_encoding.Binary.to_bytes_exn protocol_data_encoding
       (Operation_data o.(operation.protocol_data)) in
   Operation.__hash_value
-    ({| raw.shell := o.(operation.shell); raw.proto := proto |} : Operation.t).
+    {| raw.shell := o.(operation.shell); raw.proto := proto |}.
 
 Definition hash_packed (o : packed_operation) : (|Operation_hash|).(S.HASH.t) :=
   let proto :=
     Data_encoding.Binary.to_bytes_exn protocol_data_encoding
       o.(packed_operation.protocol_data) in
   Operation.__hash_value
-    ({| raw.shell := o.(packed_operation.shell); raw.proto := proto |}
-      : Operation.t).
+    {| raw.shell := o.(packed_operation.shell); raw.proto := proto |}.
 
 Inductive eq : Set :=
 | Eq : eq.
@@ -56855,12 +56700,12 @@ Definition bootstrap_account_encoding
           end)
         (fun function_parameter =&gt;
           let '(public_key, amount) := function_parameter in
-          ({|
+          {|
             bootstrap_account.public_key_hash :=
               (|Signature.Public_key|).(S.SPublic_key.__hash_value)
                 public_key;
             bootstrap_account.public_key := Some public_key;
-            bootstrap_account.amount := amount |} : bootstrap_account));
+            bootstrap_account.amount := amount |});
       Data_encoding.__case_value &quot;Public_key_unknown&quot; None (Data_encoding.Tag 1)
         (Data_encoding.tup2
           (|Signature.Public_key_hash|).(S.SPublic_key_hash.encoding)
@@ -56876,9 +56721,9 @@ Definition bootstrap_account_encoding
           end)
         (fun function_parameter =&gt;
           let '(public_key_hash, amount) := function_parameter in
-          ({| bootstrap_account.public_key_hash := public_key_hash;
+          {| bootstrap_account.public_key_hash := public_key_hash;
             bootstrap_account.public_key := None;
-            bootstrap_account.amount := amount |} : bootstrap_account))
+            bootstrap_account.amount := amount |})
     ].
 
 Definition bootstrap_contract_encoding
@@ -56893,9 +56738,9 @@ Definition bootstrap_contract_encoding
       (delegate, amount, script))
     (fun function_parameter =&gt;
       let '(delegate, amount, script) := function_parameter in
-      ({| bootstrap_contract.delegate := delegate;
+      {| bootstrap_contract.delegate := delegate;
         bootstrap_contract.amount := amount; bootstrap_contract.script := script
-        |} : bootstrap_contract)) None
+        |}) None
     (Data_encoding.obj3
       (Data_encoding.req None None &quot;delegate&quot;
         (|Signature.Public_key_hash|).(S.SPublic_key_hash.encoding))
@@ -56920,11 +56765,11 @@ Definition encoding : Data_encoding.encoding t :=
         '((bootstrap_accounts, bootstrap_contracts, commitments,
           security_deposit_ramp_up_cycles, no_reward_cycles), constants) :=
         function_parameter in
-      ({| t.bootstrap_accounts := bootstrap_accounts;
+      {| t.bootstrap_accounts := bootstrap_accounts;
         t.bootstrap_contracts := bootstrap_contracts;
         t.commitments := commitments; t.constants := constants;
         t.security_deposit_ramp_up_cycles := security_deposit_ramp_up_cycles;
-        t.no_reward_cycles := no_reward_cycles |} : t)) None
+        t.no_reward_cycles := no_reward_cycles |}) None
     (Data_encoding.merge_objs
       (Data_encoding.obj5
         (Data_encoding.req None None &quot;bootstrap_accounts&quot;
@@ -58192,7 +58037,7 @@ Definition Make :=
     <h3>Raw_context</h3>
     <ul>
       <li>OCaml size: 754 lines</li>
-      <li>Coq size: 954 lines (+26% compared to&nbsp;OCaml)</li>
+      <li>Coq size: 953 lines (+26% compared to&nbsp;OCaml)</li>
     </ul>
   </div>
   <div class="col-md-6">
@@ -59366,8 +59211,7 @@ Definition set_gas_limit (ctxt : t) (remaining : Z.t) : t :=
   t.with_internal_gas Gas_limit_repr.internal_gas_zero
     (t.with_operation_gas
       (Gas_limit_repr.Limited
-        ({| Gas_limit_repr.t.Limited.remaining := remaining |}
-          : Gas_limit_repr.t.Limited)) ctxt).
+        {| Gas_limit_repr.t.Limited.remaining := remaining |}) ctxt).
 
 Definition set_gas_unlimited (ctxt : t) : t :=
   t.with_operation_gas Gas_limit_repr.Unaccounted ctxt.
@@ -59697,7 +59541,7 @@ Definition prepare
       constants.(Constants_repr.parametric.blocks_per_voting_period)
       constants.(Constants_repr.parametric.blocks_per_commitment) level in
   Error_monad.__return
-    ({| t.context := ctxt; t.constants := constants;
+    {| t.context := ctxt; t.constants := constants;
       t.first_level := first_level; t.level := level;
       t.predecessor_timestamp := predecessor_timestamp;
       t.timestamp := timestamp; t.fitness := fitness;
@@ -59714,7 +59558,7 @@ Definition prepare
       t.storage_space_to_pay := None; t.allocated_contracts := None;
       t.origination_nonce := None; t.temporary_big_map := Z.sub Z.zero Z.one;
       t.internal_nonce := 0; t.internal_nonces_used := (|Int_set|).(S.SET.empty)
-      |} : t).
+      |}.
 
 Inductive previous_protocol : Set :=
 | Genesis : Parameters_repr.t -&gt; previous_protocol
@@ -63507,7 +63351,7 @@ Parameter logxor : num -&gt; num -&gt; num.
     <h3>Script_interpreter</h3>
     <ul>
       <li>OCaml size: 1625 lines</li>
-      <li>Coq size: 2482 lines (+52% compared to&nbsp;OCaml)</li>
+      <li>Coq size: 2470 lines (+52% compared to&nbsp;OCaml)</li>
     </ul>
   </div>
   <div class="col-md-6">
@@ -66712,44 +66556,40 @@ Fixpoint step
         (let arg_stack_ty :=
           Script_typed_ir.Item_t arg_ty Script_typed_ir.Empty_t None in
         let const_descr :=
-          ({|
+          {|
             Script_typed_ir.descr.loc :=
               __descr_value.(Script_typed_ir.descr.loc);
             Script_typed_ir.descr.bef := arg_stack_ty;
             Script_typed_ir.descr.aft :=
               Script_typed_ir.Item_t capture_ty arg_stack_ty None;
-            Script_typed_ir.descr.instr := Script_typed_ir.Const capture |}
-            : Script_typed_ir.descr) in
+            Script_typed_ir.descr.instr := Script_typed_ir.Const capture |} in
         let pair_descr :=
-          ({|
+          {|
             Script_typed_ir.descr.loc :=
               __descr_value.(Script_typed_ir.descr.loc);
             Script_typed_ir.descr.bef :=
               Script_typed_ir.Item_t capture_ty arg_stack_ty None;
             Script_typed_ir.descr.aft :=
               Script_typed_ir.Item_t full_arg_ty Script_typed_ir.Empty_t None;
-            Script_typed_ir.descr.instr := Script_typed_ir.Cons_pair |}
-            : Script_typed_ir.descr) in
+            Script_typed_ir.descr.instr := Script_typed_ir.Cons_pair |} in
         let seq_descr :=
-          ({|
+          {|
             Script_typed_ir.descr.loc :=
               __descr_value.(Script_typed_ir.descr.loc);
             Script_typed_ir.descr.bef := arg_stack_ty;
             Script_typed_ir.descr.aft :=
               Script_typed_ir.Item_t full_arg_ty Script_typed_ir.Empty_t None;
             Script_typed_ir.descr.instr :=
-              Script_typed_ir.Seq const_descr pair_descr |}
-            : Script_typed_ir.descr) in
+              Script_typed_ir.Seq const_descr pair_descr |} in
         let full_descr :=
-          ({|
+          {|
             Script_typed_ir.descr.loc :=
               __descr_value.(Script_typed_ir.descr.loc);
             Script_typed_ir.descr.bef := arg_stack_ty;
             Script_typed_ir.descr.aft :=
               __descr_value.(Script_typed_ir.descr.aft);
             Script_typed_ir.descr.instr :=
-              Script_typed_ir.Seq seq_descr __descr_value |}
-            : Script_typed_ir.descr) in
+              Script_typed_ir.Seq seq_descr __descr_value |} in
         let full_expr :=
           Micheline.Seq 0
             [
@@ -66758,9 +66598,8 @@ Fixpoint step
               Micheline.Prim 0 Alpha_context.Script.I_PAIR nil nil;
               expr
             ] in
-        let lam' :=
-          ({| Script_typed_ir.lambda.lam := (full_descr, full_expr) |}
-            : Script_typed_ir.lambda) in
+        let lam' := {| Script_typed_ir.lambda.lam := (full_descr, full_expr) |}
+          in
         logged_return ((Item lam' rest), ctxt))
       | _ =&gt;
         obj_magic (Lwt.t (Error_monad.tzresult (stack * Alpha_context.context)))
@@ -67011,24 +66850,24 @@ Fixpoint step
           __p_value in
       let operation :=
         Alpha_context.Transaction
-          ({| Alpha_context.manager_operation.Transaction.amount := amount;
+          {| Alpha_context.manager_operation.Transaction.amount := amount;
             Alpha_context.manager_operation.Transaction.parameters :=
               Alpha_context.Script.__lazy_expr_value
                 (Micheline.strip_locations __p_value);
             Alpha_context.manager_operation.Transaction.entrypoint := entrypoint;
             Alpha_context.manager_operation.Transaction.destination :=
-              destination |} : Alpha_context.manager_operation.Transaction) in
+              destination |} in
       let=? '(ctxt, __nonce_value) :=
         Lwt.__return (Alpha_context.fresh_internal_nonce ctxt) in
       logged_return
         ((Item
           ((Alpha_context.Internal_operation
-            ({|
+            {|
               Alpha_context.internal_operation.source :=
                 step_constants.(step_constants.self);
               Alpha_context.internal_operation.operation := operation;
-              Alpha_context.internal_operation.nonce := __nonce_value |}
-              : Alpha_context.internal_operation)), big_map_diff) rest), ctxt))
+              Alpha_context.internal_operation.nonce := __nonce_value |}),
+            big_map_diff) rest), ctxt))
     
     |
       (Script_typed_ir.Create_account,
@@ -67054,30 +66893,28 @@ Fixpoint step
         Script_repr.__lazy_expr_value
           (Micheline.strip_locations (Micheline.Bytes 0 manager_bytes)) in
       let script :=
-        ({|
+        {|
           Alpha_context.Script.t.code :=
             Alpha_context.Script.Legacy_support.manager_script_code;
-          Alpha_context.Script.t.storage := storage |} : Alpha_context.Script.t)
-        in
+          Alpha_context.Script.t.storage := storage |} in
       let operation :=
         Alpha_context.Origination
-          ({| Alpha_context.manager_operation.Origination.delegate := delegate;
+          {| Alpha_context.manager_operation.Origination.delegate := delegate;
             Alpha_context.manager_operation.Origination.script := script;
             Alpha_context.manager_operation.Origination.credit := credit;
             Alpha_context.manager_operation.Origination.preorigination :=
-              Some contract |} : Alpha_context.manager_operation.Origination) in
+              Some contract |} in
       let=? '(ctxt, __nonce_value) :=
         Lwt.__return (Alpha_context.fresh_internal_nonce ctxt) in
       logged_return
         ((Item
           ((Alpha_context.Internal_operation
-            ({|
+            {|
               Alpha_context.internal_operation.source :=
                 step_constants.(step_constants.self);
               Alpha_context.internal_operation.operation := operation;
-              Alpha_context.internal_operation.nonce := __nonce_value |}
-              : Alpha_context.internal_operation)), (None (A := unit)))
-          (Item (contract, &quot;default&quot;) rest)), ctxt))
+              Alpha_context.internal_operation.nonce := __nonce_value |}),
+            (None (A := unit))) (Item (contract, &quot;default&quot;) rest)), ctxt))
     
     | (Script_typed_ir.Implicit_account, Item __key_value rest, _) =&gt;
       let 'existT _ __175 [__key_value, rest] :=
@@ -67167,26 +67004,24 @@ Fixpoint step
         Alpha_context.Contract.fresh_contract_from_current_nonce ctxt in
       let operation :=
         Alpha_context.Origination
-          ({| Alpha_context.manager_operation.Origination.delegate := delegate;
+          {| Alpha_context.manager_operation.Origination.delegate := delegate;
             Alpha_context.manager_operation.Origination.script :=
-              ({| Alpha_context.Script.t.code := code;
-                Alpha_context.Script.t.storage := storage |}
-                : Alpha_context.Script.t);
+              {| Alpha_context.Script.t.code := code;
+                Alpha_context.Script.t.storage := storage |};
             Alpha_context.manager_operation.Origination.credit := credit;
             Alpha_context.manager_operation.Origination.preorigination :=
-              Some contract |} : Alpha_context.manager_operation.Origination) in
+              Some contract |} in
       let=? '(ctxt, __nonce_value) :=
         Lwt.__return (Alpha_context.fresh_internal_nonce ctxt) in
       logged_return
         ((Item
           ((Alpha_context.Internal_operation
-            ({|
+            {|
               Alpha_context.internal_operation.source :=
                 step_constants.(step_constants.self);
               Alpha_context.internal_operation.operation := operation;
-              Alpha_context.internal_operation.nonce := __nonce_value |}
-              : Alpha_context.internal_operation)), big_map_diff)
-          (Item (contract, &quot;default&quot;) rest)), ctxt))
+              Alpha_context.internal_operation.nonce := __nonce_value |}),
+            big_map_diff) (Item (contract, &quot;default&quot;) rest)), ctxt))
     
     |
       (Script_typed_ir.Create_contract_2 storage_type param_type {|
@@ -67240,29 +67075,27 @@ Fixpoint step
         Alpha_context.Contract.fresh_contract_from_current_nonce ctxt in
       let operation :=
         Alpha_context.Origination
-          ({| Alpha_context.manager_operation.Origination.delegate := delegate;
+          {| Alpha_context.manager_operation.Origination.delegate := delegate;
             Alpha_context.manager_operation.Origination.script :=
-              ({|
+              {|
                 Alpha_context.Script.t.code :=
                   Alpha_context.Script.__lazy_expr_value code;
                 Alpha_context.Script.t.storage :=
-                  Alpha_context.Script.__lazy_expr_value storage |}
-                : Alpha_context.Script.t);
+                  Alpha_context.Script.__lazy_expr_value storage |};
             Alpha_context.manager_operation.Origination.credit := credit;
             Alpha_context.manager_operation.Origination.preorigination :=
-              Some contract |} : Alpha_context.manager_operation.Origination) in
+              Some contract |} in
       let=? '(ctxt, __nonce_value) :=
         Lwt.__return (Alpha_context.fresh_internal_nonce ctxt) in
       logged_return
         ((Item
           ((Alpha_context.Internal_operation
-            ({|
+            {|
               Alpha_context.internal_operation.source :=
                 step_constants.(step_constants.self);
               Alpha_context.internal_operation.operation := operation;
-              Alpha_context.internal_operation.nonce := __nonce_value |}
-              : Alpha_context.internal_operation)), big_map_diff)
-          (Item (contract, &quot;default&quot;) rest)), ctxt))
+              Alpha_context.internal_operation.nonce := __nonce_value |}),
+            big_map_diff) (Item (contract, &quot;default&quot;) rest)), ctxt))
     
     | (Script_typed_ir.Set_delegate, Item delegate rest, _) =&gt;
       let 'existT _ __180 [delegate, rest] :=
@@ -67279,13 +67112,12 @@ Fixpoint step
       logged_return
         ((Item
           ((Alpha_context.Internal_operation
-            ({|
+            {|
               Alpha_context.internal_operation.source :=
                 step_constants.(step_constants.self);
               Alpha_context.internal_operation.operation := operation;
-              Alpha_context.internal_operation.nonce := __nonce_value |}
-              : Alpha_context.internal_operation)), (None (A := unit))) rest),
-          ctxt))
+              Alpha_context.internal_operation.nonce := __nonce_value |}),
+            (None (A := unit))) rest), ctxt))
     
     | (Script_typed_ir.Balance, rest, _) =&gt;
       let rest := obj_magic stack rest in
@@ -67635,9 +67467,9 @@ Definition trace
       (Micheline.root parameter) in
   let trace := List.rev (Pervasives.op_exclamation log) in
   Error_monad.__return
-    (({| execution_result.ctxt := ctxt; execution_result.storage := storage;
+    ({| execution_result.ctxt := ctxt; execution_result.storage := storage;
       execution_result.big_map_diff := big_map_diff;
-      execution_result.operations := operations |} : execution_result), trace).
+      execution_result.operations := operations |}, trace).
 
 Definition execute_wrapper
   (ctxt : Alpha_context.context) (mode : Script_ir_translator.unparsing_mode)
@@ -67649,9 +67481,9 @@ Definition execute_wrapper
     execute None ctxt mode step_constants entrypoint script
       (Micheline.root parameter) in
   Error_monad.__return
-    ({| execution_result.ctxt := ctxt; execution_result.storage := storage;
+    {| execution_result.ctxt := ctxt; execution_result.storage := storage;
       execution_result.big_map_diff := big_map_diff;
-      execution_result.operations := operations |} : execution_result).
+      execution_result.operations := operations |}.
 </pre>
   </div>
 </div>
@@ -69500,11 +69332,11 @@ Parameter parse_var_type_annot :
     <h3>Script_ir_translator</h3>
     <ul>
       <li>OCaml size: 5995 lines</li>
-      <li>Coq size: 8723 lines (+45% compared to&nbsp;OCaml)</li>
+      <li>Coq size: 8695 lines (+45% compared to&nbsp;OCaml)</li>
     </ul>
   </div>
   <div class="col-md-6">
-    <a href="#script_ir_translator.ml"><code>script_ir_translator.ml</code></a>&nbsp;<span class="label label-warning">184 warnings</span>
+    <a href="#script_ir_translator.ml"><code>script_ir_translator.ml</code></a>&nbsp;<span class="label label-warning">182 warnings</span>
     
     <pre>(*****************************************************************************)
 (*                                                                           *)
@@ -75523,16 +75355,12 @@ let hash_data ctxt typ data =
 (* ---------------- Big map -------------------------------------------------*)
 
 let empty_big_map tk tv =
-  <abbr class="mark-warning" title="The placeholders `_` in types are not handled
-
-——————————
-
-The placeholders `_` in types are not handled">{
+  {
     id = None;
     diff = empty_map tk;
     key_type = ty_of_comparable_ty tk;
     value_type = tv;
-  }</abbr>
+  }
 
 let big_map_mem ctxt key {id; diff; key_type; _} =
   match (map_get key diff, id) with
@@ -77958,9 +77786,7 @@ Definition merge_branches {a b bef : Set}
       : Script_typed_ir.descr :=
       branch (descrt ret) (descrf ret) in
     Error_monad.__return
-      ((Failed
-        ({| judgement.Failed.descr := __descr_value |} : judgement.Failed)),
-        ctxt)
+      ((Failed {| judgement.Failed.descr := __descr_value |}), ctxt)
   | (Typed dbt, Failed {| judgement.Failed.descr := descrf |}) =&gt;
     let 'existT _ __Typed_'aft2 [dbt, descrf] :=
       existT (A := Set)
@@ -79548,11 +79374,10 @@ Fixpoint parse_data {a : Set}
       (parse_items type_logger loc ctxt expr tk tv vs (fun x =&gt; Some x))
       (fun function_parameter =&gt;
         let '(diff, ctxt) := function_parameter in
-        (({| Script_typed_ir.big_map.id := None;
+        ({| Script_typed_ir.big_map.id := None;
           Script_typed_ir.big_map.diff := diff;
           Script_typed_ir.big_map.key_type := ty_of_comparable_ty tk;
-          Script_typed_ir.big_map.value_type := tv |}
-          : Script_typed_ir.big_map __36 __37), ctxt))
+          Script_typed_ir.big_map.value_type := tv |}, ctxt))
   
   | (Script_typed_ir.Big_map_t tk tv _ty_name, Micheline.Int loc id) =&gt;
     let 'existT _ [__38, __39] [tk, tv, _ty_name, loc, id] :=
@@ -79582,11 +79407,10 @@ Fixpoint parse_data {a : Set}
         let? 'Eq := comparable_ty_eq ctxt tk btk in
         let? '(Eq, ctxt) := ty_eq ctxt tv btv in
         Error_monad.ok
-          (({| Script_typed_ir.big_map.id := Some id;
+          ({| Script_typed_ir.big_map.id := Some id;
             Script_typed_ir.big_map.diff := empty_map tk;
             Script_typed_ir.big_map.key_type := ty_of_comparable_ty tk;
-            Script_typed_ir.big_map.value_type := tv |}
-            : Script_typed_ir.big_map __38 __39), ctxt))
+            Script_typed_ir.big_map.value_type := tv |}, ctxt))
     end
   
   | (Script_typed_ir.Big_map_t _tk _tv _, expr) =&gt;
@@ -79649,8 +79473,8 @@ with parse_returning
           let=? '(_ret, ctxt) :=
             Lwt.__return (merge_types legacy ctxt loc ty ret) in
           Error_monad.__return
-            (({| Script_typed_ir.lambda.lam := (__descr_value, script_instr) |}
-              : Script_typed_ir.lambda), ctxt))
+            ({| Script_typed_ir.lambda.lam := (__descr_value, script_instr) |},
+              ctxt))
       |
         (Typed {|
           Script_typed_ir.descr.loc := loc;
@@ -79666,11 +79490,11 @@ with parse_returning
         Error_monad.fail extensible_type_value
       | (Failed {| judgement.Failed.descr := __descr_value |}, ctxt) =&gt;
         Error_monad.__return
-          (({|
+          ({|
             Script_typed_ir.lambda.lam :=
               ((__descr_value
                 (Script_typed_ir.Item_t ret Script_typed_ir.Empty_t None)),
-                script_instr) |} : Script_typed_ir.lambda), ctxt)
+                script_instr) |}, ctxt)
       end
 
 with parse_int32
@@ -79804,10 +79628,10 @@ with parse_instr {bef : Set}
         (Alpha_context.Gas.consume ctxt (Typecheck_costs.instr instr)) in
     __return ctxt
       (Typed
-        ({| Script_typed_ir.descr.loc := loc;
+        {| Script_typed_ir.descr.loc := loc;
           Script_typed_ir.descr.bef := stack_ty;
           Script_typed_ir.descr.aft := aft; Script_typed_ir.descr.instr := instr
-          |} : Script_typed_ir.descr)) in
+          |}) in
   let=? ctxt :=
     Lwt.__return (Alpha_context.Gas.consume ctxt Typecheck_costs.cycle) in
   match
@@ -80134,13 +79958,11 @@ with parse_instr {bef : Set}
         (Script_typed_ir.Item_t __t_value rest annot) in
     let branch (ibt : Script_typed_ir.descr) (ibf : Script_typed_ir.descr)
       : Script_typed_ir.descr :=
-      ({| Script_typed_ir.descr.loc := loc; Script_typed_ir.descr.bef := bef;
+      {| Script_typed_ir.descr.loc := loc; Script_typed_ir.descr.bef := bef;
         Script_typed_ir.descr.aft := ibt.(Script_typed_ir.descr.aft);
-        Script_typed_ir.descr.instr := Script_typed_ir.If_none ibt ibf |}
-        : Script_typed_ir.descr) in
+        Script_typed_ir.descr.instr := Script_typed_ir.If_none ibt ibf |} in
     let=? '(judgement, ctxt) :=
-      merge_branches legacy ctxt loc btr bfr
-        ({| branch.branch := branch |} : branch) in
+      merge_branches legacy ctxt loc btr bfr {| branch.branch := branch |} in
     __return ctxt judgement
   
   |
@@ -80305,13 +80127,11 @@ with parse_instr {bef : Set}
         (Script_typed_ir.Item_t tr rest right_annot) in
     let branch (ibt : Script_typed_ir.descr) (ibf : Script_typed_ir.descr)
       : Script_typed_ir.descr :=
-      ({| Script_typed_ir.descr.loc := loc; Script_typed_ir.descr.bef := bef;
+      {| Script_typed_ir.descr.loc := loc; Script_typed_ir.descr.bef := bef;
         Script_typed_ir.descr.aft := ibt.(Script_typed_ir.descr.aft);
-        Script_typed_ir.descr.instr := Script_typed_ir.If_left ibt ibf |}
-        : Script_typed_ir.descr) in
+        Script_typed_ir.descr.instr := Script_typed_ir.If_left ibt ibf |} in
     let=? '(judgement, ctxt) :=
-      merge_branches legacy ctxt loc btr bfr
-        ({| branch.branch := branch |} : branch) in
+      merge_branches legacy ctxt loc btr bfr {| branch.branch := branch |} in
     __return ctxt judgement
   
   |
@@ -80391,13 +80211,11 @@ with parse_instr {bef : Set}
       in
     let branch (ibt : Script_typed_ir.descr) (ibf : Script_typed_ir.descr)
       : Script_typed_ir.descr :=
-      ({| Script_typed_ir.descr.loc := loc; Script_typed_ir.descr.bef := bef;
+      {| Script_typed_ir.descr.loc := loc; Script_typed_ir.descr.bef := bef;
         Script_typed_ir.descr.aft := ibt.(Script_typed_ir.descr.aft);
-        Script_typed_ir.descr.instr := Script_typed_ir.If_cons ibt ibf |}
-        : Script_typed_ir.descr) in
+        Script_typed_ir.descr.instr := Script_typed_ir.If_cons ibt ibf |} in
     let=? '(judgement, ctxt) :=
-      merge_branches legacy ctxt loc btr bfr
-        ({| branch.branch := branch |} : branch) in
+      merge_branches legacy ctxt loc btr bfr {| branch.branch := branch |} in
     __return ctxt judgement
   
   |
@@ -80956,25 +80774,21 @@ with parse_instr {bef : Set}
             [Script_typed_ir.stack_ty ** Script_typed_ir.descr]) _ [aft, instr]
         in
       let nop :=
-        ({| Script_typed_ir.descr.loc := loc; Script_typed_ir.descr.bef := aft;
+        {| Script_typed_ir.descr.loc := loc; Script_typed_ir.descr.bef := aft;
           Script_typed_ir.descr.aft := aft;
-          Script_typed_ir.descr.instr := Script_typed_ir.Nop |}
-          : Script_typed_ir.descr) in
+          Script_typed_ir.descr.instr := Script_typed_ir.Nop |} in
       typed ctxt loc (Script_typed_ir.Seq instr nop) aft
     | Failed {| judgement.Failed.descr := __descr_value |} =&gt;
       let __descr_value (aft : Script_typed_ir.stack_ty)
         : Script_typed_ir.descr :=
         let nop :=
-          ({| Script_typed_ir.descr.loc := loc;
-            Script_typed_ir.descr.bef := aft; Script_typed_ir.descr.aft := aft;
-            Script_typed_ir.descr.instr := Script_typed_ir.Nop |}
-            : Script_typed_ir.descr) in
+          {| Script_typed_ir.descr.loc := loc; Script_typed_ir.descr.bef := aft;
+            Script_typed_ir.descr.aft := aft;
+            Script_typed_ir.descr.instr := Script_typed_ir.Nop |} in
         let __descr_value := __descr_value aft in
         Script_typed_ir.descr.with_instr (Script_typed_ir.Seq __descr_value nop)
           __descr_value in
-      __return ctxt
-        (Failed
-          ({| judgement.Failed.descr := __descr_value |} : judgement.Failed))
+      __return ctxt (Failed {| judgement.Failed.descr := __descr_value |})
     end
   
   | ((Micheline.Seq loc (cons hd tl), __stack_value), _) =&gt;
@@ -80995,15 +80809,12 @@ with parse_instr {bef : Set}
       | Failed {| judgement.Failed.descr := __descr_value |} =&gt;
         let __descr_value (ret : Script_typed_ir.stack_ty)
           : Script_typed_ir.descr :=
-          ({| Script_typed_ir.descr.loc := loc;
+          {| Script_typed_ir.descr.loc := loc;
             Script_typed_ir.descr.bef := __stack_value;
             Script_typed_ir.descr.aft := ret;
             Script_typed_ir.descr.instr :=
-              Script_typed_ir.Seq ihd (__descr_value ret) |}
-            : Script_typed_ir.descr) in
-        __return ctxt
-          (Failed
-            ({| judgement.Failed.descr := __descr_value |} : judgement.Failed))
+              Script_typed_ir.Seq ihd (__descr_value ret) |} in
+        __return ctxt (Failed {| judgement.Failed.descr := __descr_value |})
       | Typed itl =&gt;
         let 'existT _ __Typed_'aft12 itl :=
           existT (A := Set) (fun __Typed_'aft12 =&gt; Script_typed_ir.descr) _ itl
@@ -81035,13 +80846,11 @@ with parse_instr {bef : Set}
       in
     let branch (ibt : Script_typed_ir.descr) (ibf : Script_typed_ir.descr)
       : Script_typed_ir.descr :=
-      ({| Script_typed_ir.descr.loc := loc; Script_typed_ir.descr.bef := bef;
+      {| Script_typed_ir.descr.loc := loc; Script_typed_ir.descr.bef := bef;
         Script_typed_ir.descr.aft := ibt.(Script_typed_ir.descr.aft);
-        Script_typed_ir.descr.instr := Script_typed_ir.If ibt ibf |}
-        : Script_typed_ir.descr) in
+        Script_typed_ir.descr.instr := Script_typed_ir.If ibt ibf |} in
     let=? '(judgement, ctxt) :=
-      merge_branches legacy ctxt loc btr bfr
-        ({| branch.branch := branch |} : branch) in
+      merge_branches legacy ctxt loc btr bfr {| branch.branch := branch |} in
     __return ctxt judgement
   
   |
@@ -81323,13 +81132,11 @@ with parse_instr {bef : Set}
     let=? '_ := Script_ir_annot.fail_unexpected_annot loc annot in
     let __descr_value (aft : Script_typed_ir.stack_ty)
       : Script_typed_ir.descr :=
-      ({| Script_typed_ir.descr.loc := loc;
+      {| Script_typed_ir.descr.loc := loc;
         Script_typed_ir.descr.bef := stack_ty; Script_typed_ir.descr.aft := aft;
-        Script_typed_ir.descr.instr := Script_typed_ir.Failwith v |}
-        : Script_typed_ir.descr) in
+        Script_typed_ir.descr.instr := Script_typed_ir.Failwith v |} in
     let=? '_ := log_stack ctxt loc stack_ty Script_typed_ir.Empty_t in
-    __return ctxt
-      (Failed ({| judgement.Failed.descr := __descr_value |} : judgement.Failed))
+    __return ctxt (Failed {| judgement.Failed.descr := __descr_value |})
   
   |
     ((Micheline.Prim loc Alpha_context.Script.I_ADD [] annot,
@@ -82529,12 +82336,11 @@ with parse_instr {bef : Set}
         Error_monad.trace extensible_type_value
           (parse_returning type_logger
             (Toplevel
-              ({| tc_context.Toplevel.storage_type := storage_type;
+              {| tc_context.Toplevel.storage_type := storage_type;
                 tc_context.Toplevel.param_type := arg_type;
                 tc_context.Toplevel.root_name := root_name;
-                tc_context.Toplevel.legacy_create_contract_literal := true |}
-                : tc_context.Toplevel)) ctxt legacy (arg_type_full, None)
-            ret_type_full code_field) in
+                tc_context.Toplevel.legacy_create_contract_literal := true |})
+            ctxt legacy (arg_type_full, None) ret_type_full code_field) in
       let=? '(Eq, ctxt) := Lwt.__return (ty_eq ctxt arg arg_type_full) in
       let=? '(_, ctxt) :=
         Lwt.__return (merge_types legacy ctxt loc arg arg_type_full) in
@@ -82621,12 +82427,11 @@ with parse_instr {bef : Set}
       Error_monad.trace extensible_type_value
         (parse_returning type_logger
           (Toplevel
-            ({| tc_context.Toplevel.storage_type := storage_type;
+            {| tc_context.Toplevel.storage_type := storage_type;
               tc_context.Toplevel.param_type := arg_type;
               tc_context.Toplevel.root_name := root_name;
-              tc_context.Toplevel.legacy_create_contract_literal := false |}
-              : tc_context.Toplevel)) ctxt legacy (arg_type_full, None)
-          ret_type_full code_field) in
+              tc_context.Toplevel.legacy_create_contract_literal := false |})
+          ctxt legacy (arg_type_full, None) ret_type_full code_field) in
     let=? '(Eq, ctxt) := Lwt.__return (ty_eq ctxt arg arg_type_full) in
     let=? '(_, ctxt) :=
       Lwt.__return (merge_types legacy ctxt loc arg arg_type_full) in
@@ -83398,20 +83203,18 @@ Definition parse_script
     Error_monad.trace extensible_type_value
       (parse_returning type_logger
         (Toplevel
-          ({| tc_context.Toplevel.storage_type := storage_type;
+          {| tc_context.Toplevel.storage_type := storage_type;
             tc_context.Toplevel.param_type := arg_type;
             tc_context.Toplevel.root_name := root_name;
-            tc_context.Toplevel.legacy_create_contract_literal := false |}
-            : tc_context.Toplevel)) ctxt legacy (arg_type_full, None)
-        ret_type_full code_field) in
+            tc_context.Toplevel.legacy_create_contract_literal := false |}) ctxt
+        legacy (arg_type_full, None) ret_type_full code_field) in
   Error_monad.__return
     ((Ex_script
-      ({| Script_typed_ir.script.code := code;
+      {| Script_typed_ir.script.code := code;
         Script_typed_ir.script.arg_type := arg_type;
         Script_typed_ir.script.storage := storage;
         Script_typed_ir.script.storage_type := storage_type;
-        Script_typed_ir.script.root_name := root_name |}
-        : Script_typed_ir.script __Ex_ty_'a1)), ctxt).
+        Script_typed_ir.script.root_name := root_name |}), ctxt).
 
 Definition typecheck_code
   (ctxt : Alpha_context.context) (code : Alpha_context.Script.expr)
@@ -83465,12 +83268,11 @@ Definition typecheck_code
               Pervasives.op_coloneq type_map
                 (cons (loc, (bef, aft)) (Pervasives.op_exclamation type_map))))
       (Toplevel
-        ({| tc_context.Toplevel.storage_type := storage_type;
+        {| tc_context.Toplevel.storage_type := storage_type;
           tc_context.Toplevel.param_type := arg_type;
           tc_context.Toplevel.root_name := root_name;
-          tc_context.Toplevel.legacy_create_contract_literal := false |}
-          : tc_context.Toplevel)) ctxt legacy (arg_type_full, None)
-      ret_type_full code_field in
+          tc_context.Toplevel.legacy_create_contract_literal := false |}) ctxt
+      legacy (arg_type_full, None) ret_type_full code_field in
   let=? '({| Script_typed_ir.lambda.lam := _ |}, ctxt) :=
     Error_monad.trace extensible_type_value __result_value in
   Error_monad.__return ((Pervasives.op_exclamation type_map), ctxt).
@@ -84056,12 +83858,12 @@ Definition unparse_script {A : Set}
         Alpha_context.Gas.consume ctxt (Unparse_costs.prim_cost 1 nil) in
       Alpha_context.Gas.consume ctxt (Unparse_costs.prim_cost 1 nil)) in
   Error_monad.__return
-    (({|
+    ({|
       Alpha_context.Script.t.code :=
         Alpha_context.Script.__lazy_expr_value (Micheline.strip_locations code);
       Alpha_context.Script.t.storage :=
         Alpha_context.Script.__lazy_expr_value
-          (Micheline.strip_locations storage) |} : Alpha_context.Script.t), ctxt).
+          (Micheline.strip_locations storage) |}, ctxt).
 
 Definition pack_data {A : Set}
   (ctxt : Alpha_context.context) (typ : Script_typed_ir.ty) (data : A)
@@ -84097,10 +83899,10 @@ Definition hash_data {A : Set}
 Definition empty_big_map {A B : Set}
   (tk : Script_typed_ir.comparable_ty) (tv : Script_typed_ir.ty)
   : Script_typed_ir.big_map A B :=
-  ({| Script_typed_ir.big_map.id := None;
+  {| Script_typed_ir.big_map.id := None;
     Script_typed_ir.big_map.diff := empty_map tk;
     Script_typed_ir.big_map.key_type := ty_of_comparable_ty tk;
-    Script_typed_ir.big_map.value_type := tv |} : Script_typed_ir.big_map _ _).
+    Script_typed_ir.big_map.value_type := tv |}.
 
 Definition big_map_mem {A B : Set}
   (ctxt : Alpha_context.context) (__key_value : A)
@@ -84205,14 +84007,13 @@ Definition diff_of_big_map {A B : Set}
         (ctxt,
           [
             Alpha_context.Contract.Alloc
-              ({|
+              {|
                 Alpha_context.Contract.big_map_diff_item.Alloc.big_map :=
                   id;
                 Alpha_context.Contract.big_map_diff_item.Alloc.key_type :=
                   Micheline.strip_locations kt;
                 Alpha_context.Contract.big_map_diff_item.Alloc.value_type :=
                   Micheline.strip_locations kv |}
-                : Alpha_context.Contract.big_map_diff_item.Alloc)
           ], id)
     end in
   let pairs :=
@@ -84242,7 +84043,7 @@ Definition diff_of_big_map {A B : Set}
             end in
           let diff_item :=
             Alpha_context.Contract.Update
-              ({|
+              {|
                 Alpha_context.Contract.big_map_diff_item.Update.big_map :=
                   big_map;
                 Alpha_context.Contract.big_map_diff_item.Update.diff_key :=
@@ -84250,8 +84051,7 @@ Definition diff_of_big_map {A B : Set}
                 Alpha_context.Contract.big_map_diff_item.Update.diff_key_hash :=
                   diff_key_hash;
                 Alpha_context.Contract.big_map_diff_item.Update.diff_value :=
-                  diff_value |}
-                : Alpha_context.Contract.big_map_diff_item.Update) in
+                  diff_value |} in
           Error_monad.__return ((cons diff_item acc), ctxt)) (nil, ctxt) pairs
     in
   Error_monad.__return ((Pervasives.op_at init diff), big_map, ctxt).
@@ -85490,7 +85290,7 @@ Definition encoding : Data_encoding.encoding t :=
         (code, storage))
       (fun function_parameter =&gt;
         let '(code, storage) := function_parameter in
-        ({| t.code := code; t.storage := storage |} : t)) None
+        {| t.code := code; t.storage := storage |}) None
       (Data_encoding.obj2
         (Data_encoding.req None None &quot;code&quot; lazy_expr_encoding)
         (Data_encoding.req None None &quot;storage&quot; lazy_expr_encoding))).
@@ -89207,9 +89007,9 @@ Definition rpc_init (function_parameter : Updater.rpc_context)
   let=? context :=
     Alpha_context.prepare context level timestamp timestamp fitness in
   Error_monad.__return
-    ({| rpc_context.block_hash := block_hash;
+    {| rpc_context.block_hash := block_hash;
       rpc_context.block_header := block_header; rpc_context.context := context
-      |} : rpc_context).
+      |}.
 
 Definition rpc_services
   : Pervasives.ref (RPC_directory.t Updater.rpc_context) :=
@@ -89506,7 +89306,7 @@ Definition path_length := (|Blake2BModule|).(S.HASH.path_length).
     <h3>Storage</h3>
     <ul>
       <li>OCaml size: 901 lines</li>
-      <li>Coq size: 1948 lines (+116% compared to&nbsp;OCaml)</li>
+      <li>Coq size: 1943 lines (+115% compared to&nbsp;OCaml)</li>
     </ul>
   </div>
   <div class="col-md-6">
@@ -90505,11 +90305,10 @@ Definition Int_index :=
   let args (function_parameter : unit) : Storage_description.args :=
     let '_ := function_parameter in
     Storage_description.One
-      ({| Storage_description.args.One.rpc_arg := RPC_arg.__int_value;
+      {| Storage_description.args.One.rpc_arg := RPC_arg.__int_value;
         Storage_description.args.One.encoding := Data_encoding.int31;
         Storage_description.args.One.compare :=
-          (|Compare.Int|).(Compare.S.compare) |}
-        : Storage_description.args.One (|Compare.Int|).(Compare.S.t)) in
+          (|Compare.Int|).(Compare.S.compare) |} in
   existT (A := unit) (fun _ =&gt; _) tt
     {|
       Storage_functors.INDEX.path_length := path_length;
@@ -90531,10 +90330,9 @@ Definition Make_index :=
     let args (function_parameter : unit) : Storage_description.args :=
       let '_ := function_parameter in
       Storage_description.One
-        ({| Storage_description.args.One.rpc_arg := rpc_arg;
+        {| Storage_description.args.One.rpc_arg := rpc_arg;
           Storage_description.args.One.encoding := encoding;
-          Storage_description.args.One.compare := compare |}
-          : Storage_description.args.One t) in
+          Storage_description.args.One.compare := compare |} in
     existT (A := unit) (fun _ =&gt; _) tt
       {|
         Storage_functors.INDEX.path_length := path_length;
@@ -91651,11 +91449,10 @@ Module Cycle.
             let '(nonce_hash, delegate, rewards, fees) :=
               function_parameter in
             Unrevealed
-              ({| unrevealed_nonce.nonce_hash := nonce_hash;
+              {| unrevealed_nonce.nonce_hash := nonce_hash;
                 unrevealed_nonce.delegate := delegate;
                 unrevealed_nonce.rewards := rewards;
-                unrevealed_nonce.fees := fees |}
-                : unrevealed_nonce));
+                unrevealed_nonce.fees := fees |});
         Data_encoding.__case_value &quot;Revealed&quot; None (Data_encoding.Tag 1)
           Seed_repr.nonce_encoding
           (fun function_parameter =&gt;
@@ -91851,18 +91648,16 @@ Module Roll.
     
     Definition left_args : Storage_description.args :=
       Storage_description.One
-        ({| Storage_description.args.One.rpc_arg := Cycle_repr.rpc_arg;
+        {| Storage_description.args.One.rpc_arg := Cycle_repr.rpc_arg;
           Storage_description.args.One.encoding := Cycle_repr.encoding;
-          Storage_description.args.One.compare := Cycle_repr.compare |}
-          : Storage_description.args.One Cycle_repr.cycle).
+          Storage_description.args.One.compare := Cycle_repr.compare |}.
     
     Definition right_args : Storage_description.args :=
       Storage_description.One
-        ({| Storage_description.args.One.rpc_arg := RPC_arg.__int_value;
+        {| Storage_description.args.One.rpc_arg := RPC_arg.__int_value;
           Storage_description.args.One.encoding := Data_encoding.int31;
           Storage_description.args.One.compare :=
-            (|Compare.Int|).(Compare.S.compare) |}
-          : Storage_description.args.One (|Compare.Int|).(Compare.S.t)).
+            (|Compare.Int|).(Compare.S.compare) |}.
     
     Definition args (function_parameter : unit) : Storage_description.args :=
       let '_ := function_parameter in
@@ -93113,11 +92908,11 @@ End Ramp_up.
     <h3>Storage_description</h3>
     <ul>
       <li>OCaml size: 347 lines</li>
-      <li>Coq size: 564 lines (+62% compared to&nbsp;OCaml)</li>
+      <li>Coq size: 558 lines (+60% compared to&nbsp;OCaml)</li>
     </ul>
   </div>
   <div class="col-md-6">
-    <a href="#storage_description.ml"><code>storage_description.ml</code></a>&nbsp;<span class="label label-warning">15 warnings</span>
+    <a href="#storage_description.ml"><code>storage_description.ml</code></a>&nbsp;<span class="label label-warning">13 warnings</span>
     
     <pre>(*****************************************************************************)
 (*                                                                           *)
@@ -93351,12 +93146,12 @@ type _ opt_handler =
 
 let rec combine_object = function
   | [] -&gt;
-      Handler <abbr class="mark-warning" title="The placeholders `_` in types are not handled">{encoding = Data_encoding.unit; get = (fun _ _ -&gt; return_unit)}</abbr>
+      Handler {encoding = Data_encoding.unit; get = (fun _ _ -&gt; return_unit)}
   | (name, Opt_handler handler) :: fields -&gt; (
     match combine_object fields with
     | Handler handlers -&gt;
         Handler
-          <abbr class="mark-warning" title="The placeholders `_` in types are not handled">{
+          {
             encoding =
               Data_encoding.merge_objs
                 Data_encoding.(obj1 (opt name (dynamic_size handler.encoding)))
@@ -93365,7 +93160,7 @@ let rec combine_object = function
               (fun k i -&gt;
                 handler.get k i
                 &gt;&gt;=? fun v1 -&gt; handlers.get k i &gt;&gt;=? fun v2 -&gt; return (v1, v2));
-          }</abbr> )
+          } )
 
 type query = {depth : int}
 
@@ -93711,8 +93506,8 @@ Definition register_value {a b : Set}
   | Empty =&gt;
     Pervasives.op_coloneq dir
       (Value
-        ({| description.Value.get := get; description.Value.encoding := encoding
-          |} : description.Value b a))
+        {| description.Value.get := get; description.Value.encoding := encoding
+          |})
   | _ =&gt; Pervasives.invalid_arg &quot;&quot;
   end.
 
@@ -93869,13 +93664,13 @@ Fixpoint combine_object {A : Set}
   match function_parameter with
   | [] =&gt;
     Handler
-      ({| handler.Handler.encoding := Data_encoding.__unit_value;
+      {| handler.Handler.encoding := Data_encoding.__unit_value;
         handler.Handler.get :=
           fun function_parameter =&gt;
             let '_ := function_parameter in
             fun function_parameter =&gt;
               let '_ := function_parameter in
-              Error_monad.return_unit |} : handler.Handler unit _)
+              Error_monad.return_unit |}
   | cons (name, Opt_handler __handler_value) fields =&gt;
     let 'existT _ __Opt_handler_'a [name, __handler_value, fields] :=
       existT (A := Set)
@@ -93887,7 +93682,7 @@ Fixpoint combine_object {A : Set}
       existT (A := Set) (fun __Handler_'a =&gt; handler.Handler __Handler_'a A) _
         handlers in
     Handler
-      ({|
+      {|
         handler.Handler.encoding :=
           Data_encoding.merge_objs
             (Data_encoding.obj1
@@ -93901,7 +93696,6 @@ Fixpoint combine_object {A : Set}
               let=? v1 := __handler_value.(opt_handler.Opt_handler.get) k i in
               let=? v2 := handlers.(handler.Handler.get) k i in
               Error_monad.__return (v1, v2) |}
-        : handler.Handler (option __Opt_handler_'a * __Handler_'a) _)
   end.
 
 Module query.
@@ -93915,8 +93709,7 @@ Definition query := query.record.
 Definition depth_query : RPC_query.t query :=
   RPC_query.seal
     (RPC_query.op_pipeplus
-      (RPC_query.__query_value
-        (fun depth =&gt; ({| query.depth := depth |} : query)))
+      (RPC_query.__query_value (fun depth =&gt; {| query.depth := depth |}))
       (RPC_query.__field_value None &quot;depth&quot; RPC_arg.__int_value 0
         (fun __t_value =&gt; __t_value.(query.depth)))).
 
@@ -93955,13 +93748,13 @@ Definition build_directory {key : Set} (dir : t key) : RPC_directory.t key :=
     match Pervasives.op_exclamation dir with
     | Empty =&gt;
       Opt_handler
-        ({| opt_handler.Opt_handler.encoding := Data_encoding.__unit_value;
+        {| opt_handler.Opt_handler.encoding := Data_encoding.__unit_value;
           opt_handler.Opt_handler.get :=
             fun function_parameter =&gt;
               let '_ := function_parameter in
               fun function_parameter =&gt;
                 let '_ := function_parameter in
-                Error_monad.return_none |} : opt_handler.Opt_handler unit ikey)
+                Error_monad.return_none |}
     |
       Value {|
         description.Value.get := get;
@@ -93974,14 +93767,14 @@ Definition build_directory {key : Set} (dir : t key) : RPC_directory.t key :=
               Data_encoding.t __Value_'a]) _ [get, encoding] in
       let __handler_value :=
         Opt_handler
-          ({| opt_handler.Opt_handler.encoding := encoding;
+          {| opt_handler.Opt_handler.encoding := encoding;
             opt_handler.Opt_handler.get :=
               fun k =&gt;
                 fun i =&gt;
                   if (|Compare.Int|).(Compare.S.op_lt) i 0 then
                     Error_monad.return_none
                   else
-                    get k |} : opt_handler.Opt_handler __Value_'a ikey) in
+                    get k |} in
       (* ❌ Sequences of instructions are ignored (operator &quot;;&quot;) *)
       (* ❌ instruction_sequence &quot;;&quot; *)
       __handler_value
@@ -93999,7 +93792,7 @@ Definition build_directory {key : Set} (dir : t key) : RPC_directory.t key :=
           __handler_value in
       let __handler_value :=
         Opt_handler
-          ({|
+          {|
             opt_handler.Opt_handler.encoding :=
               __handler_value.(handler.Handler.encoding);
             opt_handler.Opt_handler.get :=
@@ -94011,8 +93804,7 @@ Definition build_directory {key : Set} (dir : t key) : RPC_directory.t key :=
                     let=? v :=
                       __handler_value.(handler.Handler.get) k
                         (Pervasives.op_minus i 1) in
-                    Error_monad.return_some v |}
-            : opt_handler.Opt_handler __Handler_'a ikey) in
+                    Error_monad.return_some v |} in
       (* ❌ Sequences of instructions are ignored (operator &quot;;&quot;) *)
       (* ❌ instruction_sequence &quot;;&quot; *)
       __handler_value
@@ -94087,14 +93879,11 @@ Definition build_directory {key : Set} (dir : t key) : RPC_directory.t key :=
             Error_monad.return_some values in
       let __handler_value :=
         Opt_handler
-          ({|
+          {|
             opt_handler.Opt_handler.encoding :=
               Data_encoding.__list_value None
                 (Data_encoding.dynamic_size None encoding);
-            opt_handler.Opt_handler.get := get |}
-            :
-              opt_handler.Opt_handler
-                (list (__IndexedDir_'a * option __Opt_handler_'a1)) ikey) in
+            opt_handler.Opt_handler.get := get |} in
       (* ❌ Sequences of instructions are ignored (operator &quot;;&quot;) *)
       (* ❌ instruction_sequence &quot;;&quot; *)
       __handler_value
@@ -99127,7 +98916,7 @@ Parameter ballot_encoding : Data_encoding.t ballot.
     <h3>Vote_storage</h3>
     <ul>
       <li>OCaml size: 156 lines</li>
-      <li>Coq size: 332 lines (+112% compared to&nbsp;OCaml)</li>
+      <li>Coq size: 331 lines (+112% compared to&nbsp;OCaml)</li>
     </ul>
   </div>
   <div class="col-md-6">
@@ -99407,8 +99196,7 @@ Definition ballots_encoding : Data_encoding.encoding ballots :=
         (yay, nay, pass))
       (fun function_parameter =&gt;
         let '(yay, nay, pass) := function_parameter in
-        ({| ballots.yay := yay; ballots.nay := nay; ballots.pass := pass |}
-          : ballots)) in
+        {| ballots.yay := yay; ballots.nay := nay; ballots.pass := pass |}) in
   fun eta =&gt; arg None eta)
     (Data_encoding.obj3
       (Data_encoding.req None None &quot;yay&quot; Data_encoding.__int32_value)
@@ -99432,7 +99220,7 @@ Definition get_ballots
   : Lwt.t (Error_monad.tzresult ballots) :=
   (|Storage.Vote.Ballots|).(Storage_sigs.Indexed_data_storage.fold) ctxt
     (Error_monad.ok
-      ({|
+      {|
         ballots.yay :=
           (* ❌ Constant of type int32 is converted to int *)
           0;
@@ -99441,7 +99229,7 @@ Definition get_ballots
           0;
         ballots.pass :=
           (* ❌ Constant of type int32 is converted to int *)
-          0 |} : ballots))
+          0 |})
     (fun delegate =&gt;
       fun ballot =&gt;
         fun ballots =&gt;

@@ -132,11 +132,10 @@ Definition encoding : Data_encoding.encoding t :=
       let
         '(level, level_position, cycle, cycle_position, voting_period,
           voting_period_position, expected_commitment) := function_parameter in
-      ({| t.level := level; t.level_position := level_position;
-        t.cycle := cycle; t.cycle_position := cycle_position;
-        t.voting_period := voting_period;
+      {| t.level := level; t.level_position := level_position; t.cycle := cycle;
+        t.cycle_position := cycle_position; t.voting_period := voting_period;
         t.voting_period_position := voting_period_position;
-        t.expected_commitment := expected_commitment |} : t)) None
+        t.expected_commitment := expected_commitment |}) None
     (Data_encoding.obj7
       (Data_encoding.req None
         (Some
@@ -168,7 +167,7 @@ Definition encoding : Data_encoding.encoding t :=
         "expected_commitment" Data_encoding.__bool_value)).
 
 Definition root_level (first_level : Raw_level_repr.t) : t :=
-  ({| t.level := first_level;
+  {| t.level := first_level;
     t.level_position :=
       (* ❌ Constant of type int32 is converted to int *)
       0; t.cycle := Cycle_repr.root;
@@ -177,7 +176,7 @@ Definition root_level (first_level : Raw_level_repr.t) : t :=
       0; t.voting_period := Voting_period_repr.root;
     t.voting_period_position :=
       (* ❌ Constant of type int32 is converted to int *)
-      0; t.expected_commitment := false |} : t).
+      0; t.expected_commitment := false |}.
 
 Definition from_raw_level
   (first_level : Raw_level_repr.raw_level) (blocks_per_cycle : int32)
@@ -201,10 +200,10 @@ Definition from_raw_level
     (|Compare.Int32|).(Compare.S.op_eq)
       (Int32.rem cycle_position blocks_per_commitment)
       (Int32.pred blocks_per_commitment) in
-  ({| t.level := level; t.level_position := level_position; t.cycle := cycle;
+  {| t.level := level; t.level_position := level_position; t.cycle := cycle;
     t.cycle_position := cycle_position; t.voting_period := voting_period;
     t.voting_period_position := voting_period_position;
-    t.expected_commitment := expected_commitment |} : t).
+    t.expected_commitment := expected_commitment |}.
 
 Definition diff (function_parameter : t) : t -> int32 :=
   let '{| t.level := l1 |} := function_parameter in

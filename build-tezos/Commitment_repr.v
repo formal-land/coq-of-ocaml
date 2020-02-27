@@ -36,8 +36,8 @@ Definition encoding : Data_encoding.encoding t :=
       (blinded_public_key_hash, amount))
     (fun function_parameter =>
       let '(blinded_public_key_hash, amount) := function_parameter in
-      ({| t.blinded_public_key_hash := blinded_public_key_hash;
-        t.amount := amount |} : t)) None
+      {| t.blinded_public_key_hash := blinded_public_key_hash;
+        t.amount := amount |}) None
     (Data_encoding.tup2 Blinded_public_key_hash.encoding Tez_repr.encoding).
 
 Definition not_first_class_module : unit := tt.

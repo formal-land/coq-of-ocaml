@@ -182,8 +182,8 @@ Definition frozen_balance_encoding : Data_encoding.encoding frozen_balance :=
       (deposit, fees, rewards))
     (fun function_parameter =>
       let '(deposit, fees, rewards) := function_parameter in
-      ({| frozen_balance.deposit := deposit; frozen_balance.fees := fees;
-        frozen_balance.rewards := rewards |} : frozen_balance)) None
+      {| frozen_balance.deposit := deposit; frozen_balance.fees := fees;
+        frozen_balance.rewards := rewards |}) None
     (Data_encoding.obj3
       (Data_encoding.req None None "deposit" Tez_repr.encoding)
       (Data_encoding.req None None "fees" Tez_repr.encoding)
@@ -702,8 +702,8 @@ Definition punish
       (ctxt, contract) cycle in
   Error_monad.__return
     (ctxt,
-      ({| frozen_balance.deposit := deposit; frozen_balance.fees := fees;
-        frozen_balance.rewards := rewards |} : frozen_balance)).
+      {| frozen_balance.deposit := deposit; frozen_balance.fees := fees;
+        frozen_balance.rewards := rewards |}).
 
 Definition has_frozen_balance
   (ctxt : Raw_context.t)
@@ -739,9 +739,9 @@ Definition frozen_balance_by_cycle_encoding
         frozen_balance_encoding)).
 
 Definition empty_frozen_balance : frozen_balance :=
-  ({| frozen_balance.deposit := Tez_repr.zero;
+  {| frozen_balance.deposit := Tez_repr.zero;
     frozen_balance.fees := Tez_repr.zero;
-    frozen_balance.rewards := Tez_repr.zero |} : frozen_balance).
+    frozen_balance.rewards := Tez_repr.zero |}.
 
 Definition frozen_balance_by_cycle
   (ctxt : Raw_context.t)

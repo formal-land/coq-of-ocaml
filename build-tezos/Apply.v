@@ -109,11 +109,9 @@ Definition apply_manager_operation_content
     Error_monad.__return
       (ctxt,
         (Apply_results.Reveal_result
-          ({|
+          {|
             Apply_results.successful_manager_operation_result.Reveal_result.consumed_gas :=
-              Alpha_context.Gas.consumed before_operation ctxt |}
-            : Apply_results.successful_manager_operation_result.Reveal_result)),
-        nil)
+              Alpha_context.Gas.consumed before_operation ctxt |}), nil)
   |
     Alpha_context.Transaction {|
       Alpha_context.manager_operation.Transaction.amount := amount;
@@ -163,7 +161,7 @@ Definition apply_manager_operation_content
         end in
       let __result_value :=
         Apply_results.Transaction_result
-          ({|
+          {|
             Apply_results.successful_manager_operation_result.Transaction_result.storage :=
               None;
             Apply_results.successful_manager_operation_result.Transaction_result.big_map_diff :=
@@ -186,10 +184,7 @@ Definition apply_manager_operation_content
             Apply_results.successful_manager_operation_result.Transaction_result.paid_storage_size_diff :=
               Z.zero;
             Apply_results.successful_manager_operation_result.Transaction_result.allocated_destination_contract :=
-              allocated_destination_contract |}
-            :
-              Apply_results.successful_manager_operation_result.Transaction_result)
-        in
+              allocated_destination_contract |} in
       Error_monad.__return (ctxt, __result_value, nil)
     | Some script =>
       let=? '(parameter, ctxt) :=
@@ -198,12 +193,11 @@ Definition apply_manager_operation_content
       let=? ctxt := Lwt.__return (Alpha_context.Gas.consume ctxt cost_parameter)
         in
       let step_constants :=
-        ({| Script_interpreter.step_constants.source := source;
+        {| Script_interpreter.step_constants.source := source;
           Script_interpreter.step_constants.payer := payer;
           Script_interpreter.step_constants.self := destination;
           Script_interpreter.step_constants.amount := amount;
-          Script_interpreter.step_constants.chain_id := chain_id |}
-          : Script_interpreter.step_constants) in
+          Script_interpreter.step_constants.chain_id := chain_id |} in
       let=? '{|
         Script_interpreter.execution_result.ctxt := ctxt;
           Script_interpreter.execution_result.storage := storage;
@@ -222,7 +216,7 @@ Definition apply_manager_operation_content
           ctxt in
       let __result_value :=
         Apply_results.Transaction_result
-          ({|
+          {|
             Apply_results.successful_manager_operation_result.Transaction_result.storage :=
               Some storage;
             Apply_results.successful_manager_operation_result.Transaction_result.big_map_diff :=
@@ -246,10 +240,7 @@ Definition apply_manager_operation_content
             Apply_results.successful_manager_operation_result.Transaction_result.paid_storage_size_diff :=
               paid_storage_size_diff;
             Apply_results.successful_manager_operation_result.Transaction_result.allocated_destination_contract :=
-              allocated_destination_contract |}
-            :
-              Apply_results.successful_manager_operation_result.Transaction_result)
-        in
+              allocated_destination_contract |} in
       Error_monad.__return (ctxt, __result_value, operations)
     end
   |
@@ -316,7 +307,7 @@ Definition apply_manager_operation_content
       Alpha_context.Fees.record_paid_storage_space ctxt contract in
     let __result_value :=
       Apply_results.Origination_result
-        ({|
+        {|
           Apply_results.successful_manager_operation_result.Origination_result.big_map_diff :=
             big_map_diff;
           Apply_results.successful_manager_operation_result.Origination_result.balance_updates :=
@@ -338,21 +329,16 @@ Definition apply_manager_operation_content
           Apply_results.successful_manager_operation_result.Origination_result.storage_size :=
             size;
           Apply_results.successful_manager_operation_result.Origination_result.paid_storage_size_diff :=
-            paid_storage_size_diff |}
-          : Apply_results.successful_manager_operation_result.Origination_result)
-      in
+            paid_storage_size_diff |} in
     Error_monad.__return (ctxt, __result_value, nil)
   | Alpha_context.Delegation delegate =>
     let=? ctxt := Alpha_context.Delegate.set ctxt source delegate in
     Error_monad.__return
       (ctxt,
         (Apply_results.Delegation_result
-          ({|
+          {|
             Apply_results.successful_manager_operation_result.Delegation_result.consumed_gas :=
-              Alpha_context.Gas.consumed before_operation ctxt |}
-            :
-              Apply_results.successful_manager_operation_result.Delegation_result)),
-        nil)
+              Alpha_context.Gas.consumed before_operation ctxt |}), nil)
   end.
 
 Definition apply_internal_manager_operations
@@ -561,10 +547,9 @@ Definition skipped_operation_result
   | Alpha_context.Reveal _ =>
     Apply_results.Applied
       (Apply_results.Reveal_result
-        ({|
+        {|
           Apply_results.successful_manager_operation_result.Reveal_result.consumed_gas :=
-            Z.zero |}
-          : Apply_results.successful_manager_operation_result.Reveal_result))
+            Z.zero |})
   | _ => Apply_results.Skipped (Alpha_context.manager_kind operation)
   end.
 
@@ -584,7 +569,7 @@ Fixpoint mark_skipped
     let source := Alpha_context.Contract.implicit_contract source in
     Apply_results.Single_result
       (Apply_results.Manager_operation_result
-        ({|
+        {|
           Apply_results.contents_result.Manager_operation_result.balance_updates :=
             Alpha_context.Delegate.cleanup_balance_updates
               [
@@ -597,7 +582,7 @@ Fixpoint mark_skipped
           Apply_results.contents_result.Manager_operation_result.operation_result :=
             skipped_operation_result operation;
           Apply_results.contents_result.Manager_operation_result.internal_operation_results :=
-            nil |} : Apply_results.contents_result.Manager_operation_result))
+            nil |})
   |
     Alpha_context.Cons
       (Alpha_context.Manager_operation {|
@@ -615,7 +600,7 @@ Fixpoint mark_skipped
     let source := Alpha_context.Contract.implicit_contract source in
     Apply_results.Cons_result
       (Apply_results.Manager_operation_result
-        ({|
+        {|
           Apply_results.contents_result.Manager_operation_result.balance_updates :=
             Alpha_context.Delegate.cleanup_balance_updates
               [
@@ -628,8 +613,7 @@ Fixpoint mark_skipped
           Apply_results.contents_result.Manager_operation_result.operation_result :=
             skipped_operation_result operation;
           Apply_results.contents_result.Manager_operation_result.internal_operation_results :=
-            nil |} : Apply_results.contents_result.Manager_operation_result))
-      (mark_skipped baker level rest)
+            nil |}) (mark_skipped baker level rest)
   end.
 
 Fixpoint precheck_manager_contents_list
@@ -670,7 +654,7 @@ Fixpoint apply_manager_contents_list_rec
       apply_manager_contents ctxt mode chain_id op in
     let __result_value :=
       Apply_results.Manager_operation_result
-        ({|
+        {|
           Apply_results.contents_result.Manager_operation_result.balance_updates :=
             Alpha_context.Delegate.cleanup_balance_updates
               [
@@ -683,8 +667,7 @@ Fixpoint apply_manager_contents_list_rec
           Apply_results.contents_result.Manager_operation_result.operation_result :=
             operation_result;
           Apply_results.contents_result.Manager_operation_result.internal_operation_results :=
-            internal_operation_results |}
-          : Apply_results.contents_result.Manager_operation_result) in
+            internal_operation_results |} in
     Lwt.__return (ctxt_result, (Apply_results.Single_result __result_value))
   |
     Alpha_context.Cons
@@ -704,7 +687,7 @@ Fixpoint apply_manager_contents_list_rec
     | (Failure, operation_result, internal_operation_results) =>
       let __result_value :=
         Apply_results.Manager_operation_result
-          ({|
+          {|
             Apply_results.contents_result.Manager_operation_result.balance_updates :=
               Alpha_context.Delegate.cleanup_balance_updates
                 [
@@ -717,8 +700,7 @@ Fixpoint apply_manager_contents_list_rec
             Apply_results.contents_result.Manager_operation_result.operation_result :=
               operation_result;
             Apply_results.contents_result.Manager_operation_result.internal_operation_results :=
-              internal_operation_results |}
-            : Apply_results.contents_result.Manager_operation_result) in
+              internal_operation_results |} in
       Lwt.__return
         (Failure,
           (Apply_results.Cons_result __result_value
@@ -726,7 +708,7 @@ Fixpoint apply_manager_contents_list_rec
     | (Success ctxt, operation_result, internal_operation_results) =>
       let __result_value :=
         Apply_results.Manager_operation_result
-          ({|
+          {|
             Apply_results.contents_result.Manager_operation_result.balance_updates :=
               Alpha_context.Delegate.cleanup_balance_updates
                 [
@@ -739,8 +721,7 @@ Fixpoint apply_manager_contents_list_rec
             Apply_results.contents_result.Manager_operation_result.operation_result :=
               operation_result;
             Apply_results.contents_result.Manager_operation_result.internal_operation_results :=
-              internal_operation_results |}
-            : Apply_results.contents_result.Manager_operation_result) in
+              internal_operation_results |} in
       let= '(ctxt_result, results) :=
         apply_manager_contents_list_rec ctxt mode baker chain_id rest in
       Lwt.__return
@@ -757,7 +738,7 @@ Definition mark_backtracked (results : Apply_results.contents_result_list)
     | Apply_results.Single_result (Apply_results.Manager_operation_result op) =>
       Apply_results.Single_result
         (Apply_results.Manager_operation_result
-          ({|
+          {|
             Apply_results.contents_result.Manager_operation_result.balance_updates :=
               op.(Apply_results.contents_result.Manager_operation_result.balance_updates);
             Apply_results.contents_result.Manager_operation_result.operation_result :=
@@ -766,7 +747,7 @@ Definition mark_backtracked (results : Apply_results.contents_result_list)
             Apply_results.contents_result.Manager_operation_result.internal_operation_results :=
               List.map mark_internal_operation_results
                 op.(Apply_results.contents_result.Manager_operation_result.internal_operation_results)
-            |} : Apply_results.contents_result.Manager_operation_result))
+            |})
     | Apply_results.Cons_result (Apply_results.Manager_operation_result op) rest
       =>
       let 'existT _ [__0, __1] [op, rest] :=
@@ -776,7 +757,7 @@ Definition mark_backtracked (results : Apply_results.contents_result_list)
               Apply_results.contents_result_list]) [_, _] [op, rest] in
       Apply_results.Cons_result
         (Apply_results.Manager_operation_result
-          ({|
+          {|
             Apply_results.contents_result.Manager_operation_result.balance_updates :=
               op.(Apply_results.contents_result.Manager_operation_result.balance_updates);
             Apply_results.contents_result.Manager_operation_result.operation_result :=
@@ -785,8 +766,7 @@ Definition mark_backtracked (results : Apply_results.contents_result_list)
             Apply_results.contents_result.Manager_operation_result.internal_operation_results :=
               List.map mark_internal_operation_results
                 op.(Apply_results.contents_result.Manager_operation_result.internal_operation_results)
-            |} : Apply_results.contents_result.Manager_operation_result))
-        (mark_contents_list rest)
+            |}) (mark_contents_list rest)
     end
   with mark_internal_operation_results
     (function_parameter : Apply_results.packed_internal_operation_result)
@@ -879,7 +859,7 @@ Definition apply_contents_list
         (ctxt,
           (Apply_results.Single_result
             (Apply_results.Endorsement_result
-              ({|
+              {|
                 Apply_results.contents_result.Endorsement_result.balance_updates :=
                   Alpha_context.Delegate.cleanup_balance_updates
                     [
@@ -900,7 +880,7 @@ Definition apply_contents_list
                 Apply_results.contents_result.Endorsement_result.delegate :=
                   delegate;
                 Apply_results.contents_result.Endorsement_result.slots := slots
-                |} : Apply_results.contents_result.Endorsement_result))))
+                |})))
   
   |
     Alpha_context.Single
@@ -1218,9 +1198,7 @@ Definition apply_operation
   let ctxt := Alpha_context.Gas.set_unlimited ctxt in
   let ctxt := Alpha_context.Contract.unset_origination_nonce ctxt in
   Error_monad.__return
-    (ctxt,
-      ({| Apply_results.operation_metadata.contents := __result_value |}
-        : Apply_results.operation_metadata)).
+    (ctxt, {| Apply_results.operation_metadata.contents := __result_value |}).
 
 Definition may_snapshot_roll (ctxt : Alpha_context.context)
   : Lwt.t (Error_monad.tzresult Alpha_context.context) :=
@@ -1386,11 +1364,10 @@ Definition finalize_application
     | None => Error_monad.__return ctxt
     | Some nonce_hash =>
       Alpha_context.Nonce.record_hash ctxt
-        ({| Alpha_context.Nonce.unrevealed.nonce_hash := nonce_hash;
+        {| Alpha_context.Nonce.unrevealed.nonce_hash := nonce_hash;
           Alpha_context.Nonce.unrevealed.delegate := delegate;
           Alpha_context.Nonce.unrevealed.rewards := rewards;
           Alpha_context.Nonce.unrevealed.fees := fees |}
-          : Alpha_context.Nonce.unrevealed)
     end in
   let=? ctxt := may_snapshot_roll ctxt in
   let=? '(ctxt, balance_updates, deactivated) := may_start_new_cycle ctxt in
@@ -1414,13 +1391,12 @@ Definition finalize_application
       (Alpha_context.Gas.block_level ctxt) in
   let=? voting_period_kind := Alpha_context.Vote.get_current_period_kind ctxt in
   let receipt :=
-    ({| Apply_results.block_metadata.baker := delegate;
+    {| Apply_results.block_metadata.baker := delegate;
       Apply_results.block_metadata.level := Alpha_context.Level.current ctxt;
       Apply_results.block_metadata.voting_period_kind := voting_period_kind;
       Apply_results.block_metadata.nonce_hash :=
         protocol_data.(Alpha_context.Block_header.contents.seed_nonce_hash);
       Apply_results.block_metadata.consumed_gas := consumed_gas;
       Apply_results.block_metadata.deactivated := deactivated;
-      Apply_results.block_metadata.balance_updates := balance_updates |}
-      : Apply_results.block_metadata) in
+      Apply_results.block_metadata.balance_updates := balance_updates |} in
   Error_monad.__return (ctxt, receipt).

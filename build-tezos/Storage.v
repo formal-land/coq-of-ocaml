@@ -72,11 +72,10 @@ Definition Int_index :=
   let args (function_parameter : unit) : Storage_description.args :=
     let '_ := function_parameter in
     Storage_description.One
-      ({| Storage_description.args.One.rpc_arg := RPC_arg.__int_value;
+      {| Storage_description.args.One.rpc_arg := RPC_arg.__int_value;
         Storage_description.args.One.encoding := Data_encoding.int31;
         Storage_description.args.One.compare :=
-          (|Compare.Int|).(Compare.S.compare) |}
-        : Storage_description.args.One (|Compare.Int|).(Compare.S.t)) in
+          (|Compare.Int|).(Compare.S.compare) |} in
   existT (A := unit) (fun _ => _) tt
     {|
       Storage_functors.INDEX.path_length := path_length;
@@ -98,10 +97,9 @@ Definition Make_index :=
     let args (function_parameter : unit) : Storage_description.args :=
       let '_ := function_parameter in
       Storage_description.One
-        ({| Storage_description.args.One.rpc_arg := rpc_arg;
+        {| Storage_description.args.One.rpc_arg := rpc_arg;
           Storage_description.args.One.encoding := encoding;
-          Storage_description.args.One.compare := compare |}
-          : Storage_description.args.One t) in
+          Storage_description.args.One.compare := compare |} in
     existT (A := unit) (fun _ => _) tt
       {|
         Storage_functors.INDEX.path_length := path_length;
@@ -1218,11 +1216,10 @@ Module Cycle.
             let '(nonce_hash, delegate, rewards, fees) :=
               function_parameter in
             Unrevealed
-              ({| unrevealed_nonce.nonce_hash := nonce_hash;
+              {| unrevealed_nonce.nonce_hash := nonce_hash;
                 unrevealed_nonce.delegate := delegate;
                 unrevealed_nonce.rewards := rewards;
-                unrevealed_nonce.fees := fees |}
-                : unrevealed_nonce));
+                unrevealed_nonce.fees := fees |});
         Data_encoding.__case_value "Revealed" None (Data_encoding.Tag 1)
           Seed_repr.nonce_encoding
           (fun function_parameter =>
@@ -1418,18 +1415,16 @@ Module Roll.
     
     Definition left_args : Storage_description.args :=
       Storage_description.One
-        ({| Storage_description.args.One.rpc_arg := Cycle_repr.rpc_arg;
+        {| Storage_description.args.One.rpc_arg := Cycle_repr.rpc_arg;
           Storage_description.args.One.encoding := Cycle_repr.encoding;
-          Storage_description.args.One.compare := Cycle_repr.compare |}
-          : Storage_description.args.One Cycle_repr.cycle).
+          Storage_description.args.One.compare := Cycle_repr.compare |}.
     
     Definition right_args : Storage_description.args :=
       Storage_description.One
-        ({| Storage_description.args.One.rpc_arg := RPC_arg.__int_value;
+        {| Storage_description.args.One.rpc_arg := RPC_arg.__int_value;
           Storage_description.args.One.encoding := Data_encoding.int31;
           Storage_description.args.One.compare :=
-            (|Compare.Int|).(Compare.S.compare) |}
-          : Storage_description.args.One (|Compare.Int|).(Compare.S.t)).
+            (|Compare.Int|).(Compare.S.compare) |}.
     
     Definition args (function_parameter : unit) : Storage_description.args :=
       let '_ := function_parameter in

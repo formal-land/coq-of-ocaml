@@ -2085,9 +2085,7 @@ Definition merge_branches {a b bef : Set}
       : Script_typed_ir.descr :=
       branch (descrt ret) (descrf ret) in
     Error_monad.__return
-      ((Failed
-        ({| judgement.Failed.descr := __descr_value |} : judgement.Failed)),
-        ctxt)
+      ((Failed {| judgement.Failed.descr := __descr_value |}), ctxt)
   | (Typed dbt, Failed {| judgement.Failed.descr := descrf |}) =>
     let 'existT _ __Typed_'aft2 [dbt, descrf] :=
       existT (A := Set)
@@ -3675,11 +3673,10 @@ Fixpoint parse_data {a : Set}
       (parse_items type_logger loc ctxt expr tk tv vs (fun x => Some x))
       (fun function_parameter =>
         let '(diff, ctxt) := function_parameter in
-        (({| Script_typed_ir.big_map.id := None;
+        ({| Script_typed_ir.big_map.id := None;
           Script_typed_ir.big_map.diff := diff;
           Script_typed_ir.big_map.key_type := ty_of_comparable_ty tk;
-          Script_typed_ir.big_map.value_type := tv |}
-          : Script_typed_ir.big_map __36 __37), ctxt))
+          Script_typed_ir.big_map.value_type := tv |}, ctxt))
   
   | (Script_typed_ir.Big_map_t tk tv _ty_name, Micheline.Int loc id) =>
     let 'existT _ [__38, __39] [tk, tv, _ty_name, loc, id] :=
@@ -3709,11 +3706,10 @@ Fixpoint parse_data {a : Set}
         let? 'Eq := comparable_ty_eq ctxt tk btk in
         let? '(Eq, ctxt) := ty_eq ctxt tv btv in
         Error_monad.ok
-          (({| Script_typed_ir.big_map.id := Some id;
+          ({| Script_typed_ir.big_map.id := Some id;
             Script_typed_ir.big_map.diff := empty_map tk;
             Script_typed_ir.big_map.key_type := ty_of_comparable_ty tk;
-            Script_typed_ir.big_map.value_type := tv |}
-            : Script_typed_ir.big_map __38 __39), ctxt))
+            Script_typed_ir.big_map.value_type := tv |}, ctxt))
     end
   
   | (Script_typed_ir.Big_map_t _tk _tv _, expr) =>
@@ -3776,8 +3772,8 @@ with parse_returning
           let=? '(_ret, ctxt) :=
             Lwt.__return (merge_types legacy ctxt loc ty ret) in
           Error_monad.__return
-            (({| Script_typed_ir.lambda.lam := (__descr_value, script_instr) |}
-              : Script_typed_ir.lambda), ctxt))
+            ({| Script_typed_ir.lambda.lam := (__descr_value, script_instr) |},
+              ctxt))
       |
         (Typed {|
           Script_typed_ir.descr.loc := loc;
@@ -3793,11 +3789,11 @@ with parse_returning
         Error_monad.fail extensible_type_value
       | (Failed {| judgement.Failed.descr := __descr_value |}, ctxt) =>
         Error_monad.__return
-          (({|
+          ({|
             Script_typed_ir.lambda.lam :=
               ((__descr_value
                 (Script_typed_ir.Item_t ret Script_typed_ir.Empty_t None)),
-                script_instr) |} : Script_typed_ir.lambda), ctxt)
+                script_instr) |}, ctxt)
       end
 
 with parse_int32
@@ -3931,10 +3927,10 @@ with parse_instr {bef : Set}
         (Alpha_context.Gas.consume ctxt (Typecheck_costs.instr instr)) in
     __return ctxt
       (Typed
-        ({| Script_typed_ir.descr.loc := loc;
+        {| Script_typed_ir.descr.loc := loc;
           Script_typed_ir.descr.bef := stack_ty;
           Script_typed_ir.descr.aft := aft; Script_typed_ir.descr.instr := instr
-          |} : Script_typed_ir.descr)) in
+          |}) in
   let=? ctxt :=
     Lwt.__return (Alpha_context.Gas.consume ctxt Typecheck_costs.cycle) in
   match
@@ -4261,13 +4257,11 @@ with parse_instr {bef : Set}
         (Script_typed_ir.Item_t __t_value rest annot) in
     let branch (ibt : Script_typed_ir.descr) (ibf : Script_typed_ir.descr)
       : Script_typed_ir.descr :=
-      ({| Script_typed_ir.descr.loc := loc; Script_typed_ir.descr.bef := bef;
+      {| Script_typed_ir.descr.loc := loc; Script_typed_ir.descr.bef := bef;
         Script_typed_ir.descr.aft := ibt.(Script_typed_ir.descr.aft);
-        Script_typed_ir.descr.instr := Script_typed_ir.If_none ibt ibf |}
-        : Script_typed_ir.descr) in
+        Script_typed_ir.descr.instr := Script_typed_ir.If_none ibt ibf |} in
     let=? '(judgement, ctxt) :=
-      merge_branches legacy ctxt loc btr bfr
-        ({| branch.branch := branch |} : branch) in
+      merge_branches legacy ctxt loc btr bfr {| branch.branch := branch |} in
     __return ctxt judgement
   
   |
@@ -4432,13 +4426,11 @@ with parse_instr {bef : Set}
         (Script_typed_ir.Item_t tr rest right_annot) in
     let branch (ibt : Script_typed_ir.descr) (ibf : Script_typed_ir.descr)
       : Script_typed_ir.descr :=
-      ({| Script_typed_ir.descr.loc := loc; Script_typed_ir.descr.bef := bef;
+      {| Script_typed_ir.descr.loc := loc; Script_typed_ir.descr.bef := bef;
         Script_typed_ir.descr.aft := ibt.(Script_typed_ir.descr.aft);
-        Script_typed_ir.descr.instr := Script_typed_ir.If_left ibt ibf |}
-        : Script_typed_ir.descr) in
+        Script_typed_ir.descr.instr := Script_typed_ir.If_left ibt ibf |} in
     let=? '(judgement, ctxt) :=
-      merge_branches legacy ctxt loc btr bfr
-        ({| branch.branch := branch |} : branch) in
+      merge_branches legacy ctxt loc btr bfr {| branch.branch := branch |} in
     __return ctxt judgement
   
   |
@@ -4518,13 +4510,11 @@ with parse_instr {bef : Set}
       in
     let branch (ibt : Script_typed_ir.descr) (ibf : Script_typed_ir.descr)
       : Script_typed_ir.descr :=
-      ({| Script_typed_ir.descr.loc := loc; Script_typed_ir.descr.bef := bef;
+      {| Script_typed_ir.descr.loc := loc; Script_typed_ir.descr.bef := bef;
         Script_typed_ir.descr.aft := ibt.(Script_typed_ir.descr.aft);
-        Script_typed_ir.descr.instr := Script_typed_ir.If_cons ibt ibf |}
-        : Script_typed_ir.descr) in
+        Script_typed_ir.descr.instr := Script_typed_ir.If_cons ibt ibf |} in
     let=? '(judgement, ctxt) :=
-      merge_branches legacy ctxt loc btr bfr
-        ({| branch.branch := branch |} : branch) in
+      merge_branches legacy ctxt loc btr bfr {| branch.branch := branch |} in
     __return ctxt judgement
   
   |
@@ -5083,25 +5073,21 @@ with parse_instr {bef : Set}
             [Script_typed_ir.stack_ty ** Script_typed_ir.descr]) _ [aft, instr]
         in
       let nop :=
-        ({| Script_typed_ir.descr.loc := loc; Script_typed_ir.descr.bef := aft;
+        {| Script_typed_ir.descr.loc := loc; Script_typed_ir.descr.bef := aft;
           Script_typed_ir.descr.aft := aft;
-          Script_typed_ir.descr.instr := Script_typed_ir.Nop |}
-          : Script_typed_ir.descr) in
+          Script_typed_ir.descr.instr := Script_typed_ir.Nop |} in
       typed ctxt loc (Script_typed_ir.Seq instr nop) aft
     | Failed {| judgement.Failed.descr := __descr_value |} =>
       let __descr_value (aft : Script_typed_ir.stack_ty)
         : Script_typed_ir.descr :=
         let nop :=
-          ({| Script_typed_ir.descr.loc := loc;
-            Script_typed_ir.descr.bef := aft; Script_typed_ir.descr.aft := aft;
-            Script_typed_ir.descr.instr := Script_typed_ir.Nop |}
-            : Script_typed_ir.descr) in
+          {| Script_typed_ir.descr.loc := loc; Script_typed_ir.descr.bef := aft;
+            Script_typed_ir.descr.aft := aft;
+            Script_typed_ir.descr.instr := Script_typed_ir.Nop |} in
         let __descr_value := __descr_value aft in
         Script_typed_ir.descr.with_instr (Script_typed_ir.Seq __descr_value nop)
           __descr_value in
-      __return ctxt
-        (Failed
-          ({| judgement.Failed.descr := __descr_value |} : judgement.Failed))
+      __return ctxt (Failed {| judgement.Failed.descr := __descr_value |})
     end
   
   | ((Micheline.Seq loc (cons hd tl), __stack_value), _) =>
@@ -5122,15 +5108,12 @@ with parse_instr {bef : Set}
       | Failed {| judgement.Failed.descr := __descr_value |} =>
         let __descr_value (ret : Script_typed_ir.stack_ty)
           : Script_typed_ir.descr :=
-          ({| Script_typed_ir.descr.loc := loc;
+          {| Script_typed_ir.descr.loc := loc;
             Script_typed_ir.descr.bef := __stack_value;
             Script_typed_ir.descr.aft := ret;
             Script_typed_ir.descr.instr :=
-              Script_typed_ir.Seq ihd (__descr_value ret) |}
-            : Script_typed_ir.descr) in
-        __return ctxt
-          (Failed
-            ({| judgement.Failed.descr := __descr_value |} : judgement.Failed))
+              Script_typed_ir.Seq ihd (__descr_value ret) |} in
+        __return ctxt (Failed {| judgement.Failed.descr := __descr_value |})
       | Typed itl =>
         let 'existT _ __Typed_'aft12 itl :=
           existT (A := Set) (fun __Typed_'aft12 => Script_typed_ir.descr) _ itl
@@ -5162,13 +5145,11 @@ with parse_instr {bef : Set}
       in
     let branch (ibt : Script_typed_ir.descr) (ibf : Script_typed_ir.descr)
       : Script_typed_ir.descr :=
-      ({| Script_typed_ir.descr.loc := loc; Script_typed_ir.descr.bef := bef;
+      {| Script_typed_ir.descr.loc := loc; Script_typed_ir.descr.bef := bef;
         Script_typed_ir.descr.aft := ibt.(Script_typed_ir.descr.aft);
-        Script_typed_ir.descr.instr := Script_typed_ir.If ibt ibf |}
-        : Script_typed_ir.descr) in
+        Script_typed_ir.descr.instr := Script_typed_ir.If ibt ibf |} in
     let=? '(judgement, ctxt) :=
-      merge_branches legacy ctxt loc btr bfr
-        ({| branch.branch := branch |} : branch) in
+      merge_branches legacy ctxt loc btr bfr {| branch.branch := branch |} in
     __return ctxt judgement
   
   |
@@ -5450,13 +5431,11 @@ with parse_instr {bef : Set}
     let=? '_ := Script_ir_annot.fail_unexpected_annot loc annot in
     let __descr_value (aft : Script_typed_ir.stack_ty)
       : Script_typed_ir.descr :=
-      ({| Script_typed_ir.descr.loc := loc;
+      {| Script_typed_ir.descr.loc := loc;
         Script_typed_ir.descr.bef := stack_ty; Script_typed_ir.descr.aft := aft;
-        Script_typed_ir.descr.instr := Script_typed_ir.Failwith v |}
-        : Script_typed_ir.descr) in
+        Script_typed_ir.descr.instr := Script_typed_ir.Failwith v |} in
     let=? '_ := log_stack ctxt loc stack_ty Script_typed_ir.Empty_t in
-    __return ctxt
-      (Failed ({| judgement.Failed.descr := __descr_value |} : judgement.Failed))
+    __return ctxt (Failed {| judgement.Failed.descr := __descr_value |})
   
   |
     ((Micheline.Prim loc Alpha_context.Script.I_ADD [] annot,
@@ -6656,12 +6635,11 @@ with parse_instr {bef : Set}
         Error_monad.trace extensible_type_value
           (parse_returning type_logger
             (Toplevel
-              ({| tc_context.Toplevel.storage_type := storage_type;
+              {| tc_context.Toplevel.storage_type := storage_type;
                 tc_context.Toplevel.param_type := arg_type;
                 tc_context.Toplevel.root_name := root_name;
-                tc_context.Toplevel.legacy_create_contract_literal := true |}
-                : tc_context.Toplevel)) ctxt legacy (arg_type_full, None)
-            ret_type_full code_field) in
+                tc_context.Toplevel.legacy_create_contract_literal := true |})
+            ctxt legacy (arg_type_full, None) ret_type_full code_field) in
       let=? '(Eq, ctxt) := Lwt.__return (ty_eq ctxt arg arg_type_full) in
       let=? '(_, ctxt) :=
         Lwt.__return (merge_types legacy ctxt loc arg arg_type_full) in
@@ -6748,12 +6726,11 @@ with parse_instr {bef : Set}
       Error_monad.trace extensible_type_value
         (parse_returning type_logger
           (Toplevel
-            ({| tc_context.Toplevel.storage_type := storage_type;
+            {| tc_context.Toplevel.storage_type := storage_type;
               tc_context.Toplevel.param_type := arg_type;
               tc_context.Toplevel.root_name := root_name;
-              tc_context.Toplevel.legacy_create_contract_literal := false |}
-              : tc_context.Toplevel)) ctxt legacy (arg_type_full, None)
-          ret_type_full code_field) in
+              tc_context.Toplevel.legacy_create_contract_literal := false |})
+          ctxt legacy (arg_type_full, None) ret_type_full code_field) in
     let=? '(Eq, ctxt) := Lwt.__return (ty_eq ctxt arg arg_type_full) in
     let=? '(_, ctxt) :=
       Lwt.__return (merge_types legacy ctxt loc arg arg_type_full) in
@@ -7525,20 +7502,18 @@ Definition parse_script
     Error_monad.trace extensible_type_value
       (parse_returning type_logger
         (Toplevel
-          ({| tc_context.Toplevel.storage_type := storage_type;
+          {| tc_context.Toplevel.storage_type := storage_type;
             tc_context.Toplevel.param_type := arg_type;
             tc_context.Toplevel.root_name := root_name;
-            tc_context.Toplevel.legacy_create_contract_literal := false |}
-            : tc_context.Toplevel)) ctxt legacy (arg_type_full, None)
-        ret_type_full code_field) in
+            tc_context.Toplevel.legacy_create_contract_literal := false |}) ctxt
+        legacy (arg_type_full, None) ret_type_full code_field) in
   Error_monad.__return
     ((Ex_script
-      ({| Script_typed_ir.script.code := code;
+      {| Script_typed_ir.script.code := code;
         Script_typed_ir.script.arg_type := arg_type;
         Script_typed_ir.script.storage := storage;
         Script_typed_ir.script.storage_type := storage_type;
-        Script_typed_ir.script.root_name := root_name |}
-        : Script_typed_ir.script __Ex_ty_'a1)), ctxt).
+        Script_typed_ir.script.root_name := root_name |}), ctxt).
 
 Definition typecheck_code
   (ctxt : Alpha_context.context) (code : Alpha_context.Script.expr)
@@ -7592,12 +7567,11 @@ Definition typecheck_code
               Pervasives.op_coloneq type_map
                 (cons (loc, (bef, aft)) (Pervasives.op_exclamation type_map))))
       (Toplevel
-        ({| tc_context.Toplevel.storage_type := storage_type;
+        {| tc_context.Toplevel.storage_type := storage_type;
           tc_context.Toplevel.param_type := arg_type;
           tc_context.Toplevel.root_name := root_name;
-          tc_context.Toplevel.legacy_create_contract_literal := false |}
-          : tc_context.Toplevel)) ctxt legacy (arg_type_full, None)
-      ret_type_full code_field in
+          tc_context.Toplevel.legacy_create_contract_literal := false |}) ctxt
+      legacy (arg_type_full, None) ret_type_full code_field in
   let=? '({| Script_typed_ir.lambda.lam := _ |}, ctxt) :=
     Error_monad.trace extensible_type_value __result_value in
   Error_monad.__return ((Pervasives.op_exclamation type_map), ctxt).
@@ -8183,12 +8157,12 @@ Definition unparse_script {A : Set}
         Alpha_context.Gas.consume ctxt (Unparse_costs.prim_cost 1 nil) in
       Alpha_context.Gas.consume ctxt (Unparse_costs.prim_cost 1 nil)) in
   Error_monad.__return
-    (({|
+    ({|
       Alpha_context.Script.t.code :=
         Alpha_context.Script.__lazy_expr_value (Micheline.strip_locations code);
       Alpha_context.Script.t.storage :=
         Alpha_context.Script.__lazy_expr_value
-          (Micheline.strip_locations storage) |} : Alpha_context.Script.t), ctxt).
+          (Micheline.strip_locations storage) |}, ctxt).
 
 Definition pack_data {A : Set}
   (ctxt : Alpha_context.context) (typ : Script_typed_ir.ty) (data : A)
@@ -8224,10 +8198,10 @@ Definition hash_data {A : Set}
 Definition empty_big_map {A B : Set}
   (tk : Script_typed_ir.comparable_ty) (tv : Script_typed_ir.ty)
   : Script_typed_ir.big_map A B :=
-  ({| Script_typed_ir.big_map.id := None;
+  {| Script_typed_ir.big_map.id := None;
     Script_typed_ir.big_map.diff := empty_map tk;
     Script_typed_ir.big_map.key_type := ty_of_comparable_ty tk;
-    Script_typed_ir.big_map.value_type := tv |} : Script_typed_ir.big_map _ _).
+    Script_typed_ir.big_map.value_type := tv |}.
 
 Definition big_map_mem {A B : Set}
   (ctxt : Alpha_context.context) (__key_value : A)
@@ -8332,14 +8306,13 @@ Definition diff_of_big_map {A B : Set}
         (ctxt,
           [
             Alpha_context.Contract.Alloc
-              ({|
+              {|
                 Alpha_context.Contract.big_map_diff_item.Alloc.big_map :=
                   id;
                 Alpha_context.Contract.big_map_diff_item.Alloc.key_type :=
                   Micheline.strip_locations kt;
                 Alpha_context.Contract.big_map_diff_item.Alloc.value_type :=
                   Micheline.strip_locations kv |}
-                : Alpha_context.Contract.big_map_diff_item.Alloc)
           ], id)
     end in
   let pairs :=
@@ -8369,7 +8342,7 @@ Definition diff_of_big_map {A B : Set}
             end in
           let diff_item :=
             Alpha_context.Contract.Update
-              ({|
+              {|
                 Alpha_context.Contract.big_map_diff_item.Update.big_map :=
                   big_map;
                 Alpha_context.Contract.big_map_diff_item.Update.diff_key :=
@@ -8377,8 +8350,7 @@ Definition diff_of_big_map {A B : Set}
                 Alpha_context.Contract.big_map_diff_item.Update.diff_key_hash :=
                   diff_key_hash;
                 Alpha_context.Contract.big_map_diff_item.Update.diff_value :=
-                  diff_value |}
-                : Alpha_context.Contract.big_map_diff_item.Update) in
+                  diff_value |} in
           Error_monad.__return ((cons diff_item acc), ctxt)) (nil, ctxt) pairs
     in
   Error_monad.__return ((Pervasives.op_at init diff), big_map, ctxt).

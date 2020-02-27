@@ -48,12 +48,11 @@ Definition register (function_parameter : unit) : unit :=
         fun function_parameter =>
           let '_ := function_parameter in
           Error_monad.__return
-            ({|
+            {|
               Alpha_context.Constants.t.fixed :=
                 Alpha_context.Constants.__fixed_value;
               Alpha_context.Constants.t.parametric :=
-                Alpha_context.Constants.__parametric_value ctxt |}
-              : Alpha_context.Constants.t)).
+                Alpha_context.Constants.__parametric_value ctxt |}).
 
 Definition errors {D E G I K L a b c i o q : Set}
   (ctxt :

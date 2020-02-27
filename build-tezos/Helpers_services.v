@@ -37,11 +37,10 @@ Definition parse_operation (op : Alpha_context.Operation.raw)
       op.(Alpha_context.Operation.raw.proto) with
   | Some protocol_data =>
     Error_monad.ok
-      ({|
+      {|
         Alpha_context.packed_operation.shell :=
           op.(Alpha_context.Operation.raw.shell);
         Alpha_context.packed_operation.protocol_data := protocol_data |}
-        : Alpha_context.packed_operation)
   | None => Error_monad.__error_value extensible_type_value
   end.
 
@@ -540,11 +539,11 @@ Module Forge.
           Error_monad.__return
             (Data_encoding.Binary.to_bytes_exn
               Alpha_context.Block_header.contents_encoding
-              ({| Alpha_context.Block_header.contents.priority := priority;
+              {| Alpha_context.Block_header.contents.priority := priority;
                 Alpha_context.Block_header.contents.seed_nonce_hash :=
                   seed_nonce_hash;
                 Alpha_context.Block_header.contents.proof_of_work_nonce :=
-                  proof_of_work_nonce |} : Alpha_context.Block_header.contents))).
+                  proof_of_work_nonce |})).
   
   Module Manager.
     Definition operations {D E G I K L a b c i o q : Set}
@@ -583,7 +582,7 @@ Module Forge.
                   operation in
               Alpha_context.Contents
                 (Alpha_context.Manager_operation
-                  ({| Alpha_context.contents.Manager_operation.source := source;
+                  {| Alpha_context.contents.Manager_operation.source := source;
                     Alpha_context.contents.Manager_operation.fee := fee;
                     Alpha_context.contents.Manager_operation.counter := counter;
                     Alpha_context.contents.Manager_operation.operation :=
@@ -591,8 +590,7 @@ Module Forge.
                     Alpha_context.contents.Manager_operation.gas_limit :=
                       gas_limit;
                     Alpha_context.contents.Manager_operation.storage_limit :=
-                      storage_limit |}
-                    : Alpha_context.contents.Manager_operation))) operations in
+                      storage_limit |})) operations in
         let ops :=
           match (sourcePubKey, revealed) with
           | ((None, _) | (_, Some _)) => ops
@@ -601,7 +599,7 @@ Module Forge.
             cons
               (Alpha_context.Contents
                 (Alpha_context.Manager_operation
-                  ({| Alpha_context.contents.Manager_operation.source := source;
+                  {| Alpha_context.contents.Manager_operation.source := source;
                     Alpha_context.contents.Manager_operation.fee := fee;
                     Alpha_context.contents.Manager_operation.counter := counter;
                     Alpha_context.contents.Manager_operation.operation :=
@@ -609,12 +607,11 @@ Module Forge.
                     Alpha_context.contents.Manager_operation.gas_limit :=
                       gas_limit;
                     Alpha_context.contents.Manager_operation.storage_limit :=
-                      storage_limit |}
-                    : Alpha_context.contents.Manager_operation))) ops
+                      storage_limit |})) ops
           end in
         RPC_context.make_call0 S.operations ctxt block tt
-          (({| Operation.shell_header.branch := branch |}
-            : Operation.shell_header), (Alpha_context.Operation.of_list ops))
+          ({| Operation.shell_header.branch := branch |},
+            (Alpha_context.Operation.of_list ops))
       end.
     
     Definition reveal {D E G I K L a b c i o q : Set}
@@ -683,7 +680,7 @@ Module Forge.
                   [
                     Alpha_context.Manager
                       (Alpha_context.Transaction
-                        ({|
+                        {|
                           Alpha_context.manager_operation.Transaction.amount :=
                             amount;
                           Alpha_context.manager_operation.Transaction.parameters :=
@@ -692,9 +689,7 @@ Module Forge.
                             entrypoint;
                           Alpha_context.manager_operation.Transaction.destination :=
                             destination
-                          |}
-                          :
-                            Alpha_context.manager_operation.Transaction))
+                          |})
                   ].
     
     Definition origination {D E G I K L a b c i o q : Set}
@@ -726,7 +721,7 @@ Module Forge.
         [
           Alpha_context.Manager
             (Alpha_context.Origination
-              ({|
+              {|
                 Alpha_context.manager_operation.Origination.delegate :=
                   delegatePubKey;
                 Alpha_context.manager_operation.Origination.script :=
@@ -734,8 +729,7 @@ Module Forge.
                 Alpha_context.manager_operation.Origination.credit :=
                   balance;
                 Alpha_context.manager_operation.Origination.preorigination :=
-                  None |}
-                : Alpha_context.manager_operation.Origination))
+                  None |})
         ].
     
     Definition delegation {D E G I K L a b c i o q : Set}
@@ -778,7 +772,7 @@ Module Forge.
     (operation : Alpha_context.contents)
     : Lwt.t (Error_monad.shell_tzresult MBytes.t) :=
     RPC_context.make_call0 S.operations ctxt block tt
-      (({| Operation.shell_header.branch := branch |} : Operation.shell_header),
+      ({| Operation.shell_header.branch := branch |},
         (Alpha_context.Contents_list (Alpha_context.Single operation))).
   
   Definition endorsement {D E G I K L a b c i o q : Set}
@@ -799,8 +793,7 @@ Module Forge.
     let '_ := function_parameter in
     operation ctxt __b_value branch
       (Alpha_context.Endorsement
-        ({| Alpha_context.contents.Endorsement.level := level |}
-          : Alpha_context.contents.Endorsement)).
+        {| Alpha_context.contents.Endorsement.level := level |}).
   
   Definition proposals {D E G I K L a b c i o q : Set}
     (ctxt :
@@ -823,10 +816,9 @@ Module Forge.
     let '_ := function_parameter in
     operation ctxt __b_value branch
       (Alpha_context.Proposals
-        ({| Alpha_context.contents.Proposals.source := source;
+        {| Alpha_context.contents.Proposals.source := source;
           Alpha_context.contents.Proposals.period := period;
-          Alpha_context.contents.Proposals.proposals := proposals |}
-          : Alpha_context.contents.Proposals)).
+          Alpha_context.contents.Proposals.proposals := proposals |}).
   
   Definition ballot {D E G I K L a b c i o q : Set}
     (ctxt :
@@ -850,11 +842,10 @@ Module Forge.
     let '_ := function_parameter in
     operation ctxt __b_value branch
       (Alpha_context.Ballot
-        ({| Alpha_context.contents.Ballot.source := source;
+        {| Alpha_context.contents.Ballot.source := source;
           Alpha_context.contents.Ballot.period := period;
           Alpha_context.contents.Ballot.proposal := proposal;
-          Alpha_context.contents.Ballot.ballot := ballot |}
-          : Alpha_context.contents.Ballot)).
+          Alpha_context.contents.Ballot.ballot := ballot |}).
   
   Definition seed_nonce_revelation {D E G I K L a b c i o q : Set}
     (ctxt :
@@ -874,9 +865,8 @@ Module Forge.
     let '_ := function_parameter in
     operation ctxt block branch
       (Alpha_context.Seed_nonce_revelation
-        ({| Alpha_context.contents.Seed_nonce_revelation.level := level;
-          Alpha_context.contents.Seed_nonce_revelation.nonce := __nonce_value |}
-          : Alpha_context.contents.Seed_nonce_revelation)).
+        {| Alpha_context.contents.Seed_nonce_revelation.level := level;
+          Alpha_context.contents.Seed_nonce_revelation.nonce := __nonce_value |}).
   
   Definition double_baking_evidence {D E G I K L a b c i o q : Set}
     (ctxt :
@@ -896,9 +886,8 @@ Module Forge.
     let '_ := function_parameter in
     operation ctxt block branch
       (Alpha_context.Double_baking_evidence
-        ({| Alpha_context.contents.Double_baking_evidence.bh1 := bh1;
-          Alpha_context.contents.Double_baking_evidence.bh2 := bh2 |}
-          : Alpha_context.contents.Double_baking_evidence)).
+        {| Alpha_context.contents.Double_baking_evidence.bh1 := bh1;
+          Alpha_context.contents.Double_baking_evidence.bh2 := bh2 |}).
   
   Definition double_endorsement_evidence {D E G I K L a b c i o q : Set}
     (ctxt :
@@ -918,9 +907,8 @@ Module Forge.
     let '_ := function_parameter in
     operation ctxt block branch
       (Alpha_context.Double_endorsement_evidence
-        ({| Alpha_context.contents.Double_endorsement_evidence.op1 := op1;
-          Alpha_context.contents.Double_endorsement_evidence.op2 := op2 |}
-          : Alpha_context.contents.Double_endorsement_evidence)).
+        {| Alpha_context.contents.Double_endorsement_evidence.op1 := op1;
+          Alpha_context.contents.Double_endorsement_evidence.op2 := op2 |}).
   
   Definition empty_proof_of_work_nonce : MBytes.t :=
     MBytes.of_string
@@ -1037,9 +1025,8 @@ Module Parse.
     : Lwt.t
       (Error_monad.shell_tzresult Alpha_context.Block_header.protocol_data) :=
     RPC_context.make_call0 S.block ctxt block tt
-      ({| Block_header.t.shell := shell;
-        Block_header.t.protocol_data := protocol_data |}
-        : Alpha_context.Block_header.raw).
+      {| Block_header.t.shell := shell;
+        Block_header.t.protocol_data := protocol_data |}.
 End Parse.
 
 Module S.
@@ -1057,7 +1044,7 @@ Module S.
     RPC_query.seal
       (RPC_query.op_pipeplus
         (RPC_query.__query_value
-          (fun offset => ({| level_query.offset := offset |} : level_query)))
+          (fun offset => {| level_query.offset := offset |}))
         (RPC_query.__field_value None "offset" RPC_arg.__int32_value
           (* ❌ Constant of type int32 is converted to int *)
           0 (fun __t_value => __t_value.(level_query.offset)))).
@@ -1132,7 +1119,7 @@ Definition current_level {D E G I K L a b c i o q : Set}
     end in
   fun block =>
     RPC_context.make_call0 S.current_level ctxt block
-      ({| S.level_query.offset := offset |} : S.level_query) tt.
+      {| S.level_query.offset := offset |} tt.
 
 Definition levels_in_current_cycle {D E G I K L a b c i o q : Set}
   (ctxt :
@@ -1160,4 +1147,4 @@ Definition levels_in_current_cycle {D E G I K L a b c i o q : Set}
     end in
   fun block =>
     RPC_context.make_call0 S.levels_in_current_cycle ctxt block
-      ({| S.level_query.offset := offset |} : S.level_query) tt.
+      {| S.level_query.offset := offset |} tt.

@@ -78,8 +78,7 @@ Definition encoding : Data_encoding.encoding t :=
           | Limited {| t.Limited.remaining := remaining |} => Some remaining
           | _ => None
           end)
-        (fun remaining =>
-          Limited ({| t.Limited.remaining := remaining |} : t.Limited));
+        (fun remaining => Limited {| t.Limited.remaining := remaining |});
       Data_encoding.__case_value "Unaccounted" None (Data_encoding.Tag 1)
         (Data_encoding.constant "unaccounted")
         (fun function_parameter =>
@@ -123,10 +122,10 @@ Definition cost_encoding : Data_encoding.encoding cost :=
     (fun function_parameter =>
       let '(allocations, steps, reads, writes, bytes_read, bytes_written) :=
         function_parameter in
-      ({| cost.allocations := allocations; cost.steps := steps;
+      {| cost.allocations := allocations; cost.steps := steps;
         cost.reads := reads; cost.writes := writes;
-        cost.bytes_read := bytes_read; cost.bytes_written := bytes_written |}
-        : cost)) None
+        cost.bytes_read := bytes_read; cost.bytes_written := bytes_written |})
+    None
     (Data_encoding.obj6
       (Data_encoding.req None None "allocations" Data_encoding.z)
       (Data_encoding.req None None "steps" Data_encoding.z)
@@ -233,8 +232,7 @@ Definition consume_raw
           Error_monad.__error_value extensible_type_value
         else
           Error_monad.ok
-            (block_remaining,
-              (Limited ({| t.Limited.remaining := remaining |} : t.Limited)),
+            (block_remaining, (Limited {| t.Limited.remaining := remaining |}),
               rest)
     else
       Error_monad.ok (block_gas, operation_gas, total_internal_gas)
@@ -252,9 +250,9 @@ Definition check_enough_raw
 Definition internal_gas_zero : internal_gas := Z.zero.
 
 Definition alloc_cost (n : int) : cost :=
-  ({| cost.allocations := scale (Z.of_int (Pervasives.op_plus n 1));
+  {| cost.allocations := scale (Z.of_int (Pervasives.op_plus n 1));
     cost.steps := Z.zero; cost.reads := Z.zero; cost.writes := Z.zero;
-    cost.bytes_read := Z.zero; cost.bytes_written := Z.zero |} : cost).
+    cost.bytes_read := Z.zero; cost.bytes_written := Z.zero |}.
 
 Definition alloc_bytes_cost (n : int) : cost :=
   alloc_cost (Pervasives.op_div (Pervasives.op_plus n 7) 8).
@@ -263,47 +261,46 @@ Definition alloc_bits_cost (n : int) : cost :=
   alloc_cost (Pervasives.op_div (Pervasives.op_plus n 63) 64).
 
 Definition atomic_step_cost (n : int) : cost :=
-  ({| cost.allocations := Z.zero;
+  {| cost.allocations := Z.zero;
     cost.steps := Z.of_int (Pervasives.op_star 2 n); cost.reads := Z.zero;
     cost.writes := Z.zero; cost.bytes_read := Z.zero;
-    cost.bytes_written := Z.zero |} : cost).
+    cost.bytes_written := Z.zero |}.
 
 Definition step_cost (n : int) : cost :=
-  ({| cost.allocations := Z.zero; cost.steps := scale (Z.of_int n);
+  {| cost.allocations := Z.zero; cost.steps := scale (Z.of_int n);
     cost.reads := Z.zero; cost.writes := Z.zero; cost.bytes_read := Z.zero;
-    cost.bytes_written := Z.zero |} : cost).
+    cost.bytes_written := Z.zero |}.
 
 Definition free : cost :=
-  ({| cost.allocations := Z.zero; cost.steps := Z.zero; cost.reads := Z.zero;
+  {| cost.allocations := Z.zero; cost.steps := Z.zero; cost.reads := Z.zero;
     cost.writes := Z.zero; cost.bytes_read := Z.zero;
-    cost.bytes_written := Z.zero |} : cost).
+    cost.bytes_written := Z.zero |}.
 
 Definition read_bytes_cost (n : Z.t) : cost :=
-  ({| cost.allocations := Z.zero; cost.steps := Z.zero;
+  {| cost.allocations := Z.zero; cost.steps := Z.zero;
     cost.reads := scale Z.one; cost.writes := Z.zero;
-    cost.bytes_read := scale n; cost.bytes_written := Z.zero |} : cost).
+    cost.bytes_read := scale n; cost.bytes_written := Z.zero |}.
 
 Definition write_bytes_cost (n : Z.t) : cost :=
-  ({| cost.allocations := Z.zero; cost.steps := Z.zero; cost.reads := Z.zero;
+  {| cost.allocations := Z.zero; cost.steps := Z.zero; cost.reads := Z.zero;
     cost.writes := Z.one; cost.bytes_read := Z.zero;
-    cost.bytes_written := scale n |} : cost).
+    cost.bytes_written := scale n |}.
 
 Definition op_plusat (x : cost) (y : cost) : cost :=
-  ({| cost.allocations := Z.add x.(cost.allocations) y.(cost.allocations);
+  {| cost.allocations := Z.add x.(cost.allocations) y.(cost.allocations);
     cost.steps := Z.add x.(cost.steps) y.(cost.steps);
     cost.reads := Z.add x.(cost.reads) y.(cost.reads);
     cost.writes := Z.add x.(cost.writes) y.(cost.writes);
     cost.bytes_read := Z.add x.(cost.bytes_read) y.(cost.bytes_read);
-    cost.bytes_written := Z.add x.(cost.bytes_written) y.(cost.bytes_written) |}
-    : cost).
+    cost.bytes_written := Z.add x.(cost.bytes_written) y.(cost.bytes_written) |}.
 
 Definition op_starat (x : int) (y : cost) : cost :=
-  ({| cost.allocations := Z.mul (Z.of_int x) y.(cost.allocations);
+  {| cost.allocations := Z.mul (Z.of_int x) y.(cost.allocations);
     cost.steps := Z.mul (Z.of_int x) y.(cost.steps);
     cost.reads := Z.mul (Z.of_int x) y.(cost.reads);
     cost.writes := Z.mul (Z.of_int x) y.(cost.writes);
     cost.bytes_read := Z.mul (Z.of_int x) y.(cost.bytes_read);
-    cost.bytes_written := Z.mul (Z.of_int x) y.(cost.bytes_written) |} : cost).
+    cost.bytes_written := Z.mul (Z.of_int x) y.(cost.bytes_written) |}.
 
 Definition alloc_mbytes_cost (n : int) : cost :=
   op_plusat (alloc_cost 12) (alloc_bytes_cost n).

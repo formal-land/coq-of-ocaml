@@ -297,12 +297,11 @@ Definition check_header_proof_of_work_stamp
   (stamp_threshold : (|Compare.Uint64|).(Compare.S.t)) : bool :=
   let __hash_value :=
     Alpha_context.Block_header.__hash_value
-      ({| Alpha_context.Block_header.t.shell := shell;
+      {| Alpha_context.Block_header.t.shell := shell;
         Alpha_context.Block_header.t.protocol_data :=
-          ({| Alpha_context.Block_header.protocol_data.contents := contents;
+          {| Alpha_context.Block_header.protocol_data.contents := contents;
             Alpha_context.Block_header.protocol_data.signature := Signature.zero
-            |} : Alpha_context.Block_header.protocol_data) |}
-        : Alpha_context.Block_header.block_header) in
+            |} |} in
   check_hash __hash_value stamp_threshold.
 
 Definition check_proof_of_work_stamp

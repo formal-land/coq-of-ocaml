@@ -109,11 +109,10 @@ Definition big_map_diff_item_encoding
           let '(_, big_map, diff_key_hash, diff_key, diff_value) :=
             function_parameter in
           Update
-            ({| big_map_diff_item.Update.big_map := big_map;
+            {| big_map_diff_item.Update.big_map := big_map;
               big_map_diff_item.Update.diff_key := diff_key;
               big_map_diff_item.Update.diff_key_hash := diff_key_hash;
-              big_map_diff_item.Update.diff_value := diff_value |}
-              : big_map_diff_item.Update));
+              big_map_diff_item.Update.diff_value := diff_value |});
       Data_encoding.__case_value "remove" None (Data_encoding.Tag 1)
         (Data_encoding.obj2
           (Data_encoding.req None None "action"
@@ -162,10 +161,9 @@ Definition big_map_diff_item_encoding
         (fun function_parameter =>
           let '(_, big_map, key_type, value_type) := function_parameter in
           Alloc
-            ({| big_map_diff_item.Alloc.big_map := big_map;
+            {| big_map_diff_item.Alloc.big_map := big_map;
               big_map_diff_item.Alloc.key_type := key_type;
-              big_map_diff_item.Alloc.value_type := value_type |}
-              : big_map_diff_item.Alloc))
+              big_map_diff_item.Alloc.value_type := value_type |})
     ].
 
 Definition big_map_diff_encoding
@@ -546,9 +544,7 @@ Definition get_script
   | (Some code, Some storage) =>
     Error_monad.__return
       (c,
-        (Some
-          ({| Script_repr.t.code := code; Script_repr.t.storage := storage |}
-            : Script_repr.t)))
+        (Some {| Script_repr.t.code := code; Script_repr.t.storage := storage |}))
   | ((None, Some _) | (Some _, None)) => failwith "get_script"
   end.
 

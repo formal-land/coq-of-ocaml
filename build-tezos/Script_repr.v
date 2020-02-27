@@ -69,7 +69,7 @@ Definition encoding : Data_encoding.encoding t :=
         (code, storage))
       (fun function_parameter =>
         let '(code, storage) := function_parameter in
-        ({| t.code := code; t.storage := storage |} : t)) None
+        {| t.code := code; t.storage := storage |}) None
       (Data_encoding.obj2
         (Data_encoding.req None None "code" lazy_expr_encoding)
         (Data_encoding.req None None "storage" lazy_expr_encoding))).

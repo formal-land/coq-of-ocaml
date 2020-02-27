@@ -1540,44 +1540,40 @@ Fixpoint step
         (let arg_stack_ty :=
           Script_typed_ir.Item_t arg_ty Script_typed_ir.Empty_t None in
         let const_descr :=
-          ({|
+          {|
             Script_typed_ir.descr.loc :=
               __descr_value.(Script_typed_ir.descr.loc);
             Script_typed_ir.descr.bef := arg_stack_ty;
             Script_typed_ir.descr.aft :=
               Script_typed_ir.Item_t capture_ty arg_stack_ty None;
-            Script_typed_ir.descr.instr := Script_typed_ir.Const capture |}
-            : Script_typed_ir.descr) in
+            Script_typed_ir.descr.instr := Script_typed_ir.Const capture |} in
         let pair_descr :=
-          ({|
+          {|
             Script_typed_ir.descr.loc :=
               __descr_value.(Script_typed_ir.descr.loc);
             Script_typed_ir.descr.bef :=
               Script_typed_ir.Item_t capture_ty arg_stack_ty None;
             Script_typed_ir.descr.aft :=
               Script_typed_ir.Item_t full_arg_ty Script_typed_ir.Empty_t None;
-            Script_typed_ir.descr.instr := Script_typed_ir.Cons_pair |}
-            : Script_typed_ir.descr) in
+            Script_typed_ir.descr.instr := Script_typed_ir.Cons_pair |} in
         let seq_descr :=
-          ({|
+          {|
             Script_typed_ir.descr.loc :=
               __descr_value.(Script_typed_ir.descr.loc);
             Script_typed_ir.descr.bef := arg_stack_ty;
             Script_typed_ir.descr.aft :=
               Script_typed_ir.Item_t full_arg_ty Script_typed_ir.Empty_t None;
             Script_typed_ir.descr.instr :=
-              Script_typed_ir.Seq const_descr pair_descr |}
-            : Script_typed_ir.descr) in
+              Script_typed_ir.Seq const_descr pair_descr |} in
         let full_descr :=
-          ({|
+          {|
             Script_typed_ir.descr.loc :=
               __descr_value.(Script_typed_ir.descr.loc);
             Script_typed_ir.descr.bef := arg_stack_ty;
             Script_typed_ir.descr.aft :=
               __descr_value.(Script_typed_ir.descr.aft);
             Script_typed_ir.descr.instr :=
-              Script_typed_ir.Seq seq_descr __descr_value |}
-            : Script_typed_ir.descr) in
+              Script_typed_ir.Seq seq_descr __descr_value |} in
         let full_expr :=
           Micheline.Seq 0
             [
@@ -1586,9 +1582,8 @@ Fixpoint step
               Micheline.Prim 0 Alpha_context.Script.I_PAIR nil nil;
               expr
             ] in
-        let lam' :=
-          ({| Script_typed_ir.lambda.lam := (full_descr, full_expr) |}
-            : Script_typed_ir.lambda) in
+        let lam' := {| Script_typed_ir.lambda.lam := (full_descr, full_expr) |}
+          in
         logged_return ((Item lam' rest), ctxt))
       | _ =>
         obj_magic (Lwt.t (Error_monad.tzresult (stack * Alpha_context.context)))
@@ -1839,24 +1834,24 @@ Fixpoint step
           __p_value in
       let operation :=
         Alpha_context.Transaction
-          ({| Alpha_context.manager_operation.Transaction.amount := amount;
+          {| Alpha_context.manager_operation.Transaction.amount := amount;
             Alpha_context.manager_operation.Transaction.parameters :=
               Alpha_context.Script.__lazy_expr_value
                 (Micheline.strip_locations __p_value);
             Alpha_context.manager_operation.Transaction.entrypoint := entrypoint;
             Alpha_context.manager_operation.Transaction.destination :=
-              destination |} : Alpha_context.manager_operation.Transaction) in
+              destination |} in
       let=? '(ctxt, __nonce_value) :=
         Lwt.__return (Alpha_context.fresh_internal_nonce ctxt) in
       logged_return
         ((Item
           ((Alpha_context.Internal_operation
-            ({|
+            {|
               Alpha_context.internal_operation.source :=
                 step_constants.(step_constants.self);
               Alpha_context.internal_operation.operation := operation;
-              Alpha_context.internal_operation.nonce := __nonce_value |}
-              : Alpha_context.internal_operation)), big_map_diff) rest), ctxt))
+              Alpha_context.internal_operation.nonce := __nonce_value |}),
+            big_map_diff) rest), ctxt))
     
     |
       (Script_typed_ir.Create_account,
@@ -1882,30 +1877,28 @@ Fixpoint step
         Script_repr.__lazy_expr_value
           (Micheline.strip_locations (Micheline.Bytes 0 manager_bytes)) in
       let script :=
-        ({|
+        {|
           Alpha_context.Script.t.code :=
             Alpha_context.Script.Legacy_support.manager_script_code;
-          Alpha_context.Script.t.storage := storage |} : Alpha_context.Script.t)
-        in
+          Alpha_context.Script.t.storage := storage |} in
       let operation :=
         Alpha_context.Origination
-          ({| Alpha_context.manager_operation.Origination.delegate := delegate;
+          {| Alpha_context.manager_operation.Origination.delegate := delegate;
             Alpha_context.manager_operation.Origination.script := script;
             Alpha_context.manager_operation.Origination.credit := credit;
             Alpha_context.manager_operation.Origination.preorigination :=
-              Some contract |} : Alpha_context.manager_operation.Origination) in
+              Some contract |} in
       let=? '(ctxt, __nonce_value) :=
         Lwt.__return (Alpha_context.fresh_internal_nonce ctxt) in
       logged_return
         ((Item
           ((Alpha_context.Internal_operation
-            ({|
+            {|
               Alpha_context.internal_operation.source :=
                 step_constants.(step_constants.self);
               Alpha_context.internal_operation.operation := operation;
-              Alpha_context.internal_operation.nonce := __nonce_value |}
-              : Alpha_context.internal_operation)), (None (A := unit)))
-          (Item (contract, "default") rest)), ctxt))
+              Alpha_context.internal_operation.nonce := __nonce_value |}),
+            (None (A := unit))) (Item (contract, "default") rest)), ctxt))
     
     | (Script_typed_ir.Implicit_account, Item __key_value rest, _) =>
       let 'existT _ __175 [__key_value, rest] :=
@@ -1995,26 +1988,24 @@ Fixpoint step
         Alpha_context.Contract.fresh_contract_from_current_nonce ctxt in
       let operation :=
         Alpha_context.Origination
-          ({| Alpha_context.manager_operation.Origination.delegate := delegate;
+          {| Alpha_context.manager_operation.Origination.delegate := delegate;
             Alpha_context.manager_operation.Origination.script :=
-              ({| Alpha_context.Script.t.code := code;
-                Alpha_context.Script.t.storage := storage |}
-                : Alpha_context.Script.t);
+              {| Alpha_context.Script.t.code := code;
+                Alpha_context.Script.t.storage := storage |};
             Alpha_context.manager_operation.Origination.credit := credit;
             Alpha_context.manager_operation.Origination.preorigination :=
-              Some contract |} : Alpha_context.manager_operation.Origination) in
+              Some contract |} in
       let=? '(ctxt, __nonce_value) :=
         Lwt.__return (Alpha_context.fresh_internal_nonce ctxt) in
       logged_return
         ((Item
           ((Alpha_context.Internal_operation
-            ({|
+            {|
               Alpha_context.internal_operation.source :=
                 step_constants.(step_constants.self);
               Alpha_context.internal_operation.operation := operation;
-              Alpha_context.internal_operation.nonce := __nonce_value |}
-              : Alpha_context.internal_operation)), big_map_diff)
-          (Item (contract, "default") rest)), ctxt))
+              Alpha_context.internal_operation.nonce := __nonce_value |}),
+            big_map_diff) (Item (contract, "default") rest)), ctxt))
     
     |
       (Script_typed_ir.Create_contract_2 storage_type param_type {|
@@ -2068,29 +2059,27 @@ Fixpoint step
         Alpha_context.Contract.fresh_contract_from_current_nonce ctxt in
       let operation :=
         Alpha_context.Origination
-          ({| Alpha_context.manager_operation.Origination.delegate := delegate;
+          {| Alpha_context.manager_operation.Origination.delegate := delegate;
             Alpha_context.manager_operation.Origination.script :=
-              ({|
+              {|
                 Alpha_context.Script.t.code :=
                   Alpha_context.Script.__lazy_expr_value code;
                 Alpha_context.Script.t.storage :=
-                  Alpha_context.Script.__lazy_expr_value storage |}
-                : Alpha_context.Script.t);
+                  Alpha_context.Script.__lazy_expr_value storage |};
             Alpha_context.manager_operation.Origination.credit := credit;
             Alpha_context.manager_operation.Origination.preorigination :=
-              Some contract |} : Alpha_context.manager_operation.Origination) in
+              Some contract |} in
       let=? '(ctxt, __nonce_value) :=
         Lwt.__return (Alpha_context.fresh_internal_nonce ctxt) in
       logged_return
         ((Item
           ((Alpha_context.Internal_operation
-            ({|
+            {|
               Alpha_context.internal_operation.source :=
                 step_constants.(step_constants.self);
               Alpha_context.internal_operation.operation := operation;
-              Alpha_context.internal_operation.nonce := __nonce_value |}
-              : Alpha_context.internal_operation)), big_map_diff)
-          (Item (contract, "default") rest)), ctxt))
+              Alpha_context.internal_operation.nonce := __nonce_value |}),
+            big_map_diff) (Item (contract, "default") rest)), ctxt))
     
     | (Script_typed_ir.Set_delegate, Item delegate rest, _) =>
       let 'existT _ __180 [delegate, rest] :=
@@ -2107,13 +2096,12 @@ Fixpoint step
       logged_return
         ((Item
           ((Alpha_context.Internal_operation
-            ({|
+            {|
               Alpha_context.internal_operation.source :=
                 step_constants.(step_constants.self);
               Alpha_context.internal_operation.operation := operation;
-              Alpha_context.internal_operation.nonce := __nonce_value |}
-              : Alpha_context.internal_operation)), (None (A := unit))) rest),
-          ctxt))
+              Alpha_context.internal_operation.nonce := __nonce_value |}),
+            (None (A := unit))) rest), ctxt))
     
     | (Script_typed_ir.Balance, rest, _) =>
       let rest := obj_magic stack rest in
@@ -2463,9 +2451,9 @@ Definition trace
       (Micheline.root parameter) in
   let trace := List.rev (Pervasives.op_exclamation log) in
   Error_monad.__return
-    (({| execution_result.ctxt := ctxt; execution_result.storage := storage;
+    ({| execution_result.ctxt := ctxt; execution_result.storage := storage;
       execution_result.big_map_diff := big_map_diff;
-      execution_result.operations := operations |} : execution_result), trace).
+      execution_result.operations := operations |}, trace).
 
 Definition execute_wrapper
   (ctxt : Alpha_context.context) (mode : Script_ir_translator.unparsing_mode)
@@ -2477,6 +2465,6 @@ Definition execute_wrapper
     execute None ctxt mode step_constants entrypoint script
       (Micheline.root parameter) in
   Error_monad.__return
-    ({| execution_result.ctxt := ctxt; execution_result.storage := storage;
+    {| execution_result.ctxt := ctxt; execution_result.storage := storage;
       execution_result.big_map_diff := big_map_diff;
-      execution_result.operations := operations |} : execution_result).
+      execution_result.operations := operations |}.

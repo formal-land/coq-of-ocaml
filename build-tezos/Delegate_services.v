@@ -88,14 +88,13 @@ Definition info_encoding : Data_encoding.encoding info :=
         '(balance, __frozen_balance_value, frozen_balance_by_cycle,
           staking_balance, delegated_contracts, delegated_balance, deactivated,
           grace_period) := function_parameter in
-      ({| info.balance := balance;
-        info.frozen_balance := __frozen_balance_value;
+      {| info.balance := balance; info.frozen_balance := __frozen_balance_value;
         info.frozen_balance_by_cycle := frozen_balance_by_cycle;
         info.staking_balance := staking_balance;
         info.delegated_contracts := delegated_contracts;
         info.delegated_balance := delegated_balance;
-        info.deactivated := deactivated; info.grace_period := grace_period |}
-        : info)) None
+        info.deactivated := deactivated; info.grace_period := grace_period |})
+    None
     (Data_encoding.obj8
       (Data_encoding.req None None "balance" Alpha_context.Tez.encoding)
       (Data_encoding.req None None "frozen_balance" Alpha_context.Tez.encoding)
@@ -133,8 +132,8 @@ Module S.
           (RPC_query.__query_value
             (fun active =>
               fun inactive =>
-                ({| list_query.active := active; list_query.inactive := inactive
-                  |} : list_query)))
+                {| list_query.active := active; list_query.inactive := inactive
+                  |}))
           (RPC_query.flag None "active"
             (fun __t_value => __t_value.(list_query.active))))
         (RPC_query.flag None "inactive"
@@ -310,8 +309,8 @@ Definition __list_value {D E G I K L a b c i o q : Set}
     fun function_parameter =>
       let '_ := function_parameter in
       RPC_context.make_call0 S.list_delegate ctxt block
-        ({| S.list_query.active := active; S.list_query.inactive := inactive |}
-          : S.list_query) tt.
+        {| S.list_query.active := active; S.list_query.inactive := inactive |}
+        tt.
 
 Definition __info_value {D E G I K L a b c i o q : Set}
   (ctxt :
@@ -518,8 +517,8 @@ Module Baking_rights.
         (level, delegate, priority, timestamp))
       (fun function_parameter =>
         let '(level, delegate, priority, timestamp) := function_parameter in
-        ({| t.level := level; t.delegate := delegate; t.priority := priority;
-          t.timestamp := timestamp |} : t)) None
+        {| t.level := level; t.delegate := delegate; t.priority := priority;
+          t.timestamp := timestamp |}) None
       (Data_encoding.obj4
         (Data_encoding.req None None "level" Alpha_context.Raw_level.encoding)
         (Data_encoding.req None None "delegate"
@@ -569,12 +568,11 @@ Module Baking_rights.
                         fun delegates =>
                           fun max_priority =>
                             fun all =>
-                              ({| baking_rights_query.levels := levels;
+                              {| baking_rights_query.levels := levels;
                                 baking_rights_query.cycles := cycles;
                                 baking_rights_query.delegates := delegates;
                                 baking_rights_query.max_priority := max_priority;
-                                baking_rights_query.all := all |}
-                                : baking_rights_query)))
+                                baking_rights_query.all := all |}))
                   (RPC_query.multi_field None "level"
                     Alpha_context.Raw_level.rpc_arg
                     (fun __t_value => __t_value.(baking_rights_query.levels))))
@@ -624,9 +622,9 @@ Module Baking_rights.
           end in
         let acc :=
           cons
-            ({| t.level := level.(Alpha_context.Level.t.level);
+            {| t.level := level.(Alpha_context.Level.t.level);
               t.delegate := delegate; t.priority := priority;
-              t.timestamp := timestamp |} : t) acc in
+              t.timestamp := timestamp |} acc in
         let=? l := next tt in
         loop l acc (Pervasives.op_plus priority 1) in
     loop contract_list nil 0.
@@ -731,12 +729,11 @@ Module Baking_rights.
           fun max_priority =>
             fun block =>
               RPC_context.make_call0 S.baking_rights ctxt block
-                ({| S.baking_rights_query.levels := levels;
+                {| S.baking_rights_query.levels := levels;
                   S.baking_rights_query.cycles := cycles;
                   S.baking_rights_query.delegates := delegates;
                   S.baking_rights_query.max_priority := max_priority;
-                  S.baking_rights_query.all := all |} : S.baking_rights_query)
-                tt.
+                  S.baking_rights_query.all := all |} tt.
 End Baking_rights.
 
 Module Endorsing_rights.
@@ -769,8 +766,8 @@ Module Endorsing_rights.
         (level, delegate, slots, estimated_time))
       (fun function_parameter =>
         let '(level, delegate, slots, estimated_time) := function_parameter in
-        ({| t.level := level; t.delegate := delegate; t.slots := slots;
-          t.estimated_time := estimated_time |} : t)) None
+        {| t.level := level; t.delegate := delegate; t.slots := slots;
+          t.estimated_time := estimated_time |}) None
       (Data_encoding.obj4
         (Data_encoding.req None None "level" Alpha_context.Raw_level.encoding)
         (Data_encoding.req None None "delegate"
@@ -811,10 +808,9 @@ Module Endorsing_rights.
                 (fun levels =>
                   fun cycles =>
                     fun delegates =>
-                      ({| endorsing_rights_query.levels := levels;
+                      {| endorsing_rights_query.levels := levels;
                         endorsing_rights_query.cycles := cycles;
-                        endorsing_rights_query.delegates := delegates |}
-                        : endorsing_rights_query)))
+                        endorsing_rights_query.delegates := delegates |}))
               (RPC_query.multi_field None "level"
                 Alpha_context.Raw_level.rpc_arg
                 (fun __t_value => __t_value.(endorsing_rights_query.levels))))
@@ -847,9 +843,9 @@ Module Endorsing_rights.
             let '(_, slots, _) := function_parameter in
             fun acc =>
               cons
-                ({| t.level := level.(Alpha_context.Level.t.level);
+                {| t.level := level.(Alpha_context.Level.t.level);
                   t.delegate := delegate; t.slots := slots;
-                  t.estimated_time := estimated_time |} : t) acc) rights nil).
+                  t.estimated_time := estimated_time |} acc) rights nil).
   
   Definition register (function_parameter : unit) : unit :=
     let '_ := function_parameter in
@@ -912,10 +908,9 @@ Module Endorsing_rights.
           end in
         fun block =>
           RPC_context.make_call0 S.endorsing_rights ctxt block
-            ({| S.endorsing_rights_query.levels := levels;
+            {| S.endorsing_rights_query.levels := levels;
               S.endorsing_rights_query.cycles := cycles;
-              S.endorsing_rights_query.delegates := delegates |}
-              : S.endorsing_rights_query) tt.
+              S.endorsing_rights_query.delegates := delegates |} tt.
 End Endorsing_rights.
 
 Module Endorsing_power.
@@ -934,11 +929,10 @@ Module Endorsing_power.
     | Alpha_context.Single (Alpha_context.Endorsement _) =>
       let=? '(_, slots, _) :=
         Baking.check_endorsement_rights ctxt chain_id
-          ({|
+          {|
             Alpha_context.operation.shell :=
               operation.(Alpha_context.packed_operation.shell);
-            Alpha_context.operation.protocol_data := data |}
-            : Alpha_context.Operation.t) in
+            Alpha_context.operation.protocol_data := data |} in
       Error_monad.__return (List.length slots)
     | _ => Pervasives.failwith "Operation is not an endorsement"
     end.
@@ -1006,7 +1000,7 @@ Module Required_endorsements.
       RPC_query.seal
         (RPC_query.op_pipeplus
           (RPC_query.__query_value
-            (fun block_delay => ({| t.block_delay := block_delay |} : t)))
+            (fun block_delay => {| t.block_delay := block_delay |}))
           (RPC_query.__field_value None "block_delay"
             Alpha_context.Period.rpc_arg Alpha_context.Period.zero
             (fun __t_value => __t_value.(t.block_delay)))).
@@ -1046,7 +1040,7 @@ Module Required_endorsements.
     (block_delay : Alpha_context.Period.t)
     : Lwt.t (Error_monad.shell_tzresult int) :=
     RPC_context.make_call0 S.required_endorsements ctxt block
-      ({| S.t.block_delay := block_delay |} : S.t) tt.
+      {| S.t.block_delay := block_delay |} tt.
 End Required_endorsements.
 
 Module Minimal_valid_time.
@@ -1074,8 +1068,8 @@ Module Minimal_valid_time.
             (RPC_query.__query_value
               (fun priority =>
                 fun endorsing_power =>
-                  ({| t.priority := priority;
-                    t.endorsing_power := endorsing_power |} : t)))
+                  {| t.priority := priority;
+                    t.endorsing_power := endorsing_power |}))
             (RPC_query.__field_value None "priority" RPC_arg.__int_value 0
               (fun __t_value => __t_value.(t.priority))))
           (RPC_query.__field_value None "endorsing_power" RPC_arg.__int_value 0
@@ -1119,8 +1113,7 @@ Module Minimal_valid_time.
               * L)))) * L * D) (block : D) (priority : int)
     (endorsing_power : int) : Lwt.t (Error_monad.shell_tzresult Time.t) :=
     RPC_context.make_call0 S.minimal_valid_time ctxt block
-      ({| S.t.priority := priority; S.t.endorsing_power := endorsing_power |}
-        : S.t) tt.
+      {| S.t.priority := priority; S.t.endorsing_power := endorsing_power |} tt.
 End Minimal_valid_time.
 
 Definition register (function_parameter : unit) : unit :=

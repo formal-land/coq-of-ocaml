@@ -95,12 +95,12 @@ Definition bootstrap_account_encoding
           end)
         (fun function_parameter =>
           let '(public_key, amount) := function_parameter in
-          ({|
+          {|
             bootstrap_account.public_key_hash :=
               (|Signature.Public_key|).(S.SPublic_key.__hash_value)
                 public_key;
             bootstrap_account.public_key := Some public_key;
-            bootstrap_account.amount := amount |} : bootstrap_account));
+            bootstrap_account.amount := amount |});
       Data_encoding.__case_value "Public_key_unknown" None (Data_encoding.Tag 1)
         (Data_encoding.tup2
           (|Signature.Public_key_hash|).(S.SPublic_key_hash.encoding)
@@ -116,9 +116,9 @@ Definition bootstrap_account_encoding
           end)
         (fun function_parameter =>
           let '(public_key_hash, amount) := function_parameter in
-          ({| bootstrap_account.public_key_hash := public_key_hash;
+          {| bootstrap_account.public_key_hash := public_key_hash;
             bootstrap_account.public_key := None;
-            bootstrap_account.amount := amount |} : bootstrap_account))
+            bootstrap_account.amount := amount |})
     ].
 
 Definition bootstrap_contract_encoding
@@ -133,9 +133,9 @@ Definition bootstrap_contract_encoding
       (delegate, amount, script))
     (fun function_parameter =>
       let '(delegate, amount, script) := function_parameter in
-      ({| bootstrap_contract.delegate := delegate;
+      {| bootstrap_contract.delegate := delegate;
         bootstrap_contract.amount := amount; bootstrap_contract.script := script
-        |} : bootstrap_contract)) None
+        |}) None
     (Data_encoding.obj3
       (Data_encoding.req None None "delegate"
         (|Signature.Public_key_hash|).(S.SPublic_key_hash.encoding))
@@ -160,11 +160,11 @@ Definition encoding : Data_encoding.encoding t :=
         '((bootstrap_accounts, bootstrap_contracts, commitments,
           security_deposit_ramp_up_cycles, no_reward_cycles), constants) :=
         function_parameter in
-      ({| t.bootstrap_accounts := bootstrap_accounts;
+      {| t.bootstrap_accounts := bootstrap_accounts;
         t.bootstrap_contracts := bootstrap_contracts;
         t.commitments := commitments; t.constants := constants;
         t.security_deposit_ramp_up_cycles := security_deposit_ramp_up_cycles;
-        t.no_reward_cycles := no_reward_cycles |} : t)) None
+        t.no_reward_cycles := no_reward_cycles |}) None
     (Data_encoding.merge_objs
       (Data_encoding.obj5
         (Data_encoding.req None None "bootstrap_accounts"

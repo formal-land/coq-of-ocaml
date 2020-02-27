@@ -86,15 +86,15 @@ Definition validation_passes : list Updater.quota :=
   let max_anonymous_operations :=
     Pervasives.op_plus Alpha_context.Constants.max_revelations_per_block 100 in
   [
-    ({| Updater.quota.max_size := Pervasives.op_star 32 1024;
-      Updater.quota.max_op := Some 32 |} : Updater.quota);
-    ({| Updater.quota.max_size := Pervasives.op_star 32 1024;
-      Updater.quota.max_op := None |} : Updater.quota);
-    ({|
+    {| Updater.quota.max_size := Pervasives.op_star 32 1024;
+      Updater.quota.max_op := Some 32 |};
+    {| Updater.quota.max_size := Pervasives.op_star 32 1024;
+      Updater.quota.max_op := None |};
+    {|
       Updater.quota.max_size := Pervasives.op_star max_anonymous_operations 1024;
-      Updater.quota.max_op := Some max_anonymous_operations |} : Updater.quota);
-    ({| Updater.quota.max_size := Pervasives.op_star 512 1024;
-      Updater.quota.max_op := None |} : Updater.quota)
+      Updater.quota.max_op := Some max_anonymous_operations |};
+    {| Updater.quota.max_size := Pervasives.op_star 512 1024;
+      Updater.quota.max_op := None |}
   ].
 
 Definition rpc_services : RPC_directory.directory Updater.rpc_context :=
@@ -215,15 +215,13 @@ Definition begin_partial_application
     Apply.begin_application ctxt chain_id block_header predecessor_timestamp in
   let mode :=
     Partial_application
-      ({| validation_mode.Partial_application.block_header := block_header;
+      {| validation_mode.Partial_application.block_header := block_header;
         validation_mode.Partial_application.baker :=
           (|Signature.Public_key|).(S.SPublic_key.__hash_value) baker;
-        validation_mode.Partial_application.block_delay := block_delay |}
-        : validation_mode.Partial_application) in
+        validation_mode.Partial_application.block_delay := block_delay |} in
   Error_monad.__return
-    ({| validation_state.mode := mode; validation_state.chain_id := chain_id;
-      validation_state.ctxt := ctxt; validation_state.op_count := 0 |}
-      : validation_state).
+    {| validation_state.mode := mode; validation_state.chain_id := chain_id;
+      validation_state.ctxt := ctxt; validation_state.op_count := 0 |}.
 
 Definition begin_application
   (chain_id : (|Chain_id|).(S.HASH.t)) (ctxt : Context.t)
@@ -242,15 +240,13 @@ Definition begin_application
     Apply.begin_application ctxt chain_id block_header predecessor_timestamp in
   let mode :=
     Application
-      ({| validation_mode.Application.block_header := block_header;
+      {| validation_mode.Application.block_header := block_header;
         validation_mode.Application.baker :=
           (|Signature.Public_key|).(S.SPublic_key.__hash_value) baker;
-        validation_mode.Application.block_delay := block_delay |}
-        : validation_mode.Application) in
+        validation_mode.Application.block_delay := block_delay |} in
   Error_monad.__return
-    ({| validation_state.mode := mode; validation_state.chain_id := chain_id;
-      validation_state.ctxt := ctxt; validation_state.op_count := 0 |}
-      : validation_state).
+    {| validation_state.mode := mode; validation_state.chain_id := chain_id;
+      validation_state.ctxt := ctxt; validation_state.op_count := 0 |}.
 
 Definition begin_construction
   (chain_id : (|Chain_id|).(S.HASH.t)) (ctxt : Context.t)
@@ -270,8 +266,8 @@ Definition begin_construction
       let=? ctxt := Apply.begin_partial_construction ctxt in
       let mode :=
         Partial_construction
-          ({| validation_mode.Partial_construction.predecessor := predecessor |}
-            : validation_mode.Partial_construction) in
+          {| validation_mode.Partial_construction.predecessor := predecessor |}
+        in
       Error_monad.__return (mode, ctxt)
     | Some proto_header =>
       let=? '(ctxt, protocol_data, baker, block_delay) :=
@@ -281,17 +277,15 @@ Definition begin_construction
         let baker := (|Signature.Public_key|).(S.SPublic_key.__hash_value) baker
           in
         Full_construction
-          ({| validation_mode.Full_construction.predecessor := predecessor;
+          {| validation_mode.Full_construction.predecessor := predecessor;
             validation_mode.Full_construction.protocol_data := protocol_data;
             validation_mode.Full_construction.baker := baker;
-            validation_mode.Full_construction.block_delay := block_delay |}
-            : validation_mode.Full_construction) in
+            validation_mode.Full_construction.block_delay := block_delay |} in
       Error_monad.__return (mode, ctxt)
     end in
   Error_monad.__return
-    ({| validation_state.mode := mode; validation_state.chain_id := chain_id;
-      validation_state.ctxt := ctxt; validation_state.op_count := 0 |}
-      : validation_state).
+    {| validation_state.mode := mode; validation_state.chain_id := chain_id;
+      validation_state.ctxt := ctxt; validation_state.op_count := 0 |}.
 
 Definition apply_operation (function_parameter : validation_state)
   : Alpha_context.packed_operation ->
@@ -329,9 +323,8 @@ Definition apply_operation (function_parameter : validation_state)
             [Operation.shell_header ** Alpha_context.Operation.protocol_data]) _
           [shell, protocol_data] in
       let operation :=
-        ({| Alpha_context.operation.shell := shell;
-          Alpha_context.operation.protocol_data := protocol_data |}
-          : Alpha_context.operation) in
+        {| Alpha_context.operation.shell := shell;
+          Alpha_context.operation.protocol_data := protocol_data |} in
       let '(predecessor, baker) :=
         match mode with
         |
@@ -398,14 +391,13 @@ Definition finalize_block (function_parameter : validation_state)
     let ctxt := Alpha_context.finalize None ctxt in
     Error_monad.__return
       (ctxt,
-        ({| Apply_results.block_metadata.baker := baker;
+        {| Apply_results.block_metadata.baker := baker;
           Apply_results.block_metadata.level := level;
           Apply_results.block_metadata.voting_period_kind := voting_period_kind;
           Apply_results.block_metadata.nonce_hash := None;
           Apply_results.block_metadata.consumed_gas := Z.zero;
           Apply_results.block_metadata.deactivated := nil;
-          Apply_results.block_metadata.balance_updates := nil |}
-          : Apply_results.block_metadata))
+          Apply_results.block_metadata.balance_updates := nil |})
   |
     Partial_application {|
       validation_mode.Partial_application.block_header := block_header;
@@ -423,14 +415,13 @@ Definition finalize_block (function_parameter : validation_state)
     let ctxt := Alpha_context.finalize None ctxt in
     Error_monad.__return
       (ctxt,
-        ({| Apply_results.block_metadata.baker := baker;
+        {| Apply_results.block_metadata.baker := baker;
           Apply_results.block_metadata.level := level;
           Apply_results.block_metadata.voting_period_kind := voting_period_kind;
           Apply_results.block_metadata.nonce_hash := None;
           Apply_results.block_metadata.consumed_gas := Z.zero;
           Apply_results.block_metadata.deactivated := nil;
-          Apply_results.block_metadata.balance_updates := nil |}
-          : Apply_results.block_metadata))
+          Apply_results.block_metadata.balance_updates := nil |})
   |
     (Application {|
       validation_mode.Application.block_header := {|

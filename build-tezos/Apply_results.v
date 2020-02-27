@@ -293,10 +293,10 @@ Module Manager_result.
                 Backtracked (inj x) errs)
           ]) in
     MCase
-      ({| case.MCase.op_case := op_case; case.MCase.encoding := encoding;
+      {| case.MCase.op_case := op_case; case.MCase.encoding := encoding;
         case.MCase.kind := kind; case.MCase.iselect := iselect;
         case.MCase.select := select; case.MCase.proj := proj;
-        case.MCase.inj := inj; case.MCase.t := __t_value |} : case.MCase _ _).
+        case.MCase.inj := inj; case.MCase.t := __t_value |}.
   
   Definition reveal_case : case Alpha_context.Kind.reveal :=
     make Alpha_context.Operation.Encoding.Manager_operations.reveal_case
@@ -332,10 +332,9 @@ Module Manager_result.
         consumed_gas)
       (fun consumed_gas =>
         Reveal_result
-          ({|
+          {|
             successful_manager_operation_result.Reveal_result.consumed_gas :=
-              consumed_gas |}
-            : successful_manager_operation_result.Reveal_result)).
+              consumed_gas |}).
   
   Definition transaction_case : case Alpha_context.Kind.transaction :=
     make Alpha_context.Operation.Encoding.Manager_operations.transaction_case
@@ -404,7 +403,7 @@ Module Manager_result.
             consumed_gas, storage_size, paid_storage_size_diff,
             allocated_destination_contract) := function_parameter in
         Transaction_result
-          ({|
+          {|
             successful_manager_operation_result.Transaction_result.storage :=
               storage;
             successful_manager_operation_result.Transaction_result.big_map_diff :=
@@ -420,8 +419,7 @@ Module Manager_result.
             successful_manager_operation_result.Transaction_result.paid_storage_size_diff :=
               paid_storage_size_diff;
             successful_manager_operation_result.Transaction_result.allocated_destination_contract :=
-              allocated_destination_contract |}
-            : successful_manager_operation_result.Transaction_result)).
+              allocated_destination_contract |}).
   
   Definition origination_case : case Alpha_context.Kind.origination :=
     make Alpha_context.Operation.Encoding.Manager_operations.origination_case
@@ -480,7 +478,7 @@ Module Manager_result.
           '(big_map_diff, balance_updates, originated_contracts, consumed_gas,
             storage_size, paid_storage_size_diff) := function_parameter in
         Origination_result
-          ({|
+          {|
             successful_manager_operation_result.Origination_result.big_map_diff :=
               big_map_diff;
             successful_manager_operation_result.Origination_result.balance_updates :=
@@ -492,8 +490,7 @@ Module Manager_result.
             successful_manager_operation_result.Origination_result.storage_size :=
               storage_size;
             successful_manager_operation_result.Origination_result.paid_storage_size_diff :=
-              paid_storage_size_diff |}
-            : successful_manager_operation_result.Origination_result)).
+              paid_storage_size_diff |}).
   
   Definition delegation_case : case Alpha_context.Kind.delegation :=
     make Alpha_context.Operation.Encoding.Manager_operations.delegation_case
@@ -530,10 +527,9 @@ Module Manager_result.
         consumed_gas)
       (fun consumed_gas =>
         Delegation_result
-          ({|
+          {|
             successful_manager_operation_result.Delegation_result.consumed_gas :=
-              consumed_gas |}
-            : successful_manager_operation_result.Delegation_result)).
+              consumed_gas |}).
 End Manager_result.
 
 Definition internal_operation_result_encoding
@@ -582,11 +578,11 @@ Definition internal_operation_result_encoding
       (fun function_parameter =>
         let '((_, source, __nonce_value), (op, res)) := function_parameter in
         let op :=
-          ({| Alpha_context.internal_operation.source := source;
+          {| Alpha_context.internal_operation.source := source;
             Alpha_context.internal_operation.operation :=
               op_case.(Alpha_context.Operation.Encoding.Manager_operations.case.MCase.inj)
                 op; Alpha_context.internal_operation.nonce := __nonce_value |}
-            : Alpha_context.internal_operation) in
+          in
         Internal_operation_result op res) in
   (let arg := Data_encoding.def "operation.alpha.internal_operation_result" in
   fun eta => arg None None eta)
@@ -754,8 +750,7 @@ Module Encoding.
   
   Definition endorsement_case : case Alpha_context.Kind.endorsement :=
     Case
-      ({|
-        case.Case.op_case := Alpha_context.Operation.Encoding.endorsement_case;
+      {| case.Case.op_case := Alpha_context.Operation.Encoding.endorsement_case;
         case.Case.encoding :=
           Data_encoding.obj3
             (Data_encoding.req None None "balance_updates"
@@ -794,21 +789,16 @@ Module Encoding.
           fun function_parameter =>
             let '(balance_updates, delegate, slots) := function_parameter in
             Endorsement_result
-              ({|
+              {|
                 contents_result.Endorsement_result.balance_updates :=
                   balance_updates;
                 contents_result.Endorsement_result.delegate := delegate;
-                contents_result.Endorsement_result.slots := slots |}
-                : contents_result.Endorsement_result) |}
-        :
-          case.Case Alpha_context.Kind.endorsement
-            (Alpha_context.Delegate.balance_updates *
-              (|Signature.Public_key_hash|).(S.SPublic_key_hash.t) * list int)).
+                contents_result.Endorsement_result.slots := slots |} |}.
   
   Definition seed_nonce_revelation_case
     : case Alpha_context.Kind.seed_nonce_revelation :=
     Case
-      ({|
+      {|
         case.Case.op_case :=
           Alpha_context.Operation.Encoding.seed_nonce_revelation_case;
         case.Case.encoding :=
@@ -838,15 +828,12 @@ Module Encoding.
         case.Case.proj :=
           fun function_parameter =>
             let 'Seed_nonce_revelation_result bus := function_parameter in
-            bus; case.Case.inj := fun bus => Seed_nonce_revelation_result bus |}
-        :
-          case.Case Alpha_context.Kind.seed_nonce_revelation
-            Alpha_context.Delegate.balance_updates).
+            bus; case.Case.inj := fun bus => Seed_nonce_revelation_result bus |}.
   
   Definition double_endorsement_evidence_case
     : case Alpha_context.Kind.double_endorsement_evidence :=
     Case
-      ({|
+      {|
         case.Case.op_case :=
           Alpha_context.Operation.Encoding.double_endorsement_evidence_case;
         case.Case.encoding :=
@@ -877,15 +864,12 @@ Module Encoding.
           fun function_parameter =>
             let 'Double_endorsement_evidence_result bus := function_parameter in
             bus;
-        case.Case.inj := fun bus => Double_endorsement_evidence_result bus |}
-        :
-          case.Case Alpha_context.Kind.double_endorsement_evidence
-            Alpha_context.Delegate.balance_updates).
+        case.Case.inj := fun bus => Double_endorsement_evidence_result bus |}.
   
   Definition double_baking_evidence_case
     : case Alpha_context.Kind.double_baking_evidence :=
     Case
-      ({|
+      {|
         case.Case.op_case :=
           Alpha_context.Operation.Encoding.double_baking_evidence_case;
         case.Case.encoding :=
@@ -916,14 +900,11 @@ Module Encoding.
           fun function_parameter =>
             let 'Double_baking_evidence_result bus := function_parameter in
             bus; case.Case.inj := fun bus => Double_baking_evidence_result bus
-        |}
-        :
-          case.Case Alpha_context.Kind.double_baking_evidence
-            Alpha_context.Delegate.balance_updates).
+        |}.
   
   Definition activate_account_case : case Alpha_context.Kind.activate_account :=
     Case
-      ({|
+      {|
         case.Case.op_case :=
           Alpha_context.Operation.Encoding.activate_account_case;
         case.Case.encoding :=
@@ -951,14 +932,11 @@ Module Encoding.
         case.Case.proj :=
           fun function_parameter =>
             let 'Activate_account_result bus := function_parameter in
-            bus; case.Case.inj := fun bus => Activate_account_result bus |}
-        :
-          case.Case Alpha_context.Kind.activate_account
-            Alpha_context.Delegate.balance_updates).
+            bus; case.Case.inj := fun bus => Activate_account_result bus |}.
   
   Definition proposals_case : case Alpha_context.Kind.proposals :=
     Case
-      ({| case.Case.op_case := Alpha_context.Operation.Encoding.proposals_case;
+      {| case.Case.op_case := Alpha_context.Operation.Encoding.proposals_case;
         case.Case.encoding := Data_encoding.empty;
         case.Case.select :=
           fun function_parameter =>
@@ -984,11 +962,11 @@ Module Encoding.
         case.Case.inj :=
           fun function_parameter =>
             let '_ := function_parameter in
-            Proposals_result |} : case.Case Alpha_context.Kind.proposals unit).
+            Proposals_result |}.
   
   Definition ballot_case : case Alpha_context.Kind.ballot :=
     Case
-      ({| case.Case.op_case := Alpha_context.Operation.Encoding.ballot_case;
+      {| case.Case.op_case := Alpha_context.Operation.Encoding.ballot_case;
         case.Case.encoding := Data_encoding.empty;
         case.Case.select :=
           fun function_parameter =>
@@ -1014,7 +992,7 @@ Module Encoding.
         case.Case.inj :=
           fun function_parameter =>
             let '_ := function_parameter in
-            Ballot_result |} : case.Case Alpha_context.Kind.ballot unit).
+            Ballot_result |}.
   
   Definition make_manager_case {A : Set}
     (function_parameter :
@@ -1036,8 +1014,7 @@ Module Encoding.
           res_case in
       fun mselect =>
         Case
-          ({|
-            case.Case.op_case := Alpha_context.Operation.Encoding.Case op_case;
+          {| case.Case.op_case := Alpha_context.Operation.Encoding.Case op_case;
             case.Case.encoding :=
               Data_encoding.obj3
                 (Data_encoding.req None None "balance_updates"
@@ -1173,18 +1150,13 @@ Module Encoding.
               fun function_parameter =>
                 let '(bus, __r_value, rs) := function_parameter in
                 Manager_operation_result
-                  ({|
+                  {|
                     contents_result.Manager_operation_result.balance_updates :=
                       bus;
                     contents_result.Manager_operation_result.operation_result :=
                       __r_value;
                     contents_result.Manager_operation_result.internal_operation_results :=
-                      rs |} : contents_result.Manager_operation_result kind) |}
-            :
-              case.Case Alpha_context.Kind.manager
-                (Alpha_context.Delegate.balance_updates *
-                  manager_operation_result kind *
-                  list packed_internal_operation_result)).
+                      rs |} |}.
   
   Definition reveal_case : case Alpha_context.Kind.manager :=
     make_manager_case Alpha_context.Operation.Encoding.reveal_case
@@ -1544,8 +1516,7 @@ Definition operation_metadata_encoding
                 (fun __Contents_result_list_'kind =>
                   contents_result_list) _ contents in
             Operation_metadata
-              ({| operation_metadata.contents := contents |}
-                : operation_metadata));
+              {| operation_metadata.contents := contents |});
         Data_encoding.__case_value "No_operation_metadata" None
           (Data_encoding.Tag 1) Data_encoding.empty
           (fun function_parameter =>
@@ -1982,14 +1953,14 @@ Definition operation_data_and_metadata_encoding
             let '(op_contents, res_contents) :=
               unpack_contents_list contents in
             ((Alpha_context.Operation_data
-              ({|
+              {|
                 Alpha_context.protocol_data.contents :=
                   op_contents;
                 Alpha_context.protocol_data.signature :=
-                  signature |} : Alpha_context.protocol_data)),
+                  signature |}),
               (Operation_metadata
-                ({| operation_metadata.contents := res_contents
-                  |} : operation_metadata))));
+                {| operation_metadata.contents := res_contents
+                  |})));
         Data_encoding.__case_value "Operation_without_metadata" None
           (Data_encoding.Tag 1)
           (Data_encoding.obj2
@@ -2022,10 +1993,9 @@ Definition operation_data_and_metadata_encoding
                     option Signature.t]) _
                 [contents, signature] in
             ((Alpha_context.Operation_data
-              ({| Alpha_context.protocol_data.contents := contents;
+              {| Alpha_context.protocol_data.contents := contents;
                 Alpha_context.protocol_data.signature :=
-                  signature |} : Alpha_context.protocol_data)),
-              No_operation_metadata))
+                  signature |}), No_operation_metadata))
       ]).
 
 Module block_metadata.
@@ -2081,13 +2051,12 @@ Definition block_metadata_encoding : Data_encoding.encoding block_metadata :=
         let
           '(baker, level, voting_period_kind, nonce_hash, consumed_gas,
             deactivated, balance_updates) := function_parameter in
-        ({| block_metadata.baker := baker; block_metadata.level := level;
+        {| block_metadata.baker := baker; block_metadata.level := level;
           block_metadata.voting_period_kind := voting_period_kind;
           block_metadata.nonce_hash := nonce_hash;
           block_metadata.consumed_gas := consumed_gas;
           block_metadata.deactivated := deactivated;
-          block_metadata.balance_updates := balance_updates |} : block_metadata))
-      None
+          block_metadata.balance_updates := balance_updates |}) None
       (Data_encoding.obj7
         (Data_encoding.req None None "baker"
           (|Signature.Public_key_hash|).(S.SPublic_key_hash.encoding))

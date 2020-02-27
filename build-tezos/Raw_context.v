@@ -394,8 +394,7 @@ Definition set_gas_limit (ctxt : t) (remaining : Z.t) : t :=
   t.with_internal_gas Gas_limit_repr.internal_gas_zero
     (t.with_operation_gas
       (Gas_limit_repr.Limited
-        ({| Gas_limit_repr.t.Limited.remaining := remaining |}
-          : Gas_limit_repr.t.Limited)) ctxt).
+        {| Gas_limit_repr.t.Limited.remaining := remaining |}) ctxt).
 
 Definition set_gas_unlimited (ctxt : t) : t :=
   t.with_operation_gas Gas_limit_repr.Unaccounted ctxt.
@@ -725,7 +724,7 @@ Definition prepare
       constants.(Constants_repr.parametric.blocks_per_voting_period)
       constants.(Constants_repr.parametric.blocks_per_commitment) level in
   Error_monad.__return
-    ({| t.context := ctxt; t.constants := constants;
+    {| t.context := ctxt; t.constants := constants;
       t.first_level := first_level; t.level := level;
       t.predecessor_timestamp := predecessor_timestamp;
       t.timestamp := timestamp; t.fitness := fitness;
@@ -742,7 +741,7 @@ Definition prepare
       t.storage_space_to_pay := None; t.allocated_contracts := None;
       t.origination_nonce := None; t.temporary_big_map := Z.sub Z.zero Z.one;
       t.internal_nonce := 0; t.internal_nonces_used := (|Int_set|).(S.SET.empty)
-      |} : t).
+      |}.
 
 Inductive previous_protocol : Set :=
 | Genesis : Parameters_repr.t -> previous_protocol

@@ -344,9 +344,8 @@ Definition pack (function_parameter : operation) : packed_operation :=
   let '{|
     operation.shell := shell; operation.protocol_data := protocol_data |} :=
     function_parameter in
-  ({| packed_operation.shell := shell;
-    packed_operation.protocol_data := Operation_data protocol_data |}
-    : packed_operation).
+  {| packed_operation.shell := shell;
+    packed_operation.protocol_data := Operation_data protocol_data |}.
 
 Inductive packed_internal_operation : Set :=
 | Internal_operation : internal_operation -> packed_internal_operation.
@@ -454,7 +453,7 @@ Module Encoding.
     
     Definition reveal_case : case Kind.reveal :=
       MCase
-        ({| case.MCase.tag := 0; case.MCase.name := "reveal";
+        {| case.MCase.tag := 0; case.MCase.name := "reveal";
           case.MCase.encoding :=
             Data_encoding.obj1
               (Data_encoding.req None None "public_key"
@@ -468,8 +467,7 @@ Module Encoding.
           case.MCase.proj :=
             fun function_parameter =>
               let 'Reveal pkh := function_parameter in
-              pkh; case.MCase.inj := fun pkh => Reveal pkh |}
-          : case.MCase (|Signature.Public_key|).(S.SPublic_key.t)).
+              pkh; case.MCase.inj := fun pkh => Reveal pkh |}.
     
     Definition entrypoint_encoding
       : Data_encoding.encoding (|Compare.String|).(Compare.S.t) :=
@@ -501,7 +499,7 @@ Module Encoding.
     
     Definition transaction_case : case Kind.transaction :=
       MCase
-        ({| case.MCase.tag := 1; case.MCase.name := "transaction";
+        {| case.MCase.tag := 1; case.MCase.name := "transaction";
           case.MCase.encoding :=
             Data_encoding.obj3
               (Data_encoding.req None None "amount" Tez_repr.encoding)
@@ -545,20 +543,14 @@ Module Encoding.
                 | Some (entrypoint, value) => (entrypoint, value)
                 end in
               Transaction
-                ({| manager_operation.Transaction.amount := amount;
+                {| manager_operation.Transaction.amount := amount;
                   manager_operation.Transaction.parameters := parameters;
                   manager_operation.Transaction.entrypoint := entrypoint;
-                  manager_operation.Transaction.destination := destination |}
-                  : manager_operation.Transaction) |}
-          :
-            case.MCase
-              (Tez_repr.t * Contract_repr.contract *
-                option
-                  ((|Compare.String|).(Compare.S.t) * Script_repr.lazy_expr))).
+                  manager_operation.Transaction.destination := destination |} |}.
     
     Definition origination_case : case Kind.origination :=
       MCase
-        ({| case.MCase.tag := 2; case.MCase.name := "origination";
+        {| case.MCase.tag := 2; case.MCase.name := "origination";
           case.MCase.encoding :=
             Data_encoding.obj3
               (Data_encoding.req None None "balance" Tez_repr.encoding)
@@ -585,20 +577,14 @@ Module Encoding.
             fun function_parameter =>
               let '(credit, delegate, script) := function_parameter in
               Origination
-                ({| manager_operation.Origination.delegate := delegate;
+                {| manager_operation.Origination.delegate := delegate;
                   manager_operation.Origination.script := script;
                   manager_operation.Origination.credit := credit;
-                  manager_operation.Origination.preorigination := None |}
-                  : manager_operation.Origination) |}
-          :
-            case.MCase
-              (Tez_repr.t *
-                option (|Signature.Public_key_hash|).(S.SPublic_key_hash.t) *
-                Script_repr.t)).
+                  manager_operation.Origination.preorigination := None |} |}.
     
     Definition delegation_case : case Kind.delegation :=
       MCase
-        ({| case.MCase.tag := 3; case.MCase.name := "delegation";
+        {| case.MCase.tag := 3; case.MCase.name := "delegation";
           case.MCase.encoding :=
             Data_encoding.obj1
               (Data_encoding.opt None None "delegate"
@@ -613,10 +599,7 @@ Module Encoding.
             fun function_parameter =>
               let 'Delegation __key_value := function_parameter in
               __key_value;
-          case.MCase.inj := fun __key_value => Delegation __key_value |}
-          :
-            case.MCase
-              (option (|Signature.Public_key_hash|).(S.SPublic_key_hash.t))).
+          case.MCase.inj := fun __key_value => Delegation __key_value |}.
     
     Definition encoding : Data_encoding.encoding packed_manager_operation :=
       let make {A : Set} (function_parameter : case A)
@@ -693,7 +676,7 @@ Module Encoding.
   
   Definition endorsement_case : case Kind.endorsement :=
     Case
-      ({| case.Case.tag := 0; case.Case.name := "endorsement";
+      {| case.Case.tag := 0; case.Case.name := "endorsement";
         case.Case.encoding := endorsement_encoding;
         case.Case.select :=
           fun function_parameter =>
@@ -707,10 +690,7 @@ Module Encoding.
               function_parameter in
             level;
         case.Case.inj :=
-          fun level =>
-            Endorsement
-              ({| contents.Endorsement.level := level |} : contents.Endorsement)
-        |} : case.Case Raw_level_repr.raw_level).
+          fun level => Endorsement {| contents.Endorsement.level := level |} |}.
   
   Definition endorsement_encoding : Data_encoding.encoding operation :=
     let make {A : Set} (function_parameter : case A)
@@ -750,11 +730,10 @@ Module Encoding.
           (shell, (contents, signature)))
         (fun function_parameter =>
           let '(shell, (contents, signature)) := function_parameter in
-          ({| operation.shell := shell;
+          {| operation.shell := shell;
             operation.protocol_data :=
-              ({| protocol_data.contents := contents;
-                protocol_data.signature := signature |} : protocol_data) |}
-            : operation)) None
+              {| protocol_data.contents := contents;
+                protocol_data.signature := signature |} |}) None
         (Data_encoding.merge_objs Operation.shell_header_encoding
           (Data_encoding.obj2
             (Data_encoding.req None None "operations"
@@ -767,7 +746,7 @@ Module Encoding.
   
   Definition seed_nonce_revelation_case : case Kind.seed_nonce_revelation :=
     Case
-      ({| case.Case.tag := 1; case.Case.name := "seed_nonce_revelation";
+      {| case.Case.tag := 1; case.Case.name := "seed_nonce_revelation";
         case.Case.encoding :=
           Data_encoding.obj2
             (Data_encoding.req None None "level" Raw_level_repr.encoding)
@@ -790,15 +769,13 @@ Module Encoding.
           fun function_parameter =>
             let '(level, __nonce_value) := function_parameter in
             Seed_nonce_revelation
-              ({| contents.Seed_nonce_revelation.level := level;
-                contents.Seed_nonce_revelation.nonce := __nonce_value |}
-                : contents.Seed_nonce_revelation) |}
-        : case.Case (Raw_level_repr.raw_level * Seed_repr.nonce)).
+              {| contents.Seed_nonce_revelation.level := level;
+                contents.Seed_nonce_revelation.nonce := __nonce_value |} |}.
   
   Definition double_endorsement_evidence_case
     : case Kind.double_endorsement_evidence :=
     Case
-      ({| case.Case.tag := 2; case.Case.name := "double_endorsement_evidence";
+      {| case.Case.tag := 2; case.Case.name := "double_endorsement_evidence";
         case.Case.encoding :=
           Data_encoding.obj2
             (Data_encoding.req None None "op1"
@@ -823,14 +800,12 @@ Module Encoding.
           fun function_parameter =>
             let '(op1, op2) := function_parameter in
             Double_endorsement_evidence
-              ({| contents.Double_endorsement_evidence.op1 := op1;
-                contents.Double_endorsement_evidence.op2 := op2 |}
-                : contents.Double_endorsement_evidence) |}
-        : case.Case (operation * operation)).
+              {| contents.Double_endorsement_evidence.op1 := op1;
+                contents.Double_endorsement_evidence.op2 := op2 |} |}.
   
   Definition double_baking_evidence_case : case Kind.double_baking_evidence :=
     Case
-      ({| case.Case.tag := 3; case.Case.name := "double_baking_evidence";
+      {| case.Case.tag := 3; case.Case.name := "double_baking_evidence";
         case.Case.encoding :=
           Data_encoding.obj2
             (Data_encoding.req None None "bh1"
@@ -855,16 +830,12 @@ Module Encoding.
           fun function_parameter =>
             let '(bh1, bh2) := function_parameter in
             Double_baking_evidence
-              ({| contents.Double_baking_evidence.bh1 := bh1;
-                contents.Double_baking_evidence.bh2 := bh2 |}
-                : contents.Double_baking_evidence) |}
-        :
-          case.Case
-            (Block_header_repr.block_header * Block_header_repr.block_header)).
+              {| contents.Double_baking_evidence.bh1 := bh1;
+                contents.Double_baking_evidence.bh2 := bh2 |} |}.
   
   Definition activate_account_case : case Kind.activate_account :=
     Case
-      ({| case.Case.tag := 4; case.Case.name := "activate_account";
+      {| case.Case.tag := 4; case.Case.name := "activate_account";
         case.Case.encoding :=
           Data_encoding.obj2
             (Data_encoding.req None None "pkh"
@@ -889,17 +860,13 @@ Module Encoding.
           fun function_parameter =>
             let '(id, activation_code) := function_parameter in
             Activate_account
-              ({| contents.Activate_account.id := id;
+              {| contents.Activate_account.id := id;
                 contents.Activate_account.activation_code := activation_code |}
-                : contents.Activate_account) |}
-        :
-          case.Case
-            ((|Ed25519|).(S.SIGNATURE.Public_key_hash).(S.SPublic_key_hash.t) *
-              Blinded_public_key_hash.activation_code)).
+        |}.
   
   Definition proposals_case : case Kind.proposals :=
     Case
-      ({| case.Case.tag := 5; case.Case.name := "proposals";
+      {| case.Case.tag := 5; case.Case.name := "proposals";
         case.Case.encoding :=
           Data_encoding.obj3
             (Data_encoding.req None None "source"
@@ -927,19 +894,13 @@ Module Encoding.
           fun function_parameter =>
             let '(source, period, proposals) := function_parameter in
             Proposals
-              ({| contents.Proposals.source := source;
+              {| contents.Proposals.source := source;
                 contents.Proposals.period := period;
-                contents.Proposals.proposals := proposals |}
-                : contents.Proposals) |}
-        :
-          case.Case
-            ((|Signature.Public_key_hash|).(S.SPublic_key_hash.t) *
-              Voting_period_repr.voting_period *
-              list (|Protocol_hash|).(S.HASH.t))).
+                contents.Proposals.proposals := proposals |} |}.
   
   Definition ballot_case : case Kind.ballot :=
     Case
-      ({| case.Case.tag := 6; case.Case.name := "ballot";
+      {| case.Case.tag := 6; case.Case.name := "ballot";
         case.Case.encoding :=
           Data_encoding.obj4
             (Data_encoding.req None None "source"
@@ -968,15 +929,10 @@ Module Encoding.
           fun function_parameter =>
             let '(source, period, proposal, ballot) := function_parameter in
             Ballot
-              ({| contents.Ballot.source := source;
+              {| contents.Ballot.source := source;
                 contents.Ballot.period := period;
                 contents.Ballot.proposal := proposal;
-                contents.Ballot.ballot := ballot |} : contents.Ballot) |}
-        :
-          case.Case
-            ((|Signature.Public_key_hash|).(S.SPublic_key_hash.t) *
-              Voting_period_repr.voting_period * (|Protocol_hash|).(S.HASH.t) *
-              Vote_repr.ballot)).
+                contents.Ballot.ballot := ballot |} |}.
   
   Definition manager_encoding
     : Data_encoding.encoding
@@ -1014,13 +970,12 @@ Module Encoding.
       in
     fun operation =>
       Manager_operation
-        ({| contents.Manager_operation.source := source;
+        {| contents.Manager_operation.source := source;
           contents.Manager_operation.fee := fee;
           contents.Manager_operation.counter := counter;
           contents.Manager_operation.operation := operation;
           contents.Manager_operation.gas_limit := gas_limit;
-          contents.Manager_operation.storage_limit := storage_limit |}
-          : contents.Manager_operation).
+          contents.Manager_operation.storage_limit := storage_limit |}.
   
   Definition make_manager_case {A : Set}
     (tag : int) (function_parameter : Manager_operations.case A)
@@ -1030,7 +985,7 @@ Module Encoding.
       existT (A := Set)
         (fun __MCase_'a => Manager_operations.case.MCase __MCase_'a) _ mcase in
     Case
-      ({| case.Case.tag := tag;
+      {| case.Case.tag := tag;
         case.Case.name := mcase.(Manager_operations.case.MCase.name);
         case.Case.encoding :=
           Data_encoding.merge_objs manager_encoding
@@ -1069,11 +1024,7 @@ Module Encoding.
         case.Case.inj :=
           fun function_parameter =>
             let '(op, contents) := function_parameter in
-            rebuild op (mcase.(Manager_operations.case.MCase.inj) contents) |}
-        :
-          case.Case
-            ((Signature.public_key_hash * Tez_repr.tez * counter * Z.t * Z.t) *
-              __MCase_'a)).
+            rebuild op (mcase.(Manager_operations.case.MCase.inj) contents) |}.
   
   Definition reveal_case : case Kind.manager :=
     make_manager_case 107 Manager_operations.reveal_case.
@@ -1173,8 +1124,8 @@ Module Encoding.
                 [contents_list ** option Signature.t]) _ [contents, signature]
             in
           Operation_data
-            ({| protocol_data.contents := contents;
-              protocol_data.signature := signature |} : protocol_data)) None
+            {| protocol_data.contents := contents;
+              protocol_data.signature := signature |}) None
         (Data_encoding.obj2
           (Data_encoding.req None None "contents" contents_list_encoding)
           (Data_encoding.req None None "signature" optional_signature_encoding))).
@@ -1189,9 +1140,8 @@ Module Encoding.
         (shell, protocol_data))
       (fun function_parameter =>
         let '(shell, protocol_data) := function_parameter in
-        ({| packed_operation.shell := shell;
-          packed_operation.protocol_data := protocol_data |} : packed_operation))
-      None
+        {| packed_operation.shell := shell;
+          packed_operation.protocol_data := protocol_data |}) None
       (Data_encoding.merge_objs Operation.shell_header_encoding
         protocol_data_encoding).
   
@@ -1231,10 +1181,9 @@ Module Encoding.
                 [Contract_repr.contract ** int ** manager_operation]) _
               [source, __nonce_value, operation] in
           Internal_operation
-            ({| internal_operation.source := source;
+            {| internal_operation.source := source;
               internal_operation.operation := operation;
-              internal_operation.nonce := __nonce_value |} : internal_operation))
-        None
+              internal_operation.nonce := __nonce_value |}) None
         (Data_encoding.merge_objs
           (Data_encoding.obj2
             (Data_encoding.req None None "source" Contract_repr.encoding)
@@ -1271,7 +1220,7 @@ Definition __raw_value (function_parameter : operation) : Operation.t :=
   let proto :=
     Data_encoding.Binary.to_bytes_exn protocol_data_encoding
       (Operation_data protocol_data) in
-  ({| Operation.t.shell := shell; Operation.t.proto := proto |} : Operation.t).
+  {| Operation.t.shell := shell; Operation.t.proto := proto |}.
 
 Definition acceptable_passes (op : packed_operation) : list int :=
   let 'Operation_data protocol_data := op.(packed_operation.protocol_data) in
@@ -1361,15 +1310,14 @@ Definition __hash_value (o : operation) : (|Operation_hash|).(S.HASH.t) :=
     Data_encoding.Binary.to_bytes_exn protocol_data_encoding
       (Operation_data o.(operation.protocol_data)) in
   Operation.__hash_value
-    ({| raw.shell := o.(operation.shell); raw.proto := proto |} : Operation.t).
+    {| raw.shell := o.(operation.shell); raw.proto := proto |}.
 
 Definition hash_packed (o : packed_operation) : (|Operation_hash|).(S.HASH.t) :=
   let proto :=
     Data_encoding.Binary.to_bytes_exn protocol_data_encoding
       o.(packed_operation.protocol_data) in
   Operation.__hash_value
-    ({| raw.shell := o.(packed_operation.shell); raw.proto := proto |}
-      : Operation.t).
+    {| raw.shell := o.(packed_operation.shell); raw.proto := proto |}.
 
 Inductive eq : Set :=
 | Eq : eq.

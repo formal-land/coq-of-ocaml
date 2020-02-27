@@ -112,8 +112,7 @@ Definition ballots_encoding : Data_encoding.encoding ballots :=
         (yay, nay, pass))
       (fun function_parameter =>
         let '(yay, nay, pass) := function_parameter in
-        ({| ballots.yay := yay; ballots.nay := nay; ballots.pass := pass |}
-          : ballots)) in
+        {| ballots.yay := yay; ballots.nay := nay; ballots.pass := pass |}) in
   fun eta => arg None eta)
     (Data_encoding.obj3
       (Data_encoding.req None None "yay" Data_encoding.__int32_value)
@@ -137,7 +136,7 @@ Definition get_ballots
   : Lwt.t (Error_monad.tzresult ballots) :=
   (|Storage.Vote.Ballots|).(Storage_sigs.Indexed_data_storage.fold) ctxt
     (Error_monad.ok
-      ({|
+      {|
         ballots.yay :=
           (* ❌ Constant of type int32 is converted to int *)
           0;
@@ -146,7 +145,7 @@ Definition get_ballots
           0;
         ballots.pass :=
           (* ❌ Constant of type int32 is converted to int *)
-          0 |} : ballots))
+          0 |})
     (fun delegate =>
       fun ballot =>
         fun ballots =>

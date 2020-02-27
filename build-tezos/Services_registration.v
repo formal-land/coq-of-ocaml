@@ -43,9 +43,9 @@ Definition rpc_init (function_parameter : Updater.rpc_context)
   let=? context :=
     Alpha_context.prepare context level timestamp timestamp fitness in
   Error_monad.__return
-    ({| rpc_context.block_hash := block_hash;
+    {| rpc_context.block_hash := block_hash;
       rpc_context.block_header := block_header; rpc_context.context := context
-      |} : rpc_context).
+      |}.
 
 Definition rpc_services
   : Pervasives.ref (RPC_directory.t Updater.rpc_context) :=

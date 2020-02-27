@@ -392,13 +392,12 @@ Definition finalize (message : option string) (c : Raw_context.context)
   : Updater.validation_result :=
   let fitness := Fitness.from_int64 (Fitness.current c) in
   let context := Raw_context.recover c in
-  ({| Updater.validation_result.context := context;
+  {| Updater.validation_result.context := context;
     Updater.validation_result.fitness := fitness;
     Updater.validation_result.message := message;
     Updater.validation_result.max_operations_ttl := 60;
     Updater.validation_result.last_allowed_fork_level :=
-      Raw_level.to_int32 (Level.last_allowed_fork_level c) |}
-    : Updater.validation_result).
+      Raw_level.to_int32 (Level.last_allowed_fork_level c) |}.
 
 Definition activate
   : Raw_context.context -> (|Protocol_hash|).(S.HASH.t) -> Lwt.t Raw_context.t :=
