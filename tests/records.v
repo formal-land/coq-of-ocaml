@@ -81,26 +81,32 @@ Definition poly := poly.record.
 Definition p : poly Z bool := {| poly.first := 12; poly.second := false |}.
 
 Module ConstructorWithRecord.
-  Module ConstructorRecordNotations_t_exi.
+  Module ConstructorRecords_t_exi.
     Module t.
       Module Foo.
-        Record record {name size : Set} : Set := {
+        Record record {name size : Set} : Set := Build {
           name : name;
           size : size }.
         Arguments record : clear implicits.
+        Definition with_name {t_name t_size} name (r : record t_name t_size) :=
+          Build t_name t_size name r.(size).
+        Definition with_size {t_name t_size} size (r : record t_name t_size) :=
+          Build t_name t_size r.(name) size.
       End Foo.
       Definition Foo_skeleton := Foo.record.
     End t.
     Module exi.
       Module Ex.
-        Record record {x : Set} : Set := {
+        Record record {x : Set} : Set := Build {
           x : x }.
         Arguments record : clear implicits.
+        Definition with_x {t_x} x (r : record t_x) :=
+          Build t_x x.
       End Ex.
       Definition Ex_skeleton := Ex.record.
     End exi.
-  End ConstructorRecordNotations_t_exi.
-  Import ConstructorRecordNotations_t_exi.
+  End ConstructorRecords_t_exi.
+  Import ConstructorRecords_t_exi.
   
   Module loc.
     Record record {x y : Set} : Set := Build {
@@ -130,11 +136,11 @@ Module ConstructorWithRecord.
   and "'exi.Ex" := (fun (t_a : Set) => exi.Ex_skeleton t_a).
   
   Module t.
-    Include ConstructorRecordNotations_t_exi.t.
+    Include ConstructorRecords_t_exi.t.
     Definition Foo := 't.Foo.
   End t.
   Module exi.
-    Include ConstructorRecordNotations_t_exi.exi.
+    Include ConstructorRecords_t_exi.exi.
     Definition Ex := 'exi.Ex.
   End exi.
   
@@ -154,19 +160,28 @@ Module ConstructorWithRecord.
 End ConstructorWithRecord.
 
 Module ConstructorWithPolymorphicRecord.
-  Module ConstructorRecordNotations_t.
+  Module ConstructorRecords_t.
     Module t.
       Module Foo.
-        Record record {location payload size : Set} : Set := {
+        Record record {location payload size : Set} : Set := Build {
           location : location;
           payload : payload;
           size : size }.
         Arguments record : clear implicits.
+        Definition with_location {t_location t_payload t_size} location
+          (r : record t_location t_payload t_size) :=
+          Build t_location t_payload t_size location r.(payload) r.(size).
+        Definition with_payload {t_location t_payload t_size} payload
+          (r : record t_location t_payload t_size) :=
+          Build t_location t_payload t_size r.(location) payload r.(size).
+        Definition with_size {t_location t_payload t_size} size
+          (r : record t_location t_payload t_size) :=
+          Build t_location t_payload t_size r.(location) r.(payload) size.
       End Foo.
       Definition Foo_skeleton := Foo.record.
     End t.
-  End ConstructorRecordNotations_t.
-  Import ConstructorRecordNotations_t.
+  End ConstructorRecords_t.
+  Import ConstructorRecords_t.
   
   Reserved Notation "'t.Foo".
   
@@ -176,7 +191,7 @@ Module ConstructorWithPolymorphicRecord.
   where "'t.Foo" := (fun (t_loc t_a : Set) => t.Foo_skeleton t_loc t_a Z).
   
   Module t.
-    Include ConstructorRecordNotations_t.t.
+    Include ConstructorRecords_t.t.
     Definition Foo := 't.Foo.
   End t.
   
