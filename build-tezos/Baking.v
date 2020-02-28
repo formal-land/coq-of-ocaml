@@ -6,9 +6,6 @@ Local Open Scope Z_scope.
 Local Open Scope type_scope.
 Import ListNotations.
 
-Unset Positivity Checking.
-Unset Guard Checking.
-
 Require Import Tezos.Environment.
 Import Environment.Notations.
 Require Tezos.Alpha_context.
@@ -47,7 +44,7 @@ Definition minimal_time
   let fix cumsum_time_between_blocks
     (acc : Alpha_context.Timestamp.time)
     (durations : list Alpha_context.Period.period)
-    (__p_value : (|Compare.Int32|).(Compare.S.t)) {struct acc}
+    (__p_value : (|Compare.Int32|).(Compare.S.t))
     : Error_monad.tzresult Alpha_context.Timestamp.time :=
     if
       (|Compare.Int32|).(Compare.S.op_lteq) __p_value
@@ -172,7 +169,7 @@ Definition endorsing_reward
 Definition baking_priorities
   (c : Alpha_context.context) (level : Alpha_context.Level.t)
   : Lwt.t (Error_monad.tzresult (Misc.lazy_list_t Alpha_context.public_key)) :=
-  let fix f (priority : int) {struct priority}
+  let fix f (priority : int)
     : Lwt.t (Error_monad.tzresult (Misc.lazy_list_t Alpha_context.public_key)) :=
     let=? delegate := Alpha_context.Roll.baking_rights_owner c level priority in
     Error_monad.__return
@@ -251,7 +248,7 @@ Definition select_delegate
   let fix loop
     (acc : list (|Compare.Int|).(Compare.S.t))
     (l : Misc.lazy_list_t (|Signature.Public_key|).(S.SPublic_key.t))
-    (n : (|Compare.Int|).(Compare.S.t)) {struct acc}
+    (n : (|Compare.Int|).(Compare.S.t))
     : Lwt.t (Error_monad.tzresult (list (|Compare.Int|).(Compare.S.t))) :=
     if (|Compare.Int|).(Compare.S.op_gteq) n max_priority then
       Error_monad.__return (List.rev acc)

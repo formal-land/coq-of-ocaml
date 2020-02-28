@@ -6,9 +6,6 @@ Local Open Scope Z_scope.
 Local Open Scope type_scope.
 Import ListNotations.
 
-Unset Positivity Checking.
-Unset Guard Checking.
-
 Require Import Tezos.Environment.
 Import Environment.Notations.
 Require Tezos.Alpha_context.
@@ -455,7 +452,7 @@ Definition extract_field_annot (function_parameter : Alpha_context.Script.node)
   match function_parameter with
   | Micheline.Prim loc prim args annot =>
     let fix extract_first (acc : list string) (function_parameter : list string)
-      {struct acc} : option string * Micheline.annot :=
+      : option string * Micheline.annot :=
       match function_parameter with
       | [] => (None, annot)
       | cons s rest =>

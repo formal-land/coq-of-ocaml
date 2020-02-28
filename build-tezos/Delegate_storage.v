@@ -6,9 +6,6 @@ Local Open Scope Z_scope.
 Local Open Scope type_scope.
 Import ListNotations.
 
-Unset Positivity Checking.
-Unset Guard Checking.
-
 Require Import Tezos.Environment.
 Import Environment.Notations.
 Require Tezos.Constants_storage.

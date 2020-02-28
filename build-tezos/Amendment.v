@@ -6,9 +6,6 @@ Local Open Scope Z_scope.
 Local Open Scope type_scope.
 Import ListNotations.
 
-Unset Positivity Checking.
-Unset Guard Checking.
-
 Require Import Tezos.Environment.
 Import Environment.Notations.
 Require Tezos.Alpha_context.
@@ -172,7 +169,7 @@ Definition start_new_voting_period (ctxt : Alpha_context.context)
 (* top_level_evaluation *)
 
 Fixpoint longer_than {A : Set} (l : list A) (n : (|Compare.Int|).(Compare.S.t))
-  {struct l} : bool :=
+  : bool :=
   if (|Compare.Int|).(Compare.S.op_lt) n 0 then
     (* ❌ Assert instruction is not handled. *)
     assert bool false

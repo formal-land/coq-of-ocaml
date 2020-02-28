@@ -6,9 +6,6 @@ Local Open Scope Z_scope.
 Local Open Scope type_scope.
 Import ListNotations.
 
-Unset Positivity Checking.
-Unset Guard Checking.
-
 Module Pervasives.
   Parameter raise : forall {a : Set}, extensible_type -> a.
   

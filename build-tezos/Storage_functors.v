@@ -6,9 +6,6 @@ Local Open Scope Z_scope.
 Local Open Scope type_scope.
 Import ListNotations.
 
-Unset Positivity Checking.
-Unset Guard Checking.
-
 Require Import Tezos.Environment.
 Import Environment.Notations.
 Require Tezos.Gas_limit_repr.
@@ -391,7 +388,7 @@ Definition Make_data_set_storage :=
         (f : (|I|).(INDEX.t) -> A -> Lwt.t A) : Lwt.t A :=
         let fix dig
           (i : (|Compare.Int|).(Compare.S.t)) (path : Raw_context.key) (acc : A)
-          {struct i} : Lwt.t A :=
+          : Lwt.t A :=
           if (|Compare.Int|).(Compare.S.op_lteq) i 1 then
             (|C|).(Raw_context.T.fold) s path acc
               (fun k =>
@@ -523,7 +520,7 @@ Definition Make_indexed_data_storage :=
           (f : (|I|).(INDEX.t) -> A -> Lwt.t A) : Lwt.t A :=
           let fix dig
             (i : (|Compare.Int|).(Compare.S.t)) (path : Raw_context.key)
-            (acc : A) {struct i} : Lwt.t A :=
+            (acc : A) : Lwt.t A :=
             if (|Compare.Int|).(Compare.S.op_lteq) i 1 then
               (|C|).(Raw_context.T.fold) s path acc
                 (fun k =>
@@ -762,7 +759,7 @@ Definition Make_indexed_carbonated_data_storage :=
           (f : (|I|).(INDEX.t) -> A -> Lwt.t A) : Lwt.t A :=
           let fix dig
             (i : (|Compare.Int|).(Compare.S.t)) (path : Raw_context.key)
-            (acc : A) {struct i} : Lwt.t A :=
+            (acc : A) : Lwt.t A :=
             if (|Compare.Int|).(Compare.S.op_lteq) i 0 then
               (|C|).(Raw_context.T.fold) s path acc
                 (fun k =>
@@ -985,7 +982,7 @@ Definition Make_indexed_subcontext :=
         (f : (|I|).(INDEX.t) -> A -> Lwt.t A) : Lwt.t A :=
         let fix dig
           (i : (|Compare.Int|).(Compare.S.t)) (path : Raw_context.key) (acc : A)
-          {struct i} : Lwt.t A :=
+          : Lwt.t A :=
           if (|Compare.Int|).(Compare.S.op_lteq) i 0 then
             match (|I|).(INDEX.of_path) path with
             | None =>
@@ -1200,8 +1197,7 @@ Definition Make_indexed_subcontext :=
         : Lwt.t (list (|I|).(INDEX.t)) :=
         let fix loop
           (i : (|Compare.Int|).(Compare.S.t)) (prefix : Raw_context.key)
-          (function_parameter : list string) {struct i}
-          : Lwt.t (list (|I|).(INDEX.t)) :=
+          (function_parameter : list string) : Lwt.t (list (|I|).(INDEX.t)) :=
           match
             (function_parameter,
               match function_parameter with

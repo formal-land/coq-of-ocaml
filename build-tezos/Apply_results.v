@@ -6,9 +6,6 @@ Local Open Scope Z_scope.
 Local Open Scope type_scope.
 Import ListNotations.
 
-Unset Positivity Checking.
-Unset Guard Checking.
-
 Require Import Tezos.Environment.
 Import Environment.Notations.
 Require Tezos.Alpha_context.
@@ -1308,14 +1305,14 @@ Inductive packed_contents_result_list : Set :=
 Definition contents_result_list_encoding
   : Data_encoding.encoding packed_contents_result_list :=
   let fix to_list (function_parameter : packed_contents_result_list)
-    {struct function_parameter} : list packed_contents_result :=
+    : list packed_contents_result :=
     match function_parameter with
     | Contents_result_list (Single_result o) => [ Contents_result o ]
     | Contents_result_list (Cons_result o os) =>
       cons (Contents_result o) (to_list (Contents_result_list os))
     end in
   let fix of_list (function_parameter : list packed_contents_result)
-    {struct function_parameter} : packed_contents_result_list :=
+    : packed_contents_result_list :=
     match function_parameter with
     | [] => Pervasives.failwith "cannot decode empty operation result"
     | cons (Contents_result o) [] => Contents_result_list (Single_result o)
@@ -1348,7 +1345,7 @@ Inductive packed_contents_and_result_list : Set :=
 Definition contents_and_result_list_encoding
   : Data_encoding.encoding packed_contents_and_result_list :=
   let fix to_list (function_parameter : packed_contents_and_result_list)
-    {struct function_parameter} : list packed_contents_and_result :=
+    : list packed_contents_and_result :=
     match function_parameter with
     | Contents_and_result_list (Single_and_result op res) =>
       [ Contents_and_result op res ]
@@ -1357,7 +1354,7 @@ Definition contents_and_result_list_encoding
         (to_list (Contents_and_result_list rest))
     end in
   let fix of_list (function_parameter : list packed_contents_and_result)
-    {struct function_parameter} : packed_contents_and_result_list :=
+    : packed_contents_and_result_list :=
     match function_parameter with
     | [] => Pervasives.failwith "cannot decode empty combined operation result"
     | cons (Contents_and_result op res) [] =>
@@ -1606,7 +1603,7 @@ Definition kind_equal (op : Alpha_context.contents) (res : contents_result)
 
 Fixpoint kind_equal_list
   (contents : Alpha_context.contents_list) (res : contents_result_list)
-  {struct contents} : option eq :=
+  : option eq :=
   match (contents, res) with
   | (Alpha_context.Single op, Single_result res) =>
     match kind_equal op res with
@@ -1627,7 +1624,7 @@ Fixpoint kind_equal_list
 
 Fixpoint pack_contents_list
   (contents : Alpha_context.contents_list) (res : contents_result_list)
-  {struct contents} : contents_and_result_list :=
+  : contents_and_result_list :=
   match (contents, res) with
   | (Alpha_context.Single op, Single_result res) => Single_and_result op res
   | (Alpha_context.Cons op ops, Cons_result res ress) =>
@@ -1675,7 +1672,6 @@ Fixpoint pack_contents_list
   end.
 
 Fixpoint unpack_contents_list (function_parameter : contents_and_result_list)
-  {struct function_parameter}
   : Alpha_context.contents_list * contents_result_list :=
   match function_parameter with
   | Single_and_result op res => ((Alpha_context.Single op), (Single_result res))
@@ -1685,7 +1681,7 @@ Fixpoint unpack_contents_list (function_parameter : contents_and_result_list)
   end.
 
 Fixpoint to_list (function_parameter : packed_contents_result_list)
-  {struct function_parameter} : list packed_contents_result :=
+  : list packed_contents_result :=
   match function_parameter with
   | Contents_result_list (Single_result o) => [ Contents_result o ]
   | Contents_result_list (Cons_result o os) =>
@@ -1693,7 +1689,7 @@ Fixpoint to_list (function_parameter : packed_contents_result_list)
   end.
 
 Fixpoint of_list (function_parameter : list packed_contents_result)
-  {struct function_parameter} : packed_contents_result_list :=
+  : packed_contents_result_list :=
   match function_parameter with
   | [] =>
     (* ❌ Assert instruction is not handled. *)

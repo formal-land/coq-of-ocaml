@@ -6,9 +6,6 @@ Local Open Scope Z_scope.
 Local Open Scope type_scope.
 Import ListNotations.
 
-Unset Positivity Checking.
-Unset Guard Checking.
-
 Require Import Tezos.Environment.
 Import Environment.Notations.
 Require Tezos.Alpha_context.
@@ -604,7 +601,7 @@ Module Baking_rights.
     let=? contract_list := Baking.baking_priorities ctxt level in
     let fix loop
       (l : Misc.lazy_list_t (|Signature.Public_key|).(S.SPublic_key.t))
-      (acc : list t) (priority : (|Compare.Int|).(Compare.S.t)) {struct l}
+      (acc : list t) (priority : (|Compare.Int|).(Compare.S.t))
       : Lwt.t (Error_monad.tzresult (list t)) :=
       if (|Compare.Int|).(Compare.S.op_gteq) priority max_prio then
         Error_monad.__return (List.rev acc)

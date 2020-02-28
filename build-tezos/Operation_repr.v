@@ -6,9 +6,6 @@ Local Open Scope Z_scope.
 Local Open Scope type_scope.
 Import ListNotations.
 
-Unset Positivity Checking.
-Unset Guard Checking.
-
 Require Import Tezos.Environment.
 Import Environment.Notations.
 Require Tezos.Blinded_public_key_hash.
@@ -351,7 +348,7 @@ Inductive packed_internal_operation : Set :=
 | Internal_operation : internal_operation -> packed_internal_operation.
 
 Fixpoint to_list (function_parameter : packed_contents_list)
-  {struct function_parameter} : list packed_contents :=
+  : list packed_contents :=
   let 'Contents_list content := function_parameter in
   match content with
   | Single o =>
@@ -363,7 +360,7 @@ Fixpoint to_list (function_parameter : packed_contents_list)
   end.
 
 Fixpoint of_list (function_parameter : list packed_contents)
-  {struct function_parameter} : packed_contents_list :=
+  : packed_contents_list :=
   match function_parameter with
   | [] =>
     (* ❌ Assert instruction is not handled. *)
@@ -1304,7 +1301,7 @@ Definition equal_contents_kind (op1 : contents) (op2 : contents) : option eq :=
   end.
 
 Fixpoint equal_contents_kind_list (op1 : contents_list) (op2 : contents_list)
-  {struct op1} : option eq :=
+  : option eq :=
   match (op1, op2) with
   | (Single op1, Single op2) => equal_contents_kind op1 op2
   | (Single _, Cons _ _) => None

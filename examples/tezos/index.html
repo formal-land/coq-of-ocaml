@@ -60,7 +60,7 @@
 opam pin add https://github.com/clarus/coq-of-ocaml.git#master</code></pre>
     <ul>
       <li>OCaml size: 36043 lines</li>
-      <li>Coq size: 45054 lines (+25% compared to&nbsp;OCaml)</li>
+      <li>Coq size: 44685 lines (+23% compared to&nbsp;OCaml)</li>
       <li>Warnings from coq-of-ocaml: 4330</li>
     </ul>
     
@@ -113,7 +113,7 @@ opam pin add https://github.com/clarus/coq-of-ocaml.git#master</code></pre>
           25014,
           25014,
           24981,
-          24350,
+          24064,
         ],
         generated: [
           47563,
@@ -161,7 +161,7 @@ opam pin add https://github.com/clarus/coq-of-ocaml.git#master</code></pre>
           48552,
           48552,
           48348,
-          45054,
+          44685,
         ],
         labels: [
           "01-14",
@@ -742,7 +742,7 @@ opam pin add https://github.com/clarus/coq-of-ocaml.git#master</code></pre>
     <h3>Alpha_context</h3>
     <ul>
       <li>OCaml size: 279 lines</li>
-      <li>Coq size: 469 lines (+68% compared to&nbsp;OCaml)</li>
+      <li>Coq size: 466 lines (+67% compared to&nbsp;OCaml)</li>
     </ul>
   </div>
   <div class="col-md-6">
@@ -1038,9 +1038,6 @@ Local Open Scope string_scope.
 Local Open Scope Z_scope.
 Local Open Scope type_scope.
 Import ListNotations.
-
-Unset Positivity Checking.
-Unset Guard Checking.
 
 Require Import Tezos.Environment.
 Import Environment.Notations.
@@ -1510,7 +1507,7 @@ Definition description : Storage_description.t Raw_context.context :=
     <h3>Alpha_context_mli</h3>
     <ul>
       <li>OCaml size: 1392 lines</li>
-      <li>Coq size: 2519 lines (+80% compared to&nbsp;OCaml)</li>
+      <li>Coq size: 2516 lines (+80% compared to&nbsp;OCaml)</li>
     </ul>
   </div>
   <div class="col-md-6">
@@ -2919,9 +2916,6 @@ Local Open Scope string_scope.
 Local Open Scope Z_scope.
 Local Open Scope type_scope.
 Import ListNotations.
-
-Unset Positivity Checking.
-Unset Guard Checking.
 
 Require Import Tezos.Environment.
 Import Environment.Notations.
@@ -5441,7 +5435,7 @@ Parameter description : Storage_description.t context.
     <h3>Alpha_services</h3>
     <ul>
       <li>OCaml size: 117 lines</li>
-      <li>Coq size: 175 lines (+49% compared to&nbsp;OCaml)</li>
+      <li>Coq size: 172 lines (+47% compared to&nbsp;OCaml)</li>
     </ul>
   </div>
   <div class="col-md-6">
@@ -5810,9 +5804,6 @@ Local Open Scope Z_scope.
 Local Open Scope type_scope.
 Import ListNotations.
 
-Unset Positivity Checking.
-Unset Guard Checking.
-
 Require Import Tezos.Environment.
 Import Environment.Notations.
 Require Tezos.Alpha_context.
@@ -5987,7 +5978,7 @@ Definition register (function_parameter : unit) : unit :=
     <h3>Alpha_services_mli</h3>
     <ul>
       <li>OCaml size: 47 lines</li>
-      <li>Coq size: 73 lines (+55% compared to&nbsp;OCaml)</li>
+      <li>Coq size: 70 lines (+48% compared to&nbsp;OCaml)</li>
     </ul>
   </div>
   <div class="col-md-6">
@@ -6244,9 +6235,6 @@ Local Open Scope Z_scope.
 Local Open Scope type_scope.
 Import ListNotations.
 
-Unset Positivity Checking.
-Unset Guard Checking.
-
 Require Import Tezos.Environment.
 Import Environment.Notations.
 Require Tezos.Alpha_context.
@@ -6319,7 +6307,7 @@ Parameter register : unit -&gt; unit.
     <h3>Amendment</h3>
     <ul>
       <li>OCaml size: 323 lines</li>
-      <li>Coq size: 264 lines (-19% compared to&nbsp;OCaml)</li>
+      <li>Coq size: 261 lines (-20% compared to&nbsp;OCaml)</li>
     </ul>
   </div>
   <div class="col-md-6">
@@ -6676,9 +6664,6 @@ Local Open Scope Z_scope.
 Local Open Scope type_scope.
 Import ListNotations.
 
-Unset Positivity Checking.
-Unset Guard Checking.
-
 Require Import Tezos.Environment.
 Import Environment.Notations.
 Require Tezos.Alpha_context.
@@ -6842,7 +6827,7 @@ Definition start_new_voting_period (ctxt : Alpha_context.context)
 (* top_level_evaluation *)
 
 Fixpoint longer_than {A : Set} (l : list A) (n : (|Compare.Int|).(Compare.S.t))
-  {struct l} : bool :=
+  : bool :=
   if (|Compare.Int|).(Compare.S.op_lt) n 0 then
     (* ❌ Assert instruction is not handled. *)
     assert bool false
@@ -6942,7 +6927,7 @@ Definition may_start_new_voting_period (ctxt : Alpha_context.context)
     <h3>Amendment_mli</h3>
     <ul>
       <li>OCaml size: 75 lines</li>
-      <li>Coq size: 33 lines (-56% compared to&nbsp;OCaml)</li>
+      <li>Coq size: 30 lines (-60% compared to&nbsp;OCaml)</li>
     </ul>
   </div>
   <div class="col-md-6">
@@ -7035,9 +7020,6 @@ Local Open Scope Z_scope.
 Local Open Scope type_scope.
 Import ListNotations.
 
-Unset Positivity Checking.
-Unset Guard Checking.
-
 Require Import Tezos.Environment.
 Import Environment.Notations.
 Require Tezos.Alpha_context.
@@ -7070,7 +7052,7 @@ Parameter record_ballot :
     <h3>Apply</h3>
     <ul>
       <li>OCaml size: 1487 lines</li>
-      <li>Coq size: 1349 lines (-10% compared to&nbsp;OCaml)</li>
+      <li>Coq size: 1345 lines (-10% compared to&nbsp;OCaml)</li>
     </ul>
   </div>
   <div class="col-md-6">
@@ -8653,9 +8635,6 @@ Local Open Scope Z_scope.
 Local Open Scope type_scope.
 Import ListNotations.
 
-Unset Positivity Checking.
-Unset Guard Checking.
-
 Require Import Tezos.Environment.
 Import Environment.Notations.
 Require Tezos.Alpha_context.
@@ -8998,7 +8977,7 @@ Definition apply_internal_manager_operations
   let fix apply
     (ctxt : Alpha_context.context)
     (applied : list Apply_results.packed_internal_operation_result)
-    (worklist : list Alpha_context.packed_internal_operation) {struct ctxt}
+    (worklist : list Alpha_context.packed_internal_operation)
     : Lwt.t
       ((* `Success *) Alpha_context.context *
         list Apply_results.packed_internal_operation_result) :=
@@ -9191,7 +9170,7 @@ Definition skipped_operation_result
 Fixpoint mark_skipped
   (baker : (|Signature.Public_key_hash|).(S.SPublic_key_hash.t))
   (level : Alpha_context.Level.t)
-  (function_parameter : Alpha_context.contents_list) {struct baker}
+  (function_parameter : Alpha_context.contents_list)
   : Apply_results.contents_result_list :=
   match function_parameter with
   |
@@ -9247,7 +9226,7 @@ Fixpoint mark_skipped
 Fixpoint precheck_manager_contents_list
   (ctxt : Alpha_context.t) (chain_id : (|Chain_id|).(S.HASH.t))
   (raw_operation : Alpha_context.Operation.t)
-  (contents_list : Alpha_context.contents_list) {struct ctxt}
+  (contents_list : Alpha_context.contents_list)
   : Lwt.t (Error_monad.tzresult Alpha_context.context) :=
   match contents_list with
   | Alpha_context.Single ((Alpha_context.Manager_operation _) as op) =&gt;
@@ -9260,7 +9239,7 @@ Fixpoint precheck_manager_contents_list
 Fixpoint apply_manager_contents_list_rec
   (ctxt : Alpha_context.t) (mode : Script_ir_translator.unparsing_mode)
   (baker : Alpha_context.public_key_hash) (chain_id : (|Chain_id|).(S.HASH.t))
-  (contents_list : Alpha_context.contents_list) {struct ctxt}
+  (contents_list : Alpha_context.contents_list)
   : Lwt.t
     (((* `Failure *) unit + (* `Success *) Alpha_context.context) *
       Apply_results.contents_result_list) :=
@@ -9350,7 +9329,7 @@ Definition mark_backtracked (results : Apply_results.contents_result_list)
   : Apply_results.contents_result_list :=
   let fix mark_contents_list
     (function_parameter : Apply_results.contents_result_list)
-    {struct function_parameter} : Apply_results.contents_result_list :=
+    : Apply_results.contents_result_list :=
     match function_parameter with
     | Apply_results.Single_result (Apply_results.Manager_operation_result op) =&gt;
       Apply_results.Single_result
@@ -9382,7 +9361,6 @@ Definition mark_backtracked (results : Apply_results.contents_result_list)
     end
   with mark_internal_operation_results
     (function_parameter : Apply_results.packed_internal_operation_result)
-    {struct function_parameter}
     : Apply_results.packed_internal_operation_result :=
     let 'Apply_results.Internal_operation_result kind __result_value :=
       function_parameter in
@@ -9390,7 +9368,7 @@ Definition mark_backtracked (results : Apply_results.contents_result_list)
       (mark_manager_operation_result __result_value)
   with mark_manager_operation_result
     (function_parameter : Apply_results.manager_operation_result)
-    {struct function_parameter} : Apply_results.manager_operation_result :=
+    : Apply_results.manager_operation_result :=
     match function_parameter with
     |
       (Apply_results.Failed _ _ | Apply_results.Skipped _ |
@@ -10004,7 +9982,7 @@ Definition finalize_application
     <h3>Apply_results</h3>
     <ul>
       <li>OCaml size: 1187 lines</li>
-      <li>Coq size: 1865 lines (+57% compared to&nbsp;OCaml)</li>
+      <li>Coq size: 1861 lines (+56% compared to&nbsp;OCaml)</li>
     </ul>
   </div>
   <div class="col-md-6">
@@ -11208,9 +11186,6 @@ Local Open Scope string_scope.
 Local Open Scope Z_scope.
 Local Open Scope type_scope.
 Import ListNotations.
-
-Unset Positivity Checking.
-Unset Guard Checking.
 
 Require Import Tezos.Environment.
 Import Environment.Notations.
@@ -12511,14 +12486,14 @@ Inductive packed_contents_result_list : Set :=
 Definition contents_result_list_encoding
   : Data_encoding.encoding packed_contents_result_list :=
   let fix to_list (function_parameter : packed_contents_result_list)
-    {struct function_parameter} : list packed_contents_result :=
+    : list packed_contents_result :=
     match function_parameter with
     | Contents_result_list (Single_result o) =&gt; [ Contents_result o ]
     | Contents_result_list (Cons_result o os) =&gt;
       cons (Contents_result o) (to_list (Contents_result_list os))
     end in
   let fix of_list (function_parameter : list packed_contents_result)
-    {struct function_parameter} : packed_contents_result_list :=
+    : packed_contents_result_list :=
     match function_parameter with
     | [] =&gt; Pervasives.failwith &quot;cannot decode empty operation result&quot;
     | cons (Contents_result o) [] =&gt; Contents_result_list (Single_result o)
@@ -12551,7 +12526,7 @@ Inductive packed_contents_and_result_list : Set :=
 Definition contents_and_result_list_encoding
   : Data_encoding.encoding packed_contents_and_result_list :=
   let fix to_list (function_parameter : packed_contents_and_result_list)
-    {struct function_parameter} : list packed_contents_and_result :=
+    : list packed_contents_and_result :=
     match function_parameter with
     | Contents_and_result_list (Single_and_result op res) =&gt;
       [ Contents_and_result op res ]
@@ -12560,7 +12535,7 @@ Definition contents_and_result_list_encoding
         (to_list (Contents_and_result_list rest))
     end in
   let fix of_list (function_parameter : list packed_contents_and_result)
-    {struct function_parameter} : packed_contents_and_result_list :=
+    : packed_contents_and_result_list :=
     match function_parameter with
     | [] =&gt; Pervasives.failwith &quot;cannot decode empty combined operation result&quot;
     | cons (Contents_and_result op res) [] =&gt;
@@ -12809,7 +12784,7 @@ Definition kind_equal (op : Alpha_context.contents) (res : contents_result)
 
 Fixpoint kind_equal_list
   (contents : Alpha_context.contents_list) (res : contents_result_list)
-  {struct contents} : option eq :=
+  : option eq :=
   match (contents, res) with
   | (Alpha_context.Single op, Single_result res) =&gt;
     match kind_equal op res with
@@ -12830,7 +12805,7 @@ Fixpoint kind_equal_list
 
 Fixpoint pack_contents_list
   (contents : Alpha_context.contents_list) (res : contents_result_list)
-  {struct contents} : contents_and_result_list :=
+  : contents_and_result_list :=
   match (contents, res) with
   | (Alpha_context.Single op, Single_result res) =&gt; Single_and_result op res
   | (Alpha_context.Cons op ops, Cons_result res ress) =&gt;
@@ -12878,7 +12853,6 @@ Fixpoint pack_contents_list
   end.
 
 Fixpoint unpack_contents_list (function_parameter : contents_and_result_list)
-  {struct function_parameter}
   : Alpha_context.contents_list * contents_result_list :=
   match function_parameter with
   | Single_and_result op res =&gt; ((Alpha_context.Single op), (Single_result res))
@@ -12888,7 +12862,7 @@ Fixpoint unpack_contents_list (function_parameter : contents_and_result_list)
   end.
 
 Fixpoint to_list (function_parameter : packed_contents_result_list)
-  {struct function_parameter} : list packed_contents_result :=
+  : list packed_contents_result :=
   match function_parameter with
   | Contents_result_list (Single_result o) =&gt; [ Contents_result o ]
   | Contents_result_list (Cons_result o os) =&gt;
@@ -12896,7 +12870,7 @@ Fixpoint to_list (function_parameter : packed_contents_result_list)
   end.
 
 Fixpoint of_list (function_parameter : list packed_contents_result)
-  {struct function_parameter} : packed_contents_result_list :=
+  : packed_contents_result_list :=
   match function_parameter with
   | [] =&gt;
     (* ❌ Assert instruction is not handled. *)
@@ -13076,7 +13050,7 @@ Definition block_metadata_encoding : Data_encoding.encoding block_metadata :=
     <h3>Apply_results_mli</h3>
     <ul>
       <li>OCaml size: 191 lines</li>
-      <li>Coq size: 288 lines (+50% compared to&nbsp;OCaml)</li>
+      <li>Coq size: 285 lines (+49% compared to&nbsp;OCaml)</li>
     </ul>
   </div>
   <div class="col-md-6">
@@ -13284,9 +13258,6 @@ Local Open Scope string_scope.
 Local Open Scope Z_scope.
 Local Open Scope type_scope.
 Import ListNotations.
-
-Unset Positivity Checking.
-Unset Guard Checking.
 
 Require Import Tezos.Environment.
 Import Environment.Notations.
@@ -13575,7 +13546,7 @@ Parameter block_metadata_encoding : Data_encoding.encoding block_metadata.
     <h3>Baking</h3>
     <ul>
       <li>OCaml size: 399 lines</li>
-      <li>Coq size: 418 lines (+4% compared to&nbsp;OCaml)</li>
+      <li>Coq size: 415 lines (+4% compared to&nbsp;OCaml)</li>
     </ul>
   </div>
   <div class="col-md-6">
@@ -14008,9 +13979,6 @@ Local Open Scope Z_scope.
 Local Open Scope type_scope.
 Import ListNotations.
 
-Unset Positivity Checking.
-Unset Guard Checking.
-
 Require Import Tezos.Environment.
 Import Environment.Notations.
 Require Tezos.Alpha_context.
@@ -14049,7 +14017,7 @@ Definition minimal_time
   let fix cumsum_time_between_blocks
     (acc : Alpha_context.Timestamp.time)
     (durations : list Alpha_context.Period.period)
-    (__p_value : (|Compare.Int32|).(Compare.S.t)) {struct acc}
+    (__p_value : (|Compare.Int32|).(Compare.S.t))
     : Error_monad.tzresult Alpha_context.Timestamp.time :=
     if
       (|Compare.Int32|).(Compare.S.op_lteq) __p_value
@@ -14174,7 +14142,7 @@ Definition endorsing_reward
 Definition baking_priorities
   (c : Alpha_context.context) (level : Alpha_context.Level.t)
   : Lwt.t (Error_monad.tzresult (Misc.lazy_list_t Alpha_context.public_key)) :=
-  let fix f (priority : int) {struct priority}
+  let fix f (priority : int)
     : Lwt.t (Error_monad.tzresult (Misc.lazy_list_t Alpha_context.public_key)) :=
     let=? delegate := Alpha_context.Roll.baking_rights_owner c level priority in
     Error_monad.__return
@@ -14253,7 +14221,7 @@ Definition select_delegate
   let fix loop
     (acc : list (|Compare.Int|).(Compare.S.t))
     (l : Misc.lazy_list_t (|Signature.Public_key|).(S.SPublic_key.t))
-    (n : (|Compare.Int|).(Compare.S.t)) {struct acc}
+    (n : (|Compare.Int|).(Compare.S.t))
     : Lwt.t (Error_monad.tzresult (list (|Compare.Int|).(Compare.S.t))) :=
     if (|Compare.Int|).(Compare.S.op_gteq) n max_priority then
       Error_monad.__return (List.rev acc)
@@ -14428,7 +14396,7 @@ Definition minimal_valid_time
     <h3>Baking_mli</h3>
     <ul>
       <li>OCaml size: 165 lines</li>
-      <li>Coq size: 97 lines (-42% compared to&nbsp;OCaml)</li>
+      <li>Coq size: 94 lines (-44% compared to&nbsp;OCaml)</li>
     </ul>
   </div>
   <div class="col-md-6">
@@ -14611,9 +14579,6 @@ Local Open Scope Z_scope.
 Local Open Scope type_scope.
 Import ListNotations.
 
-Unset Positivity Checking.
-Unset Guard Checking.
-
 Require Import Tezos.Environment.
 Import Environment.Notations.
 Require Tezos.Alpha_context.
@@ -14710,7 +14675,7 @@ Parameter minimal_valid_time :
     <h3>Blinded_public_key_hash</h3>
     <ul>
       <li>OCaml size: 57 lines</li>
-      <li>Coq size: 129 lines (+126% compared to&nbsp;OCaml)</li>
+      <li>Coq size: 126 lines (+121% compared to&nbsp;OCaml)</li>
     </ul>
   </div>
   <div class="col-md-6">
@@ -14786,9 +14751,6 @@ Local Open Scope string_scope.
 Local Open Scope Z_scope.
 Local Open Scope type_scope.
 Import ListNotations.
-
-Unset Positivity Checking.
-Unset Guard Checking.
 
 Require Import Tezos.Environment.
 Import Environment.Notations.
@@ -14918,7 +14880,7 @@ Definition Index := H.
     <h3>Blinded_public_key_hash_mli</h3>
     <ul>
       <li>OCaml size: 36 lines</li>
-      <li>Coq size: 115 lines (+219% compared to&nbsp;OCaml)</li>
+      <li>Coq size: 112 lines (+211% compared to&nbsp;OCaml)</li>
     </ul>
   </div>
   <div class="col-md-6">
@@ -14971,9 +14933,6 @@ Local Open Scope string_scope.
 Local Open Scope Z_scope.
 Local Open Scope type_scope.
 Import ListNotations.
-
-Unset Positivity Checking.
-Unset Guard Checking.
 
 Require Import Tezos.Environment.
 Import Environment.Notations.
@@ -15089,7 +15048,7 @@ Parameter Index : {_ : unit &amp; Storage_description.INDEX.signature t}.
     <h3>Block_header_repr</h3>
     <ul>
       <li>OCaml size: 131 lines</li>
-      <li>Coq size: 172 lines (+31% compared to&nbsp;OCaml)</li>
+      <li>Coq size: 169 lines (+29% compared to&nbsp;OCaml)</li>
     </ul>
   </div>
   <div class="col-md-6">
@@ -15237,9 +15196,6 @@ Local Open Scope string_scope.
 Local Open Scope Z_scope.
 Local Open Scope type_scope.
 Import ListNotations.
-
-Unset Positivity Checking.
-Unset Guard Checking.
 
 Require Import Tezos.Environment.
 Import Environment.Notations.
@@ -15412,7 +15368,7 @@ Definition __hash_value (function_parameter : t) : (|Block_hash|).(S.HASH.t) :=
     <h3>Block_header_repr_mli</h3>
     <ul>
       <li>OCaml size: 61 lines</li>
-      <li>Coq size: 77 lines (+26% compared to&nbsp;OCaml)</li>
+      <li>Coq size: 74 lines (+21% compared to&nbsp;OCaml)</li>
     </ul>
   </div>
   <div class="col-md-6">
@@ -15491,9 +15447,6 @@ Local Open Scope Z_scope.
 Local Open Scope type_scope.
 Import ListNotations.
 
-Unset Positivity Checking.
-Unset Guard Checking.
-
 Require Import Tezos.Environment.
 Import Environment.Notations.
 Require Tezos.Nonce_hash.
@@ -15570,7 +15523,7 @@ Parameter hash_raw : raw -&gt; (|Block_hash|).(S.HASH.t).
     <h3>Bootstrap_storage</h3>
     <ul>
       <li>OCaml size: 152 lines</li>
-      <li>Coq size: 190 lines (+25% compared to&nbsp;OCaml)</li>
+      <li>Coq size: 187 lines (+23% compared to&nbsp;OCaml)</li>
     </ul>
   </div>
   <div class="col-md-6">
@@ -15739,9 +15692,6 @@ Local Open Scope string_scope.
 Local Open Scope Z_scope.
 Local Open Scope type_scope.
 Import ListNotations.
-
-Unset Positivity Checking.
-Unset Guard Checking.
 
 Require Import Tezos.Environment.
 Import Environment.Notations.
@@ -15932,7 +15882,7 @@ Definition cycle_end
     <h3>Bootstrap_storage_mli</h3>
     <ul>
       <li>OCaml size: 40 lines</li>
-      <li>Coq size: 31 lines (-23% compared to&nbsp;OCaml)</li>
+      <li>Coq size: 28 lines (-30% compared to&nbsp;OCaml)</li>
     </ul>
   </div>
   <div class="col-md-6">
@@ -15990,9 +15940,6 @@ Local Open Scope Z_scope.
 Local Open Scope type_scope.
 Import ListNotations.
 
-Unset Positivity Checking.
-Unset Guard Checking.
-
 Require Import Tezos.Environment.
 Import Environment.Notations.
 Require Tezos.Contract_storage.
@@ -16023,7 +15970,7 @@ Parameter cycle_end :
     <h3>Commitment_repr</h3>
     <ul>
       <li>OCaml size: 40 lines</li>
-      <li>Coq size: 43 lines (+7% compared to&nbsp;OCaml)</li>
+      <li>Coq size: 40 lines (+0% compared to&nbsp;OCaml)</li>
     </ul>
   </div>
   <div class="col-md-6">
@@ -16081,9 +16028,6 @@ Local Open Scope Z_scope.
 Local Open Scope type_scope.
 Import ListNotations.
 
-Unset Positivity Checking.
-Unset Guard Checking.
-
 Require Import Tezos.Environment.
 Import Environment.Notations.
 Require Tezos.Blinded_public_key_hash.
@@ -16126,7 +16070,7 @@ Definition not_first_class_module : unit := tt.
     <h3>Commitment_repr_mli</h3>
     <ul>
       <li>OCaml size: 33 lines</li>
-      <li>Coq size: 31 lines (-7% compared to&nbsp;OCaml)</li>
+      <li>Coq size: 28 lines (-16% compared to&nbsp;OCaml)</li>
     </ul>
   </div>
   <div class="col-md-6">
@@ -16177,9 +16121,6 @@ Local Open Scope Z_scope.
 Local Open Scope type_scope.
 Import ListNotations.
 
-Unset Positivity Checking.
-Unset Guard Checking.
-
 Require Import Tezos.Environment.
 Import Environment.Notations.
 Require Tezos.Blinded_public_key_hash.
@@ -16210,7 +16151,7 @@ Parameter not_first_class_module : unit.
     <h3>Commitment_storage</h3>
     <ul>
       <li>OCaml size: 34 lines</li>
-      <li>Coq size: 52 lines (+52% compared to&nbsp;OCaml)</li>
+      <li>Coq size: 49 lines (+44% compared to&nbsp;OCaml)</li>
     </ul>
   </div>
   <div class="col-md-6">
@@ -16261,9 +16202,6 @@ Local Open Scope string_scope.
 Local Open Scope Z_scope.
 Local Open Scope type_scope.
 Import ListNotations.
-
-Unset Positivity Checking.
-Unset Guard Checking.
 
 Require Import Tezos.Environment.
 Import Environment.Notations.
@@ -16316,7 +16254,7 @@ Definition init
     <h3>Commitment_storage_mli</h3>
     <ul>
       <li>OCaml size: 35 lines</li>
-      <li>Coq size: 29 lines (-18% compared to&nbsp;OCaml)</li>
+      <li>Coq size: 26 lines (-26% compared to&nbsp;OCaml)</li>
     </ul>
   </div>
   <div class="col-md-6">
@@ -16369,9 +16307,6 @@ Local Open Scope Z_scope.
 Local Open Scope type_scope.
 Import ListNotations.
 
-Unset Positivity Checking.
-Unset Guard Checking.
-
 Require Import Tezos.Environment.
 Import Environment.Notations.
 Require Tezos.Blinded_public_key_hash.
@@ -16400,7 +16335,7 @@ Parameter delete :
     <h3>Constants_repr</h3>
     <ul>
       <li>OCaml size: 238 lines</li>
-      <li>Coq size: 606 lines (+154% compared to&nbsp;OCaml)</li>
+      <li>Coq size: 603 lines (+153% compared to&nbsp;OCaml)</li>
     </ul>
   </div>
   <div class="col-md-6">
@@ -16655,9 +16590,6 @@ Local Open Scope string_scope.
 Local Open Scope Z_scope.
 Local Open Scope type_scope.
 Import ListNotations.
-
-Unset Positivity Checking.
-Unset Guard Checking.
 
 Require Import Tezos.Environment.
 Import Environment.Notations.
@@ -17264,7 +17196,7 @@ Definition encoding : Data_encoding.encoding t :=
     <h3>Constants_services</h3>
     <ul>
       <li>OCaml size: 60 lines</li>
-      <li>Coq size: 85 lines (+41% compared to&nbsp;OCaml)</li>
+      <li>Coq size: 82 lines (+36% compared to&nbsp;OCaml)</li>
     </ul>
   </div>
   <div class="col-md-6">
@@ -17568,9 +17500,6 @@ Local Open Scope Z_scope.
 Local Open Scope type_scope.
 Import ListNotations.
 
-Unset Positivity Checking.
-Unset Guard Checking.
-
 Require Import Tezos.Environment.
 Import Environment.Notations.
 Require Tezos.Alpha_context.
@@ -17655,7 +17584,7 @@ Definition all {D E G I K L a b c i o q : Set}
     <h3>Constants_services_mli</h3>
     <ul>
       <li>OCaml size: 36 lines</li>
-      <li>Coq size: 44 lines (+22% compared to&nbsp;OCaml)</li>
+      <li>Coq size: 41 lines (+13% compared to&nbsp;OCaml)</li>
     </ul>
   </div>
   <div class="col-md-6">
@@ -17901,9 +17830,6 @@ Local Open Scope Z_scope.
 Local Open Scope type_scope.
 Import ListNotations.
 
-Unset Positivity Checking.
-Unset Guard Checking.
-
 Require Import Tezos.Environment.
 Import Environment.Notations.
 Require Tezos.Alpha_context.
@@ -17947,7 +17873,7 @@ Parameter register : unit -&gt; unit.
     <h3>Constants_storage</h3>
     <ul>
       <li>OCaml size: 130 lines</li>
-      <li>Coq size: 126 lines (-4% compared to&nbsp;OCaml)</li>
+      <li>Coq size: 123 lines (-6% compared to&nbsp;OCaml)</li>
     </ul>
   </div>
   <div class="col-md-6">
@@ -18095,9 +18021,6 @@ Local Open Scope Z_scope.
 Local Open Scope type_scope.
 Import ListNotations.
 
-Unset Positivity Checking.
-Unset Guard Checking.
-
 Require Import Tezos.Environment.
 Import Environment.Notations.
 Require Tezos.Constants_repr.
@@ -18223,7 +18146,7 @@ Definition __parametric_value (c : Raw_context.context)
     <h3>Contract_hash</h3>
     <ul>
       <li>OCaml size: 44 lines</li>
-      <li>Coq size: 104 lines (+136% compared to&nbsp;OCaml)</li>
+      <li>Coq size: 101 lines (+129% compared to&nbsp;OCaml)</li>
     </ul>
   </div>
   <div class="col-md-6">
@@ -18284,9 +18207,6 @@ Local Open Scope string_scope.
 Local Open Scope Z_scope.
 Local Open Scope type_scope.
 Import ListNotations.
-
-Unset Positivity Checking.
-Unset Guard Checking.
 
 Require Import Tezos.Environment.
 Import Environment.Notations.
@@ -18391,7 +18311,7 @@ Definition path_length := (|Blake2BModule|).(S.HASH.path_length).
     <h3>Contract_repr</h3>
     <ul>
       <li>OCaml size: 232 lines</li>
-      <li>Coq size: 249 lines (+7% compared to&nbsp;OCaml)</li>
+      <li>Coq size: 247 lines (+6% compared to&nbsp;OCaml)</li>
     </ul>
   </div>
   <div class="col-md-6">
@@ -18656,8 +18576,6 @@ Local Open Scope string_scope.
 Local Open Scope Z_scope.
 Local Open Scope type_scope.
 Import ListNotations.
-
-Unset Positivity Checking.
 Unset Guard Checking.
 
 Require Import Tezos.Environment.
@@ -18908,7 +18826,7 @@ Definition Index :=
     <h3>Contract_repr_mli</h3>
     <ul>
       <li>OCaml size: 80 lines</li>
-      <li>Coq size: 91 lines (+13% compared to&nbsp;OCaml)</li>
+      <li>Coq size: 88 lines (+10% compared to&nbsp;OCaml)</li>
     </ul>
   </div>
   <div class="col-md-6">
@@ -19006,9 +18924,6 @@ Local Open Scope Z_scope.
 Local Open Scope type_scope.
 Import ListNotations.
 
-Unset Positivity Checking.
-Unset Guard Checking.
-
 Require Import Tezos.Environment.
 Import Environment.Notations.
 Require Tezos.Contract_hash.
@@ -19099,7 +19014,7 @@ Parameter Index : {_ : unit &amp; Storage_description.INDEX.signature t}.
     <h3>Contract_services</h3>
     <ul>
       <li>OCaml size: 425 lines</li>
-      <li>Coq size: 463 lines (+8% compared to&nbsp;OCaml)</li>
+      <li>Coq size: 460 lines (+8% compared to&nbsp;OCaml)</li>
     </ul>
   </div>
   <div class="col-md-6">
@@ -21228,9 +21143,6 @@ Local Open Scope Z_scope.
 Local Open Scope type_scope.
 Import ListNotations.
 
-Unset Positivity Checking.
-Unset Guard Checking.
-
 Require Import Tezos.Environment.
 Import Environment.Notations.
 Require Tezos.Alpha_context.
@@ -21693,7 +21605,7 @@ Definition contract_big_map_get_opt {D E G I K L a b c i o q : Set}
     <h3>Contract_services_mli</h3>
     <ul>
       <li>OCaml size: 119 lines</li>
-      <li>Coq size: 251 lines (+110% compared to&nbsp;OCaml)</li>
+      <li>Coq size: 248 lines (+108% compared to&nbsp;OCaml)</li>
     </ul>
   </div>
   <div class="col-md-6">
@@ -23270,9 +23182,6 @@ Local Open Scope Z_scope.
 Local Open Scope type_scope.
 Import ListNotations.
 
-Unset Positivity Checking.
-Unset Guard Checking.
-
 Require Import Tezos.Environment.
 Import Environment.Notations.
 Require Tezos.Alpha_context.
@@ -23523,7 +23432,7 @@ Parameter register : unit -&gt; unit.
     <h3>Contract_storage</h3>
     <ul>
       <li>OCaml size: 733 lines</li>
-      <li>Coq size: 788 lines (+7% compared to&nbsp;OCaml)</li>
+      <li>Coq size: 785 lines (+7% compared to&nbsp;OCaml)</li>
     </ul>
   </div>
   <div class="col-md-6">
@@ -24301,9 +24210,6 @@ Local Open Scope string_scope.
 Local Open Scope Z_scope.
 Local Open Scope type_scope.
 Import ListNotations.
-
-Unset Positivity Checking.
-Unset Guard Checking.
 
 Require Import Tezos.Environment.
 Import Environment.Notations.
@@ -25092,7 +24998,7 @@ Definition set_paid_storage_space_and_return_fees_to_pay
     <h3>Contract_storage_mli</h3>
     <ul>
       <li>OCaml size: 169 lines</li>
-      <li>Coq size: 161 lines (-5% compared to&nbsp;OCaml)</li>
+      <li>Coq size: 158 lines (-7% compared to&nbsp;OCaml)</li>
     </ul>
   </div>
   <div class="col-md-6">
@@ -25279,9 +25185,6 @@ Local Open Scope Z_scope.
 Local Open Scope type_scope.
 Import ListNotations.
 
-Unset Positivity Checking.
-Unset Guard Checking.
-
 Require Import Tezos.Environment.
 Import Environment.Notations.
 Require Tezos.Contract_repr.
@@ -25442,7 +25345,7 @@ Parameter set_paid_storage_space_and_return_fees_to_pay :
     <h3>Cycle_repr</h3>
     <ul>
       <li>OCaml size: 93 lines</li>
-      <li>Coq size: 128 lines (+37% compared to&nbsp;OCaml)</li>
+      <li>Coq size: 125 lines (+34% compared to&nbsp;OCaml)</li>
     </ul>
   </div>
   <div class="col-md-6">
@@ -25558,9 +25461,6 @@ Local Open Scope string_scope.
 Local Open Scope Z_scope.
 Local Open Scope type_scope.
 Import ListNotations.
-
-Unset Positivity Checking.
-Unset Guard Checking.
 
 Require Import Tezos.Environment.
 Import Environment.Notations.
@@ -25689,7 +25589,7 @@ Definition Index :=
     <h3>Cycle_repr_mli</h3>
     <ul>
       <li>OCaml size: 54 lines</li>
-      <li>Coq size: 64 lines (+18% compared to&nbsp;OCaml)</li>
+      <li>Coq size: 61 lines (+12% compared to&nbsp;OCaml)</li>
     </ul>
   </div>
   <div class="col-md-6">
@@ -25761,9 +25661,6 @@ Local Open Scope Z_scope.
 Local Open Scope type_scope.
 Import ListNotations.
 
-Unset Positivity Checking.
-Unset Guard Checking.
-
 Require Import Tezos.Environment.
 Import Environment.Notations.
 Require Tezos.Storage_description.
@@ -25827,7 +25724,7 @@ Parameter Index : {_ : unit &amp; Storage_description.INDEX.signature cycle}.
     <h3>Delegate_services</h3>
     <ul>
       <li>OCaml size: 697 lines</li>
-      <li>Coq size: 1183 lines (+69% compared to&nbsp;OCaml)</li>
+      <li>Coq size: 1180 lines (+69% compared to&nbsp;OCaml)</li>
     </ul>
   </div>
   <div class="col-md-6">
@@ -28250,9 +28147,6 @@ Local Open Scope Z_scope.
 Local Open Scope type_scope.
 Import ListNotations.
 
-Unset Positivity Checking.
-Unset Guard Checking.
-
 Require Import Tezos.Environment.
 Import Environment.Notations.
 Require Tezos.Alpha_context.
@@ -28848,7 +28742,7 @@ Module Baking_rights.
     let=? contract_list := Baking.baking_priorities ctxt level in
     let fix loop
       (l : Misc.lazy_list_t (|Signature.Public_key|).(S.SPublic_key.t))
-      (acc : list t) (priority : (|Compare.Int|).(Compare.S.t)) {struct l}
+      (acc : list t) (priority : (|Compare.Int|).(Compare.S.t))
       : Lwt.t (Error_monad.tzresult (list t)) :=
       if (|Compare.Int|).(Compare.S.op_gteq) priority max_prio then
         Error_monad.__return (List.rev acc)
@@ -29435,7 +29329,7 @@ Definition minimal_valid_time
     <h3>Delegate_services_mli</h3>
     <ul>
       <li>OCaml size: 211 lines</li>
-      <li>Coq size: 351 lines (+66% compared to&nbsp;OCaml)</li>
+      <li>Coq size: 348 lines (+64% compared to&nbsp;OCaml)</li>
     </ul>
   </div>
   <div class="col-md-6">
@@ -31104,9 +30998,6 @@ Local Open Scope Z_scope.
 Local Open Scope type_scope.
 Import ListNotations.
 
-Unset Positivity Checking.
-Unset Guard Checking.
-
 Require Import Tezos.Environment.
 Import Environment.Notations.
 Require Tezos.Alpha_context.
@@ -31457,7 +31348,7 @@ Parameter register : unit -&gt; unit.
     <h3>Delegate_storage</h3>
     <ul>
       <li>OCaml size: 713 lines</li>
-      <li>Coq size: 899 lines (+26% compared to&nbsp;OCaml)</li>
+      <li>Coq size: 896 lines (+25% compared to&nbsp;OCaml)</li>
     </ul>
   </div>
   <div class="col-md-6">
@@ -32205,9 +32096,6 @@ Local Open Scope string_scope.
 Local Open Scope Z_scope.
 Local Open Scope type_scope.
 Import ListNotations.
-
-Unset Positivity Checking.
-Unset Guard Checking.
 
 Require Import Tezos.Environment.
 Import Environment.Notations.
@@ -33107,7 +32995,7 @@ Definition __list_value
     <h3>Delegate_storage_mli</h3>
     <ul>
       <li>OCaml size: 191 lines</li>
-      <li>Coq size: 152 lines (-21% compared to&nbsp;OCaml)</li>
+      <li>Coq size: 149 lines (-22% compared to&nbsp;OCaml)</li>
     </ul>
   </div>
   <div class="col-md-6">
@@ -33316,9 +33204,6 @@ Local Open Scope Z_scope.
 Local Open Scope type_scope.
 Import ListNotations.
 
-Unset Positivity Checking.
-Unset Guard Checking.
-
 Require Import Tezos.Environment.
 Import Environment.Notations.
 Require Tezos.Contract_repr.
@@ -33470,7 +33355,7 @@ Parameter grace_period :
     <h3>Fees_storage</h3>
     <ul>
       <li>OCaml size: 121 lines</li>
-      <li>Coq size: 98 lines (-20% compared to&nbsp;OCaml)</li>
+      <li>Coq size: 95 lines (-22% compared to&nbsp;OCaml)</li>
     </ul>
   </div>
   <div class="col-md-6">
@@ -33615,9 +33500,6 @@ Local Open Scope Z_scope.
 Local Open Scope type_scope.
 Import ListNotations.
 
-Unset Positivity Checking.
-Unset Guard Checking.
-
 Require Import Tezos.Environment.
 Import Environment.Notations.
 Require Tezos.Constants_repr.
@@ -33715,7 +33597,7 @@ Definition start_counting_storage_fees (c : Raw_context.t) : Raw_context.t :=
     <h3>Fees_storage_mli</h3>
     <ul>
       <li>OCaml size: 50 lines</li>
-      <li>Coq size: 38 lines (-24% compared to&nbsp;OCaml)</li>
+      <li>Coq size: 35 lines (-30% compared to&nbsp;OCaml)</li>
     </ul>
   </div>
   <div class="col-md-6">
@@ -33783,9 +33665,6 @@ Local Open Scope Z_scope.
 Local Open Scope type_scope.
 Import ListNotations.
 
-Unset Positivity Checking.
-Unset Guard Checking.
-
 Require Import Tezos.Environment.
 Import Environment.Notations.
 Require Tezos.Contract_repr.
@@ -33823,7 +33702,7 @@ Parameter burn_storage_fees :
     <h3>Fitness_repr</h3>
     <ul>
       <li>OCaml size: 62 lines</li>
-      <li>Coq size: 63 lines (+1% compared to&nbsp;OCaml)</li>
+      <li>Coq size: 60 lines (-4% compared to&nbsp;OCaml)</li>
     </ul>
   </div>
   <div class="col-md-6">
@@ -33909,9 +33788,6 @@ Local Open Scope Z_scope.
 Local Open Scope type_scope.
 Import ListNotations.
 
-Unset Positivity Checking.
-Unset Guard Checking.
-
 Require Import Tezos.Environment.
 Import Environment.Notations.
 Require Tezos.Constants_repr.
@@ -33974,7 +33850,7 @@ Definition to_int64 (function_parameter : list MBytes.t)
     <h3>Fitness_storage</h3>
     <ul>
       <li>OCaml size: 30 lines</li>
-      <li>Coq size: 28 lines (-7% compared to&nbsp;OCaml)</li>
+      <li>Coq size: 25 lines (-17% compared to&nbsp;OCaml)</li>
     </ul>
   </div>
   <div class="col-md-6">
@@ -34022,9 +33898,6 @@ Local Open Scope Z_scope.
 Local Open Scope type_scope.
 Import ListNotations.
 
-Unset Positivity Checking.
-Unset Guard Checking.
-
 Require Import Tezos.Environment.
 Import Environment.Notations.
 Require Tezos.Raw_context.
@@ -34052,7 +33925,7 @@ Definition increase (op_staroptstar : option int)
     <h3>Gas_limit_repr</h3>
     <ul>
       <li>OCaml size: 260 lines</li>
-      <li>Coq size: 309 lines (+18% compared to&nbsp;OCaml)</li>
+      <li>Coq size: 306 lines (+17% compared to&nbsp;OCaml)</li>
     </ul>
   </div>
   <div class="col-md-6">
@@ -34333,9 +34206,6 @@ Local Open Scope string_scope.
 Local Open Scope Z_scope.
 Local Open Scope type_scope.
 Import ListNotations.
-
-Unset Positivity Checking.
-Unset Guard Checking.
 
 Require Import Tezos.Environment.
 Import Environment.Notations.
@@ -34645,7 +34515,7 @@ Definition alloc_mbytes_cost (n : int) : cost :=
     <h3>Gas_limit_repr_mli</h3>
     <ul>
       <li>OCaml size: 71 lines</li>
-      <li>Coq size: 85 lines (+19% compared to&nbsp;OCaml)</li>
+      <li>Coq size: 82 lines (+15% compared to&nbsp;OCaml)</li>
     </ul>
   </div>
   <div class="col-md-6">
@@ -34734,9 +34604,6 @@ Local Open Scope Z_scope.
 Local Open Scope type_scope.
 Import ListNotations.
 
-Unset Positivity Checking.
-Unset Guard Checking.
-
 Require Import Tezos.Environment.
 Import Environment.Notations.
 
@@ -34821,7 +34688,7 @@ Parameter op_plusat : cost -&gt; cost -&gt; cost.
     <h3>Helpers_services</h3>
     <ul>
       <li>OCaml size: 890 lines</li>
-      <li>Coq size: 1143 lines (+28% compared to&nbsp;OCaml)</li>
+      <li>Coq size: 1140 lines (+28% compared to&nbsp;OCaml)</li>
     </ul>
   </div>
   <div class="col-md-6">
@@ -38383,9 +38250,6 @@ Local Open Scope Z_scope.
 Local Open Scope type_scope.
 Import ListNotations.
 
-Unset Positivity Checking.
-Unset Guard Checking.
-
 Require Import Tezos.Environment.
 Import Environment.Notations.
 Require Tezos.Alpha_context.
@@ -39528,7 +39392,7 @@ Definition levels_in_current_cycle {D E G I K L a b c i o q : Set}
     <h3>Helpers_services_mli</h3>
     <ul>
       <li>OCaml size: 271 lines</li>
-      <li>Coq size: 413 lines (+52% compared to&nbsp;OCaml)</li>
+      <li>Coq size: 410 lines (+51% compared to&nbsp;OCaml)</li>
     </ul>
   </div>
   <div class="col-md-6">
@@ -42121,9 +41985,6 @@ Local Open Scope Z_scope.
 Local Open Scope type_scope.
 Import ListNotations.
 
-Unset Positivity Checking.
-Unset Guard Checking.
-
 Require Import Tezos.Environment.
 Import Environment.Notations.
 Require Tezos.Alpha_context.
@@ -42536,7 +42397,7 @@ Parameter register : unit -&gt; unit.
     <h3>Init_storage</h3>
     <ul>
       <li>OCaml size: 61 lines</li>
-      <li>Coq size: 62 lines (+1% compared to&nbsp;OCaml)</li>
+      <li>Coq size: 59 lines (-4% compared to&nbsp;OCaml)</li>
     </ul>
   </div>
   <div class="col-md-6">
@@ -42615,9 +42476,6 @@ Local Open Scope Z_scope.
 Local Open Scope type_scope.
 Import ListNotations.
 
-Unset Positivity Checking.
-Unset Guard Checking.
-
 Require Import Tezos.Environment.
 Import Environment.Notations.
 Require Tezos.Bootstrap_storage.
@@ -42679,7 +42537,7 @@ Definition prepare
     <h3>Legacy_script_support_repr</h3>
     <ul>
       <li>OCaml size: 828 lines</li>
-      <li>Coq size: 1343 lines (+62% compared to&nbsp;OCaml)</li>
+      <li>Coq size: 1341 lines (+61% compared to&nbsp;OCaml)</li>
     </ul>
   </div>
   <div class="col-md-6">
@@ -43524,8 +43382,6 @@ Local Open Scope string_scope.
 Local Open Scope Z_scope.
 Local Open Scope type_scope.
 Import ListNotations.
-
-Unset Positivity Checking.
 Unset Guard Checking.
 
 Require Import Tezos.Environment.
@@ -44870,7 +44726,7 @@ Definition add_root_entrypoint (script_code : Script_repr.lazy_expr)
     <h3>Legacy_script_support_repr_mli</h3>
     <ul>
       <li>OCaml size: 67 lines</li>
-      <li>Coq size: 31 lines (-54% compared to&nbsp;OCaml)</li>
+      <li>Coq size: 28 lines (-59% compared to&nbsp;OCaml)</li>
     </ul>
   </div>
   <div class="col-md-6">
@@ -44955,9 +44811,6 @@ Local Open Scope Z_scope.
 Local Open Scope type_scope.
 Import ListNotations.
 
-Unset Positivity Checking.
-Unset Guard Checking.
-
 Require Import Tezos.Environment.
 Import Environment.Notations.
 Require Tezos.Script_repr.
@@ -44988,7 +44841,7 @@ Parameter add_root_entrypoint :
     <h3>Level_repr</h3>
     <ul>
       <li>OCaml size: 187 lines</li>
-      <li>Coq size: 212 lines (+13% compared to&nbsp;OCaml)</li>
+      <li>Coq size: 209 lines (+11% compared to&nbsp;OCaml)</li>
     </ul>
   </div>
   <div class="col-md-6">
@@ -45192,9 +45045,6 @@ Local Open Scope string_scope.
 Local Open Scope Z_scope.
 Local Open Scope type_scope.
 Import ListNotations.
-
-Unset Positivity Checking.
-Unset Guard Checking.
 
 Require Import Tezos.Environment.
 Import Environment.Notations.
@@ -45407,7 +45257,7 @@ Definition diff (function_parameter : t) : t -&gt; int32 :=
     <h3>Level_repr_mli</h3>
     <ul>
       <li>OCaml size: 74 lines</li>
-      <li>Coq size: 90 lines (+21% compared to&nbsp;OCaml)</li>
+      <li>Coq size: 87 lines (+17% compared to&nbsp;OCaml)</li>
     </ul>
   </div>
   <div class="col-md-6">
@@ -45499,9 +45349,6 @@ Local Open Scope Z_scope.
 Local Open Scope type_scope.
 Import ListNotations.
 
-Unset Positivity Checking.
-Unset Guard Checking.
-
 Require Import Tezos.Environment.
 Import Environment.Notations.
 Require Tezos.Cycle_repr.
@@ -45591,7 +45438,7 @@ Parameter diff : level -&gt; level -&gt; int32.
     <h3>Level_storage</h3>
     <ul>
       <li>OCaml size: 118 lines</li>
-      <li>Coq size: 140 lines (+18% compared to&nbsp;OCaml)</li>
+      <li>Coq size: 138 lines (+16% compared to&nbsp;OCaml)</li>
     </ul>
   </div>
   <div class="col-md-6">
@@ -45726,8 +45573,6 @@ Local Open Scope string_scope.
 Local Open Scope Z_scope.
 Local Open Scope type_scope.
 Import ListNotations.
-
-Unset Positivity Checking.
 Unset Guard Checking.
 
 Require Import Tezos.Environment.
@@ -45869,7 +45714,7 @@ Definition last_allowed_fork_level (c : Raw_context.context)
     <h3>Level_storage_mli</h3>
     <ul>
       <li>OCaml size: 51 lines</li>
-      <li>Coq size: 44 lines (-14% compared to&nbsp;OCaml)</li>
+      <li>Coq size: 41 lines (-20% compared to&nbsp;OCaml)</li>
     </ul>
   </div>
   <div class="col-md-6">
@@ -45938,9 +45783,6 @@ Local Open Scope Z_scope.
 Local Open Scope type_scope.
 Import ListNotations.
 
-Unset Positivity Checking.
-Unset Guard Checking.
-
 Require Import Tezos.Environment.
 Import Environment.Notations.
 Require Tezos.Cycle_repr.
@@ -45984,7 +45826,7 @@ Parameter last_allowed_fork_level : Raw_context.t -&gt; Raw_level_repr.t.
     <h3>Main</h3>
     <ul>
       <li>OCaml size: 380 lines</li>
-      <li>Coq size: 573 lines (+50% compared to&nbsp;OCaml)</li>
+      <li>Coq size: 570 lines (+50% compared to&nbsp;OCaml)</li>
     </ul>
   </div>
   <div class="col-md-6">
@@ -46383,9 +46225,6 @@ Local Open Scope string_scope.
 Local Open Scope Z_scope.
 Local Open Scope type_scope.
 Import ListNotations.
-
-Unset Positivity Checking.
-Unset Guard Checking.
 
 Require Import Tezos.Environment.
 Import Environment.Notations.
@@ -46959,7 +46798,7 @@ Definition init (ctxt : Context.t) (block_header : Block_header.shell_header)
     <h3>Main_mli</h3>
     <ul>
       <li>OCaml size: 69 lines</li>
-      <li>Coq size: 208 lines (+201% compared to&nbsp;OCaml)</li>
+      <li>Coq size: 205 lines (+197% compared to&nbsp;OCaml)</li>
     </ul>
   </div>
   <div class="col-md-6">
@@ -47049,9 +46888,6 @@ Local Open Scope string_scope.
 Local Open Scope Z_scope.
 Local Open Scope type_scope.
 Import ListNotations.
-
-Unset Positivity Checking.
-Unset Guard Checking.
 
 Require Import Tezos.Environment.
 Import Environment.Notations.
@@ -47260,7 +47096,7 @@ Definition init :
     <h3>Manager_repr</h3>
     <ul>
       <li>OCaml size: 52 lines</li>
-      <li>Coq size: 45 lines (-14% compared to&nbsp;OCaml)</li>
+      <li>Coq size: 42 lines (-20% compared to&nbsp;OCaml)</li>
     </ul>
   </div>
   <div class="col-md-6">
@@ -47330,9 +47166,6 @@ Local Open Scope Z_scope.
 Local Open Scope type_scope.
 Import ListNotations.
 
-Unset Positivity Checking.
-Unset Guard Checking.
-
 Require Import Tezos.Environment.
 Import Environment.Notations.
 
@@ -47377,7 +47210,7 @@ Definition encoding : Data_encoding.encoding manager_key :=
     <h3>Manager_repr_mli</h3>
     <ul>
       <li>OCaml size: 38 lines</li>
-      <li>Coq size: 21 lines (-45% compared to&nbsp;OCaml)</li>
+      <li>Coq size: 18 lines (-53% compared to&nbsp;OCaml)</li>
     </ul>
   </div>
   <div class="col-md-6">
@@ -47433,9 +47266,6 @@ Local Open Scope Z_scope.
 Local Open Scope type_scope.
 Import ListNotations.
 
-Unset Positivity Checking.
-Unset Guard Checking.
-
 Require Import Tezos.Environment.
 Import Environment.Notations.
 
@@ -47456,7 +47286,7 @@ Parameter encoding : Data_encoding.encoding t.
     <h3>Michelson_v1_gas</h3>
     <ul>
       <li>OCaml size: 767 lines</li>
-      <li>Coq size: 953 lines (+24% compared to&nbsp;OCaml)</li>
+      <li>Coq size: 951 lines (+23% compared to&nbsp;OCaml)</li>
     </ul>
   </div>
   <div class="col-md-6">
@@ -48240,8 +48070,6 @@ Local Open Scope string_scope.
 Local Open Scope Z_scope.
 Local Open Scope type_scope.
 Import ListNotations.
-
-Unset Positivity Checking.
 Unset Guard Checking.
 
 Require Import Tezos.Environment.
@@ -49196,7 +49024,7 @@ End Cost_of.
     <h3>Michelson_v1_gas_mli</h3>
     <ul>
       <li>OCaml size: 316 lines</li>
-      <li>Coq size: 343 lines (+8% compared to&nbsp;OCaml)</li>
+      <li>Coq size: 340 lines (+7% compared to&nbsp;OCaml)</li>
     </ul>
   </div>
   <div class="col-md-6">
@@ -49529,9 +49357,6 @@ Local Open Scope string_scope.
 Local Open Scope Z_scope.
 Local Open Scope type_scope.
 Import ListNotations.
-
-Unset Positivity Checking.
-Unset Guard Checking.
 
 Require Import Tezos.Environment.
 Import Environment.Notations.
@@ -49875,7 +49700,7 @@ End Cost_of.
     <h3>Michelson_v1_primitives</h3>
     <ul>
       <li>OCaml size: 872 lines</li>
-      <li>Coq size: 621 lines (-29% compared to&nbsp;OCaml)</li>
+      <li>Coq size: 619 lines (-30% compared to&nbsp;OCaml)</li>
     </ul>
   </div>
   <div class="col-md-6">
@@ -50770,8 +50595,6 @@ Local Open Scope string_scope.
 Local Open Scope Z_scope.
 Local Open Scope type_scope.
 Import ListNotations.
-
-Unset Positivity Checking.
 Unset Guard Checking.
 
 Require Import Tezos.Environment.
@@ -51394,7 +51217,7 @@ Definition prim_encoding : Data_encoding.encoding prim :=
     <h3>Michelson_v1_primitives_mli</h3>
     <ul>
       <li>OCaml size: 165 lines</li>
-      <li>Coq size: 151 lines (-9% compared to&nbsp;OCaml)</li>
+      <li>Coq size: 148 lines (-11% compared to&nbsp;OCaml)</li>
     </ul>
   </div>
   <div class="col-md-6">
@@ -51577,9 +51400,6 @@ Local Open Scope Z_scope.
 Local Open Scope type_scope.
 Import ListNotations.
 
-Unset Positivity Checking.
-Unset Guard Checking.
-
 Require Import Tezos.Environment.
 Import Environment.Notations.
 
@@ -51730,7 +51550,7 @@ Parameter strings_of_prims :
     <h3>Misc</h3>
     <ul>
       <li>OCaml size: 91 lines</li>
-      <li>Coq size: 153 lines (+68% compared to&nbsp;OCaml)</li>
+      <li>Coq size: 151 lines (+65% compared to&nbsp;OCaml)</li>
     </ul>
   </div>
   <div class="col-md-6">
@@ -51838,8 +51658,6 @@ Local Open Scope string_scope.
 Local Open Scope Z_scope.
 Local Open Scope type_scope.
 Import ListNotations.
-
-Unset Positivity Checking.
 Unset Guard Checking.
 
 Require Import Tezos.Environment.
@@ -51994,7 +51812,7 @@ Fixpoint remove_elem_from_list {A : Set}
     <h3>Misc_mli</h3>
     <ul>
       <li>OCaml size: 47 lines</li>
-      <li>Coq size: 36 lines (-24% compared to&nbsp;OCaml)</li>
+      <li>Coq size: 33 lines (-30% compared to&nbsp;OCaml)</li>
     </ul>
   </div>
   <div class="col-md-6">
@@ -52059,9 +51877,6 @@ Local Open Scope Z_scope.
 Local Open Scope type_scope.
 Import ListNotations.
 
-Unset Positivity Checking.
-Unset Guard Checking.
-
 Require Import Tezos.Environment.
 Import Environment.Notations.
 
@@ -52097,7 +51912,7 @@ Parameter remove_elem_from_list : forall {a : Set}, int -&gt; list a -&gt; list 
     <h3>Nonce_hash</h3>
     <ul>
       <li>OCaml size: 44 lines</li>
-      <li>Coq size: 105 lines (+138% compared to&nbsp;OCaml)</li>
+      <li>Coq size: 102 lines (+131% compared to&nbsp;OCaml)</li>
     </ul>
   </div>
   <div class="col-md-6">
@@ -52158,9 +51973,6 @@ Local Open Scope string_scope.
 Local Open Scope Z_scope.
 Local Open Scope type_scope.
 Import ListNotations.
-
-Unset Positivity Checking.
-Unset Guard Checking.
 
 Require Import Tezos.Environment.
 Import Environment.Notations.
@@ -52266,7 +52078,7 @@ Definition path_length := (|Blake2BModule|).(S.HASH.path_length).
     <h3>Nonce_storage</h3>
     <ul>
       <li>OCaml size: 134 lines</li>
-      <li>Coq size: 113 lines (-16% compared to&nbsp;OCaml)</li>
+      <li>Coq size: 110 lines (-18% compared to&nbsp;OCaml)</li>
     </ul>
   </div>
   <div class="col-md-6">
@@ -52428,9 +52240,6 @@ Local Open Scope Z_scope.
 Local Open Scope type_scope.
 Import ListNotations.
 
-Unset Positivity Checking.
-Unset Guard Checking.
-
 Require Import Tezos.Environment.
 Import Environment.Notations.
 Require Tezos.Cycle_repr.
@@ -52543,7 +52352,7 @@ Definition check_hash : Seed_repr.nonce -&gt; Nonce_hash.t -&gt; bool :=
     <h3>Nonce_storage_mli</h3>
     <ul>
       <li>OCaml size: 58 lines</li>
-      <li>Coq size: 63 lines (+8% compared to&nbsp;OCaml)</li>
+      <li>Coq size: 60 lines (+3% compared to&nbsp;OCaml)</li>
     </ul>
   </div>
   <div class="col-md-6">
@@ -52619,9 +52428,6 @@ Local Open Scope Z_scope.
 Local Open Scope type_scope.
 Import ListNotations.
 
-Unset Positivity Checking.
-Unset Guard Checking.
-
 Require Import Tezos.Environment.
 Import Environment.Notations.
 Require Tezos.Level_repr.
@@ -52684,7 +52490,7 @@ Parameter check_hash : nonce -&gt; Nonce_hash.t -&gt; bool.
     <h3>Operation_repr</h3>
     <ul>
       <li>OCaml size: 858 lines</li>
-      <li>Coq size: 1332 lines (+55% compared to&nbsp;OCaml)</li>
+      <li>Coq size: 1329 lines (+54% compared to&nbsp;OCaml)</li>
     </ul>
   </div>
   <div class="col-md-6">
@@ -53566,9 +53372,6 @@ Local Open Scope Z_scope.
 Local Open Scope type_scope.
 Import ListNotations.
 
-Unset Positivity Checking.
-Unset Guard Checking.
-
 Require Import Tezos.Environment.
 Import Environment.Notations.
 Require Tezos.Blinded_public_key_hash.
@@ -53911,7 +53714,7 @@ Inductive packed_internal_operation : Set :=
 | Internal_operation : internal_operation -&gt; packed_internal_operation.
 
 Fixpoint to_list (function_parameter : packed_contents_list)
-  {struct function_parameter} : list packed_contents :=
+  : list packed_contents :=
   let 'Contents_list content := function_parameter in
   match content with
   | Single o =&gt;
@@ -53923,7 +53726,7 @@ Fixpoint to_list (function_parameter : packed_contents_list)
   end.
 
 Fixpoint of_list (function_parameter : list packed_contents)
-  {struct function_parameter} : packed_contents_list :=
+  : packed_contents_list :=
   match function_parameter with
   | [] =&gt;
     (* ❌ Assert instruction is not handled. *)
@@ -54864,7 +54667,7 @@ Definition equal_contents_kind (op1 : contents) (op2 : contents) : option eq :=
   end.
 
 Fixpoint equal_contents_kind_list (op1 : contents_list) (op2 : contents_list)
-  {struct op1} : option eq :=
+  : option eq :=
   match (op1, op2) with
   | (Single op1, Single op2) =&gt; equal_contents_kind op1 op2
   | (Single _, Cons _ _) =&gt; None
@@ -54900,7 +54703,7 @@ Definition equal (op1 : operation) (op2 : operation) : option eq :=
     <h3>Operation_repr_mli</h3>
     <ul>
       <li>OCaml size: 269 lines</li>
-      <li>Coq size: 485 lines (+80% compared to&nbsp;OCaml)</li>
+      <li>Coq size: 482 lines (+79% compared to&nbsp;OCaml)</li>
     </ul>
   </div>
   <div class="col-md-6">
@@ -55186,9 +54989,6 @@ Local Open Scope string_scope.
 Local Open Scope Z_scope.
 Local Open Scope type_scope.
 Import ListNotations.
-
-Unset Positivity Checking.
-Unset Guard Checking.
 
 Require Import Tezos.Environment.
 Import Environment.Notations.
@@ -55674,7 +55474,7 @@ End Encoding.
     <h3>Parameters_repr</h3>
     <ul>
       <li>OCaml size: 127 lines</li>
-      <li>Coq size: 179 lines (+40% compared to&nbsp;OCaml)</li>
+      <li>Coq size: 176 lines (+38% compared to&nbsp;OCaml)</li>
     </ul>
   </div>
   <div class="col-md-6">
@@ -55820,9 +55620,6 @@ Local Open Scope string_scope.
 Local Open Scope Z_scope.
 Local Open Scope type_scope.
 Import ListNotations.
-
-Unset Positivity Checking.
-Unset Guard Checking.
 
 Require Import Tezos.Environment.
 Import Environment.Notations.
@@ -56002,7 +55799,7 @@ Definition encoding : Data_encoding.encoding t :=
     <h3>Parameters_repr_mli</h3>
     <ul>
       <li>OCaml size: 47 lines</li>
-      <li>Coq size: 77 lines (+63% compared to&nbsp;OCaml)</li>
+      <li>Coq size: 74 lines (+57% compared to&nbsp;OCaml)</li>
     </ul>
   </div>
   <div class="col-md-6">
@@ -56066,9 +55863,6 @@ Local Open Scope string_scope.
 Local Open Scope Z_scope.
 Local Open Scope type_scope.
 Import ListNotations.
-
-Unset Positivity Checking.
-Unset Guard Checking.
 
 Require Import Tezos.Environment.
 Import Environment.Notations.
@@ -56146,7 +55940,7 @@ Parameter encoding : Data_encoding.t t.
     <h3>Period_repr</h3>
     <ul>
       <li>OCaml size: 87 lines</li>
-      <li>Coq size: 105 lines (+20% compared to&nbsp;OCaml)</li>
+      <li>Coq size: 102 lines (+17% compared to&nbsp;OCaml)</li>
     </ul>
   </div>
   <div class="col-md-6">
@@ -56255,9 +56049,6 @@ Local Open Scope Z_scope.
 Local Open Scope type_scope.
 Import ListNotations.
 
-Unset Positivity Checking.
-Unset Guard Checking.
-
 Require Import Tezos.Environment.
 Import Environment.Notations.
 
@@ -56362,7 +56153,7 @@ Definition one_hour : (|Compare.Int64|).(Compare.S.t) :=
     <h3>Period_repr_mli</h3>
     <ul>
       <li>OCaml size: 55 lines</li>
-      <li>Coq size: 61 lines (+10% compared to&nbsp;OCaml)</li>
+      <li>Coq size: 58 lines (+5% compared to&nbsp;OCaml)</li>
     </ul>
   </div>
   <div class="col-md-6">
@@ -56435,9 +56226,6 @@ Local Open Scope Z_scope.
 Local Open Scope type_scope.
 Import ListNotations.
 
-Unset Positivity Checking.
-Unset Guard Checking.
-
 Require Import Tezos.Environment.
 Import Environment.Notations.
 
@@ -56498,7 +56286,7 @@ Parameter one_hour : period.
     <h3>Qty_repr</h3>
     <ul>
       <li>OCaml size: 337 lines</li>
-      <li>Coq size: 378 lines (+12% compared to&nbsp;OCaml)</li>
+      <li>Coq size: 376 lines (+11% compared to&nbsp;OCaml)</li>
     </ul>
   </div>
   <div class="col-md-6">
@@ -56866,8 +56654,6 @@ Local Open Scope string_scope.
 Local Open Scope Z_scope.
 Local Open Scope type_scope.
 Import ListNotations.
-
-Unset Positivity Checking.
 Unset Guard Checking.
 
 Require Import Tezos.Environment.
@@ -57247,7 +57033,7 @@ Definition Make :=
     <h3>Raw_context</h3>
     <ul>
       <li>OCaml size: 754 lines</li>
-      <li>Coq size: 947 lines (+25% compared to&nbsp;OCaml)</li>
+      <li>Coq size: 945 lines (+25% compared to&nbsp;OCaml)</li>
     </ul>
   </div>
   <div class="col-md-6">
@@ -58030,8 +57816,6 @@ Local Open Scope string_scope.
 Local Open Scope Z_scope.
 Local Open Scope type_scope.
 Import ListNotations.
-
-Unset Positivity Checking.
 Unset Guard Checking.
 
 Require Import Tezos.Environment.
@@ -58980,7 +58764,7 @@ Definition temporary_big_maps {A : Set}
     <h3>Raw_context_mli</h3>
     <ul>
       <li>OCaml size: 293 lines</li>
-      <li>Coq size: 270 lines (-8% compared to&nbsp;OCaml)</li>
+      <li>Coq size: 267 lines (-9% compared to&nbsp;OCaml)</li>
     </ul>
   </div>
   <div class="col-md-6">
@@ -59291,9 +59075,6 @@ Local Open Scope Z_scope.
 Local Open Scope type_scope.
 Import ListNotations.
 
-Unset Positivity Checking.
-Unset Guard Checking.
-
 Require Import Tezos.Environment.
 Import Environment.Notations.
 Require Tezos.Constants_repr.
@@ -59563,7 +59344,7 @@ Parameter temporary_big_maps : forall {a : Set},
     <h3>Raw_level_repr</h3>
     <ul>
       <li>OCaml size: 102 lines</li>
-      <li>Coq size: 119 lines (+16% compared to&nbsp;OCaml)</li>
+      <li>Coq size: 116 lines (+13% compared to&nbsp;OCaml)</li>
     </ul>
   </div>
   <div class="col-md-6">
@@ -59687,9 +59468,6 @@ Local Open Scope Z_scope.
 Local Open Scope type_scope.
 Import ListNotations.
 
-Unset Positivity Checking.
-Unset Guard Checking.
-
 Require Import Tezos.Environment.
 Import Environment.Notations.
 Require Tezos.Storage_description.
@@ -59808,7 +59586,7 @@ Definition Index :=
     <h3>Raw_level_repr_mli</h3>
     <ul>
       <li>OCaml size: 55 lines</li>
-      <li>Coq size: 72 lines (+30% compared to&nbsp;OCaml)</li>
+      <li>Coq size: 69 lines (+25% compared to&nbsp;OCaml)</li>
     </ul>
   </div>
   <div class="col-md-6">
@@ -59881,9 +59659,6 @@ Local Open Scope Z_scope.
 Local Open Scope type_scope.
 Import ListNotations.
 
-Unset Positivity Checking.
-Unset Guard Checking.
-
 Require Import Tezos.Environment.
 Import Environment.Notations.
 Require Tezos.Storage_description.
@@ -59955,7 +59730,7 @@ Parameter Index : {_ : unit &amp; Storage_description.INDEX.signature raw_level}
     <h3>Roll_repr</h3>
     <ul>
       <li>OCaml size: 65 lines</li>
-      <li>Coq size: 82 lines (+26% compared to&nbsp;OCaml)</li>
+      <li>Coq size: 79 lines (+21% compared to&nbsp;OCaml)</li>
     </ul>
   </div>
   <div class="col-md-6">
@@ -60040,9 +59815,6 @@ Local Open Scope Z_scope.
 Local Open Scope type_scope.
 Import ListNotations.
 
-Unset Positivity Checking.
-Unset Guard Checking.
-
 Require Import Tezos.Environment.
 Import Environment.Notations.
 Require Tezos.Seed_repr.
@@ -60124,7 +59896,7 @@ Definition Index :=
     <h3>Roll_repr_mli</h3>
     <ul>
       <li>OCaml size: 44 lines</li>
-      <li>Coq size: 35 lines (-21% compared to&nbsp;OCaml)</li>
+      <li>Coq size: 32 lines (-28% compared to&nbsp;OCaml)</li>
     </ul>
   </div>
   <div class="col-md-6">
@@ -60186,9 +59958,6 @@ Local Open Scope Z_scope.
 Local Open Scope type_scope.
 Import ListNotations.
 
-Unset Positivity Checking.
-Unset Guard Checking.
-
 Require Import Tezos.Environment.
 Import Environment.Notations.
 Require Tezos.Seed_repr.
@@ -60223,7 +59992,7 @@ Parameter Index : {_ : unit &amp; Storage_description.INDEX.signature roll}.
     <h3>Roll_storage</h3>
     <ul>
       <li>OCaml size: 604 lines</li>
-      <li>Coq size: 796 lines (+31% compared to&nbsp;OCaml)</li>
+      <li>Coq size: 794 lines (+31% compared to&nbsp;OCaml)</li>
     </ul>
   </div>
   <div class="col-md-6">
@@ -60854,8 +60623,6 @@ Local Open Scope string_scope.
 Local Open Scope Z_scope.
 Local Open Scope type_scope.
 Import ListNotations.
-
-Unset Positivity Checking.
 Unset Guard Checking.
 
 Require Import Tezos.Environment.
@@ -61653,7 +61420,7 @@ Definition update_tokens_per_roll
     <h3>Roll_storage_mli</h3>
     <ul>
       <li>OCaml size: 132 lines</li>
-      <li>Coq size: 98 lines (-26% compared to&nbsp;OCaml)</li>
+      <li>Coq size: 95 lines (-29% compared to&nbsp;OCaml)</li>
     </ul>
   </div>
   <div class="col-md-6">
@@ -61803,9 +61570,6 @@ Local Open Scope Z_scope.
 Local Open Scope type_scope.
 Import ListNotations.
 
-Unset Positivity Checking.
-Unset Guard Checking.
-
 Require Import Tezos.Environment.
 Import Environment.Notations.
 Require Tezos.Contract_repr.
@@ -61903,7 +61667,7 @@ Parameter get_contract_delegate :
     <h3>Script_expr_hash</h3>
     <ul>
       <li>OCaml size: 43 lines</li>
-      <li>Coq size: 105 lines (+144% compared to&nbsp;OCaml)</li>
+      <li>Coq size: 102 lines (+137% compared to&nbsp;OCaml)</li>
     </ul>
   </div>
   <div class="col-md-6">
@@ -61963,9 +61727,6 @@ Local Open Scope string_scope.
 Local Open Scope Z_scope.
 Local Open Scope type_scope.
 Import ListNotations.
-
-Unset Positivity Checking.
-Unset Guard Checking.
 
 Require Import Tezos.Environment.
 Import Environment.Notations.
@@ -62071,7 +61832,7 @@ Definition path_length := (|Blake2BModule|).(S.HASH.path_length).
     <h3>Script_int_repr</h3>
     <ul>
       <li>OCaml size: 102 lines</li>
-      <li>Coq size: 106 lines (+3% compared to&nbsp;OCaml)</li>
+      <li>Coq size: 103 lines (+0% compared to&nbsp;OCaml)</li>
     </ul>
   </div>
   <div class="col-md-6">
@@ -62199,9 +61960,6 @@ Local Open Scope Z_scope.
 Local Open Scope type_scope.
 Import ListNotations.
 
-Unset Positivity Checking.
-Unset Guard Checking.
-
 Require Import Tezos.Environment.
 Import Environment.Notations.
 
@@ -62307,7 +62065,7 @@ Definition lognot (x : Z.t) : Z.t := Z.lognot x.
     <h3>Script_int_repr_mli</h3>
     <ul>
       <li>OCaml size: 143 lines</li>
-      <li>Coq size: 81 lines (-44% compared to&nbsp;OCaml)</li>
+      <li>Coq size: 78 lines (-46% compared to&nbsp;OCaml)</li>
     </ul>
   </div>
   <div class="col-md-6">
@@ -62468,9 +62226,6 @@ Local Open Scope Z_scope.
 Local Open Scope type_scope.
 Import ListNotations.
 
-Unset Positivity Checking.
-Unset Guard Checking.
-
 Require Import Tezos.Environment.
 Import Environment.Notations.
 
@@ -62551,7 +62306,7 @@ Parameter logxor : num -&gt; num -&gt; num.
     <h3>Script_interpreter</h3>
     <ul>
       <li>OCaml size: 1634 lines</li>
-      <li>Coq size: 2221 lines (+35% compared to&nbsp;OCaml)</li>
+      <li>Coq size: 2219 lines (+35% compared to&nbsp;OCaml)</li>
     </ul>
   </div>
   <div class="col-md-6">
@@ -64230,8 +63985,6 @@ Local Open Scope string_scope.
 Local Open Scope Z_scope.
 Local Open Scope type_scope.
 Import ListNotations.
-
-Unset Positivity Checking.
 Unset Guard Checking.
 
 Require Import Tezos.Environment.
@@ -66454,7 +66207,7 @@ Definition execute_wrapper
     <h3>Script_interpreter_mli</h3>
     <ul>
       <li>OCaml size: 89 lines</li>
-      <li>Coq size: 93 lines (+4% compared to&nbsp;OCaml)</li>
+      <li>Coq size: 90 lines (+1% compared to&nbsp;OCaml)</li>
     </ul>
   </div>
   <div class="col-md-6">
@@ -66561,9 +66314,6 @@ Local Open Scope Z_scope.
 Local Open Scope type_scope.
 Import ListNotations.
 
-Unset Positivity Checking.
-Unset Guard Checking.
-
 Require Import Tezos.Environment.
 Import Environment.Notations.
 Require Tezos.Alpha_context.
@@ -66656,7 +66406,7 @@ Parameter trace :
     <h3>Script_ir_annot</h3>
     <ul>
       <li>OCaml size: 521 lines</li>
-      <li>Coq size: 667 lines (+28% compared to&nbsp;OCaml)</li>
+      <li>Coq size: 664 lines (+27% compared to&nbsp;OCaml)</li>
     </ul>
   </div>
   <div class="col-md-6">
@@ -67231,9 +66981,6 @@ Local Open Scope Z_scope.
 Local Open Scope type_scope.
 Import ListNotations.
 
-Unset Positivity Checking.
-Unset Guard Checking.
-
 Require Import Tezos.Environment.
 Import Environment.Notations.
 Require Tezos.Alpha_context.
@@ -67680,7 +67427,7 @@ Definition extract_field_annot (function_parameter : Alpha_context.Script.node)
   match function_parameter with
   | Micheline.Prim loc prim args annot =&gt;
     let fix extract_first (acc : list string) (function_parameter : list string)
-      {struct acc} : option string * Micheline.annot :=
+      : option string * Micheline.annot :=
       match function_parameter with
       | [] =&gt; (None, annot)
       | cons s rest =&gt;
@@ -67900,7 +67647,7 @@ Definition parse_var_type_annot (loc : int) (annot : list string)
     <h3>Script_ir_annot_mli</h3>
     <ul>
       <li>OCaml size: 198 lines</li>
-      <li>Coq size: 174 lines (-13% compared to&nbsp;OCaml)</li>
+      <li>Coq size: 171 lines (-14% compared to&nbsp;OCaml)</li>
     </ul>
   </div>
   <div class="col-md-6">
@@ -68116,9 +67863,6 @@ Local Open Scope Z_scope.
 Local Open Scope type_scope.
 Import ListNotations.
 
-Unset Positivity Checking.
-Unset Guard Checking.
-
 Require Import Tezos.Environment.
 Import Environment.Notations.
 Require Tezos.Alpha_context.
@@ -68292,7 +68036,7 @@ Parameter parse_var_type_annot :
     <h3>Script_ir_translator</h3>
     <ul>
       <li>OCaml size: 5995 lines</li>
-      <li>Coq size: 6448 lines (+7% compared to&nbsp;OCaml)</li>
+      <li>Coq size: 6431 lines (+7% compared to&nbsp;OCaml)</li>
     </ul>
   </div>
   <div class="col-md-6">
@@ -74667,9 +74411,6 @@ Local Open Scope Z_scope.
 Local Open Scope type_scope.
 Import ListNotations.
 
-Unset Positivity Checking.
-Unset Guard Checking.
-
 Require Import Tezos.Environment.
 Import Environment.Notations.
 Require Tezos.Alpha_context.
@@ -74754,8 +74495,7 @@ Definition add_dip
     Dip (Script_typed_ir.Item_t ty __stack_value annot) prev
   end.
 
-Fixpoint comparable_type_size (ty : Script_typed_ir.comparable_struct)
-  {struct ty} : int :=
+Fixpoint comparable_type_size (ty : Script_typed_ir.comparable_struct) : int :=
   match ty with
   | Script_typed_ir.Int_key _ =&gt; 1
   | Script_typed_ir.Nat_key _ =&gt; 1
@@ -74770,7 +74510,7 @@ Fixpoint comparable_type_size (ty : Script_typed_ir.comparable_struct)
     Pervasives.op_plus 1 (comparable_type_size __t_value)
   end.
 
-Fixpoint type_size (ty : Script_typed_ir.ty) {struct ty} : int :=
+Fixpoint type_size (ty : Script_typed_ir.ty) : int :=
   match ty with
   | Script_typed_ir.Unit_t _ =&gt; 1
   | Script_typed_ir.Int_t _ =&gt; 1
@@ -74809,8 +74549,7 @@ Fixpoint type_size (ty : Script_typed_ir.ty) {struct ty} : int :=
   end.
 
 Fixpoint type_size_of_stack_head
-  (__stack_value : Script_typed_ir.stack_ty) (up_to : int)
-  {struct __stack_value} : int :=
+  (__stack_value : Script_typed_ir.stack_ty) (up_to : int) : int :=
   match __stack_value with
   | Script_typed_ir.Empty_t =&gt; 0
   | Script_typed_ir.Item_t head tail _annot =&gt;
@@ -75085,7 +74824,7 @@ Definition wrap_compare {A B : Set}
       (-1).
 
 Fixpoint compare_comparable {a : Set} (kind : Script_typed_ir.comparable_struct)
-  {struct kind} : a -&gt; a -&gt; int :=
+  : a -&gt; a -&gt; int :=
   match kind with
   | Script_typed_ir.String_key _ =&gt;
     wrap_compare (|Compare.String|).(Compare.S.compare)
@@ -75318,7 +75057,7 @@ Definition map_size {key value : Set} (Box : Script_typed_ir.map key value)
 
 Fixpoint ty_of_comparable_ty
   (function_parameter : Script_typed_ir.comparable_struct)
-  {struct function_parameter} : Script_typed_ir.ty :=
+  : Script_typed_ir.ty :=
   match function_parameter with
   | Script_typed_ir.Int_key tname =&gt; Script_typed_ir.Int_t tname
   | Script_typed_ir.Nat_key tname =&gt; Script_typed_ir.Nat_t tname
@@ -75335,7 +75074,7 @@ Fixpoint ty_of_comparable_ty
   end.
 
 Fixpoint comparable_ty_of_ty (function_parameter : Script_typed_ir.ty)
-  {struct function_parameter} : option Script_typed_ir.comparable_ty :=
+  : option Script_typed_ir.comparable_ty :=
   match function_parameter with
   | Script_typed_ir.Int_t tname =&gt; Some (Script_typed_ir.Int_key tname)
   | Script_typed_ir.Nat_t tname =&gt; Some (Script_typed_ir.Nat_key tname)
@@ -75411,7 +75150,7 @@ Definition add_field_annot {A B : Set}
 
 Fixpoint unparse_comparable_ty
   (function_parameter : Script_typed_ir.comparable_struct)
-  {struct function_parameter} : Alpha_context.Script.node :=
+  : Alpha_context.Script.node :=
   match function_parameter with
   | Script_typed_ir.Int_key tname =&gt;
     Micheline.Prim (-1) Alpha_context.Script.T_int nil
@@ -75448,7 +75187,7 @@ Fixpoint unparse_comparable_ty
   end.
 
 Fixpoint unparse_ty_no_lwt
-  (ctxt : Alpha_context.context) (ty : Script_typed_ir.ty) {struct ctxt}
+  (ctxt : Alpha_context.context) (ty : Script_typed_ir.ty)
   : Error_monad.tzresult (Alpha_context.Script.node * Alpha_context.context) :=
   let? ctxt := Alpha_context.Gas.consume ctxt Unparse_costs.cycle in
   let __return {A : Set}
@@ -75578,7 +75317,7 @@ Definition unparse_ty (ctxt : Alpha_context.context) (ty : Script_typed_ir.ty)
   Lwt.__return (unparse_ty_no_lwt ctxt ty).
 
 Fixpoint strip_var_annots {A B : Set} (function_parameter : Micheline.node A B)
-  {struct function_parameter} : Micheline.node A B :=
+  : Micheline.node A B :=
   match function_parameter with
   | (Micheline.Int _ _ | Micheline.String _ _ | Micheline.Bytes _ _) as atom =&gt;
     atom
@@ -75603,7 +75342,6 @@ Definition serialize_ty_for_error
 
 Fixpoint unparse_stack
   (ctxt : Alpha_context.context) (function_parameter : Script_typed_ir.stack_ty)
-  {struct ctxt}
   : Lwt.t
     (Error_monad.tzresult
       (list (Alpha_context.Script.expr * Alpha_context.Script.annot) *
@@ -75711,7 +75449,7 @@ Definition record_inconsistent_type_annotations {A : Set}
 
 Fixpoint ty_eq
   (ctxt : Alpha_context.context) (ta : Script_typed_ir.ty)
-  (tb : Script_typed_ir.ty) {struct ctxt}
+  (tb : Script_typed_ir.ty)
   : Error_monad.tzresult (eq * Alpha_context.context) :=
   let ok (__eq_value : eq) (ctxt : Alpha_context.context) (nb_args : int)
     : Error_monad.tzresult (eq * Alpha_context.context) :=
@@ -75792,7 +75530,7 @@ Fixpoint ty_eq
 
 Fixpoint stack_ty_eq
   (ctxt : Alpha_context.context) (lvl : int) (ta : Script_typed_ir.stack_ty)
-  (tb : Script_typed_ir.stack_ty) {struct ctxt}
+  (tb : Script_typed_ir.stack_ty)
   : Error_monad.tzresult (eq * Alpha_context.context) :=
   match (ta, tb) with
   | (Script_typed_ir.Item_t tva ra _, Script_typed_ir.Item_t tvb rb _) =&gt;
@@ -75861,7 +75599,7 @@ Definition merge_types (legacy : bool)
   Error_monad.tzresult (Script_typed_ir.ty * Alpha_context.context) :=
   let fix help
     (ctxt : Alpha_context.context) (ty1 : Script_typed_ir.ty)
-    (ty2 : Script_typed_ir.ty) {struct ctxt}
+    (ty2 : Script_typed_ir.ty)
     : Error_monad.tzresult (Script_typed_ir.ty * Alpha_context.context) :=
     match (ty1, ty2) with
     | (Script_typed_ir.Unit_t tn1, Script_typed_ir.Unit_t tn2) =&gt;
@@ -76022,7 +75760,7 @@ Definition merge_stacks (legacy : bool) (loc : Alpha_context.Script.location)
   Error_monad.tzresult (Script_typed_ir.stack_ty * Alpha_context.context) :=
   let fix help
     (ctxt : Alpha_context.context) (stack1 : Script_typed_ir.stack_ty)
-    (stack2 : Script_typed_ir.stack_ty) {struct ctxt}
+    (stack2 : Script_typed_ir.stack_ty)
     : Error_monad.tzresult (Script_typed_ir.stack_ty * Alpha_context.context) :=
     match (stack1, stack2) with
     | (Script_typed_ir.Empty_t, Script_typed_ir.Empty_t) =&gt;
@@ -76148,7 +75886,7 @@ Definition merge_branches {a b bef : Set}
   end.
 
 Fixpoint parse_comparable_ty
-  (ctxt : Alpha_context.context) (ty : Alpha_context.Script.node) {struct ctxt}
+  (ctxt : Alpha_context.context) (ty : Alpha_context.Script.node)
   : Error_monad.tzresult (ex_comparable_ty * Alpha_context.context) :=
   let? ctxt := Alpha_context.Gas.consume ctxt Typecheck_costs.cycle in
   let? ctxt := Alpha_context.Gas.consume ctxt (Typecheck_costs.type_ 0) in
@@ -76215,18 +75953,16 @@ Fixpoint parse_comparable_ty
   end
 
 with parse_packable_ty (ctxt : Alpha_context.context) (legacy : bool)
-  {struct ctxt}
   : Alpha_context.Script.node -&gt;
   Error_monad.tzresult (ex_ty * Alpha_context.context) :=
   parse_ty ctxt legacy false false legacy
 
 with parse_parameter_ty (ctxt : Alpha_context.context) (legacy : bool)
-  {struct ctxt}
   : Alpha_context.Script.node -&gt;
   Error_monad.tzresult (ex_ty * Alpha_context.context) :=
   parse_ty ctxt legacy true false true
 
-with parse_any_ty (ctxt : Alpha_context.context) (legacy : bool) {struct ctxt}
+with parse_any_ty (ctxt : Alpha_context.context) (legacy : bool)
   : Alpha_context.Script.node -&gt;
   Error_monad.tzresult (ex_ty * Alpha_context.context) :=
   parse_ty ctxt legacy true true true
@@ -76234,7 +75970,7 @@ with parse_any_ty (ctxt : Alpha_context.context) (legacy : bool) {struct ctxt}
 with parse_ty
   (ctxt : Alpha_context.context) (legacy : bool) (allow_big_map : bool)
   (allow_operation : bool) (allow_contract : bool)
-  (node : Alpha_context.Script.node) {struct ctxt}
+  (node : Alpha_context.Script.node)
   : Error_monad.tzresult (ex_ty * Alpha_context.context) :=
   let? ctxt := Alpha_context.Gas.consume ctxt Typecheck_costs.cycle in
   match
@@ -76474,7 +76210,7 @@ with parse_big_map_ty
   (args :
     list
       (Micheline.node Alpha_context.Script.location Alpha_context.Script.prim))
-  (map_annot : Micheline.annot) {struct ctxt}
+  (map_annot : Micheline.annot)
   : Error_monad.tzresult (ex_ty * Alpha_context.context) :=
   let? ctxt := Alpha_context.Gas.consume ctxt Typecheck_costs.cycle in
   match args with
@@ -76491,7 +76227,7 @@ with parse_big_map_ty
 
 with parse_storage_ty
   (ctxt : Alpha_context.context) (legacy : bool)
-  (node : Alpha_context.Script.node) {struct ctxt}
+  (node : Alpha_context.Script.node)
   : Error_monad.tzresult (ex_ty * Alpha_context.context) :=
   match
     (node,
@@ -76541,7 +76277,7 @@ Definition check_packable
   (legacy : bool) (loc : Alpha_context.Script.location)
   (root : Script_typed_ir.ty) : Error_monad.tzresult unit :=
   let fix check (function_parameter : Script_typed_ir.ty)
-    {struct function_parameter} : Error_monad.tzresult unit :=
+    : Error_monad.tzresult unit :=
     match
       (function_parameter,
         match function_parameter with
@@ -76673,7 +76409,6 @@ Definition find_entrypoint
   : Error_monad.tzresult
     ((Alpha_context.Script.node -&gt; Alpha_context.Script.node) * ex_ty) :=
   let fix find_entrypoint (__t_value : Script_typed_ir.ty) (entrypoint : string)
-    {struct __t_value}
     : (Alpha_context.Script.node -&gt; Alpha_context.Script.node) * ex_ty :=
     match __t_value with
     | Script_typed_ir.Union_t (tl, al) (tr, ar) _ _ =&gt;
@@ -76794,7 +76529,6 @@ Definition well_formed_entrypoints
     (__t_value : Script_typed_ir.ty) (path : list Alpha_context.Script.prim)
     (reachable : bool)
     (acc : option (list Alpha_context.Script.prim) * (|Entrypoints|).(S.SET.t))
-    {struct __t_value}
     : option (list Alpha_context.Script.prim) * (|Entrypoints|).(S.SET.t) :=
     match __t_value with
     | Script_typed_ir.Union_t (tl, al) (tr, ar) _ _ =&gt;
@@ -76834,7 +76568,7 @@ Definition well_formed_entrypoints
 Fixpoint parse_data {a : Set}
   (type_logger : option type_logger) (ctxt : Alpha_context.context)
   (legacy : bool) (ty : Script_typed_ir.ty)
-  (script_data : Alpha_context.Script.node) {struct type_logger}
+  (script_data : Alpha_context.Script.node)
   : Lwt.t (Error_monad.tzresult (a * Alpha_context.context)) :=
   let=? ctxt :=
     Lwt.__return (Alpha_context.Gas.consume ctxt Typecheck_costs.cycle) in
@@ -76971,8 +76705,7 @@ Fixpoint parse_data {a : Set}
       Lwt.__return
         (Alpha_context.Gas.consume ctxt
           (Typecheck_costs.__string_value (String.length v))) in
-    let fix check_printable_ascii (i : (|Compare.Int|).(Compare.S.t)) {struct i}
-      : bool :=
+    let fix check_printable_ascii (i : (|Compare.Int|).(Compare.S.t)) : bool :=
       if (|Compare.Int|).(Compare.S.op_lt) i 0 then
         true
       else
@@ -77424,7 +77157,6 @@ Fixpoint parse_data {a : Set}
 with parse_comparable_data {a : Set}
   (type_logger : option type_logger) (ctxt : Alpha_context.context)
   (ty : Script_typed_ir.comparable_ty) (script_data : Alpha_context.Script.node)
-  {struct type_logger}
   : Lwt.t (Error_monad.tzresult (a * Alpha_context.context)) :=
   parse_data type_logger ctxt false (ty_of_comparable_ty ty) script_data
 
@@ -77432,7 +77164,6 @@ with parse_returning
   (type_logger : option type_logger) (tc_context : tc_context)
   (ctxt : Alpha_context.context) (legacy : bool)
   (function_parameter : Script_typed_ir.ty * option Script_typed_ir.var_annot)
-  {struct type_logger}
   : Script_typed_ir.ty -&gt; Alpha_context.Script.node -&gt;
   Lwt.t (Error_monad.tzresult (Script_typed_ir.lambda * Alpha_context.context)) :=
   let '(arg, arg_annot) := function_parameter in
@@ -77485,7 +77216,7 @@ with parse_returning
 
 with parse_int32
   (n : Micheline.node Alpha_context.Script.location Alpha_context.Script.prim)
-  {struct n} : Error_monad.tzresult int :=
+  : Error_monad.tzresult int :=
   let error' (function_parameter : unit) : Error_monad.__error :=
     let '_ := function_parameter in
     extensible_type_value in
@@ -77508,7 +77239,7 @@ with parse_instr {bef : Set}
   (type_logger : option type_logger) (tc_context : tc_context)
   (ctxt : Alpha_context.context) (legacy : bool)
   (script_instr : Alpha_context.Script.node)
-  (stack_ty : Script_typed_ir.stack_ty) {struct type_logger}
+  (stack_ty : Script_typed_ir.stack_ty)
   : Lwt.t (Error_monad.tzresult (judgement bef * Alpha_context.context)) :=
   let _check_item {B : Set}
     (check : Error_monad.tzresult B) (loc : Alpha_context.Script.location)
@@ -77637,7 +77368,7 @@ with parse_instr {bef : Set}
       whole_stack), _) =&gt;
     let=? whole_n := Lwt.__return (parse_int32 n) in
     let fix make_proof_argument {tstk : Set}
-      (n : int) (stk : Script_typed_ir.stack_ty) {struct n}
+      (n : int) (stk : Script_typed_ir.stack_ty)
       : Lwt.t (Error_monad.tzresult (dropn_proof_argument tstk)) :=
       match (((|Compare.Int|).(Compare.S.op_eq) n 0), stk) with
       | (true, rest) =&gt;
@@ -77672,7 +77403,7 @@ with parse_instr {bef : Set}
     ((Micheline.Prim loc Alpha_context.Script.I_DIG (cons n []) result_annot,
       __stack_value), _) =&gt;
     let fix make_proof_argument {tstk : Set}
-      (n : int) (stk : Script_typed_ir.stack_ty) {struct n}
+      (n : int) (stk : Script_typed_ir.stack_ty)
       : Lwt.t (Error_monad.tzresult (dig_proof_argument tstk)) :=
       match (((|Compare.Int|).(Compare.S.op_eq) n 0), stk) with
       | (true, Script_typed_ir.Item_t v rest annot) =&gt;
@@ -77707,7 +77438,7 @@ with parse_instr {bef : Set}
     let fix make_proof_argument {tstk x : Set}
       (n : int) (x : Script_typed_ir.ty)
       (stack_annot : option Script_typed_ir.var_annot)
-      (stk : Script_typed_ir.stack_ty) {struct n}
+      (stk : Script_typed_ir.stack_ty)
       : Lwt.t (Error_monad.tzresult (dug_proof_argument tstk x)) :=
       match (((|Compare.Int|).(Compare.S.op_eq) n 0), stk) with
       | (true, rest) =&gt;
@@ -78491,7 +78222,7 @@ with parse_instr {bef : Set}
       result_annot, __stack_value), true) =&gt;
     let fix make_proof_argument {tstk : Set}
       (n : int) (inner_tc_context : tc_context) (stk : Script_typed_ir.stack_ty)
-      {struct n} : Lwt.t (Error_monad.tzresult (dipn_proof_argument tstk)) :=
+      : Lwt.t (Error_monad.tzresult (dipn_proof_argument tstk)) :=
       match (((|Compare.Int|).(Compare.S.op_eq) n 0), stk) with
       | (true, rest) =&gt;
         let=? '(judgement, ctxt) :=
@@ -79402,7 +79133,6 @@ with parse_instr {bef : Set}
           let 'Script_typed_ir.Field_annot annot := function_parameter in
           annot) &quot;default&quot; entrypoint in
     let fix get_toplevel_type (function_parameter : tc_context)
-      {struct function_parameter}
       : Lwt.t (Error_monad.tzresult (judgement bef * Alpha_context.context)) :=
       match function_parameter with
       | Lambda =&gt; Error_monad.fail extensible_type_value
@@ -79643,7 +79373,7 @@ with parse_instr {bef : Set}
 with parse_contract
   (legacy : bool) (ctxt : Alpha_context.context)
   (loc : Alpha_context.Script.location) (arg : Script_typed_ir.ty)
-  (contract : Alpha_context.Contract.t) (entrypoint : string) {struct legacy}
+  (contract : Alpha_context.Contract.t) (entrypoint : string)
   : Lwt.t
     (Error_monad.tzresult
       (Alpha_context.context * Script_typed_ir.typed_contract)) :=
@@ -79694,7 +79424,7 @@ with parse_contract
 with parse_contract_for_script
   (legacy : bool) (ctxt : Alpha_context.context)
   (loc : Alpha_context.Script.location) (arg : Script_typed_ir.ty)
-  (contract : Alpha_context.Contract.t) (entrypoint : string) {struct legacy}
+  (contract : Alpha_context.Contract.t) (entrypoint : string)
   : Lwt.t
     (Error_monad.tzresult
       (Alpha_context.context * option Script_typed_ir.typed_contract)) :=
@@ -79756,7 +79486,6 @@ with parse_contract_for_script
   end
 
 with parse_toplevel (legacy : bool) (toplevel : Alpha_context.Script.expr)
-  {struct legacy}
   : Error_monad.tzresult
     (Alpha_context.Script.node * Alpha_context.Script.node *
       Alpha_context.Script.node * option string) :=
@@ -79787,7 +79516,7 @@ with parse_toplevel (legacy : bool) (toplevel : Alpha_context.Script.expr)
         (fields :
           list
             (Micheline.node Alpha_context.Script.location
-              Alpha_context.Script.prim)) {struct __p_value}
+              Alpha_context.Script.prim))
         : Error_monad.tzresult
           (option
             (Micheline.node Alpha_context.Script.location
@@ -80099,7 +79828,6 @@ Definition list_entrypoints
       list (list Alpha_context.Script.prim) *
         (|Entrypoints_map|).(S.MAP.t)
           (list Alpha_context.Script.prim * Alpha_context.Script.node))
-    {struct __t_value}
     : Error_monad.tzresult
       (list (list Alpha_context.Script.prim) *
         (|Entrypoints_map|).(S.MAP.t)
@@ -80129,7 +79857,7 @@ Definition list_entrypoints
 
 Fixpoint unparse_data {a : Set}
   (ctxt : Alpha_context.context) (mode : unparsing_mode)
-  (ty : Script_typed_ir.ty) (__a_value : a) {struct ctxt}
+  (ty : Script_typed_ir.ty) (__a_value : a)
   : Lwt.t
     (Error_monad.tzresult (Alpha_context.Script.node * Alpha_context.context)) :=
   let=? ctxt :=
@@ -80492,7 +80220,6 @@ Fixpoint unparse_data {a : Set}
   end
 
 with unparse_code (ctxt : Alpha_context.context) (mode : unparsing_mode)
-  {struct ctxt}
   : Alpha_context.Script.node -&gt;
   Lwt.t
     (Error_monad.tzresult
@@ -80786,7 +80513,7 @@ Fixpoint extract_big_map_updates {a : Set}
       (Error_monad.tzresult (Alpha_context.context * Alpha_context.Big_map.id)))
   (mode : unparsing_mode) (ids : (|Ids|).(S.SET.t))
   (acc : list Alpha_context.Contract.big_map_diff) (ty : Script_typed_ir.ty)
-  (x : a) {struct ctxt}
+  (x : a)
   : Lwt.t
     (Error_monad.tzresult
       (Alpha_context.context * a * (|Ids|).(S.SET.t) *
@@ -80971,7 +80698,7 @@ Definition collect_big_maps {A : Set}
   : Lwt.t (Error_monad.tzresult ((|Ids|).(S.SET.t) * Alpha_context.context)) :=
   let fix collect {a : Set}
     (ctxt : Alpha_context.context) (ty : Script_typed_ir.ty) (x : a)
-    (acc : (|Ids|).(S.SET.t)) {struct ctxt}
+    (acc : (|Ids|).(S.SET.t))
     : Error_monad.tzresult ((|Ids|).(S.SET.t) * Alpha_context.context) :=
     match (ty, x) with
     |
@@ -81117,7 +80844,7 @@ Definition list_of_big_map_ids (ids : (|Ids|).(S.SET.t))
     <h3>Script_ir_translator_mli</h3>
     <ul>
       <li>OCaml size: 272 lines</li>
-      <li>Coq size: 276 lines (+1% compared to&nbsp;OCaml)</li>
+      <li>Coq size: 273 lines (+0% compared to&nbsp;OCaml)</li>
     </ul>
   </div>
   <div class="col-md-6">
@@ -81407,9 +81134,6 @@ Local Open Scope Z_scope.
 Local Open Scope type_scope.
 Import ListNotations.
 
-Unset Positivity Checking.
-Unset Guard Checking.
-
 Require Import Tezos.Environment.
 Import Environment.Notations.
 Require Tezos.Alpha_context.
@@ -81685,7 +81409,7 @@ Parameter extract_big_map_diff : forall {a : Set},
     <h3>Script_repr</h3>
     <ul>
       <li>OCaml size: 233 lines</li>
-      <li>Coq size: 297 lines (+27% compared to&nbsp;OCaml)</li>
+      <li>Coq size: 295 lines (+26% compared to&nbsp;OCaml)</li>
     </ul>
   </div>
   <div class="col-md-6">
@@ -81937,8 +81661,6 @@ Local Open Scope string_scope.
 Local Open Scope Z_scope.
 Local Open Scope type_scope.
 Import ListNotations.
-
-Unset Positivity Checking.
 Unset Guard Checking.
 
 Require Import Tezos.Environment.
@@ -82237,7 +81959,7 @@ Fixpoint strip_annotations {A B : Set} (node : Micheline.node A B) {struct node}
     <h3>Script_repr_mli</h3>
     <ul>
       <li>OCaml size: 88 lines</li>
-      <li>Coq size: 90 lines (+2% compared to&nbsp;OCaml)</li>
+      <li>Coq size: 87 lines (-2% compared to&nbsp;OCaml)</li>
     </ul>
   </div>
   <div class="col-md-6">
@@ -82343,9 +82065,6 @@ Local Open Scope Z_scope.
 Local Open Scope type_scope.
 Import ListNotations.
 
-Unset Positivity Checking.
-Unset Guard Checking.
-
 Require Import Tezos.Environment.
 Import Environment.Notations.
 Require Tezos.Gas_limit_repr.
@@ -82435,7 +82154,7 @@ Parameter strip_annotations : node -&gt; node.
     <h3>Script_tc_errors</h3>
     <ul>
       <li>OCaml size: 162 lines</li>
-      <li>Coq size: 175 lines (+8% compared to&nbsp;OCaml)</li>
+      <li>Coq size: 172 lines (+6% compared to&nbsp;OCaml)</li>
     </ul>
   </div>
   <div class="col-md-6">
@@ -82615,9 +82334,6 @@ Local Open Scope Z_scope.
 Local Open Scope type_scope.
 Import ListNotations.
 
-Unset Positivity Checking.
-Unset Guard Checking.
-
 Require Import Tezos.Environment.
 Import Environment.Notations.
 Require Tezos.Alpha_context.
@@ -82792,7 +82508,7 @@ Definition type_map : Set :=
     <h3>Script_tc_errors_registration</h3>
     <ul>
       <li>OCaml size: 652 lines</li>
-      <li>Coq size: 56 lines (-92% compared to&nbsp;OCaml)</li>
+      <li>Coq size: 53 lines (-92% compared to&nbsp;OCaml)</li>
     </ul>
   </div>
   <div class="col-md-6">
@@ -83462,9 +83178,6 @@ Local Open Scope Z_scope.
 Local Open Scope type_scope.
 Import ListNotations.
 
-Unset Positivity Checking.
-Unset Guard Checking.
-
 Require Import Tezos.Environment.
 Import Environment.Notations.
 Require Tezos.Alpha_context.
@@ -83520,7 +83233,7 @@ Definition stack_ty_enc
     <h3>Script_timestamp_repr</h3>
     <ul>
       <li>OCaml size: 57 lines</li>
-      <li>Coq size: 59 lines (+3% compared to&nbsp;OCaml)</li>
+      <li>Coq size: 56 lines (-2% compared to&nbsp;OCaml)</li>
     </ul>
   </div>
   <div class="col-md-6">
@@ -83599,9 +83312,6 @@ Local Open Scope Z_scope.
 Local Open Scope type_scope.
 Import ListNotations.
 
-Unset Positivity Checking.
-Unset Guard Checking.
-
 Require Import Tezos.Environment.
 Import Environment.Notations.
 Require Tezos.Script_int_repr.
@@ -83660,7 +83370,7 @@ Definition of_zint {A : Set} (x : A) : A := x.
     <h3>Script_timestamp_repr_mli</h3>
     <ul>
       <li>OCaml size: 53 lines</li>
-      <li>Coq size: 40 lines (-25% compared to&nbsp;OCaml)</li>
+      <li>Coq size: 37 lines (-31% compared to&nbsp;OCaml)</li>
     </ul>
   </div>
   <div class="col-md-6">
@@ -83731,9 +83441,6 @@ Local Open Scope Z_scope.
 Local Open Scope type_scope.
 Import ListNotations.
 
-Unset Positivity Checking.
-Unset Guard Checking.
-
 Require Import Tezos.Environment.
 Import Environment.Notations.
 Require Tezos.Script_int_repr.
@@ -83773,7 +83480,7 @@ Parameter of_zint : Z.t -&gt; t.
     <h3>Script_typed_ir</h3>
     <ul>
       <li>OCaml size: 407 lines</li>
-      <li>Coq size: 379 lines (-7% compared to&nbsp;OCaml)</li>
+      <li>Coq size: 376 lines (-8% compared to&nbsp;OCaml)</li>
     </ul>
   </div>
   <div class="col-md-6">
@@ -84198,9 +83905,6 @@ Local Open Scope Z_scope.
 Local Open Scope type_scope.
 Import ListNotations.
 
-Unset Positivity Checking.
-Unset Guard Checking.
-
 Require Import Tezos.Environment.
 Import Environment.Notations.
 Require Tezos.Alpha_context.
@@ -84579,7 +84283,7 @@ Inductive ex_big_map : Set :=
     <h3>Seed_repr</h3>
     <ul>
       <li>OCaml size: 134 lines</li>
-      <li>Coq size: 147 lines (+9% compared to&nbsp;OCaml)</li>
+      <li>Coq size: 145 lines (+8% compared to&nbsp;OCaml)</li>
     </ul>
   </div>
   <div class="col-md-6">
@@ -84734,8 +84438,6 @@ Local Open Scope string_scope.
 Local Open Scope Z_scope.
 Local Open Scope type_scope.
 Import ListNotations.
-
-Unset Positivity Checking.
 Unset Guard Checking.
 
 Require Import Tezos.Environment.
@@ -84884,7 +84586,7 @@ Definition initial_seeds (n : (|Compare.Int|).(Compare.S.t)) : list seed :=
     <h3>Seed_repr_mli</h3>
     <ul>
       <li>OCaml size: 100 lines</li>
-      <li>Coq size: 54 lines (-46% compared to&nbsp;OCaml)</li>
+      <li>Coq size: 51 lines (-49% compared to&nbsp;OCaml)</li>
     </ul>
   </div>
   <div class="col-md-6">
@@ -85002,9 +84704,6 @@ Local Open Scope Z_scope.
 Local Open Scope type_scope.
 Import ListNotations.
 
-Unset Positivity Checking.
-Unset Guard Checking.
-
 Require Import Tezos.Environment.
 Import Environment.Notations.
 Require Tezos.Nonce_hash.
@@ -85058,7 +84757,7 @@ Parameter seed_encoding : Data_encoding.t seed.
     <h3>Seed_storage</h3>
     <ul>
       <li>OCaml size: 148 lines</li>
-      <li>Coq size: 135 lines (-9% compared to&nbsp;OCaml)</li>
+      <li>Coq size: 132 lines (-11% compared to&nbsp;OCaml)</li>
     </ul>
   </div>
   <div class="col-md-6">
@@ -85226,9 +84925,6 @@ Local Open Scope Z_scope.
 Local Open Scope type_scope.
 Import ListNotations.
 
-Unset Positivity Checking.
-Unset Guard Checking.
-
 Require Import Tezos.Environment.
 Import Environment.Notations.
 Require Tezos.Constants_storage.
@@ -85363,7 +85059,7 @@ Definition cycle_end
     <h3>Seed_storage_mli</h3>
     <ul>
       <li>OCaml size: 47 lines</li>
-      <li>Coq size: 28 lines (-41% compared to&nbsp;OCaml)</li>
+      <li>Coq size: 25 lines (-47% compared to&nbsp;OCaml)</li>
     </ul>
   </div>
   <div class="col-md-6">
@@ -85428,9 +85124,6 @@ Local Open Scope Z_scope.
 Local Open Scope type_scope.
 Import ListNotations.
 
-Unset Positivity Checking.
-Unset Guard Checking.
-
 Require Import Tezos.Environment.
 Import Environment.Notations.
 Require Tezos.Cycle_repr.
@@ -85458,7 +85151,7 @@ Parameter cycle_end :
     <h3>Services_registration</h3>
     <ul>
       <li>OCaml size: 94 lines</li>
-      <li>Coq size: 166 lines (+76% compared to&nbsp;OCaml)</li>
+      <li>Coq size: 163 lines (+73% compared to&nbsp;OCaml)</li>
     </ul>
   </div>
   <div class="col-md-6">
@@ -85678,9 +85371,6 @@ Local Open Scope Z_scope.
 Local Open Scope type_scope.
 Import ListNotations.
 
-Unset Positivity Checking.
-Unset Guard Checking.
-
 Require Import Tezos.Environment.
 Import Environment.Notations.
 Require Tezos.Alpha_context.
@@ -85846,7 +85536,7 @@ Definition get_rpc_services (function_parameter : unit)
     <h3>State_hash</h3>
     <ul>
       <li>OCaml size: 43 lines</li>
-      <li>Coq size: 105 lines (+144% compared to&nbsp;OCaml)</li>
+      <li>Coq size: 102 lines (+137% compared to&nbsp;OCaml)</li>
     </ul>
   </div>
   <div class="col-md-6">
@@ -85906,9 +85596,6 @@ Local Open Scope string_scope.
 Local Open Scope Z_scope.
 Local Open Scope type_scope.
 Import ListNotations.
-
-Unset Positivity Checking.
-Unset Guard Checking.
 
 Require Import Tezos.Environment.
 Import Environment.Notations.
@@ -86014,7 +85701,7 @@ Definition path_length := (|Blake2BModule|).(S.HASH.path_length).
     <h3>Storage</h3>
     <ul>
       <li>OCaml size: 901 lines</li>
-      <li>Coq size: 1943 lines (+115% compared to&nbsp;OCaml)</li>
+      <li>Coq size: 1940 lines (+115% compared to&nbsp;OCaml)</li>
     </ul>
   </div>
   <div class="col-md-6">
@@ -86944,9 +86631,6 @@ Local Open Scope string_scope.
 Local Open Scope Z_scope.
 Local Open Scope type_scope.
 Import ListNotations.
-
-Unset Positivity Checking.
-Unset Guard Checking.
 
 Require Import Tezos.Environment.
 Import Environment.Notations.
@@ -88890,7 +88574,7 @@ End Ramp_up.
     <h3>Storage_mli</h3>
     <ul>
       <li>OCaml size: 396 lines</li>
-      <li>Coq size: 308 lines (-23% compared to&nbsp;OCaml)</li>
+      <li>Coq size: 305 lines (-23% compared to&nbsp;OCaml)</li>
     </ul>
   </div>
   <div class="col-md-6">
@@ -89304,9 +88988,6 @@ Local Open Scope Z_scope.
 Local Open Scope type_scope.
 Import ListNotations.
 
-Unset Positivity Checking.
-Unset Guard Checking.
-
 Require Import Tezos.Environment.
 Import Environment.Notations.
 Require Tezos.Blinded_public_key_hash.
@@ -89614,7 +89295,7 @@ End Ramp_up.
     <h3>Storage_description</h3>
     <ul>
       <li>OCaml size: 347 lines</li>
-      <li>Coq size: 554 lines (+59% compared to&nbsp;OCaml)</li>
+      <li>Coq size: 553 lines (+59% compared to&nbsp;OCaml)</li>
     </ul>
   </div>
   <div class="col-md-6">
@@ -90046,7 +89727,6 @@ Local Open Scope string_scope.
 Local Open Scope Z_scope.
 Local Open Scope type_scope.
 Import ListNotations.
-
 Unset Positivity Checking.
 Unset Guard Checking.
 
@@ -90603,7 +90283,7 @@ Definition build_directory {key : Set} (dir : t key) : RPC_directory.t key :=
     <h3>Storage_description_mli</h3>
     <ul>
       <li>OCaml size: 97 lines</li>
-      <li>Coq size: 78 lines (-20% compared to&nbsp;OCaml)</li>
+      <li>Coq size: 75 lines (-23% compared to&nbsp;OCaml)</li>
     </ul>
   </div>
   <div class="col-md-6">
@@ -90718,9 +90398,6 @@ Local Open Scope Z_scope.
 Local Open Scope type_scope.
 Import ListNotations.
 
-Unset Positivity Checking.
-Unset Guard Checking.
-
 Require Import Tezos.Environment.
 Import Environment.Notations.
 
@@ -90798,7 +90475,7 @@ End INDEX.
     <h3>Storage_functors</h3>
     <ul>
       <li>OCaml size: 1209 lines</li>
-      <li>Coq size: 1881 lines (+55% compared to&nbsp;OCaml)</li>
+      <li>Coq size: 1877 lines (+55% compared to&nbsp;OCaml)</li>
     </ul>
   </div>
   <div class="col-md-6">
@@ -92053,9 +91730,6 @@ Local Open Scope Z_scope.
 Local Open Scope type_scope.
 Import ListNotations.
 
-Unset Positivity Checking.
-Unset Guard Checking.
-
 Require Import Tezos.Environment.
 Import Environment.Notations.
 Require Tezos.Gas_limit_repr.
@@ -92438,7 +92112,7 @@ Definition Make_data_set_storage :=
         (f : (|I|).(INDEX.t) -&gt; A -&gt; Lwt.t A) : Lwt.t A :=
         let fix dig
           (i : (|Compare.Int|).(Compare.S.t)) (path : Raw_context.key) (acc : A)
-          {struct i} : Lwt.t A :=
+          : Lwt.t A :=
           if (|Compare.Int|).(Compare.S.op_lteq) i 1 then
             (|C|).(Raw_context.T.fold) s path acc
               (fun k =&gt;
@@ -92570,7 +92244,7 @@ Definition Make_indexed_data_storage :=
           (f : (|I|).(INDEX.t) -&gt; A -&gt; Lwt.t A) : Lwt.t A :=
           let fix dig
             (i : (|Compare.Int|).(Compare.S.t)) (path : Raw_context.key)
-            (acc : A) {struct i} : Lwt.t A :=
+            (acc : A) : Lwt.t A :=
             if (|Compare.Int|).(Compare.S.op_lteq) i 1 then
               (|C|).(Raw_context.T.fold) s path acc
                 (fun k =&gt;
@@ -92809,7 +92483,7 @@ Definition Make_indexed_carbonated_data_storage :=
           (f : (|I|).(INDEX.t) -&gt; A -&gt; Lwt.t A) : Lwt.t A :=
           let fix dig
             (i : (|Compare.Int|).(Compare.S.t)) (path : Raw_context.key)
-            (acc : A) {struct i} : Lwt.t A :=
+            (acc : A) : Lwt.t A :=
             if (|Compare.Int|).(Compare.S.op_lteq) i 0 then
               (|C|).(Raw_context.T.fold) s path acc
                 (fun k =&gt;
@@ -93032,7 +92706,7 @@ Definition Make_indexed_subcontext :=
         (f : (|I|).(INDEX.t) -&gt; A -&gt; Lwt.t A) : Lwt.t A :=
         let fix dig
           (i : (|Compare.Int|).(Compare.S.t)) (path : Raw_context.key) (acc : A)
-          {struct i} : Lwt.t A :=
+          : Lwt.t A :=
           if (|Compare.Int|).(Compare.S.op_lteq) i 0 then
             match (|I|).(INDEX.of_path) path with
             | None =&gt;
@@ -93247,8 +92921,7 @@ Definition Make_indexed_subcontext :=
         : Lwt.t (list (|I|).(INDEX.t)) :=
         let fix loop
           (i : (|Compare.Int|).(Compare.S.t)) (prefix : Raw_context.key)
-          (function_parameter : list string) {struct i}
-          : Lwt.t (list (|I|).(INDEX.t)) :=
+          (function_parameter : list string) : Lwt.t (list (|I|).(INDEX.t)) :=
           match
             (function_parameter,
               match function_parameter with
@@ -93936,7 +93609,7 @@ Definition Wrap_indexed_data_storage :=
     <h3>Storage_functors_mli</h3>
     <ul>
       <li>OCaml size: 110 lines</li>
-      <li>Coq size: 119 lines (+8% compared to&nbsp;OCaml)</li>
+      <li>Coq size: 116 lines (+5% compared to&nbsp;OCaml)</li>
     </ul>
   </div>
   <div class="col-md-6">
@@ -94064,9 +93737,6 @@ Local Open Scope Z_scope.
 Local Open Scope type_scope.
 Import ListNotations.
 
-Unset Positivity Checking.
-Unset Guard Checking.
-
 Require Import Tezos.Environment.
 Import Environment.Notations.
 Require Tezos.Raw_context.
@@ -94185,7 +93855,7 @@ Parameter Wrap_indexed_data_storage :
     <h3>Storage_sigs</h3>
     <ul>
       <li>OCaml size: 422 lines</li>
-      <li>Coq size: 249 lines (-41% compared to&nbsp;OCaml)</li>
+      <li>Coq size: 246 lines (-42% compared to&nbsp;OCaml)</li>
     </ul>
   </div>
   <div class="col-md-6">
@@ -94625,9 +94295,6 @@ Local Open Scope Z_scope.
 Local Open Scope type_scope.
 Import ListNotations.
 
-Unset Positivity Checking.
-Unset Guard Checking.
-
 Require Import Tezos.Environment.
 Import Environment.Notations.
 Require Tezos.Raw_context.
@@ -94876,7 +94543,7 @@ End Indexed_raw_context.
     <h3>Tez_repr</h3>
     <ul>
       <li>OCaml size: 36 lines</li>
-      <li>Coq size: 92 lines (+155% compared to&nbsp;OCaml)</li>
+      <li>Coq size: 89 lines (+147% compared to&nbsp;OCaml)</li>
     </ul>
   </div>
   <div class="col-md-6">
@@ -94929,9 +94596,6 @@ Local Open Scope string_scope.
 Local Open Scope Z_scope.
 Local Open Scope type_scope.
 Import ListNotations.
-
-Unset Positivity Checking.
-Unset Guard Checking.
 
 Require Import Tezos.Environment.
 Import Environment.Notations.
@@ -95024,7 +94688,7 @@ Definition encoding : Data_encoding.encoding qty :=
     <h3>Tez_repr_mli</h3>
     <ul>
       <li>OCaml size: 32 lines</li>
-      <li>Coq size: 89 lines (+178% compared to&nbsp;OCaml)</li>
+      <li>Coq size: 86 lines (+168% compared to&nbsp;OCaml)</li>
     </ul>
   </div>
   <div class="col-md-6">
@@ -95089,9 +94753,6 @@ Local Open Scope string_scope.
 Local Open Scope Z_scope.
 Local Open Scope type_scope.
 Import ListNotations.
-
-Unset Positivity Checking.
-Unset Guard Checking.
 
 Require Import Tezos.Environment.
 Import Environment.Notations.
@@ -95181,7 +94842,7 @@ Parameter encoding : Data_encoding.t t.
     <h3>Time_repr</h3>
     <ul>
       <li>OCaml size: 65 lines</li>
-      <li>Coq size: 45 lines (-31% compared to&nbsp;OCaml)</li>
+      <li>Coq size: 42 lines (-36% compared to&nbsp;OCaml)</li>
     </ul>
   </div>
   <div class="col-md-6">
@@ -95270,9 +94931,6 @@ Local Open Scope Z_scope.
 Local Open Scope type_scope.
 Import ListNotations.
 
-Unset Positivity Checking.
-Unset Guard Checking.
-
 Require Import Tezos.Environment.
 Import Environment.Notations.
 Require Tezos.Period_repr.
@@ -95317,7 +94975,7 @@ Definition op_minusquestion (x : t) (y : t)
     <h3>Time_repr_mli</h3>
     <ul>
       <li>OCaml size: 40 lines</li>
-      <li>Coq size: 68 lines (+70% compared to&nbsp;OCaml)</li>
+      <li>Coq size: 65 lines (+62% compared to&nbsp;OCaml)</li>
     </ul>
   </div>
   <div class="col-md-6">
@@ -95374,9 +95032,6 @@ Local Open Scope string_scope.
 Local Open Scope Z_scope.
 Local Open Scope type_scope.
 Import ListNotations.
-
-Unset Positivity Checking.
-Unset Guard Checking.
 
 Require Import Tezos.Environment.
 Import Environment.Notations.
@@ -95445,7 +95100,7 @@ Parameter op_minusquestion : time -&gt; time -&gt; Error_monad.tzresult Period_r
     <h3>Vote_repr</h3>
     <ul>
       <li>OCaml size: 46 lines</li>
-      <li>Coq size: 38 lines (-18% compared to&nbsp;OCaml)</li>
+      <li>Coq size: 35 lines (-24% compared to&nbsp;OCaml)</li>
     </ul>
   </div>
   <div class="col-md-6">
@@ -95509,9 +95164,6 @@ Local Open Scope Z_scope.
 Local Open Scope type_scope.
 Import ListNotations.
 
-Unset Positivity Checking.
-Unset Guard Checking.
-
 Require Import Tezos.Environment.
 Import Environment.Notations.
 
@@ -95549,7 +95201,7 @@ Definition ballot_encoding : Data_encoding.encoding ballot :=
     <h3>Vote_repr_mli</h3>
     <ul>
       <li>OCaml size: 33 lines</li>
-      <li>Coq size: 22 lines (-34% compared to&nbsp;OCaml)</li>
+      <li>Coq size: 19 lines (-43% compared to&nbsp;OCaml)</li>
     </ul>
   </div>
   <div class="col-md-6">
@@ -95600,9 +95252,6 @@ Local Open Scope Z_scope.
 Local Open Scope type_scope.
 Import ListNotations.
 
-Unset Positivity Checking.
-Unset Guard Checking.
-
 Require Import Tezos.Environment.
 Import Environment.Notations.
 
@@ -95624,7 +95273,7 @@ Parameter ballot_encoding : Data_encoding.t ballot.
     <h3>Vote_storage</h3>
     <ul>
       <li>OCaml size: 156 lines</li>
-      <li>Coq size: 331 lines (+112% compared to&nbsp;OCaml)</li>
+      <li>Coq size: 328 lines (+110% compared to&nbsp;OCaml)</li>
     </ul>
   </div>
   <div class="col-md-6">
@@ -95797,9 +95446,6 @@ Local Open Scope string_scope.
 Local Open Scope Z_scope.
 Local Open Scope type_scope.
 Import ListNotations.
-
-Unset Positivity Checking.
-Unset Guard Checking.
 
 Require Import Tezos.Environment.
 Import Environment.Notations.
@@ -96131,7 +95777,7 @@ Definition init (ctxt : Raw_context.context)
     <h3>Vote_storage_mli</h3>
     <ul>
       <li>OCaml size: 106 lines</li>
-      <li>Coq size: 115 lines (+8% compared to&nbsp;OCaml)</li>
+      <li>Coq size: 112 lines (+5% compared to&nbsp;OCaml)</li>
     </ul>
   </div>
   <div class="col-md-6">
@@ -96255,9 +95901,6 @@ Local Open Scope Z_scope.
 Local Open Scope type_scope.
 Import ListNotations.
 
-Unset Positivity Checking.
-Unset Guard Checking.
-
 Require Import Tezos.Environment.
 Import Environment.Notations.
 Require Tezos.Raw_context.
@@ -96372,7 +96015,7 @@ Parameter init : Raw_context.t -&gt; Lwt.t (Error_monad.tzresult Raw_context.t).
     <h3>Voting_period_repr</h3>
     <ul>
       <li>OCaml size: 91 lines</li>
-      <li>Coq size: 125 lines (+37% compared to&nbsp;OCaml)</li>
+      <li>Coq size: 122 lines (+34% compared to&nbsp;OCaml)</li>
     </ul>
   </div>
   <div class="col-md-6">
@@ -96480,9 +96123,6 @@ Local Open Scope string_scope.
 Local Open Scope Z_scope.
 Local Open Scope type_scope.
 Import ListNotations.
-
-Unset Positivity Checking.
-Unset Guard Checking.
 
 Require Import Tezos.Environment.
 Import Environment.Notations.
@@ -96608,7 +96248,7 @@ Definition kind_encoding : Data_encoding.encoding kind :=
     <h3>Voting_period_repr_mli</h3>
     <ul>
       <li>OCaml size: 55 lines</li>
-      <li>Coq size: 71 lines (+29% compared to&nbsp;OCaml)</li>
+      <li>Coq size: 68 lines (+23% compared to&nbsp;OCaml)</li>
     </ul>
   </div>
   <div class="col-md-6">
@@ -96681,9 +96321,6 @@ Local Open Scope Z_scope.
 Local Open Scope type_scope.
 Import ListNotations.
 
-Unset Positivity Checking.
-Unset Guard Checking.
-
 Require Import Tezos.Environment.
 Import Environment.Notations.
 
@@ -96754,7 +96391,7 @@ Parameter kind_encoding : Data_encoding.t kind.
     <h3>Voting_services</h3>
     <ul>
       <li>OCaml size: 123 lines</li>
-      <li>Coq size: 223 lines (+81% compared to&nbsp;OCaml)</li>
+      <li>Coq size: 220 lines (+78% compared to&nbsp;OCaml)</li>
     </ul>
   </div>
   <div class="col-md-6">
@@ -97691,9 +97328,6 @@ Local Open Scope Z_scope.
 Local Open Scope type_scope.
 Import ListNotations.
 
-Unset Positivity Checking.
-Unset Guard Checking.
-
 Require Import Tezos.Environment.
 Import Environment.Notations.
 Require Tezos.Alpha_context.
@@ -97916,7 +97550,7 @@ Definition current_proposal {D E G I K L a b c i o q : Set}
     <h3>Voting_services_mli</h3>
     <ul>
       <li>OCaml size: 54 lines</li>
-      <li>Coq size: 117 lines (+116% compared to&nbsp;OCaml)</li>
+      <li>Coq size: 114 lines (+111% compared to&nbsp;OCaml)</li>
     </ul>
   </div>
   <div class="col-md-6">
@@ -98659,9 +98293,6 @@ Local Open Scope string_scope.
 Local Open Scope Z_scope.
 Local Open Scope type_scope.
 Import ListNotations.
-
-Unset Positivity Checking.
-Unset Guard Checking.
 
 Require Import Tezos.Environment.
 Import Environment.Notations.
