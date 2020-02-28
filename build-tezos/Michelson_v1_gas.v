@@ -45,33 +45,33 @@ Module Cost_of.
     match (wit, v) with
     | (Script_typed_ir.Int_key _, _ as v) =>
       let v := obj_magic Script_int_repr.num v in
-      obj_magic int (int_bytes v)
+      int_bytes v
     
     | (Script_typed_ir.Nat_key _, _ as v) =>
       let v := obj_magic Script_int_repr.num v in
-      obj_magic int (int_bytes v)
+      int_bytes v
     
     | (Script_typed_ir.String_key _, _ as v) =>
       let v := obj_magic string v in
-      obj_magic int (String.length v)
+      String.length v
     
     | (Script_typed_ir.Bytes_key _, _ as v) =>
       let v := obj_magic MBytes.t v in
-      obj_magic int (MBytes.length v)
+      MBytes.length v
     
-    | (Script_typed_ir.Bool_key _, _) => obj_magic int 8
+    | (Script_typed_ir.Bool_key _, _) => 8
     
     | (Script_typed_ir.Key_hash_key _, _) =>
-      obj_magic int (|Signature.Public_key_hash|).(S.SPublic_key_hash.size)
+      (|Signature.Public_key_hash|).(S.SPublic_key_hash.size)
     
     | (Script_typed_ir.Timestamp_key _, _ as v) =>
       let v := obj_magic Alpha_context.Script_timestamp.t v in
-      obj_magic int (timestamp_bytes v)
+      timestamp_bytes v
     
     | (Script_typed_ir.Address_key _, _) =>
-      obj_magic int (|Signature.Public_key_hash|).(S.SPublic_key_hash.size)
+      (|Signature.Public_key_hash|).(S.SPublic_key_hash.size)
     
-    | (Script_typed_ir.Mutez_key _, _) => obj_magic int 8
+    | (Script_typed_ir.Mutez_key _, _) => 8
     
     | (Script_typed_ir.Pair_key (l, _) (__r_value, _) _, _ as v) =>
       let 'existT _ [__0, __1] [l, __r_value, v] :=
@@ -80,10 +80,9 @@ Module Cost_of.
             [Script_typed_ir.comparable_struct **
               Script_typed_ir.comparable_struct ** __0 * __1]) [l, __r_value, v]
         in
-      obj_magic int
-      (let '(lval, rval) := v in
+      let '(lval, rval) := v in
       Pervasives.op_plus (size_of_comparable l lval)
-        (size_of_comparable __r_value rval))
+        (size_of_comparable __r_value rval)
     end.
   
   Definition __string_value (length : int) : Alpha_context.Gas.cost :=
@@ -583,44 +582,44 @@ Module Cost_of.
       match (ty, x, y) with
       | (Script_typed_ir.Bool_key _, _ as x, _ as y) =>
         let '[x, y] := obj_magic [bool ** bool] [x, y] in
-        obj_magic Alpha_context.Gas.cost (compare_bool x y)
+        compare_bool x y
       
       | (Script_typed_ir.String_key _, _ as x, _ as y) =>
         let '[x, y] := obj_magic [string ** string] [x, y] in
-        obj_magic Alpha_context.Gas.cost (compare_string x y)
+        compare_string x y
       
       | (Script_typed_ir.Bytes_key _, _ as x, _ as y) =>
         let '[x, y] := obj_magic [MBytes.t ** MBytes.t] [x, y] in
-        obj_magic Alpha_context.Gas.cost (compare_bytes x y)
+        compare_bytes x y
       
       | (Script_typed_ir.Mutez_key _, x, y) =>
         let '[x, y] := obj_magic [a ** a] [x, y] in
-        obj_magic Alpha_context.Gas.cost (compare_tez x y)
+        compare_tez x y
       
       | (Script_typed_ir.Int_key _, _ as x, _ as y) =>
         let '[x, y] :=
           obj_magic [Script_int_repr.num ** Script_int_repr.num] [x, y] in
-        obj_magic Alpha_context.Gas.cost (compare_zint x y)
+        compare_zint x y
       
       | (Script_typed_ir.Nat_key _, _ as x, _ as y) =>
         let '[x, y] :=
           obj_magic [Script_int_repr.num ** Script_int_repr.num] [x, y] in
-        obj_magic Alpha_context.Gas.cost (compare_zint x y)
+        compare_zint x y
       
       | (Script_typed_ir.Key_hash_key _, x, y) =>
         let '[x, y] := obj_magic [a ** a] [x, y] in
-        obj_magic Alpha_context.Gas.cost (compare_key_hash x y)
+        compare_key_hash x y
       
       | (Script_typed_ir.Timestamp_key _, _ as x, _ as y) =>
         let '[x, y] :=
           obj_magic
             [Alpha_context.Script_timestamp.t **
               Alpha_context.Script_timestamp.t] [x, y] in
-        obj_magic Alpha_context.Gas.cost (compare_timestamp x y)
+        compare_timestamp x y
       
       | (Script_typed_ir.Address_key _, x, y) =>
         let '[x, y] := obj_magic [a ** a] [x, y] in
-        obj_magic Alpha_context.Gas.cost (compare_address x y)
+        compare_address x y
       
       | (Script_typed_ir.Pair_key (tl, _) (tr, _) _, _ as x, _ as y) =>
         let 'existT _ [__0, __1] [tl, tr, x, y] :=
@@ -629,10 +628,9 @@ Module Cost_of.
               [Script_typed_ir.comparable_struct **
                 Script_typed_ir.comparable_struct ** __0 * __1 ** __0 * __1])
             [tl, tr, x, y] in
-        obj_magic Alpha_context.Gas.cost
-        (let '(xl, xr) := x in
+        let '(xl, xr) := x in
         let '(yl, yr) := y in
-        Alpha_context.Gas.op_plusat (compare tl xl yl) (compare tr xr yr))
+        Alpha_context.Gas.op_plusat (compare tl xl yl) (compare tr xr yr)
       end.
   End Interpreter.
   
