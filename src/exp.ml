@@ -1140,7 +1140,8 @@ let rec to_coq (paren : bool) (e : t) : SmartPrint.t =
       begin match typ_args with
       | [] -> empty
       | _ -> parens (separate space (List.map Name.to_coq typ_args) ^^ !^ ":" ^^ Pp.set)
-      end ^^ !^ ":=" ^^ Type.to_coq None None typ ^^ !^ "in" ^^
+      end ^^ !^ ":" ^^ Pp.set ^^ !^ ":=" ^^
+      Type.to_coq None None typ ^^ !^ "in" ^^
       newline ^^ to_coq false e
     )
   | LetModuleUnpack (x, path_name, e2) ->
