@@ -28,7 +28,7 @@ Fixpoint proj_int (e : expr) {struct e} : Z :=
   match e with
   | Int n => n
   | Sum e1 e2 => Z.add (proj_int e1) (proj_int e2)
-  | _ => 0
+  | _ => unreachable_gadt_branch
   end.
 
 Inductive one_case : Set :=
@@ -38,5 +38,5 @@ Inductive one_case : Set :=
 Definition x : Z :=
   match SingleCase with
   | SingleCase => 0
-  | _ => 1
+  | _ => unreachable_gadt_branch
   end.

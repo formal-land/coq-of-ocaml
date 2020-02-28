@@ -40,7 +40,7 @@ type t =
     (** The definition of a type. It is used to represent module values. *)
   | LetModuleUnpack of Name.t * PathName.t * t
     (** Open a first-class module. *)
-  | Match of t * (Pattern.t * match_existential_cast option * t) list * t option * bool
+  | Match of t * (Pattern.t * match_existential_cast option * t) list * bool
     (** Match an expression to a list of patterns. *)
   | Record of (PathName.t * t) list
     (** Construct a record giving an expression for each field. *)
@@ -447,7 +447,6 @@ and of_match
             Variable (MixedPath.PathName PathName.false_value, [])
           )
         ],
-        None,
         false
       )
     ) in
@@ -472,33 +471,11 @@ and of_match
           ) in
       (p, existential_cast, rhs)
     ) in
-  (exception_cases |> Monad.List.filter_map (fun {c_lhs; c_guard; c_rhs} ->
+  (exception_cases |> Monad.List.iter (fun { c_lhs; _ } ->
     set_loc (Loc.of_location c_lhs.pat_loc) (
-    match c_guard with
-    | Some guard_exp ->
-      of_expression typ_vars guard_exp >>= fun guard_exp ->
-      begin match guard_exp with
-      | Constructor ({ PathName.path = []; base = Name.Make "false" }, _, []) ->
-        of_expression typ_vars c_rhs >>= fun c_rhs ->
-        return (Some c_rhs)
-      | _ ->
-        raise
-          None
-          Unexpected
-          "Expected `false` as guard on the exception case to represent the default GADT case"
-      end
-    | None ->
-      raise None NotSupported (
-        "Pattern-matching on exceptions not supported\n\n" ^
-        "Only the special case `| exception _ when false -> ...` is supported for default value of GADT pattern-matching"
-      )
-    )
-  )) >>= fun default_values ->
-  let default_value =
-    match default_values with
-    | [default_value] -> Some default_value
-    | _ -> None in
-  return (Match (e, cases, default_value, is_with_default_case))
+    raise () NotSupported "We do not support pattern-matching on exceptions")
+  )) >>= fun () ->
+  return (Match (e, cases, is_with_default_case))
 
 (** Generate a variable and a "match" on this variable from a list of
     patterns. *)
@@ -598,8 +575,8 @@ and of_let
       of_expression typ_vars e1 >>= fun e1 ->
       begin match p with
       | Some (Pattern.Variable x) -> return (LetVar (x, [], e1, e2))
-      | Some p -> return (Match (e1, [p, None, e2], None, false))
-      | None -> return (Match (e1, [], None, false))
+      | Some p -> return (Match (e1, [p, None, e2], false))
+      | None -> return (Match (e1, [], false))
       end
     | _ ->
       import_let_fun typ_vars false is_rec cases >>= fun def ->
@@ -1153,11 +1130,11 @@ let rec to_coq (paren : bool) (e : t) : SmartPrint.t =
       PathName.to_coq path_name ^^ !^ "in" ^^ newline ^^
       to_coq false e2
     )
-  | Match (e, cases, default_value, is_with_default_case) ->
+  | Match (e, cases, is_with_default_case) ->
     let single_let =
       to_coq_try_single_let_pattern
         paren "let"
-        e cases default_value is_with_default_case in
+        e cases is_with_default_case in
     begin match single_let with
     | Some single_let -> single_let
     | None ->
@@ -1182,13 +1159,6 @@ let rec to_coq (paren : bool) (e : t) : SmartPrint.t =
             to_coq_cast_existentials existential_cast e ^^ newline
           )
         )) ^^
-        (match default_value with
-        | None -> empty
-        | Some default_value ->
-          nest (
-            !^ "|" ^^ !^ "_" ^^ !^ "=>" ^^ to_coq false default_value ^^ newline
-          )
-        ) ^^
         (if is_with_default_case then
           !^ "|" ^^ !^ "_" ^^ !^ "=>" ^^ !^ "unreachable_gadt_branch" ^^ newline
         else
@@ -1270,11 +1240,10 @@ and to_coq_try_single_let_pattern
   (let_symbol : string)
   (e : t)
   (cases : (Pattern.t * match_existential_cast option * t) list)
-  (default_value : t option)
   (is_with_default_case : bool)
   : SmartPrint.t option =
-  match (cases, default_value, is_with_default_case) with
-  | ([(pattern, existential_cast, e2)], None, false)
+  match (cases, is_with_default_case) with
+  | ([(pattern, existential_cast, e2)], false)
     when not (Pattern.has_or_patterns pattern) ->
     Some (Pp.parens paren @@ nest (
       !^ let_symbol ^^ !^ "'" ^-^ Pattern.to_coq false pattern ^-^ !^ " :=" ^^
