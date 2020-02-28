@@ -35,9 +35,9 @@ Module S.
 End S.
 
 Parameter Make :
-  forall (P : {t : _ & COMPARABLE.signature t}),
+  forall (P : {t : Set & COMPARABLE.signature t}),
     {_ : unit & S.signature (|P|).(COMPARABLE.t)}.
 
 Parameter Char : {_ : unit & S.signature ascii}.
 
-Parameter Abstract : {t : _ & S.signature t}.
+Parameter Abstract : {t : Set & S.signature t}.

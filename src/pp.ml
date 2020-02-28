@@ -41,3 +41,8 @@ let to_string (doc : SmartPrint.t) : string =
 
 let set : SmartPrint.t =
   !^ "Set"
+
+let rec typ_arity (arity : int) : SmartPrint.t =
+  match arity with
+  | 0 -> set
+  | arity -> set ^^ !^ "->" ^^ (typ_arity (arity - 1))

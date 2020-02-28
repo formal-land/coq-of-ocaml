@@ -9,10 +9,14 @@ type t =
   | Sum of (string * t) list
   | Tuple of t list
   | Apply of MixedPath.t * t list
-  | Package of bool * PathName.t * t option Tree.t
+  | Package of bool * PathName.t * arity_or_typ Tree.t
   | ForallModule of Name.t * t * t
   | FunTyps of Name.t list * t
   | Error of string
+
+and arity_or_typ =
+  | Arity of int
+  | Typ of t
 
 let type_exprs_of_row_field (row_field : Types.row_field)
   : Types.type_expr list =
@@ -253,9 +257,9 @@ let rec of_typ_expr
         module_typ >>= fun signature_typ_params ->
       let typ_params = List.fold_left
         (fun typ_values (path_name, typ) ->
-          Tree.map_at typ_values path_name (fun _ -> Some typ)
+          Tree.map_at typ_values path_name (fun _ -> Typ typ)
         )
-        (signature_typ_params |> Tree.map (fun _ -> None))
+        (signature_typ_params |> Tree.map (fun arity -> Arity arity))
         typ_substitutions in
       return (Package (true, path_name, typ_params), typ_vars, new_typ_vars)
 
@@ -346,8 +350,8 @@ let rec typ_args (typ : t) : Name.Set.t =
     Tree.flatten typ_params |>
     Util.List.filter_map (fun (_, typ) ->
       match typ with
-      | None -> None
-      | Some typ -> Some (typ_args typ)
+      | Arity _ -> None
+      | Typ typ -> Some (typ_args typ)
     ) |>
     List.fold_left Name.Set.union Name.Set.empty
   | ForallModule (name, param, result) ->
@@ -473,24 +477,31 @@ let rec to_coq (subst : Subst.t option) (context : Context.t option) (typ : t)
   | Package (is_in_exp, path_name, typ_params) ->
     let existential_typs =
       Tree.flatten typ_params |>
-      List.filter (fun (_, typ) -> typ = None) |>
+      Util.List.filter_map (function
+        | (path_name, Arity arity) -> Some (path_name, arity)
+        | _ -> None
+      ) in
+    let existential_typs_pattern =
+      existential_typs |>
       List.map (fun (path_name, _) ->
         Name.to_coq (ModuleTypParams.get_typ_param_name path_name)
-      ) in
+      ) |>
+      Pp.primitive_tuple_pattern in
+    let existential_typs_typ =
+      existential_typs |>
+      List.map (fun (_, arity) -> Pp.typ_arity arity) |>
+      Pp.primitive_tuple_type in
     nest (braces (
-      Pp.primitive_tuple_pattern existential_typs ^^ !^ ":" ^^
-      begin match existential_typs with
-      | [] -> !^ "unit"
-      | _ :: _ -> !^ "_"
-      end ^^
+      existential_typs_pattern ^^ !^ ":" ^^ existential_typs_typ ^^
       (if is_in_exp then !^ "@" else !^ "&") ^^
       nest (
         separate space (
           nest (PathName.to_coq path_name ^-^ !^ "." ^-^ !^ "signature") ::
           (Tree.flatten typ_params |> List.map (fun (path_name, typ) ->
             match typ with
-            | None -> Name.to_coq (ModuleTypParams.get_typ_param_name path_name)
-            | Some typ -> to_coq subst (Some Context.Apply) typ
+            | Arity _ ->
+              Name.to_coq (ModuleTypParams.get_typ_param_name path_name)
+            | Typ typ -> to_coq subst (Some Context.Apply) typ
           ))
         )
       )

@@ -1352,11 +1352,6 @@ and to_coq_cast_existentials
       )
     end
 
-and to_coq_arity (arity : int) : SmartPrint.t =
-  match arity with
-  | 0 -> !^ "Set"
-  | arity -> !^ "Set" ^^ !^ "->" ^^ (to_coq_arity (arity - 1))
-
 and to_coq_exist_t
   (paren : bool)
   (module_typ_params_arity : int Tree.t)
@@ -1368,13 +1363,7 @@ and to_coq_exist_t
     !^ "existT" ^^
     parens (nest (
       !^ "A :=" ^^
-      match arities with
-      | [] -> !^ "unit"
-      | [arity] -> to_coq_arity arity
-      | _ :: _ :: _ ->
-        brakets (separate (space ^^ !^ "**" ^^ space) (arities |> List.map (fun arity ->
-          nest (to_coq_arity arity)
-        )))
+      Pp.primitive_tuple_type (List.map Pp.typ_arity arities)
     )) ^^
     begin match nb_of_existential_variables with
     | 0 -> !^ "(fun _ => _)"

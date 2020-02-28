@@ -4,7 +4,7 @@ open Monad.Notations
 type t =
   | Error of string
   | Functor of Name.t * t * t
-  | With of PathName.t * Type.t option Tree.t
+  | With of PathName.t * Type.arity_or_typ Tree.t
 
 let rec get_module_typ_desc_path
   (module_typ_desc : Typedtree.module_type_desc) : Path.t option =
@@ -52,10 +52,10 @@ let of_ocaml_module_with_substitutions
   let typ_values = List.fold_left
     (fun typ_values (path_name, typ_params, typ) ->
       Tree.map_at typ_values path_name (fun _ ->
-        Some (Type.FunTyps (typ_params, typ))
+        Type.Typ (Type.FunTyps (typ_params, typ))
       )
     )
-    (signature_typ_params |> Tree.map (fun _ -> None))
+    (signature_typ_params |> Tree.map (fun arity -> Type.Arity arity))
     typ_substitutions in
   return (With (signature_path_name, typ_values))
 
@@ -110,10 +110,10 @@ let to_coq (typ_variables_prefix : Name.t) (module_typ : t) : SmartPrint.t =
   | With (path_name, typ_values) ->
     nest (
       nest (PathName.to_coq path_name ^-^ !^ "." ^-^ !^ "signature") ^^
-      separate space (Tree.flatten typ_values |> List.map (fun (path_name, defined_or_free) ->
-        match defined_or_free with
-        | Some typ -> Type.to_coq None (Some Type.Context.Apply) typ
-        | None ->
+      separate space (Tree.flatten typ_values |> List.map (fun (path_name, arity_or_typ) ->
+        match arity_or_typ with
+        | Type.Typ typ -> Type.to_coq None (Some Type.Context.Apply) typ
+        | Arity _ ->
           Name.to_coq (
             ModuleTypParams.get_typ_param_name
               (PathName.add_prefix typ_variables_prefix path_name)

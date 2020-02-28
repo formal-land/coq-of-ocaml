@@ -34,7 +34,7 @@ Definition M :=
     |}.
 
 Definition F :=
-  fun (X : {t : _ & Source.signature t}) =>
+  fun (X : {t : Set & Source.signature t}) =>
     ((let t := (|X|).(Source.t) in
     let y := (|X|).(Source.x) in
     existT (A := unit) (fun _ => _) tt
@@ -43,7 +43,7 @@ Definition F :=
       |}) : {_ : unit & Target.signature (|X|).(Source.t)}).
 
 Definition FSubst :=
-  fun (X : {t : _ & Source.signature t}) =>
+  fun (X : {t : Set & Source.signature t}) =>
     ((let y := (|X|).(Source.x) in
     existT (A := unit) (fun _ => _) tt
       {|
@@ -58,4 +58,4 @@ Definition Sum :=
       existT (A := Set) _ _
         {|
           Target.y := y
-        |}) : {t : _ & Target.signature t}).
+        |}) : {t : Set & Target.signature t}).

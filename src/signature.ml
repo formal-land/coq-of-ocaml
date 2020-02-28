@@ -48,13 +48,15 @@ let items_of_types_signature (signature : Types.signature) : item list Monad.t =
           PathName.of_path_with_convert false signature_path in
         let mapper ident { Types.type_manifest; type_params; _ } =
           let name = Name.of_ident false ident in
-          match type_manifest with
-          | None -> return (Some (Tree.Item (name, None)))
+          begin match type_manifest with
+          | None -> return (Type.Arity (List.length type_params))
           | Some type_manifest ->
             (type_params |> Monad.List.map Type.of_type_expr_variable) >>= fun typ_args ->
             Type.of_type_expr_without_free_vars type_manifest >>= fun typ ->
             let typ = Type.FunTyps (typ_args, typ) in
-            return (Some (Tree.Item (name, Some typ))) in
+            return (Type.Typ typ)
+          end >>= fun arity_or_typ ->
+          return (Some (Tree.Item (name, arity_or_typ))) in
         ModuleTypParams.get_module_typ_typ_params
           mapper md_type >>= fun typ_params ->
         raise

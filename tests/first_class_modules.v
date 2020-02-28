@@ -84,7 +84,8 @@ Module Boxed_set.
   Arguments signature : clear implicits.
 End Boxed_set.
 
-Definition set (elt : Set) : Set := {OPS_t : _ @ Boxed_set.signature elt OPS_t}.
+Definition set (elt : Set) : Set :=
+  {OPS_t : Set @ Boxed_set.signature elt OPS_t}.
 
 Module IncludedFoo.
   Record signature {bar : Set} : Set := {
@@ -108,7 +109,8 @@ Module Triple.
   Arguments signature : clear implicits.
 End Triple.
 
-Definition tripe : {'[a, b, c, bar] : _ @ Triple.signature a b c bar} :=
+Definition tripe
+  : {'[a, b, c, bar] : [Set ** Set ** Set ** Set] @ Triple.signature a b c bar} :=
   (pack
     (let a := Z in
     let b := bool in
