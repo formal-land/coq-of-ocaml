@@ -65,6 +65,7 @@ let escape_reserved_word (is_value : bool) (s : string) : string =
   | "mod" -> "__mod"
   | "nativeint" -> escape_if_value s
   | "option" -> escape_if_value s
+  | "pack" -> "__pack"
   | "ref" -> escape_if_value s
   | "result" -> escape_if_value s
   | "return" -> "__return"
