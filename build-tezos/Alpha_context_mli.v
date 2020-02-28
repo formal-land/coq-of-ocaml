@@ -49,7 +49,7 @@ Definition public_key_hash : Set :=
 Definition signature : Set := Signature.t.
 
 Module Tez.
-  Parameter Included_BASIC_DATA : {t : _ & BASIC_DATA.signature t}.
+  Parameter Included_BASIC_DATA : {t : Set & BASIC_DATA.signature t}.
   
   Definition t := (|Included_BASIC_DATA|).(BASIC_DATA.t).
   
@@ -117,7 +117,7 @@ Module Tez.
 End Tez.
 
 Module Period.
-  Parameter Included_BASIC_DATA : {t : _ & BASIC_DATA.signature t}.
+  Parameter Included_BASIC_DATA : {t : Set & BASIC_DATA.signature t}.
   
   Definition t := (|Included_BASIC_DATA|).(BASIC_DATA.t).
   
@@ -231,7 +231,7 @@ Module Timestamp.
 End Timestamp.
 
 Module Raw_level.
-  Parameter Included_BASIC_DATA : {t : _ & BASIC_DATA.signature t}.
+  Parameter Included_BASIC_DATA : {t : Set & BASIC_DATA.signature t}.
   
   Definition t := (|Included_BASIC_DATA|).(BASIC_DATA.t).
   
@@ -287,7 +287,7 @@ Module Raw_level.
 End Raw_level.
 
 Module Cycle.
-  Parameter Included_BASIC_DATA : {t : _ & BASIC_DATA.signature t}.
+  Parameter Included_BASIC_DATA : {t : Set & BASIC_DATA.signature t}.
   
   Definition t := (|Included_BASIC_DATA|).(BASIC_DATA.t).
   
@@ -341,7 +341,7 @@ Module Cycle.
   
   Parameter to_int32 : cycle -> int32.
   
-  Parameter Map : {t : _ & S.MAP.signature cycle t}.
+  Parameter Map : {t : Set -> Set & S.MAP.signature cycle t}.
 End Cycle.
 
 Module Gas.
@@ -1165,7 +1165,7 @@ Module Constants.
 End Constants.
 
 Module Voting_period.
-  Parameter Included_BASIC_DATA : {t : _ & BASIC_DATA.signature t}.
+  Parameter Included_BASIC_DATA : {t : Set & BASIC_DATA.signature t}.
   
   Definition t := (|Included_BASIC_DATA|).(BASIC_DATA.t).
   
@@ -1441,7 +1441,7 @@ Module Big_map.
 End Big_map.
 
 Module Contract.
-  Parameter Included_BASIC_DATA : {t : _ & BASIC_DATA.signature t}.
+  Parameter Included_BASIC_DATA : {t : Set & BASIC_DATA.signature t}.
   
   Definition t := (|Included_BASIC_DATA|).(BASIC_DATA.t).
   

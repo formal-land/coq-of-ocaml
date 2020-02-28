@@ -71,7 +71,8 @@ Module Boxed_set.
   Arguments signature : clear implicits.
 End Boxed_set.
 
-Definition set (elt : Set) : Set := {OPS_t : _ @ Boxed_set.signature elt OPS_t}.
+Definition set (elt : Set) : Set :=
+  {OPS_t : Set @ Boxed_set.signature elt OPS_t}.
 
 Module Boxed_map.
   Record signature {key value : Set} {OPS_t : Set -> Set} : Set := {
@@ -85,7 +86,7 @@ Module Boxed_map.
 End Boxed_map.
 
 Definition map (key value : Set) : Set :=
-  {OPS_t : _ @ Boxed_map.signature key value OPS_t}.
+  {OPS_t : Set -> Set @ Boxed_map.signature key value OPS_t}.
 
 Definition operation : Set :=
   Alpha_context.packed_internal_operation *

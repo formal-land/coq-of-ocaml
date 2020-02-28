@@ -375,4 +375,4 @@ Definition Make :=
         S.pp := pp;
         S.of_string := of_string;
         S.to_string := to_string
-      |}) : {qty : _ & S.signature qty}).
+      |}) : {qty : Set & S.signature qty}).

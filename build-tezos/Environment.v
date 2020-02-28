@@ -920,7 +920,7 @@ Module Compare.
   End S.
   
   Parameter Make :
-    forall (P : {t : _ & COMPARABLE.signature t}),
+    forall (P : {t : Set & COMPARABLE.signature t}),
       {_ : unit & S.signature (|P|).(COMPARABLE.t)}.
   
   Parameter Char : {_ : unit & S.signature ascii}.
@@ -944,11 +944,11 @@ Module Compare.
   Parameter Z : {_ : unit & S.signature Z.t}.
   
   Parameter List :
-    forall (P : {t : _ & COMPARABLE.signature t}),
+    forall (P : {t : Set & COMPARABLE.signature t}),
       {_ : unit & S.signature (list (|P|).(COMPARABLE.t))}.
   
   Parameter Option :
-    forall (P : {t : _ & COMPARABLE.signature t}),
+    forall (P : {t : Set & COMPARABLE.signature t}),
       {_ : unit & S.signature (option (|P|).(COMPARABLE.t))}.
 End Compare.
 
@@ -2675,14 +2675,14 @@ End S.
 
 Module __Set.
   Parameter Make :
-    forall (Ord : {t : _ & Compare.COMPARABLE.signature t}),
-      {t : _ & S.SET.signature (|Ord|).(Compare.COMPARABLE.t) t}.
+    forall (Ord : {t : Set & Compare.COMPARABLE.signature t}),
+      {t : Set & S.SET.signature (|Ord|).(Compare.COMPARABLE.t) t}.
 End __Set.
 
 Module Map.
   Parameter Make :
-    forall (Ord : {t : _ & Compare.COMPARABLE.signature t}),
-      {t : _ & S.MAP.signature (|Ord|).(Compare.COMPARABLE.t) t}.
+    forall (Ord : {t : Set & Compare.COMPARABLE.signature t}),
+      {t : Set -> Set & S.MAP.signature (|Ord|).(Compare.COMPARABLE.t) t}.
 End Map.
 
 Module Blake2B.
@@ -2705,7 +2705,7 @@ Module Blake2B.
   
   Parameter Make_minimal :
     forall (Name : {_ : unit & Name.signature}),
-      {t : _ & S.MINIMAL_HASH.signature t}.
+      {t : Set & S.MINIMAL_HASH.signature t}.
   
   Module SRegister.
     Record signature : Set := {
@@ -2718,29 +2718,31 @@ Module Blake2B.
   Parameter Make :
     forall (Register : {_ : unit & SRegister.signature}),
       (forall (Name : {_ : unit & PrefixedName.signature}),
-        {'[t, __Set_t, Map_t] : _ & S.HASH.signature t __Set_t Map_t}).
+        {'[t, __Set_t, Map_t] : [Set ** Set ** Set -> Set] &
+          S.HASH.signature t __Set_t Map_t}).
 End Blake2B.
 
 Parameter Ed25519 :
   {'[Public_key_hash_t, Public_key_hash___Set_t, Public_key_hash_Map_t,
-    Public_key_t, t] : _ &
+    Public_key_t, t] : [Set ** Set ** Set -> Set ** Set ** Set] &
     S.SIGNATURE.signature Public_key_hash_t Public_key_hash___Set_t
       Public_key_hash_Map_t Public_key_t t MBytes.t}.
 
 Parameter Secp256k1 :
   {'[Public_key_hash_t, Public_key_hash___Set_t, Public_key_hash_Map_t,
-    Public_key_t, t] : _ &
+    Public_key_t, t] : [Set ** Set ** Set -> Set ** Set ** Set] &
     S.SIGNATURE.signature Public_key_hash_t Public_key_hash___Set_t
       Public_key_hash_Map_t Public_key_t t MBytes.t}.
 
 Parameter P256 :
   {'[Public_key_hash_t, Public_key_hash___Set_t, Public_key_hash_Map_t,
-    Public_key_t, t] : _ &
+    Public_key_t, t] : [Set ** Set ** Set -> Set ** Set ** Set] &
     S.SIGNATURE.signature Public_key_hash_t Public_key_hash___Set_t
       Public_key_hash_Map_t Public_key_t t MBytes.t}.
 
 Parameter Chain_id :
-  {'[t, __Set_t, Map_t] : _ & S.HASH.signature t __Set_t Map_t}.
+  {'[t, __Set_t, Map_t] : [Set ** Set ** Set -> Set] &
+    S.HASH.signature t __Set_t Map_t}.
 
 Module Signature.
   Parameter signature_module_tag : unit.
@@ -2770,7 +2772,8 @@ Module Signature.
   | Custom : MBytes.t -> watermark.
   
   Parameter Included_SIGNATURE :
-    {'[Public_key_hash___Set_t, Public_key_hash_Map_t, t] : _ &
+    {'[Public_key_hash___Set_t, Public_key_hash_Map_t, t] :
+      [Set ** Set -> Set ** Set] &
       S.SIGNATURE.signature public_key Public_key_hash___Set_t
         Public_key_hash_Map_t public_key t watermark}.
   
@@ -2853,25 +2856,29 @@ Module Signature.
 End Signature.
 
 Parameter Block_hash :
-  {'[t, __Set_t, Map_t] : _ & S.HASH.signature t __Set_t Map_t}.
+  {'[t, __Set_t, Map_t] : [Set ** Set ** Set -> Set] &
+    S.HASH.signature t __Set_t Map_t}.
 
 Parameter Operation_hash :
-  {'[t, __Set_t, Map_t] : _ & S.HASH.signature t __Set_t Map_t}.
+  {'[t, __Set_t, Map_t] : [Set ** Set ** Set -> Set] &
+    S.HASH.signature t __Set_t Map_t}.
 
 Parameter Operation_list_hash :
-  {'[t, __Set_t, Map_t, path] : _ &
+  {'[t, __Set_t, Map_t, path] : [Set ** Set ** Set -> Set ** Set] &
     S.MERKLE_TREE.signature (|Operation_hash|).(S.HASH.t) t __Set_t Map_t path}.
 
 Parameter Operation_list_list_hash :
-  {'[t, __Set_t, Map_t, path] : _ &
+  {'[t, __Set_t, Map_t, path] : [Set ** Set ** Set -> Set ** Set] &
     S.MERKLE_TREE.signature (|Operation_list_hash|).(S.MERKLE_TREE.t) t __Set_t
       Map_t path}.
 
 Parameter Protocol_hash :
-  {'[t, __Set_t, Map_t] : _ & S.HASH.signature t __Set_t Map_t}.
+  {'[t, __Set_t, Map_t] : [Set ** Set ** Set -> Set] &
+    S.HASH.signature t __Set_t Map_t}.
 
 Parameter Context_hash :
-  {'[t, __Set_t, Map_t] : _ & S.HASH.signature t __Set_t Map_t}.
+  {'[t, __Set_t, Map_t] : [Set ** Set ** Set -> Set] &
+    S.HASH.signature t __Set_t Map_t}.
 
 Module Micheline.
   Definition annot : Set := list string.

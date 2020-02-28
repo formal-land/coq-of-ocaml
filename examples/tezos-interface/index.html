@@ -60,7 +60,7 @@
 opam pin add https://github.com/clarus/coq-of-ocaml.git#master</code></pre>
     <ul>
       <li>OCaml size: 6154 lines</li>
-      <li>Coq size: 3554 lines (-43% compared to&nbsp;OCaml)</li>
+      <li>Coq size: 3561 lines (-43% compared to&nbsp;OCaml)</li>
       <li>Warnings from coq-of-ocaml: 265</li>
     </ul>
     
@@ -104,7 +104,7 @@ opam pin add https://github.com/clarus/coq-of-ocaml.git#master</code></pre>
     <h3>Environment_mli</h3>
     <ul>
       <li>OCaml size: 6154 lines</li>
-      <li>Coq size: 3554 lines (-43% compared to&nbsp;OCaml)</li>
+      <li>Coq size: 3561 lines (-43% compared to&nbsp;OCaml)</li>
     </ul>
   </div>
   <div class="col-md-6">
@@ -7973,7 +7973,7 @@ Module Compare.
   End S.
   
   Parameter Make :
-    forall (P : {t : _ &amp; COMPARABLE.signature t}),
+    forall (P : {t : Set &amp; COMPARABLE.signature t}),
       {_ : unit &amp; S.signature (|P|).(COMPARABLE.t)}.
   
   Parameter Char : {_ : unit &amp; S.signature ascii}.
@@ -7997,11 +7997,11 @@ Module Compare.
   Parameter Z : {_ : unit &amp; S.signature Z.t}.
   
   Parameter List :
-    forall (P : {t : _ &amp; COMPARABLE.signature t}),
+    forall (P : {t : Set &amp; COMPARABLE.signature t}),
       {_ : unit &amp; S.signature (list (|P|).(COMPARABLE.t))}.
   
   Parameter Option :
-    forall (P : {t : _ &amp; COMPARABLE.signature t}),
+    forall (P : {t : Set &amp; COMPARABLE.signature t}),
       {_ : unit &amp; S.signature (option (|P|).(COMPARABLE.t))}.
 End Compare.
 
@@ -9728,14 +9728,14 @@ End S.
 
 Module __Set.
   Parameter Make :
-    forall (Ord : {t : _ &amp; Compare.COMPARABLE.signature t}),
-      {t : _ &amp; S.SET.signature (|Ord|).(Compare.COMPARABLE.t) t}.
+    forall (Ord : {t : Set &amp; Compare.COMPARABLE.signature t}),
+      {t : Set &amp; S.SET.signature (|Ord|).(Compare.COMPARABLE.t) t}.
 End __Set.
 
 Module Map.
   Parameter Make :
-    forall (Ord : {t : _ &amp; Compare.COMPARABLE.signature t}),
-      {t : _ &amp; S.MAP.signature (|Ord|).(Compare.COMPARABLE.t) t}.
+    forall (Ord : {t : Set &amp; Compare.COMPARABLE.signature t}),
+      {t : Set -&gt; Set &amp; S.MAP.signature (|Ord|).(Compare.COMPARABLE.t) t}.
 End Map.
 
 Module Blake2B.
@@ -9758,7 +9758,7 @@ Module Blake2B.
   
   Parameter Make_minimal :
     forall (Name : {_ : unit &amp; Name.signature}),
-      {t : _ &amp; S.MINIMAL_HASH.signature t}.
+      {t : Set &amp; S.MINIMAL_HASH.signature t}.
   
   Module SRegister.
     Record signature : Set := {
@@ -9771,29 +9771,31 @@ Module Blake2B.
   Parameter Make :
     forall (Register : {_ : unit &amp; SRegister.signature}),
       (forall (Name : {_ : unit &amp; PrefixedName.signature}),
-        {'[t, __Set_t, Map_t] : _ &amp; S.HASH.signature t __Set_t Map_t}).
+        {'[t, __Set_t, Map_t] : [Set ** Set ** Set -&gt; Set] &amp;
+          S.HASH.signature t __Set_t Map_t}).
 End Blake2B.
 
 Parameter Ed25519 :
   {'[Public_key_hash_t, Public_key_hash___Set_t, Public_key_hash_Map_t,
-    Public_key_t, t] : _ &amp;
+    Public_key_t, t] : [Set ** Set ** Set -&gt; Set ** Set ** Set] &amp;
     S.SIGNATURE.signature Public_key_hash_t Public_key_hash___Set_t
       Public_key_hash_Map_t Public_key_t t MBytes.t}.
 
 Parameter Secp256k1 :
   {'[Public_key_hash_t, Public_key_hash___Set_t, Public_key_hash_Map_t,
-    Public_key_t, t] : _ &amp;
+    Public_key_t, t] : [Set ** Set ** Set -&gt; Set ** Set ** Set] &amp;
     S.SIGNATURE.signature Public_key_hash_t Public_key_hash___Set_t
       Public_key_hash_Map_t Public_key_t t MBytes.t}.
 
 Parameter P256 :
   {'[Public_key_hash_t, Public_key_hash___Set_t, Public_key_hash_Map_t,
-    Public_key_t, t] : _ &amp;
+    Public_key_t, t] : [Set ** Set ** Set -&gt; Set ** Set ** Set] &amp;
     S.SIGNATURE.signature Public_key_hash_t Public_key_hash___Set_t
       Public_key_hash_Map_t Public_key_t t MBytes.t}.
 
 Parameter Chain_id :
-  {'[t, __Set_t, Map_t] : _ &amp; S.HASH.signature t __Set_t Map_t}.
+  {'[t, __Set_t, Map_t] : [Set ** Set ** Set -&gt; Set] &amp;
+    S.HASH.signature t __Set_t Map_t}.
 
 Module Signature.
   Parameter signature_module_tag : unit.
@@ -9823,7 +9825,8 @@ Module Signature.
   | Custom : MBytes.t -&gt; watermark.
   
   Parameter Included_SIGNATURE :
-    {'[Public_key_hash___Set_t, Public_key_hash_Map_t, t] : _ &amp;
+    {'[Public_key_hash___Set_t, Public_key_hash_Map_t, t] :
+      [Set ** Set -&gt; Set ** Set] &amp;
       S.SIGNATURE.signature public_key Public_key_hash___Set_t
         Public_key_hash_Map_t public_key t watermark}.
   
@@ -9906,25 +9909,29 @@ Module Signature.
 End Signature.
 
 Parameter Block_hash :
-  {'[t, __Set_t, Map_t] : _ &amp; S.HASH.signature t __Set_t Map_t}.
+  {'[t, __Set_t, Map_t] : [Set ** Set ** Set -&gt; Set] &amp;
+    S.HASH.signature t __Set_t Map_t}.
 
 Parameter Operation_hash :
-  {'[t, __Set_t, Map_t] : _ &amp; S.HASH.signature t __Set_t Map_t}.
+  {'[t, __Set_t, Map_t] : [Set ** Set ** Set -&gt; Set] &amp;
+    S.HASH.signature t __Set_t Map_t}.
 
 Parameter Operation_list_hash :
-  {'[t, __Set_t, Map_t, path] : _ &amp;
+  {'[t, __Set_t, Map_t, path] : [Set ** Set ** Set -&gt; Set ** Set] &amp;
     S.MERKLE_TREE.signature (|Operation_hash|).(S.HASH.t) t __Set_t Map_t path}.
 
 Parameter Operation_list_list_hash :
-  {'[t, __Set_t, Map_t, path] : _ &amp;
+  {'[t, __Set_t, Map_t, path] : [Set ** Set ** Set -&gt; Set ** Set] &amp;
     S.MERKLE_TREE.signature (|Operation_list_hash|).(S.MERKLE_TREE.t) t __Set_t
       Map_t path}.
 
 Parameter Protocol_hash :
-  {'[t, __Set_t, Map_t] : _ &amp; S.HASH.signature t __Set_t Map_t}.
+  {'[t, __Set_t, Map_t] : [Set ** Set ** Set -&gt; Set] &amp;
+    S.HASH.signature t __Set_t Map_t}.
 
 Parameter Context_hash :
-  {'[t, __Set_t, Map_t] : _ &amp; S.HASH.signature t __Set_t Map_t}.
+  {'[t, __Set_t, Map_t] : [Set ** Set ** Set -&gt; Set] &amp;
+    S.HASH.signature t __Set_t Map_t}.
 
 Module Micheline.
   Definition annot : Set := list string.

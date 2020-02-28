@@ -43,7 +43,7 @@ Module ENCODER.
 End ENCODER.
 
 Definition Make_encoder :=
-  fun (V : {t : _ & VALUE.signature t}) =>
+  fun (V : {t : Set & VALUE.signature t}) =>
     ((let of_bytes (__key_value : list string) (__b_value : MBytes.t)
       : Error_monad.tzresult (|V|).(Storage_sigs.VALUE.t) :=
       match
@@ -89,7 +89,7 @@ Definition map_key
 
 Definition Make_subcontext :=
   fun (R : {_ : unit & REGISTER.signature}) =>
-    fun (C : {t : _ & Raw_context.T.signature t}) =>
+    fun (C : {t : Set & Raw_context.T.signature t}) =>
       fun (N : {_ : unit & NAME.signature}) =>
         ((let t := (|C|).(Raw_context.T.t) in
         let context := t in
@@ -201,9 +201,9 @@ Definition Make_subcontext :=
 
 Definition Make_single_data_storage :=
   fun (R : {_ : unit & REGISTER.signature}) =>
-    fun (C : {t : _ & Raw_context.T.signature t}) =>
+    fun (C : {t : Set & Raw_context.T.signature t}) =>
       fun (N : {_ : unit & NAME.signature}) =>
-        fun (V : {t : _ & VALUE.signature t}) =>
+        fun (V : {t : Set & VALUE.signature t}) =>
           ((let tag_Single_data_storage := tt in
           let t := (|C|).(Raw_context.T.t) in
           let context := t in
@@ -317,8 +317,8 @@ Module INDEX.
 End INDEX.
 
 Definition Pair :=
-  fun (I1 : {'[t, ipath] : _ & INDEX.signature t ipath}) =>
-    fun (I2 : {'[t, ipath] : _ & INDEX.signature t ipath}) =>
+  fun (I1 : {'[t, ipath] : [Set ** Set -> Set] & INDEX.signature t ipath}) =>
+    fun (I2 : {'[t, ipath] : [Set ** Set -> Set] & INDEX.signature t ipath}) =>
       ((let t := (|I1|).(INDEX.t) * (|I2|).(INDEX.t) in
       let path_length :=
         Pervasives.op_plus (|I1|).(INDEX.path_length) (|I2|).(INDEX.path_length)
@@ -350,12 +350,12 @@ Definition Pair :=
           INDEX.args := args
         |})
         :
-          {ipath : _ &
+          {ipath : Set -> Set &
             INDEX.signature ((|I1|).(INDEX.t) * (|I2|).(INDEX.t)) ipath}).
 
 Definition Make_data_set_storage :=
-  fun (C : {t : _ & Raw_context.T.signature t}) =>
-    fun (I : {'[t, ipath] : _ & INDEX.signature t ipath}) =>
+  fun (C : {t : Set & Raw_context.T.signature t}) =>
+    fun (I : {'[t, ipath] : [Set ** Set -> Set] & INDEX.signature t ipath}) =>
       ((let t := (|C|).(Raw_context.T.t) in
       let context := t in
       let elt := (|I|).(INDEX.t) in
@@ -434,9 +434,9 @@ Definition Make_data_set_storage :=
             Data_set_storage.signature (|C|).(Raw_context.T.t) (|I|).(INDEX.t)}).
 
 Definition Make_indexed_data_storage :=
-  fun (C : {t : _ & Raw_context.T.signature t}) =>
-    fun (I : {'[t, ipath] : _ & INDEX.signature t ipath}) =>
-      fun (V : {t : _ & VALUE.signature t}) =>
+  fun (C : {t : Set & Raw_context.T.signature t}) =>
+    fun (I : {'[t, ipath] : [Set ** Set -> Set] & INDEX.signature t ipath}) =>
+      fun (V : {t : Set & VALUE.signature t}) =>
         ((let tag_Non_iterable_indexed_data_storage := tt in
         let t := (|C|).(Raw_context.T.t) in
         let context := t in
@@ -592,9 +592,9 @@ Definition Make_indexed_data_storage :=
                 (|I|).(INDEX.t) (|V|).(Storage_sigs.VALUE.t)}).
 
 Definition Make_indexed_carbonated_data_storage :=
-  fun (C : {t : _ & Raw_context.T.signature t}) =>
-    fun (I : {'[t, ipath] : _ & INDEX.signature t ipath}) =>
-      fun (V : {t : _ & VALUE.signature t}) =>
+  fun (C : {t : Set & Raw_context.T.signature t}) =>
+    fun (I : {'[t, ipath] : [Set ** Set -> Set] & INDEX.signature t ipath}) =>
+      fun (V : {t : Set & VALUE.signature t}) =>
         ((let tag_Non_iterable_indexed_carbonated_data_storage := tt in
         let t := (|C|).(Raw_context.T.t) in
         let context := t in
@@ -836,10 +836,12 @@ Definition Make_indexed_carbonated_data_storage :=
                 (|V|).(Storage_sigs.VALUE.t)}).
 
 Definition Make_indexed_data_snapshotable_storage :=
-  fun (C : {t : _ & Raw_context.T.signature t}) =>
-    fun (Snapshot_index : {'[t, ipath] : _ & INDEX.signature t ipath}) =>
-      fun (I : {'[t, ipath] : _ & INDEX.signature t ipath}) =>
-        fun (V : {t : _ & VALUE.signature t}) =>
+  fun (C : {t : Set & Raw_context.T.signature t}) =>
+    fun
+      (Snapshot_index :
+        {'[t, ipath] : [Set ** Set -> Set] & INDEX.signature t ipath}) =>
+      fun (I : {'[t, ipath] : [Set ** Set -> Set] & INDEX.signature t ipath}) =>
+        fun (V : {t : Set & VALUE.signature t}) =>
           ((let snapshot := (|Snapshot_index|).(INDEX.t) in
           let data_name := [ "current" ] in
           let snapshot_name := [ "snapshot" ] in
@@ -967,8 +969,8 @@ Definition Make_indexed_data_snapshotable_storage :=
                   (|C|).(Raw_context.T.t) (|V|).(Storage_sigs.VALUE.t)}).
 
 Definition Make_indexed_subcontext :=
-  fun (C : {t : _ & Raw_context.T.signature t}) =>
-    fun (I : {'[t, ipath] : _ & INDEX.signature t ipath}) =>
+  fun (C : {t : Set & Raw_context.T.signature t}) =>
+    fun (I : {'[t, ipath] : [Set ** Set -> Set] & INDEX.signature t ipath}) =>
       ((let t := (|C|).(Raw_context.T.t) in
       let context := t in
       let key := (|I|).(INDEX.t) in
@@ -1341,7 +1343,7 @@ Definition Make_indexed_subcontext :=
               |}) : {_ : unit & Data_set_storage.signature t key}) in
       let Make_map :=
         fun (N : {_ : unit & NAME.signature}) =>
-          fun (V : {t : _ & VALUE.signature t}) =>
+          fun (V : {t : Set & VALUE.signature t}) =>
             ((let tag_Non_iterable_indexed_data_storage := tt in
             let t := (|C|).(Raw_context.T.t) in
             let context := t in
@@ -1504,7 +1506,7 @@ Definition Make_indexed_subcontext :=
                     (|V|).(Storage_sigs.VALUE.t)}) in
       let Make_carbonated_map :=
         fun (N : {_ : unit & NAME.signature}) =>
-          fun (V : {t : _ & VALUE.signature t}) =>
+          fun (V : {t : Set & VALUE.signature t}) =>
             ((let tag_Non_iterable_indexed_carbonated_data_storage := tt in
             let t := (|C|).(Raw_context.T.t) in
             let context := t in
@@ -1747,11 +1749,13 @@ Module WRAPPER.
 End WRAPPER.
 
 Definition Wrap_indexed_data_storage :=
-  fun (C : {'[t, key, value] : _ & Indexed_data_storage.signature t key value})
-    =>
+  fun
+    (C :
+      {'[t, key, value] : [Set ** Set ** Set] &
+        Indexed_data_storage.signature t key value}) =>
     fun
       (K :
-        {t : _ &
+        {t : Set &
           WRAPPER.signature t (|C|).(Storage_sigs.Indexed_data_storage.key)}) =>
       ((let tag_Non_iterable_indexed_data_storage := tt in
       let t := (|C|).(Storage_sigs.Indexed_data_storage.t) in

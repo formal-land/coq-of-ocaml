@@ -235,11 +235,11 @@ Module Indexed_raw_context.
           {_ : unit & Data_set_storage.signature t key});
     Make_map :
       forall (N : {_ : unit & NAME.signature}),
-        (forall (V : {t : _ & VALUE.signature t}),
+        (forall (V : {t : Set & VALUE.signature t}),
           {_ : unit & Indexed_data_storage.signature t key (|V|).(VALUE.t)});
     Make_carbonated_map :
       forall (N : {_ : unit & NAME.signature}),
-        (forall (V : {t : _ & VALUE.signature t}),
+        (forall (V : {t : Set & VALUE.signature t}),
           {_ : unit &
             Non_iterable_indexed_carbonated_data_storage.signature t key
               (|V|).(VALUE.t)});

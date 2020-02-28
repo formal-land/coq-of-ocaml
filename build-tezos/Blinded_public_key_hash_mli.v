@@ -14,7 +14,8 @@ Import Environment.Notations.
 Require Tezos.Storage_description.
 
 Parameter Included_HASH :
-  {'[t, __Set_t, Map_t] : _ & S.HASH.signature t __Set_t Map_t}.
+  {'[t, __Set_t, Map_t] : [Set ** Set ** Set -> Set] &
+    S.HASH.signature t __Set_t Map_t}.
 
 Definition t := (|Included_HASH|).(S.HASH.t).
 

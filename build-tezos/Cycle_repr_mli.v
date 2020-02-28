@@ -59,6 +59,6 @@ Parameter to_int32 : cycle -> int32.
 
 Parameter of_int32_exn : int32 -> cycle.
 
-Parameter Map : {t : _ & S.MAP.signature cycle t}.
+Parameter Map : {t : Set -> Set & S.MAP.signature cycle t}.
 
 Parameter Index : {_ : unit & Storage_description.INDEX.signature cycle}.

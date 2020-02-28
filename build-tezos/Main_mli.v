@@ -118,7 +118,7 @@ End operation.
 Definition operation := operation.record.
 
 Parameter Included_PROTOCOL :
-  {'[block_header, operation] : _ &
+  {'[block_header, operation] : [Set ** Set] &
     Updater.PROTOCOL.signature Alpha_context.Block_header.protocol_data
       block_header Apply_results.block_metadata operation_data
       Apply_results.packed_operation_metadata operation validation_state}.

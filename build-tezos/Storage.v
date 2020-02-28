@@ -85,7 +85,7 @@ Definition Int_index :=
     |}.
 
 Definition Make_index :=
-  fun (H : {t : _ & Storage_description.INDEX.signature t}) =>
+  fun (H : {t : Set & Storage_description.INDEX.signature t}) =>
     ((let t := (|H|).(Storage_description.INDEX.t) in
     let path_length := (|H|).(Storage_description.INDEX.path_length) in
     let to_path := (|H|).(Storage_description.INDEX.to_path) in

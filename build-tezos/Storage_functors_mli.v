@@ -23,15 +23,15 @@ Parameter Ghost : {_ : unit & REGISTER.signature}.
 
 Parameter Make_subcontext :
   forall (R : {_ : unit & REGISTER.signature}),
-    (forall (C : {t : _ & Raw_context.T.signature t}),
+    (forall (C : {t : Set & Raw_context.T.signature t}),
       (forall (N : {_ : unit & NAME.signature}),
         {_ : unit & Raw_context.T.signature (|C|).(Raw_context.T.t)})).
 
 Parameter Make_single_data_storage :
   forall (R : {_ : unit & REGISTER.signature}),
-    (forall (C : {t : _ & Raw_context.T.signature t}),
+    (forall (C : {t : Set & Raw_context.T.signature t}),
       (forall (N : {_ : unit & NAME.signature}),
-        (forall (V : {t : _ & VALUE.signature t}),
+        (forall (V : {t : Set & VALUE.signature t}),
           {_ : unit &
             Single_data_storage.signature (|C|).(Raw_context.T.t)
               (|V|).(Storage_sigs.VALUE.t)}))).
@@ -49,45 +49,49 @@ Module INDEX.
 End INDEX.
 
 Parameter Pair :
-  forall (I1 : {'[t, ipath] : _ & INDEX.signature t ipath}),
-    (forall (I2 : {'[t, ipath] : _ & INDEX.signature t ipath}),
-      {ipath : _ & INDEX.signature ((|I1|).(INDEX.t) * (|I2|).(INDEX.t)) ipath}).
+  forall (I1 : {'[t, ipath] : [Set ** Set -> Set] & INDEX.signature t ipath}),
+    (forall (I2 :
+      {'[t, ipath] : [Set ** Set -> Set] & INDEX.signature t ipath}),
+      {ipath : Set -> Set &
+        INDEX.signature ((|I1|).(INDEX.t) * (|I2|).(INDEX.t)) ipath}).
 
 Parameter Make_data_set_storage :
-  forall (C : {t : _ & Raw_context.T.signature t}),
-    (forall (I : {'[t, ipath] : _ & INDEX.signature t ipath}),
+  forall (C : {t : Set & Raw_context.T.signature t}),
+    (forall (I : {'[t, ipath] : [Set ** Set -> Set] & INDEX.signature t ipath}),
       {_ : unit &
         Data_set_storage.signature (|C|).(Raw_context.T.t) (|I|).(INDEX.t)}).
 
 Parameter Make_indexed_data_storage :
-  forall (C : {t : _ & Raw_context.T.signature t}),
-    (forall (I : {'[t, ipath] : _ & INDEX.signature t ipath}),
-      (forall (V : {t : _ & VALUE.signature t}),
+  forall (C : {t : Set & Raw_context.T.signature t}),
+    (forall (I : {'[t, ipath] : [Set ** Set -> Set] & INDEX.signature t ipath}),
+      (forall (V : {t : Set & VALUE.signature t}),
         {_ : unit &
           Indexed_data_storage.signature (|C|).(Raw_context.T.t) (|I|).(INDEX.t)
             (|V|).(Storage_sigs.VALUE.t)})).
 
 Parameter Make_indexed_carbonated_data_storage :
-  forall (C : {t : _ & Raw_context.T.signature t}),
-    (forall (I : {'[t, ipath] : _ & INDEX.signature t ipath}),
-      (forall (V : {t : _ & VALUE.signature t}),
+  forall (C : {t : Set & Raw_context.T.signature t}),
+    (forall (I : {'[t, ipath] : [Set ** Set -> Set] & INDEX.signature t ipath}),
+      (forall (V : {t : Set & VALUE.signature t}),
         {_ : unit &
           Non_iterable_indexed_carbonated_data_storage.signature
             (|C|).(Raw_context.T.t) (|I|).(INDEX.t) (|V|).(Storage_sigs.VALUE.t)})).
 
 Parameter Make_indexed_data_snapshotable_storage :
-  forall (C : {t : _ & Raw_context.T.signature t}),
-    (forall (Snapshot : {'[t, ipath] : _ & INDEX.signature t ipath}),
-      (forall (I : {'[t, ipath] : _ & INDEX.signature t ipath}),
-        (forall (V : {t : _ & VALUE.signature t}),
+  forall (C : {t : Set & Raw_context.T.signature t}),
+    (forall (Snapshot :
+      {'[t, ipath] : [Set ** Set -> Set] & INDEX.signature t ipath}),
+      (forall (I :
+        {'[t, ipath] : [Set ** Set -> Set] & INDEX.signature t ipath}),
+        (forall (V : {t : Set & VALUE.signature t}),
           {_ : unit &
             Indexed_data_snapshotable_storage.signature (|Snapshot|).(INDEX.t)
               (|I|).(INDEX.t) (|C|).(Raw_context.T.t)
               (|V|).(Storage_sigs.VALUE.t)}))).
 
 Parameter Make_indexed_subcontext :
-  forall (C : {t : _ & Raw_context.T.signature t}),
-    (forall (I : {'[t, ipath] : _ & INDEX.signature t ipath}),
+  forall (C : {t : Set & Raw_context.T.signature t}),
+    (forall (I : {'[t, ipath] : [Set ** Set -> Set] & INDEX.signature t ipath}),
       {_ : unit &
         Indexed_raw_context.signature (|C|).(Raw_context.T.t) (|I|).(INDEX.t)
           (fun (a : Set) => (|I|).(INDEX.ipath) a)}).
@@ -104,9 +108,10 @@ End WRAPPER.
 
 Parameter Wrap_indexed_data_storage :
   forall (C :
-    {'[t, key, value] : _ & Indexed_data_storage.signature t key value}),
+    {'[t, key, value] : [Set ** Set ** Set] &
+      Indexed_data_storage.signature t key value}),
     (forall (K :
-      {t : _ &
+      {t : Set &
         WRAPPER.signature t (|C|).(Storage_sigs.Indexed_data_storage.key)}),
       {_ : unit &
         Indexed_data_storage.signature
