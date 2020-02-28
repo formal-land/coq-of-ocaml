@@ -239,257 +239,131 @@ Definition number_of_generated_growing_types
   (function_parameter : Script_typed_ir.instr) : int :=
   match function_parameter with
   | Script_typed_ir.Drop => 0
-  
   | Script_typed_ir.Dup => 0
-  
   | Script_typed_ir.Swap => 0
-  
   | Script_typed_ir.Const _ => 1
-  
   | Script_typed_ir.Cons_pair => 1
-  
   | Script_typed_ir.Car => 0
-  
   | Script_typed_ir.Cdr => 0
-  
   | Script_typed_ir.Cons_some => 1
-  
   | Script_typed_ir.Cons_none _ => 1
-  
   | Script_typed_ir.If_none _ _ => 0
-  
   | Script_typed_ir.Left => 0
-  
   | Script_typed_ir.Right => 0
-  
   | Script_typed_ir.If_left _ _ => 0
-  
   | Script_typed_ir.Cons_list => 1
-  
   | Script_typed_ir.Nil => 1
-  
   | Script_typed_ir.If_cons _ _ => 0
-  
   | Script_typed_ir.List_map _ => 1
-  
   | Script_typed_ir.List_size => 0
-  
   | Script_typed_ir.List_iter _ => 1
-  
   | Script_typed_ir.Empty_set _ => 1
-  
   | Script_typed_ir.Set_iter _ => 0
-  
   | Script_typed_ir.Set_mem => 0
-  
   | Script_typed_ir.Set_update => 0
-  
   | Script_typed_ir.Set_size => 0
-  
   | Script_typed_ir.Empty_map _ _ => 1
-  
   | Script_typed_ir.Map_map _ => 1
-  
   | Script_typed_ir.Map_iter _ => 1
-  
   | Script_typed_ir.Map_mem => 0
-  
   | Script_typed_ir.Map_get => 0
-  
   | Script_typed_ir.Map_update => 0
-  
   | Script_typed_ir.Map_size => 0
-  
   | Script_typed_ir.Empty_big_map _ _ => 1
-  
   | Script_typed_ir.Big_map_get => 0
-  
   | Script_typed_ir.Big_map_update => 0
-  
   | Script_typed_ir.Big_map_mem => 0
-  
   | Script_typed_ir.Concat_string => 0
-  
   | Script_typed_ir.Concat_string_pair => 0
-  
   | Script_typed_ir.Slice_string => 0
-  
   | Script_typed_ir.String_size => 0
-  
   | Script_typed_ir.Concat_bytes => 0
-  
   | Script_typed_ir.Concat_bytes_pair => 0
-  
   | Script_typed_ir.Slice_bytes => 0
-  
   | Script_typed_ir.Bytes_size => 0
-  
   | Script_typed_ir.Add_seconds_to_timestamp => 0
-  
   | Script_typed_ir.Add_timestamp_to_seconds => 0
-  
   | Script_typed_ir.Sub_timestamp_seconds => 0
-  
   | Script_typed_ir.Diff_timestamps => 0
-  
   | Script_typed_ir.Add_tez => 0
-  
   | Script_typed_ir.Sub_tez => 0
-  
   | Script_typed_ir.Mul_teznat => 0
-  
   | Script_typed_ir.Mul_nattez => 0
-  
   | Script_typed_ir.Ediv_teznat => 0
-  
   | Script_typed_ir.Ediv_tez => 0
-  
   | Script_typed_ir.Or => 0
-  
   | Script_typed_ir.And => 0
-  
   | Script_typed_ir.Xor => 0
-  
   | Script_typed_ir.Not => 0
-  
   | Script_typed_ir.Is_nat => 0
-  
   | Script_typed_ir.Neg_nat => 0
-  
   | Script_typed_ir.Neg_int => 0
-  
   | Script_typed_ir.Abs_int => 0
-  
   | Script_typed_ir.Int_nat => 0
-  
   | Script_typed_ir.Add_intint => 0
-  
   | Script_typed_ir.Add_intnat => 0
-  
   | Script_typed_ir.Add_natint => 0
-  
   | Script_typed_ir.Add_natnat => 0
-  
   | Script_typed_ir.Sub_int => 0
-  
   | Script_typed_ir.Mul_intint => 0
-  
   | Script_typed_ir.Mul_intnat => 0
-  
   | Script_typed_ir.Mul_natint => 0
-  
   | Script_typed_ir.Mul_natnat => 0
-  
   | Script_typed_ir.Ediv_intint => 0
-  
   | Script_typed_ir.Ediv_intnat => 0
-  
   | Script_typed_ir.Ediv_natint => 0
-  
   | Script_typed_ir.Ediv_natnat => 0
-  
   | Script_typed_ir.Lsl_nat => 0
-  
   | Script_typed_ir.Lsr_nat => 0
-  
   | Script_typed_ir.Or_nat => 0
-  
   | Script_typed_ir.And_nat => 0
-  
   | Script_typed_ir.And_int_nat => 0
-  
   | Script_typed_ir.Xor_nat => 0
-  
   | Script_typed_ir.Not_nat => 0
-  
   | Script_typed_ir.Not_int => 0
-  
   | Script_typed_ir.Seq _ _ => 0
-  
   | Script_typed_ir.If _ _ => 0
-  
   | Script_typed_ir.Loop _ => 0
-  
   | Script_typed_ir.Loop_left _ => 0
-  
   | Script_typed_ir.Dip _ => 0
-  
   | Script_typed_ir.Exec => 0
-  
   | Script_typed_ir.Apply _ => 0
-  
   | Script_typed_ir.Lambda _ => 1
-  
   | Script_typed_ir.Failwith _ => 1
-  
   | Script_typed_ir.Nop => 0
-  
   | Script_typed_ir.Compare _ => 1
-  
   | Script_typed_ir.Eq => 0
-  
   | Script_typed_ir.Neq => 0
-  
   | Script_typed_ir.Lt => 0
-  
   | Script_typed_ir.Gt => 0
-  
   | Script_typed_ir.Le => 0
-  
   | Script_typed_ir.Ge => 0
-  
   | Script_typed_ir.Address => 0
-  
   | Script_typed_ir.Contract _ _ => 1
-  
   | Script_typed_ir.Transfer_tokens => 1
-  
   | Script_typed_ir.Create_account => 0
-  
   | Script_typed_ir.Implicit_account => 0
-  
   | Script_typed_ir.Create_contract _ _ _ _ => 1
-  
   | Script_typed_ir.Create_contract_2 _ _ _ _ => 1
-  
   | Script_typed_ir.Now => 0
-  
   | Script_typed_ir.Balance => 0
-  
   | Script_typed_ir.Check_signature => 0
-  
   | Script_typed_ir.Hash_key => 0
-  
   | Script_typed_ir.Blake2b => 0
-  
   | Script_typed_ir.Sha256 => 0
-  
   | Script_typed_ir.Sha512 => 0
-  
   | Script_typed_ir.Steps_to_quota => 0
-  
   | Script_typed_ir.Source => 0
-  
   | Script_typed_ir.Sender => 0
-  
   | Script_typed_ir.Self _ _ => 1
-  
   | Script_typed_ir.Amount => 0
-  
   | Script_typed_ir.Set_delegate => 0
-  
   | Script_typed_ir.Pack _ => 0
-  
   | Script_typed_ir.Unpack _ => 1
-  
   | Script_typed_ir.Dig _ _ => 0
-  
   | Script_typed_ir.Dug _ _ => 0
-  
   | Script_typed_ir.Dipn _ _ _ => 0
-  
   | Script_typed_ir.Dropn _ _ => 0
-  
   | Script_typed_ir.ChainId => 0
   end.
 
@@ -504,13 +378,9 @@ Definition kind {A B : Set} (function_parameter : Micheline.node A B)
   : Script_tc_errors.kind :=
   match function_parameter with
   | Micheline.Int _ _ => Script_tc_errors.Int_kind
-  
   | Micheline.String _ _ => Script_tc_errors.String_kind
-  
   | Micheline.Bytes _ _ => Script_tc_errors.Bytes_kind
-  
   | Micheline.Prim _ _ _ _ => Script_tc_errors.Prim_kind
-  
   | Micheline.Seq _ _ => Script_tc_errors.Seq_kind
   end.
 
@@ -591,13 +461,9 @@ Definition unexpected
   (exp_prims : list Alpha_context.Script.prim) : Error_monad.__error :=
   match expr with
   | Micheline.Int loc _ => extensible_type_value
-  
   | Micheline.String loc _ => extensible_type_value
-  
   | Micheline.Bytes loc _ => extensible_type_value
-  
   | Micheline.Seq loc _ => extensible_type_value
-  
   | Micheline.Prim loc name _ _ =>
     match ((namespace name), exp_ns) with
     |
@@ -950,49 +816,39 @@ Fixpoint comparable_ty_of_ty (function_parameter : Script_typed_ir.ty)
     | Some rty =>
       match comparable_ty_of_ty l with
       | None => None
-      
       | Some (Script_typed_ir.Pair_key _ _ _) => None
-      
       | Some (Script_typed_ir.Int_key tname) =>
         Some
           (Script_typed_ir.Pair_key ((Script_typed_ir.Int_key tname), al)
             (rty, ar) pname)
-      
       | Some (Script_typed_ir.Nat_key tname) =>
         Some
           (Script_typed_ir.Pair_key ((Script_typed_ir.Nat_key tname), al)
             (rty, ar) pname)
-      
       | Some (Script_typed_ir.String_key tname) =>
         Some
           (Script_typed_ir.Pair_key ((Script_typed_ir.String_key tname), al)
             (rty, ar) pname)
-      
       | Some (Script_typed_ir.Bytes_key tname) =>
         Some
           (Script_typed_ir.Pair_key ((Script_typed_ir.Bytes_key tname), al)
             (rty, ar) pname)
-      
       | Some (Script_typed_ir.Mutez_key tname) =>
         Some
           (Script_typed_ir.Pair_key ((Script_typed_ir.Mutez_key tname), al)
             (rty, ar) pname)
-      
       | Some (Script_typed_ir.Bool_key tname) =>
         Some
           (Script_typed_ir.Pair_key ((Script_typed_ir.Bool_key tname), al)
             (rty, ar) pname)
-      
       | Some (Script_typed_ir.Key_hash_key tname) =>
         Some
           (Script_typed_ir.Pair_key ((Script_typed_ir.Key_hash_key tname), al)
             (rty, ar) pname)
-      
       | Some (Script_typed_ir.Timestamp_key tname) =>
         Some
           (Script_typed_ir.Pair_key ((Script_typed_ir.Timestamp_key tname), al)
             (rty, ar) pname)
-      
       | Some (Script_typed_ir.Address_key tname) =>
         Some
           (Script_typed_ir.Pair_key ((Script_typed_ir.Address_key tname), al)
@@ -1332,49 +1188,27 @@ Definition name_of_ty (function_parameter : Script_typed_ir.ty)
   : option Script_typed_ir.type_annot :=
   match function_parameter with
   | Script_typed_ir.Unit_t tname => tname
-  
   | Script_typed_ir.Int_t tname => tname
-  
   | Script_typed_ir.Nat_t tname => tname
-  
   | Script_typed_ir.String_t tname => tname
-  
   | Script_typed_ir.Bytes_t tname => tname
-  
   | Script_typed_ir.Mutez_t tname => tname
-  
   | Script_typed_ir.Bool_t tname => tname
-  
   | Script_typed_ir.Key_hash_t tname => tname
-  
   | Script_typed_ir.Key_t tname => tname
-  
   | Script_typed_ir.Timestamp_t tname => tname
-  
   | Script_typed_ir.Address_t tname => tname
-  
   | Script_typed_ir.Signature_t tname => tname
-  
   | Script_typed_ir.Operation_t tname => tname
-  
   | Script_typed_ir.Chain_id_t tname => tname
-  
   | Script_typed_ir.Contract_t _ tname => tname
-  
   | Script_typed_ir.Pair_t _ _ tname _ => tname
-  
   | Script_typed_ir.Union_t _ _ tname _ => tname
-  
   | Script_typed_ir.Lambda_t _ _ tname => tname
-  
   | Script_typed_ir.Option_t _ tname _ => tname
-  
   | Script_typed_ir.List_t _ tname _ => tname
-  
   | Script_typed_ir.Set_t _ tname => tname
-  
   | Script_typed_ir.Map_t _ _ tname _ => tname
-  
   | Script_typed_ir.Big_map_t _ _ tname => tname
   end.
 
@@ -1386,29 +1220,20 @@ Definition comparable_ty_eq
   (tb : Script_typed_ir.comparable_ty) : Error_monad.tzresult eq :=
   match (ta, tb) with
   | (Script_typed_ir.Int_key _, Script_typed_ir.Int_key _) => Pervasives.Ok Eq
-  
   | (Script_typed_ir.Nat_key _, Script_typed_ir.Nat_key _) => Pervasives.Ok Eq
-  
   | (Script_typed_ir.String_key _, Script_typed_ir.String_key _) =>
     Pervasives.Ok Eq
-  
   | (Script_typed_ir.Bytes_key _, Script_typed_ir.Bytes_key _) =>
     Pervasives.Ok Eq
-  
   | (Script_typed_ir.Mutez_key _, Script_typed_ir.Mutez_key _) =>
     Pervasives.Ok Eq
-  
   | (Script_typed_ir.Bool_key _, Script_typed_ir.Bool_key _) => Pervasives.Ok Eq
-  
   | (Script_typed_ir.Key_hash_key _, Script_typed_ir.Key_hash_key _) =>
     Pervasives.Ok Eq
-  
   | (Script_typed_ir.Timestamp_key _, Script_typed_ir.Timestamp_key _) =>
     Pervasives.Ok Eq
-  
   | (Script_typed_ir.Address_key _, Script_typed_ir.Address_key _) =>
     Pervasives.Ok Eq
-  
   | (_, _) =>
     let? '(ta, ctxt) := serialize_ty_for_error ctxt (ty_of_comparable_ty ta) in
     let? '(tb, _ctxt) := serialize_ty_for_error ctxt (ty_of_comparable_ty tb) in
@@ -1618,51 +1443,42 @@ Definition merge_comparable_types
     Error_monad.op_gtpipequestion
       (Script_ir_annot.merge_type_annot legacy annot_a annot_b)
       (fun annot => Script_typed_ir.Int_key annot)
-  
   | (Script_typed_ir.Nat_key annot_a, Script_typed_ir.Nat_key annot_b) =>
     Error_monad.op_gtpipequestion
       (Script_ir_annot.merge_type_annot legacy annot_a annot_b)
       (fun annot => Script_typed_ir.Nat_key annot)
-  
   | (Script_typed_ir.String_key annot_a, Script_typed_ir.String_key annot_b) =>
     Error_monad.op_gtpipequestion
       (Script_ir_annot.merge_type_annot legacy annot_a annot_b)
       (fun annot => Script_typed_ir.String_key annot)
-  
   | (Script_typed_ir.Bytes_key annot_a, Script_typed_ir.Bytes_key annot_b) =>
     Error_monad.op_gtpipequestion
       (Script_ir_annot.merge_type_annot legacy annot_a annot_b)
       (fun annot => Script_typed_ir.Bytes_key annot)
-  
   | (Script_typed_ir.Mutez_key annot_a, Script_typed_ir.Mutez_key annot_b) =>
     Error_monad.op_gtpipequestion
       (Script_ir_annot.merge_type_annot legacy annot_a annot_b)
       (fun annot => Script_typed_ir.Mutez_key annot)
-  
   | (Script_typed_ir.Bool_key annot_a, Script_typed_ir.Bool_key annot_b) =>
     Error_monad.op_gtpipequestion
       (Script_ir_annot.merge_type_annot legacy annot_a annot_b)
       (fun annot => Script_typed_ir.Bool_key annot)
-  
   | (Script_typed_ir.Key_hash_key annot_a, Script_typed_ir.Key_hash_key annot_b)
     =>
     Error_monad.op_gtpipequestion
       (Script_ir_annot.merge_type_annot legacy annot_a annot_b)
       (fun annot => Script_typed_ir.Key_hash_key annot)
-  
   |
     (Script_typed_ir.Timestamp_key annot_a,
       Script_typed_ir.Timestamp_key annot_b) =>
     Error_monad.op_gtpipequestion
       (Script_ir_annot.merge_type_annot legacy annot_a annot_b)
       (fun annot => Script_typed_ir.Timestamp_key annot)
-  
   | (Script_typed_ir.Address_key annot_a, Script_typed_ir.Address_key annot_b)
     =>
     Error_monad.op_gtpipequestion
       (Script_ir_annot.merge_type_annot legacy annot_a annot_b)
       (fun annot => Script_typed_ir.Address_key annot)
-  
   | (_, _) =>
     (* ❌ Assert instruction is not handled. *)
     assert (Error_monad.tzresult Script_typed_ir.comparable_ty) false
@@ -1961,49 +1777,27 @@ Definition merge_stacks (legacy : bool) (loc : Alpha_context.Script.location)
 Definition has_big_map (function_parameter : Script_typed_ir.ty) : bool :=
   match function_parameter with
   | Script_typed_ir.Unit_t _ => false
-  
   | Script_typed_ir.Int_t _ => false
-  
   | Script_typed_ir.Nat_t _ => false
-  
   | Script_typed_ir.Signature_t _ => false
-  
   | Script_typed_ir.String_t _ => false
-  
   | Script_typed_ir.Bytes_t _ => false
-  
   | Script_typed_ir.Mutez_t _ => false
-  
   | Script_typed_ir.Key_hash_t _ => false
-  
   | Script_typed_ir.Key_t _ => false
-  
   | Script_typed_ir.Timestamp_t _ => false
-  
   | Script_typed_ir.Address_t _ => false
-  
   | Script_typed_ir.Bool_t _ => false
-  
   | Script_typed_ir.Lambda_t _ _ _ => false
-  
   | Script_typed_ir.Set_t _ _ => false
-  
   | Script_typed_ir.Big_map_t _ _ _ => true
-  
   | Script_typed_ir.Contract_t _ _ => false
-  
   | Script_typed_ir.Operation_t _ => false
-  
   | Script_typed_ir.Chain_id_t _ => false
-  
   | Script_typed_ir.Pair_t _ _ _ has_big_map => has_big_map
-  
   | Script_typed_ir.Union_t _ _ _ has_big_map => has_big_map
-  
   | Script_typed_ir.Option_t _ _ has_big_map => has_big_map
-  
   | Script_typed_ir.List_t _ _ has_big_map => has_big_map
-  
   | Script_typed_ir.Map_t _ _ _ has_big_map => has_big_map
   end.
 
@@ -2114,43 +1908,34 @@ Fixpoint parse_comparable_ty
   | Micheline.Prim loc Alpha_context.Script.T_int [] annot =>
     Error_monad.op_gtpipequestion (Script_ir_annot.parse_type_annot loc annot)
       (fun tname => ((Ex_comparable_ty (Script_typed_ir.Int_key tname)), ctxt))
-  
   | Micheline.Prim loc Alpha_context.Script.T_nat [] annot =>
     Error_monad.op_gtpipequestion (Script_ir_annot.parse_type_annot loc annot)
       (fun tname => ((Ex_comparable_ty (Script_typed_ir.Nat_key tname)), ctxt))
-  
   | Micheline.Prim loc Alpha_context.Script.T_string [] annot =>
     Error_monad.op_gtpipequestion (Script_ir_annot.parse_type_annot loc annot)
       (fun tname =>
         ((Ex_comparable_ty (Script_typed_ir.String_key tname)), ctxt))
-  
   | Micheline.Prim loc Alpha_context.Script.T_bytes [] annot =>
     Error_monad.op_gtpipequestion (Script_ir_annot.parse_type_annot loc annot)
       (fun tname => ((Ex_comparable_ty (Script_typed_ir.Bytes_key tname)), ctxt))
-  
   | Micheline.Prim loc Alpha_context.Script.T_mutez [] annot =>
     Error_monad.op_gtpipequestion (Script_ir_annot.parse_type_annot loc annot)
       (fun tname => ((Ex_comparable_ty (Script_typed_ir.Mutez_key tname)), ctxt))
-  
   | Micheline.Prim loc Alpha_context.Script.T_bool [] annot =>
     Error_monad.op_gtpipequestion (Script_ir_annot.parse_type_annot loc annot)
       (fun tname => ((Ex_comparable_ty (Script_typed_ir.Bool_key tname)), ctxt))
-  
   | Micheline.Prim loc Alpha_context.Script.T_key_hash [] annot =>
     Error_monad.op_gtpipequestion (Script_ir_annot.parse_type_annot loc annot)
       (fun tname =>
         ((Ex_comparable_ty (Script_typed_ir.Key_hash_key tname)), ctxt))
-  
   | Micheline.Prim loc Alpha_context.Script.T_timestamp [] annot =>
     Error_monad.op_gtpipequestion (Script_ir_annot.parse_type_annot loc annot)
       (fun tname =>
         ((Ex_comparable_ty (Script_typed_ir.Timestamp_key tname)), ctxt))
-  
   | Micheline.Prim loc Alpha_context.Script.T_address [] annot =>
     Error_monad.op_gtpipequestion (Script_ir_annot.parse_type_annot loc annot)
       (fun tname =>
         ((Ex_comparable_ty (Script_typed_ir.Address_key tname)), ctxt))
-  
   |
     Micheline.Prim loc
       ((Alpha_context.Script.T_int | Alpha_context.Script.T_nat |
@@ -2158,7 +1943,6 @@ Fixpoint parse_comparable_ty
       Alpha_context.Script.T_bool | Alpha_context.Script.T_key |
       Alpha_context.Script.T_address | Alpha_context.Script.T_timestamp) as prim)
       l _ => Error_monad.__error_value extensible_type_value
-  
   |
     Micheline.Prim loc
       (Alpha_context.Script.T_pair | Alpha_context.Script.T_or |
@@ -2167,7 +1951,6 @@ Fixpoint parse_comparable_ty
       Alpha_context.Script.T_lambda | Alpha_context.Script.T_unit |
       Alpha_context.Script.T_signature | Alpha_context.Script.T_contract) _ _ =>
     Error_monad.__error_value extensible_type_value
-  
   | expr =>
     Error_monad.__error_value
       (unexpected expr nil Script_tc_errors.Type_namespace
@@ -2218,73 +2001,61 @@ with parse_ty
     Error_monad.op_gtpipequestion
       (Alpha_context.Gas.consume ctxt (Typecheck_costs.type_ 0))
       (fun ctxt => ((Ex_ty (Script_typed_ir.Unit_t ty_name)), ctxt))
-  
   | (Micheline.Prim loc Alpha_context.Script.T_int [] annot, _) =>
     let? ty_name := Script_ir_annot.parse_type_annot loc annot in
     Error_monad.op_gtpipequestion
       (Alpha_context.Gas.consume ctxt (Typecheck_costs.type_ 0))
       (fun ctxt => ((Ex_ty (Script_typed_ir.Int_t ty_name)), ctxt))
-  
   | (Micheline.Prim loc Alpha_context.Script.T_nat [] annot, _) =>
     let? ty_name := Script_ir_annot.parse_type_annot loc annot in
     Error_monad.op_gtpipequestion
       (Alpha_context.Gas.consume ctxt (Typecheck_costs.type_ 0))
       (fun ctxt => ((Ex_ty (Script_typed_ir.Nat_t ty_name)), ctxt))
-  
   | (Micheline.Prim loc Alpha_context.Script.T_string [] annot, _) =>
     let? ty_name := Script_ir_annot.parse_type_annot loc annot in
     Error_monad.op_gtpipequestion
       (Alpha_context.Gas.consume ctxt (Typecheck_costs.type_ 0))
       (fun ctxt => ((Ex_ty (Script_typed_ir.String_t ty_name)), ctxt))
-  
   | (Micheline.Prim loc Alpha_context.Script.T_bytes [] annot, _) =>
     let? ty_name := Script_ir_annot.parse_type_annot loc annot in
     Error_monad.op_gtpipequestion
       (Alpha_context.Gas.consume ctxt (Typecheck_costs.type_ 0))
       (fun ctxt => ((Ex_ty (Script_typed_ir.Bytes_t ty_name)), ctxt))
-  
   | (Micheline.Prim loc Alpha_context.Script.T_mutez [] annot, _) =>
     let? ty_name := Script_ir_annot.parse_type_annot loc annot in
     Error_monad.op_gtpipequestion
       (Alpha_context.Gas.consume ctxt (Typecheck_costs.type_ 0))
       (fun ctxt => ((Ex_ty (Script_typed_ir.Mutez_t ty_name)), ctxt))
-  
   | (Micheline.Prim loc Alpha_context.Script.T_bool [] annot, _) =>
     let? ty_name := Script_ir_annot.parse_type_annot loc annot in
     Error_monad.op_gtpipequestion
       (Alpha_context.Gas.consume ctxt (Typecheck_costs.type_ 0))
       (fun ctxt => ((Ex_ty (Script_typed_ir.Bool_t ty_name)), ctxt))
-  
   | (Micheline.Prim loc Alpha_context.Script.T_key [] annot, _) =>
     let? ty_name := Script_ir_annot.parse_type_annot loc annot in
     Error_monad.op_gtpipequestion
       (Alpha_context.Gas.consume ctxt (Typecheck_costs.type_ 0))
       (fun ctxt => ((Ex_ty (Script_typed_ir.Key_t ty_name)), ctxt))
-  
   | (Micheline.Prim loc Alpha_context.Script.T_key_hash [] annot, _) =>
     let? ty_name := Script_ir_annot.parse_type_annot loc annot in
     Error_monad.op_gtpipequestion
       (Alpha_context.Gas.consume ctxt (Typecheck_costs.type_ 0))
       (fun ctxt => ((Ex_ty (Script_typed_ir.Key_hash_t ty_name)), ctxt))
-  
   | (Micheline.Prim loc Alpha_context.Script.T_timestamp [] annot, _) =>
     let? ty_name := Script_ir_annot.parse_type_annot loc annot in
     Error_monad.op_gtpipequestion
       (Alpha_context.Gas.consume ctxt (Typecheck_costs.type_ 0))
       (fun ctxt => ((Ex_ty (Script_typed_ir.Timestamp_t ty_name)), ctxt))
-  
   | (Micheline.Prim loc Alpha_context.Script.T_address [] annot, _) =>
     let? ty_name := Script_ir_annot.parse_type_annot loc annot in
     Error_monad.op_gtpipequestion
       (Alpha_context.Gas.consume ctxt (Typecheck_costs.type_ 0))
       (fun ctxt => ((Ex_ty (Script_typed_ir.Address_t ty_name)), ctxt))
-  
   | (Micheline.Prim loc Alpha_context.Script.T_signature [] annot, _) =>
     let? ty_name := Script_ir_annot.parse_type_annot loc annot in
     Error_monad.op_gtpipequestion
       (Alpha_context.Gas.consume ctxt (Typecheck_costs.type_ 0))
       (fun ctxt => ((Ex_ty (Script_typed_ir.Signature_t ty_name)), ctxt))
-  
   | (Micheline.Prim loc Alpha_context.Script.T_operation [] annot, _) =>
     if allow_operation then
       let? ty_name := Script_ir_annot.parse_type_annot loc annot in
@@ -2293,13 +2064,11 @@ with parse_ty
         (fun ctxt => ((Ex_ty (Script_typed_ir.Operation_t ty_name)), ctxt))
     else
       Error_monad.__error_value extensible_type_value
-  
   | (Micheline.Prim loc Alpha_context.Script.T_chain_id [] annot, _) =>
     let? ty_name := Script_ir_annot.parse_type_annot loc annot in
     Error_monad.op_gtpipequestion
       (Alpha_context.Gas.consume ctxt (Typecheck_costs.type_ 0))
       (fun ctxt => ((Ex_ty (Script_typed_ir.Chain_id_t ty_name)), ctxt))
-  
   | (Micheline.Prim loc Alpha_context.Script.T_contract (cons utl []) annot, _)
     =>
     if allow_contract then
@@ -2314,7 +2083,6 @@ with parse_ty
         (fun ctxt => ((Ex_ty (Script_typed_ir.Contract_t tl ty_name)), ctxt))
     else
       Error_monad.__error_value extensible_type_value
-  
   |
     (Micheline.Prim loc Alpha_context.Script.T_pair (cons utl (cons utr []))
       annot, _) =>
@@ -2340,7 +2108,6 @@ with parse_ty
           (Script_typed_ir.Pair_t (tl, left_field, None) (tr, right_field, None)
             ty_name (Pervasives.op_pipepipe (has_big_map tl) (has_big_map tr)))),
           ctxt))
-  
   |
     (Micheline.Prim loc Alpha_context.Script.T_or (cons utl (cons utr [])) annot,
       _) =>
@@ -2365,7 +2132,6 @@ with parse_ty
         ((Ex_ty
           (Script_typed_ir.Union_t (tl, left_constr) (tr, right_constr) ty_name
             (Pervasives.op_pipepipe (has_big_map tl) (has_big_map tr)))), ctxt))
-  
   |
     (Micheline.Prim loc Alpha_context.Script.T_lambda (cons uta (cons utr []))
       annot, _) =>
@@ -2383,7 +2149,6 @@ with parse_ty
     Error_monad.op_gtpipequestion
       (Alpha_context.Gas.consume ctxt (Typecheck_costs.type_ 2))
       (fun ctxt => ((Ex_ty (Script_typed_ir.Lambda_t ta tr ty_name)), ctxt))
-  
   | (Micheline.Prim loc Alpha_context.Script.T_option (cons ut []) annot, _) =>
     let? '(ut, ty_name) :=
       if legacy then
@@ -2406,7 +2171,6 @@ with parse_ty
         ((Ex_ty
           (Script_typed_ir.Option_t __t_value ty_name (has_big_map __t_value))),
           ctxt))
-  
   | (Micheline.Prim loc Alpha_context.Script.T_list (cons ut []) annot, _) =>
     let? '(Ex_ty __t_value, ctxt) :=
       parse_ty ctxt legacy allow_big_map allow_operation allow_contract ut in
@@ -2421,7 +2185,6 @@ with parse_ty
         ((Ex_ty
           (Script_typed_ir.List_t __t_value ty_name (has_big_map __t_value))),
           ctxt))
-  
   | (Micheline.Prim loc Alpha_context.Script.T_set (cons ut []) annot, _) =>
     let? '(Ex_comparable_ty __t_value, ctxt) := parse_comparable_ty ctxt ut in
     let 'existT _ __Ex_comparable_ty_'a [__t_value, ctxt] :=
@@ -2433,7 +2196,6 @@ with parse_ty
     Error_monad.op_gtpipequestion
       (Alpha_context.Gas.consume ctxt (Typecheck_costs.type_ 1))
       (fun ctxt => ((Ex_ty (Script_typed_ir.Set_t __t_value ty_name)), ctxt))
-  
   |
     (Micheline.Prim loc Alpha_context.Script.T_map (cons uta (cons utr []))
       annot, _) =>
@@ -2454,16 +2216,13 @@ with parse_ty
       (Alpha_context.Gas.consume ctxt (Typecheck_costs.type_ 2))
       (fun ctxt =>
         ((Ex_ty (Script_typed_ir.Map_t ta tr ty_name (has_big_map tr))), ctxt))
-  
   | (Micheline.Prim loc Alpha_context.Script.T_big_map args annot, true) =>
     let? '(big_map_ty, ctxt) := parse_big_map_ty ctxt legacy loc args annot in
     Error_monad.op_gtpipequestion
       (Alpha_context.Gas.consume ctxt (Typecheck_costs.type_ 2))
       (fun ctxt => (big_map_ty, ctxt))
-  
   | (Micheline.Prim loc Alpha_context.Script.T_big_map _ _, _) =>
     Error_monad.__error_value extensible_type_value
-  
   |
     (Micheline.Prim loc
       ((Alpha_context.Script.T_unit | Alpha_context.Script.T_signature |
@@ -2473,19 +2232,16 @@ with parse_ty
       Alpha_context.Script.T_key | Alpha_context.Script.T_key_hash |
       Alpha_context.Script.T_timestamp | Alpha_context.Script.T_address) as prim)
       l _, _) => Error_monad.__error_value extensible_type_value
-  
   |
     (Micheline.Prim loc
       ((Alpha_context.Script.T_set | Alpha_context.Script.T_list |
       Alpha_context.Script.T_option | Alpha_context.Script.T_contract) as prim)
       l _, _) => Error_monad.__error_value extensible_type_value
-  
   |
     (Micheline.Prim loc
       ((Alpha_context.Script.T_pair | Alpha_context.Script.T_or |
       Alpha_context.Script.T_map | Alpha_context.Script.T_lambda) as prim) l _,
       _) => Error_monad.__error_value extensible_type_value
-  
   | (expr, _) =>
     Error_monad.__error_value
       (unexpected expr nil Script_tc_errors.Type_namespace
@@ -7286,14 +7042,10 @@ with parse_toplevel (legacy : bool) (toplevel : Alpha_context.Script.expr)
   (Error_monad.record_trace extensible_type_value)
     match Micheline.root toplevel with
     | Micheline.Int loc _ => Error_monad.__error_value extensible_type_value
-    
     | Micheline.String loc _ => Error_monad.__error_value extensible_type_value
-    
     | Micheline.Bytes loc _ => Error_monad.__error_value extensible_type_value
-    
     | Micheline.Prim loc _ _ _ =>
       Error_monad.__error_value extensible_type_value
-    
     | Micheline.Seq _ fields =>
       let fix find_fields
         (__p_value :
@@ -7330,19 +7082,14 @@ with parse_toplevel (legacy : bool) (toplevel : Alpha_context.Script.expr)
                 Micheline.annot)) :=
         match fields with
         | [] => Error_monad.ok (__p_value, s, c)
-        
         | cons (Micheline.Int loc _) _ =>
           Error_monad.__error_value extensible_type_value
-        
         | cons (Micheline.String loc _) _ =>
           Error_monad.__error_value extensible_type_value
-        
         | cons (Micheline.Bytes loc _) _ =>
           Error_monad.__error_value extensible_type_value
-        
         | cons (Micheline.Seq loc _) _ =>
           Error_monad.__error_value extensible_type_value
-        
         |
           cons
             (Micheline.Prim loc Alpha_context.Script.K_parameter (cons arg [])
@@ -7351,7 +7098,6 @@ with parse_toplevel (legacy : bool) (toplevel : Alpha_context.Script.expr)
           | None => find_fields (Some (arg, loc, annot)) s c rest
           | Some _ => Error_monad.__error_value extensible_type_value
           end
-        
         |
           cons
             (Micheline.Prim loc Alpha_context.Script.K_storage (cons arg [])
@@ -7360,7 +7106,6 @@ with parse_toplevel (legacy : bool) (toplevel : Alpha_context.Script.expr)
           | None => find_fields __p_value (Some (arg, loc, annot)) c rest
           | Some _ => Error_monad.__error_value extensible_type_value
           end
-        
         |
           cons
             (Micheline.Prim loc Alpha_context.Script.K_code (cons arg []) annot)
@@ -7369,7 +7114,6 @@ with parse_toplevel (legacy : bool) (toplevel : Alpha_context.Script.expr)
           | None => find_fields __p_value s (Some (arg, loc, annot)) rest
           | Some _ => Error_monad.__error_value extensible_type_value
           end
-        
         |
           cons
             (Micheline.Prim loc
@@ -7377,7 +7121,6 @@ with parse_toplevel (legacy : bool) (toplevel : Alpha_context.Script.expr)
               Alpha_context.Script.K_storage | Alpha_context.Script.K_code) as
                 name) args _) _ =>
           Error_monad.__error_value extensible_type_value
-        
         | cons (Micheline.Prim loc name _ _) _ =>
           let allowed :=
             [

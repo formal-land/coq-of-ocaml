@@ -124,11 +124,8 @@ Fixpoint node_size {A B : Set} (node : Micheline.node A B) {struct node}
   : int * int :=
   match node with
   | Micheline.Int _ n => int_node_size n
-  
   | Micheline.String _ s => string_node_size s
-  
   | Micheline.Bytes _ s => bytes_node_size s
-  
   | Micheline.Prim _ _ args annot =>
     List.fold_left
       (fun function_parameter =>
@@ -138,7 +135,6 @@ Fixpoint node_size {A B : Set} (node : Micheline.node A B) {struct node}
           ((Pervasives.op_plus blocks nblocks),
             (Pervasives.op_plus words nwords)))
       (prim_node_size_nonrec args annot) args
-  
   | Micheline.Seq _ args =>
     List.fold_left
       (fun function_parameter =>

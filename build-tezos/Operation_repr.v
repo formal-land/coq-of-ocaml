@@ -1229,21 +1229,13 @@ Definition acceptable_passes (op : packed_operation) : list int :=
       protocol_data in
   match protocol_data.(protocol_data.contents) with
   | Single (Endorsement _) => [ 0 ]
-  
   | Single (Proposals _) => [ 1 ]
-  
   | Single (Ballot _) => [ 1 ]
-  
   | Single (Seed_nonce_revelation _) => [ 2 ]
-  
   | Single (Double_endorsement_evidence _) => [ 2 ]
-  
   | Single (Double_baking_evidence _) => [ 2 ]
-  
   | Single (Activate_account _) => [ 2 ]
-  
   | Single (Manager_operation _) => [ 3 ]
-  
   | Cons _ _ => [ 3 ]
   end.
 
@@ -1326,19 +1318,12 @@ Definition equal_manager_operation_kind
   (op1 : manager_operation) (op2 : manager_operation) : option eq :=
   match (op1, op2) with
   | (Reveal _, Reveal _) => Some Eq
-  
   | (Reveal _, _) => None
-  
   | (Transaction _, Transaction _) => Some Eq
-  
   | (Transaction _, _) => None
-  
   | (Origination _, Origination _) => Some Eq
-  
   | (Origination _, _) => None
-  
   | (Delegation _, Delegation _) => Some Eq
-  
   | (Delegation _, _) => None
   end.
 

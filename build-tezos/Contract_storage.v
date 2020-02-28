@@ -202,7 +202,6 @@ Definition update_script_big_map
             else
               Error_monad.__return
                 (c, (Z.sub (Z.sub total size) (Z.of_int big_map_cost)))
-          
           | Copy from to_ =>
             let=? c := Storage.Big_map.copy c from to_ in
             if (|Compare.Z|).(Compare.S.op_lt) to_ Z.zero then
@@ -213,7 +212,6 @@ Definition update_script_big_map
                   c from in
               Error_monad.__return
                 (c, (Z.add (Z.add total size) (Z.of_int big_map_cost)))
-          
           |
             Alloc {|
               big_map_diff_item.Alloc.big_map := big_map;
@@ -239,7 +237,6 @@ Definition update_script_big_map
               Error_monad.__return (c, total)
             else
               Error_monad.__return (c, (Z.add total (Z.of_int big_map_cost)))
-          
           |
             Update {|
               big_map_diff_item.Update.big_map := big_map;
@@ -264,7 +261,6 @@ Definition update_script_big_map
               Error_monad.__return (c, total)
             else
               Error_monad.__return (c, (Z.sub total (Z.of_int freed)))
-          
           |
             Update {|
               big_map_diff_item.Update.big_map := big_map;

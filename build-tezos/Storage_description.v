@@ -82,17 +82,13 @@ Fixpoint register_named_subcontext {r : Set} (dir : t r) (names : list string)
   {struct dir} : t r :=
   match ((Pervasives.op_exclamation dir), names) with
   | (_, []) => dir
-  
   | (Value _, _) => Pervasives.invalid_arg ""
-  
   | (IndexedDir _, _) => Pervasives.invalid_arg ""
-  
   | (Empty, cons name names) =>
     let subdir := Pervasives.__ref_value Empty in
     (* ❌ Sequences of instructions are ignored (operator ";") *)
     (* ❌ instruction_sequence ";" *)
     register_named_subcontext subdir names
-  
   | (NamedDir map, cons name names) =>
     let subdir :=
       match (|StringMap|).(S.MAP.find_opt) name map with

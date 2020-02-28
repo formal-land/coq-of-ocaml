@@ -60,7 +60,7 @@
 opam pin add https://github.com/clarus/coq-of-ocaml.git#master</code></pre>
     <ul>
       <li>OCaml size: 36034 lines</li>
-      <li>Coq size: 48359 lines (+34% compared to&nbsp;OCaml)</li>
+      <li>Coq size: 47656 lines (+32% compared to&nbsp;OCaml)</li>
       <li>Warnings from coq-of-ocaml: 4330</li>
     </ul>
     
@@ -113,7 +113,7 @@ opam pin add https://github.com/clarus/coq-of-ocaml.git#master</code></pre>
           25014,
           25014,
           24981,
-          24988,
+          24601,
         ],
         generated: [
           47563,
@@ -161,7 +161,7 @@ opam pin add https://github.com/clarus/coq-of-ocaml.git#master</code></pre>
           48552,
           48552,
           48348,
-          48359,
+          47656,
         ],
         labels: [
           "01-14",
@@ -10057,7 +10057,7 @@ Definition finalize_application
     <h3>Apply_results</h3>
     <ul>
       <li>OCaml size: 1187 lines</li>
-      <li>Coq size: 2074 lines (+74% compared to&nbsp;OCaml)</li>
+      <li>Coq size: 2034 lines (+71% compared to&nbsp;OCaml)</li>
     </ul>
   </div>
   <div class="col-md-6">
@@ -11927,25 +11927,18 @@ Definition equal_manager_kind
   |
     (Alpha_context.Kind.Reveal_manager_kind,
       Alpha_context.Kind.Reveal_manager_kind) =&gt; Some Eq
-  
   | (Alpha_context.Kind.Reveal_manager_kind, _) =&gt; None
-  
   |
     (Alpha_context.Kind.Transaction_manager_kind,
       Alpha_context.Kind.Transaction_manager_kind) =&gt; Some Eq
-  
   | (Alpha_context.Kind.Transaction_manager_kind, _) =&gt; None
-  
   |
     (Alpha_context.Kind.Origination_manager_kind,
       Alpha_context.Kind.Origination_manager_kind) =&gt; Some Eq
-  
   | (Alpha_context.Kind.Origination_manager_kind, _) =&gt; None
-  
   |
     (Alpha_context.Kind.Delegation_manager_kind,
       Alpha_context.Kind.Delegation_manager_kind) =&gt; Some Eq
-  
   | (Alpha_context.Kind.Delegation_manager_kind, _) =&gt; None
   end.
 
@@ -12789,37 +12782,23 @@ Definition kind_equal (op : Alpha_context.contents) (res : contents_result)
   : option eq :=
   match (op, res) with
   | (Alpha_context.Endorsement _, Endorsement_result _) =&gt; Some Eq
-  
   | (Alpha_context.Endorsement _, _) =&gt; None
-  
   | (Alpha_context.Seed_nonce_revelation _, Seed_nonce_revelation_result _) =&gt;
     Some Eq
-  
   | (Alpha_context.Seed_nonce_revelation _, _) =&gt; None
-  
   |
     (Alpha_context.Double_endorsement_evidence _,
       Double_endorsement_evidence_result _) =&gt; Some Eq
-  
   | (Alpha_context.Double_endorsement_evidence _, _) =&gt; None
-  
   | (Alpha_context.Double_baking_evidence _, Double_baking_evidence_result _) =&gt;
     Some Eq
-  
   | (Alpha_context.Double_baking_evidence _, _) =&gt; None
-  
   | (Alpha_context.Activate_account _, Activate_account_result _) =&gt; Some Eq
-  
   | (Alpha_context.Activate_account _, _) =&gt; None
-  
   | (Alpha_context.Proposals _, Proposals_result) =&gt; Some Eq
-  
   | (Alpha_context.Proposals _, _) =&gt; None
-  
   | (Alpha_context.Ballot _, Ballot_result) =&gt; Some Eq
-  
   | (Alpha_context.Ballot _, _) =&gt; None
-  
   |
     (Alpha_context.Manager_operation {|
       Alpha_context.contents.Manager_operation.operation := Alpha_context.Reveal _
@@ -12828,7 +12807,6 @@ Definition kind_equal (op : Alpha_context.contents) (res : contents_result)
         contents_result.Manager_operation_result.operation_result :=
           Applied (Reveal_result _)
           |}) =&gt; Some Eq
-  
   |
     (Alpha_context.Manager_operation {|
       Alpha_context.contents.Manager_operation.operation := Alpha_context.Reveal _
@@ -12837,7 +12815,6 @@ Definition kind_equal (op : Alpha_context.contents) (res : contents_result)
         contents_result.Manager_operation_result.operation_result :=
           Backtracked (Reveal_result _) _
           |}) =&gt; Some Eq
-  
   |
     (Alpha_context.Manager_operation {|
       Alpha_context.contents.Manager_operation.operation := Alpha_context.Reveal _
@@ -12846,7 +12823,6 @@ Definition kind_equal (op : Alpha_context.contents) (res : contents_result)
         contents_result.Manager_operation_result.operation_result :=
           Failed Alpha_context.Kind.Reveal_manager_kind _
           |}) =&gt; Some Eq
-  
   |
     (Alpha_context.Manager_operation {|
       Alpha_context.contents.Manager_operation.operation := Alpha_context.Reveal _
@@ -12855,12 +12831,10 @@ Definition kind_equal (op : Alpha_context.contents) (res : contents_result)
         contents_result.Manager_operation_result.operation_result :=
           Skipped Alpha_context.Kind.Reveal_manager_kind
           |}) =&gt; Some Eq
-  
   |
     (Alpha_context.Manager_operation {|
       Alpha_context.contents.Manager_operation.operation := Alpha_context.Reveal _
         |}, _) =&gt; None
-  
   |
     (Alpha_context.Manager_operation {|
       Alpha_context.contents.Manager_operation.operation :=
@@ -12870,7 +12844,6 @@ Definition kind_equal (op : Alpha_context.contents) (res : contents_result)
         contents_result.Manager_operation_result.operation_result :=
           Applied (Transaction_result _)
           |}) =&gt; Some Eq
-  
   |
     (Alpha_context.Manager_operation {|
       Alpha_context.contents.Manager_operation.operation :=
@@ -12880,7 +12853,6 @@ Definition kind_equal (op : Alpha_context.contents) (res : contents_result)
         contents_result.Manager_operation_result.operation_result :=
           Backtracked (Transaction_result _) _
           |}) =&gt; Some Eq
-  
   |
     (Alpha_context.Manager_operation {|
       Alpha_context.contents.Manager_operation.operation :=
@@ -12890,7 +12862,6 @@ Definition kind_equal (op : Alpha_context.contents) (res : contents_result)
         contents_result.Manager_operation_result.operation_result :=
           Failed Alpha_context.Kind.Transaction_manager_kind _
           |}) =&gt; Some Eq
-  
   |
     (Alpha_context.Manager_operation {|
       Alpha_context.contents.Manager_operation.operation :=
@@ -12900,13 +12871,11 @@ Definition kind_equal (op : Alpha_context.contents) (res : contents_result)
         contents_result.Manager_operation_result.operation_result :=
           Skipped Alpha_context.Kind.Transaction_manager_kind
           |}) =&gt; Some Eq
-  
   |
     (Alpha_context.Manager_operation {|
       Alpha_context.contents.Manager_operation.operation :=
         Alpha_context.Transaction _
         |}, _) =&gt; None
-  
   |
     (Alpha_context.Manager_operation {|
       Alpha_context.contents.Manager_operation.operation :=
@@ -12916,7 +12885,6 @@ Definition kind_equal (op : Alpha_context.contents) (res : contents_result)
         contents_result.Manager_operation_result.operation_result :=
           Applied (Origination_result _)
           |}) =&gt; Some Eq
-  
   |
     (Alpha_context.Manager_operation {|
       Alpha_context.contents.Manager_operation.operation :=
@@ -12926,7 +12894,6 @@ Definition kind_equal (op : Alpha_context.contents) (res : contents_result)
         contents_result.Manager_operation_result.operation_result :=
           Backtracked (Origination_result _) _
           |}) =&gt; Some Eq
-  
   |
     (Alpha_context.Manager_operation {|
       Alpha_context.contents.Manager_operation.operation :=
@@ -12936,7 +12903,6 @@ Definition kind_equal (op : Alpha_context.contents) (res : contents_result)
         contents_result.Manager_operation_result.operation_result :=
           Failed Alpha_context.Kind.Origination_manager_kind _
           |}) =&gt; Some Eq
-  
   |
     (Alpha_context.Manager_operation {|
       Alpha_context.contents.Manager_operation.operation :=
@@ -12946,13 +12912,11 @@ Definition kind_equal (op : Alpha_context.contents) (res : contents_result)
         contents_result.Manager_operation_result.operation_result :=
           Skipped Alpha_context.Kind.Origination_manager_kind
           |}) =&gt; Some Eq
-  
   |
     (Alpha_context.Manager_operation {|
       Alpha_context.contents.Manager_operation.operation :=
         Alpha_context.Origination _
         |}, _) =&gt; None
-  
   |
     (Alpha_context.Manager_operation {|
       Alpha_context.contents.Manager_operation.operation :=
@@ -12962,7 +12926,6 @@ Definition kind_equal (op : Alpha_context.contents) (res : contents_result)
         contents_result.Manager_operation_result.operation_result :=
           Applied (Delegation_result _)
           |}) =&gt; Some Eq
-  
   |
     (Alpha_context.Manager_operation {|
       Alpha_context.contents.Manager_operation.operation :=
@@ -12972,7 +12935,6 @@ Definition kind_equal (op : Alpha_context.contents) (res : contents_result)
         contents_result.Manager_operation_result.operation_result :=
           Backtracked (Delegation_result _) _
           |}) =&gt; Some Eq
-  
   |
     (Alpha_context.Manager_operation {|
       Alpha_context.contents.Manager_operation.operation :=
@@ -12982,7 +12944,6 @@ Definition kind_equal (op : Alpha_context.contents) (res : contents_result)
         contents_result.Manager_operation_result.operation_result :=
           Failed Alpha_context.Kind.Delegation_manager_kind _
           |}) =&gt; Some Eq
-  
   |
     (Alpha_context.Manager_operation {|
       Alpha_context.contents.Manager_operation.operation :=
@@ -12992,7 +12953,6 @@ Definition kind_equal (op : Alpha_context.contents) (res : contents_result)
         contents_result.Manager_operation_result.operation_result :=
           Skipped Alpha_context.Kind.Delegation_manager_kind
           |}) =&gt; Some Eq
-  
   |
     (Alpha_context.Manager_operation {|
       Alpha_context.contents.Manager_operation.operation :=
@@ -23785,7 +23745,7 @@ Parameter register : unit -&gt; unit.
     <h3>Contract_storage</h3>
     <ul>
       <li>OCaml size: 733 lines</li>
-      <li>Coq size: 792 lines (+8% compared to&nbsp;OCaml)</li>
+      <li>Coq size: 788 lines (+7% compared to&nbsp;OCaml)</li>
     </ul>
   </div>
   <div class="col-md-6">
@@ -24760,7 +24720,6 @@ Definition update_script_big_map
             else
               Error_monad.__return
                 (c, (Z.sub (Z.sub total size) (Z.of_int big_map_cost)))
-          
           | Copy from to_ =&gt;
             let=? c := Storage.Big_map.copy c from to_ in
             if (|Compare.Z|).(Compare.S.op_lt) to_ Z.zero then
@@ -24771,7 +24730,6 @@ Definition update_script_big_map
                   c from in
               Error_monad.__return
                 (c, (Z.add (Z.add total size) (Z.of_int big_map_cost)))
-          
           |
             Alloc {|
               big_map_diff_item.Alloc.big_map := big_map;
@@ -24797,7 +24755,6 @@ Definition update_script_big_map
               Error_monad.__return (c, total)
             else
               Error_monad.__return (c, (Z.add total (Z.of_int big_map_cost)))
-          
           |
             Update {|
               big_map_diff_item.Update.big_map := big_map;
@@ -24822,7 +24779,6 @@ Definition update_script_big_map
               Error_monad.__return (c, total)
             else
               Error_monad.__return (c, (Z.sub total (Z.of_int freed)))
-          
           |
             Update {|
               big_map_diff_item.Update.big_map := big_map;
@@ -47789,7 +47745,7 @@ Parameter encoding : Data_encoding.encoding t.
     <h3>Michelson_v1_gas</h3>
     <ul>
       <li>OCaml size: 767 lines</li>
-      <li>Coq size: 1081 lines (+40% compared to&nbsp;OCaml)</li>
+      <li>Coq size: 955 lines (+24% compared to&nbsp;OCaml)</li>
     </ul>
   </div>
   <div class="col-md-6">
@@ -49300,266 +49256,140 @@ Module Cost_of.
       Alpha_context.Gas.op_plusat (Alpha_context.Gas.alloc_cost 1)
         match i with
         | Script_typed_ir.Drop =&gt; Alpha_context.Gas.alloc_cost 0
-        
         | Script_typed_ir.Dup =&gt; Alpha_context.Gas.alloc_cost 1
-        
         | Script_typed_ir.Swap =&gt; Alpha_context.Gas.alloc_cost 0
-        
         | Script_typed_ir.Const _ =&gt; Alpha_context.Gas.alloc_cost 1
-        
         | Script_typed_ir.Cons_pair =&gt; Alpha_context.Gas.alloc_cost 2
-        
         | Script_typed_ir.Car =&gt; Alpha_context.Gas.alloc_cost 1
-        
         | Script_typed_ir.Cdr =&gt; Alpha_context.Gas.alloc_cost 1
-        
         | Script_typed_ir.Cons_some =&gt; Alpha_context.Gas.alloc_cost 2
-        
         | Script_typed_ir.Cons_none _ =&gt; Alpha_context.Gas.alloc_cost 3
-        
         | Script_typed_ir.If_none _ _ =&gt; Alpha_context.Gas.alloc_cost 2
-        
         | Script_typed_ir.Left =&gt; Alpha_context.Gas.alloc_cost 3
-        
         | Script_typed_ir.Right =&gt; Alpha_context.Gas.alloc_cost 3
-        
         | Script_typed_ir.If_left _ _ =&gt; Alpha_context.Gas.alloc_cost 2
-        
         | Script_typed_ir.Cons_list =&gt; Alpha_context.Gas.alloc_cost 1
-        
         | Script_typed_ir.Nil =&gt; Alpha_context.Gas.alloc_cost 1
-        
         | Script_typed_ir.If_cons _ _ =&gt; Alpha_context.Gas.alloc_cost 2
-        
         | Script_typed_ir.List_map _ =&gt; Alpha_context.Gas.alloc_cost 5
-        
         | Script_typed_ir.List_iter _ =&gt; Alpha_context.Gas.alloc_cost 4
-        
         | Script_typed_ir.List_size =&gt; Alpha_context.Gas.alloc_cost 1
-        
         | Script_typed_ir.Empty_set _ =&gt; Alpha_context.Gas.alloc_cost 1
-        
         | Script_typed_ir.Set_iter _ =&gt; Alpha_context.Gas.alloc_cost 4
-        
         | Script_typed_ir.Set_mem =&gt; Alpha_context.Gas.alloc_cost 1
-        
         | Script_typed_ir.Set_update =&gt; Alpha_context.Gas.alloc_cost 1
-        
         | Script_typed_ir.Set_size =&gt; Alpha_context.Gas.alloc_cost 1
-        
         | Script_typed_ir.Empty_map _ _ =&gt; Alpha_context.Gas.alloc_cost 2
-        
         | Script_typed_ir.Map_map _ =&gt; Alpha_context.Gas.alloc_cost 5
-        
         | Script_typed_ir.Map_iter _ =&gt; Alpha_context.Gas.alloc_cost 4
-        
         | Script_typed_ir.Map_mem =&gt; Alpha_context.Gas.alloc_cost 1
-        
         | Script_typed_ir.Map_get =&gt; Alpha_context.Gas.alloc_cost 1
-        
         | Script_typed_ir.Map_update =&gt; Alpha_context.Gas.alloc_cost 1
-        
         | Script_typed_ir.Map_size =&gt; Alpha_context.Gas.alloc_cost 1
-        
         | Script_typed_ir.Empty_big_map _ _ =&gt; Alpha_context.Gas.alloc_cost 2
-        
         | Script_typed_ir.Big_map_mem =&gt; Alpha_context.Gas.alloc_cost 1
-        
         | Script_typed_ir.Big_map_get =&gt; Alpha_context.Gas.alloc_cost 1
-        
         | Script_typed_ir.Big_map_update =&gt; Alpha_context.Gas.alloc_cost 1
-        
         | Script_typed_ir.Concat_string =&gt; Alpha_context.Gas.alloc_cost 1
-        
         | Script_typed_ir.Concat_string_pair =&gt; Alpha_context.Gas.alloc_cost 1
-        
         | Script_typed_ir.Concat_bytes =&gt; Alpha_context.Gas.alloc_cost 1
-        
         | Script_typed_ir.Concat_bytes_pair =&gt; Alpha_context.Gas.alloc_cost 1
-        
         | Script_typed_ir.Slice_string =&gt; Alpha_context.Gas.alloc_cost 1
-        
         | Script_typed_ir.Slice_bytes =&gt; Alpha_context.Gas.alloc_cost 1
-        
         | Script_typed_ir.String_size =&gt; Alpha_context.Gas.alloc_cost 1
-        
         | Script_typed_ir.Bytes_size =&gt; Alpha_context.Gas.alloc_cost 1
-        
         | Script_typed_ir.Add_seconds_to_timestamp =&gt;
           Alpha_context.Gas.alloc_cost 1
-        
         | Script_typed_ir.Add_timestamp_to_seconds =&gt;
           Alpha_context.Gas.alloc_cost 1
-        
         | Script_typed_ir.Sub_timestamp_seconds =&gt;
           Alpha_context.Gas.alloc_cost 1
-        
         | Script_typed_ir.Diff_timestamps =&gt; Alpha_context.Gas.alloc_cost 1
-        
         | Script_typed_ir.Add_tez =&gt; Alpha_context.Gas.alloc_cost 1
-        
         | Script_typed_ir.Sub_tez =&gt; Alpha_context.Gas.alloc_cost 1
-        
         | Script_typed_ir.Mul_teznat =&gt; Alpha_context.Gas.alloc_cost 1
-        
         | Script_typed_ir.Mul_nattez =&gt; Alpha_context.Gas.alloc_cost 1
-        
         | Script_typed_ir.Ediv_teznat =&gt; Alpha_context.Gas.alloc_cost 1
-        
         | Script_typed_ir.Ediv_tez =&gt; Alpha_context.Gas.alloc_cost 1
-        
         | Script_typed_ir.Or =&gt; Alpha_context.Gas.alloc_cost 1
-        
         | Script_typed_ir.And =&gt; Alpha_context.Gas.alloc_cost 1
-        
         | Script_typed_ir.Xor =&gt; Alpha_context.Gas.alloc_cost 1
-        
         | Script_typed_ir.Not =&gt; Alpha_context.Gas.alloc_cost 1
-        
         | Script_typed_ir.Is_nat =&gt; Alpha_context.Gas.alloc_cost 1
-        
         | Script_typed_ir.Neg_nat =&gt; Alpha_context.Gas.alloc_cost 1
-        
         | Script_typed_ir.Neg_int =&gt; Alpha_context.Gas.alloc_cost 1
-        
         | Script_typed_ir.Abs_int =&gt; Alpha_context.Gas.alloc_cost 1
-        
         | Script_typed_ir.Int_nat =&gt; Alpha_context.Gas.alloc_cost 1
-        
         | Script_typed_ir.Add_intint =&gt; Alpha_context.Gas.alloc_cost 1
-        
         | Script_typed_ir.Add_intnat =&gt; Alpha_context.Gas.alloc_cost 1
-        
         | Script_typed_ir.Add_natint =&gt; Alpha_context.Gas.alloc_cost 1
-        
         | Script_typed_ir.Add_natnat =&gt; Alpha_context.Gas.alloc_cost 1
-        
         | Script_typed_ir.Sub_int =&gt; Alpha_context.Gas.alloc_cost 1
-        
         | Script_typed_ir.Mul_intint =&gt; Alpha_context.Gas.alloc_cost 1
-        
         | Script_typed_ir.Mul_intnat =&gt; Alpha_context.Gas.alloc_cost 1
-        
         | Script_typed_ir.Mul_natint =&gt; Alpha_context.Gas.alloc_cost 1
-        
         | Script_typed_ir.Mul_natnat =&gt; Alpha_context.Gas.alloc_cost 1
-        
         | Script_typed_ir.Ediv_intint =&gt; Alpha_context.Gas.alloc_cost 1
-        
         | Script_typed_ir.Ediv_intnat =&gt; Alpha_context.Gas.alloc_cost 1
-        
         | Script_typed_ir.Ediv_natint =&gt; Alpha_context.Gas.alloc_cost 1
-        
         | Script_typed_ir.Ediv_natnat =&gt; Alpha_context.Gas.alloc_cost 1
-        
         | Script_typed_ir.Lsl_nat =&gt; Alpha_context.Gas.alloc_cost 1
-        
         | Script_typed_ir.Lsr_nat =&gt; Alpha_context.Gas.alloc_cost 1
-        
         | Script_typed_ir.Or_nat =&gt; Alpha_context.Gas.alloc_cost 1
-        
         | Script_typed_ir.And_nat =&gt; Alpha_context.Gas.alloc_cost 1
-        
         | Script_typed_ir.And_int_nat =&gt; Alpha_context.Gas.alloc_cost 1
-        
         | Script_typed_ir.Xor_nat =&gt; Alpha_context.Gas.alloc_cost 1
-        
         | Script_typed_ir.Not_nat =&gt; Alpha_context.Gas.alloc_cost 1
-        
         | Script_typed_ir.Not_int =&gt; Alpha_context.Gas.alloc_cost 1
-        
         | Script_typed_ir.Seq _ _ =&gt; Alpha_context.Gas.alloc_cost 8
-        
         | Script_typed_ir.If _ _ =&gt; Alpha_context.Gas.alloc_cost 8
-        
         | Script_typed_ir.Loop _ =&gt; Alpha_context.Gas.alloc_cost 4
-        
         | Script_typed_ir.Loop_left _ =&gt; Alpha_context.Gas.alloc_cost 5
-        
         | Script_typed_ir.Dip _ =&gt; Alpha_context.Gas.alloc_cost 4
-        
         | Script_typed_ir.Exec =&gt; Alpha_context.Gas.alloc_cost 1
-        
         | Script_typed_ir.Apply _ =&gt; Alpha_context.Gas.alloc_cost 1
-        
         | Script_typed_ir.Lambda _ =&gt; Alpha_context.Gas.alloc_cost 2
-        
         | Script_typed_ir.Failwith _ =&gt; Alpha_context.Gas.alloc_cost 1
-        
         | Script_typed_ir.Nop =&gt; Alpha_context.Gas.alloc_cost 0
-        
         | Script_typed_ir.Compare _ =&gt; Alpha_context.Gas.alloc_cost 1
-        
         | Script_typed_ir.Eq =&gt; Alpha_context.Gas.alloc_cost 1
-        
         | Script_typed_ir.Neq =&gt; Alpha_context.Gas.alloc_cost 1
-        
         | Script_typed_ir.Lt =&gt; Alpha_context.Gas.alloc_cost 1
-        
         | Script_typed_ir.Gt =&gt; Alpha_context.Gas.alloc_cost 1
-        
         | Script_typed_ir.Le =&gt; Alpha_context.Gas.alloc_cost 1
-        
         | Script_typed_ir.Ge =&gt; Alpha_context.Gas.alloc_cost 1
-        
         | Script_typed_ir.Address =&gt; Alpha_context.Gas.alloc_cost 1
-        
         | Script_typed_ir.Contract _ _ =&gt; Alpha_context.Gas.alloc_cost 2
-        
         | Script_typed_ir.Transfer_tokens =&gt; Alpha_context.Gas.alloc_cost 1
-        
         | Script_typed_ir.Create_account =&gt; Alpha_context.Gas.alloc_cost 2
-        
         | Script_typed_ir.Implicit_account =&gt; Alpha_context.Gas.alloc_cost 1
-        
         | Script_typed_ir.Create_contract _ _ _ _ =&gt;
           Alpha_context.Gas.alloc_cost 8
-        
         | Script_typed_ir.Create_contract_2 _ _ _ _ =&gt;
           Alpha_context.Gas.alloc_cost 7
-        
         | Script_typed_ir.Set_delegate =&gt; Alpha_context.Gas.alloc_cost 1
-        
         | Script_typed_ir.Now =&gt; Alpha_context.Gas.alloc_cost 1
-        
         | Script_typed_ir.Balance =&gt; Alpha_context.Gas.alloc_cost 1
-        
         | Script_typed_ir.Check_signature =&gt; Alpha_context.Gas.alloc_cost 1
-        
         | Script_typed_ir.Hash_key =&gt; Alpha_context.Gas.alloc_cost 1
-        
         | Script_typed_ir.Pack _ =&gt; Alpha_context.Gas.alloc_cost 2
-        
         | Script_typed_ir.Unpack _ =&gt; Alpha_context.Gas.alloc_cost 2
-        
         | Script_typed_ir.Blake2b =&gt; Alpha_context.Gas.alloc_cost 1
-        
         | Script_typed_ir.Sha256 =&gt; Alpha_context.Gas.alloc_cost 1
-        
         | Script_typed_ir.Sha512 =&gt; Alpha_context.Gas.alloc_cost 1
-        
         | Script_typed_ir.Steps_to_quota =&gt; Alpha_context.Gas.alloc_cost 1
-        
         | Script_typed_ir.Source =&gt; Alpha_context.Gas.alloc_cost 1
-        
         | Script_typed_ir.Sender =&gt; Alpha_context.Gas.alloc_cost 1
-        
         | Script_typed_ir.Self _ _ =&gt; Alpha_context.Gas.alloc_cost 2
-        
         | Script_typed_ir.Amount =&gt; Alpha_context.Gas.alloc_cost 1
-        
         | Script_typed_ir.Dig n _ =&gt;
           Alpha_context.Gas.op_starat n (Alpha_context.Gas.alloc_cost 1)
-        
         | Script_typed_ir.Dug n _ =&gt;
           Alpha_context.Gas.op_starat n (Alpha_context.Gas.alloc_cost 1)
-        
         | Script_typed_ir.Dipn n _ _ =&gt;
           Alpha_context.Gas.op_starat n (Alpha_context.Gas.alloc_cost 1)
-        
         | Script_typed_ir.Dropn n _ =&gt;
           Alpha_context.Gas.op_starat n (Alpha_context.Gas.alloc_cost 1)
-        
         | Script_typed_ir.ChainId =&gt; Alpha_context.Gas.alloc_cost 1
         end.
   End Typechecking.
@@ -50336,7 +50166,7 @@ End Cost_of.
     <h3>Michelson_v1_primitives</h3>
     <ul>
       <li>OCaml size: 872 lines</li>
-      <li>Coq size: 864 lines (-1% compared to&nbsp;OCaml)</li>
+      <li>Coq size: 621 lines (-29% compared to&nbsp;OCaml)</li>
     </ul>
   </div>
   <div class="col-md-6">
@@ -51419,239 +51249,122 @@ Definition valid_case (name : string) : bool :=
 Definition string_of_prim (function_parameter : prim) : string :=
   match function_parameter with
   | K_parameter =&gt; &quot;parameter&quot;
-  
   | K_storage =&gt; &quot;storage&quot;
-  
   | K_code =&gt; &quot;code&quot;
-  
   | D_False =&gt; &quot;False&quot;
-  
   | D_Elt =&gt; &quot;Elt&quot;
-  
   | D_Left =&gt; &quot;Left&quot;
-  
   | D_None =&gt; &quot;None&quot;
-  
   | D_Pair =&gt; &quot;Pair&quot;
-  
   | D_Right =&gt; &quot;Right&quot;
-  
   | D_Some =&gt; &quot;Some&quot;
-  
   | D_True =&gt; &quot;True&quot;
-  
   | D_Unit =&gt; &quot;Unit&quot;
-  
   | I_PACK =&gt; &quot;PACK&quot;
-  
   | I_UNPACK =&gt; &quot;UNPACK&quot;
-  
   | I_BLAKE2B =&gt; &quot;BLAKE2B&quot;
-  
   | I_SHA256 =&gt; &quot;SHA256&quot;
-  
   | I_SHA512 =&gt; &quot;SHA512&quot;
-  
   | I_ABS =&gt; &quot;ABS&quot;
-  
   | I_ADD =&gt; &quot;ADD&quot;
-  
   | I_AMOUNT =&gt; &quot;AMOUNT&quot;
-  
   | I_AND =&gt; &quot;AND&quot;
-  
   | I_BALANCE =&gt; &quot;BALANCE&quot;
-  
   | I_CAR =&gt; &quot;CAR&quot;
-  
   | I_CDR =&gt; &quot;CDR&quot;
-  
   | I_CHAIN_ID =&gt; &quot;CHAIN_ID&quot;
-  
   | I_CHECK_SIGNATURE =&gt; &quot;CHECK_SIGNATURE&quot;
-  
   | I_COMPARE =&gt; &quot;COMPARE&quot;
-  
   | I_CONCAT =&gt; &quot;CONCAT&quot;
-  
   | I_CONS =&gt; &quot;CONS&quot;
-  
   | I_CREATE_ACCOUNT =&gt; &quot;CREATE_ACCOUNT&quot;
-  
   | I_CREATE_CONTRACT =&gt; &quot;CREATE_CONTRACT&quot;
-  
   | I_IMPLICIT_ACCOUNT =&gt; &quot;IMPLICIT_ACCOUNT&quot;
-  
   | I_DIP =&gt; &quot;DIP&quot;
-  
   | I_DROP =&gt; &quot;DROP&quot;
-  
   | I_DUP =&gt; &quot;DUP&quot;
-  
   | I_EDIV =&gt; &quot;EDIV&quot;
-  
   | I_EMPTY_BIG_MAP =&gt; &quot;EMPTY_BIG_MAP&quot;
-  
   | I_EMPTY_MAP =&gt; &quot;EMPTY_MAP&quot;
-  
   | I_EMPTY_SET =&gt; &quot;EMPTY_SET&quot;
-  
   | I_EQ =&gt; &quot;EQ&quot;
-  
   | I_EXEC =&gt; &quot;EXEC&quot;
-  
   | I_APPLY =&gt; &quot;APPLY&quot;
-  
   | I_FAILWITH =&gt; &quot;FAILWITH&quot;
-  
   | I_GE =&gt; &quot;GE&quot;
-  
   | I_GET =&gt; &quot;GET&quot;
-  
   | I_GT =&gt; &quot;GT&quot;
-  
   | I_HASH_KEY =&gt; &quot;HASH_KEY&quot;
-  
   | I_IF =&gt; &quot;IF&quot;
-  
   | I_IF_CONS =&gt; &quot;IF_CONS&quot;
-  
   | I_IF_LEFT =&gt; &quot;IF_LEFT&quot;
-  
   | I_IF_NONE =&gt; &quot;IF_NONE&quot;
-  
   | I_INT =&gt; &quot;INT&quot;
-  
   | I_LAMBDA =&gt; &quot;LAMBDA&quot;
-  
   | I_LE =&gt; &quot;LE&quot;
-  
   | I_LEFT =&gt; &quot;LEFT&quot;
-  
   | I_LOOP =&gt; &quot;LOOP&quot;
-  
   | I_LSL =&gt; &quot;LSL&quot;
-  
   | I_LSR =&gt; &quot;LSR&quot;
-  
   | I_LT =&gt; &quot;LT&quot;
-  
   | I_MAP =&gt; &quot;MAP&quot;
-  
   | I_MEM =&gt; &quot;MEM&quot;
-  
   | I_MUL =&gt; &quot;MUL&quot;
-  
   | I_NEG =&gt; &quot;NEG&quot;
-  
   | I_NEQ =&gt; &quot;NEQ&quot;
-  
   | I_NIL =&gt; &quot;NIL&quot;
-  
   | I_NONE =&gt; &quot;NONE&quot;
-  
   | I_NOT =&gt; &quot;NOT&quot;
-  
   | I_NOW =&gt; &quot;NOW&quot;
-  
   | I_OR =&gt; &quot;OR&quot;
-  
   | I_PAIR =&gt; &quot;PAIR&quot;
-  
   | I_PUSH =&gt; &quot;PUSH&quot;
-  
   | I_RIGHT =&gt; &quot;RIGHT&quot;
-  
   | I_SIZE =&gt; &quot;SIZE&quot;
-  
   | I_SOME =&gt; &quot;SOME&quot;
-  
   | I_SOURCE =&gt; &quot;SOURCE&quot;
-  
   | I_SENDER =&gt; &quot;SENDER&quot;
-  
   | I_SELF =&gt; &quot;SELF&quot;
-  
   | I_SLICE =&gt; &quot;SLICE&quot;
-  
   | I_STEPS_TO_QUOTA =&gt; &quot;STEPS_TO_QUOTA&quot;
-  
   | I_SUB =&gt; &quot;SUB&quot;
-  
   | I_SWAP =&gt; &quot;SWAP&quot;
-  
   | I_TRANSFER_TOKENS =&gt; &quot;TRANSFER_TOKENS&quot;
-  
   | I_SET_DELEGATE =&gt; &quot;SET_DELEGATE&quot;
-  
   | I_UNIT =&gt; &quot;UNIT&quot;
-  
   | I_UPDATE =&gt; &quot;UPDATE&quot;
-  
   | I_XOR =&gt; &quot;XOR&quot;
-  
   | I_ITER =&gt; &quot;ITER&quot;
-  
   | I_LOOP_LEFT =&gt; &quot;LOOP_LEFT&quot;
-  
   | I_ADDRESS =&gt; &quot;ADDRESS&quot;
-  
   | I_CONTRACT =&gt; &quot;CONTRACT&quot;
-  
   | I_ISNAT =&gt; &quot;ISNAT&quot;
-  
   | I_CAST =&gt; &quot;CAST&quot;
-  
   | I_RENAME =&gt; &quot;RENAME&quot;
-  
   | I_DIG =&gt; &quot;DIG&quot;
-  
   | I_DUG =&gt; &quot;DUG&quot;
-  
   | T_bool =&gt; &quot;bool&quot;
-  
   | T_contract =&gt; &quot;contract&quot;
-  
   | T_int =&gt; &quot;int&quot;
-  
   | T_key =&gt; &quot;key&quot;
-  
   | T_key_hash =&gt; &quot;key_hash&quot;
-  
   | T_lambda =&gt; &quot;lambda&quot;
-  
   | T_list =&gt; &quot;list&quot;
-  
   | T_map =&gt; &quot;map&quot;
-  
   | T_big_map =&gt; &quot;big_map&quot;
-  
   | T_nat =&gt; &quot;nat&quot;
-  
   | T_option =&gt; &quot;option&quot;
-  
   | T_or =&gt; &quot;or&quot;
-  
   | T_pair =&gt; &quot;pair&quot;
-  
   | T_set =&gt; &quot;set&quot;
-  
   | T_signature =&gt; &quot;signature&quot;
-  
   | T_string =&gt; &quot;string&quot;
-  
   | T_bytes =&gt; &quot;bytes&quot;
-  
   | T_mutez =&gt; &quot;mutez&quot;
-  
   | T_timestamp =&gt; &quot;timestamp&quot;
-  
   | T_unit =&gt; &quot;unit&quot;
-  
   | T_operation =&gt; &quot;operation&quot;
-  
   | T_address =&gt; &quot;address&quot;
-  
   | T_chain_id =&gt; &quot;chain_id&quot;
   end.
 
@@ -51659,241 +51372,123 @@ Definition prim_of_string (function_parameter : string)
   : Error_monad.tzresult prim :=
   match function_parameter with
   | &quot;parameter&quot; =&gt; Error_monad.ok K_parameter
-  
   | &quot;storage&quot; =&gt; Error_monad.ok K_storage
-  
   | &quot;code&quot; =&gt; Error_monad.ok K_code
-  
   | &quot;False&quot; =&gt; Error_monad.ok D_False
-  
   | &quot;Elt&quot; =&gt; Error_monad.ok D_Elt
-  
   | &quot;Left&quot; =&gt; Error_monad.ok D_Left
-  
   | &quot;None&quot; =&gt; Error_monad.ok D_None
-  
   | &quot;Pair&quot; =&gt; Error_monad.ok D_Pair
-  
   | &quot;Right&quot; =&gt; Error_monad.ok D_Right
-  
   | &quot;Some&quot; =&gt; Error_monad.ok D_Some
-  
   | &quot;True&quot; =&gt; Error_monad.ok D_True
-  
   | &quot;Unit&quot; =&gt; Error_monad.ok D_Unit
-  
   | &quot;PACK&quot; =&gt; Error_monad.ok I_PACK
-  
   | &quot;UNPACK&quot; =&gt; Error_monad.ok I_UNPACK
-  
   | &quot;BLAKE2B&quot; =&gt; Error_monad.ok I_BLAKE2B
-  
   | &quot;SHA256&quot; =&gt; Error_monad.ok I_SHA256
-  
   | &quot;SHA512&quot; =&gt; Error_monad.ok I_SHA512
-  
   | &quot;ABS&quot; =&gt; Error_monad.ok I_ABS
-  
   | &quot;ADD&quot; =&gt; Error_monad.ok I_ADD
-  
   | &quot;AMOUNT&quot; =&gt; Error_monad.ok I_AMOUNT
-  
   | &quot;AND&quot; =&gt; Error_monad.ok I_AND
-  
   | &quot;BALANCE&quot; =&gt; Error_monad.ok I_BALANCE
-  
   | &quot;CAR&quot; =&gt; Error_monad.ok I_CAR
-  
   | &quot;CDR&quot; =&gt; Error_monad.ok I_CDR
-  
   | &quot;CHAIN_ID&quot; =&gt; Error_monad.ok I_CHAIN_ID
-  
   | &quot;CHECK_SIGNATURE&quot; =&gt; Error_monad.ok I_CHECK_SIGNATURE
-  
   | &quot;COMPARE&quot; =&gt; Error_monad.ok I_COMPARE
-  
   | &quot;CONCAT&quot; =&gt; Error_monad.ok I_CONCAT
-  
   | &quot;CONS&quot; =&gt; Error_monad.ok I_CONS
-  
   | &quot;CREATE_ACCOUNT&quot; =&gt; Error_monad.ok I_CREATE_ACCOUNT
-  
   | &quot;CREATE_CONTRACT&quot; =&gt; Error_monad.ok I_CREATE_CONTRACT
-  
   | &quot;IMPLICIT_ACCOUNT&quot; =&gt; Error_monad.ok I_IMPLICIT_ACCOUNT
-  
   | &quot;DIP&quot; =&gt; Error_monad.ok I_DIP
-  
   | &quot;DROP&quot; =&gt; Error_monad.ok I_DROP
-  
   | &quot;DUP&quot; =&gt; Error_monad.ok I_DUP
-  
   | &quot;EDIV&quot; =&gt; Error_monad.ok I_EDIV
-  
   | &quot;EMPTY_BIG_MAP&quot; =&gt; Error_monad.ok I_EMPTY_BIG_MAP
-  
   | &quot;EMPTY_MAP&quot; =&gt; Error_monad.ok I_EMPTY_MAP
-  
   | &quot;EMPTY_SET&quot; =&gt; Error_monad.ok I_EMPTY_SET
-  
   | &quot;EQ&quot; =&gt; Error_monad.ok I_EQ
-  
   | &quot;EXEC&quot; =&gt; Error_monad.ok I_EXEC
-  
   | &quot;APPLY&quot; =&gt; Error_monad.ok I_APPLY
-  
   | &quot;FAILWITH&quot; =&gt; Error_monad.ok I_FAILWITH
-  
   | &quot;GE&quot; =&gt; Error_monad.ok I_GE
-  
   | &quot;GET&quot; =&gt; Error_monad.ok I_GET
-  
   | &quot;GT&quot; =&gt; Error_monad.ok I_GT
-  
   | &quot;HASH_KEY&quot; =&gt; Error_monad.ok I_HASH_KEY
-  
   | &quot;IF&quot; =&gt; Error_monad.ok I_IF
-  
   | &quot;IF_CONS&quot; =&gt; Error_monad.ok I_IF_CONS
-  
   | &quot;IF_LEFT&quot; =&gt; Error_monad.ok I_IF_LEFT
-  
   | &quot;IF_NONE&quot; =&gt; Error_monad.ok I_IF_NONE
-  
   | &quot;INT&quot; =&gt; Error_monad.ok I_INT
-  
   | &quot;LAMBDA&quot; =&gt; Error_monad.ok I_LAMBDA
-  
   | &quot;LE&quot; =&gt; Error_monad.ok I_LE
-  
   | &quot;LEFT&quot; =&gt; Error_monad.ok I_LEFT
-  
   | &quot;LOOP&quot; =&gt; Error_monad.ok I_LOOP
-  
   | &quot;LSL&quot; =&gt; Error_monad.ok I_LSL
-  
   | &quot;LSR&quot; =&gt; Error_monad.ok I_LSR
-  
   | &quot;LT&quot; =&gt; Error_monad.ok I_LT
-  
   | &quot;MAP&quot; =&gt; Error_monad.ok I_MAP
-  
   | &quot;MEM&quot; =&gt; Error_monad.ok I_MEM
-  
   | &quot;MUL&quot; =&gt; Error_monad.ok I_MUL
-  
   | &quot;NEG&quot; =&gt; Error_monad.ok I_NEG
-  
   | &quot;NEQ&quot; =&gt; Error_monad.ok I_NEQ
-  
   | &quot;NIL&quot; =&gt; Error_monad.ok I_NIL
-  
   | &quot;NONE&quot; =&gt; Error_monad.ok I_NONE
-  
   | &quot;NOT&quot; =&gt; Error_monad.ok I_NOT
-  
   | &quot;NOW&quot; =&gt; Error_monad.ok I_NOW
-  
   | &quot;OR&quot; =&gt; Error_monad.ok I_OR
-  
   | &quot;PAIR&quot; =&gt; Error_monad.ok I_PAIR
-  
   | &quot;PUSH&quot; =&gt; Error_monad.ok I_PUSH
-  
   | &quot;RIGHT&quot; =&gt; Error_monad.ok I_RIGHT
-  
   | &quot;SIZE&quot; =&gt; Error_monad.ok I_SIZE
-  
   | &quot;SOME&quot; =&gt; Error_monad.ok I_SOME
-  
   | &quot;SOURCE&quot; =&gt; Error_monad.ok I_SOURCE
-  
   | &quot;SENDER&quot; =&gt; Error_monad.ok I_SENDER
-  
   | &quot;SELF&quot; =&gt; Error_monad.ok I_SELF
-  
   | &quot;SLICE&quot; =&gt; Error_monad.ok I_SLICE
-  
   | &quot;STEPS_TO_QUOTA&quot; =&gt; Error_monad.ok I_STEPS_TO_QUOTA
-  
   | &quot;SUB&quot; =&gt; Error_monad.ok I_SUB
-  
   | &quot;SWAP&quot; =&gt; Error_monad.ok I_SWAP
-  
   | &quot;TRANSFER_TOKENS&quot; =&gt; Error_monad.ok I_TRANSFER_TOKENS
-  
   | &quot;SET_DELEGATE&quot; =&gt; Error_monad.ok I_SET_DELEGATE
-  
   | &quot;UNIT&quot; =&gt; Error_monad.ok I_UNIT
-  
   | &quot;UPDATE&quot; =&gt; Error_monad.ok I_UPDATE
-  
   | &quot;XOR&quot; =&gt; Error_monad.ok I_XOR
-  
   | &quot;ITER&quot; =&gt; Error_monad.ok I_ITER
-  
   | &quot;LOOP_LEFT&quot; =&gt; Error_monad.ok I_LOOP_LEFT
-  
   | &quot;ADDRESS&quot; =&gt; Error_monad.ok I_ADDRESS
-  
   | &quot;CONTRACT&quot; =&gt; Error_monad.ok I_CONTRACT
-  
   | &quot;ISNAT&quot; =&gt; Error_monad.ok I_ISNAT
-  
   | &quot;CAST&quot; =&gt; Error_monad.ok I_CAST
-  
   | &quot;RENAME&quot; =&gt; Error_monad.ok I_RENAME
-  
   | &quot;DIG&quot; =&gt; Error_monad.ok I_DIG
-  
   | &quot;DUG&quot; =&gt; Error_monad.ok I_DUG
-  
   | &quot;bool&quot; =&gt; Error_monad.ok T_bool
-  
   | &quot;contract&quot; =&gt; Error_monad.ok T_contract
-  
   | &quot;int&quot; =&gt; Error_monad.ok T_int
-  
   | &quot;key&quot; =&gt; Error_monad.ok T_key
-  
   | &quot;key_hash&quot; =&gt; Error_monad.ok T_key_hash
-  
   | &quot;lambda&quot; =&gt; Error_monad.ok T_lambda
-  
   | &quot;list&quot; =&gt; Error_monad.ok T_list
-  
   | &quot;map&quot; =&gt; Error_monad.ok T_map
-  
   | &quot;big_map&quot; =&gt; Error_monad.ok T_big_map
-  
   | &quot;nat&quot; =&gt; Error_monad.ok T_nat
-  
   | &quot;option&quot; =&gt; Error_monad.ok T_option
-  
   | &quot;or&quot; =&gt; Error_monad.ok T_or
-  
   | &quot;pair&quot; =&gt; Error_monad.ok T_pair
-  
   | &quot;set&quot; =&gt; Error_monad.ok T_set
-  
   | &quot;signature&quot; =&gt; Error_monad.ok T_signature
-  
   | &quot;string&quot; =&gt; Error_monad.ok T_string
-  
   | &quot;bytes&quot; =&gt; Error_monad.ok T_bytes
-  
   | &quot;mutez&quot; =&gt; Error_monad.ok T_mutez
-  
   | &quot;timestamp&quot; =&gt; Error_monad.ok T_timestamp
-  
   | &quot;unit&quot; =&gt; Error_monad.ok T_unit
-  
   | &quot;operation&quot; =&gt; Error_monad.ok T_operation
-  
   | &quot;address&quot; =&gt; Error_monad.ok T_address
-  
   | &quot;chain_id&quot; =&gt; Error_monad.ok T_chain_id
-  
   | n =&gt;
     if valid_case n then
       Error_monad.__error_value extensible_type_value
@@ -51909,11 +51504,8 @@ Definition prims_of_strings (expr : Micheline.canonical string)
     : Error_monad.tzresult (Micheline.node Micheline.canonical_location prim) :=
     match function_parameter with
     | Micheline.Int l x =&gt; Error_monad.ok (Micheline.Int l x)
-    
     | Micheline.String l x =&gt; Error_monad.ok (Micheline.String l x)
-    
     | Micheline.Bytes l x =&gt; Error_monad.ok (Micheline.Bytes l x)
-    
     | Micheline.Prim loc prim args annot =&gt;
       let? prim :=
         Error_monad.record_trace extensible_type_value (prim_of_string prim) in
@@ -51925,7 +51517,6 @@ Definition prims_of_strings (expr : Micheline.canonical string)
               let? arg := convert arg in
               Error_monad.ok (cons arg args)) (Error_monad.ok nil) args in
       Error_monad.ok (Micheline.Prim 0 prim (List.rev args) annot)
-    
     | Micheline.Seq _ args =&gt;
       let? args :=
         List.fold_left
@@ -51945,16 +51536,12 @@ Definition strings_of_prims (expr : Micheline.canonical prim)
     {struct function_parameter} : Micheline.node int string :=
     match function_parameter with
     | Micheline.Int l x =&gt; Micheline.Int l x
-    
     | Micheline.String l x =&gt; Micheline.String l x
-    
     | Micheline.Bytes l x =&gt; Micheline.Bytes l x
-    
     | Micheline.Prim _ prim args annot =&gt;
       let prim := string_of_prim prim in
       let args := List.map convert args in
       Micheline.Prim 0 prim args annot
-    
     | Micheline.Seq _ args =&gt;
       let args := List.map convert args in
       Micheline.Seq 0 args
@@ -53388,7 +52975,7 @@ Parameter check_hash : nonce -&gt; Nonce_hash.t -&gt; bool.
     <h3>Operation_repr</h3>
     <ul>
       <li>OCaml size: 858 lines</li>
-      <li>Coq size: 1422 lines (+65% compared to&nbsp;OCaml)</li>
+      <li>Coq size: 1407 lines (+63% compared to&nbsp;OCaml)</li>
     </ul>
   </div>
   <div class="col-md-6">
@@ -55493,21 +55080,13 @@ Definition acceptable_passes (op : packed_operation) : list int :=
       protocol_data in
   match protocol_data.(protocol_data.contents) with
   | Single (Endorsement _) =&gt; [ 0 ]
-  
   | Single (Proposals _) =&gt; [ 1 ]
-  
   | Single (Ballot _) =&gt; [ 1 ]
-  
   | Single (Seed_nonce_revelation _) =&gt; [ 2 ]
-  
   | Single (Double_endorsement_evidence _) =&gt; [ 2 ]
-  
   | Single (Double_baking_evidence _) =&gt; [ 2 ]
-  
   | Single (Activate_account _) =&gt; [ 2 ]
-  
   | Single (Manager_operation _) =&gt; [ 3 ]
-  
   | Cons _ _ =&gt; [ 3 ]
   end.
 
@@ -55590,19 +55169,12 @@ Definition equal_manager_operation_kind
   (op1 : manager_operation) (op2 : manager_operation) : option eq :=
   match (op1, op2) with
   | (Reveal _, Reveal _) =&gt; Some Eq
-  
   | (Reveal _, _) =&gt; None
-  
   | (Transaction _, Transaction _) =&gt; Some Eq
-  
   | (Transaction _, _) =&gt; None
-  
   | (Origination _, Origination _) =&gt; Some Eq
-  
   | (Origination _, _) =&gt; None
-  
   | (Delegation _, Delegation _) =&gt; Some Eq
-  
   | (Delegation _, _) =&gt; None
   end.
 
@@ -58041,7 +57613,7 @@ Definition Make :=
     <h3>Raw_context</h3>
     <ul>
       <li>OCaml size: 754 lines</li>
-      <li>Coq size: 953 lines (+26% compared to&nbsp;OCaml)</li>
+      <li>Coq size: 947 lines (+25% compared to&nbsp;OCaml)</li>
     </ul>
   </div>
   <div class="col-md-6">
@@ -59362,7 +58934,6 @@ Definition pp_storage_error
             (CamlinternalFormatBasics.String_literal &quot;'.&quot;
               CamlinternalFormatBasics.End_of_format)))
         &quot;Found a context with an unexpected version '%s'.&quot;) version
-  
   | Missing_key __key_value Get =&gt;
     Format.fprintf ppf
       (CamlinternalFormatBasics.Format
@@ -59371,7 +58942,6 @@ Definition pp_storage_error
             (CamlinternalFormatBasics.String_literal &quot;'.&quot;
               CamlinternalFormatBasics.End_of_format))) &quot;Missing key '%s'.&quot;)
       (String.concat &quot;/&quot; __key_value)
-  
   | Missing_key __key_value __Set =&gt;
     Format.fprintf ppf
       (CamlinternalFormatBasics.Format
@@ -59380,7 +58950,6 @@ Definition pp_storage_error
             (CamlinternalFormatBasics.String_literal &quot;'.&quot;
               CamlinternalFormatBasics.End_of_format)))
         &quot;Cannot set undefined key '%s'.&quot;) (String.concat &quot;/&quot; __key_value)
-  
   | Missing_key __key_value Del =&gt;
     Format.fprintf ppf
       (CamlinternalFormatBasics.Format
@@ -59389,7 +58958,6 @@ Definition pp_storage_error
             (CamlinternalFormatBasics.String_literal &quot;'.&quot;
               CamlinternalFormatBasics.End_of_format)))
         &quot;Cannot delete undefined key '%s'.&quot;) (String.concat &quot;/&quot; __key_value)
-  
   | Missing_key __key_value Copy =&gt;
     Format.fprintf ppf
       (CamlinternalFormatBasics.Format
@@ -59398,7 +58966,6 @@ Definition pp_storage_error
             (CamlinternalFormatBasics.String_literal &quot;'.&quot;
               CamlinternalFormatBasics.End_of_format)))
         &quot;Cannot copy undefined key '%s'.&quot;) (String.concat &quot;/&quot; __key_value)
-  
   | Existing_key __key_value =&gt;
     Format.fprintf ppf
       (CamlinternalFormatBasics.Format
@@ -59408,7 +58975,6 @@ Definition pp_storage_error
             (CamlinternalFormatBasics.String_literal &quot;'.&quot;
               CamlinternalFormatBasics.End_of_format)))
         &quot;Cannot initialize defined key '%s'.&quot;) (String.concat &quot;/&quot; __key_value)
-  
   | Corrupted_data __key_value =&gt;
     Format.fprintf ppf
       (CamlinternalFormatBasics.Format
@@ -69336,7 +68902,7 @@ Parameter parse_var_type_annot :
     <h3>Script_ir_translator</h3>
     <ul>
       <li>OCaml size: 5995 lines</li>
-      <li>Coq size: 8695 lines (+45% compared to&nbsp;OCaml)</li>
+      <li>Coq size: 8438 lines (+40% compared to&nbsp;OCaml)</li>
     </ul>
   </div>
   <div class="col-md-6">
@@ -75944,257 +75510,131 @@ Definition number_of_generated_growing_types
   (function_parameter : Script_typed_ir.instr) : int :=
   match function_parameter with
   | Script_typed_ir.Drop =&gt; 0
-  
   | Script_typed_ir.Dup =&gt; 0
-  
   | Script_typed_ir.Swap =&gt; 0
-  
   | Script_typed_ir.Const _ =&gt; 1
-  
   | Script_typed_ir.Cons_pair =&gt; 1
-  
   | Script_typed_ir.Car =&gt; 0
-  
   | Script_typed_ir.Cdr =&gt; 0
-  
   | Script_typed_ir.Cons_some =&gt; 1
-  
   | Script_typed_ir.Cons_none _ =&gt; 1
-  
   | Script_typed_ir.If_none _ _ =&gt; 0
-  
   | Script_typed_ir.Left =&gt; 0
-  
   | Script_typed_ir.Right =&gt; 0
-  
   | Script_typed_ir.If_left _ _ =&gt; 0
-  
   | Script_typed_ir.Cons_list =&gt; 1
-  
   | Script_typed_ir.Nil =&gt; 1
-  
   | Script_typed_ir.If_cons _ _ =&gt; 0
-  
   | Script_typed_ir.List_map _ =&gt; 1
-  
   | Script_typed_ir.List_size =&gt; 0
-  
   | Script_typed_ir.List_iter _ =&gt; 1
-  
   | Script_typed_ir.Empty_set _ =&gt; 1
-  
   | Script_typed_ir.Set_iter _ =&gt; 0
-  
   | Script_typed_ir.Set_mem =&gt; 0
-  
   | Script_typed_ir.Set_update =&gt; 0
-  
   | Script_typed_ir.Set_size =&gt; 0
-  
   | Script_typed_ir.Empty_map _ _ =&gt; 1
-  
   | Script_typed_ir.Map_map _ =&gt; 1
-  
   | Script_typed_ir.Map_iter _ =&gt; 1
-  
   | Script_typed_ir.Map_mem =&gt; 0
-  
   | Script_typed_ir.Map_get =&gt; 0
-  
   | Script_typed_ir.Map_update =&gt; 0
-  
   | Script_typed_ir.Map_size =&gt; 0
-  
   | Script_typed_ir.Empty_big_map _ _ =&gt; 1
-  
   | Script_typed_ir.Big_map_get =&gt; 0
-  
   | Script_typed_ir.Big_map_update =&gt; 0
-  
   | Script_typed_ir.Big_map_mem =&gt; 0
-  
   | Script_typed_ir.Concat_string =&gt; 0
-  
   | Script_typed_ir.Concat_string_pair =&gt; 0
-  
   | Script_typed_ir.Slice_string =&gt; 0
-  
   | Script_typed_ir.String_size =&gt; 0
-  
   | Script_typed_ir.Concat_bytes =&gt; 0
-  
   | Script_typed_ir.Concat_bytes_pair =&gt; 0
-  
   | Script_typed_ir.Slice_bytes =&gt; 0
-  
   | Script_typed_ir.Bytes_size =&gt; 0
-  
   | Script_typed_ir.Add_seconds_to_timestamp =&gt; 0
-  
   | Script_typed_ir.Add_timestamp_to_seconds =&gt; 0
-  
   | Script_typed_ir.Sub_timestamp_seconds =&gt; 0
-  
   | Script_typed_ir.Diff_timestamps =&gt; 0
-  
   | Script_typed_ir.Add_tez =&gt; 0
-  
   | Script_typed_ir.Sub_tez =&gt; 0
-  
   | Script_typed_ir.Mul_teznat =&gt; 0
-  
   | Script_typed_ir.Mul_nattez =&gt; 0
-  
   | Script_typed_ir.Ediv_teznat =&gt; 0
-  
   | Script_typed_ir.Ediv_tez =&gt; 0
-  
   | Script_typed_ir.Or =&gt; 0
-  
   | Script_typed_ir.And =&gt; 0
-  
   | Script_typed_ir.Xor =&gt; 0
-  
   | Script_typed_ir.Not =&gt; 0
-  
   | Script_typed_ir.Is_nat =&gt; 0
-  
   | Script_typed_ir.Neg_nat =&gt; 0
-  
   | Script_typed_ir.Neg_int =&gt; 0
-  
   | Script_typed_ir.Abs_int =&gt; 0
-  
   | Script_typed_ir.Int_nat =&gt; 0
-  
   | Script_typed_ir.Add_intint =&gt; 0
-  
   | Script_typed_ir.Add_intnat =&gt; 0
-  
   | Script_typed_ir.Add_natint =&gt; 0
-  
   | Script_typed_ir.Add_natnat =&gt; 0
-  
   | Script_typed_ir.Sub_int =&gt; 0
-  
   | Script_typed_ir.Mul_intint =&gt; 0
-  
   | Script_typed_ir.Mul_intnat =&gt; 0
-  
   | Script_typed_ir.Mul_natint =&gt; 0
-  
   | Script_typed_ir.Mul_natnat =&gt; 0
-  
   | Script_typed_ir.Ediv_intint =&gt; 0
-  
   | Script_typed_ir.Ediv_intnat =&gt; 0
-  
   | Script_typed_ir.Ediv_natint =&gt; 0
-  
   | Script_typed_ir.Ediv_natnat =&gt; 0
-  
   | Script_typed_ir.Lsl_nat =&gt; 0
-  
   | Script_typed_ir.Lsr_nat =&gt; 0
-  
   | Script_typed_ir.Or_nat =&gt; 0
-  
   | Script_typed_ir.And_nat =&gt; 0
-  
   | Script_typed_ir.And_int_nat =&gt; 0
-  
   | Script_typed_ir.Xor_nat =&gt; 0
-  
   | Script_typed_ir.Not_nat =&gt; 0
-  
   | Script_typed_ir.Not_int =&gt; 0
-  
   | Script_typed_ir.Seq _ _ =&gt; 0
-  
   | Script_typed_ir.If _ _ =&gt; 0
-  
   | Script_typed_ir.Loop _ =&gt; 0
-  
   | Script_typed_ir.Loop_left _ =&gt; 0
-  
   | Script_typed_ir.Dip _ =&gt; 0
-  
   | Script_typed_ir.Exec =&gt; 0
-  
   | Script_typed_ir.Apply _ =&gt; 0
-  
   | Script_typed_ir.Lambda _ =&gt; 1
-  
   | Script_typed_ir.Failwith _ =&gt; 1
-  
   | Script_typed_ir.Nop =&gt; 0
-  
   | Script_typed_ir.Compare _ =&gt; 1
-  
   | Script_typed_ir.Eq =&gt; 0
-  
   | Script_typed_ir.Neq =&gt; 0
-  
   | Script_typed_ir.Lt =&gt; 0
-  
   | Script_typed_ir.Gt =&gt; 0
-  
   | Script_typed_ir.Le =&gt; 0
-  
   | Script_typed_ir.Ge =&gt; 0
-  
   | Script_typed_ir.Address =&gt; 0
-  
   | Script_typed_ir.Contract _ _ =&gt; 1
-  
   | Script_typed_ir.Transfer_tokens =&gt; 1
-  
   | Script_typed_ir.Create_account =&gt; 0
-  
   | Script_typed_ir.Implicit_account =&gt; 0
-  
   | Script_typed_ir.Create_contract _ _ _ _ =&gt; 1
-  
   | Script_typed_ir.Create_contract_2 _ _ _ _ =&gt; 1
-  
   | Script_typed_ir.Now =&gt; 0
-  
   | Script_typed_ir.Balance =&gt; 0
-  
   | Script_typed_ir.Check_signature =&gt; 0
-  
   | Script_typed_ir.Hash_key =&gt; 0
-  
   | Script_typed_ir.Blake2b =&gt; 0
-  
   | Script_typed_ir.Sha256 =&gt; 0
-  
   | Script_typed_ir.Sha512 =&gt; 0
-  
   | Script_typed_ir.Steps_to_quota =&gt; 0
-  
   | Script_typed_ir.Source =&gt; 0
-  
   | Script_typed_ir.Sender =&gt; 0
-  
   | Script_typed_ir.Self _ _ =&gt; 1
-  
   | Script_typed_ir.Amount =&gt; 0
-  
   | Script_typed_ir.Set_delegate =&gt; 0
-  
   | Script_typed_ir.Pack _ =&gt; 0
-  
   | Script_typed_ir.Unpack _ =&gt; 1
-  
   | Script_typed_ir.Dig _ _ =&gt; 0
-  
   | Script_typed_ir.Dug _ _ =&gt; 0
-  
   | Script_typed_ir.Dipn _ _ _ =&gt; 0
-  
   | Script_typed_ir.Dropn _ _ =&gt; 0
-  
   | Script_typed_ir.ChainId =&gt; 0
   end.
 
@@ -76209,13 +75649,9 @@ Definition kind {A B : Set} (function_parameter : Micheline.node A B)
   : Script_tc_errors.kind :=
   match function_parameter with
   | Micheline.Int _ _ =&gt; Script_tc_errors.Int_kind
-  
   | Micheline.String _ _ =&gt; Script_tc_errors.String_kind
-  
   | Micheline.Bytes _ _ =&gt; Script_tc_errors.Bytes_kind
-  
   | Micheline.Prim _ _ _ _ =&gt; Script_tc_errors.Prim_kind
-  
   | Micheline.Seq _ _ =&gt; Script_tc_errors.Seq_kind
   end.
 
@@ -76296,13 +75732,9 @@ Definition unexpected
   (exp_prims : list Alpha_context.Script.prim) : Error_monad.__error :=
   match expr with
   | Micheline.Int loc _ =&gt; extensible_type_value
-  
   | Micheline.String loc _ =&gt; extensible_type_value
-  
   | Micheline.Bytes loc _ =&gt; extensible_type_value
-  
   | Micheline.Seq loc _ =&gt; extensible_type_value
-  
   | Micheline.Prim loc name _ _ =&gt;
     match ((namespace name), exp_ns) with
     |
@@ -76655,49 +76087,39 @@ Fixpoint comparable_ty_of_ty (function_parameter : Script_typed_ir.ty)
     | Some rty =&gt;
       match comparable_ty_of_ty l with
       | None =&gt; None
-      
       | Some (Script_typed_ir.Pair_key _ _ _) =&gt; None
-      
       | Some (Script_typed_ir.Int_key tname) =&gt;
         Some
           (Script_typed_ir.Pair_key ((Script_typed_ir.Int_key tname), al)
             (rty, ar) pname)
-      
       | Some (Script_typed_ir.Nat_key tname) =&gt;
         Some
           (Script_typed_ir.Pair_key ((Script_typed_ir.Nat_key tname), al)
             (rty, ar) pname)
-      
       | Some (Script_typed_ir.String_key tname) =&gt;
         Some
           (Script_typed_ir.Pair_key ((Script_typed_ir.String_key tname), al)
             (rty, ar) pname)
-      
       | Some (Script_typed_ir.Bytes_key tname) =&gt;
         Some
           (Script_typed_ir.Pair_key ((Script_typed_ir.Bytes_key tname), al)
             (rty, ar) pname)
-      
       | Some (Script_typed_ir.Mutez_key tname) =&gt;
         Some
           (Script_typed_ir.Pair_key ((Script_typed_ir.Mutez_key tname), al)
             (rty, ar) pname)
-      
       | Some (Script_typed_ir.Bool_key tname) =&gt;
         Some
           (Script_typed_ir.Pair_key ((Script_typed_ir.Bool_key tname), al)
             (rty, ar) pname)
-      
       | Some (Script_typed_ir.Key_hash_key tname) =&gt;
         Some
           (Script_typed_ir.Pair_key ((Script_typed_ir.Key_hash_key tname), al)
             (rty, ar) pname)
-      
       | Some (Script_typed_ir.Timestamp_key tname) =&gt;
         Some
           (Script_typed_ir.Pair_key ((Script_typed_ir.Timestamp_key tname), al)
             (rty, ar) pname)
-      
       | Some (Script_typed_ir.Address_key tname) =&gt;
         Some
           (Script_typed_ir.Pair_key ((Script_typed_ir.Address_key tname), al)
@@ -77037,49 +76459,27 @@ Definition name_of_ty (function_parameter : Script_typed_ir.ty)
   : option Script_typed_ir.type_annot :=
   match function_parameter with
   | Script_typed_ir.Unit_t tname =&gt; tname
-  
   | Script_typed_ir.Int_t tname =&gt; tname
-  
   | Script_typed_ir.Nat_t tname =&gt; tname
-  
   | Script_typed_ir.String_t tname =&gt; tname
-  
   | Script_typed_ir.Bytes_t tname =&gt; tname
-  
   | Script_typed_ir.Mutez_t tname =&gt; tname
-  
   | Script_typed_ir.Bool_t tname =&gt; tname
-  
   | Script_typed_ir.Key_hash_t tname =&gt; tname
-  
   | Script_typed_ir.Key_t tname =&gt; tname
-  
   | Script_typed_ir.Timestamp_t tname =&gt; tname
-  
   | Script_typed_ir.Address_t tname =&gt; tname
-  
   | Script_typed_ir.Signature_t tname =&gt; tname
-  
   | Script_typed_ir.Operation_t tname =&gt; tname
-  
   | Script_typed_ir.Chain_id_t tname =&gt; tname
-  
   | Script_typed_ir.Contract_t _ tname =&gt; tname
-  
   | Script_typed_ir.Pair_t _ _ tname _ =&gt; tname
-  
   | Script_typed_ir.Union_t _ _ tname _ =&gt; tname
-  
   | Script_typed_ir.Lambda_t _ _ tname =&gt; tname
-  
   | Script_typed_ir.Option_t _ tname _ =&gt; tname
-  
   | Script_typed_ir.List_t _ tname _ =&gt; tname
-  
   | Script_typed_ir.Set_t _ tname =&gt; tname
-  
   | Script_typed_ir.Map_t _ _ tname _ =&gt; tname
-  
   | Script_typed_ir.Big_map_t _ _ tname =&gt; tname
   end.
 
@@ -77091,29 +76491,20 @@ Definition comparable_ty_eq
   (tb : Script_typed_ir.comparable_ty) : Error_monad.tzresult eq :=
   match (ta, tb) with
   | (Script_typed_ir.Int_key _, Script_typed_ir.Int_key _) =&gt; Pervasives.Ok Eq
-  
   | (Script_typed_ir.Nat_key _, Script_typed_ir.Nat_key _) =&gt; Pervasives.Ok Eq
-  
   | (Script_typed_ir.String_key _, Script_typed_ir.String_key _) =&gt;
     Pervasives.Ok Eq
-  
   | (Script_typed_ir.Bytes_key _, Script_typed_ir.Bytes_key _) =&gt;
     Pervasives.Ok Eq
-  
   | (Script_typed_ir.Mutez_key _, Script_typed_ir.Mutez_key _) =&gt;
     Pervasives.Ok Eq
-  
   | (Script_typed_ir.Bool_key _, Script_typed_ir.Bool_key _) =&gt; Pervasives.Ok Eq
-  
   | (Script_typed_ir.Key_hash_key _, Script_typed_ir.Key_hash_key _) =&gt;
     Pervasives.Ok Eq
-  
   | (Script_typed_ir.Timestamp_key _, Script_typed_ir.Timestamp_key _) =&gt;
     Pervasives.Ok Eq
-  
   | (Script_typed_ir.Address_key _, Script_typed_ir.Address_key _) =&gt;
     Pervasives.Ok Eq
-  
   | (_, _) =&gt;
     let? '(ta, ctxt) := serialize_ty_for_error ctxt (ty_of_comparable_ty ta) in
     let? '(tb, _ctxt) := serialize_ty_for_error ctxt (ty_of_comparable_ty tb) in
@@ -77323,51 +76714,42 @@ Definition merge_comparable_types
     Error_monad.op_gtpipequestion
       (Script_ir_annot.merge_type_annot legacy annot_a annot_b)
       (fun annot =&gt; Script_typed_ir.Int_key annot)
-  
   | (Script_typed_ir.Nat_key annot_a, Script_typed_ir.Nat_key annot_b) =&gt;
     Error_monad.op_gtpipequestion
       (Script_ir_annot.merge_type_annot legacy annot_a annot_b)
       (fun annot =&gt; Script_typed_ir.Nat_key annot)
-  
   | (Script_typed_ir.String_key annot_a, Script_typed_ir.String_key annot_b) =&gt;
     Error_monad.op_gtpipequestion
       (Script_ir_annot.merge_type_annot legacy annot_a annot_b)
       (fun annot =&gt; Script_typed_ir.String_key annot)
-  
   | (Script_typed_ir.Bytes_key annot_a, Script_typed_ir.Bytes_key annot_b) =&gt;
     Error_monad.op_gtpipequestion
       (Script_ir_annot.merge_type_annot legacy annot_a annot_b)
       (fun annot =&gt; Script_typed_ir.Bytes_key annot)
-  
   | (Script_typed_ir.Mutez_key annot_a, Script_typed_ir.Mutez_key annot_b) =&gt;
     Error_monad.op_gtpipequestion
       (Script_ir_annot.merge_type_annot legacy annot_a annot_b)
       (fun annot =&gt; Script_typed_ir.Mutez_key annot)
-  
   | (Script_typed_ir.Bool_key annot_a, Script_typed_ir.Bool_key annot_b) =&gt;
     Error_monad.op_gtpipequestion
       (Script_ir_annot.merge_type_annot legacy annot_a annot_b)
       (fun annot =&gt; Script_typed_ir.Bool_key annot)
-  
   | (Script_typed_ir.Key_hash_key annot_a, Script_typed_ir.Key_hash_key annot_b)
     =&gt;
     Error_monad.op_gtpipequestion
       (Script_ir_annot.merge_type_annot legacy annot_a annot_b)
       (fun annot =&gt; Script_typed_ir.Key_hash_key annot)
-  
   |
     (Script_typed_ir.Timestamp_key annot_a,
       Script_typed_ir.Timestamp_key annot_b) =&gt;
     Error_monad.op_gtpipequestion
       (Script_ir_annot.merge_type_annot legacy annot_a annot_b)
       (fun annot =&gt; Script_typed_ir.Timestamp_key annot)
-  
   | (Script_typed_ir.Address_key annot_a, Script_typed_ir.Address_key annot_b)
     =&gt;
     Error_monad.op_gtpipequestion
       (Script_ir_annot.merge_type_annot legacy annot_a annot_b)
       (fun annot =&gt; Script_typed_ir.Address_key annot)
-  
   | (_, _) =&gt;
     (* ❌ Assert instruction is not handled. *)
     assert (Error_monad.tzresult Script_typed_ir.comparable_ty) false
@@ -77666,49 +77048,27 @@ Definition merge_stacks (legacy : bool) (loc : Alpha_context.Script.location)
 Definition has_big_map (function_parameter : Script_typed_ir.ty) : bool :=
   match function_parameter with
   | Script_typed_ir.Unit_t _ =&gt; false
-  
   | Script_typed_ir.Int_t _ =&gt; false
-  
   | Script_typed_ir.Nat_t _ =&gt; false
-  
   | Script_typed_ir.Signature_t _ =&gt; false
-  
   | Script_typed_ir.String_t _ =&gt; false
-  
   | Script_typed_ir.Bytes_t _ =&gt; false
-  
   | Script_typed_ir.Mutez_t _ =&gt; false
-  
   | Script_typed_ir.Key_hash_t _ =&gt; false
-  
   | Script_typed_ir.Key_t _ =&gt; false
-  
   | Script_typed_ir.Timestamp_t _ =&gt; false
-  
   | Script_typed_ir.Address_t _ =&gt; false
-  
   | Script_typed_ir.Bool_t _ =&gt; false
-  
   | Script_typed_ir.Lambda_t _ _ _ =&gt; false
-  
   | Script_typed_ir.Set_t _ _ =&gt; false
-  
   | Script_typed_ir.Big_map_t _ _ _ =&gt; true
-  
   | Script_typed_ir.Contract_t _ _ =&gt; false
-  
   | Script_typed_ir.Operation_t _ =&gt; false
-  
   | Script_typed_ir.Chain_id_t _ =&gt; false
-  
   | Script_typed_ir.Pair_t _ _ _ has_big_map =&gt; has_big_map
-  
   | Script_typed_ir.Union_t _ _ _ has_big_map =&gt; has_big_map
-  
   | Script_typed_ir.Option_t _ _ has_big_map =&gt; has_big_map
-  
   | Script_typed_ir.List_t _ _ has_big_map =&gt; has_big_map
-  
   | Script_typed_ir.Map_t _ _ _ has_big_map =&gt; has_big_map
   end.
 
@@ -77819,43 +77179,34 @@ Fixpoint parse_comparable_ty
   | Micheline.Prim loc Alpha_context.Script.T_int [] annot =&gt;
     Error_monad.op_gtpipequestion (Script_ir_annot.parse_type_annot loc annot)
       (fun tname =&gt; ((Ex_comparable_ty (Script_typed_ir.Int_key tname)), ctxt))
-  
   | Micheline.Prim loc Alpha_context.Script.T_nat [] annot =&gt;
     Error_monad.op_gtpipequestion (Script_ir_annot.parse_type_annot loc annot)
       (fun tname =&gt; ((Ex_comparable_ty (Script_typed_ir.Nat_key tname)), ctxt))
-  
   | Micheline.Prim loc Alpha_context.Script.T_string [] annot =&gt;
     Error_monad.op_gtpipequestion (Script_ir_annot.parse_type_annot loc annot)
       (fun tname =&gt;
         ((Ex_comparable_ty (Script_typed_ir.String_key tname)), ctxt))
-  
   | Micheline.Prim loc Alpha_context.Script.T_bytes [] annot =&gt;
     Error_monad.op_gtpipequestion (Script_ir_annot.parse_type_annot loc annot)
       (fun tname =&gt; ((Ex_comparable_ty (Script_typed_ir.Bytes_key tname)), ctxt))
-  
   | Micheline.Prim loc Alpha_context.Script.T_mutez [] annot =&gt;
     Error_monad.op_gtpipequestion (Script_ir_annot.parse_type_annot loc annot)
       (fun tname =&gt; ((Ex_comparable_ty (Script_typed_ir.Mutez_key tname)), ctxt))
-  
   | Micheline.Prim loc Alpha_context.Script.T_bool [] annot =&gt;
     Error_monad.op_gtpipequestion (Script_ir_annot.parse_type_annot loc annot)
       (fun tname =&gt; ((Ex_comparable_ty (Script_typed_ir.Bool_key tname)), ctxt))
-  
   | Micheline.Prim loc Alpha_context.Script.T_key_hash [] annot =&gt;
     Error_monad.op_gtpipequestion (Script_ir_annot.parse_type_annot loc annot)
       (fun tname =&gt;
         ((Ex_comparable_ty (Script_typed_ir.Key_hash_key tname)), ctxt))
-  
   | Micheline.Prim loc Alpha_context.Script.T_timestamp [] annot =&gt;
     Error_monad.op_gtpipequestion (Script_ir_annot.parse_type_annot loc annot)
       (fun tname =&gt;
         ((Ex_comparable_ty (Script_typed_ir.Timestamp_key tname)), ctxt))
-  
   | Micheline.Prim loc Alpha_context.Script.T_address [] annot =&gt;
     Error_monad.op_gtpipequestion (Script_ir_annot.parse_type_annot loc annot)
       (fun tname =&gt;
         ((Ex_comparable_ty (Script_typed_ir.Address_key tname)), ctxt))
-  
   |
     Micheline.Prim loc
       ((Alpha_context.Script.T_int | Alpha_context.Script.T_nat |
@@ -77863,7 +77214,6 @@ Fixpoint parse_comparable_ty
       Alpha_context.Script.T_bool | Alpha_context.Script.T_key |
       Alpha_context.Script.T_address | Alpha_context.Script.T_timestamp) as prim)
       l _ =&gt; Error_monad.__error_value extensible_type_value
-  
   |
     Micheline.Prim loc
       (Alpha_context.Script.T_pair | Alpha_context.Script.T_or |
@@ -77872,7 +77222,6 @@ Fixpoint parse_comparable_ty
       Alpha_context.Script.T_lambda | Alpha_context.Script.T_unit |
       Alpha_context.Script.T_signature | Alpha_context.Script.T_contract) _ _ =&gt;
     Error_monad.__error_value extensible_type_value
-  
   | expr =&gt;
     Error_monad.__error_value
       (unexpected expr nil Script_tc_errors.Type_namespace
@@ -77923,73 +77272,61 @@ with parse_ty
     Error_monad.op_gtpipequestion
       (Alpha_context.Gas.consume ctxt (Typecheck_costs.type_ 0))
       (fun ctxt =&gt; ((Ex_ty (Script_typed_ir.Unit_t ty_name)), ctxt))
-  
   | (Micheline.Prim loc Alpha_context.Script.T_int [] annot, _) =&gt;
     let? ty_name := Script_ir_annot.parse_type_annot loc annot in
     Error_monad.op_gtpipequestion
       (Alpha_context.Gas.consume ctxt (Typecheck_costs.type_ 0))
       (fun ctxt =&gt; ((Ex_ty (Script_typed_ir.Int_t ty_name)), ctxt))
-  
   | (Micheline.Prim loc Alpha_context.Script.T_nat [] annot, _) =&gt;
     let? ty_name := Script_ir_annot.parse_type_annot loc annot in
     Error_monad.op_gtpipequestion
       (Alpha_context.Gas.consume ctxt (Typecheck_costs.type_ 0))
       (fun ctxt =&gt; ((Ex_ty (Script_typed_ir.Nat_t ty_name)), ctxt))
-  
   | (Micheline.Prim loc Alpha_context.Script.T_string [] annot, _) =&gt;
     let? ty_name := Script_ir_annot.parse_type_annot loc annot in
     Error_monad.op_gtpipequestion
       (Alpha_context.Gas.consume ctxt (Typecheck_costs.type_ 0))
       (fun ctxt =&gt; ((Ex_ty (Script_typed_ir.String_t ty_name)), ctxt))
-  
   | (Micheline.Prim loc Alpha_context.Script.T_bytes [] annot, _) =&gt;
     let? ty_name := Script_ir_annot.parse_type_annot loc annot in
     Error_monad.op_gtpipequestion
       (Alpha_context.Gas.consume ctxt (Typecheck_costs.type_ 0))
       (fun ctxt =&gt; ((Ex_ty (Script_typed_ir.Bytes_t ty_name)), ctxt))
-  
   | (Micheline.Prim loc Alpha_context.Script.T_mutez [] annot, _) =&gt;
     let? ty_name := Script_ir_annot.parse_type_annot loc annot in
     Error_monad.op_gtpipequestion
       (Alpha_context.Gas.consume ctxt (Typecheck_costs.type_ 0))
       (fun ctxt =&gt; ((Ex_ty (Script_typed_ir.Mutez_t ty_name)), ctxt))
-  
   | (Micheline.Prim loc Alpha_context.Script.T_bool [] annot, _) =&gt;
     let? ty_name := Script_ir_annot.parse_type_annot loc annot in
     Error_monad.op_gtpipequestion
       (Alpha_context.Gas.consume ctxt (Typecheck_costs.type_ 0))
       (fun ctxt =&gt; ((Ex_ty (Script_typed_ir.Bool_t ty_name)), ctxt))
-  
   | (Micheline.Prim loc Alpha_context.Script.T_key [] annot, _) =&gt;
     let? ty_name := Script_ir_annot.parse_type_annot loc annot in
     Error_monad.op_gtpipequestion
       (Alpha_context.Gas.consume ctxt (Typecheck_costs.type_ 0))
       (fun ctxt =&gt; ((Ex_ty (Script_typed_ir.Key_t ty_name)), ctxt))
-  
   | (Micheline.Prim loc Alpha_context.Script.T_key_hash [] annot, _) =&gt;
     let? ty_name := Script_ir_annot.parse_type_annot loc annot in
     Error_monad.op_gtpipequestion
       (Alpha_context.Gas.consume ctxt (Typecheck_costs.type_ 0))
       (fun ctxt =&gt; ((Ex_ty (Script_typed_ir.Key_hash_t ty_name)), ctxt))
-  
   | (Micheline.Prim loc Alpha_context.Script.T_timestamp [] annot, _) =&gt;
     let? ty_name := Script_ir_annot.parse_type_annot loc annot in
     Error_monad.op_gtpipequestion
       (Alpha_context.Gas.consume ctxt (Typecheck_costs.type_ 0))
       (fun ctxt =&gt; ((Ex_ty (Script_typed_ir.Timestamp_t ty_name)), ctxt))
-  
   | (Micheline.Prim loc Alpha_context.Script.T_address [] annot, _) =&gt;
     let? ty_name := Script_ir_annot.parse_type_annot loc annot in
     Error_monad.op_gtpipequestion
       (Alpha_context.Gas.consume ctxt (Typecheck_costs.type_ 0))
       (fun ctxt =&gt; ((Ex_ty (Script_typed_ir.Address_t ty_name)), ctxt))
-  
   | (Micheline.Prim loc Alpha_context.Script.T_signature [] annot, _) =&gt;
     let? ty_name := Script_ir_annot.parse_type_annot loc annot in
     Error_monad.op_gtpipequestion
       (Alpha_context.Gas.consume ctxt (Typecheck_costs.type_ 0))
       (fun ctxt =&gt; ((Ex_ty (Script_typed_ir.Signature_t ty_name)), ctxt))
-  
   | (Micheline.Prim loc Alpha_context.Script.T_operation [] annot, _) =&gt;
     if allow_operation then
       let? ty_name := Script_ir_annot.parse_type_annot loc annot in
@@ -77998,13 +77335,11 @@ with parse_ty
         (fun ctxt =&gt; ((Ex_ty (Script_typed_ir.Operation_t ty_name)), ctxt))
     else
       Error_monad.__error_value extensible_type_value
-  
   | (Micheline.Prim loc Alpha_context.Script.T_chain_id [] annot, _) =&gt;
     let? ty_name := Script_ir_annot.parse_type_annot loc annot in
     Error_monad.op_gtpipequestion
       (Alpha_context.Gas.consume ctxt (Typecheck_costs.type_ 0))
       (fun ctxt =&gt; ((Ex_ty (Script_typed_ir.Chain_id_t ty_name)), ctxt))
-  
   | (Micheline.Prim loc Alpha_context.Script.T_contract (cons utl []) annot, _)
     =&gt;
     if allow_contract then
@@ -78019,7 +77354,6 @@ with parse_ty
         (fun ctxt =&gt; ((Ex_ty (Script_typed_ir.Contract_t tl ty_name)), ctxt))
     else
       Error_monad.__error_value extensible_type_value
-  
   |
     (Micheline.Prim loc Alpha_context.Script.T_pair (cons utl (cons utr []))
       annot, _) =&gt;
@@ -78045,7 +77379,6 @@ with parse_ty
           (Script_typed_ir.Pair_t (tl, left_field, None) (tr, right_field, None)
             ty_name (Pervasives.op_pipepipe (has_big_map tl) (has_big_map tr)))),
           ctxt))
-  
   |
     (Micheline.Prim loc Alpha_context.Script.T_or (cons utl (cons utr [])) annot,
       _) =&gt;
@@ -78070,7 +77403,6 @@ with parse_ty
         ((Ex_ty
           (Script_typed_ir.Union_t (tl, left_constr) (tr, right_constr) ty_name
             (Pervasives.op_pipepipe (has_big_map tl) (has_big_map tr)))), ctxt))
-  
   |
     (Micheline.Prim loc Alpha_context.Script.T_lambda (cons uta (cons utr []))
       annot, _) =&gt;
@@ -78088,7 +77420,6 @@ with parse_ty
     Error_monad.op_gtpipequestion
       (Alpha_context.Gas.consume ctxt (Typecheck_costs.type_ 2))
       (fun ctxt =&gt; ((Ex_ty (Script_typed_ir.Lambda_t ta tr ty_name)), ctxt))
-  
   | (Micheline.Prim loc Alpha_context.Script.T_option (cons ut []) annot, _) =&gt;
     let? '(ut, ty_name) :=
       if legacy then
@@ -78111,7 +77442,6 @@ with parse_ty
         ((Ex_ty
           (Script_typed_ir.Option_t __t_value ty_name (has_big_map __t_value))),
           ctxt))
-  
   | (Micheline.Prim loc Alpha_context.Script.T_list (cons ut []) annot, _) =&gt;
     let? '(Ex_ty __t_value, ctxt) :=
       parse_ty ctxt legacy allow_big_map allow_operation allow_contract ut in
@@ -78126,7 +77456,6 @@ with parse_ty
         ((Ex_ty
           (Script_typed_ir.List_t __t_value ty_name (has_big_map __t_value))),
           ctxt))
-  
   | (Micheline.Prim loc Alpha_context.Script.T_set (cons ut []) annot, _) =&gt;
     let? '(Ex_comparable_ty __t_value, ctxt) := parse_comparable_ty ctxt ut in
     let 'existT _ __Ex_comparable_ty_'a [__t_value, ctxt] :=
@@ -78138,7 +77467,6 @@ with parse_ty
     Error_monad.op_gtpipequestion
       (Alpha_context.Gas.consume ctxt (Typecheck_costs.type_ 1))
       (fun ctxt =&gt; ((Ex_ty (Script_typed_ir.Set_t __t_value ty_name)), ctxt))
-  
   |
     (Micheline.Prim loc Alpha_context.Script.T_map (cons uta (cons utr []))
       annot, _) =&gt;
@@ -78159,16 +77487,13 @@ with parse_ty
       (Alpha_context.Gas.consume ctxt (Typecheck_costs.type_ 2))
       (fun ctxt =&gt;
         ((Ex_ty (Script_typed_ir.Map_t ta tr ty_name (has_big_map tr))), ctxt))
-  
   | (Micheline.Prim loc Alpha_context.Script.T_big_map args annot, true) =&gt;
     let? '(big_map_ty, ctxt) := parse_big_map_ty ctxt legacy loc args annot in
     Error_monad.op_gtpipequestion
       (Alpha_context.Gas.consume ctxt (Typecheck_costs.type_ 2))
       (fun ctxt =&gt; (big_map_ty, ctxt))
-  
   | (Micheline.Prim loc Alpha_context.Script.T_big_map _ _, _) =&gt;
     Error_monad.__error_value extensible_type_value
-  
   |
     (Micheline.Prim loc
       ((Alpha_context.Script.T_unit | Alpha_context.Script.T_signature |
@@ -78178,19 +77503,16 @@ with parse_ty
       Alpha_context.Script.T_key | Alpha_context.Script.T_key_hash |
       Alpha_context.Script.T_timestamp | Alpha_context.Script.T_address) as prim)
       l _, _) =&gt; Error_monad.__error_value extensible_type_value
-  
   |
     (Micheline.Prim loc
       ((Alpha_context.Script.T_set | Alpha_context.Script.T_list |
       Alpha_context.Script.T_option | Alpha_context.Script.T_contract) as prim)
       l _, _) =&gt; Error_monad.__error_value extensible_type_value
-  
   |
     (Micheline.Prim loc
       ((Alpha_context.Script.T_pair | Alpha_context.Script.T_or |
       Alpha_context.Script.T_map | Alpha_context.Script.T_lambda) as prim) l _,
       _) =&gt; Error_monad.__error_value extensible_type_value
-  
   | (expr, _) =&gt;
     Error_monad.__error_value
       (unexpected expr nil Script_tc_errors.Type_namespace
@@ -82991,14 +82313,10 @@ with parse_toplevel (legacy : bool) (toplevel : Alpha_context.Script.expr)
   (Error_monad.record_trace extensible_type_value)
     match Micheline.root toplevel with
     | Micheline.Int loc _ =&gt; Error_monad.__error_value extensible_type_value
-    
     | Micheline.String loc _ =&gt; Error_monad.__error_value extensible_type_value
-    
     | Micheline.Bytes loc _ =&gt; Error_monad.__error_value extensible_type_value
-    
     | Micheline.Prim loc _ _ _ =&gt;
       Error_monad.__error_value extensible_type_value
-    
     | Micheline.Seq _ fields =&gt;
       let fix find_fields
         (__p_value :
@@ -83035,19 +82353,14 @@ with parse_toplevel (legacy : bool) (toplevel : Alpha_context.Script.expr)
                 Micheline.annot)) :=
         match fields with
         | [] =&gt; Error_monad.ok (__p_value, s, c)
-        
         | cons (Micheline.Int loc _) _ =&gt;
           Error_monad.__error_value extensible_type_value
-        
         | cons (Micheline.String loc _) _ =&gt;
           Error_monad.__error_value extensible_type_value
-        
         | cons (Micheline.Bytes loc _) _ =&gt;
           Error_monad.__error_value extensible_type_value
-        
         | cons (Micheline.Seq loc _) _ =&gt;
           Error_monad.__error_value extensible_type_value
-        
         |
           cons
             (Micheline.Prim loc Alpha_context.Script.K_parameter (cons arg [])
@@ -83056,7 +82369,6 @@ with parse_toplevel (legacy : bool) (toplevel : Alpha_context.Script.expr)
           | None =&gt; find_fields (Some (arg, loc, annot)) s c rest
           | Some _ =&gt; Error_monad.__error_value extensible_type_value
           end
-        
         |
           cons
             (Micheline.Prim loc Alpha_context.Script.K_storage (cons arg [])
@@ -83065,7 +82377,6 @@ with parse_toplevel (legacy : bool) (toplevel : Alpha_context.Script.expr)
           | None =&gt; find_fields __p_value (Some (arg, loc, annot)) c rest
           | Some _ =&gt; Error_monad.__error_value extensible_type_value
           end
-        
         |
           cons
             (Micheline.Prim loc Alpha_context.Script.K_code (cons arg []) annot)
@@ -83074,7 +82385,6 @@ with parse_toplevel (legacy : bool) (toplevel : Alpha_context.Script.expr)
           | None =&gt; find_fields __p_value s (Some (arg, loc, annot)) rest
           | Some _ =&gt; Error_monad.__error_value extensible_type_value
           end
-        
         |
           cons
             (Micheline.Prim loc
@@ -83082,7 +82392,6 @@ with parse_toplevel (legacy : bool) (toplevel : Alpha_context.Script.expr)
               Alpha_context.Script.K_storage | Alpha_context.Script.K_code) as
                 name) args _) _ =&gt;
           Error_monad.__error_value extensible_type_value
-        
         | cons (Micheline.Prim loc name _ _) _ =&gt;
           let allowed :=
             [
@@ -84976,7 +84285,7 @@ Parameter extract_big_map_diff : forall {a : Set},
     <h3>Script_repr</h3>
     <ul>
       <li>OCaml size: 233 lines</li>
-      <li>Coq size: 301 lines (+29% compared to&nbsp;OCaml)</li>
+      <li>Coq size: 297 lines (+27% compared to&nbsp;OCaml)</li>
     </ul>
   </div>
   <div class="col-md-6">
@@ -85349,11 +84658,8 @@ Fixpoint node_size {A B : Set} (node : Micheline.node A B) {struct node}
   : int * int :=
   match node with
   | Micheline.Int _ n =&gt; int_node_size n
-  
   | Micheline.String _ s =&gt; string_node_size s
-  
   | Micheline.Bytes _ s =&gt; bytes_node_size s
-  
   | Micheline.Prim _ _ args annot =&gt;
     List.fold_left
       (fun function_parameter =&gt;
@@ -85363,7 +84669,6 @@ Fixpoint node_size {A B : Set} (node : Micheline.node A B) {struct node}
           ((Pervasives.op_plus blocks nblocks),
             (Pervasives.op_plus words nwords)))
       (prim_node_size_nonrec args annot) args
-  
   | Micheline.Seq _ args =&gt;
     List.fold_left
       (fun function_parameter =&gt;
@@ -92913,7 +92218,7 @@ End Ramp_up.
     <h3>Storage_description</h3>
     <ul>
       <li>OCaml size: 347 lines</li>
-      <li>Coq size: 558 lines (+60% compared to&nbsp;OCaml)</li>
+      <li>Coq size: 554 lines (+59% compared to&nbsp;OCaml)</li>
     </ul>
   </div>
   <div class="col-md-6">
@@ -93422,17 +92727,13 @@ Fixpoint register_named_subcontext {r : Set} (dir : t r) (names : list string)
   {struct dir} : t r :=
   match ((Pervasives.op_exclamation dir), names) with
   | (_, []) =&gt; dir
-  
   | (Value _, _) =&gt; Pervasives.invalid_arg &quot;&quot;
-  
   | (IndexedDir _, _) =&gt; Pervasives.invalid_arg &quot;&quot;
-  
   | (Empty, cons name names) =&gt;
     let subdir := Pervasives.__ref_value Empty in
     (* ❌ Sequences of instructions are ignored (operator &quot;;&quot;) *)
     (* ❌ instruction_sequence &quot;;&quot; *)
     register_named_subcontext subdir names
-  
   | (NamedDir map, cons name names) =&gt;
     let subdir :=
       match (|StringMap|).(S.MAP.find_opt) name map with
@@ -94101,7 +93402,7 @@ End INDEX.
     <h3>Storage_functors</h3>
     <ul>
       <li>OCaml size: 1209 lines</li>
-      <li>Coq size: 1884 lines (+55% compared to&nbsp;OCaml)</li>
+      <li>Coq size: 1880 lines (+55% compared to&nbsp;OCaml)</li>
     </ul>
   </div>
   <div class="col-md-6">
@@ -96571,7 +95872,6 @@ Definition Make_indexed_subcontext :=
               assert (Lwt.t (list (|I|).(INDEX.t))) false
             | Some path =&gt; Lwt.__return [ path ]
             end
-          
           | ([], _, _) =&gt;
             let= prefixes := __list_value __t_value prefix in
             Error_monad.op_gtpipeeq
@@ -96581,7 +95881,6 @@ Definition Make_indexed_subcontext :=
                   | (Context.Key prefix | Context.Dir prefix) =&gt;
                     loop (Pervasives.op_plus i 1) prefix nil
                   end) prefixes) List.flatten
-          
           | (cons d [], _, true) =&gt;
             (* ❌ Sequences of instructions are ignored (operator &quot;;&quot;) *)
             (* ❌ instruction_sequence &quot;;&quot; *)
@@ -96596,7 +95895,6 @@ Definition Make_indexed_subcontext :=
                     | Some _ =&gt; loop (Pervasives.op_plus i 1) prefix nil
                     end
                   end) prefixes) List.flatten
-          
           | (cons &quot;&quot; ds, _, _) =&gt;
             let= prefixes := __list_value __t_value prefix in
             Error_monad.op_gtpipeeq
@@ -96606,7 +95904,6 @@ Definition Make_indexed_subcontext :=
                   | (Context.Key prefix | Context.Dir prefix) =&gt;
                     loop (Pervasives.op_plus i 1) prefix ds
                   end) prefixes) List.flatten
-          
           | (cons d ds, _, _) =&gt;
             (* ❌ Sequences of instructions are ignored (operator &quot;;&quot;) *)
             (* ❌ instruction_sequence &quot;;&quot; *)

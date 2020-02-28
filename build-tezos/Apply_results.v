@@ -671,25 +671,18 @@ Definition equal_manager_kind
   |
     (Alpha_context.Kind.Reveal_manager_kind,
       Alpha_context.Kind.Reveal_manager_kind) => Some Eq
-  
   | (Alpha_context.Kind.Reveal_manager_kind, _) => None
-  
   |
     (Alpha_context.Kind.Transaction_manager_kind,
       Alpha_context.Kind.Transaction_manager_kind) => Some Eq
-  
   | (Alpha_context.Kind.Transaction_manager_kind, _) => None
-  
   |
     (Alpha_context.Kind.Origination_manager_kind,
       Alpha_context.Kind.Origination_manager_kind) => Some Eq
-  
   | (Alpha_context.Kind.Origination_manager_kind, _) => None
-  
   |
     (Alpha_context.Kind.Delegation_manager_kind,
       Alpha_context.Kind.Delegation_manager_kind) => Some Eq
-  
   | (Alpha_context.Kind.Delegation_manager_kind, _) => None
   end.
 
@@ -1533,37 +1526,23 @@ Definition kind_equal (op : Alpha_context.contents) (res : contents_result)
   : option eq :=
   match (op, res) with
   | (Alpha_context.Endorsement _, Endorsement_result _) => Some Eq
-  
   | (Alpha_context.Endorsement _, _) => None
-  
   | (Alpha_context.Seed_nonce_revelation _, Seed_nonce_revelation_result _) =>
     Some Eq
-  
   | (Alpha_context.Seed_nonce_revelation _, _) => None
-  
   |
     (Alpha_context.Double_endorsement_evidence _,
       Double_endorsement_evidence_result _) => Some Eq
-  
   | (Alpha_context.Double_endorsement_evidence _, _) => None
-  
   | (Alpha_context.Double_baking_evidence _, Double_baking_evidence_result _) =>
     Some Eq
-  
   | (Alpha_context.Double_baking_evidence _, _) => None
-  
   | (Alpha_context.Activate_account _, Activate_account_result _) => Some Eq
-  
   | (Alpha_context.Activate_account _, _) => None
-  
   | (Alpha_context.Proposals _, Proposals_result) => Some Eq
-  
   | (Alpha_context.Proposals _, _) => None
-  
   | (Alpha_context.Ballot _, Ballot_result) => Some Eq
-  
   | (Alpha_context.Ballot _, _) => None
-  
   |
     (Alpha_context.Manager_operation {|
       Alpha_context.contents.Manager_operation.operation := Alpha_context.Reveal _
@@ -1572,7 +1551,6 @@ Definition kind_equal (op : Alpha_context.contents) (res : contents_result)
         contents_result.Manager_operation_result.operation_result :=
           Applied (Reveal_result _)
           |}) => Some Eq
-  
   |
     (Alpha_context.Manager_operation {|
       Alpha_context.contents.Manager_operation.operation := Alpha_context.Reveal _
@@ -1581,7 +1559,6 @@ Definition kind_equal (op : Alpha_context.contents) (res : contents_result)
         contents_result.Manager_operation_result.operation_result :=
           Backtracked (Reveal_result _) _
           |}) => Some Eq
-  
   |
     (Alpha_context.Manager_operation {|
       Alpha_context.contents.Manager_operation.operation := Alpha_context.Reveal _
@@ -1590,7 +1567,6 @@ Definition kind_equal (op : Alpha_context.contents) (res : contents_result)
         contents_result.Manager_operation_result.operation_result :=
           Failed Alpha_context.Kind.Reveal_manager_kind _
           |}) => Some Eq
-  
   |
     (Alpha_context.Manager_operation {|
       Alpha_context.contents.Manager_operation.operation := Alpha_context.Reveal _
@@ -1599,12 +1575,10 @@ Definition kind_equal (op : Alpha_context.contents) (res : contents_result)
         contents_result.Manager_operation_result.operation_result :=
           Skipped Alpha_context.Kind.Reveal_manager_kind
           |}) => Some Eq
-  
   |
     (Alpha_context.Manager_operation {|
       Alpha_context.contents.Manager_operation.operation := Alpha_context.Reveal _
         |}, _) => None
-  
   |
     (Alpha_context.Manager_operation {|
       Alpha_context.contents.Manager_operation.operation :=
@@ -1614,7 +1588,6 @@ Definition kind_equal (op : Alpha_context.contents) (res : contents_result)
         contents_result.Manager_operation_result.operation_result :=
           Applied (Transaction_result _)
           |}) => Some Eq
-  
   |
     (Alpha_context.Manager_operation {|
       Alpha_context.contents.Manager_operation.operation :=
@@ -1624,7 +1597,6 @@ Definition kind_equal (op : Alpha_context.contents) (res : contents_result)
         contents_result.Manager_operation_result.operation_result :=
           Backtracked (Transaction_result _) _
           |}) => Some Eq
-  
   |
     (Alpha_context.Manager_operation {|
       Alpha_context.contents.Manager_operation.operation :=
@@ -1634,7 +1606,6 @@ Definition kind_equal (op : Alpha_context.contents) (res : contents_result)
         contents_result.Manager_operation_result.operation_result :=
           Failed Alpha_context.Kind.Transaction_manager_kind _
           |}) => Some Eq
-  
   |
     (Alpha_context.Manager_operation {|
       Alpha_context.contents.Manager_operation.operation :=
@@ -1644,13 +1615,11 @@ Definition kind_equal (op : Alpha_context.contents) (res : contents_result)
         contents_result.Manager_operation_result.operation_result :=
           Skipped Alpha_context.Kind.Transaction_manager_kind
           |}) => Some Eq
-  
   |
     (Alpha_context.Manager_operation {|
       Alpha_context.contents.Manager_operation.operation :=
         Alpha_context.Transaction _
         |}, _) => None
-  
   |
     (Alpha_context.Manager_operation {|
       Alpha_context.contents.Manager_operation.operation :=
@@ -1660,7 +1629,6 @@ Definition kind_equal (op : Alpha_context.contents) (res : contents_result)
         contents_result.Manager_operation_result.operation_result :=
           Applied (Origination_result _)
           |}) => Some Eq
-  
   |
     (Alpha_context.Manager_operation {|
       Alpha_context.contents.Manager_operation.operation :=
@@ -1670,7 +1638,6 @@ Definition kind_equal (op : Alpha_context.contents) (res : contents_result)
         contents_result.Manager_operation_result.operation_result :=
           Backtracked (Origination_result _) _
           |}) => Some Eq
-  
   |
     (Alpha_context.Manager_operation {|
       Alpha_context.contents.Manager_operation.operation :=
@@ -1680,7 +1647,6 @@ Definition kind_equal (op : Alpha_context.contents) (res : contents_result)
         contents_result.Manager_operation_result.operation_result :=
           Failed Alpha_context.Kind.Origination_manager_kind _
           |}) => Some Eq
-  
   |
     (Alpha_context.Manager_operation {|
       Alpha_context.contents.Manager_operation.operation :=
@@ -1690,13 +1656,11 @@ Definition kind_equal (op : Alpha_context.contents) (res : contents_result)
         contents_result.Manager_operation_result.operation_result :=
           Skipped Alpha_context.Kind.Origination_manager_kind
           |}) => Some Eq
-  
   |
     (Alpha_context.Manager_operation {|
       Alpha_context.contents.Manager_operation.operation :=
         Alpha_context.Origination _
         |}, _) => None
-  
   |
     (Alpha_context.Manager_operation {|
       Alpha_context.contents.Manager_operation.operation :=
@@ -1706,7 +1670,6 @@ Definition kind_equal (op : Alpha_context.contents) (res : contents_result)
         contents_result.Manager_operation_result.operation_result :=
           Applied (Delegation_result _)
           |}) => Some Eq
-  
   |
     (Alpha_context.Manager_operation {|
       Alpha_context.contents.Manager_operation.operation :=
@@ -1716,7 +1679,6 @@ Definition kind_equal (op : Alpha_context.contents) (res : contents_result)
         contents_result.Manager_operation_result.operation_result :=
           Backtracked (Delegation_result _) _
           |}) => Some Eq
-  
   |
     (Alpha_context.Manager_operation {|
       Alpha_context.contents.Manager_operation.operation :=
@@ -1726,7 +1688,6 @@ Definition kind_equal (op : Alpha_context.contents) (res : contents_result)
         contents_result.Manager_operation_result.operation_result :=
           Failed Alpha_context.Kind.Delegation_manager_kind _
           |}) => Some Eq
-  
   |
     (Alpha_context.Manager_operation {|
       Alpha_context.contents.Manager_operation.operation :=
@@ -1736,7 +1697,6 @@ Definition kind_equal (op : Alpha_context.contents) (res : contents_result)
         contents_result.Manager_operation_result.operation_result :=
           Skipped Alpha_context.Kind.Delegation_manager_kind
           |}) => Some Eq
-  
   |
     (Alpha_context.Manager_operation {|
       Alpha_context.contents.Manager_operation.operation :=

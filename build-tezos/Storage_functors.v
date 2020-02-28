@@ -1221,7 +1221,6 @@ Definition Make_indexed_subcontext :=
               assert (Lwt.t (list (|I|).(INDEX.t))) false
             | Some path => Lwt.__return [ path ]
             end
-          
           | ([], _, _) =>
             let= prefixes := __list_value __t_value prefix in
             Error_monad.op_gtpipeeq
@@ -1231,7 +1230,6 @@ Definition Make_indexed_subcontext :=
                   | (Context.Key prefix | Context.Dir prefix) =>
                     loop (Pervasives.op_plus i 1) prefix nil
                   end) prefixes) List.flatten
-          
           | (cons d [], _, true) =>
             (* ❌ Sequences of instructions are ignored (operator ";") *)
             (* ❌ instruction_sequence ";" *)
@@ -1246,7 +1244,6 @@ Definition Make_indexed_subcontext :=
                     | Some _ => loop (Pervasives.op_plus i 1) prefix nil
                     end
                   end) prefixes) List.flatten
-          
           | (cons "" ds, _, _) =>
             let= prefixes := __list_value __t_value prefix in
             Error_monad.op_gtpipeeq
@@ -1256,7 +1253,6 @@ Definition Make_indexed_subcontext :=
                   | (Context.Key prefix | Context.Dir prefix) =>
                     loop (Pervasives.op_plus i 1) prefix ds
                   end) prefixes) List.flatten
-          
           | (cons d ds, _, _) =>
             (* ❌ Sequences of instructions are ignored (operator ";") *)
             (* ❌ instruction_sequence ";" *)

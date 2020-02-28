@@ -732,266 +732,140 @@ Module Cost_of.
       Alpha_context.Gas.op_plusat (Alpha_context.Gas.alloc_cost 1)
         match i with
         | Script_typed_ir.Drop => Alpha_context.Gas.alloc_cost 0
-        
         | Script_typed_ir.Dup => Alpha_context.Gas.alloc_cost 1
-        
         | Script_typed_ir.Swap => Alpha_context.Gas.alloc_cost 0
-        
         | Script_typed_ir.Const _ => Alpha_context.Gas.alloc_cost 1
-        
         | Script_typed_ir.Cons_pair => Alpha_context.Gas.alloc_cost 2
-        
         | Script_typed_ir.Car => Alpha_context.Gas.alloc_cost 1
-        
         | Script_typed_ir.Cdr => Alpha_context.Gas.alloc_cost 1
-        
         | Script_typed_ir.Cons_some => Alpha_context.Gas.alloc_cost 2
-        
         | Script_typed_ir.Cons_none _ => Alpha_context.Gas.alloc_cost 3
-        
         | Script_typed_ir.If_none _ _ => Alpha_context.Gas.alloc_cost 2
-        
         | Script_typed_ir.Left => Alpha_context.Gas.alloc_cost 3
-        
         | Script_typed_ir.Right => Alpha_context.Gas.alloc_cost 3
-        
         | Script_typed_ir.If_left _ _ => Alpha_context.Gas.alloc_cost 2
-        
         | Script_typed_ir.Cons_list => Alpha_context.Gas.alloc_cost 1
-        
         | Script_typed_ir.Nil => Alpha_context.Gas.alloc_cost 1
-        
         | Script_typed_ir.If_cons _ _ => Alpha_context.Gas.alloc_cost 2
-        
         | Script_typed_ir.List_map _ => Alpha_context.Gas.alloc_cost 5
-        
         | Script_typed_ir.List_iter _ => Alpha_context.Gas.alloc_cost 4
-        
         | Script_typed_ir.List_size => Alpha_context.Gas.alloc_cost 1
-        
         | Script_typed_ir.Empty_set _ => Alpha_context.Gas.alloc_cost 1
-        
         | Script_typed_ir.Set_iter _ => Alpha_context.Gas.alloc_cost 4
-        
         | Script_typed_ir.Set_mem => Alpha_context.Gas.alloc_cost 1
-        
         | Script_typed_ir.Set_update => Alpha_context.Gas.alloc_cost 1
-        
         | Script_typed_ir.Set_size => Alpha_context.Gas.alloc_cost 1
-        
         | Script_typed_ir.Empty_map _ _ => Alpha_context.Gas.alloc_cost 2
-        
         | Script_typed_ir.Map_map _ => Alpha_context.Gas.alloc_cost 5
-        
         | Script_typed_ir.Map_iter _ => Alpha_context.Gas.alloc_cost 4
-        
         | Script_typed_ir.Map_mem => Alpha_context.Gas.alloc_cost 1
-        
         | Script_typed_ir.Map_get => Alpha_context.Gas.alloc_cost 1
-        
         | Script_typed_ir.Map_update => Alpha_context.Gas.alloc_cost 1
-        
         | Script_typed_ir.Map_size => Alpha_context.Gas.alloc_cost 1
-        
         | Script_typed_ir.Empty_big_map _ _ => Alpha_context.Gas.alloc_cost 2
-        
         | Script_typed_ir.Big_map_mem => Alpha_context.Gas.alloc_cost 1
-        
         | Script_typed_ir.Big_map_get => Alpha_context.Gas.alloc_cost 1
-        
         | Script_typed_ir.Big_map_update => Alpha_context.Gas.alloc_cost 1
-        
         | Script_typed_ir.Concat_string => Alpha_context.Gas.alloc_cost 1
-        
         | Script_typed_ir.Concat_string_pair => Alpha_context.Gas.alloc_cost 1
-        
         | Script_typed_ir.Concat_bytes => Alpha_context.Gas.alloc_cost 1
-        
         | Script_typed_ir.Concat_bytes_pair => Alpha_context.Gas.alloc_cost 1
-        
         | Script_typed_ir.Slice_string => Alpha_context.Gas.alloc_cost 1
-        
         | Script_typed_ir.Slice_bytes => Alpha_context.Gas.alloc_cost 1
-        
         | Script_typed_ir.String_size => Alpha_context.Gas.alloc_cost 1
-        
         | Script_typed_ir.Bytes_size => Alpha_context.Gas.alloc_cost 1
-        
         | Script_typed_ir.Add_seconds_to_timestamp =>
           Alpha_context.Gas.alloc_cost 1
-        
         | Script_typed_ir.Add_timestamp_to_seconds =>
           Alpha_context.Gas.alloc_cost 1
-        
         | Script_typed_ir.Sub_timestamp_seconds =>
           Alpha_context.Gas.alloc_cost 1
-        
         | Script_typed_ir.Diff_timestamps => Alpha_context.Gas.alloc_cost 1
-        
         | Script_typed_ir.Add_tez => Alpha_context.Gas.alloc_cost 1
-        
         | Script_typed_ir.Sub_tez => Alpha_context.Gas.alloc_cost 1
-        
         | Script_typed_ir.Mul_teznat => Alpha_context.Gas.alloc_cost 1
-        
         | Script_typed_ir.Mul_nattez => Alpha_context.Gas.alloc_cost 1
-        
         | Script_typed_ir.Ediv_teznat => Alpha_context.Gas.alloc_cost 1
-        
         | Script_typed_ir.Ediv_tez => Alpha_context.Gas.alloc_cost 1
-        
         | Script_typed_ir.Or => Alpha_context.Gas.alloc_cost 1
-        
         | Script_typed_ir.And => Alpha_context.Gas.alloc_cost 1
-        
         | Script_typed_ir.Xor => Alpha_context.Gas.alloc_cost 1
-        
         | Script_typed_ir.Not => Alpha_context.Gas.alloc_cost 1
-        
         | Script_typed_ir.Is_nat => Alpha_context.Gas.alloc_cost 1
-        
         | Script_typed_ir.Neg_nat => Alpha_context.Gas.alloc_cost 1
-        
         | Script_typed_ir.Neg_int => Alpha_context.Gas.alloc_cost 1
-        
         | Script_typed_ir.Abs_int => Alpha_context.Gas.alloc_cost 1
-        
         | Script_typed_ir.Int_nat => Alpha_context.Gas.alloc_cost 1
-        
         | Script_typed_ir.Add_intint => Alpha_context.Gas.alloc_cost 1
-        
         | Script_typed_ir.Add_intnat => Alpha_context.Gas.alloc_cost 1
-        
         | Script_typed_ir.Add_natint => Alpha_context.Gas.alloc_cost 1
-        
         | Script_typed_ir.Add_natnat => Alpha_context.Gas.alloc_cost 1
-        
         | Script_typed_ir.Sub_int => Alpha_context.Gas.alloc_cost 1
-        
         | Script_typed_ir.Mul_intint => Alpha_context.Gas.alloc_cost 1
-        
         | Script_typed_ir.Mul_intnat => Alpha_context.Gas.alloc_cost 1
-        
         | Script_typed_ir.Mul_natint => Alpha_context.Gas.alloc_cost 1
-        
         | Script_typed_ir.Mul_natnat => Alpha_context.Gas.alloc_cost 1
-        
         | Script_typed_ir.Ediv_intint => Alpha_context.Gas.alloc_cost 1
-        
         | Script_typed_ir.Ediv_intnat => Alpha_context.Gas.alloc_cost 1
-        
         | Script_typed_ir.Ediv_natint => Alpha_context.Gas.alloc_cost 1
-        
         | Script_typed_ir.Ediv_natnat => Alpha_context.Gas.alloc_cost 1
-        
         | Script_typed_ir.Lsl_nat => Alpha_context.Gas.alloc_cost 1
-        
         | Script_typed_ir.Lsr_nat => Alpha_context.Gas.alloc_cost 1
-        
         | Script_typed_ir.Or_nat => Alpha_context.Gas.alloc_cost 1
-        
         | Script_typed_ir.And_nat => Alpha_context.Gas.alloc_cost 1
-        
         | Script_typed_ir.And_int_nat => Alpha_context.Gas.alloc_cost 1
-        
         | Script_typed_ir.Xor_nat => Alpha_context.Gas.alloc_cost 1
-        
         | Script_typed_ir.Not_nat => Alpha_context.Gas.alloc_cost 1
-        
         | Script_typed_ir.Not_int => Alpha_context.Gas.alloc_cost 1
-        
         | Script_typed_ir.Seq _ _ => Alpha_context.Gas.alloc_cost 8
-        
         | Script_typed_ir.If _ _ => Alpha_context.Gas.alloc_cost 8
-        
         | Script_typed_ir.Loop _ => Alpha_context.Gas.alloc_cost 4
-        
         | Script_typed_ir.Loop_left _ => Alpha_context.Gas.alloc_cost 5
-        
         | Script_typed_ir.Dip _ => Alpha_context.Gas.alloc_cost 4
-        
         | Script_typed_ir.Exec => Alpha_context.Gas.alloc_cost 1
-        
         | Script_typed_ir.Apply _ => Alpha_context.Gas.alloc_cost 1
-        
         | Script_typed_ir.Lambda _ => Alpha_context.Gas.alloc_cost 2
-        
         | Script_typed_ir.Failwith _ => Alpha_context.Gas.alloc_cost 1
-        
         | Script_typed_ir.Nop => Alpha_context.Gas.alloc_cost 0
-        
         | Script_typed_ir.Compare _ => Alpha_context.Gas.alloc_cost 1
-        
         | Script_typed_ir.Eq => Alpha_context.Gas.alloc_cost 1
-        
         | Script_typed_ir.Neq => Alpha_context.Gas.alloc_cost 1
-        
         | Script_typed_ir.Lt => Alpha_context.Gas.alloc_cost 1
-        
         | Script_typed_ir.Gt => Alpha_context.Gas.alloc_cost 1
-        
         | Script_typed_ir.Le => Alpha_context.Gas.alloc_cost 1
-        
         | Script_typed_ir.Ge => Alpha_context.Gas.alloc_cost 1
-        
         | Script_typed_ir.Address => Alpha_context.Gas.alloc_cost 1
-        
         | Script_typed_ir.Contract _ _ => Alpha_context.Gas.alloc_cost 2
-        
         | Script_typed_ir.Transfer_tokens => Alpha_context.Gas.alloc_cost 1
-        
         | Script_typed_ir.Create_account => Alpha_context.Gas.alloc_cost 2
-        
         | Script_typed_ir.Implicit_account => Alpha_context.Gas.alloc_cost 1
-        
         | Script_typed_ir.Create_contract _ _ _ _ =>
           Alpha_context.Gas.alloc_cost 8
-        
         | Script_typed_ir.Create_contract_2 _ _ _ _ =>
           Alpha_context.Gas.alloc_cost 7
-        
         | Script_typed_ir.Set_delegate => Alpha_context.Gas.alloc_cost 1
-        
         | Script_typed_ir.Now => Alpha_context.Gas.alloc_cost 1
-        
         | Script_typed_ir.Balance => Alpha_context.Gas.alloc_cost 1
-        
         | Script_typed_ir.Check_signature => Alpha_context.Gas.alloc_cost 1
-        
         | Script_typed_ir.Hash_key => Alpha_context.Gas.alloc_cost 1
-        
         | Script_typed_ir.Pack _ => Alpha_context.Gas.alloc_cost 2
-        
         | Script_typed_ir.Unpack _ => Alpha_context.Gas.alloc_cost 2
-        
         | Script_typed_ir.Blake2b => Alpha_context.Gas.alloc_cost 1
-        
         | Script_typed_ir.Sha256 => Alpha_context.Gas.alloc_cost 1
-        
         | Script_typed_ir.Sha512 => Alpha_context.Gas.alloc_cost 1
-        
         | Script_typed_ir.Steps_to_quota => Alpha_context.Gas.alloc_cost 1
-        
         | Script_typed_ir.Source => Alpha_context.Gas.alloc_cost 1
-        
         | Script_typed_ir.Sender => Alpha_context.Gas.alloc_cost 1
-        
         | Script_typed_ir.Self _ _ => Alpha_context.Gas.alloc_cost 2
-        
         | Script_typed_ir.Amount => Alpha_context.Gas.alloc_cost 1
-        
         | Script_typed_ir.Dig n _ =>
           Alpha_context.Gas.op_starat n (Alpha_context.Gas.alloc_cost 1)
-        
         | Script_typed_ir.Dug n _ =>
           Alpha_context.Gas.op_starat n (Alpha_context.Gas.alloc_cost 1)
-        
         | Script_typed_ir.Dipn n _ _ =>
           Alpha_context.Gas.op_starat n (Alpha_context.Gas.alloc_cost 1)
-        
         | Script_typed_ir.Dropn n _ =>
           Alpha_context.Gas.op_starat n (Alpha_context.Gas.alloc_cost 1)
-        
         | Script_typed_ir.ChainId => Alpha_context.Gas.alloc_cost 1
         end.
   End Typechecking.

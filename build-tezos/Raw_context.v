@@ -541,7 +541,6 @@ Definition pp_storage_error
             (CamlinternalFormatBasics.String_literal "'."
               CamlinternalFormatBasics.End_of_format)))
         "Found a context with an unexpected version '%s'.") version
-  
   | Missing_key __key_value Get =>
     Format.fprintf ppf
       (CamlinternalFormatBasics.Format
@@ -550,7 +549,6 @@ Definition pp_storage_error
             (CamlinternalFormatBasics.String_literal "'."
               CamlinternalFormatBasics.End_of_format))) "Missing key '%s'.")
       (String.concat "/" __key_value)
-  
   | Missing_key __key_value __Set =>
     Format.fprintf ppf
       (CamlinternalFormatBasics.Format
@@ -559,7 +557,6 @@ Definition pp_storage_error
             (CamlinternalFormatBasics.String_literal "'."
               CamlinternalFormatBasics.End_of_format)))
         "Cannot set undefined key '%s'.") (String.concat "/" __key_value)
-  
   | Missing_key __key_value Del =>
     Format.fprintf ppf
       (CamlinternalFormatBasics.Format
@@ -568,7 +565,6 @@ Definition pp_storage_error
             (CamlinternalFormatBasics.String_literal "'."
               CamlinternalFormatBasics.End_of_format)))
         "Cannot delete undefined key '%s'.") (String.concat "/" __key_value)
-  
   | Missing_key __key_value Copy =>
     Format.fprintf ppf
       (CamlinternalFormatBasics.Format
@@ -577,7 +573,6 @@ Definition pp_storage_error
             (CamlinternalFormatBasics.String_literal "'."
               CamlinternalFormatBasics.End_of_format)))
         "Cannot copy undefined key '%s'.") (String.concat "/" __key_value)
-  
   | Existing_key __key_value =>
     Format.fprintf ppf
       (CamlinternalFormatBasics.Format
@@ -587,7 +582,6 @@ Definition pp_storage_error
             (CamlinternalFormatBasics.String_literal "'."
               CamlinternalFormatBasics.End_of_format)))
         "Cannot initialize defined key '%s'.") (String.concat "/" __key_value)
-  
   | Corrupted_data __key_value =>
     Format.fprintf ppf
       (CamlinternalFormatBasics.Format
