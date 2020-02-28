@@ -340,7 +340,7 @@ and existential_typs_of_typs (typs : Types.type_expr list)
     Name.Set.empty typs
 
 (** The free variables of a type. *)
-let rec typ_args (typ : t) : Name.Set.t =
+let rec typ_args_of_typ (typ : t) : Name.Set.t =
   match typ with
   | Variable x -> Name.Set.singleton x
   | Arrow (typ1, typ2) -> typ_args_of_typs [typ1; typ2]
@@ -351,17 +351,50 @@ let rec typ_args (typ : t) : Name.Set.t =
     Util.List.filter_map (fun (_, typ) ->
       match typ with
       | Arity _ -> None
-      | Typ typ -> Some (typ_args typ)
+      | Typ typ -> Some (typ_args_of_typ typ)
     ) |>
     List.fold_left Name.Set.union Name.Set.empty
-  | ForallModule (name, param, result) ->
-    Name.Set.union (typ_args param) (Name.Set.remove name (typ_args result))
+  | ForallModule (_, param, result) ->
+    Name.Set.union (typ_args_of_typ param) (typ_args_of_typ result)
   | FunTyps (typ_params, typ) ->
-    Name.Set.diff (typ_args typ) (Name.Set.of_list typ_params)
+    Name.Set.diff (typ_args_of_typ typ) (Name.Set.of_list typ_params)
   | Error _ -> Name.Set.empty
 
 and typ_args_of_typs (typs : t list) : Name.Set.t =
-  List.fold_left (fun args typ -> Name.Set.union args (typ_args typ))
+  List.fold_left (fun args typ -> Name.Set.union args (typ_args_of_typ typ))
+    Name.Set.empty typs
+
+(** The local type constructors of a type. Used to detect the existential
+    variables which are actually used by a type, once we remove the phantom
+    types. *)
+let rec local_typ_constructors_of_typ (typ : t) : Name.Set.t =
+  match typ with
+  | Variable x -> Name.Set.singleton x
+  | Arrow (typ1, typ2) -> local_typ_constructors_of_typs [typ1; typ2]
+  | Sum typs -> local_typ_constructors_of_typs (List.map snd typs)
+  | Tuple typs -> local_typ_constructors_of_typs typs
+  | Apply (mixed_path, typs) ->
+    let local_typ_constructors = local_typ_constructors_of_typs typs in
+    begin match mixed_path with
+    | MixedPath.PathName { path = []; base } ->
+      Name.Set.add base local_typ_constructors
+    | _ -> local_typ_constructors
+    end
+  | Package (_, _, typ_params) ->
+    Tree.flatten typ_params |>
+    Util.List.filter_map (fun (_, typ) ->
+      match typ with
+      | Arity _ -> None
+      | Typ typ -> Some (local_typ_constructors_of_typ typ)
+    ) |>
+    List.fold_left Name.Set.union Name.Set.empty
+  | ForallModule (_, param, result) ->
+    local_typ_constructors_of_typs [param; result]
+  | FunTyps (_, typ) -> local_typ_constructors_of_typ typ
+  | Error _ -> Name.Set.empty
+
+and local_typ_constructors_of_typs (typs : t list) : Name.Set.t =
+  List.fold_left (fun args typ -> Name.Set.union args (local_typ_constructors_of_typ typ))
     Name.Set.empty typs
 
 (** In a function's type extract the body's type (up to [n] arguments). *)

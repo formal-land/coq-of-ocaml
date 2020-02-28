@@ -407,6 +407,8 @@ and of_match
         return (name, typ)
       )
       bound_vars >>= fun bound_vars ->
+    let free_vars = Type.local_typ_constructors_of_typs (List.map snd bound_vars) in
+    let existentials = Name.Set.inter existentials free_vars in
     Type.of_typ_expr true typ_vars c_rhs.exp_type >>= fun (typ, _, _) ->
     let existential_cast =
       Some {

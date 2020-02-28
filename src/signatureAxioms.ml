@@ -46,7 +46,7 @@ let of_types_signature (signature : Types.signature) : t Monad.t =
     | Types.Sig_value (ident, { val_type; _ }) ->
       let name = Name.of_ident true ident in
       Type.of_typ_expr true Name.Map.empty val_type >>= fun (typ, _, _) ->
-      let typ_vars = Name.Set.elements (Type.typ_args typ) in
+      let typ_vars = Name.Set.elements (Type.typ_args_of_typ typ) in
       return (Value (name, typ_vars, typ))
     | Sig_type (ident, { type_params; _ }, _) ->
       (* We ignore the type manifest so that we do not unroll unwanted type
@@ -214,7 +214,7 @@ let rec of_signature (signature : Typedtree.signature) : t Monad.t =
     | Tsig_value { val_id; val_desc = { ctyp_type; _ }; _ } ->
       let name = Name.of_ident true val_id in
       Type.of_typ_expr true Name.Map.empty ctyp_type >>= fun (typ, _, _) ->
-      let typ_vars = Name.Set.elements (Type.typ_args typ) in
+      let typ_vars = Name.Set.elements (Type.typ_args_of_typ typ) in
       return [Value (name, typ_vars, typ)])) in
   Monad.List.fold_right
     (fun signature_item (signature, final_env) ->

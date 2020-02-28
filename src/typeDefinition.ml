@@ -150,7 +150,7 @@ module Constructors = struct
               )
             )
             []
-            (List.map Type.typ_args record_params) in
+            (List.map Type.typ_args_of_typ record_params) in
         return (
 
           [
@@ -595,7 +595,7 @@ let of_ocaml (typs : type_declaration list) : t Monad.t =
           "Polymorphic variant types are defined as standard algebraic types"
       | _ ->
         Type.of_type_expr_without_free_vars typ >>= fun typ ->
-        let free_vars = Type.typ_args typ in
+        let free_vars = Type.typ_args_of_typ typ in
         let typ_args = filter_in_free_vars typ_args free_vars in
         return (Synonym (name, typ_args, typ))
       end
@@ -630,7 +630,7 @@ let of_ocaml (typs : type_declaration list) : t Monad.t =
             "Polymorphic variant types are defined as standard algebraic types"
         | _ ->
           Type.of_type_expr_without_free_vars typ >>= fun typ ->
-          let free_vars = Type.typ_args typ in
+          let free_vars = Type.typ_args_of_typ typ in
           let typ_args = filter_in_free_vars typ_args free_vars in
           return (
             constructor_records,

@@ -21,7 +21,7 @@ let items_of_types_signature (signature : Types.signature) : item list Monad.t =
     | Sig_value (ident, { val_type; _ }) ->
       let name = Name.of_ident true ident in
       Type.of_type_expr_without_free_vars val_type >>= fun typ ->
-      let typ_args = Name.Set.elements (Type.typ_args typ) in
+      let typ_args = Name.Set.elements (Type.typ_args_of_typ typ) in
       return (Value (name, typ_args, typ))
     | Sig_type (ident, { type_manifest = None; type_params; _ }, _) ->
       let name = Name.of_ident false ident in
@@ -159,7 +159,7 @@ let items_of_signature (signature : signature) : item list Monad.t =
     | Tsig_value { val_id; val_desc = { ctyp_type; _ }; _ } ->
       let name = Name.of_ident true val_id in
       Type.of_type_expr_without_free_vars ctyp_type >>= fun typ ->
-      let typ_args = Name.Set.elements (Type.typ_args typ) in
+      let typ_args = Name.Set.elements (Type.typ_args_of_typ typ) in
       return [Value (name, typ_args, typ)])) in
   signature.sig_items |> Monad.List.flatten_map of_signature_item
 
