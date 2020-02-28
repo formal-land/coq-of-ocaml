@@ -26,19 +26,28 @@ Parameter register_value : forall {a key : Set},
 Parameter register_named_subcontext : forall {key : Set},
   t key -> list string -> t key.
 
-Module ConstructorRecordNotations_args.
+Module ConstructorRecords_args.
   Module args.
     Module One.
-      Record record {rpc_arg encoding compare : Set} : Set := {
+      Record record {rpc_arg encoding compare : Set} : Set := Build {
         rpc_arg : rpc_arg;
         encoding : encoding;
         compare : compare }.
       Arguments record : clear implicits.
+      Definition with_rpc_arg {t_rpc_arg t_encoding t_compare} rpc_arg
+        (r : record t_rpc_arg t_encoding t_compare) :=
+        Build t_rpc_arg t_encoding t_compare rpc_arg r.(encoding) r.(compare).
+      Definition with_encoding {t_rpc_arg t_encoding t_compare} encoding
+        (r : record t_rpc_arg t_encoding t_compare) :=
+        Build t_rpc_arg t_encoding t_compare r.(rpc_arg) encoding r.(compare).
+      Definition with_compare {t_rpc_arg t_encoding t_compare} compare
+        (r : record t_rpc_arg t_encoding t_compare) :=
+        Build t_rpc_arg t_encoding t_compare r.(rpc_arg) r.(encoding) compare.
     End One.
     Definition One_skeleton := One.record.
   End args.
-End ConstructorRecordNotations_args.
-Import ConstructorRecordNotations_args.
+End ConstructorRecords_args.
+Import ConstructorRecords_args.
 
 Reserved Notation "'args.One".
 
@@ -50,14 +59,14 @@ where "'args.One" := (fun (t_a : Set) =>
   args.One_skeleton (RPC_arg.t t_a) (Data_encoding.t t_a) (t_a -> t_a -> int)).
 
 Module args.
-  Include ConstructorRecordNotations_args.args.
+  Include ConstructorRecords_args.args.
   Definition One := 'args.One.
 End args.
 
 Parameter register_indexed_subcontext : forall {arg key sub_key : Set},
   t key -> (key -> Lwt.t (Error_monad.tzresult (list arg))) -> args -> t sub_key.
 
-Parameter pack : forall {a key sub_key : Set}, args -> key -> a -> sub_key.
+Parameter __pack : forall {a key sub_key : Set}, args -> key -> a -> sub_key.
 
 Parameter unpack : forall {a key sub_key : Set}, args -> sub_key -> key * a.
 

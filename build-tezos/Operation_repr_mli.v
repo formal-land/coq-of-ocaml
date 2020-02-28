@@ -59,83 +59,121 @@ Module Kind.
   | Delegation_manager_kind : manager.
 End Kind.
 
-Module raw.
-  Record record : Set := Build {
-    shell : Operation.shell_header;
-    proto : MBytes.t }.
-  Definition with_shell shell (r : record) :=
-    Build shell r.(proto).
-  Definition with_proto proto (r : record) :=
-    Build r.(shell) proto.
-End raw.
-Definition raw := raw.record.
+Definition raw : Set := Operation.t.
 
 Parameter raw_encoding : Data_encoding.t raw.
 
-Module ConstructorRecordNotations_contents_list_contents_manager_operation.
+Module ConstructorRecords_contents_list_contents_manager_operation.
   Module contents.
     Module Endorsement.
-      Record record {level : Set} : Set := {
+      Record record {level : Set} : Set := Build {
         level : level }.
       Arguments record : clear implicits.
+      Definition with_level {t_level} level (r : record t_level) :=
+        Build t_level level.
     End Endorsement.
     Definition Endorsement_skeleton := Endorsement.record.
     
     Module Seed_nonce_revelation.
-      Record record {level nonce : Set} : Set := {
+      Record record {level nonce : Set} : Set := Build {
         level : level;
         nonce : nonce }.
       Arguments record : clear implicits.
+      Definition with_level {t_level t_nonce} level
+        (r : record t_level t_nonce) :=
+        Build t_level t_nonce level r.(nonce).
+      Definition with_nonce {t_level t_nonce} nonce
+        (r : record t_level t_nonce) :=
+        Build t_level t_nonce r.(level) nonce.
     End Seed_nonce_revelation.
     Definition Seed_nonce_revelation_skeleton := Seed_nonce_revelation.record.
     
     Module Double_endorsement_evidence.
-      Record record {op1 op2 : Set} : Set := {
+      Record record {op1 op2 : Set} : Set := Build {
         op1 : op1;
         op2 : op2 }.
       Arguments record : clear implicits.
+      Definition with_op1 {t_op1 t_op2} op1 (r : record t_op1 t_op2) :=
+        Build t_op1 t_op2 op1 r.(op2).
+      Definition with_op2 {t_op1 t_op2} op2 (r : record t_op1 t_op2) :=
+        Build t_op1 t_op2 r.(op1) op2.
     End Double_endorsement_evidence.
     Definition Double_endorsement_evidence_skeleton :=
       Double_endorsement_evidence.record.
     
     Module Double_baking_evidence.
-      Record record {bh1 bh2 : Set} : Set := {
+      Record record {bh1 bh2 : Set} : Set := Build {
         bh1 : bh1;
         bh2 : bh2 }.
       Arguments record : clear implicits.
+      Definition with_bh1 {t_bh1 t_bh2} bh1 (r : record t_bh1 t_bh2) :=
+        Build t_bh1 t_bh2 bh1 r.(bh2).
+      Definition with_bh2 {t_bh1 t_bh2} bh2 (r : record t_bh1 t_bh2) :=
+        Build t_bh1 t_bh2 r.(bh1) bh2.
     End Double_baking_evidence.
     Definition Double_baking_evidence_skeleton := Double_baking_evidence.record.
     
     Module Activate_account.
-      Record record {id activation_code : Set} : Set := {
+      Record record {id activation_code : Set} : Set := Build {
         id : id;
         activation_code : activation_code }.
       Arguments record : clear implicits.
+      Definition with_id {t_id t_activation_code} id
+        (r : record t_id t_activation_code) :=
+        Build t_id t_activation_code id r.(activation_code).
+      Definition with_activation_code {t_id t_activation_code} activation_code
+        (r : record t_id t_activation_code) :=
+        Build t_id t_activation_code r.(id) activation_code.
     End Activate_account.
     Definition Activate_account_skeleton := Activate_account.record.
     
     Module Proposals.
-      Record record {source period proposals : Set} : Set := {
+      Record record {source period proposals : Set} : Set := Build {
         source : source;
         period : period;
         proposals : proposals }.
       Arguments record : clear implicits.
+      Definition with_source {t_source t_period t_proposals} source
+        (r : record t_source t_period t_proposals) :=
+        Build t_source t_period t_proposals source r.(period) r.(proposals).
+      Definition with_period {t_source t_period t_proposals} period
+        (r : record t_source t_period t_proposals) :=
+        Build t_source t_period t_proposals r.(source) period r.(proposals).
+      Definition with_proposals {t_source t_period t_proposals} proposals
+        (r : record t_source t_period t_proposals) :=
+        Build t_source t_period t_proposals r.(source) r.(period) proposals.
     End Proposals.
     Definition Proposals_skeleton := Proposals.record.
     
     Module Ballot.
-      Record record {source period proposal ballot : Set} : Set := {
+      Record record {source period proposal ballot : Set} : Set := Build {
         source : source;
         period : period;
         proposal : proposal;
         ballot : ballot }.
       Arguments record : clear implicits.
+      Definition with_source {t_source t_period t_proposal t_ballot} source
+        (r : record t_source t_period t_proposal t_ballot) :=
+        Build t_source t_period t_proposal t_ballot source r.(period)
+          r.(proposal) r.(ballot).
+      Definition with_period {t_source t_period t_proposal t_ballot} period
+        (r : record t_source t_period t_proposal t_ballot) :=
+        Build t_source t_period t_proposal t_ballot r.(source) period
+          r.(proposal) r.(ballot).
+      Definition with_proposal {t_source t_period t_proposal t_ballot} proposal
+        (r : record t_source t_period t_proposal t_ballot) :=
+        Build t_source t_period t_proposal t_ballot r.(source) r.(period)
+          proposal r.(ballot).
+      Definition with_ballot {t_source t_period t_proposal t_ballot} ballot
+        (r : record t_source t_period t_proposal t_ballot) :=
+        Build t_source t_period t_proposal t_ballot r.(source) r.(period)
+          r.(proposal) ballot.
     End Ballot.
     Definition Ballot_skeleton := Ballot.record.
     
     Module Manager_operation.
       Record record {source fee counter operation gas_limit storage_limit : Set} :
-        Set := {
+        Set := Build {
         source : source;
         fee : fee;
         counter : counter;
@@ -143,32 +181,121 @@ Module ConstructorRecordNotations_contents_list_contents_manager_operation.
         gas_limit : gas_limit;
         storage_limit : storage_limit }.
       Arguments record : clear implicits.
+      Definition with_source
+        {t_source t_fee t_counter t_operation t_gas_limit t_storage_limit}
+        source
+        (r :
+          record t_source t_fee t_counter t_operation t_gas_limit
+            t_storage_limit) :=
+        Build t_source t_fee t_counter t_operation t_gas_limit t_storage_limit
+          source r.(fee) r.(counter) r.(operation) r.(gas_limit)
+          r.(storage_limit).
+      Definition with_fee
+        {t_source t_fee t_counter t_operation t_gas_limit t_storage_limit} fee
+        (r :
+          record t_source t_fee t_counter t_operation t_gas_limit
+            t_storage_limit) :=
+        Build t_source t_fee t_counter t_operation t_gas_limit t_storage_limit
+          r.(source) fee r.(counter) r.(operation) r.(gas_limit)
+          r.(storage_limit).
+      Definition with_counter
+        {t_source t_fee t_counter t_operation t_gas_limit t_storage_limit}
+        counter
+        (r :
+          record t_source t_fee t_counter t_operation t_gas_limit
+            t_storage_limit) :=
+        Build t_source t_fee t_counter t_operation t_gas_limit t_storage_limit
+          r.(source) r.(fee) counter r.(operation) r.(gas_limit)
+          r.(storage_limit).
+      Definition with_operation
+        {t_source t_fee t_counter t_operation t_gas_limit t_storage_limit}
+        operation
+        (r :
+          record t_source t_fee t_counter t_operation t_gas_limit
+            t_storage_limit) :=
+        Build t_source t_fee t_counter t_operation t_gas_limit t_storage_limit
+          r.(source) r.(fee) r.(counter) operation r.(gas_limit)
+          r.(storage_limit).
+      Definition with_gas_limit
+        {t_source t_fee t_counter t_operation t_gas_limit t_storage_limit}
+        gas_limit
+        (r :
+          record t_source t_fee t_counter t_operation t_gas_limit
+            t_storage_limit) :=
+        Build t_source t_fee t_counter t_operation t_gas_limit t_storage_limit
+          r.(source) r.(fee) r.(counter) r.(operation) gas_limit
+          r.(storage_limit).
+      Definition with_storage_limit
+        {t_source t_fee t_counter t_operation t_gas_limit t_storage_limit}
+        storage_limit
+        (r :
+          record t_source t_fee t_counter t_operation t_gas_limit
+            t_storage_limit) :=
+        Build t_source t_fee t_counter t_operation t_gas_limit t_storage_limit
+          r.(source) r.(fee) r.(counter) r.(operation) r.(gas_limit)
+          storage_limit.
     End Manager_operation.
     Definition Manager_operation_skeleton := Manager_operation.record.
   End contents.
   Module manager_operation.
     Module Transaction.
-      Record record {amount parameters entrypoint destination : Set} : Set := {
+      Record record {amount parameters entrypoint destination : Set} : Set := Build {
         amount : amount;
         parameters : parameters;
         entrypoint : entrypoint;
         destination : destination }.
       Arguments record : clear implicits.
+      Definition with_amount {t_amount t_parameters t_entrypoint t_destination}
+        amount (r : record t_amount t_parameters t_entrypoint t_destination) :=
+        Build t_amount t_parameters t_entrypoint t_destination amount
+          r.(parameters) r.(entrypoint) r.(destination).
+      Definition with_parameters
+        {t_amount t_parameters t_entrypoint t_destination} parameters
+        (r : record t_amount t_parameters t_entrypoint t_destination) :=
+        Build t_amount t_parameters t_entrypoint t_destination r.(amount)
+          parameters r.(entrypoint) r.(destination).
+      Definition with_entrypoint
+        {t_amount t_parameters t_entrypoint t_destination} entrypoint
+        (r : record t_amount t_parameters t_entrypoint t_destination) :=
+        Build t_amount t_parameters t_entrypoint t_destination r.(amount)
+          r.(parameters) entrypoint r.(destination).
+      Definition with_destination
+        {t_amount t_parameters t_entrypoint t_destination} destination
+        (r : record t_amount t_parameters t_entrypoint t_destination) :=
+        Build t_amount t_parameters t_entrypoint t_destination r.(amount)
+          r.(parameters) r.(entrypoint) destination.
     End Transaction.
     Definition Transaction_skeleton := Transaction.record.
     
     Module Origination.
-      Record record {delegate script credit preorigination : Set} : Set := {
+      Record record {delegate script credit preorigination : Set} : Set := Build {
         delegate : delegate;
         script : script;
         credit : credit;
         preorigination : preorigination }.
       Arguments record : clear implicits.
+      Definition with_delegate {t_delegate t_script t_credit t_preorigination}
+        delegate (r : record t_delegate t_script t_credit t_preorigination) :=
+        Build t_delegate t_script t_credit t_preorigination delegate r.(script)
+          r.(credit) r.(preorigination).
+      Definition with_script {t_delegate t_script t_credit t_preorigination}
+        script (r : record t_delegate t_script t_credit t_preorigination) :=
+        Build t_delegate t_script t_credit t_preorigination r.(delegate) script
+          r.(credit) r.(preorigination).
+      Definition with_credit {t_delegate t_script t_credit t_preorigination}
+        credit (r : record t_delegate t_script t_credit t_preorigination) :=
+        Build t_delegate t_script t_credit t_preorigination r.(delegate)
+          r.(script) credit r.(preorigination).
+      Definition with_preorigination
+        {t_delegate t_script t_credit t_preorigination} preorigination
+        (r : record t_delegate t_script t_credit t_preorigination) :=
+        Build t_delegate t_script t_credit t_preorigination r.(delegate)
+          r.(script) r.(credit) preorigination.
     End Origination.
     Definition Origination_skeleton := Origination.record.
   End manager_operation.
-End ConstructorRecordNotations_contents_list_contents_manager_operation.
-Import ConstructorRecordNotations_contents_list_contents_manager_operation.
+End ConstructorRecords_contents_list_contents_manager_operation.
+Import ConstructorRecords_contents_list_contents_manager_operation.
 
 Module operation.
   Record record {shell protocol_data : Set} : Set := Build {
@@ -271,7 +398,7 @@ and "'manager_operation.Origination" :=
     Tez_repr.tez (option Contract_repr.t)).
 
 Module contents.
-  Include ConstructorRecordNotations_contents_list_contents_manager_operation.contents.
+  Include ConstructorRecords_contents_list_contents_manager_operation.contents.
   Definition Endorsement := 'contents.Endorsement.
   Definition Seed_nonce_revelation := 'contents.Seed_nonce_revelation.
   Definition Double_endorsement_evidence :=
@@ -283,7 +410,7 @@ Module contents.
   Definition Manager_operation := 'contents.Manager_operation.
 End contents.
 Module manager_operation.
-  Include ConstructorRecordNotations_contents_list_contents_manager_operation.manager_operation.
+  Include ConstructorRecords_contents_list_contents_manager_operation.manager_operation.
   Definition Transaction := 'manager_operation.Transaction.
   Definition Origination := 'manager_operation.Origination.
 End manager_operation.
@@ -333,7 +460,7 @@ Module packed_operation.
 End packed_operation.
 Definition packed_operation := packed_operation.record.
 
-Parameter pack : operation -> packed_operation.
+Parameter __pack : operation -> packed_operation.
 
 Inductive packed_internal_operation : Set :=
 | Internal_operation : internal_operation -> packed_internal_operation.
@@ -382,10 +509,10 @@ Inductive eq : Set :=
 Parameter equal : operation -> operation -> option eq.
 
 Module Encoding.
-  Module ConstructorRecordNotations_case.
+  Module ConstructorRecords_case.
     Module case.
       Module Case.
-        Record record {tag name encoding select proj inj : Set} : Set := {
+        Record record {tag name encoding select proj inj : Set} : Set := Build {
           tag : tag;
           name : name;
           encoding : encoding;
@@ -393,11 +520,35 @@ Module Encoding.
           proj : proj;
           inj : inj }.
         Arguments record : clear implicits.
+        Definition with_tag {t_tag t_name t_encoding t_select t_proj t_inj} tag
+          (r : record t_tag t_name t_encoding t_select t_proj t_inj) :=
+          Build t_tag t_name t_encoding t_select t_proj t_inj tag r.(name)
+            r.(encoding) r.(select) r.(proj) r.(inj).
+        Definition with_name {t_tag t_name t_encoding t_select t_proj t_inj}
+          name (r : record t_tag t_name t_encoding t_select t_proj t_inj) :=
+          Build t_tag t_name t_encoding t_select t_proj t_inj r.(tag) name
+            r.(encoding) r.(select) r.(proj) r.(inj).
+        Definition with_encoding {t_tag t_name t_encoding t_select t_proj t_inj}
+          encoding (r : record t_tag t_name t_encoding t_select t_proj t_inj) :=
+          Build t_tag t_name t_encoding t_select t_proj t_inj r.(tag) r.(name)
+            encoding r.(select) r.(proj) r.(inj).
+        Definition with_select {t_tag t_name t_encoding t_select t_proj t_inj}
+          select (r : record t_tag t_name t_encoding t_select t_proj t_inj) :=
+          Build t_tag t_name t_encoding t_select t_proj t_inj r.(tag) r.(name)
+            r.(encoding) select r.(proj) r.(inj).
+        Definition with_proj {t_tag t_name t_encoding t_select t_proj t_inj}
+          proj (r : record t_tag t_name t_encoding t_select t_proj t_inj) :=
+          Build t_tag t_name t_encoding t_select t_proj t_inj r.(tag) r.(name)
+            r.(encoding) r.(select) proj r.(inj).
+        Definition with_inj {t_tag t_name t_encoding t_select t_proj t_inj} inj
+          (r : record t_tag t_name t_encoding t_select t_proj t_inj) :=
+          Build t_tag t_name t_encoding t_select t_proj t_inj r.(tag) r.(name)
+            r.(encoding) r.(select) r.(proj) inj.
       End Case.
       Definition Case_skeleton := Case.record.
     End case.
-  End ConstructorRecordNotations_case.
-  Import ConstructorRecordNotations_case.
+  End ConstructorRecords_case.
+  Import ConstructorRecords_case.
   
   Reserved Notation "'case.Case".
   
@@ -409,7 +560,7 @@ Module Encoding.
       (packed_contents -> option contents) (contents -> t_a) (t_a -> contents)).
   
   Module case.
-    Include ConstructorRecordNotations_case.case.
+    Include ConstructorRecords_case.case.
     Definition Case := 'case.Case.
   End case.
   
@@ -439,10 +590,10 @@ Module Encoding.
   Parameter delegation_case : case Kind.manager.
   
   Module Manager_operations.
-    Module ConstructorRecordNotations_case.
+    Module ConstructorRecords_case.
       Module case.
         Module MCase.
-          Record record {tag name encoding select proj inj : Set} : Set := {
+          Record record {tag name encoding select proj inj : Set} : Set := Build {
             tag : tag;
             name : name;
             encoding : encoding;
@@ -450,11 +601,36 @@ Module Encoding.
             proj : proj;
             inj : inj }.
           Arguments record : clear implicits.
+          Definition with_tag {t_tag t_name t_encoding t_select t_proj t_inj}
+            tag (r : record t_tag t_name t_encoding t_select t_proj t_inj) :=
+            Build t_tag t_name t_encoding t_select t_proj t_inj tag r.(name)
+              r.(encoding) r.(select) r.(proj) r.(inj).
+          Definition with_name {t_tag t_name t_encoding t_select t_proj t_inj}
+            name (r : record t_tag t_name t_encoding t_select t_proj t_inj) :=
+            Build t_tag t_name t_encoding t_select t_proj t_inj r.(tag) name
+              r.(encoding) r.(select) r.(proj) r.(inj).
+          Definition with_encoding
+            {t_tag t_name t_encoding t_select t_proj t_inj} encoding
+            (r : record t_tag t_name t_encoding t_select t_proj t_inj) :=
+            Build t_tag t_name t_encoding t_select t_proj t_inj r.(tag) r.(name)
+              encoding r.(select) r.(proj) r.(inj).
+          Definition with_select {t_tag t_name t_encoding t_select t_proj t_inj}
+            select (r : record t_tag t_name t_encoding t_select t_proj t_inj) :=
+            Build t_tag t_name t_encoding t_select t_proj t_inj r.(tag) r.(name)
+              r.(encoding) select r.(proj) r.(inj).
+          Definition with_proj {t_tag t_name t_encoding t_select t_proj t_inj}
+            proj (r : record t_tag t_name t_encoding t_select t_proj t_inj) :=
+            Build t_tag t_name t_encoding t_select t_proj t_inj r.(tag) r.(name)
+              r.(encoding) r.(select) proj r.(inj).
+          Definition with_inj {t_tag t_name t_encoding t_select t_proj t_inj}
+            inj (r : record t_tag t_name t_encoding t_select t_proj t_inj) :=
+            Build t_tag t_name t_encoding t_select t_proj t_inj r.(tag) r.(name)
+              r.(encoding) r.(select) r.(proj) inj.
         End MCase.
         Definition MCase_skeleton := MCase.record.
       End case.
-    End ConstructorRecordNotations_case.
-    Import ConstructorRecordNotations_case.
+    End ConstructorRecords_case.
+    Import ConstructorRecords_case.
     
     Reserved Notation "'case.MCase".
     
@@ -467,7 +643,7 @@ Module Encoding.
         (manager_operation -> t_a) (t_a -> manager_operation)).
     
     Module case.
-      Include ConstructorRecordNotations_case.case.
+      Include ConstructorRecords_case.case.
       Definition MCase := 'case.MCase.
     End case.
     

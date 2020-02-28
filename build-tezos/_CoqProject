@@ -71,7 +71,7 @@ Nonce_hash.v
 Nonce_storage_mli.v
 Nonce_storage.v
 Operation_repr_mli.v
-#Operation_repr.v
+Operation_repr.v
 Parameters_repr_mli.v
 Parameters_repr.v
 Period_repr_mli.v

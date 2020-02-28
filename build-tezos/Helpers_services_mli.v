@@ -12,7 +12,7 @@ Require Tezos.Alpha_context.
 Require Tezos.Apply_results_mli. Module Apply_results := Apply_results_mli.
 Require Tezos.Michelson_v1_primitives.
 Require Tezos.Nonce_hash.
-Require Tezos.Script_interpreter_mli. Module Script_interpreter := Script_interpreter_mli.
+Require Tezos.Script_interpreter.
 Require Tezos.Script_tc_errors.
 
 Import Alpha_context.

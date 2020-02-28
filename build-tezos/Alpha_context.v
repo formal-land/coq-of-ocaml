@@ -28,7 +28,7 @@ Require Tezos.Level_repr.
 Require Tezos.Level_storage.
 Require Tezos.Michelson_v1_primitives.
 Require Tezos.Nonce_storage.
-Require Tezos.Operation_repr_mli. Module Operation_repr := Operation_repr_mli.
+Require Tezos.Operation_repr.
 Require Tezos.Period_repr.
 Require Tezos.Raw_context.
 Require Tezos.Raw_level_repr.

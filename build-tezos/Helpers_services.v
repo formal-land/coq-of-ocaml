@@ -31,12 +31,10 @@ Definition parse_operation (op : Alpha_context.Operation.raw)
   : Error_monad.tzresult Alpha_context.packed_operation :=
   match
     Data_encoding.Binary.of_bytes Alpha_context.Operation.protocol_data_encoding
-      op.(Alpha_context.Operation.raw.proto) with
+      op.(Operation.t.proto) with
   | Some protocol_data =>
     Error_monad.ok
-      {|
-        Alpha_context.packed_operation.shell :=
-          op.(Alpha_context.Operation.raw.shell);
+      {| Alpha_context.packed_operation.shell := op.(Operation.t.shell);
         Alpha_context.packed_operation.protocol_data := protocol_data |}
   | None => Error_monad.__error_value extensible_type_value
   end.

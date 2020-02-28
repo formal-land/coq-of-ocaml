@@ -5,6 +5,7 @@ Local Open Scope string_scope.
 Local Open Scope Z_scope.
 Local Open Scope type_scope.
 Import ListNotations.
+Unset Guard Checking.
 
 Require Import Tezos.Environment.
 Import Environment.Notations.
@@ -40,21 +41,57 @@ Inductive ex_ty : Set :=
 Inductive ex_stack_ty : Set :=
 | Ex_stack_ty : Script_typed_ir.stack_ty -> ex_stack_ty.
 
-Module ConstructorRecordNotations_tc_context.
+Module ConstructorRecords_tc_context.
   Module tc_context.
     Module Toplevel.
       Record record {storage_type param_type root_name
-        legacy_create_contract_literal : Set} : Set := {
+        legacy_create_contract_literal : Set} : Set := Build {
         storage_type : storage_type;
         param_type : param_type;
         root_name : root_name;
         legacy_create_contract_literal : legacy_create_contract_literal }.
       Arguments record : clear implicits.
+      Definition with_storage_type
+        {t_storage_type t_param_type t_root_name
+          t_legacy_create_contract_literal} storage_type
+        (r :
+          record t_storage_type t_param_type t_root_name
+            t_legacy_create_contract_literal) :=
+        Build t_storage_type t_param_type t_root_name
+          t_legacy_create_contract_literal storage_type r.(param_type)
+          r.(root_name) r.(legacy_create_contract_literal).
+      Definition with_param_type
+        {t_storage_type t_param_type t_root_name
+          t_legacy_create_contract_literal} param_type
+        (r :
+          record t_storage_type t_param_type t_root_name
+            t_legacy_create_contract_literal) :=
+        Build t_storage_type t_param_type t_root_name
+          t_legacy_create_contract_literal r.(storage_type) param_type
+          r.(root_name) r.(legacy_create_contract_literal).
+      Definition with_root_name
+        {t_storage_type t_param_type t_root_name
+          t_legacy_create_contract_literal} root_name
+        (r :
+          record t_storage_type t_param_type t_root_name
+            t_legacy_create_contract_literal) :=
+        Build t_storage_type t_param_type t_root_name
+          t_legacy_create_contract_literal r.(storage_type) r.(param_type)
+          root_name r.(legacy_create_contract_literal).
+      Definition with_legacy_create_contract_literal
+        {t_storage_type t_param_type t_root_name
+          t_legacy_create_contract_literal} legacy_create_contract_literal
+        (r :
+          record t_storage_type t_param_type t_root_name
+            t_legacy_create_contract_literal) :=
+        Build t_storage_type t_param_type t_root_name
+          t_legacy_create_contract_literal r.(storage_type) r.(param_type)
+          r.(root_name) legacy_create_contract_literal.
     End Toplevel.
     Definition Toplevel_skeleton := Toplevel.record.
   End tc_context.
-End ConstructorRecordNotations_tc_context.
-Import ConstructorRecordNotations_tc_context.
+End ConstructorRecords_tc_context.
+Import ConstructorRecords_tc_context.
 
 Reserved Notation "'tc_context.Toplevel".
 
@@ -68,7 +105,7 @@ where "'tc_context.Toplevel" :=
     (option string) bool).
 
 Module tc_context.
-  Include ConstructorRecordNotations_tc_context.tc_context.
+  Include ConstructorRecords_tc_context.tc_context.
   Definition Toplevel := 'tc_context.Toplevel.
 End tc_context.
 
@@ -90,7 +127,8 @@ Definition add_dip
     Dip (Script_typed_ir.Item_t ty __stack_value annot) prev
   end.
 
-Fixpoint comparable_type_size (ty : Script_typed_ir.comparable_struct) : int :=
+Fixpoint comparable_type_size (ty : Script_typed_ir.comparable_struct)
+  {struct ty} : int :=
   match ty with
   | Script_typed_ir.Int_key _ => 1
   | Script_typed_ir.Nat_key _ => 1
@@ -105,7 +143,7 @@ Fixpoint comparable_type_size (ty : Script_typed_ir.comparable_struct) : int :=
     Pervasives.op_plus 1 (comparable_type_size __t_value)
   end.
 
-Fixpoint type_size (ty : Script_typed_ir.ty) : int :=
+Fixpoint type_size (ty : Script_typed_ir.ty) {struct ty} : int :=
   match ty with
   | Script_typed_ir.Unit_t _ => 1
   | Script_typed_ir.Int_t _ => 1
@@ -144,7 +182,8 @@ Fixpoint type_size (ty : Script_typed_ir.ty) : int :=
   end.
 
 Fixpoint type_size_of_stack_head
-  (__stack_value : Script_typed_ir.stack_ty) (up_to : int) : int :=
+  (__stack_value : Script_typed_ir.stack_ty) (up_to : int)
+  {struct __stack_value} : int :=
   match __stack_value with
   | Script_typed_ir.Empty_t => 0
   | Script_typed_ir.Item_t head tail _annot =>
@@ -418,22 +457,52 @@ Definition wrap_compare {A B : Set}
     else
       (-1).
 
-Fixpoint compare_comparable {a : Set} (kind : Script_typed_ir.comparable_struct)
-  : a -> a -> int :=
-  match kind with
-  | Script_typed_ir.String_key _ =>
-    wrap_compare (|Compare.String|).(Compare.S.compare)
-  | Script_typed_ir.Bool_key _ =>
-    wrap_compare (|Compare.Bool|).(Compare.S.compare)
-  | Script_typed_ir.Mutez_key _ => wrap_compare Alpha_context.Tez.compare
-  | Script_typed_ir.Key_hash_key _ =>
-    wrap_compare (|Signature.Public_key_hash|).(S.SPublic_key_hash.compare)
-  | Script_typed_ir.Int_key _ => wrap_compare Alpha_context.Script_int.compare
-  | Script_typed_ir.Nat_key _ => wrap_compare Alpha_context.Script_int.compare
-  | Script_typed_ir.Timestamp_key _ =>
-    wrap_compare Alpha_context.Script_timestamp.compare
-  | Script_typed_ir.Address_key _ =>
-    wrap_compare
+Fixpoint compare_comparable {a : Set}
+  (kind : Script_typed_ir.comparable_struct) (x : a) (y : a) {struct kind}
+  : int :=
+  match (kind, x, y) with
+  | (Script_typed_ir.String_key _, _ as x, _ as y) =>
+    let '[x, y] := obj_magic [string ** string] [x, y] in
+    wrap_compare (|Compare.String|).(Compare.S.compare) x y
+  
+  | (Script_typed_ir.Bool_key _, _ as x, _ as y) =>
+    let '[x, y] := obj_magic [bool ** bool] [x, y] in
+    wrap_compare (|Compare.Bool|).(Compare.S.compare) x y
+  
+  | (Script_typed_ir.Mutez_key _, _ as x, _ as y) =>
+    let '[x, y] := obj_magic [Alpha_context.Tez.t ** Alpha_context.Tez.t] [x, y]
+      in
+    wrap_compare Alpha_context.Tez.compare x y
+  
+  | (Script_typed_ir.Key_hash_key _, _ as x, _ as y) =>
+    let '[x, y] :=
+      obj_magic [Alpha_context.public_key_hash ** Alpha_context.public_key_hash]
+        [x, y] in
+    wrap_compare (|Signature.Public_key_hash|).(S.SPublic_key_hash.compare) x y
+  
+  | (Script_typed_ir.Int_key _, _ as x, _ as y) =>
+    let '[x, y] :=
+      obj_magic [Alpha_context.Script_int.num ** Alpha_context.Script_int.num]
+        [x, y] in
+    wrap_compare Alpha_context.Script_int.compare x y
+  
+  | (Script_typed_ir.Nat_key _, _ as x, _ as y) =>
+    let '[x, y] :=
+      obj_magic [Alpha_context.Script_int.num ** Alpha_context.Script_int.num]
+        [x, y] in
+    wrap_compare Alpha_context.Script_int.compare x y
+  
+  | (Script_typed_ir.Timestamp_key _, _ as x, _ as y) =>
+    let '[x, y] :=
+      obj_magic
+        [Alpha_context.Script_timestamp.t ** Alpha_context.Script_timestamp.t]
+        [x, y] in
+    wrap_compare Alpha_context.Script_timestamp.compare x y
+  
+  | (Script_typed_ir.Address_key _, _ as x, _ as y) =>
+    let '[x, y] :=
+      obj_magic [Script_typed_ir.address ** Script_typed_ir.address] [x, y] in
+    (wrap_compare
       (fun function_parameter =>
         let '(x, ex) := function_parameter in
         fun function_parameter =>
@@ -442,10 +511,20 @@ Fixpoint compare_comparable {a : Set} (kind : Script_typed_ir.comparable_struct)
           if (|Compare.Int|).(Compare.S.op_eq) lres 0 then
             (|Compare.String|).(Compare.S.compare) ex ey
           else
-            lres)
-  | Script_typed_ir.Bytes_key _ => wrap_compare MBytes.compare
-  | Script_typed_ir.Pair_key (tl, _) (tr, _) _ =>
-    fun function_parameter =>
+            lres)) x y
+  
+  | (Script_typed_ir.Bytes_key _, _ as x, _ as y) =>
+    let '[x, y] := obj_magic [MBytes.t ** MBytes.t] [x, y] in
+    wrap_compare MBytes.compare x y
+  
+  | (Script_typed_ir.Pair_key (tl, _) (tr, _) _, _ as x, _ as y) =>
+    let 'existT _ [__0, __1] [tl, tr, x, y] :=
+      obj_magic_exists (Es := [Set ** Set])
+        (fun '[__0, __1] =>
+          [Script_typed_ir.comparable_struct **
+            Script_typed_ir.comparable_struct ** __0 * __1 ** __0 * __1])
+        [tl, tr, x, y] in
+    (fun function_parameter =>
       let '(lx, rx) := function_parameter in
       fun function_parameter =>
         let '(ly, ry) := function_parameter in
@@ -453,7 +532,7 @@ Fixpoint compare_comparable {a : Set} (kind : Script_typed_ir.comparable_struct)
         if (|Compare.Int|).(Compare.S.op_eq) lres 0 then
           compare_comparable tr rx ry
         else
-          lres
+          lres) x y
   end.
 
 Definition empty_set {a : Set} (ty : Script_typed_ir.comparable_ty)
@@ -652,7 +731,7 @@ Definition map_size {key value : Set} (Box : Script_typed_ir.map key value)
 
 Fixpoint ty_of_comparable_ty
   (function_parameter : Script_typed_ir.comparable_struct)
-  : Script_typed_ir.ty :=
+  {struct function_parameter} : Script_typed_ir.ty :=
   match function_parameter with
   | Script_typed_ir.Int_key tname => Script_typed_ir.Int_t tname
   | Script_typed_ir.Nat_key tname => Script_typed_ir.Nat_t tname
@@ -669,7 +748,7 @@ Fixpoint ty_of_comparable_ty
   end.
 
 Fixpoint comparable_ty_of_ty (function_parameter : Script_typed_ir.ty)
-  : option Script_typed_ir.comparable_ty :=
+  {struct function_parameter} : option Script_typed_ir.comparable_ty :=
   match function_parameter with
   | Script_typed_ir.Int_t tname => Some (Script_typed_ir.Int_key tname)
   | Script_typed_ir.Nat_t tname => Some (Script_typed_ir.Nat_key tname)
@@ -745,7 +824,7 @@ Definition add_field_annot {A B : Set}
 
 Fixpoint unparse_comparable_ty
   (function_parameter : Script_typed_ir.comparable_struct)
-  : Alpha_context.Script.node :=
+  {struct function_parameter} : Alpha_context.Script.node :=
   match function_parameter with
   | Script_typed_ir.Int_key tname =>
     Micheline.Prim (-1) Alpha_context.Script.T_int nil
@@ -782,7 +861,7 @@ Fixpoint unparse_comparable_ty
   end.
 
 Fixpoint unparse_ty_no_lwt
-  (ctxt : Alpha_context.context) (ty : Script_typed_ir.ty)
+  (ctxt : Alpha_context.context) (ty : Script_typed_ir.ty) {struct ctxt}
   : Error_monad.tzresult (Alpha_context.Script.node * Alpha_context.context) :=
   let? ctxt := Alpha_context.Gas.consume ctxt Unparse_costs.cycle in
   let __return {A : Set}
@@ -912,7 +991,7 @@ Definition unparse_ty (ctxt : Alpha_context.context) (ty : Script_typed_ir.ty)
   Lwt.__return (unparse_ty_no_lwt ctxt ty).
 
 Fixpoint strip_var_annots {A B : Set} (function_parameter : Micheline.node A B)
-  : Micheline.node A B :=
+  {struct function_parameter} : Micheline.node A B :=
   match function_parameter with
   | (Micheline.Int _ _ | Micheline.String _ _ | Micheline.Bytes _ _) as atom =>
     atom
@@ -937,6 +1016,7 @@ Definition serialize_ty_for_error
 
 Fixpoint unparse_stack
   (ctxt : Alpha_context.context) (function_parameter : Script_typed_ir.stack_ty)
+  {struct ctxt}
   : Lwt.t
     (Error_monad.tzresult
       (list (Alpha_context.Script.expr * Alpha_context.Script.annot) *
@@ -1044,7 +1124,7 @@ Definition record_inconsistent_type_annotations {A : Set}
 
 Fixpoint ty_eq
   (ctxt : Alpha_context.context) (ta : Script_typed_ir.ty)
-  (tb : Script_typed_ir.ty)
+  (tb : Script_typed_ir.ty) {struct ctxt}
   : Error_monad.tzresult (eq * Alpha_context.context) :=
   let ok (__eq_value : eq) (ctxt : Alpha_context.context) (nb_args : int)
     : Error_monad.tzresult (eq * Alpha_context.context) :=
@@ -1125,7 +1205,7 @@ Fixpoint ty_eq
 
 Fixpoint stack_ty_eq
   (ctxt : Alpha_context.context) (lvl : int) (ta : Script_typed_ir.stack_ty)
-  (tb : Script_typed_ir.stack_ty)
+  (tb : Script_typed_ir.stack_ty) {struct ctxt}
   : Error_monad.tzresult (eq * Alpha_context.context) :=
   match (ta, tb) with
   | (Script_typed_ir.Item_t tva ra _, Script_typed_ir.Item_t tvb rb _) =>
@@ -1194,7 +1274,7 @@ Definition merge_types (legacy : bool)
   Error_monad.tzresult (Script_typed_ir.ty * Alpha_context.context) :=
   let fix help
     (ctxt : Alpha_context.context) (ty1 : Script_typed_ir.ty)
-    (ty2 : Script_typed_ir.ty)
+    (ty2 : Script_typed_ir.ty) {struct ctxt}
     : Error_monad.tzresult (Script_typed_ir.ty * Alpha_context.context) :=
     match (ty1, ty2) with
     | (Script_typed_ir.Unit_t tn1, Script_typed_ir.Unit_t tn2) =>
@@ -1355,7 +1435,7 @@ Definition merge_stacks (legacy : bool) (loc : Alpha_context.Script.location)
   Error_monad.tzresult (Script_typed_ir.stack_ty * Alpha_context.context) :=
   let fix help
     (ctxt : Alpha_context.context) (stack1 : Script_typed_ir.stack_ty)
-    (stack2 : Script_typed_ir.stack_ty)
+    (stack2 : Script_typed_ir.stack_ty) {struct ctxt}
     : Error_monad.tzresult (Script_typed_ir.stack_ty * Alpha_context.context) :=
     match (stack1, stack2) with
     | (Script_typed_ir.Empty_t, Script_typed_ir.Empty_t) =>
@@ -1369,6 +1449,7 @@ Definition merge_stacks (legacy : bool) (loc : Alpha_context.Script.location)
         (fun function_parameter =>
           let '(rest, ctxt) := function_parameter in
           ((Script_typed_ir.Item_t ty rest annot), ctxt))
+    | _ => unreachable_gadt_branch
     end in
   help.
 
@@ -1399,17 +1480,19 @@ Definition has_big_map (function_parameter : Script_typed_ir.ty) : bool :=
   | Script_typed_ir.Map_t _ _ _ has_big_map => has_big_map
   end.
 
-Module ConstructorRecordNotations_judgement.
+Module ConstructorRecords_judgement.
   Module judgement.
     Module Failed.
-      Record record {descr : Set} : Set := {
+      Record record {descr : Set} : Set := Build {
         descr : descr }.
       Arguments record : clear implicits.
+      Definition with_descr {t_descr} descr (r : record t_descr) :=
+        Build t_descr descr.
     End Failed.
     Definition Failed_skeleton := Failed.record.
   End judgement.
-End ConstructorRecordNotations_judgement.
-Import ConstructorRecordNotations_judgement.
+End ConstructorRecords_judgement.
+Import ConstructorRecords_judgement.
 
 Reserved Notation "'judgement.Failed".
 
@@ -1422,7 +1505,7 @@ where "'judgement.Failed" := (fun (t_aft : Set) =>
     ((Script_typed_ir.stack_ty -> Script_typed_ir.descr) * t_aft)).
 
 Module judgement.
-  Include ConstructorRecordNotations_judgement.judgement.
+  Include ConstructorRecords_judgement.judgement.
   Definition Failed := 'judgement.Failed.
 End judgement.
 
@@ -1481,7 +1564,7 @@ Definition merge_branches {a b bef : Set}
   end.
 
 Fixpoint parse_comparable_ty
-  (ctxt : Alpha_context.context) (ty : Alpha_context.Script.node)
+  (ctxt : Alpha_context.context) (ty : Alpha_context.Script.node) {struct ctxt}
   : Error_monad.tzresult (ex_comparable_ty * Alpha_context.context) :=
   let? ctxt := Alpha_context.Gas.consume ctxt Typecheck_costs.cycle in
   let? ctxt := Alpha_context.Gas.consume ctxt (Typecheck_costs.type_ 0) in
@@ -1548,16 +1631,18 @@ Fixpoint parse_comparable_ty
   end
 
 with parse_packable_ty (ctxt : Alpha_context.context) (legacy : bool)
+  {struct ctxt}
   : Alpha_context.Script.node ->
   Error_monad.tzresult (ex_ty * Alpha_context.context) :=
   parse_ty ctxt legacy false false legacy
 
 with parse_parameter_ty (ctxt : Alpha_context.context) (legacy : bool)
+  {struct ctxt}
   : Alpha_context.Script.node ->
   Error_monad.tzresult (ex_ty * Alpha_context.context) :=
   parse_ty ctxt legacy true false true
 
-with parse_any_ty (ctxt : Alpha_context.context) (legacy : bool)
+with parse_any_ty (ctxt : Alpha_context.context) (legacy : bool) {struct ctxt}
   : Alpha_context.Script.node ->
   Error_monad.tzresult (ex_ty * Alpha_context.context) :=
   parse_ty ctxt legacy true true true
@@ -1565,7 +1650,7 @@ with parse_any_ty (ctxt : Alpha_context.context) (legacy : bool)
 with parse_ty
   (ctxt : Alpha_context.context) (legacy : bool) (allow_big_map : bool)
   (allow_operation : bool) (allow_contract : bool)
-  (node : Alpha_context.Script.node)
+  (node : Alpha_context.Script.node) {struct ctxt}
   : Error_monad.tzresult (ex_ty * Alpha_context.context) :=
   let? ctxt := Alpha_context.Gas.consume ctxt Typecheck_costs.cycle in
   match
@@ -1805,7 +1890,7 @@ with parse_big_map_ty
   (args :
     list
       (Micheline.node Alpha_context.Script.location Alpha_context.Script.prim))
-  (map_annot : Micheline.annot)
+  (map_annot : Micheline.annot) {struct ctxt}
   : Error_monad.tzresult (ex_ty * Alpha_context.context) :=
   let? ctxt := Alpha_context.Gas.consume ctxt Typecheck_costs.cycle in
   match args with
@@ -1822,7 +1907,7 @@ with parse_big_map_ty
 
 with parse_storage_ty
   (ctxt : Alpha_context.context) (legacy : bool)
-  (node : Alpha_context.Script.node)
+  (node : Alpha_context.Script.node) {struct ctxt}
   : Error_monad.tzresult (ex_ty * Alpha_context.context) :=
   match
     (node,
@@ -1872,7 +1957,7 @@ Definition check_packable
   (legacy : bool) (loc : Alpha_context.Script.location)
   (root : Script_typed_ir.ty) : Error_monad.tzresult unit :=
   let fix check (function_parameter : Script_typed_ir.ty)
-    : Error_monad.tzresult unit :=
+    {struct function_parameter} : Error_monad.tzresult unit :=
     match
       (function_parameter,
         match function_parameter with
@@ -2004,6 +2089,7 @@ Definition find_entrypoint
   : Error_monad.tzresult
     ((Alpha_context.Script.node -> Alpha_context.Script.node) * ex_ty) :=
   let fix find_entrypoint (__t_value : Script_typed_ir.ty) (entrypoint : string)
+    {struct __t_value}
     : (Alpha_context.Script.node -> Alpha_context.Script.node) * ex_ty :=
     match __t_value with
     | Script_typed_ir.Union_t (tl, al) (tr, ar) _ _ =>
@@ -2124,6 +2210,7 @@ Definition well_formed_entrypoints
     (__t_value : Script_typed_ir.ty) (path : list Alpha_context.Script.prim)
     (reachable : bool)
     (acc : option (list Alpha_context.Script.prim) * (|Entrypoints|).(S.SET.t))
+    {struct __t_value}
     : option (list Alpha_context.Script.prim) * (|Entrypoints|).(S.SET.t) :=
     match __t_value with
     | Script_typed_ir.Union_t (tl, al) (tr, ar) _ _ =>
@@ -2163,7 +2250,7 @@ Definition well_formed_entrypoints
 Fixpoint parse_data {a : Set}
   (type_logger : option type_logger) (ctxt : Alpha_context.context)
   (legacy : bool) (ty : Script_typed_ir.ty)
-  (script_data : Alpha_context.Script.node)
+  (script_data : Alpha_context.Script.node) {struct type_logger}
   : Lwt.t (Error_monad.tzresult (a * Alpha_context.context)) :=
   let=? ctxt :=
     Lwt.__return (Alpha_context.Gas.consume ctxt Typecheck_costs.cycle) in
@@ -2300,7 +2387,8 @@ Fixpoint parse_data {a : Set}
       Lwt.__return
         (Alpha_context.Gas.consume ctxt
           (Typecheck_costs.__string_value (String.length v))) in
-    let fix check_printable_ascii (i : (|Compare.Int|).(Compare.S.t)) : bool :=
+    let fix check_printable_ascii (i : (|Compare.Int|).(Compare.S.t)) {struct i}
+      : bool :=
       if (|Compare.Int|).(Compare.S.op_lt) i 0 then
         true
       else
@@ -2752,6 +2840,7 @@ Fixpoint parse_data {a : Set}
 with parse_comparable_data {a : Set}
   (type_logger : option type_logger) (ctxt : Alpha_context.context)
   (ty : Script_typed_ir.comparable_ty) (script_data : Alpha_context.Script.node)
+  {struct type_logger}
   : Lwt.t (Error_monad.tzresult (a * Alpha_context.context)) :=
   parse_data type_logger ctxt false (ty_of_comparable_ty ty) script_data
 
@@ -2759,6 +2848,7 @@ with parse_returning
   (type_logger : option type_logger) (tc_context : tc_context)
   (ctxt : Alpha_context.context) (legacy : bool)
   (function_parameter : Script_typed_ir.ty * option Script_typed_ir.var_annot)
+  {struct type_logger}
   : Script_typed_ir.ty -> Alpha_context.Script.node ->
   Lwt.t (Error_monad.tzresult (Script_typed_ir.lambda * Alpha_context.context)) :=
   let '(arg, arg_annot) := function_parameter in
@@ -2811,7 +2901,7 @@ with parse_returning
 
 with parse_int32
   (n : Micheline.node Alpha_context.Script.location Alpha_context.Script.prim)
-  : Error_monad.tzresult int :=
+  {struct n} : Error_monad.tzresult int :=
   let error' (function_parameter : unit) : Error_monad.__error :=
     let '_ := function_parameter in
     extensible_type_value in
@@ -2834,7 +2924,7 @@ with parse_instr {bef : Set}
   (type_logger : option type_logger) (tc_context : tc_context)
   (ctxt : Alpha_context.context) (legacy : bool)
   (script_instr : Alpha_context.Script.node)
-  (stack_ty : Script_typed_ir.stack_ty)
+  (stack_ty : Script_typed_ir.stack_ty) {struct type_logger}
   : Lwt.t (Error_monad.tzresult (judgement bef * Alpha_context.context)) :=
   let _check_item {B : Set}
     (check : Error_monad.tzresult B) (loc : Alpha_context.Script.location)
@@ -2963,7 +3053,7 @@ with parse_instr {bef : Set}
       whole_stack), _) =>
     let=? whole_n := Lwt.__return (parse_int32 n) in
     let fix make_proof_argument {tstk : Set}
-      (n : int) (stk : Script_typed_ir.stack_ty)
+      (n : int) (stk : Script_typed_ir.stack_ty) {struct n}
       : Lwt.t (Error_monad.tzresult (dropn_proof_argument tstk)) :=
       match (((|Compare.Int|).(Compare.S.op_eq) n 0), stk) with
       | (true, rest) =>
@@ -2998,7 +3088,7 @@ with parse_instr {bef : Set}
     ((Micheline.Prim loc Alpha_context.Script.I_DIG (cons n []) result_annot,
       __stack_value), _) =>
     let fix make_proof_argument {tstk : Set}
-      (n : int) (stk : Script_typed_ir.stack_ty)
+      (n : int) (stk : Script_typed_ir.stack_ty) {struct n}
       : Lwt.t (Error_monad.tzresult (dig_proof_argument tstk)) :=
       match (((|Compare.Int|).(Compare.S.op_eq) n 0), stk) with
       | (true, Script_typed_ir.Item_t v rest annot) =>
@@ -3033,7 +3123,7 @@ with parse_instr {bef : Set}
     let fix make_proof_argument {tstk x : Set}
       (n : int) (x : Script_typed_ir.ty)
       (stack_annot : option Script_typed_ir.var_annot)
-      (stk : Script_typed_ir.stack_ty)
+      (stk : Script_typed_ir.stack_ty) {struct n}
       : Lwt.t (Error_monad.tzresult (dug_proof_argument tstk x)) :=
       match (((|Compare.Int|).(Compare.S.op_eq) n 0), stk) with
       | (true, rest) =>
@@ -3817,7 +3907,7 @@ with parse_instr {bef : Set}
       result_annot, __stack_value), true) =>
     let fix make_proof_argument {tstk : Set}
       (n : int) (inner_tc_context : tc_context) (stk : Script_typed_ir.stack_ty)
-      : Lwt.t (Error_monad.tzresult (dipn_proof_argument tstk)) :=
+      {struct n} : Lwt.t (Error_monad.tzresult (dipn_proof_argument tstk)) :=
       match (((|Compare.Int|).(Compare.S.op_eq) n 0), stk) with
       | (true, rest) =>
         let=? '(judgement, ctxt) :=
@@ -4728,6 +4818,7 @@ with parse_instr {bef : Set}
           let 'Script_typed_ir.Field_annot annot := function_parameter in
           annot) "default" entrypoint in
     let fix get_toplevel_type (function_parameter : tc_context)
+      {struct function_parameter}
       : Lwt.t (Error_monad.tzresult (judgement bef * Alpha_context.context)) :=
       match function_parameter with
       | Lambda => Error_monad.fail extensible_type_value
@@ -4968,7 +5059,7 @@ with parse_instr {bef : Set}
 with parse_contract
   (legacy : bool) (ctxt : Alpha_context.context)
   (loc : Alpha_context.Script.location) (arg : Script_typed_ir.ty)
-  (contract : Alpha_context.Contract.t) (entrypoint : string)
+  (contract : Alpha_context.Contract.t) (entrypoint : string) {struct legacy}
   : Lwt.t
     (Error_monad.tzresult
       (Alpha_context.context * Script_typed_ir.typed_contract)) :=
@@ -5019,7 +5110,7 @@ with parse_contract
 with parse_contract_for_script
   (legacy : bool) (ctxt : Alpha_context.context)
   (loc : Alpha_context.Script.location) (arg : Script_typed_ir.ty)
-  (contract : Alpha_context.Contract.t) (entrypoint : string)
+  (contract : Alpha_context.Contract.t) (entrypoint : string) {struct legacy}
   : Lwt.t
     (Error_monad.tzresult
       (Alpha_context.context * option Script_typed_ir.typed_contract)) :=
@@ -5081,6 +5172,7 @@ with parse_contract_for_script
   end
 
 with parse_toplevel (legacy : bool) (toplevel : Alpha_context.Script.expr)
+  {struct legacy}
   : Error_monad.tzresult
     (Alpha_context.Script.node * Alpha_context.Script.node *
       Alpha_context.Script.node * option string) :=
@@ -5111,7 +5203,7 @@ with parse_toplevel (legacy : bool) (toplevel : Alpha_context.Script.expr)
         (fields :
           list
             (Micheline.node Alpha_context.Script.location
-              Alpha_context.Script.prim))
+              Alpha_context.Script.prim)) {struct __p_value}
         : Error_monad.tzresult
           (option
             (Micheline.node Alpha_context.Script.location
@@ -5423,6 +5515,7 @@ Definition list_entrypoints
       list (list Alpha_context.Script.prim) *
         (|Entrypoints_map|).(S.MAP.t)
           (list Alpha_context.Script.prim * Alpha_context.Script.node))
+    {struct __t_value}
     : Error_monad.tzresult
       (list (list Alpha_context.Script.prim) *
         (|Entrypoints_map|).(S.MAP.t)
@@ -5452,7 +5545,7 @@ Definition list_entrypoints
 
 Fixpoint unparse_data {a : Set}
   (ctxt : Alpha_context.context) (mode : unparsing_mode)
-  (ty : Script_typed_ir.ty) (__a_value : a)
+  (ty : Script_typed_ir.ty) (__a_value : a) {struct ctxt}
   : Lwt.t
     (Error_monad.tzresult (Alpha_context.Script.node * Alpha_context.context)) :=
   let=? ctxt :=
@@ -5815,6 +5908,7 @@ Fixpoint unparse_data {a : Set}
   end
 
 with unparse_code (ctxt : Alpha_context.context) (mode : unparsing_mode)
+  {struct ctxt}
   : Alpha_context.Script.node ->
   Lwt.t
     (Error_monad.tzresult
@@ -6108,7 +6202,7 @@ Fixpoint extract_big_map_updates {a : Set}
       (Error_monad.tzresult (Alpha_context.context * Alpha_context.Big_map.id)))
   (mode : unparsing_mode) (ids : (|Ids|).(S.SET.t))
   (acc : list Alpha_context.Contract.big_map_diff) (ty : Script_typed_ir.ty)
-  (x : a)
+  (x : a) {struct ctxt}
   : Lwt.t
     (Error_monad.tzresult
       (Alpha_context.context * a * (|Ids|).(S.SET.t) *
@@ -6293,7 +6387,7 @@ Definition collect_big_maps {A : Set}
   : Lwt.t (Error_monad.tzresult ((|Ids|).(S.SET.t) * Alpha_context.context)) :=
   let fix collect {a : Set}
     (ctxt : Alpha_context.context) (ty : Script_typed_ir.ty) (x : a)
-    (acc : (|Ids|).(S.SET.t))
+    (acc : (|Ids|).(S.SET.t)) {struct ctxt}
     : Error_monad.tzresult ((|Ids|).(S.SET.t) * Alpha_context.context) :=
     match (ty, x) with
     |

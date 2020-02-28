@@ -11,45 +11,92 @@ Import Environment.Notations.
 Require Tezos.Alpha_context.
 Require Tezos.Apply_results_mli. Module Apply_results := Apply_results_mli.
 
-Module ConstructorRecordNotations_validation_mode.
+Module ConstructorRecords_validation_mode.
   Module validation_mode.
     Module Application.
-      Record record {block_header baker block_delay : Set} : Set := {
+      Record record {block_header baker block_delay : Set} : Set := Build {
         block_header : block_header;
         baker : baker;
         block_delay : block_delay }.
       Arguments record : clear implicits.
+      Definition with_block_header {t_block_header t_baker t_block_delay}
+        block_header (r : record t_block_header t_baker t_block_delay) :=
+        Build t_block_header t_baker t_block_delay block_header r.(baker)
+          r.(block_delay).
+      Definition with_baker {t_block_header t_baker t_block_delay} baker
+        (r : record t_block_header t_baker t_block_delay) :=
+        Build t_block_header t_baker t_block_delay r.(block_header) baker
+          r.(block_delay).
+      Definition with_block_delay {t_block_header t_baker t_block_delay}
+        block_delay (r : record t_block_header t_baker t_block_delay) :=
+        Build t_block_header t_baker t_block_delay r.(block_header) r.(baker)
+          block_delay.
     End Application.
     Definition Application_skeleton := Application.record.
     
     Module Partial_application.
-      Record record {block_header baker block_delay : Set} : Set := {
+      Record record {block_header baker block_delay : Set} : Set := Build {
         block_header : block_header;
         baker : baker;
         block_delay : block_delay }.
       Arguments record : clear implicits.
+      Definition with_block_header {t_block_header t_baker t_block_delay}
+        block_header (r : record t_block_header t_baker t_block_delay) :=
+        Build t_block_header t_baker t_block_delay block_header r.(baker)
+          r.(block_delay).
+      Definition with_baker {t_block_header t_baker t_block_delay} baker
+        (r : record t_block_header t_baker t_block_delay) :=
+        Build t_block_header t_baker t_block_delay r.(block_header) baker
+          r.(block_delay).
+      Definition with_block_delay {t_block_header t_baker t_block_delay}
+        block_delay (r : record t_block_header t_baker t_block_delay) :=
+        Build t_block_header t_baker t_block_delay r.(block_header) r.(baker)
+          block_delay.
     End Partial_application.
     Definition Partial_application_skeleton := Partial_application.record.
     
     Module Partial_construction.
-      Record record {predecessor : Set} : Set := {
+      Record record {predecessor : Set} : Set := Build {
         predecessor : predecessor }.
       Arguments record : clear implicits.
+      Definition with_predecessor {t_predecessor} predecessor
+        (r : record t_predecessor) :=
+        Build t_predecessor predecessor.
     End Partial_construction.
     Definition Partial_construction_skeleton := Partial_construction.record.
     
     Module Full_construction.
-      Record record {predecessor protocol_data baker block_delay : Set} : Set := {
+      Record record {predecessor protocol_data baker block_delay : Set} : Set := Build {
         predecessor : predecessor;
         protocol_data : protocol_data;
         baker : baker;
         block_delay : block_delay }.
       Arguments record : clear implicits.
+      Definition with_predecessor
+        {t_predecessor t_protocol_data t_baker t_block_delay} predecessor
+        (r : record t_predecessor t_protocol_data t_baker t_block_delay) :=
+        Build t_predecessor t_protocol_data t_baker t_block_delay predecessor
+          r.(protocol_data) r.(baker) r.(block_delay).
+      Definition with_protocol_data
+        {t_predecessor t_protocol_data t_baker t_block_delay} protocol_data
+        (r : record t_predecessor t_protocol_data t_baker t_block_delay) :=
+        Build t_predecessor t_protocol_data t_baker t_block_delay
+          r.(predecessor) protocol_data r.(baker) r.(block_delay).
+      Definition with_baker
+        {t_predecessor t_protocol_data t_baker t_block_delay} baker
+        (r : record t_predecessor t_protocol_data t_baker t_block_delay) :=
+        Build t_predecessor t_protocol_data t_baker t_block_delay
+          r.(predecessor) r.(protocol_data) baker r.(block_delay).
+      Definition with_block_delay
+        {t_predecessor t_protocol_data t_baker t_block_delay} block_delay
+        (r : record t_predecessor t_protocol_data t_baker t_block_delay) :=
+        Build t_predecessor t_protocol_data t_baker t_block_delay
+          r.(predecessor) r.(protocol_data) r.(baker) block_delay.
     End Full_construction.
     Definition Full_construction_skeleton := Full_construction.record.
   End validation_mode.
-End ConstructorRecordNotations_validation_mode.
-Import ConstructorRecordNotations_validation_mode.
+End ConstructorRecords_validation_mode.
+Import ConstructorRecords_validation_mode.
 
 Reserved Notation "'validation_mode.Application".
 Reserved Notation "'validation_mode.Partial_application".
@@ -77,7 +124,7 @@ and "'validation_mode.Full_construction" :=
     Alpha_context.Period.t).
 
 Module validation_mode.
-  Include ConstructorRecordNotations_validation_mode.validation_mode.
+  Include ConstructorRecords_validation_mode.validation_mode.
   Definition Application := 'validation_mode.Application.
   Definition Partial_application := 'validation_mode.Partial_application.
   Definition Partial_construction := 'validation_mode.Partial_construction.

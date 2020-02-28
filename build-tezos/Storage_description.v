@@ -22,28 +22,50 @@ Definition StringMap :=
         Compare.COMPARABLE.compare := String.compare
       |}).
 
-Module ConstructorRecordNotations_description.
+Module ConstructorRecords_description.
   Module description.
     Module Value.
-      Record record {get encoding : Set} : Set := {
+      Record record {get encoding : Set} : Set := Build {
         get : get;
         encoding : encoding }.
       Arguments record : clear implicits.
+      Definition with_get {t_get t_encoding} get
+        (r : record t_get t_encoding) :=
+        Build t_get t_encoding get r.(encoding).
+      Definition with_encoding {t_get t_encoding} encoding
+        (r : record t_get t_encoding) :=
+        Build t_get t_encoding r.(get) encoding.
     End Value.
     Definition Value_skeleton := Value.record.
     
     Module IndexedDir.
-      Record record {arg arg_encoding list subdir : Set} : Set := {
+      Record record {arg arg_encoding list subdir : Set} : Set := Build {
         arg : arg;
         arg_encoding : arg_encoding;
         list : list;
         subdir : subdir }.
       Arguments record : clear implicits.
+      Definition with_arg {t_arg t_arg_encoding t_list t_subdir} arg
+        (r : record t_arg t_arg_encoding t_list t_subdir) :=
+        Build t_arg t_arg_encoding t_list t_subdir arg r.(arg_encoding) r.(list)
+          r.(subdir).
+      Definition with_arg_encoding {t_arg t_arg_encoding t_list t_subdir}
+        arg_encoding (r : record t_arg t_arg_encoding t_list t_subdir) :=
+        Build t_arg t_arg_encoding t_list t_subdir r.(arg) arg_encoding r.(list)
+          r.(subdir).
+      Definition with_list {t_arg t_arg_encoding t_list t_subdir} list
+        (r : record t_arg t_arg_encoding t_list t_subdir) :=
+        Build t_arg t_arg_encoding t_list t_subdir r.(arg) r.(arg_encoding) list
+          r.(subdir).
+      Definition with_subdir {t_arg t_arg_encoding t_list t_subdir} subdir
+        (r : record t_arg t_arg_encoding t_list t_subdir) :=
+        Build t_arg t_arg_encoding t_list t_subdir r.(arg) r.(arg_encoding)
+          r.(list) subdir.
     End IndexedDir.
     Definition IndexedDir_skeleton := IndexedDir.record.
   End description.
-End ConstructorRecordNotations_description.
-Import ConstructorRecordNotations_description.
+End ConstructorRecords_description.
+Import ConstructorRecords_description.
 
 Reserved Notation "'description.Value".
 Reserved Notation "'description.IndexedDir".
@@ -65,7 +87,7 @@ and "'description.IndexedDir" := (fun (t_a t_key : Set) =>
     (t_key -> Lwt.t (Error_monad.tzresult (list t_a))) ('t (t_key * t_a))).
 
 Module description.
-  Include ConstructorRecordNotations_description.description.
+  Include ConstructorRecords_description.description.
   Definition Value := 'description.Value.
   Definition IndexedDir := 'description.IndexedDir.
 End description.
@@ -101,19 +123,28 @@ Fixpoint register_named_subcontext {r : Set} (dir : t r) (names : list string)
     register_named_subcontext subdir names
   end.
 
-Module ConstructorRecordNotations_args.
+Module ConstructorRecords_args.
   Module args.
     Module One.
-      Record record {rpc_arg encoding compare : Set} : Set := {
+      Record record {rpc_arg encoding compare : Set} : Set := Build {
         rpc_arg : rpc_arg;
         encoding : encoding;
         compare : compare }.
       Arguments record : clear implicits.
+      Definition with_rpc_arg {t_rpc_arg t_encoding t_compare} rpc_arg
+        (r : record t_rpc_arg t_encoding t_compare) :=
+        Build t_rpc_arg t_encoding t_compare rpc_arg r.(encoding) r.(compare).
+      Definition with_encoding {t_rpc_arg t_encoding t_compare} encoding
+        (r : record t_rpc_arg t_encoding t_compare) :=
+        Build t_rpc_arg t_encoding t_compare r.(rpc_arg) encoding r.(compare).
+      Definition with_compare {t_rpc_arg t_encoding t_compare} compare
+        (r : record t_rpc_arg t_encoding t_compare) :=
+        Build t_rpc_arg t_encoding t_compare r.(rpc_arg) r.(encoding) compare.
     End One.
     Definition One_skeleton := One.record.
   End args.
-End ConstructorRecordNotations_args.
-Import ConstructorRecordNotations_args.
+End ConstructorRecords_args.
+Import ConstructorRecords_args.
 
 Reserved Notation "'args.One".
 
@@ -125,13 +156,13 @@ where "'args.One" := (fun (t_a : Set) =>
   args.One_skeleton (RPC_arg.t t_a) (Data_encoding.t t_a) (t_a -> t_a -> int)).
 
 Module args.
-  Include ConstructorRecordNotations_args.args.
+  Include ConstructorRecords_args.args.
   Definition One := 'args.One.
 End args.
 
 Fixpoint unpack {a b c : Set} (v : args) (x : c) {struct v} : a * b := axiom.
 
-Fixpoint pack {a b c : Set} (v : args) (x : a) (y : b) {struct v} : c := axiom.
+Fixpoint __pack {a b c : Set} (v : args) (x : a) (y : b) {struct v} : c := axiom.
 
 Fixpoint compare {b : Set} (function_parameter : args)
   {struct function_parameter} : b -> b -> int := axiom.
@@ -259,18 +290,24 @@ Module INDEX.
   Arguments signature : clear implicits.
 End INDEX.
 
-Module ConstructorRecordNotations_handler.
+Module ConstructorRecords_handler.
   Module handler.
     Module Handler.
-      Record record {encoding get : Set} : Set := {
+      Record record {encoding get : Set} : Set := Build {
         encoding : encoding;
         get : get }.
       Arguments record : clear implicits.
+      Definition with_encoding {t_encoding t_get} encoding
+        (r : record t_encoding t_get) :=
+        Build t_encoding t_get encoding r.(get).
+      Definition with_get {t_encoding t_get} get
+        (r : record t_encoding t_get) :=
+        Build t_encoding t_get r.(encoding) get.
     End Handler.
     Definition Handler_skeleton := Handler.record.
   End handler.
-End ConstructorRecordNotations_handler.
-Import ConstructorRecordNotations_handler.
+End ConstructorRecords_handler.
+Import ConstructorRecords_handler.
 
 Reserved Notation "'handler.Handler".
 
@@ -282,24 +319,30 @@ where "'handler.Handler" := (fun (t_a t_key : Set) =>
     (t_key -> int -> Lwt.t (Error_monad.tzresult t_a))).
 
 Module handler.
-  Include ConstructorRecordNotations_handler.handler.
+  Include ConstructorRecords_handler.handler.
   Definition Handler := 'handler.Handler.
 End handler.
 
 Arguments Handler {_ _}.
 
-Module ConstructorRecordNotations_opt_handler.
+Module ConstructorRecords_opt_handler.
   Module opt_handler.
     Module Opt_handler.
-      Record record {encoding get : Set} : Set := {
+      Record record {encoding get : Set} : Set := Build {
         encoding : encoding;
         get : get }.
       Arguments record : clear implicits.
+      Definition with_encoding {t_encoding t_get} encoding
+        (r : record t_encoding t_get) :=
+        Build t_encoding t_get encoding r.(get).
+      Definition with_get {t_encoding t_get} get
+        (r : record t_encoding t_get) :=
+        Build t_encoding t_get r.(encoding) get.
     End Opt_handler.
     Definition Opt_handler_skeleton := Opt_handler.record.
   End opt_handler.
-End ConstructorRecordNotations_opt_handler.
-Import ConstructorRecordNotations_opt_handler.
+End ConstructorRecords_opt_handler.
+Import ConstructorRecords_opt_handler.
 
 Reserved Notation "'opt_handler.Opt_handler".
 
@@ -312,7 +355,7 @@ where "'opt_handler.Opt_handler" := (fun (t_a t_key : Set) =>
     (t_key -> int -> Lwt.t (Error_monad.tzresult (option t_a)))).
 
 Module opt_handler.
-  Include ConstructorRecordNotations_opt_handler.opt_handler.
+  Include ConstructorRecords_opt_handler.opt_handler.
   Definition Opt_handler := 'opt_handler.Opt_handler.
 End opt_handler.
 

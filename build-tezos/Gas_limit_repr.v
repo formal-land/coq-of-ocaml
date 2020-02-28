@@ -9,17 +9,20 @@ Import ListNotations.
 Require Import Tezos.Environment.
 Import Environment.Notations.
 
-Module ConstructorRecordNotations_t.
+Module ConstructorRecords_t.
   Module t.
     Module Limited.
-      Record record {remaining : Set} : Set := {
+      Record record {remaining : Set} : Set := Build {
         remaining : remaining }.
       Arguments record : clear implicits.
+      Definition with_remaining {t_remaining} remaining
+        (r : record t_remaining) :=
+        Build t_remaining remaining.
     End Limited.
     Definition Limited_skeleton := Limited.record.
   End t.
-End ConstructorRecordNotations_t.
-Import ConstructorRecordNotations_t.
+End ConstructorRecords_t.
+Import ConstructorRecords_t.
 
 Reserved Notation "'t.Limited".
 
@@ -30,7 +33,7 @@ Inductive t : Set :=
 where "'t.Limited" := (t.Limited_skeleton Z.t).
 
 Module t.
-  Include ConstructorRecordNotations_t.t.
+  Include ConstructorRecords_t.t.
   Definition Limited := 't.Limited.
 End t.
 

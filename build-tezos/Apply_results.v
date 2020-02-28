@@ -17,19 +17,22 @@ Import Data_encoding.
 
 Definition error_encoding : Data_encoding.encoding Error_monad.__error := axiom.
 
-Module ConstructorRecordNotations_successful_manager_operation_result.
+Module ConstructorRecords_successful_manager_operation_result.
   Module successful_manager_operation_result.
     Module Reveal_result.
-      Record record {consumed_gas : Set} : Set := {
+      Record record {consumed_gas : Set} : Set := Build {
         consumed_gas : consumed_gas }.
       Arguments record : clear implicits.
+      Definition with_consumed_gas {t_consumed_gas} consumed_gas
+        (r : record t_consumed_gas) :=
+        Build t_consumed_gas consumed_gas.
     End Reveal_result.
     Definition Reveal_result_skeleton := Reveal_result.record.
     
     Module Transaction_result.
       Record record {storage big_map_diff balance_updates originated_contracts
         consumed_gas storage_size paid_storage_size_diff
-        allocated_destination_contract : Set} : Set := {
+        allocated_destination_contract : Set} : Set := Build {
         storage : storage;
         big_map_diff : big_map_diff;
         balance_updates : balance_updates;
@@ -39,12 +42,124 @@ Module ConstructorRecordNotations_successful_manager_operation_result.
         paid_storage_size_diff : paid_storage_size_diff;
         allocated_destination_contract : allocated_destination_contract }.
       Arguments record : clear implicits.
+      Definition with_storage
+        {t_storage t_big_map_diff t_balance_updates t_originated_contracts
+          t_consumed_gas t_storage_size t_paid_storage_size_diff
+          t_allocated_destination_contract} storage
+        (r :
+          record t_storage t_big_map_diff t_balance_updates
+            t_originated_contracts t_consumed_gas t_storage_size
+            t_paid_storage_size_diff t_allocated_destination_contract) :=
+        Build t_storage t_big_map_diff t_balance_updates t_originated_contracts
+          t_consumed_gas t_storage_size t_paid_storage_size_diff
+          t_allocated_destination_contract storage r.(big_map_diff)
+          r.(balance_updates) r.(originated_contracts) r.(consumed_gas)
+          r.(storage_size) r.(paid_storage_size_diff)
+          r.(allocated_destination_contract).
+      Definition with_big_map_diff
+        {t_storage t_big_map_diff t_balance_updates t_originated_contracts
+          t_consumed_gas t_storage_size t_paid_storage_size_diff
+          t_allocated_destination_contract} big_map_diff
+        (r :
+          record t_storage t_big_map_diff t_balance_updates
+            t_originated_contracts t_consumed_gas t_storage_size
+            t_paid_storage_size_diff t_allocated_destination_contract) :=
+        Build t_storage t_big_map_diff t_balance_updates t_originated_contracts
+          t_consumed_gas t_storage_size t_paid_storage_size_diff
+          t_allocated_destination_contract r.(storage) big_map_diff
+          r.(balance_updates) r.(originated_contracts) r.(consumed_gas)
+          r.(storage_size) r.(paid_storage_size_diff)
+          r.(allocated_destination_contract).
+      Definition with_balance_updates
+        {t_storage t_big_map_diff t_balance_updates t_originated_contracts
+          t_consumed_gas t_storage_size t_paid_storage_size_diff
+          t_allocated_destination_contract} balance_updates
+        (r :
+          record t_storage t_big_map_diff t_balance_updates
+            t_originated_contracts t_consumed_gas t_storage_size
+            t_paid_storage_size_diff t_allocated_destination_contract) :=
+        Build t_storage t_big_map_diff t_balance_updates t_originated_contracts
+          t_consumed_gas t_storage_size t_paid_storage_size_diff
+          t_allocated_destination_contract r.(storage) r.(big_map_diff)
+          balance_updates r.(originated_contracts) r.(consumed_gas)
+          r.(storage_size) r.(paid_storage_size_diff)
+          r.(allocated_destination_contract).
+      Definition with_originated_contracts
+        {t_storage t_big_map_diff t_balance_updates t_originated_contracts
+          t_consumed_gas t_storage_size t_paid_storage_size_diff
+          t_allocated_destination_contract} originated_contracts
+        (r :
+          record t_storage t_big_map_diff t_balance_updates
+            t_originated_contracts t_consumed_gas t_storage_size
+            t_paid_storage_size_diff t_allocated_destination_contract) :=
+        Build t_storage t_big_map_diff t_balance_updates t_originated_contracts
+          t_consumed_gas t_storage_size t_paid_storage_size_diff
+          t_allocated_destination_contract r.(storage) r.(big_map_diff)
+          r.(balance_updates) originated_contracts r.(consumed_gas)
+          r.(storage_size) r.(paid_storage_size_diff)
+          r.(allocated_destination_contract).
+      Definition with_consumed_gas
+        {t_storage t_big_map_diff t_balance_updates t_originated_contracts
+          t_consumed_gas t_storage_size t_paid_storage_size_diff
+          t_allocated_destination_contract} consumed_gas
+        (r :
+          record t_storage t_big_map_diff t_balance_updates
+            t_originated_contracts t_consumed_gas t_storage_size
+            t_paid_storage_size_diff t_allocated_destination_contract) :=
+        Build t_storage t_big_map_diff t_balance_updates t_originated_contracts
+          t_consumed_gas t_storage_size t_paid_storage_size_diff
+          t_allocated_destination_contract r.(storage) r.(big_map_diff)
+          r.(balance_updates) r.(originated_contracts) consumed_gas
+          r.(storage_size) r.(paid_storage_size_diff)
+          r.(allocated_destination_contract).
+      Definition with_storage_size
+        {t_storage t_big_map_diff t_balance_updates t_originated_contracts
+          t_consumed_gas t_storage_size t_paid_storage_size_diff
+          t_allocated_destination_contract} storage_size
+        (r :
+          record t_storage t_big_map_diff t_balance_updates
+            t_originated_contracts t_consumed_gas t_storage_size
+            t_paid_storage_size_diff t_allocated_destination_contract) :=
+        Build t_storage t_big_map_diff t_balance_updates t_originated_contracts
+          t_consumed_gas t_storage_size t_paid_storage_size_diff
+          t_allocated_destination_contract r.(storage) r.(big_map_diff)
+          r.(balance_updates) r.(originated_contracts) r.(consumed_gas)
+          storage_size r.(paid_storage_size_diff)
+          r.(allocated_destination_contract).
+      Definition with_paid_storage_size_diff
+        {t_storage t_big_map_diff t_balance_updates t_originated_contracts
+          t_consumed_gas t_storage_size t_paid_storage_size_diff
+          t_allocated_destination_contract} paid_storage_size_diff
+        (r :
+          record t_storage t_big_map_diff t_balance_updates
+            t_originated_contracts t_consumed_gas t_storage_size
+            t_paid_storage_size_diff t_allocated_destination_contract) :=
+        Build t_storage t_big_map_diff t_balance_updates t_originated_contracts
+          t_consumed_gas t_storage_size t_paid_storage_size_diff
+          t_allocated_destination_contract r.(storage) r.(big_map_diff)
+          r.(balance_updates) r.(originated_contracts) r.(consumed_gas)
+          r.(storage_size) paid_storage_size_diff
+          r.(allocated_destination_contract).
+      Definition with_allocated_destination_contract
+        {t_storage t_big_map_diff t_balance_updates t_originated_contracts
+          t_consumed_gas t_storage_size t_paid_storage_size_diff
+          t_allocated_destination_contract} allocated_destination_contract
+        (r :
+          record t_storage t_big_map_diff t_balance_updates
+            t_originated_contracts t_consumed_gas t_storage_size
+            t_paid_storage_size_diff t_allocated_destination_contract) :=
+        Build t_storage t_big_map_diff t_balance_updates t_originated_contracts
+          t_consumed_gas t_storage_size t_paid_storage_size_diff
+          t_allocated_destination_contract r.(storage) r.(big_map_diff)
+          r.(balance_updates) r.(originated_contracts) r.(consumed_gas)
+          r.(storage_size) r.(paid_storage_size_diff)
+          allocated_destination_contract.
     End Transaction_result.
     Definition Transaction_result_skeleton := Transaction_result.record.
     
     Module Origination_result.
       Record record {big_map_diff balance_updates originated_contracts
-        consumed_gas storage_size paid_storage_size_diff : Set} : Set := {
+        consumed_gas storage_size paid_storage_size_diff : Set} : Set := Build {
         big_map_diff : big_map_diff;
         balance_updates : balance_updates;
         originated_contracts : originated_contracts;
@@ -52,18 +167,81 @@ Module ConstructorRecordNotations_successful_manager_operation_result.
         storage_size : storage_size;
         paid_storage_size_diff : paid_storage_size_diff }.
       Arguments record : clear implicits.
+      Definition with_big_map_diff
+        {t_big_map_diff t_balance_updates t_originated_contracts t_consumed_gas
+          t_storage_size t_paid_storage_size_diff} big_map_diff
+        (r :
+          record t_big_map_diff t_balance_updates t_originated_contracts
+            t_consumed_gas t_storage_size t_paid_storage_size_diff) :=
+        Build t_big_map_diff t_balance_updates t_originated_contracts
+          t_consumed_gas t_storage_size t_paid_storage_size_diff big_map_diff
+          r.(balance_updates) r.(originated_contracts) r.(consumed_gas)
+          r.(storage_size) r.(paid_storage_size_diff).
+      Definition with_balance_updates
+        {t_big_map_diff t_balance_updates t_originated_contracts t_consumed_gas
+          t_storage_size t_paid_storage_size_diff} balance_updates
+        (r :
+          record t_big_map_diff t_balance_updates t_originated_contracts
+            t_consumed_gas t_storage_size t_paid_storage_size_diff) :=
+        Build t_big_map_diff t_balance_updates t_originated_contracts
+          t_consumed_gas t_storage_size t_paid_storage_size_diff
+          r.(big_map_diff) balance_updates r.(originated_contracts)
+          r.(consumed_gas) r.(storage_size) r.(paid_storage_size_diff).
+      Definition with_originated_contracts
+        {t_big_map_diff t_balance_updates t_originated_contracts t_consumed_gas
+          t_storage_size t_paid_storage_size_diff} originated_contracts
+        (r :
+          record t_big_map_diff t_balance_updates t_originated_contracts
+            t_consumed_gas t_storage_size t_paid_storage_size_diff) :=
+        Build t_big_map_diff t_balance_updates t_originated_contracts
+          t_consumed_gas t_storage_size t_paid_storage_size_diff
+          r.(big_map_diff) r.(balance_updates) originated_contracts
+          r.(consumed_gas) r.(storage_size) r.(paid_storage_size_diff).
+      Definition with_consumed_gas
+        {t_big_map_diff t_balance_updates t_originated_contracts t_consumed_gas
+          t_storage_size t_paid_storage_size_diff} consumed_gas
+        (r :
+          record t_big_map_diff t_balance_updates t_originated_contracts
+            t_consumed_gas t_storage_size t_paid_storage_size_diff) :=
+        Build t_big_map_diff t_balance_updates t_originated_contracts
+          t_consumed_gas t_storage_size t_paid_storage_size_diff
+          r.(big_map_diff) r.(balance_updates) r.(originated_contracts)
+          consumed_gas r.(storage_size) r.(paid_storage_size_diff).
+      Definition with_storage_size
+        {t_big_map_diff t_balance_updates t_originated_contracts t_consumed_gas
+          t_storage_size t_paid_storage_size_diff} storage_size
+        (r :
+          record t_big_map_diff t_balance_updates t_originated_contracts
+            t_consumed_gas t_storage_size t_paid_storage_size_diff) :=
+        Build t_big_map_diff t_balance_updates t_originated_contracts
+          t_consumed_gas t_storage_size t_paid_storage_size_diff
+          r.(big_map_diff) r.(balance_updates) r.(originated_contracts)
+          r.(consumed_gas) storage_size r.(paid_storage_size_diff).
+      Definition with_paid_storage_size_diff
+        {t_big_map_diff t_balance_updates t_originated_contracts t_consumed_gas
+          t_storage_size t_paid_storage_size_diff} paid_storage_size_diff
+        (r :
+          record t_big_map_diff t_balance_updates t_originated_contracts
+            t_consumed_gas t_storage_size t_paid_storage_size_diff) :=
+        Build t_big_map_diff t_balance_updates t_originated_contracts
+          t_consumed_gas t_storage_size t_paid_storage_size_diff
+          r.(big_map_diff) r.(balance_updates) r.(originated_contracts)
+          r.(consumed_gas) r.(storage_size) paid_storage_size_diff.
     End Origination_result.
     Definition Origination_result_skeleton := Origination_result.record.
     
     Module Delegation_result.
-      Record record {consumed_gas : Set} : Set := {
+      Record record {consumed_gas : Set} : Set := Build {
         consumed_gas : consumed_gas }.
       Arguments record : clear implicits.
+      Definition with_consumed_gas {t_consumed_gas} consumed_gas
+        (r : record t_consumed_gas) :=
+        Build t_consumed_gas consumed_gas.
     End Delegation_result.
     Definition Delegation_result_skeleton := Delegation_result.record.
   End successful_manager_operation_result.
-End ConstructorRecordNotations_successful_manager_operation_result.
-Import ConstructorRecordNotations_successful_manager_operation_result.
+End ConstructorRecords_successful_manager_operation_result.
+Import ConstructorRecords_successful_manager_operation_result.
 
 Reserved Notation "'successful_manager_operation_result.Reveal_result".
 Reserved Notation "'successful_manager_operation_result.Transaction_result".
@@ -101,7 +279,7 @@ and "'successful_manager_operation_result.Delegation_result" :=
   (successful_manager_operation_result.Delegation_result_skeleton Z.t).
 
 Module successful_manager_operation_result.
-  Include ConstructorRecordNotations_successful_manager_operation_result.successful_manager_operation_result.
+  Include ConstructorRecords_successful_manager_operation_result.successful_manager_operation_result.
   Definition Reveal_result :=
     'successful_manager_operation_result.Reveal_result.
   Definition Transaction_result :=
@@ -138,11 +316,11 @@ Inductive packed_internal_operation_result : Set :=
   packed_internal_operation_result.
 
 Module Manager_result.
-  Module ConstructorRecordNotations_case.
+  Module ConstructorRecords_case.
     Module case.
       Module MCase.
         Record record {op_case encoding kind iselect select proj inj t : Set} :
-          Set := {
+          Set := Build {
           op_case : op_case;
           encoding : encoding;
           kind : kind;
@@ -152,11 +330,79 @@ Module Manager_result.
           inj : inj;
           t : t }.
         Arguments record : clear implicits.
+        Definition with_op_case
+          {t_op_case t_encoding t_kind t_iselect t_select t_proj t_inj t_t}
+          op_case
+          (r :
+            record t_op_case t_encoding t_kind t_iselect t_select t_proj t_inj
+              t_t) :=
+          Build t_op_case t_encoding t_kind t_iselect t_select t_proj t_inj t_t
+            op_case r.(encoding) r.(kind) r.(iselect) r.(select) r.(proj)
+            r.(inj) r.(t).
+        Definition with_encoding
+          {t_op_case t_encoding t_kind t_iselect t_select t_proj t_inj t_t}
+          encoding
+          (r :
+            record t_op_case t_encoding t_kind t_iselect t_select t_proj t_inj
+              t_t) :=
+          Build t_op_case t_encoding t_kind t_iselect t_select t_proj t_inj t_t
+            r.(op_case) encoding r.(kind) r.(iselect) r.(select) r.(proj)
+            r.(inj) r.(t).
+        Definition with_kind
+          {t_op_case t_encoding t_kind t_iselect t_select t_proj t_inj t_t} kind
+          (r :
+            record t_op_case t_encoding t_kind t_iselect t_select t_proj t_inj
+              t_t) :=
+          Build t_op_case t_encoding t_kind t_iselect t_select t_proj t_inj t_t
+            r.(op_case) r.(encoding) kind r.(iselect) r.(select) r.(proj)
+            r.(inj) r.(t).
+        Definition with_iselect
+          {t_op_case t_encoding t_kind t_iselect t_select t_proj t_inj t_t}
+          iselect
+          (r :
+            record t_op_case t_encoding t_kind t_iselect t_select t_proj t_inj
+              t_t) :=
+          Build t_op_case t_encoding t_kind t_iselect t_select t_proj t_inj t_t
+            r.(op_case) r.(encoding) r.(kind) iselect r.(select) r.(proj)
+            r.(inj) r.(t).
+        Definition with_select
+          {t_op_case t_encoding t_kind t_iselect t_select t_proj t_inj t_t}
+          select
+          (r :
+            record t_op_case t_encoding t_kind t_iselect t_select t_proj t_inj
+              t_t) :=
+          Build t_op_case t_encoding t_kind t_iselect t_select t_proj t_inj t_t
+            r.(op_case) r.(encoding) r.(kind) r.(iselect) select r.(proj)
+            r.(inj) r.(t).
+        Definition with_proj
+          {t_op_case t_encoding t_kind t_iselect t_select t_proj t_inj t_t} proj
+          (r :
+            record t_op_case t_encoding t_kind t_iselect t_select t_proj t_inj
+              t_t) :=
+          Build t_op_case t_encoding t_kind t_iselect t_select t_proj t_inj t_t
+            r.(op_case) r.(encoding) r.(kind) r.(iselect) r.(select) proj
+            r.(inj) r.(t).
+        Definition with_inj
+          {t_op_case t_encoding t_kind t_iselect t_select t_proj t_inj t_t} inj
+          (r :
+            record t_op_case t_encoding t_kind t_iselect t_select t_proj t_inj
+              t_t) :=
+          Build t_op_case t_encoding t_kind t_iselect t_select t_proj t_inj t_t
+            r.(op_case) r.(encoding) r.(kind) r.(iselect) r.(select) r.(proj)
+            inj r.(t).
+        Definition with_t
+          {t_op_case t_encoding t_kind t_iselect t_select t_proj t_inj t_t} t
+          (r :
+            record t_op_case t_encoding t_kind t_iselect t_select t_proj t_inj
+              t_t) :=
+          Build t_op_case t_encoding t_kind t_iselect t_select t_proj t_inj t_t
+            r.(op_case) r.(encoding) r.(kind) r.(iselect) r.(select) r.(proj)
+            r.(inj) t.
       End MCase.
       Definition MCase_skeleton := MCase.record.
     End case.
-  End ConstructorRecordNotations_case.
-  Import ConstructorRecordNotations_case.
+  End ConstructorRecords_case.
+  Import ConstructorRecords_case.
   
   Reserved Notation "'case.MCase".
   
@@ -176,7 +422,7 @@ Module Manager_result.
       (Data_encoding.t (manager_operation_result t_kind))).
   
   Module case.
-    Include ConstructorRecordNotations_case.case.
+    Include ConstructorRecords_case.case.
     Definition MCase := 'case.MCase.
   End case.
   
@@ -591,30 +837,66 @@ Definition internal_operation_result_encoding
         make Manager_result.delegation_case
       ]).
 
-Module ConstructorRecordNotations_contents_result.
+Module ConstructorRecords_contents_result.
   Module contents_result.
     Module Endorsement_result.
-      Record record {balance_updates delegate slots : Set} : Set := {
+      Record record {balance_updates delegate slots : Set} : Set := Build {
         balance_updates : balance_updates;
         delegate : delegate;
         slots : slots }.
       Arguments record : clear implicits.
+      Definition with_balance_updates {t_balance_updates t_delegate t_slots}
+        balance_updates (r : record t_balance_updates t_delegate t_slots) :=
+        Build t_balance_updates t_delegate t_slots balance_updates r.(delegate)
+          r.(slots).
+      Definition with_delegate {t_balance_updates t_delegate t_slots} delegate
+        (r : record t_balance_updates t_delegate t_slots) :=
+        Build t_balance_updates t_delegate t_slots r.(balance_updates) delegate
+          r.(slots).
+      Definition with_slots {t_balance_updates t_delegate t_slots} slots
+        (r : record t_balance_updates t_delegate t_slots) :=
+        Build t_balance_updates t_delegate t_slots r.(balance_updates)
+          r.(delegate) slots.
     End Endorsement_result.
     Definition Endorsement_result_skeleton := Endorsement_result.record.
     
     Module Manager_operation_result.
       Record record {balance_updates operation_result internal_operation_results
-        : Set} : Set := {
+        : Set} : Set := Build {
         balance_updates : balance_updates;
         operation_result : operation_result;
         internal_operation_results : internal_operation_results }.
       Arguments record : clear implicits.
+      Definition with_balance_updates
+        {t_balance_updates t_operation_result t_internal_operation_results}
+        balance_updates
+        (r :
+          record t_balance_updates t_operation_result
+            t_internal_operation_results) :=
+        Build t_balance_updates t_operation_result t_internal_operation_results
+          balance_updates r.(operation_result) r.(internal_operation_results).
+      Definition with_operation_result
+        {t_balance_updates t_operation_result t_internal_operation_results}
+        operation_result
+        (r :
+          record t_balance_updates t_operation_result
+            t_internal_operation_results) :=
+        Build t_balance_updates t_operation_result t_internal_operation_results
+          r.(balance_updates) operation_result r.(internal_operation_results).
+      Definition with_internal_operation_results
+        {t_balance_updates t_operation_result t_internal_operation_results}
+        internal_operation_results
+        (r :
+          record t_balance_updates t_operation_result
+            t_internal_operation_results) :=
+        Build t_balance_updates t_operation_result t_internal_operation_results
+          r.(balance_updates) r.(operation_result) internal_operation_results.
     End Manager_operation_result.
     Definition Manager_operation_result_skeleton :=
       Manager_operation_result.record.
   End contents_result.
-End ConstructorRecordNotations_contents_result.
-Import ConstructorRecordNotations_contents_result.
+End ConstructorRecords_contents_result.
+Import ConstructorRecords_contents_result.
 
 Reserved Notation "'contents_result.Endorsement_result".
 Reserved Notation "'contents_result.Manager_operation_result".
@@ -644,7 +926,7 @@ and "'contents_result.Manager_operation_result" := (fun (t_kind : Set) =>
     (list packed_internal_operation_result)).
 
 Module contents_result.
-  Include ConstructorRecordNotations_contents_result.contents_result.
+  Include ConstructorRecords_contents_result.contents_result.
   Definition Endorsement_result := 'contents_result.Endorsement_result.
   Definition Manager_operation_result :=
     'contents_result.Manager_operation_result.
@@ -684,10 +966,10 @@ Definition equal_manager_kind
   end.
 
 Module Encoding.
-  Module ConstructorRecordNotations_case.
+  Module ConstructorRecords_case.
     Module case.
       Module Case.
-        Record record {op_case encoding select mselect proj inj : Set} : Set := {
+        Record record {op_case encoding select mselect proj inj : Set} : Set := Build {
           op_case : op_case;
           encoding : encoding;
           select : select;
@@ -695,11 +977,41 @@ Module Encoding.
           proj : proj;
           inj : inj }.
         Arguments record : clear implicits.
+        Definition with_op_case
+          {t_op_case t_encoding t_select t_mselect t_proj t_inj} op_case
+          (r : record t_op_case t_encoding t_select t_mselect t_proj t_inj) :=
+          Build t_op_case t_encoding t_select t_mselect t_proj t_inj op_case
+            r.(encoding) r.(select) r.(mselect) r.(proj) r.(inj).
+        Definition with_encoding
+          {t_op_case t_encoding t_select t_mselect t_proj t_inj} encoding
+          (r : record t_op_case t_encoding t_select t_mselect t_proj t_inj) :=
+          Build t_op_case t_encoding t_select t_mselect t_proj t_inj r.(op_case)
+            encoding r.(select) r.(mselect) r.(proj) r.(inj).
+        Definition with_select
+          {t_op_case t_encoding t_select t_mselect t_proj t_inj} select
+          (r : record t_op_case t_encoding t_select t_mselect t_proj t_inj) :=
+          Build t_op_case t_encoding t_select t_mselect t_proj t_inj r.(op_case)
+            r.(encoding) select r.(mselect) r.(proj) r.(inj).
+        Definition with_mselect
+          {t_op_case t_encoding t_select t_mselect t_proj t_inj} mselect
+          (r : record t_op_case t_encoding t_select t_mselect t_proj t_inj) :=
+          Build t_op_case t_encoding t_select t_mselect t_proj t_inj r.(op_case)
+            r.(encoding) r.(select) mselect r.(proj) r.(inj).
+        Definition with_proj
+          {t_op_case t_encoding t_select t_mselect t_proj t_inj} proj
+          (r : record t_op_case t_encoding t_select t_mselect t_proj t_inj) :=
+          Build t_op_case t_encoding t_select t_mselect t_proj t_inj r.(op_case)
+            r.(encoding) r.(select) r.(mselect) proj r.(inj).
+        Definition with_inj
+          {t_op_case t_encoding t_select t_mselect t_proj t_inj} inj
+          (r : record t_op_case t_encoding t_select t_mselect t_proj t_inj) :=
+          Build t_op_case t_encoding t_select t_mselect t_proj t_inj r.(op_case)
+            r.(encoding) r.(select) r.(mselect) r.(proj) inj.
       End Case.
       Definition Case_skeleton := Case.record.
     End case.
-  End ConstructorRecordNotations_case.
-  Import ConstructorRecordNotations_case.
+  End ConstructorRecords_case.
+  Import ConstructorRecords_case.
   
   Reserved Notation "'case.Case".
   
@@ -714,7 +1026,7 @@ Module Encoding.
       (contents_result -> t_a) (t_a -> contents_result)).
   
   Module case.
-    Include ConstructorRecordNotations_case.case.
+    Include ConstructorRecords_case.case.
     Definition Case := 'case.Case.
   End case.
   

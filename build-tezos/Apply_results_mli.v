@@ -14,40 +14,79 @@ Require Tezos.Nonce_hash.
 Import Alpha_context.
 
 Module
-  ConstructorRecordNotations_packed_operation_metadata_contents_result_list_packed_contents_result_list_contents_result_packed_contents_result_manager_operation_result_successful_manager_operation_result_packed_successful_manager_operation_result_packed_internal_operation_result.
+  ConstructorRecords_packed_operation_metadata_contents_result_list_packed_contents_result_list_contents_result_packed_contents_result_manager_operation_result_successful_manager_operation_result_packed_successful_manager_operation_result_packed_internal_operation_result.
   Module contents_result.
     Module Endorsement_result.
-      Record record {balance_updates delegate slots : Set} : Set := {
+      Record record {balance_updates delegate slots : Set} : Set := Build {
         balance_updates : balance_updates;
         delegate : delegate;
         slots : slots }.
       Arguments record : clear implicits.
+      Definition with_balance_updates {t_balance_updates t_delegate t_slots}
+        balance_updates (r : record t_balance_updates t_delegate t_slots) :=
+        Build t_balance_updates t_delegate t_slots balance_updates r.(delegate)
+          r.(slots).
+      Definition with_delegate {t_balance_updates t_delegate t_slots} delegate
+        (r : record t_balance_updates t_delegate t_slots) :=
+        Build t_balance_updates t_delegate t_slots r.(balance_updates) delegate
+          r.(slots).
+      Definition with_slots {t_balance_updates t_delegate t_slots} slots
+        (r : record t_balance_updates t_delegate t_slots) :=
+        Build t_balance_updates t_delegate t_slots r.(balance_updates)
+          r.(delegate) slots.
     End Endorsement_result.
     Definition Endorsement_result_skeleton := Endorsement_result.record.
     
     Module Manager_operation_result.
       Record record {balance_updates operation_result internal_operation_results
-        : Set} : Set := {
+        : Set} : Set := Build {
         balance_updates : balance_updates;
         operation_result : operation_result;
         internal_operation_results : internal_operation_results }.
       Arguments record : clear implicits.
+      Definition with_balance_updates
+        {t_balance_updates t_operation_result t_internal_operation_results}
+        balance_updates
+        (r :
+          record t_balance_updates t_operation_result
+            t_internal_operation_results) :=
+        Build t_balance_updates t_operation_result t_internal_operation_results
+          balance_updates r.(operation_result) r.(internal_operation_results).
+      Definition with_operation_result
+        {t_balance_updates t_operation_result t_internal_operation_results}
+        operation_result
+        (r :
+          record t_balance_updates t_operation_result
+            t_internal_operation_results) :=
+        Build t_balance_updates t_operation_result t_internal_operation_results
+          r.(balance_updates) operation_result r.(internal_operation_results).
+      Definition with_internal_operation_results
+        {t_balance_updates t_operation_result t_internal_operation_results}
+        internal_operation_results
+        (r :
+          record t_balance_updates t_operation_result
+            t_internal_operation_results) :=
+        Build t_balance_updates t_operation_result t_internal_operation_results
+          r.(balance_updates) r.(operation_result) internal_operation_results.
     End Manager_operation_result.
     Definition Manager_operation_result_skeleton :=
       Manager_operation_result.record.
   End contents_result.
   Module successful_manager_operation_result.
     Module Reveal_result.
-      Record record {consumed_gas : Set} : Set := {
+      Record record {consumed_gas : Set} : Set := Build {
         consumed_gas : consumed_gas }.
       Arguments record : clear implicits.
+      Definition with_consumed_gas {t_consumed_gas} consumed_gas
+        (r : record t_consumed_gas) :=
+        Build t_consumed_gas consumed_gas.
     End Reveal_result.
     Definition Reveal_result_skeleton := Reveal_result.record.
     
     Module Transaction_result.
       Record record {storage big_map_diff balance_updates originated_contracts
         consumed_gas storage_size paid_storage_size_diff
-        allocated_destination_contract : Set} : Set := {
+        allocated_destination_contract : Set} : Set := Build {
         storage : storage;
         big_map_diff : big_map_diff;
         balance_updates : balance_updates;
@@ -57,12 +96,124 @@ Module
         paid_storage_size_diff : paid_storage_size_diff;
         allocated_destination_contract : allocated_destination_contract }.
       Arguments record : clear implicits.
+      Definition with_storage
+        {t_storage t_big_map_diff t_balance_updates t_originated_contracts
+          t_consumed_gas t_storage_size t_paid_storage_size_diff
+          t_allocated_destination_contract} storage
+        (r :
+          record t_storage t_big_map_diff t_balance_updates
+            t_originated_contracts t_consumed_gas t_storage_size
+            t_paid_storage_size_diff t_allocated_destination_contract) :=
+        Build t_storage t_big_map_diff t_balance_updates t_originated_contracts
+          t_consumed_gas t_storage_size t_paid_storage_size_diff
+          t_allocated_destination_contract storage r.(big_map_diff)
+          r.(balance_updates) r.(originated_contracts) r.(consumed_gas)
+          r.(storage_size) r.(paid_storage_size_diff)
+          r.(allocated_destination_contract).
+      Definition with_big_map_diff
+        {t_storage t_big_map_diff t_balance_updates t_originated_contracts
+          t_consumed_gas t_storage_size t_paid_storage_size_diff
+          t_allocated_destination_contract} big_map_diff
+        (r :
+          record t_storage t_big_map_diff t_balance_updates
+            t_originated_contracts t_consumed_gas t_storage_size
+            t_paid_storage_size_diff t_allocated_destination_contract) :=
+        Build t_storage t_big_map_diff t_balance_updates t_originated_contracts
+          t_consumed_gas t_storage_size t_paid_storage_size_diff
+          t_allocated_destination_contract r.(storage) big_map_diff
+          r.(balance_updates) r.(originated_contracts) r.(consumed_gas)
+          r.(storage_size) r.(paid_storage_size_diff)
+          r.(allocated_destination_contract).
+      Definition with_balance_updates
+        {t_storage t_big_map_diff t_balance_updates t_originated_contracts
+          t_consumed_gas t_storage_size t_paid_storage_size_diff
+          t_allocated_destination_contract} balance_updates
+        (r :
+          record t_storage t_big_map_diff t_balance_updates
+            t_originated_contracts t_consumed_gas t_storage_size
+            t_paid_storage_size_diff t_allocated_destination_contract) :=
+        Build t_storage t_big_map_diff t_balance_updates t_originated_contracts
+          t_consumed_gas t_storage_size t_paid_storage_size_diff
+          t_allocated_destination_contract r.(storage) r.(big_map_diff)
+          balance_updates r.(originated_contracts) r.(consumed_gas)
+          r.(storage_size) r.(paid_storage_size_diff)
+          r.(allocated_destination_contract).
+      Definition with_originated_contracts
+        {t_storage t_big_map_diff t_balance_updates t_originated_contracts
+          t_consumed_gas t_storage_size t_paid_storage_size_diff
+          t_allocated_destination_contract} originated_contracts
+        (r :
+          record t_storage t_big_map_diff t_balance_updates
+            t_originated_contracts t_consumed_gas t_storage_size
+            t_paid_storage_size_diff t_allocated_destination_contract) :=
+        Build t_storage t_big_map_diff t_balance_updates t_originated_contracts
+          t_consumed_gas t_storage_size t_paid_storage_size_diff
+          t_allocated_destination_contract r.(storage) r.(big_map_diff)
+          r.(balance_updates) originated_contracts r.(consumed_gas)
+          r.(storage_size) r.(paid_storage_size_diff)
+          r.(allocated_destination_contract).
+      Definition with_consumed_gas
+        {t_storage t_big_map_diff t_balance_updates t_originated_contracts
+          t_consumed_gas t_storage_size t_paid_storage_size_diff
+          t_allocated_destination_contract} consumed_gas
+        (r :
+          record t_storage t_big_map_diff t_balance_updates
+            t_originated_contracts t_consumed_gas t_storage_size
+            t_paid_storage_size_diff t_allocated_destination_contract) :=
+        Build t_storage t_big_map_diff t_balance_updates t_originated_contracts
+          t_consumed_gas t_storage_size t_paid_storage_size_diff
+          t_allocated_destination_contract r.(storage) r.(big_map_diff)
+          r.(balance_updates) r.(originated_contracts) consumed_gas
+          r.(storage_size) r.(paid_storage_size_diff)
+          r.(allocated_destination_contract).
+      Definition with_storage_size
+        {t_storage t_big_map_diff t_balance_updates t_originated_contracts
+          t_consumed_gas t_storage_size t_paid_storage_size_diff
+          t_allocated_destination_contract} storage_size
+        (r :
+          record t_storage t_big_map_diff t_balance_updates
+            t_originated_contracts t_consumed_gas t_storage_size
+            t_paid_storage_size_diff t_allocated_destination_contract) :=
+        Build t_storage t_big_map_diff t_balance_updates t_originated_contracts
+          t_consumed_gas t_storage_size t_paid_storage_size_diff
+          t_allocated_destination_contract r.(storage) r.(big_map_diff)
+          r.(balance_updates) r.(originated_contracts) r.(consumed_gas)
+          storage_size r.(paid_storage_size_diff)
+          r.(allocated_destination_contract).
+      Definition with_paid_storage_size_diff
+        {t_storage t_big_map_diff t_balance_updates t_originated_contracts
+          t_consumed_gas t_storage_size t_paid_storage_size_diff
+          t_allocated_destination_contract} paid_storage_size_diff
+        (r :
+          record t_storage t_big_map_diff t_balance_updates
+            t_originated_contracts t_consumed_gas t_storage_size
+            t_paid_storage_size_diff t_allocated_destination_contract) :=
+        Build t_storage t_big_map_diff t_balance_updates t_originated_contracts
+          t_consumed_gas t_storage_size t_paid_storage_size_diff
+          t_allocated_destination_contract r.(storage) r.(big_map_diff)
+          r.(balance_updates) r.(originated_contracts) r.(consumed_gas)
+          r.(storage_size) paid_storage_size_diff
+          r.(allocated_destination_contract).
+      Definition with_allocated_destination_contract
+        {t_storage t_big_map_diff t_balance_updates t_originated_contracts
+          t_consumed_gas t_storage_size t_paid_storage_size_diff
+          t_allocated_destination_contract} allocated_destination_contract
+        (r :
+          record t_storage t_big_map_diff t_balance_updates
+            t_originated_contracts t_consumed_gas t_storage_size
+            t_paid_storage_size_diff t_allocated_destination_contract) :=
+        Build t_storage t_big_map_diff t_balance_updates t_originated_contracts
+          t_consumed_gas t_storage_size t_paid_storage_size_diff
+          t_allocated_destination_contract r.(storage) r.(big_map_diff)
+          r.(balance_updates) r.(originated_contracts) r.(consumed_gas)
+          r.(storage_size) r.(paid_storage_size_diff)
+          allocated_destination_contract.
     End Transaction_result.
     Definition Transaction_result_skeleton := Transaction_result.record.
     
     Module Origination_result.
       Record record {big_map_diff balance_updates originated_contracts
-        consumed_gas storage_size paid_storage_size_diff : Set} : Set := {
+        consumed_gas storage_size paid_storage_size_diff : Set} : Set := Build {
         big_map_diff : big_map_diff;
         balance_updates : balance_updates;
         originated_contracts : originated_contracts;
@@ -70,20 +221,83 @@ Module
         storage_size : storage_size;
         paid_storage_size_diff : paid_storage_size_diff }.
       Arguments record : clear implicits.
+      Definition with_big_map_diff
+        {t_big_map_diff t_balance_updates t_originated_contracts t_consumed_gas
+          t_storage_size t_paid_storage_size_diff} big_map_diff
+        (r :
+          record t_big_map_diff t_balance_updates t_originated_contracts
+            t_consumed_gas t_storage_size t_paid_storage_size_diff) :=
+        Build t_big_map_diff t_balance_updates t_originated_contracts
+          t_consumed_gas t_storage_size t_paid_storage_size_diff big_map_diff
+          r.(balance_updates) r.(originated_contracts) r.(consumed_gas)
+          r.(storage_size) r.(paid_storage_size_diff).
+      Definition with_balance_updates
+        {t_big_map_diff t_balance_updates t_originated_contracts t_consumed_gas
+          t_storage_size t_paid_storage_size_diff} balance_updates
+        (r :
+          record t_big_map_diff t_balance_updates t_originated_contracts
+            t_consumed_gas t_storage_size t_paid_storage_size_diff) :=
+        Build t_big_map_diff t_balance_updates t_originated_contracts
+          t_consumed_gas t_storage_size t_paid_storage_size_diff
+          r.(big_map_diff) balance_updates r.(originated_contracts)
+          r.(consumed_gas) r.(storage_size) r.(paid_storage_size_diff).
+      Definition with_originated_contracts
+        {t_big_map_diff t_balance_updates t_originated_contracts t_consumed_gas
+          t_storage_size t_paid_storage_size_diff} originated_contracts
+        (r :
+          record t_big_map_diff t_balance_updates t_originated_contracts
+            t_consumed_gas t_storage_size t_paid_storage_size_diff) :=
+        Build t_big_map_diff t_balance_updates t_originated_contracts
+          t_consumed_gas t_storage_size t_paid_storage_size_diff
+          r.(big_map_diff) r.(balance_updates) originated_contracts
+          r.(consumed_gas) r.(storage_size) r.(paid_storage_size_diff).
+      Definition with_consumed_gas
+        {t_big_map_diff t_balance_updates t_originated_contracts t_consumed_gas
+          t_storage_size t_paid_storage_size_diff} consumed_gas
+        (r :
+          record t_big_map_diff t_balance_updates t_originated_contracts
+            t_consumed_gas t_storage_size t_paid_storage_size_diff) :=
+        Build t_big_map_diff t_balance_updates t_originated_contracts
+          t_consumed_gas t_storage_size t_paid_storage_size_diff
+          r.(big_map_diff) r.(balance_updates) r.(originated_contracts)
+          consumed_gas r.(storage_size) r.(paid_storage_size_diff).
+      Definition with_storage_size
+        {t_big_map_diff t_balance_updates t_originated_contracts t_consumed_gas
+          t_storage_size t_paid_storage_size_diff} storage_size
+        (r :
+          record t_big_map_diff t_balance_updates t_originated_contracts
+            t_consumed_gas t_storage_size t_paid_storage_size_diff) :=
+        Build t_big_map_diff t_balance_updates t_originated_contracts
+          t_consumed_gas t_storage_size t_paid_storage_size_diff
+          r.(big_map_diff) r.(balance_updates) r.(originated_contracts)
+          r.(consumed_gas) storage_size r.(paid_storage_size_diff).
+      Definition with_paid_storage_size_diff
+        {t_big_map_diff t_balance_updates t_originated_contracts t_consumed_gas
+          t_storage_size t_paid_storage_size_diff} paid_storage_size_diff
+        (r :
+          record t_big_map_diff t_balance_updates t_originated_contracts
+            t_consumed_gas t_storage_size t_paid_storage_size_diff) :=
+        Build t_big_map_diff t_balance_updates t_originated_contracts
+          t_consumed_gas t_storage_size t_paid_storage_size_diff
+          r.(big_map_diff) r.(balance_updates) r.(originated_contracts)
+          r.(consumed_gas) r.(storage_size) paid_storage_size_diff.
     End Origination_result.
     Definition Origination_result_skeleton := Origination_result.record.
     
     Module Delegation_result.
-      Record record {consumed_gas : Set} : Set := {
+      Record record {consumed_gas : Set} : Set := Build {
         consumed_gas : consumed_gas }.
       Arguments record : clear implicits.
+      Definition with_consumed_gas {t_consumed_gas} consumed_gas
+        (r : record t_consumed_gas) :=
+        Build t_consumed_gas consumed_gas.
     End Delegation_result.
     Definition Delegation_result_skeleton := Delegation_result.record.
   End successful_manager_operation_result.
 End
-  ConstructorRecordNotations_packed_operation_metadata_contents_result_list_packed_contents_result_list_contents_result_packed_contents_result_manager_operation_result_successful_manager_operation_result_packed_successful_manager_operation_result_packed_internal_operation_result.
+  ConstructorRecords_packed_operation_metadata_contents_result_list_packed_contents_result_list_contents_result_packed_contents_result_manager_operation_result_successful_manager_operation_result_packed_successful_manager_operation_result_packed_internal_operation_result.
 Import
-  ConstructorRecordNotations_packed_operation_metadata_contents_result_list_packed_contents_result_list_contents_result_packed_contents_result_manager_operation_result_successful_manager_operation_result_packed_successful_manager_operation_result_packed_internal_operation_result.
+  ConstructorRecords_packed_operation_metadata_contents_result_list_packed_contents_result_list_contents_result_packed_contents_result_manager_operation_result_successful_manager_operation_result_packed_successful_manager_operation_result_packed_internal_operation_result.
 
 Module operation_metadata.
   Record record {contents : Set} : Set := Build {
@@ -192,13 +406,13 @@ and "'successful_manager_operation_result.Delegation_result" :=
   (successful_manager_operation_result.Delegation_result_skeleton Z.t).
 
 Module contents_result.
-  Include ConstructorRecordNotations_packed_operation_metadata_contents_result_list_packed_contents_result_list_contents_result_packed_contents_result_manager_operation_result_successful_manager_operation_result_packed_successful_manager_operation_result_packed_internal_operation_result.contents_result.
+  Include ConstructorRecords_packed_operation_metadata_contents_result_list_packed_contents_result_list_contents_result_packed_contents_result_manager_operation_result_successful_manager_operation_result_packed_successful_manager_operation_result_packed_internal_operation_result.contents_result.
   Definition Endorsement_result := 'contents_result.Endorsement_result.
   Definition Manager_operation_result :=
     'contents_result.Manager_operation_result.
 End contents_result.
 Module successful_manager_operation_result.
-  Include ConstructorRecordNotations_packed_operation_metadata_contents_result_list_packed_contents_result_list_contents_result_packed_contents_result_manager_operation_result_successful_manager_operation_result_packed_successful_manager_operation_result_packed_internal_operation_result.successful_manager_operation_result.
+  Include ConstructorRecords_packed_operation_metadata_contents_result_list_packed_contents_result_list_contents_result_packed_contents_result_manager_operation_result_successful_manager_operation_result_packed_successful_manager_operation_result_packed_internal_operation_result.successful_manager_operation_result.
   Definition Reveal_result :=
     'successful_manager_operation_result.Reveal_result.
   Definition Transaction_result :=

@@ -70,29 +70,61 @@ Parameter get_storage :
   Raw_context.t -> Contract_repr.t ->
   Lwt.t (Error_monad.tzresult (Raw_context.t * option Script_repr.expr)).
 
-Module ConstructorRecordNotations_big_map_diff_item.
+Module ConstructorRecords_big_map_diff_item.
   Module big_map_diff_item.
     Module Update.
-      Record record {big_map diff_key diff_key_hash diff_value : Set} : Set := {
+      Record record {big_map diff_key diff_key_hash diff_value : Set} : Set := Build {
         big_map : big_map;
         diff_key : diff_key;
         diff_key_hash : diff_key_hash;
         diff_value : diff_value }.
       Arguments record : clear implicits.
+      Definition with_big_map
+        {t_big_map t_diff_key t_diff_key_hash t_diff_value} big_map
+        (r : record t_big_map t_diff_key t_diff_key_hash t_diff_value) :=
+        Build t_big_map t_diff_key t_diff_key_hash t_diff_value big_map
+          r.(diff_key) r.(diff_key_hash) r.(diff_value).
+      Definition with_diff_key
+        {t_big_map t_diff_key t_diff_key_hash t_diff_value} diff_key
+        (r : record t_big_map t_diff_key t_diff_key_hash t_diff_value) :=
+        Build t_big_map t_diff_key t_diff_key_hash t_diff_value r.(big_map)
+          diff_key r.(diff_key_hash) r.(diff_value).
+      Definition with_diff_key_hash
+        {t_big_map t_diff_key t_diff_key_hash t_diff_value} diff_key_hash
+        (r : record t_big_map t_diff_key t_diff_key_hash t_diff_value) :=
+        Build t_big_map t_diff_key t_diff_key_hash t_diff_value r.(big_map)
+          r.(diff_key) diff_key_hash r.(diff_value).
+      Definition with_diff_value
+        {t_big_map t_diff_key t_diff_key_hash t_diff_value} diff_value
+        (r : record t_big_map t_diff_key t_diff_key_hash t_diff_value) :=
+        Build t_big_map t_diff_key t_diff_key_hash t_diff_value r.(big_map)
+          r.(diff_key) r.(diff_key_hash) diff_value.
     End Update.
     Definition Update_skeleton := Update.record.
     
     Module Alloc.
-      Record record {big_map key_type value_type : Set} : Set := {
+      Record record {big_map key_type value_type : Set} : Set := Build {
         big_map : big_map;
         key_type : key_type;
         value_type : value_type }.
       Arguments record : clear implicits.
+      Definition with_big_map {t_big_map t_key_type t_value_type} big_map
+        (r : record t_big_map t_key_type t_value_type) :=
+        Build t_big_map t_key_type t_value_type big_map r.(key_type)
+          r.(value_type).
+      Definition with_key_type {t_big_map t_key_type t_value_type} key_type
+        (r : record t_big_map t_key_type t_value_type) :=
+        Build t_big_map t_key_type t_value_type r.(big_map) key_type
+          r.(value_type).
+      Definition with_value_type {t_big_map t_key_type t_value_type} value_type
+        (r : record t_big_map t_key_type t_value_type) :=
+        Build t_big_map t_key_type t_value_type r.(big_map) r.(key_type)
+          value_type.
     End Alloc.
     Definition Alloc_skeleton := Alloc.record.
   End big_map_diff_item.
-End ConstructorRecordNotations_big_map_diff_item.
-Import ConstructorRecordNotations_big_map_diff_item.
+End ConstructorRecords_big_map_diff_item.
+Import ConstructorRecords_big_map_diff_item.
 
 Reserved Notation "'big_map_diff_item.Update".
 Reserved Notation "'big_map_diff_item.Alloc".
@@ -110,7 +142,7 @@ and "'big_map_diff_item.Alloc" :=
   (big_map_diff_item.Alloc_skeleton Z.t Script_repr.expr Script_repr.expr).
 
 Module big_map_diff_item.
-  Include ConstructorRecordNotations_big_map_diff_item.big_map_diff_item.
+  Include ConstructorRecords_big_map_diff_item.big_map_diff_item.
   Definition Update := 'big_map_diff_item.Update.
   Definition Alloc := 'big_map_diff_item.Alloc.
 End big_map_diff_item.

@@ -33,21 +33,57 @@ Inductive ex_stack_ty : Set :=
 Inductive ex_script : Set :=
 | Ex_script : forall {b : Set}, Script_typed_ir.script b -> ex_script.
 
-Module ConstructorRecordNotations_tc_context.
+Module ConstructorRecords_tc_context.
   Module tc_context.
     Module Toplevel.
       Record record {storage_type param_type root_name
-        legacy_create_contract_literal : Set} : Set := {
+        legacy_create_contract_literal : Set} : Set := Build {
         storage_type : storage_type;
         param_type : param_type;
         root_name : root_name;
         legacy_create_contract_literal : legacy_create_contract_literal }.
       Arguments record : clear implicits.
+      Definition with_storage_type
+        {t_storage_type t_param_type t_root_name
+          t_legacy_create_contract_literal} storage_type
+        (r :
+          record t_storage_type t_param_type t_root_name
+            t_legacy_create_contract_literal) :=
+        Build t_storage_type t_param_type t_root_name
+          t_legacy_create_contract_literal storage_type r.(param_type)
+          r.(root_name) r.(legacy_create_contract_literal).
+      Definition with_param_type
+        {t_storage_type t_param_type t_root_name
+          t_legacy_create_contract_literal} param_type
+        (r :
+          record t_storage_type t_param_type t_root_name
+            t_legacy_create_contract_literal) :=
+        Build t_storage_type t_param_type t_root_name
+          t_legacy_create_contract_literal r.(storage_type) param_type
+          r.(root_name) r.(legacy_create_contract_literal).
+      Definition with_root_name
+        {t_storage_type t_param_type t_root_name
+          t_legacy_create_contract_literal} root_name
+        (r :
+          record t_storage_type t_param_type t_root_name
+            t_legacy_create_contract_literal) :=
+        Build t_storage_type t_param_type t_root_name
+          t_legacy_create_contract_literal r.(storage_type) r.(param_type)
+          root_name r.(legacy_create_contract_literal).
+      Definition with_legacy_create_contract_literal
+        {t_storage_type t_param_type t_root_name
+          t_legacy_create_contract_literal} legacy_create_contract_literal
+        (r :
+          record t_storage_type t_param_type t_root_name
+            t_legacy_create_contract_literal) :=
+        Build t_storage_type t_param_type t_root_name
+          t_legacy_create_contract_literal r.(storage_type) r.(param_type)
+          r.(root_name) legacy_create_contract_literal.
     End Toplevel.
     Definition Toplevel_skeleton := Toplevel.record.
   End tc_context.
-End ConstructorRecordNotations_tc_context.
-Import ConstructorRecordNotations_tc_context.
+End ConstructorRecords_tc_context.
+Import ConstructorRecords_tc_context.
 
 Reserved Notation "'tc_context.Toplevel".
 
@@ -61,21 +97,23 @@ where "'tc_context.Toplevel" :=
     (option string) bool).
 
 Module tc_context.
-  Include ConstructorRecordNotations_tc_context.tc_context.
+  Include ConstructorRecords_tc_context.tc_context.
   Definition Toplevel := 'tc_context.Toplevel.
 End tc_context.
 
-Module ConstructorRecordNotations_judgement.
+Module ConstructorRecords_judgement.
   Module judgement.
     Module Failed.
-      Record record {descr : Set} : Set := {
+      Record record {descr : Set} : Set := Build {
         descr : descr }.
       Arguments record : clear implicits.
+      Definition with_descr {t_descr} descr (r : record t_descr) :=
+        Build t_descr descr.
     End Failed.
     Definition Failed_skeleton := Failed.record.
   End judgement.
-End ConstructorRecordNotations_judgement.
-Import ConstructorRecordNotations_judgement.
+End ConstructorRecords_judgement.
+Import ConstructorRecords_judgement.
 
 Reserved Notation "'judgement.Failed".
 
@@ -88,7 +126,7 @@ where "'judgement.Failed" := (fun (t_aft : Set) =>
     ((Script_typed_ir.stack_ty -> Script_typed_ir.descr) * t_aft)).
 
 Module judgement.
-  Include ConstructorRecordNotations_judgement.judgement.
+  Include ConstructorRecords_judgement.judgement.
   Definition Failed := 'judgement.Failed.
 End judgement.
 
