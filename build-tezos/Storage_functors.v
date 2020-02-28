@@ -91,8 +91,8 @@ Definition Make_subcontext :=
   fun (R : {_ : unit & REGISTER.signature}) =>
     fun (C : {t : Set & Raw_context.T.signature t}) =>
       fun (N : {_ : unit & NAME.signature}) =>
-        ((let t := (|C|).(Raw_context.T.t) in
-        let context := t in
+        ((let t : Set := (|C|).(Raw_context.T.t) in
+        let context : Set := t in
         let name_length := List.length (|N|).(Storage_sigs.NAME.name) in
         let to_key (k : list string) : list string :=
           Pervasives.op_at (|N|).(Storage_sigs.NAME.name) k in
@@ -205,9 +205,9 @@ Definition Make_single_data_storage :=
       fun (N : {_ : unit & NAME.signature}) =>
         fun (V : {t : Set & VALUE.signature t}) =>
           ((let tag_Single_data_storage := tt in
-          let t := (|C|).(Raw_context.T.t) in
-          let context := t in
-          let value := (|V|).(Storage_sigs.VALUE.t) in
+          let t : Set := (|C|).(Raw_context.T.t) in
+          let context : Set := t in
+          let value : Set := (|V|).(Storage_sigs.VALUE.t) in
           let mem (__t_value : (|C|).(Raw_context.T.context)) : Lwt.t bool :=
             (|C|).(Raw_context.T.mem) __t_value (|N|).(Storage_sigs.NAME.name)
             in
@@ -319,7 +319,7 @@ End INDEX.
 Definition Pair :=
   fun (I1 : {'[t, ipath] : [Set ** Set -> Set] & INDEX.signature t ipath}) =>
     fun (I2 : {'[t, ipath] : [Set ** Set -> Set] & INDEX.signature t ipath}) =>
-      ((let t := (|I1|).(INDEX.t) * (|I2|).(INDEX.t) in
+      ((let t : Set := (|I1|).(INDEX.t) * (|I2|).(INDEX.t) in
       let path_length :=
         Pervasives.op_plus (|I1|).(INDEX.path_length) (|I2|).(INDEX.path_length)
         in
@@ -337,7 +337,8 @@ Definition Pair :=
           | _ => None
           end
         end in
-      let ipath (a : Set) := (|I2|).(INDEX.ipath) ((|I1|).(INDEX.ipath) a) in
+      let ipath (a : Set) : Set := (|I2|).(INDEX.ipath) ((|I1|).(INDEX.ipath) a)
+        in
       let args (function_parameter : unit) : Storage_description.args :=
         let '_ := function_parameter in
         Storage_description.Pair ((|I1|).(INDEX.args) tt)
@@ -356,9 +357,9 @@ Definition Pair :=
 Definition Make_data_set_storage :=
   fun (C : {t : Set & Raw_context.T.signature t}) =>
     fun (I : {'[t, ipath] : [Set ** Set -> Set] & INDEX.signature t ipath}) =>
-      ((let t := (|C|).(Raw_context.T.t) in
-      let context := t in
-      let elt := (|I|).(INDEX.t) in
+      ((let t : Set := (|C|).(Raw_context.T.t) in
+      let context : Set := t in
+      let elt : Set := (|I|).(INDEX.t) in
       let inited := MBytes.of_string "inited" in
       let mem (s : (|C|).(Raw_context.T.context)) (i : (|I|).(INDEX.t))
         : Lwt.t bool :=
@@ -438,10 +439,10 @@ Definition Make_indexed_data_storage :=
     fun (I : {'[t, ipath] : [Set ** Set -> Set] & INDEX.signature t ipath}) =>
       fun (V : {t : Set & VALUE.signature t}) =>
         ((let tag_Non_iterable_indexed_data_storage := tt in
-        let t := (|C|).(Raw_context.T.t) in
-        let context := t in
-        let key := (|I|).(INDEX.t) in
-        let value := (|V|).(Storage_sigs.VALUE.t) in
+        let t : Set := (|C|).(Raw_context.T.t) in
+        let context : Set := t in
+        let key : Set := (|I|).(INDEX.t) in
+        let value : Set := (|V|).(Storage_sigs.VALUE.t) in
         let Encoder := Make_encoder (existT (A := Set) _ _ (|V|)) in
         let of_bytes := (|Encoder|).(ENCODER.of_bytes) in
         let to_bytes := (|Encoder|).(ENCODER.to_bytes) in
@@ -596,10 +597,10 @@ Definition Make_indexed_carbonated_data_storage :=
     fun (I : {'[t, ipath] : [Set ** Set -> Set] & INDEX.signature t ipath}) =>
       fun (V : {t : Set & VALUE.signature t}) =>
         ((let tag_Non_iterable_indexed_carbonated_data_storage := tt in
-        let t := (|C|).(Raw_context.T.t) in
-        let context := t in
-        let key := (|I|).(INDEX.t) in
-        let value := (|V|).(Storage_sigs.VALUE.t) in
+        let t : Set := (|C|).(Raw_context.T.t) in
+        let context : Set := t in
+        let key : Set := (|I|).(INDEX.t) in
+        let value : Set := (|V|).(Storage_sigs.VALUE.t) in
         let Encoder := Make_encoder (existT (A := Set) _ _ (|V|)) in
         let of_bytes := (|Encoder|).(ENCODER.of_bytes) in
         let to_bytes := (|Encoder|).(ENCODER.to_bytes) in
@@ -842,7 +843,7 @@ Definition Make_indexed_data_snapshotable_storage :=
         {'[t, ipath] : [Set ** Set -> Set] & INDEX.signature t ipath}) =>
       fun (I : {'[t, ipath] : [Set ** Set -> Set] & INDEX.signature t ipath}) =>
         fun (V : {t : Set & VALUE.signature t}) =>
-          ((let snapshot := (|Snapshot_index|).(INDEX.t) in
+          ((let snapshot : Set := (|Snapshot_index|).(INDEX.t) in
           let data_name := [ "current" ] in
           let snapshot_name := [ "snapshot" ] in
           let C_data :=
@@ -971,10 +972,10 @@ Definition Make_indexed_data_snapshotable_storage :=
 Definition Make_indexed_subcontext :=
   fun (C : {t : Set & Raw_context.T.signature t}) =>
     fun (I : {'[t, ipath] : [Set ** Set -> Set] & INDEX.signature t ipath}) =>
-      ((let t := (|C|).(Raw_context.T.t) in
-      let context := t in
-      let key := (|I|).(INDEX.t) in
-      let ipath (a : Set) := (|I|).(INDEX.ipath) a in
+      ((let t : Set := (|C|).(Raw_context.T.t) in
+      let context : Set := t in
+      let key : Set := (|I|).(INDEX.t) in
+      let ipath (a : Set) : Set := (|I|).(INDEX.ipath) a in
       let clear (__t_value : (|C|).(Raw_context.T.context))
         : Lwt.t Raw_context.root_context :=
         let= __t_value := (|C|).(Raw_context.T.remove_rec) __t_value nil in
@@ -1029,8 +1030,8 @@ Definition Make_indexed_subcontext :=
       let unpack := Storage_description.unpack ((|I|).(INDEX.args) tt) in
       let pack := Storage_description.pack ((|I|).(INDEX.args) tt) in
       let Raw_context :=
-        ((let t := (|I|).(INDEX.ipath) (|C|).(Raw_context.T.t) in
-        let context := t in
+        ((let t : Set := (|I|).(INDEX.ipath) (|C|).(Raw_context.T.t) in
+        let context : Set := t in
         let to_key (i : (|I|).(INDEX.t)) (k : list string) : list string :=
           (|I|).(INDEX.to_path) i k in
         let of_key {A : Set} (k : list A) : list A :=
@@ -1269,9 +1270,9 @@ Definition Make_indexed_subcontext :=
       let Make_set :=
         fun (R : {_ : unit & REGISTER.signature}) =>
           fun (N : {_ : unit & NAME.signature}) =>
-            ((let t := (|C|).(Raw_context.T.t) in
-            let context := t in
-            let elt := (|I|).(INDEX.t) in
+            ((let t : Set := (|C|).(Raw_context.T.t) in
+            let context : Set := t in
+            let elt : Set := (|I|).(INDEX.t) in
             let inited := MBytes.of_string "inited" in
             let mem (s : (|C|).(Raw_context.T.context)) (i : (|I|).(INDEX.t))
               : Lwt.t bool :=
@@ -1341,10 +1342,10 @@ Definition Make_indexed_subcontext :=
         fun (N : {_ : unit & NAME.signature}) =>
           fun (V : {t : Set & VALUE.signature t}) =>
             ((let tag_Non_iterable_indexed_data_storage := tt in
-            let t := (|C|).(Raw_context.T.t) in
-            let context := t in
-            let key := (|I|).(INDEX.t) in
-            let value := (|V|).(Storage_sigs.VALUE.t) in
+            let t : Set := (|C|).(Raw_context.T.t) in
+            let context : Set := t in
+            let key : Set := (|I|).(INDEX.t) in
+            let value : Set := (|V|).(Storage_sigs.VALUE.t) in
             let Encoder := Make_encoder (existT (A := Set) _ _ (|V|)) in
             let of_bytes := (|Encoder|).(ENCODER.of_bytes) in
             let to_bytes := (|Encoder|).(ENCODER.to_bytes) in
@@ -1504,10 +1505,10 @@ Definition Make_indexed_subcontext :=
         fun (N : {_ : unit & NAME.signature}) =>
           fun (V : {t : Set & VALUE.signature t}) =>
             ((let tag_Non_iterable_indexed_carbonated_data_storage := tt in
-            let t := (|C|).(Raw_context.T.t) in
-            let context := t in
-            let key := (|I|).(INDEX.t) in
-            let value := (|V|).(Storage_sigs.VALUE.t) in
+            let t : Set := (|C|).(Raw_context.T.t) in
+            let context : Set := t in
+            let key : Set := (|I|).(INDEX.t) in
+            let value : Set := (|V|).(Storage_sigs.VALUE.t) in
             let Encoder := Make_encoder (existT (A := Set) _ _ (|V|)) in
             let of_bytes := (|Encoder|).(ENCODER.of_bytes) in
             let to_bytes := (|Encoder|).(ENCODER.to_bytes) in
@@ -1754,10 +1755,10 @@ Definition Wrap_indexed_data_storage :=
         {t : Set &
           WRAPPER.signature t (|C|).(Storage_sigs.Indexed_data_storage.key)}) =>
       ((let tag_Non_iterable_indexed_data_storage := tt in
-      let t := (|C|).(Storage_sigs.Indexed_data_storage.t) in
-      let context := (|C|).(Storage_sigs.Indexed_data_storage.t) in
-      let key := (|K|).(WRAPPER.t) in
-      let value := (|C|).(Storage_sigs.Indexed_data_storage.value) in
+      let t : Set := (|C|).(Storage_sigs.Indexed_data_storage.t) in
+      let context : Set := (|C|).(Storage_sigs.Indexed_data_storage.t) in
+      let key : Set := (|K|).(WRAPPER.t) in
+      let value : Set := (|C|).(Storage_sigs.Indexed_data_storage.value) in
       let mem
         (ctxt : (|C|).(Storage_sigs.Indexed_data_storage.context))
         (k : (|K|).(WRAPPER.t)) : Lwt.t bool :=

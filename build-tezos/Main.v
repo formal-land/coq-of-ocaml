@@ -317,11 +317,6 @@ Definition apply_operation (function_parameter : validation_state)
         operation.shell := shell;
           operation.protocol_data := Operation_data protocol_data
           |} := operation in
-      let 'existT _ __Operation_data_'kind [shell, protocol_data] :=
-        existT (A := Set)
-          (fun __Operation_data_'kind =>
-            [Operation.shell_header ** Alpha_context.Operation.protocol_data]) _
-          [shell, protocol_data] in
       let operation :=
         {| Alpha_context.operation.shell := shell;
           Alpha_context.operation.protocol_data := protocol_data |} in
@@ -478,115 +473,65 @@ Definition compare_operations
   : int :=
   let 'Alpha_context.Operation_data op1 :=
     op1.(Alpha_context.packed_operation.protocol_data) in
-  let 'existT _ __Operation_data_'kind op1 :=
-    existT (A := Set)
-      (fun __Operation_data_'kind => Alpha_context.protocol_data) _ op1 in
   let 'Alpha_context.Operation_data op2 :=
     op2.(Alpha_context.packed_operation.protocol_data) in
-  let 'existT _ __Operation_data_'kind1 op2 :=
-    existT (A := Set)
-      (fun __Operation_data_'kind1 => Alpha_context.protocol_data) _ op2 in
   match
     (op1.(Alpha_context.protocol_data.contents),
       op2.(Alpha_context.protocol_data.contents)) with
   |
     (Alpha_context.Single (Alpha_context.Endorsement _),
       Alpha_context.Single (Alpha_context.Endorsement _)) => 0
-  
   | (_, Alpha_context.Single (Alpha_context.Endorsement _)) => 1
-  
   | (Alpha_context.Single (Alpha_context.Endorsement _), _) => (-1)
-  
   |
     (Alpha_context.Single (Alpha_context.Seed_nonce_revelation _),
       Alpha_context.Single (Alpha_context.Seed_nonce_revelation _)) => 0
-  
   | (_, Alpha_context.Single (Alpha_context.Seed_nonce_revelation _)) => 1
-  
   | (Alpha_context.Single (Alpha_context.Seed_nonce_revelation _), _) => (-1)
-  
   |
     (Alpha_context.Single (Alpha_context.Double_endorsement_evidence _),
       Alpha_context.Single (Alpha_context.Double_endorsement_evidence _)) => 0
-  
   | (_, Alpha_context.Single (Alpha_context.Double_endorsement_evidence _)) => 1
-  
   | (Alpha_context.Single (Alpha_context.Double_endorsement_evidence _), _) =>
     (-1)
-  
   |
     (Alpha_context.Single (Alpha_context.Double_baking_evidence _),
       Alpha_context.Single (Alpha_context.Double_baking_evidence _)) => 0
-  
   | (_, Alpha_context.Single (Alpha_context.Double_baking_evidence _)) => 1
-  
   | (Alpha_context.Single (Alpha_context.Double_baking_evidence _), _) => (-1)
-  
   |
     (Alpha_context.Single (Alpha_context.Activate_account _),
       Alpha_context.Single (Alpha_context.Activate_account _)) => 0
-  
   | (_, Alpha_context.Single (Alpha_context.Activate_account _)) => 1
-  
   | (Alpha_context.Single (Alpha_context.Activate_account _), _) => (-1)
-  
   |
     (Alpha_context.Single (Alpha_context.Proposals _),
       Alpha_context.Single (Alpha_context.Proposals _)) => 0
-  
   | (_, Alpha_context.Single (Alpha_context.Proposals _)) => 1
-  
   | (Alpha_context.Single (Alpha_context.Proposals _), _) => (-1)
-  
   |
     (Alpha_context.Single (Alpha_context.Ballot _),
       Alpha_context.Single (Alpha_context.Ballot _)) => 0
-  
   | (_, Alpha_context.Single (Alpha_context.Ballot _)) => 1
-  
   | (Alpha_context.Single (Alpha_context.Ballot _), _) => (-1)
-  
   |
     (Alpha_context.Single (Alpha_context.Manager_operation op1),
       Alpha_context.Single (Alpha_context.Manager_operation op2)) =>
-    let 'existT _ [__0, __1] [op1, op2] :=
-      existT (A := [Set ** Set])
-        (fun '[__0, __1] =>
-          [Alpha_context.contents.Manager_operation **
-            Alpha_context.contents.Manager_operation]) [_, _] [op1, op2] in
     Z.compare op1.(Alpha_context.contents.Manager_operation.counter)
       op2.(Alpha_context.contents.Manager_operation.counter)
-  
   |
     (Alpha_context.Cons (Alpha_context.Manager_operation op1) _,
       Alpha_context.Single (Alpha_context.Manager_operation op2)) =>
-    let 'existT _ [__2, __4] [op1, op2] :=
-      existT (A := [Set ** Set])
-        (fun '[__2, __4] =>
-          [Alpha_context.contents.Manager_operation **
-            Alpha_context.contents.Manager_operation]) [_, _] [op1, op2] in
     Z.compare op1.(Alpha_context.contents.Manager_operation.counter)
       op2.(Alpha_context.contents.Manager_operation.counter)
-  
   |
     (Alpha_context.Single (Alpha_context.Manager_operation op1),
       Alpha_context.Cons (Alpha_context.Manager_operation op2) _) =>
-    let 'existT _ [__5, __6] [op1, op2] :=
-      existT (A := [Set ** Set])
-        (fun '[__5, __6] =>
-          [Alpha_context.contents.Manager_operation **
-            Alpha_context.contents.Manager_operation]) [_, _] [op1, op2] in
     Z.compare op1.(Alpha_context.contents.Manager_operation.counter)
       op2.(Alpha_context.contents.Manager_operation.counter)
-  
   |
     (Alpha_context.Cons (Alpha_context.Manager_operation op1) _,
       Alpha_context.Cons (Alpha_context.Manager_operation op2) _) =>
-    let 'existT _ [__10, __8] [op1, op2] :=
-      existT (A := [Set ** Set])
-        (fun '[__10, __8] =>
-          [Alpha_context.contents.Manager_operation **
-            Alpha_context.contents.Manager_operation]) [_, _] [op1, op2] in
     Z.compare op1.(Alpha_context.contents.Manager_operation.counter)
       op2.(Alpha_context.contents.Manager_operation.counter)
   end.
@@ -603,11 +548,11 @@ Definition init (ctxt : Context.t) (block_header : Block_header.shell_header)
           Alpha_context.context)) :=
     let=? '(Script_ir_translator.Ex_script parsed_script, ctxt) :=
       Script_ir_translator.parse_script None ctxt false script in
-    let 'existT _ [__Ex_script_'a, __Ex_script_'b] [parsed_script, ctxt] :=
-      existT (A := [Set ** Set])
-        (fun '[__Ex_script_'a, __Ex_script_'b] =>
-          [Script_typed_ir.script __Ex_script_'b ** Alpha_context.context]) [_,
-        _] [parsed_script, ctxt] in
+    let 'existT _ __Ex_script_'b [parsed_script, ctxt] :=
+      existT (A := Set)
+        (fun __Ex_script_'b =>
+          [Script_typed_ir.script __Ex_script_'b ** Alpha_context.context]) _
+        [parsed_script, ctxt] in
     let=? '(storage, big_map_diff, ctxt) :=
       Script_ir_translator.extract_big_map_diff ctxt
         Script_ir_translator.Optimized false Script_ir_translator.no_big_map_id

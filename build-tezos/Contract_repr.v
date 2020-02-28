@@ -20,7 +20,7 @@ Inductive t : Set :=
 
 Definition CompareModule :=
   Compare.Make
-    (let t := t in
+    (let t : Set := t in
     let compare (l1 : t) (l2 : t) : int :=
       match (l1, l2) with
       | (Implicit pkh1, Implicit pkh2) =>
@@ -195,7 +195,7 @@ Definition rpc_arg : RPC_arg.arg t :=
     destruct construct tt.
 
 Definition Index :=
-  let t := contract in
+  let t : Set := contract in
   let path_length := 7 in
   let to_path (c : t) (l : list string) : list string :=
     let raw_key := Data_encoding.Binary.to_bytes_exn encoding c in

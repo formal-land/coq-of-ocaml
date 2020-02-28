@@ -106,7 +106,7 @@ Definition of_int32_exn (l : (|Compare.Int32|).(Compare.S.t))
     Pervasives.invalid_arg "Level_repr.Cycle.of_int32".
 
 Definition Index :=
-  let t := cycle in
+  let t : Set := cycle in
   let path_length := 1 in
   let to_path (c : int32) (l : list string) : list string :=
     cons (Int32.to_string (to_int32 c)) l in

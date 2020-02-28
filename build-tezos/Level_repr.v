@@ -50,7 +50,7 @@ Definition t := t.record.
 
 Definition CompareModule :=
   Compare.Make
-    (let t := t in
+    (let t : Set := t in
     let compare (function_parameter : t) : t -> int :=
       let '{| t.level := l1 |} := function_parameter in
       fun function_parameter =>

@@ -301,9 +301,6 @@ Module Scripts.
                 let? '(Script_ir_translator.Ex_ty arg_type, _) :=
                   Script_ir_translator.parse_ty ctxt legacy true false true
                     arg_type in
-                let 'existT _ __Ex_ty_'a3 arg_type :=
-                  existT (A := Set) (fun __Ex_ty_'a3 => Script_typed_ir.ty) _
-                    arg_type in
                 Script_ir_translator.list_entrypoints arg_type ctxt root_name)
               in
             Error_monad.__return
@@ -576,10 +573,6 @@ Module Forge.
           List.map
             (fun function_parameter =>
               let 'Alpha_context.Manager operation := function_parameter in
-              let 'existT _ __Manager_'kind operation :=
-                existT (A := Set)
-                  (fun __Manager_'kind => Alpha_context.manager_operation) _
-                  operation in
               Alpha_context.Contents
                 (Alpha_context.Manager_operation
                   {| Alpha_context.contents.Manager_operation.source := source;

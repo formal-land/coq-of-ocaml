@@ -56,7 +56,7 @@ Definition rpc_arg : RPC_arg.arg int32 :=
 Definition to_int32 {A : Set} (v : A) : A := v.
 
 Definition Index :=
-  let t := roll in
+  let t : Set := roll in
   let path_length := 3 in
   let to_path (roll : int32) (l : list string) : list string :=
     cons (Int32.to_string (Int32.logand roll (Int32.of_int 255)))

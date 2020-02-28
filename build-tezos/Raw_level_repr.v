@@ -97,7 +97,7 @@ Definition of_int32 (l : (|Compare.Int32|).(Compare.S.t))
   try (Pervasives.Ok (of_int32_exn l)).
 
 Definition Index :=
-  let t := raw_level in
+  let t : Set := raw_level in
   let path_length := 1 in
   let to_path (level : int32) (l : list string) : list string :=
     cons (Int32.to_string level) l in

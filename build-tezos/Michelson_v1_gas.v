@@ -74,9 +74,9 @@ Module Cost_of.
     | (Script_typed_ir.Mutez_key _, _) => obj_magic int 8
     
     | (Script_typed_ir.Pair_key (l, _) (__r_value, _) _, _ as v) =>
-      let 'existT _ [__0, __1, __Pair_key] [l, __r_value, v] :=
-        obj_magic_exists (Es := [Set ** Set ** Set])
-          (fun '[__0, __1, __Pair_key] =>
+      let 'existT _ [__0, __1] [l, __r_value, v] :=
+        obj_magic_exists (Es := [Set ** Set])
+          (fun '[__0, __1] =>
             [Script_typed_ir.comparable_struct **
               Script_typed_ir.comparable_struct ** __0 * __1]) [l, __r_value, v]
         in
@@ -623,9 +623,9 @@ Module Cost_of.
         obj_magic Alpha_context.Gas.cost (compare_address x y)
       
       | (Script_typed_ir.Pair_key (tl, _) (tr, _) _, _ as x, _ as y) =>
-        let 'existT _ [__0, __1, __Pair_key] [tl, tr, x, y] :=
-          obj_magic_exists (Es := [Set ** Set ** Set])
-            (fun '[__0, __1, __Pair_key] =>
+        let 'existT _ [__0, __1] [tl, tr, x, y] :=
+          obj_magic_exists (Es := [Set ** Set])
+            (fun '[__0, __1] =>
               [Script_typed_ir.comparable_struct **
                 Script_typed_ir.comparable_struct ** __0 * __1 ** __0 * __1])
             [tl, tr, x, y] in

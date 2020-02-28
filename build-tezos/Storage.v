@@ -35,7 +35,7 @@ Require Tezos.Voting_period_repr.
 Import Storage_functors.
 
 Definition Int :=
-  let t := int in
+  let t : Set := int in
   let encoding := Data_encoding.uint16 in
   existT (A := unit) (fun _ => _) tt
     {|
@@ -43,7 +43,7 @@ Definition Int :=
     |}.
 
 Definition Int32 :=
-  let t := Int32.t in
+  let t : Set := Int32.t in
   let encoding := Data_encoding.__int32_value in
   existT (A := unit) (fun _ => _) tt
     {|
@@ -51,7 +51,7 @@ Definition Int32 :=
     |}.
 
 Definition Z_value :=
-  let t := Z.t in
+  let t : Set := Z.t in
   let encoding := Data_encoding.z in
   existT (A := unit) (fun _ => _) tt
     {|
@@ -59,7 +59,7 @@ Definition Z_value :=
     |}.
 
 Definition Int_index :=
-  let t := int in
+  let t : Set := int in
   let path_length := 1 in
   let to_path (c : int) (l : list string) : list string :=
     cons (Pervasives.string_of_int c) l in
@@ -68,7 +68,7 @@ Definition Int_index :=
     | ([] | cons _ (cons _ _)) => None
     | cons c [] => Pervasives.int_of_string_opt c
     end in
-  let ipath (a : Set) := a * t in
+  let ipath (a : Set) : Set := a * t in
   let args (function_parameter : unit) : Storage_description.args :=
     let '_ := function_parameter in
     Storage_description.One
@@ -93,7 +93,7 @@ Definition Make_index :=
     let rpc_arg := (|H|).(Storage_description.INDEX.rpc_arg) in
     let encoding := (|H|).(Storage_description.INDEX.encoding) in
     let compare := (|H|).(Storage_description.INDEX.compare) in
-    let ipath (a : Set) := a * t in
+    let ipath (a : Set) : Set := a * t in
     let args (function_parameter : unit) : Storage_description.args :=
       let '_ := function_parameter in
       Storage_description.One
@@ -351,19 +351,19 @@ Module Contract.
       ((let I :=
         ((|Indexed_context|).(Storage_sigs.Indexed_raw_context.Make_carbonated_map)
           (existT (A := unit) (fun _ => _) tt (|N|)))
-          (let t := Script_repr.lazy_expr in
+          (let t : Set := Script_repr.lazy_expr in
           let encoding := Script_repr.lazy_expr_encoding in
           existT (A := Set) _ _
             {|
               Storage_sigs.VALUE.encoding := encoding
             |}) in
       let tag_Non_iterable_indexed_carbonated_data_storage := tt in
-      let context :=
+      let context : Set :=
         (|I|).(Storage_sigs.Non_iterable_indexed_carbonated_data_storage.context)
         in
-      let key :=
+      let key : Set :=
         (|I|).(Storage_sigs.Non_iterable_indexed_carbonated_data_storage.key) in
-      let value :=
+      let value : Set :=
         (|I|).(Storage_sigs.Non_iterable_indexed_carbonated_data_storage.value)
         in
       let mem :=
@@ -645,7 +645,7 @@ Module Big_map.
   End Next.
   
   Definition Index :=
-    let t := Z.t in
+    let t : Set := Z.t in
     let rpc_arg :=
       let construct := Z.to_string in
       let destruct (__hash_value : string) : Pervasives.result Z.t string :=
@@ -774,7 +774,7 @@ Module Big_map.
         {|
           Storage_sigs.NAME.name := name
         |}))
-      (let t := Script_repr.expr in
+      (let t : Set := Script_repr.expr in
       let encoding := Script_repr.expr_encoding in
       existT (A := Set) _ _
         {|
@@ -788,7 +788,7 @@ Module Big_map.
         {|
           Storage_sigs.NAME.name := name
         |}))
-      (let t := Script_repr.expr in
+      (let t : Set := Script_repr.expr in
       let encoding := Script_repr.expr_encoding in
       existT (A := Set) _ _
         {|
@@ -822,7 +822,7 @@ Module Big_map.
                 Storage_description.INDEX.compare := Script_expr_hash.compare
               |}) in
         existT (A := [Set ** Set -> Set]) _ [_, _] (|functor_result|)))
-        (let t := Script_repr.expr in
+        (let t : Set := Script_repr.expr in
         let encoding := Script_repr.expr_encoding in
         existT (A := Set) _ _
           {|
@@ -1245,7 +1245,7 @@ Module Cycle.
       (let functor_result :=
         Make_index (existT (A := Set) _ _ (|Raw_level_repr.Index|)) in
       existT (A := [Set ** Set -> Set]) _ [_, _] (|functor_result|)))
-      (let t := nonce_status in
+      (let t : Set := nonce_status in
       let encoding := nonce_status_encoding in
       existT (A := Set) _ _
         {|
@@ -1259,7 +1259,7 @@ Module Cycle.
         {|
           Storage_sigs.NAME.name := name
         |}))
-      (let t := Seed_repr.seed in
+      (let t : Set := Seed_repr.seed in
       let encoding := Seed_repr.seed_encoding in
       existT (A := Set) _ _
         {|
@@ -1347,7 +1347,7 @@ Module Roll.
   Definition Delegate_roll_list :=
     (Storage_functors.Wrap_indexed_data_storage
       (existT (A := [Set ** Set ** Set]) _ [_, _, _] (|Contract.Roll_list|)))
-      (let t := (|Signature.Public_key_hash|).(S.SPublic_key_hash.t) in
+      (let t : Set := (|Signature.Public_key_hash|).(S.SPublic_key_hash.t) in
       let wrap := Contract_repr.implicit_contract in
       let unwrap := Contract_repr.is_implicit in
       existT (A := Set) _ _
@@ -1371,7 +1371,7 @@ Module Roll.
   Definition Delegate_change :=
     (Storage_functors.Wrap_indexed_data_storage
       (existT (A := [Set ** Set ** Set]) _ [_, _, _] (|Contract.Change|)))
-      (let t := (|Signature.Public_key_hash|).(S.SPublic_key_hash.t) in
+      (let t : Set := (|Signature.Public_key_hash|).(S.SPublic_key_hash.t) in
       let wrap := Contract_repr.implicit_contract in
       let unwrap := Contract_repr.is_implicit in
       existT (A := Set) _ _
@@ -1512,7 +1512,7 @@ Module Vote.
         {|
           Storage_sigs.NAME.name := name
         |}))
-      (let t := Voting_period_repr.kind in
+      (let t : Set := Voting_period_repr.kind in
       let encoding := Voting_period_repr.kind_encoding in
       existT (A := Set) _ _
         {|
@@ -1699,7 +1699,7 @@ Module Vote.
                 (|Signature.Public_key_hash|).(S.SPublic_key_hash.compare)
             |}) in
       existT (A := [Set ** Set -> Set]) _ [_, _] (|functor_result|)))
-      (let t := Vote_repr.ballot in
+      (let t : Set := Vote_repr.ballot in
       let encoding := Vote_repr.ballot_encoding in
       existT (A := Set) _ _
         {|
@@ -1732,7 +1732,7 @@ Module Seed.
   Definition Nonce :=
     (* ❌ open *)
     let tag_Non_iterable_indexed_data_storage := tt in
-    let context := Raw_context.t in
+    let context : Set := Raw_context.t in
     let mem
       (ctxt : (|Cycle.Indexed_context|).(Storage_sigs.Indexed_raw_context.t))
       (l : Level_repr.t) : Lwt.t bool :=
@@ -1890,7 +1890,7 @@ Module Ramp_up.
       (let functor_result :=
         Make_index (existT (A := Set) _ _ (|Cycle_repr.Index|)) in
       existT (A := [Set ** Set -> Set]) _ [_, _] (|functor_result|)))
-      (let t := Tez_repr.t * Tez_repr.t in
+      (let t : Set := Tez_repr.t * Tez_repr.t in
       let encoding := Data_encoding.tup2 Tez_repr.encoding Tez_repr.encoding in
       existT (A := Set) _ _
         {|
@@ -1934,7 +1934,7 @@ Module Ramp_up.
       (let functor_result :=
         Make_index (existT (A := Set) _ _ (|Cycle_repr.Index|)) in
       existT (A := [Set ** Set -> Set]) _ [_, _] (|functor_result|)))
-      (let t := Tez_repr.t * Tez_repr.t in
+      (let t : Set := Tez_repr.t * Tez_repr.t in
       let encoding := Data_encoding.tup2 Tez_repr.encoding Tez_repr.encoding in
       existT (A := Set) _ _
         {|

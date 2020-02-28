@@ -267,11 +267,11 @@ Definition apply_manager_operation_content
           (Alpha_context.Script.deserialized_cost unparsed_code)) in
     let=? '(Script_ir_translator.Ex_script parsed_script, ctxt) :=
       Script_ir_translator.parse_script None ctxt false script in
-    let 'existT _ [__Ex_script_'a, __Ex_script_'b] [parsed_script, ctxt] :=
-      existT (A := [Set ** Set])
-        (fun '[__Ex_script_'a, __Ex_script_'b] =>
-          [Script_typed_ir.script __Ex_script_'b ** Alpha_context.context]) [_,
-        _] [parsed_script, ctxt] in
+    let 'existT _ __Ex_script_'b [parsed_script, ctxt] :=
+      existT (A := Set)
+        (fun __Ex_script_'b =>
+          [Script_typed_ir.script __Ex_script_'b ** Alpha_context.context]) _
+        [parsed_script, ctxt] in
     let=? '(to_duplicate, ctxt) :=
       Script_ir_translator.collect_big_maps ctxt
         parsed_script.(Script_typed_ir.script.storage_type)
@@ -365,14 +365,6 @@ Definition apply_internal_manager_operations
               Alpha_context.internal_operation.operation := operation;
               Alpha_context.internal_operation.nonce := __nonce_value
               |} as op)) rest =>
-      let 'existT _ __Internal_operation_'kind
-        [source, operation, __nonce_value, op, rest] :=
-        existT (A := Set)
-          (fun __Internal_operation_'kind =>
-            [Alpha_context.Contract.contract ** Alpha_context.manager_operation
-              ** int ** Alpha_context.internal_operation **
-              list Alpha_context.packed_internal_operation]) _
-          [source, operation, __nonce_value, op, rest] in
       let= function_parameter :=
         if Alpha_context.internal_nonce_already_recorded ctxt __nonce_value then
           Error_monad.fail extensible_type_value
@@ -391,10 +383,6 @@ Definition apply_internal_manager_operations
           List.rev_map
             (fun function_parameter =>
               let 'Alpha_context.Internal_operation op := function_parameter in
-              let 'existT _ __Internal_operation_'kind1 op :=
-                existT (A := Set)
-                  (fun __Internal_operation_'kind1 =>
-                    Alpha_context.internal_operation) _ op in
               Apply_results.Internal_operation_result op
                 (Apply_results.Skipped
                   (Alpha_context.manager_kind
@@ -590,13 +578,6 @@ Fixpoint mark_skipped
           Alpha_context.contents.Manager_operation.fee := fee;
           Alpha_context.contents.Manager_operation.operation := operation
           |}) rest =>
-    let 'existT _ [__0, __1] [source, fee, operation, rest] :=
-      existT (A := [Set ** Set])
-        (fun '[__0, __1] =>
-          [(|Signature.Public_key_hash|).(S.SPublic_key_hash.t) **
-            Alpha_context.Tez.tez ** Alpha_context.manager_operation **
-            Alpha_context.contents_list]) [_, _] [source, fee, operation, rest]
-      in
     let source := Alpha_context.Contract.implicit_contract source in
     Apply_results.Cons_result
       (Apply_results.Manager_operation_result
@@ -625,11 +606,6 @@ Fixpoint precheck_manager_contents_list
   | Alpha_context.Single ((Alpha_context.Manager_operation _) as op) =>
     precheck_manager_contents ctxt chain_id raw_operation op
   | Alpha_context.Cons ((Alpha_context.Manager_operation _) as op) rest =>
-    let 'existT _ [__0, __1] [op, rest] :=
-      existT (A := [Set ** Set])
-        (fun '[__0, __1] =>
-          [Alpha_context.contents ** Alpha_context.contents_list]) [_, _]
-        [op, rest] in
     let=? ctxt := precheck_manager_contents ctxt chain_id raw_operation op in
     precheck_manager_contents_list ctxt chain_id raw_operation rest
   end.
@@ -675,12 +651,6 @@ Fixpoint apply_manager_contents_list_rec
         Alpha_context.contents.Manager_operation.source := source;
           Alpha_context.contents.Manager_operation.fee := fee
           |}) as op) rest =>
-    let 'existT _ [__0, __1] [source, fee, op, rest] :=
-      existT (A := [Set ** Set])
-        (fun '[__0, __1] =>
-          [(|Signature.Public_key_hash|).(S.SPublic_key_hash.t) **
-            Alpha_context.Tez.tez ** Alpha_context.contents **
-            Alpha_context.contents_list]) [_, _] [source, fee, op, rest] in
     let source := Alpha_context.Contract.implicit_contract source in
     let= function_parameter := apply_manager_contents ctxt mode chain_id op in
     match function_parameter with
@@ -750,11 +720,6 @@ Definition mark_backtracked (results : Apply_results.contents_result_list)
             |})
     | Apply_results.Cons_result (Apply_results.Manager_operation_result op) rest
       =>
-      let 'existT _ [__0, __1] [op, rest] :=
-        existT (A := [Set ** Set])
-          (fun '[__0, __1] =>
-            [Apply_results.contents_result.Manager_operation_result **
-              Apply_results.contents_result_list]) [_, _] [op, rest] in
       Apply_results.Cons_result
         (Apply_results.Manager_operation_result
           {|
@@ -774,11 +739,6 @@ Definition mark_backtracked (results : Apply_results.contents_result_list)
     : Apply_results.packed_internal_operation_result :=
     let 'Apply_results.Internal_operation_result kind __result_value :=
       function_parameter in
-    let 'existT _ __Internal_operation_result_'kind [kind, __result_value] :=
-      existT (A := Set)
-        (fun __Internal_operation_result_'kind =>
-          [Alpha_context.internal_operation **
-            Apply_results.manager_operation_result]) _ [kind, __result_value] in
     Apply_results.Internal_operation_result kind
       (mark_manager_operation_result __result_value)
   with mark_manager_operation_result
@@ -881,7 +841,6 @@ Definition apply_contents_list
                   delegate;
                 Apply_results.contents_result.Endorsement_result.slots := slots
                 |})))
-  
   |
     Alpha_context.Single
       (Alpha_context.Seed_nonce_revelation {|
@@ -903,7 +862,6 @@ Definition apply_contents_list
                 (Alpha_context.Delegate.Credited
                   seed_nonce_revelation_tip))
             ])))
-  
   |
     Alpha_context.Single
       (Alpha_context.Double_endorsement_evidence {|
@@ -999,7 +957,6 @@ Definition apply_contents_list
                 ]))))
     | ((_, _), _) => Error_monad.fail extensible_type_value
     end
-  
   |
     Alpha_context.Single
       (Alpha_context.Double_baking_evidence {|
@@ -1092,7 +1049,6 @@ Definition apply_contents_list
                 ((Alpha_context.Delegate.Rewards baker current_cycle),
                   (Alpha_context.Delegate.Credited reward))
               ]))))
-  
   |
     Alpha_context.Single
       (Alpha_context.Activate_account {|
@@ -1120,7 +1076,6 @@ Definition apply_contents_list
                   (Alpha_context.Delegate.Credited amount))
               ])))
     end
-  
   |
     Alpha_context.Single
       (Alpha_context.Proposals {|
@@ -1140,7 +1095,6 @@ Definition apply_contents_list
     let=? ctxt := Amendment.record_proposals ctxt source proposals in
     Error_monad.__return
       (ctxt, (Apply_results.Single_result Apply_results.Proposals_result))
-  
   |
     Alpha_context.Single
       (Alpha_context.Ballot {|
@@ -1161,19 +1115,12 @@ Definition apply_contents_list
     let=? ctxt := Amendment.record_ballot ctxt source proposal ballot in
     Error_monad.__return
       (ctxt, (Apply_results.Single_result Apply_results.Ballot_result))
-  
   | (Alpha_context.Single (Alpha_context.Manager_operation _)) as op =>
-    let 'existT _ __0 op :=
-      existT (A := Set) (fun __0 => Alpha_context.contents_list) _ op in
     let=? ctxt := precheck_manager_contents_list ctxt chain_id operation op in
     let= '(ctxt, __result_value) :=
       apply_manager_contents_list ctxt mode baker chain_id op in
     Error_monad.__return (ctxt, __result_value)
-  
   | (Alpha_context.Cons (Alpha_context.Manager_operation _) _) as op =>
-    let 'existT _ [__1, __2] op :=
-      existT (A := [Set ** Set])
-        (fun '[__1, __2] => Alpha_context.contents_list) [_, _] op in
     let=? ctxt := precheck_manager_contents_list ctxt chain_id operation op in
     let= '(ctxt, __result_value) :=
       apply_manager_contents_list ctxt mode baker chain_id op in

@@ -58,7 +58,7 @@ End S.
 
 Definition Make :=
   fun (T : {_ : unit & QTY.signature}) =>
-    ((let qty := int64 in
+    ((let qty : Set := int64 in
     (* ❌ type_extension *)
     let t := (|Compare.Int64|).(Compare.S.t) in
     let op_eq := (|Compare.Int64|).(Compare.S.op_eq) in
