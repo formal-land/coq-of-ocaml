@@ -551,8 +551,49 @@ let filter_in_free_vars
         None
   )
 
+let raise_if_synonym_and_definition
+  (type_kind : Types.type_kind) : unit Monad.t =
+  match type_kind with
+  | Type_abstract -> return ()
+  | _ ->
+    raise
+      ()
+      NotSupported
+      "We do not handle types with both a synonym and a type definition"
+
 let of_ocaml (typs : type_declaration list) : t Monad.t =
   match typs with
+  | [ { typ_id; typ_type = { type_kind; type_manifest = Some typ; type_params; _ }; _ } ] ->
+    raise_if_synonym_and_definition type_kind >>= fun () ->
+    let name = Name.of_ident false typ_id in
+    TypeIsGadt.named_typ_params_expecting_variables type_params >>= fun typ_args ->
+    begin match typ.Types.desc with
+    | Tvariant { row_fields; _ } ->
+      Monad.List.map
+        (Constructors.Single.of_ocaml_row typ_args)
+        row_fields >>= fun single_constructors ->
+      Constructors.of_ocaml typ_args false single_constructors >>= fun (constructors, _) ->
+      raise
+        (Inductive {
+          constructor_records = [];
+          notations = [];
+          records = [];
+          typs = [(name, typ_args, constructors)];
+        })
+        NotSupported
+        "Polymorphic variant types are defined as standard algebraic types"
+    | _ ->
+      Type.of_type_expr_without_free_vars typ >>= fun typ ->
+      let free_vars = Type.typ_args_of_typ typ in
+      let typ_args = filter_in_free_vars typ_args free_vars in
+      return (Synonym (name, typ_args, typ))
+    end
+  | [ { typ_id; typ_type = { type_kind = Type_abstract; type_manifest = None; type_params; _ }; _ } ] ->
+    let name = Name.of_ident false typ_id in
+    TypeIsGadt.named_typ_params_expecting_variables type_params >>= fun typ_args ->
+    let typ_args_with_unknowns =
+      TypeIsGadt.named_typ_params_with_unknowns typ_args in
+    return (Abstract (name, typ_args_with_unknowns))
   | [ { typ_id; typ_type = { type_kind = Type_record (fields, _); type_params; _ }; _ } ] ->
     let name = Name.of_ident false typ_id in
     TypeIsGadt.named_typ_params_expecting_variables type_params >>= fun typ_args ->
@@ -563,37 +604,6 @@ let of_ocaml (typs : type_declaration list) : t Monad.t =
     let free_vars = Type.typ_args_of_typs (List.map snd fields) in
     let typ_args = filter_in_free_vars typ_args free_vars in
     return (Record (name, typ_args, fields))
-  | [ { typ_id; typ_type = { type_kind = Type_abstract; type_manifest; type_params; _ }; _ } ] ->
-    let name = Name.of_ident false typ_id in
-    TypeIsGadt.named_typ_params_expecting_variables type_params >>= fun typ_args ->
-    begin match type_manifest with
-    | Some typ ->
-      begin match typ.Types.desc with
-      | Tvariant { row_fields; _ } ->
-        Monad.List.map
-          (Constructors.Single.of_ocaml_row typ_args)
-          row_fields >>= fun single_constructors ->
-        Constructors.of_ocaml typ_args false single_constructors >>= fun (constructors, _) ->
-        raise
-          (Inductive {
-            constructor_records = [];
-            notations = [];
-            records = [];
-            typs = [(name, typ_args, constructors)];
-          })
-          NotSupported
-          "Polymorphic variant types are defined as standard algebraic types"
-      | _ ->
-        Type.of_type_expr_without_free_vars typ >>= fun typ ->
-        let free_vars = Type.typ_args_of_typ typ in
-        let typ_args = filter_in_free_vars typ_args free_vars in
-        return (Synonym (name, typ_args, typ))
-      end
-    | None ->
-      let typ_args_with_unknowns =
-        TypeIsGadt.named_typ_params_with_unknowns typ_args in
-      return (Abstract (name, typ_args_with_unknowns))
-    end
   | [ { typ_id; typ_type = { type_kind = Type_open; _ }; _ } ] ->
     let name = Name.of_ident false typ_id in
     let typ = Type.Apply (MixedPath.of_name (Name.of_string false "extensible_type"), []) in
@@ -604,7 +614,8 @@ let of_ocaml (typs : type_declaration list) : t Monad.t =
       let name = Name.of_ident false typ.typ_id in
       TypeIsGadt.named_typ_params_expecting_variables typ.typ_type.type_params >>= fun typ_args ->
       match typ with
-      | { typ_type = { type_kind = Type_abstract; type_manifest = Some typ; _ }; _ } ->
+      | { typ_type = { type_kind; type_manifest = Some typ; _ }; _ } ->
+        raise_if_synonym_and_definition type_kind >>= fun () ->
         begin match typ.Types.desc with
         | Tvariant { row_fields; _ } ->
           Monad.List.map (Constructors.Single.of_ocaml_row typ_args) row_fields >>= fun single_constructors ->
