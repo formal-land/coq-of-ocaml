@@ -66,6 +66,8 @@ Axiom obj_magic_exists_eval
 
 Parameter unreachable_gadt_branch : forall {A : Set}, A.
 
+Parameter unreachable : forall {A : Set}, A.
+
 Parameter extensible_type : Set.
 
 Parameter extensible_type_value : extensible_type.
