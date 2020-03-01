@@ -17,16 +17,7 @@ Require Tezos.Services_registration.
 
 Definition block_header_data : Set := Alpha_context.Block_header.protocol_data.
 
-Module block_header.
-  Record record : Set := Build {
-    shell : Block_header.shell_header;
-    protocol_data : block_header_data }.
-  Definition with_shell shell (r : record) :=
-    Build shell r.(protocol_data).
-  Definition with_protocol_data protocol_data (r : record) :=
-    Build r.(shell) protocol_data.
-End block_header.
-Definition block_header := block_header.record.
+Definition block_header : Set := Alpha_context.Block_header.t.
 
 Definition block_header_data_encoding
   : Data_encoding.encoding Alpha_context.Block_header.protocol_data :=
@@ -38,16 +29,13 @@ Definition block_header_metadata_encoding
   : Data_encoding.encoding Apply_results.block_metadata :=
   Apply_results.block_metadata_encoding.
 
-Inductive operation_data : Set :=
-| Operation_data : Alpha_context.Operation.protocol_data -> operation_data.
+Definition operation_data : Set := Alpha_context.packed_protocol_data.
 
 Definition operation_data_encoding
   : Data_encoding.t Alpha_context.Operation.packed_protocol_data :=
   Alpha_context.Operation.protocol_data_encoding.
 
-Inductive operation_receipt : Set :=
-| Operation_metadata : Apply_results.operation_metadata -> operation_receipt
-| No_operation_metadata : operation_receipt.
+Definition operation_receipt : Set := Apply_results.packed_operation_metadata.
 
 Definition operation_receipt_encoding
   : Data_encoding.t Apply_results.packed_operation_metadata :=
@@ -59,16 +47,7 @@ Definition operation_data_and_receipt_encoding
       Apply_results.packed_operation_metadata) :=
   Apply_results.operation_data_and_metadata_encoding.
 
-Module operation.
-  Record record : Set := Build {
-    shell : Operation.shell_header;
-    protocol_data : operation_data }.
-  Definition with_shell shell (r : record) :=
-    Build shell r.(protocol_data).
-  Definition with_protocol_data protocol_data (r : record) :=
-    Build r.(shell) protocol_data.
-End operation.
-Definition operation := operation.record.
+Definition operation : Set := Alpha_context.packed_operation.
 
 Definition acceptable_passes : Alpha_context.packed_operation -> list int :=
   Alpha_context.Operation.acceptable_passes.

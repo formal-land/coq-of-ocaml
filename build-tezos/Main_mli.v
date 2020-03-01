@@ -150,16 +150,7 @@ Definition validation_state := validation_state.record.
 
 Definition operation_data : Set := Alpha_context.packed_protocol_data.
 
-Module operation.
-  Record record : Set := Build {
-    shell : Operation.shell_header;
-    protocol_data : operation_data }.
-  Definition with_shell shell (r : record) :=
-    Build shell r.(protocol_data).
-  Definition with_protocol_data protocol_data (r : record) :=
-    Build r.(shell) protocol_data.
-End operation.
-Definition operation := operation.record.
+Definition operation : Set := Alpha_context.packed_operation.
 
 Parameter Included_PROTOCOL :
   {'[block_header, operation] : [Set ** Set] &

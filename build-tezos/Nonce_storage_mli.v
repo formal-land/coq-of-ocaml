@@ -12,7 +12,7 @@ Require Tezos.Level_repr.
 Require Tezos.Nonce_hash.
 Require Tezos.Raw_context.
 Require Tezos.Seed_repr.
-Require Tezos.Tez_repr.
+Require Tezos.Storage_mli. Module Storage := Storage_mli.
 
 (* extensible_type_definition `error` *)
 
@@ -22,22 +22,7 @@ Definition nonce : Set := t.
 
 Parameter encoding : Data_encoding.t nonce.
 
-Module unrevealed.
-  Record record : Set := Build {
-    nonce_hash : Nonce_hash.t;
-    delegate : (|Signature.Public_key_hash|).(S.SPublic_key_hash.t);
-    rewards : Tez_repr.t;
-    fees : Tez_repr.t }.
-  Definition with_nonce_hash nonce_hash (r : record) :=
-    Build nonce_hash r.(delegate) r.(rewards) r.(fees).
-  Definition with_delegate delegate (r : record) :=
-    Build r.(nonce_hash) delegate r.(rewards) r.(fees).
-  Definition with_rewards rewards (r : record) :=
-    Build r.(nonce_hash) r.(delegate) rewards r.(fees).
-  Definition with_fees fees (r : record) :=
-    Build r.(nonce_hash) r.(delegate) r.(rewards) fees.
-End unrevealed.
-Definition unrevealed := unrevealed.record.
+Definition unrevealed : Set := Storage.Seed.unrevealed_nonce.
 
 Inductive status : Set :=
 | Unrevealed : unrevealed -> status

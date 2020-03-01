@@ -15,6 +15,7 @@ Require Tezos.Delegate_services_mli. Module Delegate_services := Delegate_servic
 Require Tezos.Helpers_services_mli. Module Helpers_services := Helpers_services_mli.
 Require Tezos.Nonce_hash.
 Require Tezos.Services_registration.
+Require Tezos.Storage_mli. Module Storage := Storage_mli.
 Require Tezos.Voting_services_mli. Module Voting_services := Voting_services_mli.
 
 Import Alpha_context.
@@ -120,7 +121,7 @@ Module Nonce.
               |
                 Pervasives.Ok
                   (Alpha_context.Nonce.Unrevealed {|
-                    Alpha_context.Nonce.unrevealed.nonce_hash := nonce_hash
+                    Storage.Seed.unrevealed_nonce.nonce_hash := nonce_hash
                       |}) => Error_monad.__return (Missing nonce_hash)
               | Pervasives.Error _ => Error_monad.__return Forgotten
               end).

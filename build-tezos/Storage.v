@@ -1705,26 +1705,9 @@ Module Vote.
 End Vote.
 
 Module Seed.
-  Module unrevealed_nonce.
-    Record record : Set := Build {
-      nonce_hash : Nonce_hash.t;
-      delegate : (|Signature.Public_key_hash|).(S.SPublic_key_hash.t);
-      rewards : Tez_repr.t;
-      fees : Tez_repr.t }.
-    Definition with_nonce_hash nonce_hash (r : record) :=
-      Build nonce_hash r.(delegate) r.(rewards) r.(fees).
-    Definition with_delegate delegate (r : record) :=
-      Build r.(nonce_hash) delegate r.(rewards) r.(fees).
-    Definition with_rewards rewards (r : record) :=
-      Build r.(nonce_hash) r.(delegate) rewards r.(fees).
-    Definition with_fees fees (r : record) :=
-      Build r.(nonce_hash) r.(delegate) r.(rewards) fees.
-  End unrevealed_nonce.
-  Definition unrevealed_nonce := unrevealed_nonce.record.
+  Definition unrevealed_nonce : Set := Cycle.unrevealed_nonce.
   
-  Inductive nonce_status : Set :=
-  | Unrevealed : unrevealed_nonce -> nonce_status
-  | Revealed : Seed_repr.nonce -> nonce_status.
+  Definition nonce_status : Set := Cycle.nonce_status.
   
   Definition Nonce :=
     (* ❌ open *)

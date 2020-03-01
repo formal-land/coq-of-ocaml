@@ -13,7 +13,7 @@ Apply_results_mli.v
 #Apply_results.v
 #Apply.v
 Baking_mli.v
-#Baking.v
+Baking.v
 Blinded_public_key_hash_mli.v
 Blinded_public_key_hash.v
 Block_header_repr_mli.v

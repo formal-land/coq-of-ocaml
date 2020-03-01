@@ -10,10 +10,13 @@ Require Import Tezos.Environment.
 Import Environment.Notations.
 Require Tezos.Blinded_public_key_hash.
 Require Tezos.Contract_repr.
+Require Tezos.Michelson_v1_primitives.
 Require Tezos.Nonce_hash.
 Require Tezos.Script_expr_hash.
 Require Tezos.Script_int_repr.
+Require Tezos.Storage_mli. Module Storage := Storage_mli.
 Require Tezos.Storage_description.
+Require Tezos.Tez_repr.
 
 Module BASIC_DATA.
   Record signature {t : Set} : Set := {
@@ -46,7 +49,7 @@ Definition public_key_hash : Set :=
 Definition signature : Set := Signature.t.
 
 Module Tez.
-  Parameter Included_BASIC_DATA : {t : Set & BASIC_DATA.signature t}.
+  Parameter Included_BASIC_DATA : {_ : unit & BASIC_DATA.signature Tez_repr.t}.
   
   Definition t := (|Included_BASIC_DATA|).(BASIC_DATA.t).
   
@@ -456,125 +459,7 @@ Module Script_timestamp.
 End Script_timestamp.
 
 Module Script.
-  Inductive prim : Set :=
-  | K_parameter : prim
-  | K_storage : prim
-  | K_code : prim
-  | D_False : prim
-  | D_Elt : prim
-  | D_Left : prim
-  | D_None : prim
-  | D_Pair : prim
-  | D_Right : prim
-  | D_Some : prim
-  | D_True : prim
-  | D_Unit : prim
-  | I_PACK : prim
-  | I_UNPACK : prim
-  | I_BLAKE2B : prim
-  | I_SHA256 : prim
-  | I_SHA512 : prim
-  | I_ABS : prim
-  | I_ADD : prim
-  | I_AMOUNT : prim
-  | I_AND : prim
-  | I_BALANCE : prim
-  | I_CAR : prim
-  | I_CDR : prim
-  | I_CHAIN_ID : prim
-  | I_CHECK_SIGNATURE : prim
-  | I_COMPARE : prim
-  | I_CONCAT : prim
-  | I_CONS : prim
-  | I_CREATE_ACCOUNT : prim
-  | I_CREATE_CONTRACT : prim
-  | I_IMPLICIT_ACCOUNT : prim
-  | I_DIP : prim
-  | I_DROP : prim
-  | I_DUP : prim
-  | I_EDIV : prim
-  | I_EMPTY_BIG_MAP : prim
-  | I_EMPTY_MAP : prim
-  | I_EMPTY_SET : prim
-  | I_EQ : prim
-  | I_EXEC : prim
-  | I_APPLY : prim
-  | I_FAILWITH : prim
-  | I_GE : prim
-  | I_GET : prim
-  | I_GT : prim
-  | I_HASH_KEY : prim
-  | I_IF : prim
-  | I_IF_CONS : prim
-  | I_IF_LEFT : prim
-  | I_IF_NONE : prim
-  | I_INT : prim
-  | I_LAMBDA : prim
-  | I_LE : prim
-  | I_LEFT : prim
-  | I_LOOP : prim
-  | I_LSL : prim
-  | I_LSR : prim
-  | I_LT : prim
-  | I_MAP : prim
-  | I_MEM : prim
-  | I_MUL : prim
-  | I_NEG : prim
-  | I_NEQ : prim
-  | I_NIL : prim
-  | I_NONE : prim
-  | I_NOT : prim
-  | I_NOW : prim
-  | I_OR : prim
-  | I_PAIR : prim
-  | I_PUSH : prim
-  | I_RIGHT : prim
-  | I_SIZE : prim
-  | I_SOME : prim
-  | I_SOURCE : prim
-  | I_SENDER : prim
-  | I_SELF : prim
-  | I_SLICE : prim
-  | I_STEPS_TO_QUOTA : prim
-  | I_SUB : prim
-  | I_SWAP : prim
-  | I_TRANSFER_TOKENS : prim
-  | I_SET_DELEGATE : prim
-  | I_UNIT : prim
-  | I_UPDATE : prim
-  | I_XOR : prim
-  | I_ITER : prim
-  | I_LOOP_LEFT : prim
-  | I_ADDRESS : prim
-  | I_CONTRACT : prim
-  | I_ISNAT : prim
-  | I_CAST : prim
-  | I_RENAME : prim
-  | I_DIG : prim
-  | I_DUG : prim
-  | T_bool : prim
-  | T_contract : prim
-  | T_int : prim
-  | T_key : prim
-  | T_key_hash : prim
-  | T_lambda : prim
-  | T_list : prim
-  | T_map : prim
-  | T_big_map : prim
-  | T_nat : prim
-  | T_option : prim
-  | T_or : prim
-  | T_pair : prim
-  | T_set : prim
-  | T_signature : prim
-  | T_string : prim
-  | T_bytes : prim
-  | T_mutez : prim
-  | T_timestamp : prim
-  | T_unit : prim
-  | T_operation : prim
-  | T_address : prim
-  | T_chain_id : prim.
+  Definition prim : Set := Michelson_v1_primitives.prim.
   
   Definition location : Set := Micheline.canonical_location.
   
@@ -1366,22 +1251,7 @@ Module Nonce.
   
   Parameter encoding : Data_encoding.t nonce.
   
-  Module unrevealed.
-    Record record : Set := Build {
-      nonce_hash : Nonce_hash.t;
-      delegate : public_key_hash;
-      rewards : Tez.t;
-      fees : Tez.t }.
-    Definition with_nonce_hash nonce_hash (r : record) :=
-      Build nonce_hash r.(delegate) r.(rewards) r.(fees).
-    Definition with_delegate delegate (r : record) :=
-      Build r.(nonce_hash) delegate r.(rewards) r.(fees).
-    Definition with_rewards rewards (r : record) :=
-      Build r.(nonce_hash) r.(delegate) rewards r.(fees).
-    Definition with_fees fees (r : record) :=
-      Build r.(nonce_hash) r.(delegate) r.(rewards) fees.
-  End unrevealed.
-  Definition unrevealed := unrevealed.record.
+  Definition unrevealed : Set := Storage.Seed.unrevealed_nonce.
   
   Parameter record_hash :
     context -> unrevealed -> Lwt.t (Error_monad.tzresult context).
@@ -2401,16 +2271,7 @@ Module Operation.
   
   Parameter contents_list_encoding : Data_encoding.t packed_contents_list.
   
-  Module t.
-    Record record : Set := Build {
-      shell : Operation.shell_header;
-      protocol_data : protocol_data }.
-    Definition with_shell shell (r : record) :=
-      Build shell r.(protocol_data).
-    Definition with_protocol_data protocol_data (r : record) :=
-      Build r.(shell) protocol_data.
-  End t.
-  Definition t := t.record.
+  Definition t : Set := operation.
   
   Definition packed : Set := packed_operation.
   

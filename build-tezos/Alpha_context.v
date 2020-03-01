@@ -85,16 +85,7 @@ End Timestamp.
 Include Operation_repr.
 
 Module Operation.
-  Module t.
-    Record record : Set := Build {
-      shell : Operation.shell_header;
-      protocol_data : protocol_data }.
-    Definition with_shell shell (r : record) :=
-      Build shell r.(protocol_data).
-    Definition with_protocol_data protocol_data (r : record) :=
-      Build r.(shell) protocol_data.
-  End t.
-  Definition t := t.record.
+  Definition t : Set := operation.
   
   Definition packed : Set := packed_operation.
   

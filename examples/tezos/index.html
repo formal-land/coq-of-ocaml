@@ -59,9 +59,9 @@
     <pre><code>opam repo add coq-released https://coq.inria.fr/opam/released
 opam pin add https://github.com/clarus/coq-of-ocaml.git#master</code></pre>
     <ul>
-      <li>OCaml size: 36025 lines</li>
-      <li>Coq size: 46049 lines (+27% compared to&nbsp;OCaml)</li>
-      <li>Warnings from coq-of-ocaml: 4330</li>
+      <li>OCaml size: 36011 lines</li>
+      <li>Coq size: 45830 lines (+27% compared to&nbsp;OCaml)</li>
+      <li>Warnings from coq-of-ocaml: 4341</li>
     </ul>
     
       <canvas id="chart" width="400" height="400"></canvas>
@@ -114,6 +114,8 @@ opam pin add https://github.com/clarus/coq-of-ocaml.git#master</code></pre>
           25014,
           24981,
           26259,
+          26259,
+          26500,
         ],
         generated: [
           47563,
@@ -162,6 +164,8 @@ opam pin add https://github.com/clarus/coq-of-ocaml.git#master</code></pre>
           48552,
           48348,
           46049,
+          46049,
+          45830,
         ],
         labels: [
           "01-14",
@@ -210,6 +214,8 @@ opam pin add https://github.com/clarus/coq-of-ocaml.git#master</code></pre>
           "02-26",
           "02-27",
           "02-28",
+          "02-29",
+          "03-01",
         ]
       }
 ;
@@ -231,11 +237,11 @@ opam pin add https://github.com/clarus/coq-of-ocaml.git#master</code></pre>
     <ul>
       
       <li>
-        <a href="#alpha_context.ml">alpha_context.ml</a>&nbsp;<span class="label label-warning">1</span>
+        <a href="#alpha_context.ml">alpha_context.ml</a>&nbsp;<span class="label label-warning">2</span>
       </li>
       
       <li>
-        <a href="#alpha_context.mli">alpha_context.mli</a>&nbsp;<span class="label label-warning">10</span>
+        <a href="#alpha_context.mli">alpha_context.mli</a>&nbsp;<span class="label label-warning">12</span>
       </li>
       
       <li>
@@ -449,11 +455,11 @@ opam pin add https://github.com/clarus/coq-of-ocaml.git#master</code></pre>
       </li>
       
       <li>
-        <a href="#main.ml">main.ml</a>&nbsp;<span class="label label-warning">1</span>
+        <a href="#main.ml">main.ml</a>&nbsp;<span class="label label-warning">5</span>
       </li>
       
       <li>
-        <a href="#main.mli">main.mli</a>&nbsp;<span class="label label-warning">2</span>
+        <a href="#main.mli">main.mli</a>&nbsp;<span class="label label-warning">3</span>
       </li>
       
       <li>
@@ -493,7 +499,7 @@ opam pin add https://github.com/clarus/coq-of-ocaml.git#master</code></pre>
       </li>
       
       <li>
-        <a href="#nonce_storage.ml">nonce_storage.ml</a>&nbsp;<span class="label label-warning">7</span>
+        <a href="#nonce_storage.ml">nonce_storage.ml</a>&nbsp;<span class="label label-warning">8</span>
       </li>
       
       <li>
@@ -655,7 +661,7 @@ opam pin add https://github.com/clarus/coq-of-ocaml.git#master</code></pre>
       </li>
       
       <li>
-        <a href="#storage.ml">storage.ml</a>&nbsp;<span class="label label-warning">8</span>
+        <a href="#storage.ml">storage.ml</a>&nbsp;<span class="label label-warning">10</span>
       </li>
       
       <li>
@@ -742,11 +748,11 @@ opam pin add https://github.com/clarus/coq-of-ocaml.git#master</code></pre>
     <h3>Alpha_context</h3>
     <ul>
       <li>OCaml size: 279 lines</li>
-      <li>Coq size: 466 lines (+67% compared to&nbsp;OCaml)</li>
+      <li>Coq size: 457 lines (+63% compared to&nbsp;OCaml)</li>
     </ul>
   </div>
   <div class="col-md-6">
-    <a href="#alpha_context.ml"><code>alpha_context.ml</code></a>&nbsp;<span class="label label-warning">1 warning</span>
+    <a href="#alpha_context.ml"><code>alpha_context.ml</code></a>&nbsp;<span class="label label-warning">2 warnings</span>
     
     <pre>(*****************************************************************************)
 (*                                                                           *)
@@ -799,10 +805,10 @@ end
 include Operation_repr
 
 module Operation = struct
-  type 'kind t = 'kind operation = {
+  <abbr class="mark-warning" title="We do not handle types with both a synonym and a type definition">type 'kind t = 'kind operation = {
     shell : Operation.shell_header;
     protocol_data : 'kind protocol_data;
-  }
+  }</abbr>
 
   type packed = packed_operation
 
@@ -1118,16 +1124,7 @@ End Timestamp.
 Include Operation_repr.
 
 Module Operation.
-  Module t.
-    Record record : Set := Build {
-      shell : Operation.shell_header;
-      protocol_data : protocol_data }.
-    Definition with_shell shell (r : record) :=
-      Build shell r.(protocol_data).
-    Definition with_protocol_data protocol_data (r : record) :=
-      Build r.(shell) protocol_data.
-  End t.
-  Definition t := t.record.
+  Definition t : Set := operation.
   
   Definition packed : Set := packed_operation.
   
@@ -1506,12 +1503,12 @@ Definition description : Storage_description.t Raw_context.context :=
   <div style="margin: 20px;">
     <h3>Alpha_context_mli</h3>
     <ul>
-      <li>OCaml size: 1392 lines</li>
-      <li>Coq size: 2729 lines (+96% compared to&nbsp;OCaml)</li>
+      <li>OCaml size: 1387 lines</li>
+      <li>Coq size: 2590 lines (+86% compared to&nbsp;OCaml)</li>
     </ul>
   </div>
   <div class="col-md-6">
-    <a href="#alpha_context.mli"><code>alpha_context.mli</code></a>&nbsp;<span class="label label-warning">10 warnings</span>
+    <a href="#alpha_context.mli"><code>alpha_context.mli</code></a>&nbsp;<span class="label label-warning">12 warnings</span>
     
     <pre>(*****************************************************************************)
 (*                                                                           *)
@@ -1559,7 +1556,7 @@ type public_key_hash = Signature.Public_key_hash.t
 type signature = Signature.t
 
 module Tez : sig
-  include BASIC_DATA
+  include BASIC_DATA with type t = Tez_repr.t
 
   type tez = t
 
@@ -1763,7 +1760,7 @@ module Script_timestamp : sig
 end
 
 module Script : sig
-  type prim = Michelson_v1_primitives.prim =
+  <abbr class="mark-warning" title="We do not handle types with both a synonym and a type definition">type prim = Michelson_v1_primitives.prim =
     | K_parameter
     | K_storage
     | K_code
@@ -1881,7 +1878,7 @@ module Script : sig
     | T_unit
     | T_operation
     | T_address
-    | T_chain_id
+    | T_chain_id</abbr>
 
   type location = Micheline.canonical_location
 
@@ -2157,12 +2154,7 @@ module Nonce : sig
 
   val encoding : nonce Data_encoding.t
 
-  type unrevealed = {
-    nonce_hash : Nonce_hash.t;
-    delegate : public_key_hash;
-    rewards : Tez.t;
-    fees : Tez.t;
-  }
+  type unrevealed = Storage.Seed.unrevealed_nonce
 
   val record_hash : context -&gt; unrevealed -&gt; context tzresult Lwt.t
 
@@ -2697,10 +2689,10 @@ module Operation : sig
 
   val contents_list_encoding : packed_contents_list Data_encoding.t
 
-  type 'kind t = 'kind operation = {
+  <abbr class="mark-warning" title="We do not handle types with both a synonym and a type definition">type 'kind t = 'kind operation = {
     shell : Operation.shell_header;
     protocol_data : 'kind protocol_data;
-  }
+  }</abbr>
 
   type nonrec packed = packed_operation
 
@@ -2921,10 +2913,13 @@ Require Import Tezos.Environment.
 Import Environment.Notations.
 Require Tezos.Blinded_public_key_hash.
 Require Tezos.Contract_repr.
+Require Tezos.Michelson_v1_primitives.
 Require Tezos.Nonce_hash.
 Require Tezos.Script_expr_hash.
 Require Tezos.Script_int_repr.
+Require Tezos.Storage_mli. Module Storage := Storage_mli.
 Require Tezos.Storage_description.
+Require Tezos.Tez_repr.
 
 Module BASIC_DATA.
   Record signature {t : Set} : Set := {
@@ -2957,7 +2952,7 @@ Definition public_key_hash : Set :=
 Definition signature : Set := Signature.t.
 
 Module Tez.
-  Parameter Included_BASIC_DATA : {t : Set &amp; BASIC_DATA.signature t}.
+  Parameter Included_BASIC_DATA : {_ : unit &amp; BASIC_DATA.signature Tez_repr.t}.
   
   Definition t := (|Included_BASIC_DATA|).(BASIC_DATA.t).
   
@@ -3367,125 +3362,7 @@ Module Script_timestamp.
 End Script_timestamp.
 
 Module Script.
-  Inductive prim : Set :=
-  | K_parameter : prim
-  | K_storage : prim
-  | K_code : prim
-  | D_False : prim
-  | D_Elt : prim
-  | D_Left : prim
-  | D_None : prim
-  | D_Pair : prim
-  | D_Right : prim
-  | D_Some : prim
-  | D_True : prim
-  | D_Unit : prim
-  | I_PACK : prim
-  | I_UNPACK : prim
-  | I_BLAKE2B : prim
-  | I_SHA256 : prim
-  | I_SHA512 : prim
-  | I_ABS : prim
-  | I_ADD : prim
-  | I_AMOUNT : prim
-  | I_AND : prim
-  | I_BALANCE : prim
-  | I_CAR : prim
-  | I_CDR : prim
-  | I_CHAIN_ID : prim
-  | I_CHECK_SIGNATURE : prim
-  | I_COMPARE : prim
-  | I_CONCAT : prim
-  | I_CONS : prim
-  | I_CREATE_ACCOUNT : prim
-  | I_CREATE_CONTRACT : prim
-  | I_IMPLICIT_ACCOUNT : prim
-  | I_DIP : prim
-  | I_DROP : prim
-  | I_DUP : prim
-  | I_EDIV : prim
-  | I_EMPTY_BIG_MAP : prim
-  | I_EMPTY_MAP : prim
-  | I_EMPTY_SET : prim
-  | I_EQ : prim
-  | I_EXEC : prim
-  | I_APPLY : prim
-  | I_FAILWITH : prim
-  | I_GE : prim
-  | I_GET : prim
-  | I_GT : prim
-  | I_HASH_KEY : prim
-  | I_IF : prim
-  | I_IF_CONS : prim
-  | I_IF_LEFT : prim
-  | I_IF_NONE : prim
-  | I_INT : prim
-  | I_LAMBDA : prim
-  | I_LE : prim
-  | I_LEFT : prim
-  | I_LOOP : prim
-  | I_LSL : prim
-  | I_LSR : prim
-  | I_LT : prim
-  | I_MAP : prim
-  | I_MEM : prim
-  | I_MUL : prim
-  | I_NEG : prim
-  | I_NEQ : prim
-  | I_NIL : prim
-  | I_NONE : prim
-  | I_NOT : prim
-  | I_NOW : prim
-  | I_OR : prim
-  | I_PAIR : prim
-  | I_PUSH : prim
-  | I_RIGHT : prim
-  | I_SIZE : prim
-  | I_SOME : prim
-  | I_SOURCE : prim
-  | I_SENDER : prim
-  | I_SELF : prim
-  | I_SLICE : prim
-  | I_STEPS_TO_QUOTA : prim
-  | I_SUB : prim
-  | I_SWAP : prim
-  | I_TRANSFER_TOKENS : prim
-  | I_SET_DELEGATE : prim
-  | I_UNIT : prim
-  | I_UPDATE : prim
-  | I_XOR : prim
-  | I_ITER : prim
-  | I_LOOP_LEFT : prim
-  | I_ADDRESS : prim
-  | I_CONTRACT : prim
-  | I_ISNAT : prim
-  | I_CAST : prim
-  | I_RENAME : prim
-  | I_DIG : prim
-  | I_DUG : prim
-  | T_bool : prim
-  | T_contract : prim
-  | T_int : prim
-  | T_key : prim
-  | T_key_hash : prim
-  | T_lambda : prim
-  | T_list : prim
-  | T_map : prim
-  | T_big_map : prim
-  | T_nat : prim
-  | T_option : prim
-  | T_or : prim
-  | T_pair : prim
-  | T_set : prim
-  | T_signature : prim
-  | T_string : prim
-  | T_bytes : prim
-  | T_mutez : prim
-  | T_timestamp : prim
-  | T_unit : prim
-  | T_operation : prim
-  | T_address : prim
-  | T_chain_id : prim.
+  Definition prim : Set := Michelson_v1_primitives.prim.
   
   Definition location : Set := Micheline.canonical_location.
   
@@ -4277,22 +4154,7 @@ Module Nonce.
   
   Parameter encoding : Data_encoding.t nonce.
   
-  Module unrevealed.
-    Record record : Set := Build {
-      nonce_hash : Nonce_hash.t;
-      delegate : public_key_hash;
-      rewards : Tez.t;
-      fees : Tez.t }.
-    Definition with_nonce_hash nonce_hash (r : record) :=
-      Build nonce_hash r.(delegate) r.(rewards) r.(fees).
-    Definition with_delegate delegate (r : record) :=
-      Build r.(nonce_hash) delegate r.(rewards) r.(fees).
-    Definition with_rewards rewards (r : record) :=
-      Build r.(nonce_hash) r.(delegate) rewards r.(fees).
-    Definition with_fees fees (r : record) :=
-      Build r.(nonce_hash) r.(delegate) r.(rewards) fees.
-  End unrevealed.
-  Definition unrevealed := unrevealed.record.
+  Definition unrevealed : Set := Storage.Seed.unrevealed_nonce.
   
   Parameter record_hash :
     context -&gt; unrevealed -&gt; Lwt.t (Error_monad.tzresult context).
@@ -5312,16 +5174,7 @@ Module Operation.
   
   Parameter contents_list_encoding : Data_encoding.t packed_contents_list.
   
-  Module t.
-    Record record : Set := Build {
-      shell : Operation.shell_header;
-      protocol_data : protocol_data }.
-    Definition with_shell shell (r : record) :=
-      Build shell r.(protocol_data).
-    Definition with_protocol_data protocol_data (r : record) :=
-      Build r.(shell) protocol_data.
-  End t.
-  Definition t := t.record.
+  Definition t : Set := operation.
   
   Definition packed : Set := packed_operation.
   
@@ -5648,7 +5501,7 @@ Parameter description : Storage_description.t context.
     <h3>Alpha_services</h3>
     <ul>
       <li>OCaml size: 117 lines</li>
-      <li>Coq size: 172 lines (+47% compared to&nbsp;OCaml)</li>
+      <li>Coq size: 173 lines (+47% compared to&nbsp;OCaml)</li>
     </ul>
   </div>
   <div class="col-md-6">
@@ -6026,6 +5879,7 @@ Require Tezos.Delegate_services_mli. Module Delegate_services := Delegate_servic
 Require Tezos.Helpers_services_mli. Module Helpers_services := Helpers_services_mli.
 Require Tezos.Nonce_hash.
 Require Tezos.Services_registration.
+Require Tezos.Storage_mli. Module Storage := Storage_mli.
 Require Tezos.Voting_services_mli. Module Voting_services := Voting_services_mli.
 
 Import Alpha_context.
@@ -6131,7 +5985,7 @@ Module Nonce.
               |
                 Pervasives.Ok
                   (Alpha_context.Nonce.Unrevealed {|
-                    Alpha_context.Nonce.unrevealed.nonce_hash := nonce_hash
+                    Storage.Seed.unrevealed_nonce.nonce_hash := nonce_hash
                       |}) =&gt; Error_monad.__return (Missing nonce_hash)
               | Pervasives.Error _ =&gt; Error_monad.__return Forgotten
               end).
@@ -7265,7 +7119,7 @@ Parameter record_ballot :
     <h3>Apply</h3>
     <ul>
       <li>OCaml size: 1487 lines</li>
-      <li>Coq size: 1345 lines (-10% compared to&nbsp;OCaml)</li>
+      <li>Coq size: 1346 lines (-10% compared to&nbsp;OCaml)</li>
     </ul>
   </div>
   <div class="col-md-6">
@@ -8860,6 +8714,7 @@ Require Tezos.Nonce_hash.
 Require Tezos.Script_interpreter.
 Require Tezos.Script_ir_translator_mli. Module Script_ir_translator := Script_ir_translator_mli.
 Require Tezos.Script_typed_ir.
+Require Tezos.Storage_mli. Module Storage := Storage_mli.
 
 Import Alpha_context.
 
@@ -10149,10 +10004,10 @@ Definition finalize_application
     | None =&gt; Error_monad.__return ctxt
     | Some nonce_hash =&gt;
       Alpha_context.Nonce.record_hash ctxt
-        {| Alpha_context.Nonce.unrevealed.nonce_hash := nonce_hash;
-          Alpha_context.Nonce.unrevealed.delegate := delegate;
-          Alpha_context.Nonce.unrevealed.rewards := rewards;
-          Alpha_context.Nonce.unrevealed.fees := fees |}
+        {| Storage.Seed.unrevealed_nonce.nonce_hash := nonce_hash;
+          Storage.Seed.unrevealed_nonce.delegate := delegate;
+          Storage.Seed.unrevealed_nonce.rewards := rewards;
+          Storage.Seed.unrevealed_nonce.fees := fees |}
     end in
   let=? ctxt := may_snapshot_roll ctxt in
   let=? '(ctxt, balance_updates, deactivated) := may_start_new_cycle ctxt in
@@ -14284,8 +14139,8 @@ Parameter block_metadata_encoding : Data_encoding.encoding block_metadata.
   <div style="margin: 20px;">
     <h3>Baking</h3>
     <ul>
-      <li>OCaml size: 399 lines</li>
-      <li>Coq size: 415 lines (+4% compared to&nbsp;OCaml)</li>
+      <li>OCaml size: 400 lines</li>
+      <li>Coq size: 421 lines (+5% compared to&nbsp;OCaml)</li>
     </ul>
   </div>
   <div class="col-md-6">
@@ -14562,28 +14417,29 @@ let endorsement_rights c level =
 let check_endorsement_rights ctxt chain_id (op : Kind.endorsement Operation.t)
     =
   let current_level = Level.current ctxt in
-  let (Single (Endorsement {level; _})) = op.protocol_data.contents in
-  ( if Raw_level.(succ level = current_level.level) then
-    return (Alpha_context.allowed_endorsements ctxt)
-  else endorsement_rights ctxt (Level.from_raw ctxt level) )
-  &gt;&gt;=? fun endorsements -&gt;
-  match
-    Signature.Public_key_hash.Map.fold (* no find_first *)
-      (fun pkh (pk, slots, used) acc -&gt;
-        match Operation.check_signature_sync pk chain_id op with
-        | Error _ -&gt;
-            acc
-        | Ok () -&gt;
-            Some (pkh, slots, used))
-      endorsements
-      None
-  with
-  | None -&gt;
-      fail <abbr class="mark-warning" title="Values of extensible types are ignored.
+  match[@coq_match_with_default] op.protocol_data.contents with
+  | Single (Endorsement {level; _}) -&gt; (
+      ( if Raw_level.(succ level = current_level.level) then
+        return (Alpha_context.allowed_endorsements ctxt)
+      else endorsement_rights ctxt (Level.from_raw ctxt level) )
+      &gt;&gt;=? fun endorsements -&gt;
+      match
+        Signature.Public_key_hash.Map.fold (* no find_first *)
+          (fun pkh (pk, slots, used) acc -&gt;
+            match Operation.check_signature_sync pk chain_id op with
+            | Error _ -&gt;
+                acc
+            | Ok () -&gt;
+                Some (pkh, slots, used))
+          endorsements
+          None
+      with
+      | None -&gt;
+          fail <abbr class="mark-warning" title="Values of extensible types are ignored.
 
 They are sent to a unit type.">Unexpected_endorsement</abbr>
-  | Some v -&gt;
-      return v
+      | Some v -&gt;
+          return v )
 
 let select_delegate delegate delegate_list max_priority =
   let rec loop acc l n =
@@ -14704,8 +14560,8 @@ let minimal_valid_time ctxt ~priority ~endorsing_power =
   with
   | Ok delay -&gt;
       return (Time.add minimal_time (Period.to_seconds delay))
-  | Error _ as err -&gt;
-      Lwt.return err
+  | Error error -&gt;
+      Lwt.return (Error error)
 </pre>
   </div>
   <div class="col-md-6">
@@ -14717,6 +14573,7 @@ Local Open Scope string_scope.
 Local Open Scope Z_scope.
 Local Open Scope type_scope.
 Import ListNotations.
+Unset Guard Checking.
 
 Require Import Tezos.Environment.
 Import Environment.Notations.
@@ -14756,7 +14613,7 @@ Definition minimal_time
   let fix cumsum_time_between_blocks
     (acc : Alpha_context.Timestamp.time)
     (durations : list Alpha_context.Period.period)
-    (__p_value : (|Compare.Int32|).(Compare.S.t))
+    (__p_value : (|Compare.Int32|).(Compare.S.t)) {struct acc}
     : Error_monad.tzresult Alpha_context.Timestamp.time :=
     if
       (|Compare.Int32|).(Compare.S.op_lteq) __p_value
@@ -14881,7 +14738,7 @@ Definition endorsing_reward
 Definition baking_priorities
   (c : Alpha_context.context) (level : Alpha_context.Level.t)
   : Lwt.t (Error_monad.tzresult (Misc.lazy_list_t Alpha_context.public_key)) :=
-  let fix f (priority : int)
+  let fix f (priority : int) {struct priority}
     : Lwt.t (Error_monad.tzresult (Misc.lazy_list_t Alpha_context.public_key)) :=
     let=? delegate := Alpha_context.Roll.baking_rights_owner c level priority in
     Error_monad.__return
@@ -14924,32 +14781,36 @@ Definition check_endorsement_rights
       ((|Signature.Public_key_hash|).(S.SPublic_key_hash.Map).(S.INDEXES_Map.key)
         * list int * bool)) :=
   let current_level := Alpha_context.Level.current ctxt in
-  let
-    'Alpha_context.Single
-      (Alpha_context.Endorsement {|
-        Alpha_context.contents.Endorsement.level := level |}) :=
-    op.(Alpha_context.operation.protocol_data).(Alpha_context.protocol_data.contents)
-    in
-  let=? endorsements :=
-    if
-      Alpha_context.Raw_level.op_eq (Alpha_context.Raw_level.succ level)
-        current_level.(Alpha_context.Level.t.level) then
-      Error_monad.__return (Alpha_context.allowed_endorsements ctxt)
-    else
-      endorsement_rights ctxt (Alpha_context.Level.from_raw ctxt None level) in
   match
-    (|Signature.Public_key_hash|).(S.SPublic_key_hash.Map).(S.INDEXES_Map.fold)
-      (fun pkh =&gt;
-        fun function_parameter =&gt;
-          let '(pk, slots, used) := function_parameter in
-          fun acc =&gt;
-            match Alpha_context.Operation.check_signature_sync pk chain_id op
-              with
-            | Pervasives.Error _ =&gt; acc
-            | Pervasives.Ok _ =&gt; Some (pkh, slots, used)
-            end) endorsements None with
-  | None =&gt; Error_monad.fail extensible_type_value
-  | Some v =&gt; Error_monad.__return v
+    op.(Alpha_context.operation.protocol_data).(Alpha_context.protocol_data.contents)
+    with
+  |
+    Alpha_context.Single
+      (Alpha_context.Endorsement {|
+        Alpha_context.contents.Endorsement.level := level |}) =&gt;
+    let=? endorsements :=
+      if
+        Alpha_context.Raw_level.op_eq (Alpha_context.Raw_level.succ level)
+          current_level.(Alpha_context.Level.t.level) then
+        Error_monad.__return (Alpha_context.allowed_endorsements ctxt)
+      else
+        endorsement_rights ctxt (Alpha_context.Level.from_raw ctxt None level)
+      in
+    match
+      (|Signature.Public_key_hash|).(S.SPublic_key_hash.Map).(S.INDEXES_Map.fold)
+        (fun pkh =&gt;
+          fun function_parameter =&gt;
+            let '(pk, slots, used) := function_parameter in
+            fun acc =&gt;
+              match Alpha_context.Operation.check_signature_sync pk chain_id op
+                with
+              | Pervasives.Error _ =&gt; acc
+              | Pervasives.Ok _ =&gt; Some (pkh, slots, used)
+              end) endorsements None with
+    | None =&gt; Error_monad.fail extensible_type_value
+    | Some v =&gt; Error_monad.__return v
+    end
+  | _ =&gt; unreachable_gadt_branch
   end.
 
 Definition select_delegate
@@ -14960,7 +14821,7 @@ Definition select_delegate
   let fix loop
     (acc : list (|Compare.Int|).(Compare.S.t))
     (l : Misc.lazy_list_t (|Signature.Public_key|).(S.SPublic_key.t))
-    (n : (|Compare.Int|).(Compare.S.t))
+    (n : (|Compare.Int|).(Compare.S.t)) {struct acc}
     : Lwt.t (Error_monad.tzresult (list (|Compare.Int|).(Compare.S.t))) :=
     if (|Compare.Int|).(Compare.S.op_gteq) n max_priority then
       Error_monad.__return (List.rev acc)
@@ -15123,7 +14984,8 @@ Definition minimal_valid_time
   | Pervasives.Ok delay =&gt;
     Error_monad.__return
       (Time.add minimal_time (Alpha_context.Period.to_seconds delay))
-  | (Pervasives.Error _) as err =&gt; Lwt.__return err
+  | Pervasives.Error __error_value =&gt;
+    Lwt.__return (Pervasives.Error __error_value)
   end.
 </pre>
   </div>
@@ -32151,7 +32013,7 @@ Parameter register : unit -&gt; unit.
     <h3>Delegate_storage</h3>
     <ul>
       <li>OCaml size: 713 lines</li>
-      <li>Coq size: 896 lines (+25% compared to&nbsp;OCaml)</li>
+      <li>Coq size: 897 lines (+25% compared to&nbsp;OCaml)</li>
     </ul>
   </div>
   <div class="col-md-6">
@@ -33522,17 +33384,18 @@ Definition cycle_end
           fun u =&gt;
             let=? '(ctxt, balance_updates) := acc in
             let=? ctxt :=
-              burn_fees ctxt u.(Nonce_storage.unrevealed.delegate)
-                revealed_cycle u.(Nonce_storage.unrevealed.fees) in
+              burn_fees ctxt u.(Storage.Seed.unrevealed_nonce.delegate)
+                revealed_cycle u.(Storage.Seed.unrevealed_nonce.fees) in
             let=? ctxt :=
-              burn_rewards ctxt u.(Nonce_storage.unrevealed.delegate)
-                revealed_cycle u.(Nonce_storage.unrevealed.rewards) in
+              burn_rewards ctxt u.(Storage.Seed.unrevealed_nonce.delegate)
+                revealed_cycle u.(Storage.Seed.unrevealed_nonce.rewards) in
             let bus :=
               [
-                ((Fees u.(Nonce_storage.unrevealed.delegate) revealed_cycle),
-                  (Debited u.(Nonce_storage.unrevealed.fees)));
-                ((Rewards u.(Nonce_storage.unrevealed.delegate) revealed_cycle),
-                  (Debited u.(Nonce_storage.unrevealed.rewards)))
+                ((Fees u.(Storage.Seed.unrevealed_nonce.delegate) revealed_cycle),
+                  (Debited u.(Storage.Seed.unrevealed_nonce.fees)));
+                ((Rewards u.(Storage.Seed.unrevealed_nonce.delegate)
+                  revealed_cycle),
+                  (Debited u.(Storage.Seed.unrevealed_nonce.rewards)))
               ] in
             Error_monad.__return (ctxt, (Pervasives.op_at bus balance_updates)))
         (Error_monad.__return (ctxt, nil)) unrevealed
@@ -46633,11 +46496,11 @@ Parameter last_allowed_fork_level : Raw_context.t -&gt; Raw_level_repr.t.
     <h3>Main</h3>
     <ul>
       <li>OCaml size: 380 lines</li>
-      <li>Coq size: 617 lines (+62% compared to&nbsp;OCaml)</li>
+      <li>Coq size: 596 lines (+56% compared to&nbsp;OCaml)</li>
     </ul>
   </div>
   <div class="col-md-6">
-    <a href="#main.ml"><code>main.ml</code></a>&nbsp;<span class="label label-warning">1 warning</span>
+    <a href="#main.ml"><code>main.ml</code></a>&nbsp;<span class="label label-warning">5 warnings</span>
     
     <pre>(*****************************************************************************)
 (*                                                                           *)
@@ -46668,10 +46531,10 @@ Parameter last_allowed_fork_level : Raw_context.t -&gt; Raw_level_repr.t.
 
 type block_header_data = Alpha_context.Block_header.protocol_data
 
-type block_header = Alpha_context.Block_header.t = {
+<abbr class="mark-warning" title="We do not handle types with both a synonym and a type definition">type block_header = Alpha_context.Block_header.t = {
   shell : Block_header.shell_header;
   protocol_data : block_header_data;
-}
+}</abbr>
 
 let block_header_data_encoding =
   Alpha_context.Block_header.protocol_data_encoding
@@ -46680,28 +46543,28 @@ type block_header_metadata = Apply_results.block_metadata
 
 let block_header_metadata_encoding = Apply_results.block_metadata_encoding
 
-type operation_data = Alpha_context.packed_protocol_data =
+<abbr class="mark-warning" title="We do not handle types with both a synonym and a type definition">type operation_data = Alpha_context.packed_protocol_data =
   | Operation_data :
       'kind Alpha_context.Operation.protocol_data
-      -&gt; operation_data
+      -&gt; operation_data</abbr>
 
 let operation_data_encoding = Alpha_context.Operation.protocol_data_encoding
 
-type operation_receipt = Apply_results.packed_operation_metadata =
+<abbr class="mark-warning" title="We do not handle types with both a synonym and a type definition">type operation_receipt = Apply_results.packed_operation_metadata =
   | Operation_metadata :
       'kind Apply_results.operation_metadata
       -&gt; operation_receipt
-  | No_operation_metadata : operation_receipt
+  | No_operation_metadata : operation_receipt</abbr>
 
 let operation_receipt_encoding = Apply_results.operation_metadata_encoding
 
 let operation_data_and_receipt_encoding =
   Apply_results.operation_data_and_metadata_encoding
 
-type operation = Alpha_context.packed_operation = {
+<abbr class="mark-warning" title="We do not handle types with both a synonym and a type definition">type operation = Alpha_context.packed_operation = {
   shell : Operation.shell_header;
   protocol_data : operation_data;
-}
+}</abbr>
 
 let acceptable_passes = Alpha_context.Operation.acceptable_passes
 
@@ -47044,16 +46907,7 @@ Require Tezos.Services_registration.
 
 Definition block_header_data : Set := Alpha_context.Block_header.protocol_data.
 
-Module block_header.
-  Record record : Set := Build {
-    shell : Block_header.shell_header;
-    protocol_data : block_header_data }.
-  Definition with_shell shell (r : record) :=
-    Build shell r.(protocol_data).
-  Definition with_protocol_data protocol_data (r : record) :=
-    Build r.(shell) protocol_data.
-End block_header.
-Definition block_header := block_header.record.
+Definition block_header : Set := Alpha_context.Block_header.t.
 
 Definition block_header_data_encoding
   : Data_encoding.encoding Alpha_context.Block_header.protocol_data :=
@@ -47065,16 +46919,13 @@ Definition block_header_metadata_encoding
   : Data_encoding.encoding Apply_results.block_metadata :=
   Apply_results.block_metadata_encoding.
 
-Inductive operation_data : Set :=
-| Operation_data : Alpha_context.Operation.protocol_data -&gt; operation_data.
+Definition operation_data : Set := Alpha_context.packed_protocol_data.
 
 Definition operation_data_encoding
   : Data_encoding.t Alpha_context.Operation.packed_protocol_data :=
   Alpha_context.Operation.protocol_data_encoding.
 
-Inductive operation_receipt : Set :=
-| Operation_metadata : Apply_results.operation_metadata -&gt; operation_receipt
-| No_operation_metadata : operation_receipt.
+Definition operation_receipt : Set := Apply_results.packed_operation_metadata.
 
 Definition operation_receipt_encoding
   : Data_encoding.t Apply_results.packed_operation_metadata :=
@@ -47086,16 +46937,7 @@ Definition operation_data_and_receipt_encoding
       Apply_results.packed_operation_metadata) :=
   Apply_results.operation_data_and_metadata_encoding.
 
-Module operation.
-  Record record : Set := Build {
-    shell : Operation.shell_header;
-    protocol_data : operation_data }.
-  Definition with_shell shell (r : record) :=
-    Build shell r.(protocol_data).
-  Definition with_protocol_data protocol_data (r : record) :=
-    Build r.(shell) protocol_data.
-End operation.
-Definition operation := operation.record.
+Definition operation : Set := Alpha_context.packed_operation.
 
 Definition acceptable_passes : Alpha_context.packed_operation -&gt; list int :=
   Alpha_context.Operation.acceptable_passes.
@@ -47652,11 +47494,11 @@ Definition init (ctxt : Context.t) (block_header : Block_header.shell_header)
     <h3>Main_mli</h3>
     <ul>
       <li>OCaml size: 69 lines</li>
-      <li>Coq size: 252 lines (+265% compared to&nbsp;OCaml)</li>
+      <li>Coq size: 243 lines (+252% compared to&nbsp;OCaml)</li>
     </ul>
   </div>
   <div class="col-md-6">
-    <a href="#main.mli"><code>main.mli</code></a>&nbsp;<span class="label label-warning">2 warnings</span>
+    <a href="#main.mli"><code>main.mli</code></a>&nbsp;<span class="label label-warning">3 warnings</span>
     
     <pre>(*****************************************************************************)
 (*                                                                           *)
@@ -47713,10 +47555,10 @@ type validation_state = {
 
 type operation_data = Alpha_context.packed_protocol_data
 
-type operation = Alpha_context.packed_operation = {
+<abbr class="mark-warning" title="We do not handle types with both a synonym and a type definition">type operation = Alpha_context.packed_operation = {
   shell : Operation.shell_header;
   protocol_data : operation_data;
-}
+}</abbr>
 
 include
   <abbr class="mark-warning" title="Can only do `with` on types in module types using type expressions rather than type definitions
@@ -47887,16 +47729,7 @@ Definition validation_state := validation_state.record.
 
 Definition operation_data : Set := Alpha_context.packed_protocol_data.
 
-Module operation.
-  Record record : Set := Build {
-    shell : Operation.shell_header;
-    protocol_data : operation_data }.
-  Definition with_shell shell (r : record) :=
-    Build shell r.(protocol_data).
-  Definition with_protocol_data protocol_data (r : record) :=
-    Build r.(shell) protocol_data.
-End operation.
-Definition operation := operation.record.
+Definition operation : Set := Alpha_context.packed_operation.
 
 Parameter Included_PROTOCOL :
   {'[block_header, operation] : [Set ** Set] &amp;
@@ -52978,12 +52811,12 @@ Definition path_length := (|Blake2BModule|).(S.HASH.path_length).
   <div style="margin: 20px;">
     <h3>Nonce_storage</h3>
     <ul>
-      <li>OCaml size: 134 lines</li>
-      <li>Coq size: 110 lines (-18% compared to&nbsp;OCaml)</li>
+      <li>OCaml size: 129 lines</li>
+      <li>Coq size: 92 lines (-29% compared to&nbsp;OCaml)</li>
     </ul>
   </div>
   <div class="col-md-6">
-    <a href="#nonce_storage.ml"><code>nonce_storage.ml</code></a>&nbsp;<span class="label label-warning">7 warnings</span>
+    <a href="#nonce_storage.ml"><code>nonce_storage.ml</code></a>&nbsp;<span class="label label-warning">8 warnings</span>
     
     <pre>(*****************************************************************************)
 (*                                                                           *)
@@ -53111,16 +52944,11 @@ They are sent to a unit type.">Unexpected_nonce</abbr>
   Storage.Seed.Nonce.set ctxt level (Revealed nonce)
   &gt;&gt;=? fun ctxt -&gt; return ctxt
 
-type unrevealed = Storage.Seed.unrevealed_nonce = {
-  nonce_hash : Nonce_hash.t;
-  delegate : Signature.Public_key_hash.t;
-  rewards : Tez_repr.t;
-  fees : Tez_repr.t;
-}
+type unrevealed = Storage.Seed.unrevealed_nonce
 
-type status = Storage.Seed.nonce_status =
+<abbr class="mark-warning" title="We do not handle types with both a synonym and a type definition">type status = Storage.Seed.nonce_status =
   | Unrevealed of unrevealed
-  | Revealed of Seed_repr.nonce
+  | Revealed of Seed_repr.nonce</abbr>
 
 let get = Storage.Seed.Nonce.get
 
@@ -53151,7 +52979,6 @@ Require Tezos.Raw_context.
 Require Tezos.Seed_repr.
 Require Tezos.Storage_mli. Module Storage := Storage_mli.
 Require Tezos.Storage_sigs.
-Require Tezos.Tez_repr.
 
 Definition t : Set := Seed_repr.nonce.
 
@@ -53209,26 +53036,9 @@ Definition reveal
       ctxt level (Storage.Seed.Revealed __nonce_value) in
   Error_monad.__return ctxt.
 
-Module unrevealed.
-  Record record : Set := Build {
-    nonce_hash : Nonce_hash.t;
-    delegate : (|Signature.Public_key_hash|).(S.SPublic_key_hash.t);
-    rewards : Tez_repr.t;
-    fees : Tez_repr.t }.
-  Definition with_nonce_hash nonce_hash (r : record) :=
-    Build nonce_hash r.(delegate) r.(rewards) r.(fees).
-  Definition with_delegate delegate (r : record) :=
-    Build r.(nonce_hash) delegate r.(rewards) r.(fees).
-  Definition with_rewards rewards (r : record) :=
-    Build r.(nonce_hash) r.(delegate) rewards r.(fees).
-  Definition with_fees fees (r : record) :=
-    Build r.(nonce_hash) r.(delegate) r.(rewards) fees.
-End unrevealed.
-Definition unrevealed := unrevealed.record.
+Definition unrevealed : Set := Storage.Seed.unrevealed_nonce.
 
-Inductive status : Set :=
-| Unrevealed : unrevealed -&gt; status
-| Revealed : Seed_repr.nonce -&gt; status.
+Definition status : Set := Storage.Seed.nonce_status.
 
 Definition get
   : (|Storage.Seed.Nonce|).(Storage_sigs.Non_iterable_indexed_data_storage.context)
@@ -53252,8 +53062,8 @@ Definition check_hash : Seed_repr.nonce -&gt; Nonce_hash.t -&gt; bool :=
   <div style="margin: 20px;">
     <h3>Nonce_storage_mli</h3>
     <ul>
-      <li>OCaml size: 58 lines</li>
-      <li>Coq size: 60 lines (+3% compared to&nbsp;OCaml)</li>
+      <li>OCaml size: 53 lines</li>
+      <li>Coq size: 45 lines (-16% compared to&nbsp;OCaml)</li>
     </ul>
   </div>
   <div class="col-md-6">
@@ -53296,12 +53106,7 @@ type nonce = t
 
 val encoding : nonce Data_encoding.t
 
-type unrevealed = Storage.Seed.unrevealed_nonce = {
-  nonce_hash : Nonce_hash.t;
-  delegate : Signature.Public_key_hash.t;
-  rewards : Tez_repr.t;
-  fees : Tez_repr.t;
-}
+type unrevealed = Storage.Seed.unrevealed_nonce
 
 type status = Unrevealed of unrevealed | Revealed of Seed_repr.nonce
 
@@ -53335,7 +53140,7 @@ Require Tezos.Level_repr.
 Require Tezos.Nonce_hash.
 Require Tezos.Raw_context.
 Require Tezos.Seed_repr.
-Require Tezos.Tez_repr.
+Require Tezos.Storage_mli. Module Storage := Storage_mli.
 
 (* extensible_type_definition `error` *)
 
@@ -53345,22 +53150,7 @@ Definition nonce : Set := t.
 
 Parameter encoding : Data_encoding.t nonce.
 
-Module unrevealed.
-  Record record : Set := Build {
-    nonce_hash : Nonce_hash.t;
-    delegate : (|Signature.Public_key_hash|).(S.SPublic_key_hash.t);
-    rewards : Tez_repr.t;
-    fees : Tez_repr.t }.
-  Definition with_nonce_hash nonce_hash (r : record) :=
-    Build nonce_hash r.(delegate) r.(rewards) r.(fees).
-  Definition with_delegate delegate (r : record) :=
-    Build r.(nonce_hash) delegate r.(rewards) r.(fees).
-  Definition with_rewards rewards (r : record) :=
-    Build r.(nonce_hash) r.(delegate) rewards r.(fees).
-  Definition with_fees fees (r : record) :=
-    Build r.(nonce_hash) r.(delegate) r.(rewards) fees.
-End unrevealed.
-Definition unrevealed := unrevealed.record.
+Definition unrevealed : Set := Storage.Seed.unrevealed_nonce.
 
 Inductive status : Set :=
 | Unrevealed : unrevealed -&gt; status
@@ -86995,11 +86785,11 @@ Definition path_length := (|Blake2BModule|).(S.HASH.path_length).
     <h3>Storage</h3>
     <ul>
       <li>OCaml size: 901 lines</li>
-      <li>Coq size: 1940 lines (+115% compared to&nbsp;OCaml)</li>
+      <li>Coq size: 1923 lines (+113% compared to&nbsp;OCaml)</li>
     </ul>
   </div>
   <div class="col-md-6">
-    <a href="#storage.ml"><code>storage.ml</code></a>&nbsp;<span class="label label-warning">8 warnings</span>
+    <a href="#storage.ml"><code>storage.ml</code></a>&nbsp;<span class="label label-warning">10 warnings</span>
     
     <pre>(*****************************************************************************)
 (*                                                                           *)
@@ -87832,16 +87622,16 @@ end
 (** Seed *)
 
 module Seed = struct
-  type unrevealed_nonce = Cycle.unrevealed_nonce = {
+  <abbr class="mark-warning" title="We do not handle types with both a synonym and a type definition">type unrevealed_nonce = Cycle.unrevealed_nonce = {
     nonce_hash : Nonce_hash.t;
     delegate : Signature.Public_key_hash.t;
     rewards : Tez_repr.t;
     fees : Tez_repr.t;
-  }
+  }</abbr>
 
-  type nonce_status = Cycle.nonce_status =
+  <abbr class="mark-warning" title="We do not handle types with both a synonym and a type definition">type nonce_status = Cycle.nonce_status =
     | Unrevealed of unrevealed_nonce
-    | Revealed of Seed_repr.nonce
+    | Revealed of Seed_repr.nonce</abbr>
 
   module Nonce = struct
     <abbr class="mark-warning" title="Open not handled in module with a named signature">open Level_repr</abbr>
@@ -89625,26 +89415,9 @@ Module Vote.
 End Vote.
 
 Module Seed.
-  Module unrevealed_nonce.
-    Record record : Set := Build {
-      nonce_hash : Nonce_hash.t;
-      delegate : (|Signature.Public_key_hash|).(S.SPublic_key_hash.t);
-      rewards : Tez_repr.t;
-      fees : Tez_repr.t }.
-    Definition with_nonce_hash nonce_hash (r : record) :=
-      Build nonce_hash r.(delegate) r.(rewards) r.(fees).
-    Definition with_delegate delegate (r : record) :=
-      Build r.(nonce_hash) delegate r.(rewards) r.(fees).
-    Definition with_rewards rewards (r : record) :=
-      Build r.(nonce_hash) r.(delegate) rewards r.(fees).
-    Definition with_fees fees (r : record) :=
-      Build r.(nonce_hash) r.(delegate) r.(rewards) fees.
-  End unrevealed_nonce.
-  Definition unrevealed_nonce := unrevealed_nonce.record.
+  Definition unrevealed_nonce : Set := Cycle.unrevealed_nonce.
   
-  Inductive nonce_status : Set :=
-  | Unrevealed : unrevealed_nonce -&gt; nonce_status
-  | Revealed : Seed_repr.nonce -&gt; nonce_status.
+  Definition nonce_status : Set := Cycle.nonce_status.
   
   Definition Nonce :=
     (* ❌ open *)

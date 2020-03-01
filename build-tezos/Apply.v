@@ -18,6 +18,7 @@ Require Tezos.Nonce_hash.
 Require Tezos.Script_interpreter.
 Require Tezos.Script_ir_translator_mli. Module Script_ir_translator := Script_ir_translator_mli.
 Require Tezos.Script_typed_ir.
+Require Tezos.Storage_mli. Module Storage := Storage_mli.
 
 Import Alpha_context.
 
@@ -1307,10 +1308,10 @@ Definition finalize_application
     | None => Error_monad.__return ctxt
     | Some nonce_hash =>
       Alpha_context.Nonce.record_hash ctxt
-        {| Alpha_context.Nonce.unrevealed.nonce_hash := nonce_hash;
-          Alpha_context.Nonce.unrevealed.delegate := delegate;
-          Alpha_context.Nonce.unrevealed.rewards := rewards;
-          Alpha_context.Nonce.unrevealed.fees := fees |}
+        {| Storage.Seed.unrevealed_nonce.nonce_hash := nonce_hash;
+          Storage.Seed.unrevealed_nonce.delegate := delegate;
+          Storage.Seed.unrevealed_nonce.rewards := rewards;
+          Storage.Seed.unrevealed_nonce.fees := fees |}
     end in
   let=? ctxt := may_snapshot_roll ctxt in
   let=? '(ctxt, balance_updates, deactivated) := may_start_new_cycle ctxt in
