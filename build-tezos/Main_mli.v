@@ -9,7 +9,7 @@ Import ListNotations.
 Require Import Tezos.Environment.
 Import Environment.Notations.
 Require Tezos.Alpha_context.
-Require Tezos.Apply_results_mli. Module Apply_results := Apply_results_mli.
+Require Tezos.Apply_results.
 
 Module ConstructorRecords_validation_mode.
   Module validation_mode.

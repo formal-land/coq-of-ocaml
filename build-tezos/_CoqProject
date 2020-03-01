@@ -10,7 +10,7 @@ Alpha_context.v
 Amendment_mli.v
 Amendment.v
 Apply_results_mli.v
-#Apply_results.v
+Apply_results.v
 #Apply.v
 Baking_mli.v
 Baking.v

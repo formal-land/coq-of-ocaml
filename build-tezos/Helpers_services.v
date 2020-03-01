@@ -9,7 +9,7 @@ Import ListNotations.
 Require Import Tezos.Environment.
 Import Environment.Notations.
 Require Tezos.Alpha_context.
-Require Tezos.Apply_results_mli. Module Apply_results := Apply_results_mli.
+Require Tezos.Apply_results.
 Require Tezos.Constants_repr.
 Require Tezos.Contract_services_mli. Module Contract_services := Contract_services_mli.
 Require Tezos.Michelson_v1_primitives.

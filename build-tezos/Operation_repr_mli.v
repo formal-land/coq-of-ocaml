@@ -552,8 +552,8 @@ Module Encoding.
   
   Reserved Notation "'case.Case".
   
-  Inductive case (b : Set) : Set :=
-  | Case : forall {a : Set}, 'case.Case a -> case b
+  Inductive case : Set :=
+  | Case : forall {a : Set}, 'case.Case a -> case
   
   where "'case.Case" := (fun (t_a : Set) =>
     case.Case_skeleton int string (Data_encoding.t t_a)
@@ -564,30 +564,27 @@ Module Encoding.
     Definition Case := 'case.Case.
   End case.
   
-  Arguments Case {_ _}.
+  Parameter endorsement_case : case.
   
-  Parameter endorsement_case : case Kind.endorsement.
+  Parameter seed_nonce_revelation_case : case.
   
-  Parameter seed_nonce_revelation_case : case Kind.seed_nonce_revelation.
+  Parameter double_endorsement_evidence_case : case.
   
-  Parameter double_endorsement_evidence_case :
-    case Kind.double_endorsement_evidence.
+  Parameter double_baking_evidence_case : case.
   
-  Parameter double_baking_evidence_case : case Kind.double_baking_evidence.
+  Parameter activate_account_case : case.
   
-  Parameter activate_account_case : case Kind.activate_account.
+  Parameter proposals_case : case.
   
-  Parameter proposals_case : case Kind.proposals.
+  Parameter ballot_case : case.
   
-  Parameter ballot_case : case Kind.ballot.
+  Parameter reveal_case : case.
   
-  Parameter reveal_case : case Kind.manager.
+  Parameter transaction_case : case.
   
-  Parameter transaction_case : case Kind.manager.
+  Parameter origination_case : case.
   
-  Parameter origination_case : case Kind.manager.
-  
-  Parameter delegation_case : case Kind.manager.
+  Parameter delegation_case : case.
   
   Module Manager_operations.
     Module ConstructorRecords_case.

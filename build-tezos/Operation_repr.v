@@ -569,8 +569,8 @@ Module Encoding.
     
     Reserved Notation "'case.MCase".
     
-    Inductive case (kind : Set) : Set :=
-    | MCase : forall {a : Set}, 'case.MCase a -> case kind
+    Inductive case : Set :=
+    | MCase : forall {a : Set}, 'case.MCase a -> case
     
     where "'case.MCase" := (fun (t_a : Set) =>
       case.MCase_skeleton int string (Data_encoding.t t_a)
@@ -582,9 +582,7 @@ Module Encoding.
       Definition MCase := 'case.MCase.
     End case.
     
-    Arguments MCase {_ _}.
-    
-    Definition reveal_case : case Kind.reveal :=
+    Definition reveal_case : case :=
       MCase
         {| case.MCase.tag := 0; case.MCase.name := "reveal";
           case.MCase.encoding :=
@@ -632,7 +630,7 @@ Module Encoding.
               (fun s => Some s) (fun s => s)
           ]).
     
-    Definition transaction_case : case Kind.transaction :=
+    Definition transaction_case : case :=
       MCase
         {| case.MCase.tag := 1; case.MCase.name := "transaction";
           case.MCase.encoding :=
@@ -686,7 +684,7 @@ Module Encoding.
                   manager_operation.Transaction.entrypoint := entrypoint;
                   manager_operation.Transaction.destination := destination |} |}.
     
-    Definition origination_case : case Kind.origination :=
+    Definition origination_case : case :=
       MCase
         {| case.MCase.tag := 2; case.MCase.name := "origination";
           case.MCase.encoding :=
@@ -722,7 +720,7 @@ Module Encoding.
                   manager_operation.Origination.credit := credit;
                   manager_operation.Origination.preorigination := None |} |}.
     
-    Definition delegation_case : case Kind.delegation :=
+    Definition delegation_case : case :=
       MCase
         {| case.MCase.tag := 3; case.MCase.name := "delegation";
           case.MCase.encoding :=
@@ -744,7 +742,7 @@ Module Encoding.
           |}.
     
     Definition encoding : Data_encoding.encoding packed_manager_operation :=
-      let make {A : Set} (function_parameter : case A)
+      let make (function_parameter : case)
         : Data_encoding.case packed_manager_operation :=
         let
           'MCase {|
@@ -821,8 +819,8 @@ Module Encoding.
   
   Reserved Notation "'case.Case".
   
-  Inductive case (b : Set) : Set :=
-  | Case : forall {a : Set}, 'case.Case a -> case b
+  Inductive case : Set :=
+  | Case : forall {a : Set}, 'case.Case a -> case
   
   where "'case.Case" := (fun (t_a : Set) =>
     case.Case_skeleton int string (Data_encoding.t t_a)
@@ -833,14 +831,12 @@ Module Encoding.
     Definition Case := 'case.Case.
   End case.
   
-  Arguments Case {_ _}.
-  
   Definition raw_endorsement_encoding
     : Data_encoding.encoding Raw_level_repr.raw_level :=
     Data_encoding.obj1
       (Data_encoding.req None None "level" Raw_level_repr.encoding).
   
-  Definition endorsement_case : case Kind.endorsement :=
+  Definition endorsement_case : case :=
     Case
       {| case.Case.tag := 0; case.Case.name := "endorsement";
         case.Case.encoding := raw_endorsement_encoding;
@@ -861,7 +857,7 @@ Module Encoding.
   
   Definition endorsement_encoding : Data_encoding.encoding operation := axiom.
   
-  Definition seed_nonce_revelation_case : case Kind.seed_nonce_revelation :=
+  Definition seed_nonce_revelation_case : case :=
     Case
       {| case.Case.tag := 1; case.Case.name := "seed_nonce_revelation";
         case.Case.encoding :=
@@ -891,8 +887,7 @@ Module Encoding.
               {| contents.Seed_nonce_revelation.level := level;
                 contents.Seed_nonce_revelation.nonce := __nonce_value |} |}.
   
-  Definition double_endorsement_evidence_case
-    : case Kind.double_endorsement_evidence :=
+  Definition double_endorsement_evidence_case : case :=
     Case
       {| case.Case.tag := 2; case.Case.name := "double_endorsement_evidence";
         case.Case.encoding :=
@@ -924,7 +919,7 @@ Module Encoding.
               {| contents.Double_endorsement_evidence.op1 := op1;
                 contents.Double_endorsement_evidence.op2 := op2 |} |}.
   
-  Definition double_baking_evidence_case : case Kind.double_baking_evidence :=
+  Definition double_baking_evidence_case : case :=
     Case
       {| case.Case.tag := 3; case.Case.name := "double_baking_evidence";
         case.Case.encoding :=
@@ -956,7 +951,7 @@ Module Encoding.
               {| contents.Double_baking_evidence.bh1 := bh1;
                 contents.Double_baking_evidence.bh2 := bh2 |} |}.
   
-  Definition activate_account_case : case Kind.activate_account :=
+  Definition activate_account_case : case :=
     Case
       {| case.Case.tag := 4; case.Case.name := "activate_account";
         case.Case.encoding :=
@@ -989,7 +984,7 @@ Module Encoding.
                 contents.Activate_account.activation_code := activation_code |}
         |}.
   
-  Definition proposals_case : case Kind.proposals :=
+  Definition proposals_case : case :=
     Case
       {| case.Case.tag := 5; case.Case.name := "proposals";
         case.Case.encoding :=
@@ -1025,7 +1020,7 @@ Module Encoding.
                 contents.Proposals.period := period;
                 contents.Proposals.proposals := proposals |} |}.
   
-  Definition ballot_case : case Kind.ballot :=
+  Definition ballot_case : case :=
     Case
       {| case.Case.tag := 6; case.Case.name := "ballot";
         case.Case.encoding :=
@@ -1109,9 +1104,8 @@ Module Encoding.
           contents.Manager_operation.gas_limit := gas_limit;
           contents.Manager_operation.storage_limit := storage_limit |}.
   
-  Definition make_manager_case {A : Set}
-    (tag : int) (function_parameter : Manager_operations.case A)
-    : case Kind.manager :=
+  Definition make_manager_case
+    (tag : int) (function_parameter : Manager_operations.case) : case :=
     let 'Manager_operations.MCase mcase := function_parameter in
     let 'existT _ __MCase_'a mcase :=
       existT (A := Set)
@@ -1157,21 +1151,20 @@ Module Encoding.
             let '(op, contents) := function_parameter in
             rebuild op (mcase.(Manager_operations.case.MCase.inj) contents) |}.
   
-  Definition reveal_case : case Kind.manager :=
+  Definition reveal_case : case :=
     make_manager_case 107 Manager_operations.reveal_case.
   
-  Definition transaction_case : case Kind.manager :=
+  Definition transaction_case : case :=
     make_manager_case 108 Manager_operations.transaction_case.
   
-  Definition origination_case : case Kind.manager :=
+  Definition origination_case : case :=
     make_manager_case 109 Manager_operations.origination_case.
   
-  Definition delegation_case : case Kind.manager :=
+  Definition delegation_case : case :=
     make_manager_case 110 Manager_operations.delegation_case.
   
   Definition contents_encoding : Data_encoding.encoding packed_contents :=
-    let make {A : Set} (function_parameter : case A)
-      : Data_encoding.case packed_contents :=
+    let make (function_parameter : case) : Data_encoding.case packed_contents :=
       let
         'Case {|
           case.Case.tag := tag;

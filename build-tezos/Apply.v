@@ -10,8 +10,8 @@ Require Import Tezos.Environment.
 Import Environment.Notations.
 Require Tezos.Alpha_context.
 Require Tezos.Amendment.
-Require Tezos.Apply_results_mli. Module Apply_results := Apply_results_mli.
-Require Tezos.Baking_mli. Module Baking := Baking_mli.
+Require Tezos.Apply_results.
+Require Tezos.Baking.
 Require Tezos.Blinded_public_key_hash.
 Require Tezos.Michelson_v1_gas.
 Require Tezos.Nonce_hash.

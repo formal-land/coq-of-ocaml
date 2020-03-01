@@ -59,8 +59,8 @@
     <pre><code>opam repo add coq-released https://coq.inria.fr/opam/released
 opam pin add https://github.com/clarus/coq-of-ocaml.git#master</code></pre>
     <ul>
-      <li>OCaml size: 36011 lines</li>
-      <li>Coq size: 45830 lines (+27% compared to&nbsp;OCaml)</li>
+      <li>OCaml size: 36028 lines</li>
+      <li>Coq size: 45766 lines (+27% compared to&nbsp;OCaml)</li>
       <li>Warnings from coq-of-ocaml: 4341</li>
     </ul>
     
@@ -115,7 +115,7 @@ opam pin add https://github.com/clarus/coq-of-ocaml.git#master</code></pre>
           24981,
           26259,
           26259,
-          26500,
+          28609,
         ],
         generated: [
           47563,
@@ -165,7 +165,7 @@ opam pin add https://github.com/clarus/coq-of-ocaml.git#master</code></pre>
           48348,
           46049,
           46049,
-          45830,
+          45766,
         ],
         labels: [
           "01-14",
@@ -1503,8 +1503,8 @@ Definition description : Storage_description.t Raw_context.context :=
   <div style="margin: 20px;">
     <h3>Alpha_context_mli</h3>
     <ul>
-      <li>OCaml size: 1387 lines</li>
-      <li>Coq size: 2590 lines (+86% compared to&nbsp;OCaml)</li>
+      <li>OCaml size: 1389 lines</li>
+      <li>Coq size: 2587 lines (+86% compared to&nbsp;OCaml)</li>
     </ul>
   </div>
   <div class="col-md-6">
@@ -2737,6 +2737,7 @@ module Operation : sig
           inj : 'a -&gt; 'b contents;
         }
           -&gt; 'b case
+    [@@coq_force_gadt]
 
     val endorsement_case : Kind.endorsement case
 
@@ -2762,7 +2763,7 @@ module Operation : sig
     val delegation_case : Kind.delegation Kind.manager case
 
     module Manager_operations : sig
-      type 'b case =
+      type 'kind case =
         | MCase : {
             tag : int;
             name : string;
@@ -2773,6 +2774,7 @@ module Operation : sig
             inj : 'a -&gt; 'kind manager_operation;
           }
             -&gt; 'kind case
+      [@@coq_force_gadt]
 
       val reveal_case : Kind.reveal case
 
@@ -5257,8 +5259,8 @@ Module Operation.
     
     Reserved Notation &quot;'case.Case&quot;.
     
-    Inductive case (b : Set) : Set :=
-    | Case : forall {a : Set}, 'case.Case a -&gt; case b
+    Inductive case : Set :=
+    | Case : forall {a : Set}, 'case.Case a -&gt; case
     
     where &quot;'case.Case&quot; := (fun (t_a : Set) =&gt;
       case.Case_skeleton int string (Data_encoding.t t_a)
@@ -5269,30 +5271,27 @@ Module Operation.
       Definition Case := 'case.Case.
     End case.
     
-    Arguments Case {_ _}.
+    Parameter endorsement_case : case.
     
-    Parameter endorsement_case : case Kind.endorsement.
+    Parameter seed_nonce_revelation_case : case.
     
-    Parameter seed_nonce_revelation_case : case Kind.seed_nonce_revelation.
+    Parameter double_endorsement_evidence_case : case.
     
-    Parameter double_endorsement_evidence_case :
-      case Kind.double_endorsement_evidence.
+    Parameter double_baking_evidence_case : case.
     
-    Parameter double_baking_evidence_case : case Kind.double_baking_evidence.
+    Parameter activate_account_case : case.
     
-    Parameter activate_account_case : case Kind.activate_account.
+    Parameter proposals_case : case.
     
-    Parameter proposals_case : case Kind.proposals.
+    Parameter ballot_case : case.
     
-    Parameter ballot_case : case Kind.ballot.
+    Parameter reveal_case : case.
     
-    Parameter reveal_case : case Kind.manager.
+    Parameter transaction_case : case.
     
-    Parameter transaction_case : case Kind.manager.
+    Parameter origination_case : case.
     
-    Parameter origination_case : case Kind.manager.
-    
-    Parameter delegation_case : case Kind.manager.
+    Parameter delegation_case : case.
     
     Module Manager_operations.
       Module ConstructorRecords_case.
@@ -8706,8 +8705,8 @@ Require Import Tezos.Environment.
 Import Environment.Notations.
 Require Tezos.Alpha_context.
 Require Tezos.Amendment.
-Require Tezos.Apply_results_mli. Module Apply_results := Apply_results_mli.
-Require Tezos.Baking_mli. Module Baking := Baking_mli.
+Require Tezos.Apply_results.
+Require Tezos.Baking.
 Require Tezos.Blinded_public_key_hash.
 Require Tezos.Michelson_v1_gas.
 Require Tezos.Nonce_hash.
@@ -10049,8 +10048,8 @@ Definition finalize_application
   <div style="margin: 20px;">
     <h3>Apply_results</h3>
     <ul>
-      <li>OCaml size: 1187 lines</li>
-      <li>Coq size: 2173 lines (+83% compared to&nbsp;OCaml)</li>
+      <li>OCaml size: 1198 lines</li>
+      <li>Coq size: 2122 lines (+77% compared to&nbsp;OCaml)</li>
     </ul>
   </div>
   <div class="col-md-6">
@@ -10143,6 +10142,7 @@ type 'kind manager_operation_result =
       'kind successful_manager_operation_result * error list option
   | Failed : 'kind Kind.manager * error list -&gt; 'kind manager_operation_result
   | Skipped : 'kind Kind.manager -&gt; 'kind manager_operation_result
+[@@coq_force_gadt]
 
 type packed_internal_operation_result =
   | Internal_operation_result :
@@ -10166,6 +10166,7 @@ module Manager_result = struct
         t : 'kind manager_operation_result Data_encoding.t;
       }
         -&gt; 'kind case
+  [@@coq_force_gadt]
 
   let make ~op_case ~encoding ~kind ~iselect ~select ~proj ~inj =
     let (Operation.Encoding.Manager_operations.MCase {name; _}) = op_case in
@@ -10224,7 +10225,7 @@ module Manager_result = struct
     in
     MCase {op_case; encoding; kind; iselect; select; proj; inj; t}
 
-  let reveal_case =
+  let reveal_case : Kind.reveal case =
     make
       ~op_case:Operation.Encoding.Manager_operations.reveal_case
       ~encoding:Data_encoding.(obj1 (dft &quot;consumed_gas&quot; z Z.zero))
@@ -10239,7 +10240,8 @@ module Manager_result = struct
         | _ -&gt;
             None)
       ~kind:Kind.Reveal_manager_kind
-      ~proj:(function Reveal_result {consumed_gas} -&gt; consumed_gas)
+      ~proj:(function[@coq_match_with_default]
+        | Reveal_result {consumed_gas} -&gt; consumed_gas)
       ~inj:(fun consumed_gas -&gt; Reveal_result {consumed_gas})
 
   let transaction_case =
@@ -10267,7 +10269,7 @@ module Manager_result = struct
         | _ -&gt;
             None)
       ~kind:Kind.Transaction_manager_kind
-      ~proj:(function
+      ~proj:(function[@coq_match_with_default]
         | Transaction_result
             { storage;
               big_map_diff;
@@ -10328,7 +10330,7 @@ module Manager_result = struct
             Some op
         | _ -&gt;
             None)
-      ~proj:(function
+      ~proj:(function[@coq_match_with_default]
         | Origination_result
             { big_map_diff;
               balance_updates;
@@ -10376,7 +10378,8 @@ module Manager_result = struct
         | _ -&gt;
             None)
       ~kind:Kind.Delegation_manager_kind
-      ~proj:(function Delegation_result {consumed_gas} -&gt; consumed_gas)
+      ~proj:(function[@coq_match_with_default]
+        | Delegation_result {consumed_gas} -&gt; consumed_gas)
       ~inj:(fun consumed_gas -&gt; Delegation_result {consumed_gas})
 end
 
@@ -10485,6 +10488,7 @@ module Encoding = struct
         inj : 'a -&gt; 'kind contents_result;
       }
         -&gt; 'kind case
+  [@@coq_force_gadt]
 
   let tagged_case tag name args proj inj =
     let open Data_encoding in
@@ -10514,7 +10518,7 @@ module Encoding = struct
           | _ -&gt;
               None);
         proj =
-          (function
+          (function[@coq_match_with_default]
           | Endorsement_result {balance_updates; delegate; slots} -&gt;
               (balance_updates, delegate, slots));
         inj =
@@ -10540,7 +10544,9 @@ module Encoding = struct
               Some (op, res)
           | _ -&gt;
               None);
-        proj = (fun (Seed_nonce_revelation_result bus) -&gt; bus);
+        proj =
+          (fun [@coq_match_with_default] (Seed_nonce_revelation_result bus) -&gt;
+            bus);
         inj = (fun bus -&gt; Seed_nonce_revelation_result bus);
       }
 
@@ -10562,7 +10568,10 @@ module Encoding = struct
               Some (op, res)
           | _ -&gt;
               None);
-        proj = (fun (Double_endorsement_evidence_result bus) -&gt; bus);
+        proj =
+          (fun [@coq_match_with_default] (Double_endorsement_evidence_result
+                                           bus) -&gt;
+            bus);
         inj = (fun bus -&gt; Double_endorsement_evidence_result bus);
       }
 
@@ -10584,7 +10593,9 @@ module Encoding = struct
               Some (op, res)
           | _ -&gt;
               None);
-        proj = (fun (Double_baking_evidence_result bus) -&gt; bus);
+        proj =
+          (fun [@coq_match_with_default] (Double_baking_evidence_result bus) -&gt;
+            bus);
         inj = (fun bus -&gt; Double_baking_evidence_result bus);
       }
 
@@ -10606,7 +10617,8 @@ module Encoding = struct
               Some (op, res)
           | _ -&gt;
               None);
-        proj = (fun (Activate_account_result bus) -&gt; bus);
+        proj =
+          (fun [@coq_match_with_default] (Activate_account_result bus) -&gt; bus);
         inj = (fun bus -&gt; Activate_account_result bus);
       }
 
@@ -10624,7 +10636,7 @@ module Encoding = struct
               Some (op, res)
           | _ -&gt;
               None);
-        proj = (fun Proposals_result -&gt; ());
+        proj = (fun [@coq_match_with_default] Proposals_result -&gt; ());
         inj = (fun () -&gt; Proposals_result);
       }
 
@@ -10642,7 +10654,7 @@ module Encoding = struct
               Some (op, res)
           | _ -&gt;
               None);
-        proj = (fun Ballot_result -&gt; ());
+        proj = (fun [@coq_match_with_default] Ballot_result -&gt; ());
         inj = (fun () -&gt; Ballot_result);
       }
 
@@ -10719,10 +10731,10 @@ module Encoding = struct
               None);
         mselect;
         proj =
-          (fun (Manager_operation_result
-                 { balance_updates = bus;
-                   operation_result = r;
-                   internal_operation_results = rs }) -&gt;
+          (fun [@coq_match_with_default] (Manager_operation_result
+                                           { balance_updates = bus;
+                                             operation_result = r;
+                                             internal_operation_results = rs }) -&gt;
             (bus, r, rs));
         inj =
           (fun (bus, r, rs) -&gt;
@@ -10780,9 +10792,8 @@ module Encoding = struct
 end
 
 let contents_result_encoding =
-  let open Encoding in
   let make
-      (Case
+      (Encoding.Case
         { op_case = Operation.Encoding.Case {tag; name; _};
           encoding;
           mselect = _;
@@ -10793,26 +10804,25 @@ let contents_result_encoding =
       match select x with None -&gt; None | Some x -&gt; Some (proj x)
     in
     let inj x = Contents_result (inj x) in
-    tagged_case (Tag tag) name encoding proj inj
+    Encoding.tagged_case (Tag tag) name encoding proj inj
   in
   def &quot;operation.alpha.contents_result&quot;
   @@ union
-       [ make endorsement_case;
-         make seed_nonce_revelation_case;
-         make double_endorsement_evidence_case;
-         make double_baking_evidence_case;
-         make activate_account_case;
-         make proposals_case;
-         make ballot_case;
-         make reveal_case;
-         make transaction_case;
-         make origination_case;
-         make delegation_case ]
+       [ make Encoding.endorsement_case;
+         make Encoding.seed_nonce_revelation_case;
+         make Encoding.double_endorsement_evidence_case;
+         make Encoding.double_baking_evidence_case;
+         make Encoding.activate_account_case;
+         make Encoding.proposals_case;
+         make Encoding.ballot_case;
+         make Encoding.reveal_case;
+         make Encoding.transaction_case;
+         make Encoding.origination_case;
+         make Encoding.delegation_case ]
 
 let contents_and_result_encoding =
-  let open Encoding in
   let make
-      (Case
+      (Encoding.Case
         { op_case = Operation.Encoding.Case {tag; name; encoding; proj; inj; _};
           mselect;
           encoding = meta_encoding;
@@ -10828,21 +10838,21 @@ let contents_and_result_encoding =
     in
     let inj (op, res) = Contents_and_result (inj op, meta_inj res) in
     let encoding = merge_objs encoding (obj1 (req &quot;metadata&quot; meta_encoding)) in
-    tagged_case (Tag tag) name encoding proj inj
+    Encoding.tagged_case (Tag tag) name encoding proj inj
   in
   def &quot;operation.alpha.operation_contents_and_result&quot;
   @@ union
-       [ make endorsement_case;
-         make seed_nonce_revelation_case;
-         make double_endorsement_evidence_case;
-         make double_baking_evidence_case;
-         make activate_account_case;
-         make proposals_case;
-         make ballot_case;
-         make reveal_case;
-         make transaction_case;
-         make origination_case;
-         make delegation_case ]
+       [ make Encoding.endorsement_case;
+         make Encoding.seed_nonce_revelation_case;
+         make Encoding.double_endorsement_evidence_case;
+         make Encoding.double_baking_evidence_case;
+         make Encoding.activate_account_case;
+         make Encoding.proposals_case;
+         make Encoding.ballot_case;
+         make Encoding.reveal_case;
+         make Encoding.transaction_case;
+         make Encoding.origination_case;
+         make Encoding.delegation_case ]
 
 type 'kind contents_result_list =
   | Single_result : 'kind contents_result -&gt; 'kind contents_result_list
@@ -11090,7 +11100,7 @@ let rec pack_contents_list :
     kind contents_result_list -&gt;
     kind contents_and_result_list =
  fun contents res -&gt;
-  match (contents, res) with
+  match[@coq_match_with_default] (contents, res) with
   | (Single op, Single_result res) -&gt;
       Single_and_result (op, res)
   | (Cons (op, ops), Cons_result (res, ress)) -&gt;
@@ -11254,6 +11264,7 @@ Local Open Scope string_scope.
 Local Open Scope Z_scope.
 Local Open Scope type_scope.
 Import ListNotations.
+Unset Guard Checking.
 
 Require Import Tezos.Environment.
 Import Environment.Notations.
@@ -11544,24 +11555,19 @@ Inductive packed_successful_manager_operation_result : Set :=
   successful_manager_operation_result -&gt;
   packed_successful_manager_operation_result.
 
-Inductive manager_operation_result (kind : Set) : Set :=
-| Applied : successful_manager_operation_result -&gt; manager_operation_result kind
+Inductive manager_operation_result : Set :=
+| Applied : successful_manager_operation_result -&gt; manager_operation_result
 | Backtracked :
   successful_manager_operation_result -&gt; option (list Error_monad.__error) -&gt;
-  manager_operation_result kind
+  manager_operation_result
 | Failed :
   Alpha_context.Kind.manager -&gt; list Error_monad.__error -&gt;
-  manager_operation_result kind
-| Skipped : Alpha_context.Kind.manager -&gt; manager_operation_result kind.
-
-Arguments Applied {_}.
-Arguments Backtracked {_}.
-Arguments Failed {_}.
-Arguments Skipped {_}.
+  manager_operation_result
+| Skipped : Alpha_context.Kind.manager -&gt; manager_operation_result.
 
 Inductive packed_internal_operation_result : Set :=
-| Internal_operation_result : forall {kind : Set},
-  Alpha_context.internal_operation -&gt; manager_operation_result kind -&gt;
+| Internal_operation_result :
+  Alpha_context.internal_operation -&gt; manager_operation_result -&gt;
   packed_internal_operation_result.
 
 Module Manager_result.
@@ -11655,39 +11661,36 @@ Module Manager_result.
   
   Reserved Notation &quot;'case.MCase&quot;.
   
-  Inductive case (kind : Set) : Set :=
-  | MCase : forall {a : Set}, 'case.MCase a kind -&gt; case kind
+  Inductive case : Set :=
+  | MCase : forall {a : Set}, 'case.MCase a -&gt; case
   
-  where &quot;'case.MCase&quot; := (fun (t_a t_kind : Set) =&gt;
+  where &quot;'case.MCase&quot; := (fun (t_a : Set) =&gt;
     case.MCase_skeleton Alpha_context.Operation.Encoding.Manager_operations.case
       (Data_encoding.t t_a) Alpha_context.Kind.manager
       (packed_internal_operation_result -&gt;
-      option
-        (Alpha_context.internal_operation * manager_operation_result t_kind))
+      option (Alpha_context.internal_operation * manager_operation_result))
       (packed_successful_manager_operation_result -&gt;
       option successful_manager_operation_result)
       (successful_manager_operation_result -&gt; t_a)
       (t_a -&gt; successful_manager_operation_result)
-      (Data_encoding.t (manager_operation_result t_kind))).
+      (Data_encoding.t manager_operation_result)).
   
   Module case.
     Include ConstructorRecords_case.case.
     Definition MCase := 'case.MCase.
   End case.
   
-  Arguments MCase {_ _}.
-  
-  Definition make {A B : Set}
+  Definition make {A : Set}
     (op_case : Alpha_context.Operation.Encoding.Manager_operations.case)
     (encoding : Data_encoding.encoding A) (kind : Alpha_context.Kind.manager)
     (iselect :
       packed_internal_operation_result -&gt;
-      option (Alpha_context.internal_operation * manager_operation_result B))
+      option (Alpha_context.internal_operation * manager_operation_result))
     (select :
       packed_successful_manager_operation_result -&gt;
       option successful_manager_operation_result)
     (proj : successful_manager_operation_result -&gt; A)
-    (inj : A -&gt; successful_manager_operation_result) : case B :=
+    (inj : A -&gt; successful_manager_operation_result) : case :=
     let
       'Alpha_context.Operation.Encoding.Manager_operations.MCase {|
         Alpha_context.Operation.Encoding.Manager_operations.case.MCase.name := name
@@ -11790,7 +11793,7 @@ Module Manager_result.
         case.MCase.select := select; case.MCase.proj := proj;
         case.MCase.inj := inj; case.MCase.t := __t_value |}.
   
-  Definition reveal_case : case Alpha_context.Kind.reveal :=
+  Definition reveal_case : case :=
     make Alpha_context.Operation.Encoding.Manager_operations.reveal_case
       (Data_encoding.obj1
         (Data_encoding.dft None None &quot;consumed_gas&quot; Data_encoding.z Z.zero))
@@ -11801,14 +11804,7 @@ Module Manager_result.
           Internal_operation_result
             ({|
               Alpha_context.internal_operation.operation := Alpha_context.Reveal _
-                |} as op) res =&gt;
-          let 'existT _ __Internal_operation_result_'kind [op, res] :=
-            existT (A := Set)
-              (fun __Internal_operation_result_'kind =&gt;
-                [Alpha_context.internal_operation **
-                  manager_operation_result __Internal_operation_result_'kind]) _
-              [op, res] in
-          Some (op, res)
+                |} as op) res =&gt; Some (op, res)
         | _ =&gt; None
         end)
       (fun function_parameter =&gt;
@@ -11817,18 +11813,20 @@ Module Manager_result.
         | _ =&gt; None
         end)
       (fun function_parameter =&gt;
-        let
-          'Reveal_result {|
+        match function_parameter with
+        |
+          Reveal_result {|
             successful_manager_operation_result.Reveal_result.consumed_gas := consumed_gas
-              |} := function_parameter in
-        consumed_gas)
+              |} =&gt; consumed_gas
+        | _ =&gt; unreachable_gadt_branch
+        end)
       (fun consumed_gas =&gt;
         Reveal_result
           {|
             successful_manager_operation_result.Reveal_result.consumed_gas :=
               consumed_gas |}).
   
-  Definition transaction_case : case Alpha_context.Kind.transaction :=
+  Definition transaction_case : case :=
     make Alpha_context.Operation.Encoding.Manager_operations.transaction_case
       (Data_encoding.obj8
         (Data_encoding.opt None None &quot;storage&quot;
@@ -11852,14 +11850,7 @@ Module Manager_result.
           Internal_operation_result
             ({|
               Alpha_context.internal_operation.operation := Alpha_context.Transaction _
-                |} as op) res =&gt;
-          let 'existT _ __Internal_operation_result_'kind [op, res] :=
-            existT (A := Set)
-              (fun __Internal_operation_result_'kind =&gt;
-                [Alpha_context.internal_operation **
-                  manager_operation_result __Internal_operation_result_'kind]) _
-              [op, res] in
-          Some (op, res)
+                |} as op) res =&gt; Some (op, res)
         | _ =&gt; None
         end)
       (fun function_parameter =&gt;
@@ -11868,8 +11859,9 @@ Module Manager_result.
         | _ =&gt; None
         end)
       (fun function_parameter =&gt;
-        let
-          'Transaction_result {|
+        match function_parameter with
+        |
+          Transaction_result {|
             successful_manager_operation_result.Transaction_result.storage := storage;
               successful_manager_operation_result.Transaction_result.big_map_diff
                 := big_map_diff;
@@ -11885,10 +11877,12 @@ Module Manager_result.
                 := paid_storage_size_diff;
               successful_manager_operation_result.Transaction_result.allocated_destination_contract
                 := allocated_destination_contract
-              |} := function_parameter in
-        (storage, big_map_diff, balance_updates, originated_contracts,
-          consumed_gas, storage_size, paid_storage_size_diff,
-          allocated_destination_contract))
+              |} =&gt;
+          (storage, big_map_diff, balance_updates, originated_contracts,
+            consumed_gas, storage_size, paid_storage_size_diff,
+            allocated_destination_contract)
+        | _ =&gt; unreachable_gadt_branch
+        end)
       (fun function_parameter =&gt;
         let
           '(storage, big_map_diff, balance_updates, originated_contracts,
@@ -11913,7 +11907,7 @@ Module Manager_result.
             successful_manager_operation_result.Transaction_result.allocated_destination_contract :=
               allocated_destination_contract |}).
   
-  Definition origination_case : case Alpha_context.Kind.origination :=
+  Definition origination_case : case :=
     make Alpha_context.Operation.Encoding.Manager_operations.origination_case
       (Data_encoding.obj6
         (Data_encoding.opt None None &quot;big_map_diff&quot;
@@ -11932,14 +11926,7 @@ Module Manager_result.
           Internal_operation_result
             ({|
               Alpha_context.internal_operation.operation := Alpha_context.Origination _
-                |} as op) res =&gt;
-          let 'existT _ __Internal_operation_result_'kind [op, res] :=
-            existT (A := Set)
-              (fun __Internal_operation_result_'kind =&gt;
-                [Alpha_context.internal_operation **
-                  manager_operation_result __Internal_operation_result_'kind]) _
-              [op, res] in
-          Some (op, res)
+                |} as op) res =&gt; Some (op, res)
         | _ =&gt; None
         end)
       (fun function_parameter =&gt;
@@ -11948,8 +11935,9 @@ Module Manager_result.
         | _ =&gt; None
         end)
       (fun function_parameter =&gt;
-        let
-          'Origination_result {|
+        match function_parameter with
+        |
+          Origination_result {|
             successful_manager_operation_result.Origination_result.big_map_diff :=
               big_map_diff;
               successful_manager_operation_result.Origination_result.balance_updates
@@ -11962,9 +11950,11 @@ Module Manager_result.
                 := storage_size;
               successful_manager_operation_result.Origination_result.paid_storage_size_diff
                 := paid_storage_size_diff
-              |} := function_parameter in
-        (big_map_diff, balance_updates, originated_contracts, consumed_gas,
-          storage_size, paid_storage_size_diff))
+              |} =&gt;
+          (big_map_diff, balance_updates, originated_contracts, consumed_gas,
+            storage_size, paid_storage_size_diff)
+        | _ =&gt; unreachable_gadt_branch
+        end)
       (fun function_parameter =&gt;
         let
           '(big_map_diff, balance_updates, originated_contracts, consumed_gas,
@@ -11984,7 +11974,7 @@ Module Manager_result.
             successful_manager_operation_result.Origination_result.paid_storage_size_diff :=
               paid_storage_size_diff |}).
   
-  Definition delegation_case : case Alpha_context.Kind.delegation :=
+  Definition delegation_case : case :=
     make Alpha_context.Operation.Encoding.Manager_operations.delegation_case
       (Data_encoding.obj1
         (Data_encoding.dft None None &quot;consumed_gas&quot; Data_encoding.z Z.zero))
@@ -11995,14 +11985,7 @@ Module Manager_result.
           Internal_operation_result
             ({|
               Alpha_context.internal_operation.operation := Alpha_context.Delegation _
-                |} as op) res =&gt;
-          let 'existT _ __Internal_operation_result_'kind [op, res] :=
-            existT (A := Set)
-              (fun __Internal_operation_result_'kind =&gt;
-                [Alpha_context.internal_operation **
-                  manager_operation_result __Internal_operation_result_'kind]) _
-              [op, res] in
-          Some (op, res)
+                |} as op) res =&gt; Some (op, res)
         | _ =&gt; None
         end)
       (fun function_parameter =&gt;
@@ -12011,12 +11994,14 @@ Module Manager_result.
         | _ =&gt; None
         end)
       (fun function_parameter =&gt;
-        let
-          'Delegation_result {|
+        match function_parameter with
+        |
+          Delegation_result {|
             successful_manager_operation_result.Delegation_result.consumed_gas :=
               consumed_gas
-              |} := function_parameter in
-        consumed_gas)
+              |} =&gt; consumed_gas
+        | _ =&gt; unreachable_gadt_branch
+        end)
       (fun consumed_gas =&gt;
         Delegation_result
           {|
@@ -12026,13 +12011,12 @@ End Manager_result.
 
 Definition internal_operation_result_encoding
   : Data_encoding.t packed_internal_operation_result :=
-  let make {A : Set} (function_parameter : Manager_result.case A)
+  let make (function_parameter : Manager_result.case)
     : Data_encoding.case packed_internal_operation_result :=
     let 'Manager_result.MCase res_case := function_parameter in
     let 'existT _ __MCase_'a res_case :=
-      existT (A := Set)
-        (fun __MCase_'a =&gt; Manager_result.case.MCase kind __MCase_'a) _ res_case
-      in
+      existT (A := Set) (fun __MCase_'a =&gt; Manager_result.case.MCase __MCase_'a)
+        _ res_case in
     let 'Alpha_context.Operation.Encoding.Manager_operations.MCase op_case :=
       res_case.(Manager_result.case.MCase.op_case) in
     let 'existT _ __MCase_'a1 op_case :=
@@ -12162,16 +12146,16 @@ Inductive contents_result : Set :=
   Alpha_context.Delegate.balance_updates -&gt; contents_result
 | Proposals_result : contents_result
 | Ballot_result : contents_result
-| Manager_operation_result : forall {kind : Set},
-  'contents_result.Manager_operation_result kind -&gt; contents_result
+| Manager_operation_result :
+  'contents_result.Manager_operation_result -&gt; contents_result
 
 where &quot;'contents_result.Endorsement_result&quot; :=
   (contents_result.Endorsement_result_skeleton
     Alpha_context.Delegate.balance_updates
     (|Signature.Public_key_hash|).(S.SPublic_key_hash.t) (list int))
-and &quot;'contents_result.Manager_operation_result&quot; := (fun (t_kind : Set) =&gt;
-  contents_result.Manager_operation_result_skeleton
-    Alpha_context.Delegate.balance_updates (manager_operation_result t_kind)
+and &quot;'contents_result.Manager_operation_result&quot; :=
+  (contents_result.Manager_operation_result_skeleton
+    Alpha_context.Delegate.balance_updates manager_operation_result
     (list packed_internal_operation_result)).
 
 Module contents_result.
@@ -12264,11 +12248,11 @@ Module Encoding.
   
   Reserved Notation &quot;'case.Case&quot;.
   
-  Inductive case (kind : Set) : Set :=
-  | Case : forall {a : Set}, 'case.Case kind a -&gt; case kind
+  Inductive case : Set :=
+  | Case : forall {a : Set}, 'case.Case a -&gt; case
   
-  where &quot;'case.Case&quot; := (fun (t_kind t_a : Set) =&gt;
-    case.Case_skeleton (Alpha_context.Operation.Encoding.case t_kind)
+  where &quot;'case.Case&quot; := (fun (t_a : Set) =&gt;
+    case.Case_skeleton Alpha_context.Operation.Encoding.case
       (Data_encoding.t t_a) (packed_contents_result -&gt; option contents_result)
       (packed_contents_and_result -&gt;
       option (Alpha_context.contents * contents_result))
@@ -12278,8 +12262,6 @@ Module Encoding.
     Include ConstructorRecords_case.case.
     Definition Case := 'case.Case.
   End case.
-  
-  Arguments Case {_ _}.
   
   Definition tagged_case {A B : Set}
     (tag : Data_encoding.case_tag) (name : string)
@@ -12299,7 +12281,7 @@ Module Encoding.
         let '(_, x) := function_parameter in
         inj x).
   
-  Definition endorsement_case : case Alpha_context.Kind.endorsement :=
+  Definition endorsement_case : case :=
     Case
       {| case.Case.op_case := Alpha_context.Operation.Encoding.endorsement_case;
         case.Case.encoding :=
@@ -12325,13 +12307,15 @@ Module Encoding.
             end;
         case.Case.proj :=
           fun function_parameter =&gt;
-            let
-              'Endorsement_result {|
+            match function_parameter with
+            |
+              Endorsement_result {|
                 contents_result.Endorsement_result.balance_updates := balance_updates;
                   contents_result.Endorsement_result.delegate := delegate;
                   contents_result.Endorsement_result.slots := slots
-                  |} := function_parameter in
-            (balance_updates, delegate, slots);
+                  |} =&gt; (balance_updates, delegate, slots)
+            | _ =&gt; unreachable_gadt_branch
+            end;
         case.Case.inj :=
           fun function_parameter =&gt;
             let '(balance_updates, delegate, slots) := function_parameter in
@@ -12342,8 +12326,7 @@ Module Encoding.
                 contents_result.Endorsement_result.delegate := delegate;
                 contents_result.Endorsement_result.slots := slots |} |}.
   
-  Definition seed_nonce_revelation_case
-    : case Alpha_context.Kind.seed_nonce_revelation :=
+  Definition seed_nonce_revelation_case : case :=
     Case
       {|
         case.Case.op_case :=
@@ -12370,11 +12353,12 @@ Module Encoding.
             end;
         case.Case.proj :=
           fun function_parameter =&gt;
-            let 'Seed_nonce_revelation_result bus := function_parameter in
-            bus; case.Case.inj := fun bus =&gt; Seed_nonce_revelation_result bus |}.
+            match function_parameter with
+            | Seed_nonce_revelation_result bus =&gt; bus
+            | _ =&gt; unreachable_gadt_branch
+            end; case.Case.inj := fun bus =&gt; Seed_nonce_revelation_result bus |}.
   
-  Definition double_endorsement_evidence_case
-    : case Alpha_context.Kind.double_endorsement_evidence :=
+  Definition double_endorsement_evidence_case : case :=
     Case
       {|
         case.Case.op_case :=
@@ -12401,12 +12385,13 @@ Module Encoding.
             end;
         case.Case.proj :=
           fun function_parameter =&gt;
-            let 'Double_endorsement_evidence_result bus := function_parameter in
-            bus;
+            match function_parameter with
+            | Double_endorsement_evidence_result bus =&gt; bus
+            | _ =&gt; unreachable_gadt_branch
+            end;
         case.Case.inj := fun bus =&gt; Double_endorsement_evidence_result bus |}.
   
-  Definition double_baking_evidence_case
-    : case Alpha_context.Kind.double_baking_evidence :=
+  Definition double_baking_evidence_case : case :=
     Case
       {|
         case.Case.op_case :=
@@ -12433,11 +12418,13 @@ Module Encoding.
             end;
         case.Case.proj :=
           fun function_parameter =&gt;
-            let 'Double_baking_evidence_result bus := function_parameter in
-            bus; case.Case.inj := fun bus =&gt; Double_baking_evidence_result bus
+            match function_parameter with
+            | Double_baking_evidence_result bus =&gt; bus
+            | _ =&gt; unreachable_gadt_branch
+            end; case.Case.inj := fun bus =&gt; Double_baking_evidence_result bus
         |}.
   
-  Definition activate_account_case : case Alpha_context.Kind.activate_account :=
+  Definition activate_account_case : case :=
     Case
       {|
         case.Case.op_case :=
@@ -12461,10 +12448,12 @@ Module Encoding.
             end;
         case.Case.proj :=
           fun function_parameter =&gt;
-            let 'Activate_account_result bus := function_parameter in
-            bus; case.Case.inj := fun bus =&gt; Activate_account_result bus |}.
+            match function_parameter with
+            | Activate_account_result bus =&gt; bus
+            | _ =&gt; unreachable_gadt_branch
+            end; case.Case.inj := fun bus =&gt; Activate_account_result bus |}.
   
-  Definition proposals_case : case Alpha_context.Kind.proposals :=
+  Definition proposals_case : case :=
     Case
       {| case.Case.op_case := Alpha_context.Operation.Encoding.proposals_case;
         case.Case.encoding := Data_encoding.empty;
@@ -12483,14 +12472,16 @@ Module Encoding.
             end;
         case.Case.proj :=
           fun function_parameter =&gt;
-            let 'Proposals_result := function_parameter in
-            tt;
+            match function_parameter with
+            | Proposals_result =&gt; tt
+            | _ =&gt; unreachable_gadt_branch
+            end;
         case.Case.inj :=
           fun function_parameter =&gt;
             let '_ := function_parameter in
             Proposals_result |}.
   
-  Definition ballot_case : case Alpha_context.Kind.ballot :=
+  Definition ballot_case : case :=
     Case
       {| case.Case.op_case := Alpha_context.Operation.Encoding.ballot_case;
         case.Case.encoding := Data_encoding.empty;
@@ -12509,20 +12500,20 @@ Module Encoding.
             end;
         case.Case.proj :=
           fun function_parameter =&gt;
-            let 'Ballot_result := function_parameter in
-            tt;
+            match function_parameter with
+            | Ballot_result =&gt; tt
+            | _ =&gt; unreachable_gadt_branch
+            end;
         case.Case.inj :=
           fun function_parameter =&gt;
             let '_ := function_parameter in
             Ballot_result |}.
   
-  Definition make_manager_case {A : Set}
-    (function_parameter :
-      Alpha_context.Operation.Encoding.case Alpha_context.Kind.manager)
-    : Manager_result.case A -&gt;
+  Definition make_manager_case
+    (function_parameter : Alpha_context.Operation.Encoding.case)
+    : Manager_result.case -&gt;
     (packed_contents_and_result -&gt;
-    option (Alpha_context.contents * contents_result)) -&gt;
-    case Alpha_context.Kind.manager :=
+    option (Alpha_context.contents * contents_result)) -&gt; case :=
     let 'Alpha_context.Operation.Encoding.Case op_case := function_parameter in
     let 'existT _ __Case_'a op_case :=
       existT (A := Set)
@@ -12532,8 +12523,7 @@ Module Encoding.
       let 'Manager_result.MCase res_case := function_parameter in
       let 'existT _ __MCase_'a res_case :=
         existT (A := Set)
-          (fun __MCase_'a =&gt; Manager_result.case.MCase kind __MCase_'a) _
-          res_case in
+          (fun __MCase_'a =&gt; Manager_result.case.MCase __MCase_'a) _ res_case in
       fun mselect =&gt;
         Case
           {| case.Case.op_case := Alpha_context.Operation.Encoding.Case op_case;
@@ -12555,12 +12545,6 @@ Module Encoding.
                       ({|
                         contents_result.Manager_operation_result.operation_result := Applied res
                           |} as op)) =&gt;
-                  let 'existT _ __0 [res, op] :=
-                    existT (A := Set)
-                      (fun __0 =&gt;
-                        [successful_manager_operation_result **
-                          contents_result.Manager_operation_result __0]) _
-                      [res, op] in
                   match
                     res_case.(Manager_result.case.MCase.select)
                       (Successful_manager_result res) with
@@ -12571,7 +12555,6 @@ Module Encoding.
                           (Applied res) op))
                   | None =&gt; None
                   end
-                
                 |
                   Contents_result
                     (Manager_operation_result
@@ -12579,13 +12562,6 @@ Module Encoding.
                         contents_result.Manager_operation_result.operation_result :=
                           Backtracked res errs
                           |} as op)) =&gt;
-                  let 'existT _ __1 [res, errs, op] :=
-                    existT (A := Set)
-                      (fun __1 =&gt;
-                        [successful_manager_operation_result **
-                          option (list Error_monad.__error) **
-                          contents_result.Manager_operation_result __1]) _
-                      [res, errs, op] in
                   match
                     res_case.(Manager_result.case.MCase.select)
                       (Successful_manager_result res) with
@@ -12596,19 +12572,12 @@ Module Encoding.
                           (Backtracked res errs) op))
                   | None =&gt; None
                   end
-                
                 |
                   Contents_result
                     (Manager_operation_result
                       ({|
                         contents_result.Manager_operation_result.operation_result := Skipped kind
                           |} as op)) =&gt;
-                  let 'existT _ __2 [kind, op] :=
-                    existT (A := Set)
-                      (fun __2 =&gt;
-                        [Alpha_context.Kind.manager **
-                          contents_result.Manager_operation_result __2]) _
-                      [kind, op] in
                   match
                     equal_manager_kind kind
                       res_case.(Manager_result.case.MCase.kind) with
@@ -12619,19 +12588,12 @@ Module Encoding.
                         (contents_result.Manager_operation_result.with_operation_result
                           (Skipped kind) op))
                   end
-                
                 |
                   Contents_result
                     (Manager_operation_result
                       ({|
                         contents_result.Manager_operation_result.operation_result := Failed kind errs
                           |} as op)) =&gt;
-                  let 'existT _ __3 [kind, errs, op] :=
-                    existT (A := Set)
-                      (fun __3 =&gt;
-                        [Alpha_context.Kind.manager ** list Error_monad.__error
-                          ** contents_result.Manager_operation_result __3]) _
-                      [kind, errs, op] in
                   match
                     equal_manager_kind kind
                       res_case.(Manager_result.case.MCase.kind) with
@@ -12642,32 +12604,27 @@ Module Encoding.
                         (contents_result.Manager_operation_result.with_operation_result
                           (Failed kind errs) op))
                   end
-                
                 | Contents_result Ballot_result =&gt; None
-                
                 | Contents_result (Endorsement_result _) =&gt; None
-                
                 | Contents_result (Seed_nonce_revelation_result _) =&gt; None
-                
                 | Contents_result (Double_endorsement_evidence_result _) =&gt; None
-                
                 | Contents_result (Double_baking_evidence_result _) =&gt; None
-                
                 | Contents_result (Activate_account_result _) =&gt; None
-                
                 | Contents_result Proposals_result =&gt; None
                 end; case.Case.mselect := mselect;
             case.Case.proj :=
               fun function_parameter =&gt;
-                let
-                  'Manager_operation_result {|
+                match function_parameter with
+                |
+                  Manager_operation_result {|
                     contents_result.Manager_operation_result.balance_updates := bus;
                       contents_result.Manager_operation_result.operation_result
                         := __r_value;
                       contents_result.Manager_operation_result.internal_operation_results
                         := rs
-                      |} := function_parameter in
-                (bus, __r_value, rs);
+                      |} =&gt; (bus, __r_value, rs)
+                | _ =&gt; unreachable_gadt_branch
+                end;
             case.Case.inj :=
               fun function_parameter =&gt;
                 let '(bus, __r_value, rs) := function_parameter in
@@ -12680,7 +12637,7 @@ Module Encoding.
                     contents_result.Manager_operation_result.internal_operation_results :=
                       rs |} |}.
   
-  Definition reveal_case : case Alpha_context.Kind.manager :=
+  Definition reveal_case : case :=
     make_manager_case Alpha_context.Operation.Encoding.reveal_case
       Manager_result.reveal_case
       (fun function_parameter =&gt;
@@ -12693,7 +12650,7 @@ Module Encoding.
         | _ =&gt; None
         end).
   
-  Definition transaction_case : case Alpha_context.Kind.manager :=
+  Definition transaction_case : case :=
     make_manager_case Alpha_context.Operation.Encoding.transaction_case
       Manager_result.transaction_case
       (fun function_parameter =&gt;
@@ -12707,7 +12664,7 @@ Module Encoding.
         | _ =&gt; None
         end).
   
-  Definition origination_case : case Alpha_context.Kind.manager :=
+  Definition origination_case : case :=
     make_manager_case Alpha_context.Operation.Encoding.origination_case
       Manager_result.origination_case
       (fun function_parameter =&gt;
@@ -12721,7 +12678,7 @@ Module Encoding.
         | _ =&gt; None
         end).
   
-  Definition delegation_case : case Alpha_context.Kind.manager :=
+  Definition delegation_case : case :=
     make_manager_case Alpha_context.Operation.Encoding.delegation_case
       Manager_result.delegation_case
       (fun function_parameter =&gt;
@@ -12738,7 +12695,7 @@ End Encoding.
 
 Definition contents_result_encoding
   : Data_encoding.encoding packed_contents_result :=
-  let make {A : Set} (function_parameter : Encoding.case A)
+  let make (function_parameter : Encoding.case)
     : Data_encoding.case packed_contents_result :=
     let
       'Encoding.Case {|
@@ -12768,27 +12725,27 @@ Definition contents_result_encoding
       end in
     let inj (x : __Case_'a) : packed_contents_result :=
       Contents_result (inj x) in
-    tagged_case (Data_encoding.Tag tag) name encoding proj inj in
+    Encoding.tagged_case (Data_encoding.Tag tag) name encoding proj inj in
   (let arg := Data_encoding.def &quot;operation.alpha.contents_result&quot; in
   fun eta =&gt; arg None None eta)
     (Data_encoding.union None
       [
-        make endorsement_case;
-        make seed_nonce_revelation_case;
-        make double_endorsement_evidence_case;
-        make double_baking_evidence_case;
-        make activate_account_case;
-        make proposals_case;
-        make ballot_case;
-        make reveal_case;
-        make transaction_case;
-        make origination_case;
-        make delegation_case
+        make Encoding.endorsement_case;
+        make Encoding.seed_nonce_revelation_case;
+        make Encoding.double_endorsement_evidence_case;
+        make Encoding.double_baking_evidence_case;
+        make Encoding.activate_account_case;
+        make Encoding.proposals_case;
+        make Encoding.ballot_case;
+        make Encoding.reveal_case;
+        make Encoding.transaction_case;
+        make Encoding.origination_case;
+        make Encoding.delegation_case
       ]).
 
 Definition contents_and_result_encoding
   : Data_encoding.encoding packed_contents_and_result :=
-  let make {A : Set} (function_parameter : Encoding.case A)
+  let make (function_parameter : Encoding.case)
     : Data_encoding.case packed_contents_and_result :=
     let
       'Encoding.Case {|
@@ -12837,23 +12794,23 @@ Definition contents_and_result_encoding
       Data_encoding.merge_objs encoding
         (Data_encoding.obj1
           (Data_encoding.req None None &quot;metadata&quot; meta_encoding)) in
-    tagged_case (Data_encoding.Tag tag) name encoding proj inj in
+    Encoding.tagged_case (Data_encoding.Tag tag) name encoding proj inj in
   (let arg := Data_encoding.def &quot;operation.alpha.operation_contents_and_result&quot;
     in
   fun eta =&gt; arg None None eta)
     (Data_encoding.union None
       [
-        make endorsement_case;
-        make seed_nonce_revelation_case;
-        make double_endorsement_evidence_case;
-        make double_baking_evidence_case;
-        make activate_account_case;
-        make proposals_case;
-        make ballot_case;
-        make reveal_case;
-        make transaction_case;
-        make origination_case;
-        make delegation_case
+        make Encoding.endorsement_case;
+        make Encoding.seed_nonce_revelation_case;
+        make Encoding.double_endorsement_evidence_case;
+        make Encoding.double_baking_evidence_case;
+        make Encoding.activate_account_case;
+        make Encoding.proposals_case;
+        make Encoding.ballot_case;
+        make Encoding.reveal_case;
+        make Encoding.transaction_case;
+        make Encoding.origination_case;
+        make Encoding.delegation_case
       ]).
 
 Inductive contents_result_list : Set :=
@@ -12866,14 +12823,14 @@ Inductive packed_contents_result_list : Set :=
 Definition contents_result_list_encoding
   : Data_encoding.encoding packed_contents_result_list :=
   let fix to_list (function_parameter : packed_contents_result_list)
-    : list packed_contents_result :=
+    {struct function_parameter} : list packed_contents_result :=
     match function_parameter with
     | Contents_result_list (Single_result o) =&gt; [ Contents_result o ]
     | Contents_result_list (Cons_result o os) =&gt;
       cons (Contents_result o) (to_list (Contents_result_list os))
     end in
   let fix of_list (function_parameter : list packed_contents_result)
-    : packed_contents_result_list :=
+    {struct function_parameter} : packed_contents_result_list :=
     match function_parameter with
     | [] =&gt; Pervasives.failwith &quot;cannot decode empty operation result&quot;
     | cons (Contents_result o) [] =&gt; Contents_result_list (Single_result o)
@@ -12906,7 +12863,7 @@ Inductive packed_contents_and_result_list : Set :=
 Definition contents_and_result_list_encoding
   : Data_encoding.encoding packed_contents_and_result_list :=
   let fix to_list (function_parameter : packed_contents_and_result_list)
-    : list packed_contents_and_result :=
+    {struct function_parameter} : list packed_contents_and_result :=
     match function_parameter with
     | Contents_and_result_list (Single_and_result op res) =&gt;
       [ Contents_and_result op res ]
@@ -12915,7 +12872,7 @@ Definition contents_and_result_list_encoding
         (to_list (Contents_and_result_list rest))
     end in
   let fix of_list (function_parameter : list packed_contents_and_result)
-    : packed_contents_and_result_list :=
+    {struct function_parameter} : packed_contents_and_result_list :=
     match function_parameter with
     | [] =&gt; Pervasives.failwith &quot;cannot decode empty combined operation result&quot;
     | cons (Contents_and_result op res) [] =&gt;
@@ -13164,7 +13121,7 @@ Definition kind_equal (op : Alpha_context.contents) (res : contents_result)
 
 Fixpoint kind_equal_list
   (contents : Alpha_context.contents_list) (res : contents_result_list)
-  : option eq :=
+  {struct contents} : option eq :=
   match (contents, res) with
   | (Alpha_context.Single op, Single_result res) =&gt;
     match kind_equal op res with
@@ -13185,7 +13142,7 @@ Fixpoint kind_equal_list
 
 Fixpoint pack_contents_list
   (contents : Alpha_context.contents_list) (res : contents_result_list)
-  : contents_and_result_list :=
+  {struct contents} : contents_and_result_list :=
   match (contents, res) with
   | (Alpha_context.Single op, Single_result res) =&gt; Single_and_result op res
   | (Alpha_context.Cons op ops, Cons_result res ress) =&gt;
@@ -13230,9 +13187,11 @@ Fixpoint pack_contents_list
   | (Alpha_context.Single _, Cons_result _ _) =&gt;
     (* ❌ Unreachable expressions are not supported *)
     unreachable
+  | _ =&gt; unreachable_gadt_branch
   end.
 
 Fixpoint unpack_contents_list (function_parameter : contents_and_result_list)
+  {struct function_parameter}
   : Alpha_context.contents_list * contents_result_list :=
   match function_parameter with
   | Single_and_result op res =&gt; ((Alpha_context.Single op), (Single_result res))
@@ -13242,7 +13201,7 @@ Fixpoint unpack_contents_list (function_parameter : contents_and_result_list)
   end.
 
 Fixpoint to_list (function_parameter : packed_contents_result_list)
-  : list packed_contents_result :=
+  {struct function_parameter} : list packed_contents_result :=
   match function_parameter with
   | Contents_result_list (Single_result o) =&gt; [ Contents_result o ]
   | Contents_result_list (Cons_result o os) =&gt;
@@ -13250,7 +13209,7 @@ Fixpoint to_list (function_parameter : packed_contents_result_list)
   end.
 
 Fixpoint of_list (function_parameter : list packed_contents_result)
-  : packed_contents_result_list :=
+  {struct function_parameter} : packed_contents_result_list :=
   match function_parameter with
   | [] =&gt;
     (* ❌ Assert instruction is not handled. *)
@@ -28815,7 +28774,7 @@ Import ListNotations.
 Require Import Tezos.Environment.
 Import Environment.Notations.
 Require Tezos.Alpha_context.
-Require Tezos.Baking_mli. Module Baking := Baking_mli.
+Require Tezos.Baking.
 Require Tezos.Contract_repr.
 Require Tezos.Misc.
 Require Tezos.Services_registration.
@@ -38925,7 +38884,7 @@ Import ListNotations.
 Require Import Tezos.Environment.
 Import Environment.Notations.
 Require Tezos.Alpha_context.
-Require Tezos.Apply_results_mli. Module Apply_results := Apply_results_mli.
+Require Tezos.Apply_results.
 Require Tezos.Constants_repr.
 Require Tezos.Contract_services_mli. Module Contract_services := Contract_services_mli.
 Require Tezos.Michelson_v1_primitives.
@@ -42658,7 +42617,7 @@ Import ListNotations.
 Require Import Tezos.Environment.
 Import Environment.Notations.
 Require Tezos.Alpha_context.
-Require Tezos.Apply_results_mli. Module Apply_results := Apply_results_mli.
+Require Tezos.Apply_results.
 Require Tezos.Michelson_v1_primitives.
 Require Tezos.Nonce_hash.
 Require Tezos.Script_interpreter.
@@ -46900,7 +46859,7 @@ Require Import Tezos.Environment.
 Import Environment.Notations.
 Require Tezos.Alpha_context.
 Require Tezos.Apply.
-Require Tezos.Apply_results_mli. Module Apply_results := Apply_results_mli.
+Require Tezos.Apply_results.
 Require Tezos.Script_ir_translator_mli. Module Script_ir_translator := Script_ir_translator_mli.
 Require Tezos.Script_typed_ir.
 Require Tezos.Services_registration.
@@ -47588,7 +47547,7 @@ Import ListNotations.
 Require Import Tezos.Environment.
 Import Environment.Notations.
 Require Tezos.Alpha_context.
-Require Tezos.Apply_results_mli. Module Apply_results := Apply_results_mli.
+Require Tezos.Apply_results.
 
 Module ConstructorRecords_validation_mode.
   Module validation_mode.
@@ -53180,8 +53139,8 @@ Parameter check_hash : nonce -&gt; Nonce_hash.t -&gt; bool.
   <div style="margin: 20px;">
     <h3>Operation_repr</h3>
     <ul>
-      <li>OCaml size: 877 lines</li>
-      <li>Coq size: 1482 lines (+68% compared to&nbsp;OCaml)</li>
+      <li>OCaml size: 879 lines</li>
+      <li>Coq size: 1475 lines (+67% compared to&nbsp;OCaml)</li>
     </ul>
   </div>
   <div class="col-md-6">
@@ -53418,6 +53377,7 @@ module Encoding = struct
           inj : 'a -&gt; 'kind manager_operation;
         }
           -&gt; 'kind case
+    [@@coq_force_gadt]
 
     let reveal_case =
       MCase
@@ -53566,6 +53526,7 @@ module Encoding = struct
         inj : 'a -&gt; 'b contents;
       }
         -&gt; 'b case
+  [@@coq_force_gadt]
 
   let raw_endorsement_encoding = obj1 (req &quot;level&quot; Raw_level_repr.encoding)
 
@@ -54645,8 +54606,8 @@ Module Encoding.
     
     Reserved Notation &quot;'case.MCase&quot;.
     
-    Inductive case (kind : Set) : Set :=
-    | MCase : forall {a : Set}, 'case.MCase a -&gt; case kind
+    Inductive case : Set :=
+    | MCase : forall {a : Set}, 'case.MCase a -&gt; case
     
     where &quot;'case.MCase&quot; := (fun (t_a : Set) =&gt;
       case.MCase_skeleton int string (Data_encoding.t t_a)
@@ -54658,9 +54619,7 @@ Module Encoding.
       Definition MCase := 'case.MCase.
     End case.
     
-    Arguments MCase {_ _}.
-    
-    Definition reveal_case : case Kind.reveal :=
+    Definition reveal_case : case :=
       MCase
         {| case.MCase.tag := 0; case.MCase.name := &quot;reveal&quot;;
           case.MCase.encoding :=
@@ -54708,7 +54667,7 @@ Module Encoding.
               (fun s =&gt; Some s) (fun s =&gt; s)
           ]).
     
-    Definition transaction_case : case Kind.transaction :=
+    Definition transaction_case : case :=
       MCase
         {| case.MCase.tag := 1; case.MCase.name := &quot;transaction&quot;;
           case.MCase.encoding :=
@@ -54762,7 +54721,7 @@ Module Encoding.
                   manager_operation.Transaction.entrypoint := entrypoint;
                   manager_operation.Transaction.destination := destination |} |}.
     
-    Definition origination_case : case Kind.origination :=
+    Definition origination_case : case :=
       MCase
         {| case.MCase.tag := 2; case.MCase.name := &quot;origination&quot;;
           case.MCase.encoding :=
@@ -54798,7 +54757,7 @@ Module Encoding.
                   manager_operation.Origination.credit := credit;
                   manager_operation.Origination.preorigination := None |} |}.
     
-    Definition delegation_case : case Kind.delegation :=
+    Definition delegation_case : case :=
       MCase
         {| case.MCase.tag := 3; case.MCase.name := &quot;delegation&quot;;
           case.MCase.encoding :=
@@ -54820,7 +54779,7 @@ Module Encoding.
           |}.
     
     Definition encoding : Data_encoding.encoding packed_manager_operation :=
-      let make {A : Set} (function_parameter : case A)
+      let make (function_parameter : case)
         : Data_encoding.case packed_manager_operation :=
         let
           'MCase {|
@@ -54897,8 +54856,8 @@ Module Encoding.
   
   Reserved Notation &quot;'case.Case&quot;.
   
-  Inductive case (b : Set) : Set :=
-  | Case : forall {a : Set}, 'case.Case a -&gt; case b
+  Inductive case : Set :=
+  | Case : forall {a : Set}, 'case.Case a -&gt; case
   
   where &quot;'case.Case&quot; := (fun (t_a : Set) =&gt;
     case.Case_skeleton int string (Data_encoding.t t_a)
@@ -54909,14 +54868,12 @@ Module Encoding.
     Definition Case := 'case.Case.
   End case.
   
-  Arguments Case {_ _}.
-  
   Definition raw_endorsement_encoding
     : Data_encoding.encoding Raw_level_repr.raw_level :=
     Data_encoding.obj1
       (Data_encoding.req None None &quot;level&quot; Raw_level_repr.encoding).
   
-  Definition endorsement_case : case Kind.endorsement :=
+  Definition endorsement_case : case :=
     Case
       {| case.Case.tag := 0; case.Case.name := &quot;endorsement&quot;;
         case.Case.encoding := raw_endorsement_encoding;
@@ -54937,7 +54894,7 @@ Module Encoding.
   
   Definition endorsement_encoding : Data_encoding.encoding operation := axiom.
   
-  Definition seed_nonce_revelation_case : case Kind.seed_nonce_revelation :=
+  Definition seed_nonce_revelation_case : case :=
     Case
       {| case.Case.tag := 1; case.Case.name := &quot;seed_nonce_revelation&quot;;
         case.Case.encoding :=
@@ -54967,8 +54924,7 @@ Module Encoding.
               {| contents.Seed_nonce_revelation.level := level;
                 contents.Seed_nonce_revelation.nonce := __nonce_value |} |}.
   
-  Definition double_endorsement_evidence_case
-    : case Kind.double_endorsement_evidence :=
+  Definition double_endorsement_evidence_case : case :=
     Case
       {| case.Case.tag := 2; case.Case.name := &quot;double_endorsement_evidence&quot;;
         case.Case.encoding :=
@@ -55000,7 +54956,7 @@ Module Encoding.
               {| contents.Double_endorsement_evidence.op1 := op1;
                 contents.Double_endorsement_evidence.op2 := op2 |} |}.
   
-  Definition double_baking_evidence_case : case Kind.double_baking_evidence :=
+  Definition double_baking_evidence_case : case :=
     Case
       {| case.Case.tag := 3; case.Case.name := &quot;double_baking_evidence&quot;;
         case.Case.encoding :=
@@ -55032,7 +54988,7 @@ Module Encoding.
               {| contents.Double_baking_evidence.bh1 := bh1;
                 contents.Double_baking_evidence.bh2 := bh2 |} |}.
   
-  Definition activate_account_case : case Kind.activate_account :=
+  Definition activate_account_case : case :=
     Case
       {| case.Case.tag := 4; case.Case.name := &quot;activate_account&quot;;
         case.Case.encoding :=
@@ -55065,7 +55021,7 @@ Module Encoding.
                 contents.Activate_account.activation_code := activation_code |}
         |}.
   
-  Definition proposals_case : case Kind.proposals :=
+  Definition proposals_case : case :=
     Case
       {| case.Case.tag := 5; case.Case.name := &quot;proposals&quot;;
         case.Case.encoding :=
@@ -55101,7 +55057,7 @@ Module Encoding.
                 contents.Proposals.period := period;
                 contents.Proposals.proposals := proposals |} |}.
   
-  Definition ballot_case : case Kind.ballot :=
+  Definition ballot_case : case :=
     Case
       {| case.Case.tag := 6; case.Case.name := &quot;ballot&quot;;
         case.Case.encoding :=
@@ -55185,9 +55141,8 @@ Module Encoding.
           contents.Manager_operation.gas_limit := gas_limit;
           contents.Manager_operation.storage_limit := storage_limit |}.
   
-  Definition make_manager_case {A : Set}
-    (tag : int) (function_parameter : Manager_operations.case A)
-    : case Kind.manager :=
+  Definition make_manager_case
+    (tag : int) (function_parameter : Manager_operations.case) : case :=
     let 'Manager_operations.MCase mcase := function_parameter in
     let 'existT _ __MCase_'a mcase :=
       existT (A := Set)
@@ -55233,21 +55188,20 @@ Module Encoding.
             let '(op, contents) := function_parameter in
             rebuild op (mcase.(Manager_operations.case.MCase.inj) contents) |}.
   
-  Definition reveal_case : case Kind.manager :=
+  Definition reveal_case : case :=
     make_manager_case 107 Manager_operations.reveal_case.
   
-  Definition transaction_case : case Kind.manager :=
+  Definition transaction_case : case :=
     make_manager_case 108 Manager_operations.transaction_case.
   
-  Definition origination_case : case Kind.manager :=
+  Definition origination_case : case :=
     make_manager_case 109 Manager_operations.origination_case.
   
-  Definition delegation_case : case Kind.manager :=
+  Definition delegation_case : case :=
     make_manager_case 110 Manager_operations.delegation_case.
   
   Definition contents_encoding : Data_encoding.encoding packed_contents :=
-    let make {A : Set} (function_parameter : case A)
-      : Data_encoding.case packed_contents :=
+    let make (function_parameter : case) : Data_encoding.case packed_contents :=
       let
         'Case {|
           case.Case.tag := tag;
@@ -55565,8 +55519,8 @@ Definition equal (op1 : operation) (op2 : operation) : option eq :=
   <div style="margin: 20px;">
     <h3>Operation_repr_mli</h3>
     <ul>
-      <li>OCaml size: 269 lines</li>
-      <li>Coq size: 658 lines (+144% compared to&nbsp;OCaml)</li>
+      <li>OCaml size: 271 lines</li>
+      <li>Coq size: 655 lines (+141% compared to&nbsp;OCaml)</li>
     </ul>
   </div>
   <div class="col-md-6">
@@ -55797,6 +55751,7 @@ module Encoding : sig
         inj : 'a -&gt; 'b contents;
       }
         -&gt; 'b case
+  [@@coq_force_gadt]
 
   val endorsement_case : Kind.endorsement case
 
@@ -55831,6 +55786,7 @@ module Encoding : sig
           inj : 'a -&gt; 'kind manager_operation;
         }
           -&gt; 'kind case
+    [@@coq_force_gadt]
 
     val reveal_case : Kind.reveal case
 
@@ -56399,8 +56355,8 @@ Module Encoding.
   
   Reserved Notation &quot;'case.Case&quot;.
   
-  Inductive case (b : Set) : Set :=
-  | Case : forall {a : Set}, 'case.Case a -&gt; case b
+  Inductive case : Set :=
+  | Case : forall {a : Set}, 'case.Case a -&gt; case
   
   where &quot;'case.Case&quot; := (fun (t_a : Set) =&gt;
     case.Case_skeleton int string (Data_encoding.t t_a)
@@ -56411,30 +56367,27 @@ Module Encoding.
     Definition Case := 'case.Case.
   End case.
   
-  Arguments Case {_ _}.
+  Parameter endorsement_case : case.
   
-  Parameter endorsement_case : case Kind.endorsement.
+  Parameter seed_nonce_revelation_case : case.
   
-  Parameter seed_nonce_revelation_case : case Kind.seed_nonce_revelation.
+  Parameter double_endorsement_evidence_case : case.
   
-  Parameter double_endorsement_evidence_case :
-    case Kind.double_endorsement_evidence.
+  Parameter double_baking_evidence_case : case.
   
-  Parameter double_baking_evidence_case : case Kind.double_baking_evidence.
+  Parameter activate_account_case : case.
   
-  Parameter activate_account_case : case Kind.activate_account.
+  Parameter proposals_case : case.
   
-  Parameter proposals_case : case Kind.proposals.
+  Parameter ballot_case : case.
   
-  Parameter ballot_case : case Kind.ballot.
+  Parameter reveal_case : case.
   
-  Parameter reveal_case : case Kind.manager.
+  Parameter transaction_case : case.
   
-  Parameter transaction_case : case Kind.manager.
+  Parameter origination_case : case.
   
-  Parameter origination_case : case Kind.manager.
-  
-  Parameter delegation_case : case Kind.manager.
+  Parameter delegation_case : case.
   
   Module Manager_operations.
     Module ConstructorRecords_case.

@@ -10,7 +10,7 @@ Require Import Tezos.Environment.
 Import Environment.Notations.
 Require Tezos.Alpha_context.
 Require Tezos.Apply.
-Require Tezos.Apply_results_mli. Module Apply_results := Apply_results_mli.
+Require Tezos.Apply_results.
 Require Tezos.Script_ir_translator_mli. Module Script_ir_translator := Script_ir_translator_mli.
 Require Tezos.Script_typed_ir.
 Require Tezos.Services_registration.

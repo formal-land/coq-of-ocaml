@@ -9,7 +9,7 @@ Import ListNotations.
 Require Import Tezos.Environment.
 Import Environment.Notations.
 Require Tezos.Alpha_context.
-Require Tezos.Baking_mli. Module Baking := Baking_mli.
+Require Tezos.Baking.
 Require Tezos.Contract_repr.
 Require Tezos.Misc.
 Require Tezos.Services_registration.
