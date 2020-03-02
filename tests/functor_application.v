@@ -26,13 +26,13 @@ Module Target.
   Arguments signature : clear implicits.
 End Target.
 
-Definition M :=
-  ((let t : Set := Z in
+Definition M : {t : Set & Source.signature t} :=
+  let t : Set := Z in
   let x := 12 in
   existT (A := Set) _ _
     {|
       Source.x := x
-    |}) : {t : Set & Source.signature t}).
+    |}.
 
 Definition F :=
   fun (X : {t : Set & Source.signature t}) =>

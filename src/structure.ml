@@ -303,8 +303,17 @@ let rec to_coq (defs : t list) : SmartPrint.t =
         !^ "End" ^^ Name.to_coq name ^-^ !^ "."
       )
     | ModuleExp (name, e) ->
+      let (e, typ) =
+        match e with
+        | TypeAnnotation (e, typ) -> (e, Some typ)
+        | _ -> (e, None) in
       nest (
-        !^ "Definition" ^^ Name.to_coq name ^^ !^ ":=" ^^
+        !^ "Definition" ^^ Name.to_coq name ^^
+        begin match typ with
+        | None -> empty
+        | Some typ -> !^ ":" ^^ Type.to_coq None None typ
+        end ^^
+        !^ ":=" ^^
         Exp.to_coq false e ^-^ !^ "."
       )
     | ModuleInclude reference ->
