@@ -122,8 +122,8 @@ Module Nonce.
               |
                 Pervasives.Ok
                   (Alpha_context.Nonce.Unrevealed {|
-                    Storage.Seed.unrevealed_nonce.nonce_hash := nonce_hash
-                      |}) => Error_monad.__return (Missing nonce_hash)
+                    Storage.unrevealed_nonce.nonce_hash := nonce_hash |}) =>
+                Error_monad.__return (Missing nonce_hash)
               | Pervasives.Error _ => Error_monad.__return Forgotten
               end).
   

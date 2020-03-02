@@ -12,10 +12,6 @@ Unset Guard Checking.
 Require Import Tezos.Environment.
 Import Environment.Notations.
 
-Definition depends_on_me (function_parameter : unit) : unit :=
-  let '_ := function_parameter in
-  tt.
-
 Definition StringMap :=
   Map.Make
     (existT (A := Set) _ _
@@ -161,12 +157,47 @@ Module args.
   Definition One := 'args.One.
 End args.
 
-Fixpoint unpack {a b c : Set} (v : args) (x : c) {struct v} : a * b := axiom.
+Fixpoint unpack {a b c : Set} (v : args) (x : c) {struct v} : a * b :=
+  match v with
+  | One _ => obj_magic (a * b) x
+  | Pair l __r_value =>
+    let '[l, __r_value] := obj_magic [args ** args] [l, __r_value] in
+    obj_magic (a * b)
+    (let '(c, d) := (unpack (a := unit) (b := unit)) __r_value x in
+    let '(__b_value, __a_value) := (unpack (a := unit) (b := unit)) l c in
+    (__b_value, (__a_value, d)))
+  end.
 
-Fixpoint __pack {a b c : Set} (v : args) (x : a) (y : b) {struct v} : c := axiom.
+Fixpoint __pack {a b c : Set} (v : args) (x : a) (y : b) {struct v} : c :=
+  match (v, y) with
+  | (One _, _) => obj_magic c (x, y)
+  | (Pair l __r_value, _ as y) =>
+    let 'existT _ [__0, __1] [l, __r_value, y] :=
+      obj_magic_exists (Es := [Set ** Set])
+        (fun '[__0, __1] => [args ** args ** __0 * __1]) [l, __r_value, y] in
+    obj_magic c
+    (let '(__a_value, d) := y in
+    let c := (__pack (c := unit)) l x __a_value in
+    (__pack (c := unit)) __r_value c d)
+  end.
 
-Fixpoint compare {b : Set} (function_parameter : args)
-  {struct function_parameter} : b -> b -> int := axiom.
+Fixpoint compare {b : Set} (v : args) (x1 : b) (x2 : b) {struct v} : int :=
+  match (v, x1, x2) with
+  | (One {| args.One.compare := compare' |}, _, _) =>
+    let compare' := obj_magic (b -> b -> int) compare' in
+    compare' x1 x2
+  | (Pair l __r_value, _ as x1, _ as x2) =>
+    let 'existT _ [__0, __1] [l, __r_value, x1, x2] :=
+      obj_magic_exists (Es := [Set ** Set])
+        (fun '[__0, __1] => [args ** args ** __0 * __1 ** __0 * __1])
+        [l, __r_value, x1, x2] in
+    let '(a1, b1) := x1 in
+    let '(a2, b2) := x2 in
+    match compare l a1 a2 with
+    | 0 => compare __r_value b1 b2
+    | x => x
+    end
+  end.
 
 Definition destutter {A B : Set} (equal : A -> A -> bool) (l : list (A * B))
   : list A :=
@@ -189,7 +220,58 @@ Definition destutter {A B : Set} (equal : A -> A -> bool) (l : list (A * B))
 
 Fixpoint register_indexed_subcontext {a b r : Set}
   (dir : t r) (__list_value : r -> Lwt.t (Error_monad.tzresult (list a)))
-  (path : args) {struct dir} : t b := axiom.
+  (path : args) {struct dir} : t b :=
+  match (path, __list_value) with
+  | (Pair __left __right, _ as __list_value) =>
+    let 'existT _ [__0, __1] [__left, __right, __list_value] :=
+      obj_magic_exists (Es := [Set ** Set])
+        (fun '[__0, __1] =>
+          [args ** args ** r -> Lwt.t (Error_monad.tzresult (list (__0 * __1)))])
+        [__left, __right, __list_value] in
+    let compare_left := compare __left in
+    let equal_left (x : __0) (y : __0) : bool :=
+      (|Compare.Int|).(Compare.S.op_eq) (compare_left x y) 0 in
+    let list_left (__r_value : r) : Lwt.t (Error_monad.tzresult (list __0)) :=
+      let=? l := __list_value __r_value in
+      Error_monad.__return (destutter equal_left l) in
+    register_indexed_subcontext
+      (register_indexed_subcontext dir list_left __left)
+      (fun __r_value =>
+        let '(__a_value, k) := (unpack (c := unit)) __left __r_value in
+        let=? l := __list_value __a_value in
+        Error_monad.__return
+          (List.map Pervasives.snd
+            (List.filter
+              (fun function_parameter =>
+                let '(x, _) := function_parameter in
+                equal_left x k) l))) __right
+  | (One {| args.One.rpc_arg := arg; args.One.encoding := arg_encoding |}, _) =>
+    let '[arg, arg_encoding] :=
+      obj_magic [RPC_arg.t a ** Data_encoding.t a] [arg, arg_encoding] in
+    match Pervasives.op_exclamation dir with
+    | Value _ => Pervasives.invalid_arg ""
+    | NamedDir _ => Pervasives.invalid_arg ""
+    | Empty =>
+      let subdir := Pervasives.__ref_value Empty in
+      (* ❌ Sequences of instructions are ignored (operator ";") *)
+      (* ❌ instruction_sequence ";" *)
+      subdir
+    |
+      IndexedDir {|
+        description.IndexedDir.arg := inner_arg;
+          description.IndexedDir.subdir := subdir
+          |} =>
+      let 'existT _ __IndexedDir_'a [inner_arg, subdir] :=
+        existT (A := Set)
+          (fun __IndexedDir_'a =>
+            [RPC_arg.t __IndexedDir_'a ** t (r * __IndexedDir_'a)]) _
+          [inner_arg, subdir] in
+      match RPC_arg.__eq_value arg inner_arg with
+      | None => obj_magic (t b) ((Pervasives.invalid_arg (a := t b)) "")
+      | Some RPC_arg.Eq => obj_magic (t b) subdir
+      end
+    end
+  end.
 
 Definition register_value {a b : Set}
   (dir : t a) (get : a -> Lwt.t (Error_monad.tzresult (option b)))

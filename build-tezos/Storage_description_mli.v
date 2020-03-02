@@ -10,8 +10,6 @@ Import ListNotations.
 Require Import Tezos.Environment.
 Import Environment.Notations.
 
-Parameter depends_on_me : unit -> unit.
-
 Parameter t : forall (key : Set), Set.
 
 Parameter pp : forall {key : Set}, Format.formatter -> t key -> unit.

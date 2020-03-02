@@ -1252,7 +1252,7 @@ Module Nonce.
   
   Parameter encoding : Data_encoding.t nonce.
   
-  Definition unrevealed : Set := Storage.Seed.unrevealed_nonce.
+  Definition unrevealed : Set := Storage.unrevealed_nonce.
   
   Parameter record_hash :
     context -> unrevealed -> Lwt.t (Error_monad.tzresult context).

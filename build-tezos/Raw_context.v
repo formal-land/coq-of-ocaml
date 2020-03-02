@@ -926,7 +926,8 @@ Definition absolute_key {A B : Set} (function_parameter : A) : B -> B :=
   let '_ := function_parameter in
   fun k => k.
 
-Definition description {A : Set} : Storage_description.t A := axiom.
+Definition description {A : Set} : Storage_description.t A :=
+  Storage_description.create tt.
 
 Definition fresh_temporary_big_map (ctxt : t) : t * Z.t :=
   ((t.with_temporary_big_map (Z.sub ctxt.(t.temporary_big_map) Z.one) ctxt),

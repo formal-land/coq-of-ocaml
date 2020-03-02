@@ -59,9 +59,9 @@
     <pre><code>opam repo add coq-released https://coq.inria.fr/opam/released
 opam pin add https://github.com/clarus/coq-of-ocaml.git#master</code></pre>
     <ul>
-      <li>OCaml size: 36048 lines</li>
-      <li>Coq size: 45934 lines (+27% compared to&nbsp;OCaml)</li>
-      <li>Warnings from coq-of-ocaml: 4341</li>
+      <li>OCaml size: 36129 lines</li>
+      <li>Coq size: 46327 lines (+28% compared to&nbsp;OCaml)</li>
+      <li>Warnings from coq-of-ocaml: 4338</li>
     </ul>
     
       <canvas id="chart" width="400" height="400"></canvas>
@@ -116,7 +116,7 @@ opam pin add https://github.com/clarus/coq-of-ocaml.git#master</code></pre>
           26259,
           26259,
           28609,
-          32560,
+          32833,
         ],
         generated: [
           47563,
@@ -167,7 +167,7 @@ opam pin add https://github.com/clarus/coq-of-ocaml.git#master</code></pre>
           46049,
           46049,
           45766,
-          45934,
+          46327,
         ],
         labels: [
           "01-14",
@@ -268,7 +268,7 @@ opam pin add https://github.com/clarus/coq-of-ocaml.git#master</code></pre>
       </li>
       
       <li>
-        <a href="#apply_results.ml">apply_results.ml</a>&nbsp;<span class="label label-warning">8</span>
+        <a href="#apply_results.ml">apply_results.ml</a>&nbsp;<span class="label label-warning">7</span>
       </li>
       
       <li>
@@ -664,7 +664,7 @@ opam pin add https://github.com/clarus/coq-of-ocaml.git#master</code></pre>
       </li>
       
       <li>
-        <a href="#storage.ml">storage.ml</a>&nbsp;<span class="label label-warning">10</span>
+        <a href="#storage.ml">storage.ml</a>&nbsp;<span class="label label-warning">8</span>
       </li>
       
       <li>
@@ -2158,7 +2158,7 @@ module Nonce : sig
 
   val encoding : nonce Data_encoding.t
 
-  type unrevealed = Storage.Seed.unrevealed_nonce
+  type unrevealed = Storage.unrevealed_nonce
 
   val record_hash : context -&gt; unrevealed -&gt; context tzresult Lwt.t
 
@@ -4161,7 +4161,7 @@ Module Nonce.
   
   Parameter encoding : Data_encoding.t nonce.
   
-  Definition unrevealed : Set := Storage.Seed.unrevealed_nonce.
+  Definition unrevealed : Set := Storage.unrevealed_nonce.
   
   Parameter record_hash :
     context -&gt; unrevealed -&gt; Lwt.t (Error_monad.tzresult context).
@@ -5990,8 +5990,8 @@ Module Nonce.
               |
                 Pervasives.Ok
                   (Alpha_context.Nonce.Unrevealed {|
-                    Storage.Seed.unrevealed_nonce.nonce_hash := nonce_hash
-                      |}) =&gt; Error_monad.__return (Missing nonce_hash)
+                    Storage.unrevealed_nonce.nonce_hash := nonce_hash |}) =&gt;
+                Error_monad.__return (Missing nonce_hash)
               | Pervasives.Error _ =&gt; Error_monad.__return Forgotten
               end).
   
@@ -10013,10 +10013,10 @@ Definition finalize_application
     | None =&gt; Error_monad.__return ctxt
     | Some nonce_hash =&gt;
       Alpha_context.Nonce.record_hash ctxt
-        {| Storage.Seed.unrevealed_nonce.nonce_hash := nonce_hash;
-          Storage.Seed.unrevealed_nonce.delegate := delegate;
-          Storage.Seed.unrevealed_nonce.rewards := rewards;
-          Storage.Seed.unrevealed_nonce.fees := fees |}
+        {| Storage.unrevealed_nonce.nonce_hash := nonce_hash;
+          Storage.unrevealed_nonce.delegate := delegate;
+          Storage.unrevealed_nonce.rewards := rewards;
+          Storage.unrevealed_nonce.fees := fees |}
     end in
   let=? ctxt := may_snapshot_roll ctxt in
   let=? '(ctxt, balance_updates, deactivated) := may_start_new_cycle ctxt in
@@ -10059,11 +10059,11 @@ Definition finalize_application
     <h3>Apply_results</h3>
     <ul>
       <li>OCaml size: 1198 lines</li>
-      <li>Coq size: 2123 lines (+77% compared to&nbsp;OCaml)</li>
+      <li>Coq size: 2135 lines (+78% compared to&nbsp;OCaml)</li>
     </ul>
   </div>
   <div class="col-md-6">
-    <a href="#apply_results.ml"><code>apply_results.ml</code></a>&nbsp;<span class="label label-warning">8 warnings</span>
+    <a href="#apply_results.ml"><code>apply_results.ml</code></a>&nbsp;<span class="label label-warning">7 warnings</span>
     
     <pre>(*****************************************************************************)
 (*                                                                           *)
@@ -10093,14 +10093,14 @@ Definition finalize_application
 open Alpha_context
 open Data_encoding
 
-let[@coq_axiom] error_encoding =
-  <abbr class="mark-warning" title="expected an argument">def
+let error_encoding =
+  def
     &quot;error&quot;
     ~description:
       &quot;The full list of RPC errors would be too long to include.\n\
        It is available at RPC `/errors` (GET).\n\
        Errors specific to protocol Alpha have an id that starts with \
-       `proto.alpha`.&quot;</abbr>
+       `proto.alpha`.&quot;
   @@ splitted
        ~json:
          (conv
@@ -11286,7 +11286,19 @@ Import Alpha_context.
 
 Import Data_encoding.
 
-Definition error_encoding : Data_encoding.encoding Error_monad.__error := axiom.
+Definition error_encoding : Data_encoding.encoding Error_monad.__error :=
+  (let arg :=
+    Data_encoding.def &quot;error&quot;
+      (Some
+        &quot;The full list of RPC errors would be too long to include.\nIt is available at RPC `/errors` (GET).\nErrors specific to protocol Alpha have an id that starts with `proto.alpha`.&quot;)
+    in
+  fun eta =&gt; arg None eta)
+    (Data_encoding.splitted
+      (Data_encoding.conv
+        (fun err =&gt; Data_encoding.Json.construct Error_monad.error_encoding err)
+        (fun __json_value =&gt;
+          Data_encoding.Json.destruct Error_monad.error_encoding __json_value)
+        None Data_encoding.__json_value) Error_monad.error_encoding).
 
 Module ConstructorRecords_successful_manager_operation_result.
   Module successful_manager_operation_result.
@@ -15445,8 +15457,8 @@ Definition activation_code_of_hex (h : string) : MBytes.t :=
   (* ❌ instruction_sequence &quot;;&quot; *)
   MBytes.of_hex (MBytes.Hex h).
 
-Definition Index :=
-  ((existT (A := unit) (fun _ =&gt; _) tt
+Definition Index : {_ : unit &amp; Storage_description.INDEX.signature t} :=
+  existT (A := unit) (fun _ =&gt; _) tt
     {|
       Storage_description.INDEX.path_length := (|H|).(S.HASH.path_length);
       Storage_description.INDEX.to_path := (|H|).(S.HASH.to_path);
@@ -15454,7 +15466,7 @@ Definition Index :=
       Storage_description.INDEX.rpc_arg := (|H|).(S.HASH.rpc_arg);
       Storage_description.INDEX.encoding := (|H|).(S.HASH.encoding);
       Storage_description.INDEX.compare := (|H|).(S.HASH.compare)
-    |}) : {_ : unit &amp; Storage_description.INDEX.signature t}).
+    |}.
 </pre>
   </div>
 </div>
@@ -18910,7 +18922,7 @@ Definition path_length := (|Blake2BModule|).(S.HASH.path_length).
     <h3>Contract_repr</h3>
     <ul>
       <li>OCaml size: 232 lines</li>
-      <li>Coq size: 248 lines (+6% compared to&nbsp;OCaml)</li>
+      <li>Coq size: 281 lines (+21% compared to&nbsp;OCaml)</li>
     </ul>
   </div>
   <div class="col-md-6">
@@ -18999,7 +19011,7 @@ let pp_short ppf = function
   | Originated h -&gt;
       Contract_hash.pp_short ppf h
 
-let[@coq_axiom] encoding =
+let encoding =
   let open Data_encoding in
   def
     &quot;contract_id&quot;
@@ -19253,7 +19265,40 @@ Definition pp_short (ppf : Format.formatter) (function_parameter : t) : unit :=
   | Originated h =&gt; Contract_hash.pp_short ppf h
   end.
 
-Definition encoding : Data_encoding.encoding t := axiom.
+Definition encoding : Data_encoding.encoding t :=
+  (Data_encoding.def &quot;contract_id&quot; (Some &quot;A contract handle&quot;)
+    (Some
+      &quot;A contract notation as given to an RPC or inside scripts. Can be a base58 implicit contract hash or a base58 originated contract hash.&quot;))
+    (Data_encoding.splitted
+      (Data_encoding.conv to_b58check
+        (fun s =&gt;
+          match of_b58check s with
+          | Pervasives.Ok s =&gt; s
+          | Pervasives.Error _ =&gt;
+            Data_encoding.Json.cannot_destruct
+              (CamlinternalFormatBasics.Format
+                (CamlinternalFormatBasics.String_literal
+                  &quot;Invalid contract notation.&quot;
+                  CamlinternalFormatBasics.End_of_format)
+                &quot;Invalid contract notation.&quot;)
+          end) None Data_encoding.__string_value)
+      (Data_encoding.union (Some Data_encoding.Uint8)
+        [
+          Data_encoding.__case_value &quot;Implicit&quot; None (Data_encoding.Tag 0)
+            (|Signature.Public_key_hash|).(S.SPublic_key_hash.encoding)
+            (fun function_parameter =&gt;
+              match function_parameter with
+              | Implicit k =&gt; Some k
+              | _ =&gt; None
+              end) (fun k =&gt; Implicit k);
+          Data_encoding.__case_value &quot;Originated&quot; None (Data_encoding.Tag 1)
+            (Data_encoding.Fixed.add_padding Contract_hash.encoding 1)
+            (fun function_parameter =&gt;
+              match function_parameter with
+              | Originated k =&gt; Some k
+              | _ =&gt; None
+              end) (fun k =&gt; Originated k)
+        ])).
 
 (* ❌ Top-level evaluations are ignored *)
 (* top_level_evaluation *)
@@ -19363,8 +19408,8 @@ Definition rpc_arg : RPC_arg.arg t :=
   RPC_arg.make (Some &quot;A contract identifier encoded in b58check.&quot;) &quot;contract_id&quot;
     destruct construct tt.
 
-Definition Index :=
-  ((let t : Set := contract in
+Definition Index : {_ : unit &amp; Storage_description.INDEX.signature contract} :=
+  let t : Set := contract in
   let path_length := 7 in
   let to_path (c : t) (l : list string) : list string :=
     let raw_key := Data_encoding.Binary.to_bytes_exn encoding c in
@@ -19415,7 +19460,7 @@ Definition Index :=
       Storage_description.INDEX.rpc_arg := rpc_arg;
       Storage_description.INDEX.encoding := encoding;
       Storage_description.INDEX.compare := compare
-    |}) : {_ : unit &amp; Storage_description.INDEX.signature contract}).
+    |}.
 </pre>
   </div>
 </div>
@@ -19615,7 +19660,7 @@ Parameter Index : {_ : unit &amp; Storage_description.INDEX.signature t}.
     <h3>Contract_services</h3>
     <ul>
       <li>OCaml size: 425 lines</li>
-      <li>Coq size: 461 lines (+8% compared to&nbsp;OCaml)</li>
+      <li>Coq size: 581 lines (+36% compared to&nbsp;OCaml)</li>
     </ul>
   </div>
   <div class="col-md-6">
@@ -19975,7 +20020,7 @@ Expected a list of named or unspecified '_' type variables">list</abbr> =
       custom_root
 end
 
-let[@coq_axiom] register () =
+let register () =
   let open Services_registration in
   <abbr class="mark-warning" title="Sequences of instructions are ignored (operator &quot;;&quot;)
 
@@ -21944,7 +21989,127 @@ Module S.
       custom_root.
 End S.
 
-Definition register (function_parameter : unit) : unit := axiom.
+Definition register (function_parameter : unit) : unit :=
+  let '_ := function_parameter in
+  (* ❌ Sequences of instructions are ignored (operator &quot;;&quot;) *)
+  (* ❌ instruction_sequence &quot;;&quot; *)
+  let register_field {A : Set}
+    (s :
+      RPC_service.t Updater.rpc_context
+        (Updater.rpc_context * Alpha_context.Contract.contract) unit unit A)
+    (f :
+      Alpha_context.t -&gt; Alpha_context.Contract.contract -&gt;
+      Lwt.t (Error_monad.tzresult A)) : unit :=
+    Services_registration.register1 s
+      (fun ctxt =&gt;
+        fun contract =&gt;
+          fun function_parameter =&gt;
+            let '_ := function_parameter in
+            fun function_parameter =&gt;
+              let '_ := function_parameter in
+              let=? function_parameter :=
+                Alpha_context.Contract.__exists ctxt contract in
+              match function_parameter with
+              | true =&gt; f ctxt contract
+              | false =&gt; Pervasives.raise extensible_type_value
+              end) in
+  let register_opt_field {A : Set}
+    (s :
+      RPC_service.t Updater.rpc_context
+        (Updater.rpc_context * Alpha_context.Contract.contract) unit unit A)
+    (f :
+      Alpha_context.t -&gt; Alpha_context.Contract.contract -&gt;
+      Lwt.t (Error_monad.tzresult (option A))) : unit :=
+    register_field s
+      (fun ctxt =&gt;
+        fun a1 =&gt;
+          let=? function_parameter := f ctxt a1 in
+          match function_parameter with
+          | None =&gt; Pervasives.raise extensible_type_value
+          | Some v =&gt; Error_monad.__return v
+          end) in
+  let do_big_map_get
+    (ctxt : Alpha_context.context) (id : Alpha_context.Big_map.id)
+    (__key_value : Script_expr_hash.t)
+    : Lwt.t
+      (Error_monad.tzresult (Micheline.canonical Alpha_context.Script.prim)) :=
+    let ctxt := Alpha_context.Gas.set_unlimited ctxt in
+    let=? '(ctxt, types) := Alpha_context.Big_map.__exists ctxt id in
+    match types with
+    | None =&gt; Pervasives.raise extensible_type_value
+    | Some (_, value_type) =&gt;
+      let=? '(Script_ir_translator.Ex_ty value_type, ctxt) :=
+        Lwt.__return
+          (Script_ir_translator.parse_ty ctxt true false false true
+            (Micheline.root value_type)) in
+      let=? '(_ctxt, value) := Alpha_context.Big_map.get_opt ctxt id __key_value
+        in
+      match value with
+      | None =&gt; Pervasives.raise extensible_type_value
+      | Some value =&gt;
+        let=? '(value, ctxt) :=
+          Script_ir_translator.parse_data None ctxt true value_type
+            (Micheline.root value) in
+        let=? '(value, _ctxt) :=
+          Script_ir_translator.unparse_data ctxt Script_ir_translator.Readable
+            value_type value in
+        Error_monad.__return (Micheline.strip_locations value)
+      end
+    end in
+  (* ❌ Sequences of instructions are ignored (operator &quot;;&quot;) *)
+  (* ❌ instruction_sequence &quot;;&quot; *)
+  (* ❌ Sequences of instructions are ignored (operator &quot;;&quot;) *)
+  (* ❌ instruction_sequence &quot;;&quot; *)
+  (* ❌ Sequences of instructions are ignored (operator &quot;;&quot;) *)
+  (* ❌ instruction_sequence &quot;;&quot; *)
+  (* ❌ Sequences of instructions are ignored (operator &quot;;&quot;) *)
+  (* ❌ instruction_sequence &quot;;&quot; *)
+  (* ❌ Sequences of instructions are ignored (operator &quot;;&quot;) *)
+  (* ❌ instruction_sequence &quot;;&quot; *)
+  (* ❌ Sequences of instructions are ignored (operator &quot;;&quot;) *)
+  (* ❌ instruction_sequence &quot;;&quot; *)
+  (* ❌ Sequences of instructions are ignored (operator &quot;;&quot;) *)
+  (* ❌ instruction_sequence &quot;;&quot; *)
+  (* ❌ Sequences of instructions are ignored (operator &quot;;&quot;) *)
+  (* ❌ instruction_sequence &quot;;&quot; *)
+  (* ❌ Sequences of instructions are ignored (operator &quot;;&quot;) *)
+  (* ❌ instruction_sequence &quot;;&quot; *)
+  (* ❌ Sequences of instructions are ignored (operator &quot;;&quot;) *)
+  (* ❌ instruction_sequence &quot;;&quot; *)
+  register_field S.__info_value
+    (fun ctxt =&gt;
+      fun contract =&gt;
+        let=? balance := Alpha_context.Contract.get_balance ctxt contract in
+        let=? delegate := Alpha_context.Delegate.get ctxt contract in
+        let=? counter :=
+          match Alpha_context.Contract.is_implicit contract with
+          | Some manager =&gt;
+            let=? counter := Alpha_context.Contract.get_counter ctxt manager in
+            Error_monad.return_some counter
+          | None =&gt; Error_monad.__return None
+          end in
+        let=? '(ctxt, script) := Alpha_context.Contract.get_script ctxt contract
+          in
+        let=? '(script, _ctxt) :=
+          match script with
+          | None =&gt; Error_monad.__return (None, ctxt)
+          | Some script =&gt;
+            let ctxt := Alpha_context.Gas.set_unlimited ctxt in
+            let=? '(Script_ir_translator.Ex_script script, ctxt) :=
+              Script_ir_translator.parse_script None ctxt true script in
+            let 'existT _ __Ex_script_'b2 [script, ctxt] :=
+              existT (A := Set)
+                (fun __Ex_script_'b2 =&gt;
+                  [Script_typed_ir.script __Ex_script_'b2 **
+                    Alpha_context.context]) _ [script, ctxt] in
+            let=? '(script, ctxt) :=
+              Script_ir_translator.unparse_script ctxt
+                Script_ir_translator.Readable script in
+            Error_monad.__return ((Some script), ctxt)
+          end in
+        Error_monad.__return
+          {| info.balance := balance; info.delegate := delegate;
+            info.counter := counter; info.script := script |}).
 
 Definition __list_value {D E G I K L a b c i o q : Set}
   (ctxt :
@@ -26228,8 +26393,8 @@ Definition of_int32_exn (l : (|Compare.Int32|).(Compare.S.t))
   else
     Pervasives.invalid_arg &quot;Level_repr.Cycle.of_int32&quot;.
 
-Definition Index :=
-  ((let t : Set := cycle in
+Definition Index : {_ : unit &amp; Storage_description.INDEX.signature cycle} :=
+  let t : Set := cycle in
   let path_length := 1 in
   let to_path (c : int32) (l : list string) : list string :=
     cons (Int32.to_string (to_int32 c)) l in
@@ -26248,7 +26413,7 @@ Definition Index :=
       Storage_description.INDEX.rpc_arg := rpc_arg;
       Storage_description.INDEX.encoding := encoding;
       Storage_description.INDEX.compare := compare
-    |}) : {_ : unit &amp; Storage_description.INDEX.signature cycle}).
+    |}.
 </pre>
   </div>
 </div>
@@ -32021,7 +32186,7 @@ Parameter register : unit -&gt; unit.
     <h3>Delegate_storage</h3>
     <ul>
       <li>OCaml size: 713 lines</li>
-      <li>Coq size: 898 lines (+25% compared to&nbsp;OCaml)</li>
+      <li>Coq size: 897 lines (+25% compared to&nbsp;OCaml)</li>
     </ul>
   </div>
   <div class="col-md-6">
@@ -33393,18 +33558,17 @@ Definition cycle_end
           fun u =&gt;
             let=? '(ctxt, balance_updates) := acc in
             let=? ctxt :=
-              burn_fees ctxt u.(Storage.Seed.unrevealed_nonce.delegate)
-                revealed_cycle u.(Storage.Seed.unrevealed_nonce.fees) in
+              burn_fees ctxt u.(Storage.unrevealed_nonce.delegate)
+                revealed_cycle u.(Storage.unrevealed_nonce.fees) in
             let=? ctxt :=
-              burn_rewards ctxt u.(Storage.Seed.unrevealed_nonce.delegate)
-                revealed_cycle u.(Storage.Seed.unrevealed_nonce.rewards) in
+              burn_rewards ctxt u.(Storage.unrevealed_nonce.delegate)
+                revealed_cycle u.(Storage.unrevealed_nonce.rewards) in
             let bus :=
               [
-                ((Fees u.(Storage.Seed.unrevealed_nonce.delegate) revealed_cycle),
-                  (Debited u.(Storage.Seed.unrevealed_nonce.fees)));
-                ((Rewards u.(Storage.Seed.unrevealed_nonce.delegate)
-                  revealed_cycle),
-                  (Debited u.(Storage.Seed.unrevealed_nonce.rewards)))
+                ((Fees u.(Storage.unrevealed_nonce.delegate) revealed_cycle),
+                  (Debited u.(Storage.unrevealed_nonce.fees)));
+                ((Rewards u.(Storage.unrevealed_nonce.delegate) revealed_cycle),
+                  (Debited u.(Storage.unrevealed_nonce.rewards)))
               ] in
             Error_monad.__return (ctxt, (Pervasives.op_at bus balance_updates)))
         (Error_monad.__return (ctxt, nil)) unrevealed
@@ -52988,9 +53152,9 @@ They are sent to a unit type.">Unexpected_nonce</abbr>
   Storage.Seed.Nonce.set ctxt level (Revealed nonce)
   &gt;&gt;=? fun ctxt -&gt; return ctxt
 
-type unrevealed = Storage.Seed.unrevealed_nonce
+type unrevealed = Storage.unrevealed_nonce
 
-<abbr class="mark-warning" title="We do not handle types with both a synonym and a type definition">type status = Storage.Seed.nonce_status =
+<abbr class="mark-warning" title="We do not handle types with both a synonym and a type definition">type status = Storage.nonce_status =
   | Unrevealed of unrevealed
   | Revealed of Seed_repr.nonce</abbr>
 
@@ -53039,7 +53203,7 @@ Definition encoding : Data_encoding.t Seed_repr.nonce :=
 (* top_level_evaluation *)
 
 Definition get_unrevealed (ctxt : Raw_context.t) (level : Level_repr.t)
-  : Lwt.t (Error_monad.tzresult Storage.Seed.unrevealed_nonce) :=
+  : Lwt.t (Error_monad.tzresult Storage.unrevealed_nonce) :=
   let cur_level := Level_storage.current ctxt in
   match Cycle_repr.pred cur_level.(Level_repr.t.cycle) with
   | None =&gt; Error_monad.fail extensible_type_value
@@ -53054,17 +53218,17 @@ Definition get_unrevealed (ctxt : Raw_context.t) (level : Level_repr.t)
           (|Storage.Seed.Nonce|).(Storage_sigs.Non_iterable_indexed_data_storage.get)
             ctxt level in
         match function_parameter with
-        | Storage.Seed.Revealed _ =&gt; Error_monad.fail extensible_type_value
-        | Storage.Seed.Unrevealed status =&gt; Error_monad.__return status
+        | Storage.Revealed _ =&gt; Error_monad.fail extensible_type_value
+        | Storage.Unrevealed status =&gt; Error_monad.__return status
         end
   end.
 
 Definition record_hash
-  (ctxt : Raw_context.t) (unrevealed : Storage.Seed.unrevealed_nonce)
+  (ctxt : Raw_context.t) (unrevealed : Storage.unrevealed_nonce)
   : Lwt.t (Error_monad.tzresult Raw_context.t) :=
   let level := Level_storage.current ctxt in
   (|Storage.Seed.Nonce|).(Storage_sigs.Non_iterable_indexed_data_storage.init)
-    ctxt level (Storage.Seed.Unrevealed unrevealed).
+    ctxt level (Storage.Unrevealed unrevealed).
 
 Definition reveal
   (ctxt : Raw_context.t) (level : Level_repr.t)
@@ -53074,20 +53238,20 @@ Definition reveal
   let=? '_ :=
     Error_monad.fail_unless
       (Seed_repr.check_hash __nonce_value
-        unrevealed.(Storage.Seed.unrevealed_nonce.nonce_hash))
-      extensible_type_value in
+        unrevealed.(Storage.unrevealed_nonce.nonce_hash)) extensible_type_value
+    in
   let=? ctxt :=
     (|Storage.Seed.Nonce|).(Storage_sigs.Non_iterable_indexed_data_storage.set)
-      ctxt level (Storage.Seed.Revealed __nonce_value) in
+      ctxt level (Storage.Revealed __nonce_value) in
   Error_monad.__return ctxt.
 
-Definition unrevealed : Set := Storage.Seed.unrevealed_nonce.
+Definition unrevealed : Set := Storage.unrevealed_nonce.
 
-Definition status : Set := Storage.Seed.nonce_status.
+Definition status : Set := Storage.nonce_status.
 
 Definition get
   : (|Storage.Seed.Nonce|).(Storage_sigs.Non_iterable_indexed_data_storage.context)
-  -&gt; Level_repr.t -&gt; Lwt.t (Error_monad.tzresult Storage.Seed.nonce_status) :=
+  -&gt; Level_repr.t -&gt; Lwt.t (Error_monad.tzresult Storage.nonce_status) :=
   (|Storage.Seed.Nonce|).(Storage_sigs.Non_iterable_indexed_data_storage.get).
 
 Definition of_bytes : MBytes.t -&gt; Error_monad.tzresult Seed_repr.nonce :=
@@ -53151,7 +53315,7 @@ type nonce = t
 
 val encoding : nonce Data_encoding.t
 
-type unrevealed = Storage.Seed.unrevealed_nonce
+type unrevealed = Storage.unrevealed_nonce
 
 type status = Unrevealed of unrevealed | Revealed of Seed_repr.nonce
 
@@ -53196,7 +53360,7 @@ Definition nonce : Set := t.
 
 Parameter encoding : Data_encoding.t nonce.
 
-Definition unrevealed : Set := Storage.Seed.unrevealed_nonce.
+Definition unrevealed : Set := Storage.unrevealed_nonce.
 
 Inductive status : Set :=
 | Unrevealed : unrevealed -&gt; status
@@ -53226,8 +53390,8 @@ Parameter check_hash : nonce -&gt; Nonce_hash.t -&gt; bool.
   <div style="margin: 20px;">
     <h3>Operation_repr</h3>
     <ul>
-      <li>OCaml size: 879 lines</li>
-      <li>Coq size: 1476 lines (+67% compared to&nbsp;OCaml)</li>
+      <li>OCaml size: 880 lines</li>
+      <li>Coq size: 1527 lines (+73% compared to&nbsp;OCaml)</li>
     </ul>
   </div>
   <div class="col-md-6">
@@ -53629,8 +53793,8 @@ module Encoding = struct
         inj = (fun level -&gt; Endorsement {level});
       }
 
-  let[@coq_axiom] endorsement_encoding =
-    let make = function[@coq_match_with_default]
+  let endorsement_encoding =
+    let make = function
       | Case {tag; name; encoding; select = _; proj; inj} -&gt;
           case
             (Tag tag)
@@ -53639,7 +53803,8 @@ module Encoding = struct
             (fun o -&gt; Some (proj o))
             (fun x -&gt; inj x)
     in
-    let to_list : Kind.endorsement contents_list -&gt; _ = function
+    let to_list : Kind.endorsement contents_list -&gt; _ =
+      function[@coq_match_with_default]
       | Single o -&gt;
           o
     in
@@ -54980,7 +55145,58 @@ Module Encoding.
         case.Case.inj :=
           fun level =&gt; Endorsement {| contents.Endorsement.level := level |} |}.
   
-  Definition endorsement_encoding : Data_encoding.encoding operation := axiom.
+  Definition endorsement_encoding : Data_encoding.encoding operation :=
+    let make (function_parameter : case) : Data_encoding.case contents :=
+      let
+        'Case {|
+          case.Case.tag := tag;
+            case.Case.name := name;
+            case.Case.encoding := encoding;
+            case.Case.select := _;
+            case.Case.proj := proj;
+            case.Case.inj := inj
+            |} := function_parameter in
+      let 'existT _ __Case_'a [tag, name, encoding, proj, inj] :=
+        existT (A := Set)
+          (fun __Case_'a =&gt;
+            [int ** string ** Data_encoding.t __Case_'a ** contents -&gt; __Case_'a
+              ** __Case_'a -&gt; contents]) _ [tag, name, encoding, proj, inj] in
+      __case_value (Data_encoding.Tag tag) name encoding
+        (fun o =&gt; Some (proj o)) (fun x =&gt; inj x) in
+    let to_list (function_parameter : contents_list) : contents :=
+      match function_parameter with
+      | Single o =&gt; o
+      | _ =&gt; unreachable_gadt_branch
+      end in
+    let of_list (o : contents) : contents_list :=
+      Single o in
+    (let arg := Data_encoding.def &quot;inlined.endorsement&quot; in
+    fun eta =&gt; arg None None eta)
+      (Data_encoding.conv
+        (fun function_parameter =&gt;
+          let '{|
+            operation.shell := shell;
+              operation.protocol_data := {|
+                protocol_data.contents := contents;
+                  protocol_data.signature := signature
+                  |}
+              |} := function_parameter in
+          (shell, (contents, signature)))
+        (fun function_parameter =&gt;
+          let '(shell, (contents, signature)) := function_parameter in
+          {| operation.shell := shell;
+            operation.protocol_data :=
+              {| protocol_data.contents := contents;
+                protocol_data.signature := signature |} |}) None
+        (Data_encoding.merge_objs Operation.shell_header_encoding
+          (Data_encoding.obj2
+            (Data_encoding.req None None &quot;operations&quot;
+              ((let arg := Data_encoding.conv to_list of_list in
+              fun eta =&gt; arg None eta)
+                ((let arg := Data_encoding.def &quot;inlined.endorsement.contents&quot; in
+                fun eta =&gt; arg None None eta)
+                  (Data_encoding.union None [ make endorsement_case ]))))
+            (Data_encoding.varopt None None &quot;signature&quot; Signature.encoding)))).
   
   Definition seed_nonce_revelation_case : case :=
     Case
@@ -58119,7 +58335,7 @@ Definition Make :=
     <h3>Raw_context</h3>
     <ul>
       <li>OCaml size: 754 lines</li>
-      <li>Coq size: 946 lines (+25% compared to&nbsp;OCaml)</li>
+      <li>Coq size: 947 lines (+25% compared to&nbsp;OCaml)</li>
     </ul>
   </div>
   <div class="col-md-6">
@@ -58876,7 +59092,7 @@ let project x = x
 
 let absolute_key _ k = k
 
-let[@coq_axiom] description = Storage_description.create ()
+let description = Storage_description.create ()
 
 let fresh_temporary_big_map ctxt =
   ( {ctxt with temporary_big_map = Z.sub ctxt.temporary_big_map Z.one},
@@ -59823,7 +60039,8 @@ Definition absolute_key {A B : Set} (function_parameter : A) : B -&gt; B :=
   let '_ := function_parameter in
   fun k =&gt; k.
 
-Definition description {A : Set} : Storage_description.t A := axiom.
+Definition description {A : Set} : Storage_description.t A :=
+  Storage_description.create tt.
 
 Definition fresh_temporary_big_map (ctxt : t) : t * Z.t :=
   ((t.with_temporary_big_map (Z.sub ctxt.(t.temporary_big_map) Z.one) ctxt),
@@ -61084,7 +61301,7 @@ Parameter Index : {_ : unit &amp; Storage_description.INDEX.signature roll}.
     <h3>Roll_storage</h3>
     <ul>
       <li>OCaml size: 604 lines</li>
-      <li>Coq size: 795 lines (+31% compared to&nbsp;OCaml)</li>
+      <li>Coq size: 796 lines (+31% compared to&nbsp;OCaml)</li>
     </ul>
   </div>
   <div class="col-md-6">
@@ -61848,7 +62065,8 @@ Definition freeze_rolls_for_cycle
   let=? max_index :=
     (|Storage.Roll.Snapshot_for_cycle|).(Storage_sigs.Indexed_data_storage.get)
       ctxt cycle in
-  let=? __seed_value := Storage.Seed.For_cycle.get ctxt cycle in
+  let=? __seed_value :=
+    (|Storage.Seed.For_cycle|).(Storage.For_cycle_sig.get) ctxt cycle in
   let rd :=
     Seed_repr.initialize_new __seed_value [ MBytes.of_string &quot;roll_snapshot&quot; ]
     in
@@ -85914,7 +86132,7 @@ Parameter seed_encoding : Data_encoding.t seed.
     <h3>Seed_storage</h3>
     <ul>
       <li>OCaml size: 148 lines</li>
-      <li>Coq size: 133 lines (-11% compared to&nbsp;OCaml)</li>
+      <li>Coq size: 134 lines (-10% compared to&nbsp;OCaml)</li>
     </ul>
   </div>
   <div class="col-md-6">
@@ -86105,48 +86323,50 @@ Import Misc.
 
 Definition compute_for_cycle
   (c : Raw_context.t) (revealed : Cycle_repr.t) (cycle : Cycle_repr.cycle)
-  : Lwt.t
-    (Error_monad.tzresult (Raw_context.t * list Storage.Seed.unrevealed_nonce)) :=
+  : Lwt.t (Error_monad.tzresult (Raw_context.t * list Storage.unrevealed_nonce)) :=
   match Cycle_repr.pred cycle with
   | None =&gt;
     (* ❌ Assert instruction is not handled. *)
     assert
       (Lwt.t
-        (Error_monad.tzresult
-          (Raw_context.t * list Storage.Seed.unrevealed_nonce))) false
+        (Error_monad.tzresult (Raw_context.t * list Storage.unrevealed_nonce)))
+      false
   | Some previous_cycle =&gt;
     let levels := Level_storage.levels_with_commitments_in_cycle c revealed in
     let combine
       (function_parameter :
         (|Storage.Seed.Nonce|).(Storage_sigs.Non_iterable_indexed_data_storage.context)
-          * Seed_repr.seed * list Storage.Seed.unrevealed_nonce)
+          * Seed_repr.seed * list Storage.unrevealed_nonce)
       : Level_repr.t -&gt;
       Lwt.t
         (Error_monad.tzresult
-          (Raw_context.t * Seed_repr.seed * list Storage.Seed.unrevealed_nonce)) :=
+          (Raw_context.t * Seed_repr.seed * list Storage.unrevealed_nonce)) :=
       let '(c, random_seed, unrevealed) := function_parameter in
       fun level =&gt;
         let=? function_parameter :=
           (|Storage.Seed.Nonce|).(Storage_sigs.Non_iterable_indexed_data_storage.get)
             c level in
         match function_parameter with
-        | Storage.Seed.Revealed __nonce_value =&gt;
+        | Storage.Revealed __nonce_value =&gt;
           let=? c :=
             (|Storage.Seed.Nonce|).(Storage_sigs.Non_iterable_indexed_data_storage.delete)
               c level in
           Error_monad.__return
             (c, (Seed_repr.__nonce_value random_seed __nonce_value), unrevealed)
-        | Storage.Seed.Unrevealed u =&gt;
+        | Storage.Unrevealed u =&gt;
           let=? c :=
             (|Storage.Seed.Nonce|).(Storage_sigs.Non_iterable_indexed_data_storage.delete)
               c level in
           Error_monad.__return (c, random_seed, (cons u unrevealed))
         end in
-    let=? prev_seed := Storage.Seed.For_cycle.get c previous_cycle in
+    let=? prev_seed :=
+      (|Storage.Seed.For_cycle|).(Storage.For_cycle_sig.get) c previous_cycle in
     let __seed_value := Seed_repr.deterministic_seed prev_seed in
     let=? '(c, __seed_value, unrevealed) :=
       Error_monad.fold_left_s combine (c, __seed_value, nil) levels in
-    let=? c := Storage.Seed.For_cycle.init c cycle __seed_value in
+    let=? c :=
+      (|Storage.Seed.For_cycle|).(Storage.For_cycle_sig.init) c cycle
+        __seed_value in
     Error_monad.__return (c, unrevealed)
   end.
 
@@ -86169,11 +86389,11 @@ Definition for_cycle (ctxt : Raw_context.context) (cycle : Cycle_repr.t)
     Error_monad.fail_unless
       (Pervasives.op_andand (Cycle_repr.op_lteq oldest cycle)
         (Cycle_repr.op_lteq cycle latest)) extensible_type_value in
-  Storage.Seed.For_cycle.get ctxt cycle.
+  (|Storage.Seed.For_cycle|).(Storage.For_cycle_sig.get) ctxt cycle.
 
 Definition clear_cycle (c : Raw_context.t) (cycle : Cycle_repr.t)
   : Lwt.t (Error_monad.tzresult Raw_context.t) :=
-  Storage.Seed.For_cycle.delete c cycle.
+  (|Storage.Seed.For_cycle|).(Storage.For_cycle_sig.delete) c cycle.
 
 Definition init (ctxt : Raw_context.context)
   : Lwt.t (Error_monad.tzresult Raw_context.t) :=
@@ -86184,16 +86404,15 @@ Definition init (ctxt : Raw_context.context)
         fun __seed_value =&gt;
           let=? ctxt := ctxt in
           let cycle := Cycle_repr.of_int32_exn (Int32.of_int c) in
-          Storage.Seed.For_cycle.init ctxt cycle __seed_value)
-    (Error_monad.__return ctxt)
+          (|Storage.Seed.For_cycle|).(Storage.For_cycle_sig.init) ctxt cycle
+            __seed_value) (Error_monad.__return ctxt)
     (Misc.op_minusminusgt 0 (Pervasives.op_plus preserved 1))
     (Seed_repr.initial_seeds (Pervasives.op_plus preserved 2)).
 
 Definition cycle_end
   (ctxt : Raw_context.context) (last_cycle : Cycle_repr.cycle)
   : Lwt.t
-    (Error_monad.tzresult
-      (Raw_context.context * list Storage.Seed.unrevealed_nonce)) :=
+    (Error_monad.tzresult (Raw_context.context * list Storage.unrevealed_nonce)) :=
   let preserved := Constants_storage.preserved_cycles ctxt in
   let=? ctxt :=
     match Cycle_repr.sub last_cycle preserved with
@@ -86861,12 +87080,12 @@ Definition path_length := (|Blake2BModule|).(S.HASH.path_length).
   <div style="margin: 20px;">
     <h3>Storage</h3>
     <ul>
-      <li>OCaml size: 911 lines</li>
-      <li>Coq size: 1948 lines (+113% compared to&nbsp;OCaml)</li>
+      <li>OCaml size: 999 lines</li>
+      <li>Coq size: 2041 lines (+104% compared to&nbsp;OCaml)</li>
     </ul>
   </div>
   <div class="col-md-6">
-    <a href="#storage.ml"><code>storage.ml</code></a>&nbsp;<span class="label label-warning">10 warnings</span>
+    <a href="#storage.ml"><code>storage.ml</code></a>&nbsp;<span class="label label-warning">8 warnings</span>
     
     <pre>(*****************************************************************************)
 (*                                                                           *)
@@ -86894,6 +87113,7 @@ Definition path_length := (|Blake2BModule|).(S.HASH.path_length).
 (*****************************************************************************)
 
 open Storage_functors
+open Storage_sigs
 
 module Int = struct
   type t = int
@@ -86960,7 +87180,7 @@ module Block_priority =
 (** Contracts handling *)
 
 module Contract = struct
-  module Raw_context =
+  module Raw_context : Raw_context.T with type t = Raw_context.t =
     Make_subcontext (Registered) (Raw_context)
       (struct
         let name = [&quot;contracts&quot;]
@@ -86985,7 +87205,11 @@ module Contract = struct
 
   let list = Indexed_context.keys
 
-  module Balance =
+  module Balance :
+    Indexed_data_storage
+      with type key = Contract_repr.t
+       and type value = Tez_repr.t
+       and type t := Raw_context.t =
     Indexed_context.Make_map
       (struct
         let name = [&quot;balance&quot;]
@@ -87000,56 +87224,84 @@ module Contract = struct
          end))
          (Make_index (Cycle_repr.Index))
 
-  module Frozen_deposits =
+  module Frozen_deposits :
+    Indexed_data_storage
+      with type key = Cycle_repr.t
+       and type value = Tez_repr.t
+       and type t = Raw_context.t * Contract_repr.t =
     Frozen_balance_index.Make_map
       (struct
         let name = [&quot;deposits&quot;]
       end)
       (Tez_repr)
 
-  module Frozen_fees =
+  module Frozen_fees :
+    Indexed_data_storage
+      with type key = Cycle_repr.t
+       and type value = Tez_repr.t
+       and type t = Raw_context.t * Contract_repr.t =
     Frozen_balance_index.Make_map
       (struct
         let name = [&quot;fees&quot;]
       end)
       (Tez_repr)
 
-  module Frozen_rewards =
+  module Frozen_rewards :
+    Indexed_data_storage
+      with type key = Cycle_repr.t
+       and type value = Tez_repr.t
+       and type t = Raw_context.t * Contract_repr.t =
     Frozen_balance_index.Make_map
       (struct
         let name = [&quot;rewards&quot;]
       end)
       (Tez_repr)
 
-  module Manager =
+  module Manager :
+    Indexed_data_storage
+      with type key = Contract_repr.t
+       and type value = Manager_repr.t
+       and type t := Raw_context.t =
     Indexed_context.Make_map
       (struct
         let name = [&quot;manager&quot;]
       end)
       (Manager_repr)
 
-  module Delegate =
+  module Delegate :
+    Indexed_data_storage
+      with type key = Contract_repr.t
+       and type value = Signature.Public_key_hash.t
+       and type t := Raw_context.t =
     Indexed_context.Make_map
       (struct
         let name = [&quot;delegate&quot;]
       end)
       (Signature.Public_key_hash)
 
-  module Inactive_delegate =
+  module Inactive_delegate :
+    Data_set_storage with type elt = Contract_repr.t and type t = Raw_context.t =
     Indexed_context.Make_set
       (Registered)
       (struct
         let name = [&quot;inactive_delegate&quot;]
       end)
 
-  module Delegate_desactivation =
+  module Delegate_desactivation :
+    Indexed_data_storage
+      with type key = Contract_repr.t
+       and type value = Cycle_repr.t
+       and type t := Raw_context.t =
     Indexed_context.Make_map
       (struct
         let name = [&quot;delegate_desactivation&quot;]
       end)
       (Cycle_repr)
 
-  module Delegated =
+  module Delegated :
+    Data_set_storage
+      with type elt = Contract_repr.t
+       and type t = Raw_context.t * Contract_repr.t =
     Make_data_set_storage
       (Make_subcontext (Registered) (Indexed_context.Raw_context)
          (struct
@@ -87057,7 +87309,11 @@ module Contract = struct
          end))
          (Make_index (Contract_repr.Index))
 
-  module Counter =
+  module Counter :
+    Indexed_data_storage
+      with type key = Contract_repr.t
+       and type value = Z.t
+       and type t := Raw_context.t =
     Indexed_context.Make_map
       (struct
         let name = [&quot;counter&quot;]
@@ -87145,22 +87401,38 @@ module Contract = struct
       &gt;&gt;=? fun ctxt -&gt; I.init_set ctxt contract value
   end
 
-  module Code = Make_carbonated_map_expr (struct
+  module Code :
+    Non_iterable_indexed_carbonated_data_storage
+      with type key = Contract_repr.t
+       and type value = Script_repr.lazy_expr
+       and type t := Raw_context.t = Make_carbonated_map_expr (struct
     let name = [&quot;code&quot;]
   end)
 
-  module Storage = Make_carbonated_map_expr (struct
+  module Storage :
+    Non_iterable_indexed_carbonated_data_storage
+      with type key = Contract_repr.t
+       and type value = Script_repr.lazy_expr
+       and type t := Raw_context.t = Make_carbonated_map_expr (struct
     let name = [&quot;storage&quot;]
   end)
 
-  module Paid_storage_space =
+  module Paid_storage_space :
+    Indexed_data_storage
+      with type key = Contract_repr.t
+       and type value = Z.t
+       and type t := Raw_context.t =
     Indexed_context.Make_map
       (struct
         let name = [&quot;paid_bytes&quot;]
       end)
       (Z_value)
 
-  module Used_storage_space =
+  module Used_storage_space :
+    Indexed_data_storage
+      with type key = Contract_repr.t
+       and type value = Z.t
+       and type t := Raw_context.t =
     Indexed_context.Make_map
       (struct
         let name = [&quot;used_bytes&quot;]
@@ -87417,6 +87689,17 @@ module Delegates_with_frozen_balance =
 
 (** Rolls *)
 
+type unrevealed_nonce = {
+  nonce_hash : Nonce_hash.t;
+  delegate : Signature.Public_key_hash.t;
+  rewards : Tez_repr.t;
+  fees : Tez_repr.t;
+}
+
+type nonce_status =
+  | Unrevealed of unrevealed_nonce
+  | Revealed of Seed_repr.nonce
+
 module Cycle = struct
   module Indexed_context =
     Make_indexed_subcontext
@@ -87441,17 +87724,6 @@ module Cycle = struct
         let name = [&quot;roll_snapshot&quot;]
       end)
       (Int)
-
-  type unrevealed_nonce = {
-    nonce_hash : Nonce_hash.t;
-    delegate : Signature.Public_key_hash.t;
-    rewards : Tez_repr.t;
-    fees : Tez_repr.t;
-  }
-
-  type nonce_status =
-    | Unrevealed of unrevealed_nonce
-    | Revealed of Seed_repr.nonce
 
   let nonce_status_encoding =
     let open Data_encoding in
@@ -87518,21 +87790,31 @@ module Roll = struct
          end))
          (Make_index (Roll_repr.Index))
 
-  module Next =
+  module Next :
+    Single_data_storage
+      with type value = Roll_repr.t
+       and type t := Raw_context.t =
     Make_single_data_storage (Registered) (Raw_context)
       (struct
         let name = [&quot;next&quot;]
       end)
       (Roll_repr)
 
-  module Limbo =
+  module Limbo :
+    Single_data_storage
+      with type value = Roll_repr.t
+       and type t := Raw_context.t =
     Make_single_data_storage (Registered) (Raw_context)
       (struct
         let name = [&quot;limbo&quot;]
       end)
       (Roll_repr)
 
-  module Delegate_roll_list =
+  module Delegate_roll_list :
+    Indexed_data_storage
+      with type key = Signature.Public_key_hash.t
+       and type value = Roll_repr.t
+       and type t := Raw_context.t =
     Wrap_indexed_data_storage
       (Contract.Roll_list)
       (struct
@@ -87543,14 +87825,22 @@ module Roll = struct
         let unwrap = Contract_repr.is_implicit
       end)
 
-  module Successor =
+  module Successor :
+    Indexed_data_storage
+      with type key = Roll_repr.t
+       and type value = Roll_repr.t
+       and type t := Raw_context.t =
     Indexed_context.Make_map
       (struct
         let name = [&quot;successor&quot;]
       end)
       (Roll_repr)
 
-  module Delegate_change =
+  module Delegate_change :
+    Indexed_data_storage
+      with type key = Signature.Public_key_hash.t
+       and type value = Tez_repr.t
+       and type t := Raw_context.t =
     Wrap_indexed_data_storage
       (Contract.Change)
       (struct
@@ -87602,7 +87892,12 @@ module Roll = struct
     let infer_ipath (_ : 'a ipath) (x : 'a) : 'a = x
   end
 
-  module Owner =
+  module Owner :
+    Indexed_data_snapshotable_storage
+      with type key = Roll_repr.t
+       and type snapshot = Cycle_repr.t * int
+       and type value = Signature.Public_key.t
+       and type t := Raw_context.t =
     Make_indexed_data_snapshotable_storage
       (Make_subcontext (Registered) (Raw_context)
          (struct
@@ -87612,8 +87907,19 @@ module Roll = struct
       (Make_index (Roll_repr.Index))
       (Signature.Public_key)
 
-  module Snapshot_for_cycle = Cycle.Roll_snapshot
-  module Last_for_snapshot = Cycle.Last_roll
+  module Snapshot_for_cycle :
+    Indexed_data_storage
+      with type key = Cycle_repr.t
+       and type value = int
+       and type t := Raw_context.t =
+    Cycle.Roll_snapshot
+
+  module Last_for_snapshot :
+    Indexed_data_storage
+      with type key = int
+       and type value = Roll_repr.t
+       and type t = Raw_context.t * Cycle_repr.t =
+    Cycle.Last_roll
 
   let clear = Indexed_context.clear
 end
@@ -87704,18 +88010,19 @@ end
 
 (** Seed *)
 
+module type For_cycle_sig = sig
+  val init :
+    Raw_context.t -&gt;
+    Cycle_repr.t -&gt;
+    Seed_repr.seed -&gt;
+    Raw_context.t tzresult Lwt.t
+
+  val get : Raw_context.t -&gt; Cycle_repr.t -&gt; Seed_repr.seed tzresult Lwt.t
+
+  val delete : Raw_context.t -&gt; Cycle_repr.t -&gt; Raw_context.t tzresult Lwt.t
+end
+
 module Seed = struct
-  <abbr class="mark-warning" title="We do not handle types with both a synonym and a type definition">type unrevealed_nonce = Cycle.unrevealed_nonce = {
-    nonce_hash : Nonce_hash.t;
-    delegate : Signature.Public_key_hash.t;
-    rewards : Tez_repr.t;
-    fees : Tez_repr.t;
-  }</abbr>
-
-  <abbr class="mark-warning" title="We do not handle types with both a synonym and a type definition">type nonce_status = Cycle.nonce_status =
-    | Unrevealed of unrevealed_nonce
-    | Revealed of Seed_repr.nonce</abbr>
-
   module Nonce :
     Storage_sigs.Non_iterable_indexed_data_storage
       with type key := Level_repr.t
@@ -87746,7 +88053,7 @@ module Seed = struct
     let remove ctxt l = Cycle.Nonce.remove (ctxt, l.cycle) l.level
   end
 
-  module For_cycle = Cycle.Seed
+  module For_cycle : For_cycle_sig = Cycle.Seed
 end
 
 (** Commitments *)
@@ -87828,6 +88135,8 @@ Require Tezos.Vote_repr.
 Require Tezos.Voting_period_repr.
 
 Import Storage_functors.
+
+Import Storage_sigs.
 
 Definition Int :=
   let t : Set := int in
@@ -87948,7 +88257,7 @@ Definition Block_priority :=
       |})) (existT (A := Set) _ _ (|Int|)).
 
 Module Contract.
-  Definition Raw_context :=
+  Definition Raw_context : {_ : unit &amp; Raw_context.T.signature Raw_context.t} :=
     ((Storage_functors.Make_subcontext
       (existT (A := unit) (fun _ =&gt; _) tt (|Storage_functors.Registered|)))
       (existT (A := Set) _ _
@@ -88017,7 +88326,10 @@ Module Contract.
     Lwt.t (list (|Indexed_context|).(Storage_sigs.Indexed_raw_context.key)) :=
     (|Indexed_context|).(Storage_sigs.Indexed_raw_context.keys).
   
-  Definition Balance :=
+  Definition Balance :
+    {_ : unit &amp;
+      Indexed_data_storage.signature (|Raw_context|).(Raw_context.T.t)
+        Contract_repr.t Tez_repr.t} :=
     ((|Indexed_context|).(Storage_sigs.Indexed_raw_context.Make_map)
       (let name := [ &quot;balance&quot; ] in
       existT (A := unit) (fun _ =&gt; _) tt
@@ -88046,7 +88358,11 @@ Module Contract.
         Make_index (existT (A := Set) _ _ (|Cycle_repr.Index|)) in
       existT (A := [Set ** Set -&gt; Set]) _ [_, _] (|functor_result|)).
   
-  Definition Frozen_deposits :=
+  Definition Frozen_deposits :
+    {_ : unit &amp;
+      Indexed_data_storage.signature
+        ((|Raw_context|).(Raw_context.T.t) * Contract_repr.t) Cycle_repr.t
+        Tez_repr.t} :=
     ((|Frozen_balance_index|).(Storage_sigs.Indexed_raw_context.Make_map)
       (let name := [ &quot;deposits&quot; ] in
       existT (A := unit) (fun _ =&gt; _) tt
@@ -88058,7 +88374,11 @@ Module Contract.
           Storage_sigs.VALUE.encoding := Tez_repr.encoding
         |}).
   
-  Definition Frozen_fees :=
+  Definition Frozen_fees :
+    {_ : unit &amp;
+      Indexed_data_storage.signature
+        ((|Raw_context|).(Raw_context.T.t) * Contract_repr.t) Cycle_repr.t
+        Tez_repr.t} :=
     ((|Frozen_balance_index|).(Storage_sigs.Indexed_raw_context.Make_map)
       (let name := [ &quot;fees&quot; ] in
       existT (A := unit) (fun _ =&gt; _) tt
@@ -88070,7 +88390,11 @@ Module Contract.
           Storage_sigs.VALUE.encoding := Tez_repr.encoding
         |}).
   
-  Definition Frozen_rewards :=
+  Definition Frozen_rewards :
+    {_ : unit &amp;
+      Indexed_data_storage.signature
+        ((|Raw_context|).(Raw_context.T.t) * Contract_repr.t) Cycle_repr.t
+        Tez_repr.t} :=
     ((|Frozen_balance_index|).(Storage_sigs.Indexed_raw_context.Make_map)
       (let name := [ &quot;rewards&quot; ] in
       existT (A := unit) (fun _ =&gt; _) tt
@@ -88082,7 +88406,10 @@ Module Contract.
           Storage_sigs.VALUE.encoding := Tez_repr.encoding
         |}).
   
-  Definition Manager :=
+  Definition Manager :
+    {_ : unit &amp;
+      Indexed_data_storage.signature (|Raw_context|).(Raw_context.T.t)
+        Contract_repr.t Manager_repr.t} :=
     ((|Indexed_context|).(Storage_sigs.Indexed_raw_context.Make_map)
       (let name := [ &quot;manager&quot; ] in
       existT (A := unit) (fun _ =&gt; _) tt
@@ -88094,7 +88421,10 @@ Module Contract.
           Storage_sigs.VALUE.encoding := Manager_repr.encoding
         |}).
   
-  Definition Delegate :=
+  Definition Delegate :
+    {_ : unit &amp;
+      Indexed_data_storage.signature (|Raw_context|).(Raw_context.T.t)
+        Contract_repr.t (|Signature.Public_key_hash|).(S.SPublic_key_hash.t)} :=
     ((|Indexed_context|).(Storage_sigs.Indexed_raw_context.Make_map)
       (let name := [ &quot;delegate&quot; ] in
       existT (A := unit) (fun _ =&gt; _) tt
@@ -88107,7 +88437,10 @@ Module Contract.
             (|Signature.Public_key_hash|).(S.SPublic_key_hash.encoding)
         |}).
   
-  Definition Inactive_delegate :=
+  Definition Inactive_delegate :
+    {_ : unit &amp;
+      Data_set_storage.signature (|Raw_context|).(Raw_context.T.t)
+        Contract_repr.t} :=
     ((|Indexed_context|).(Storage_sigs.Indexed_raw_context.Make_set)
       (existT (A := unit) (fun _ =&gt; _) tt (|Storage_functors.Registered|)))
       (let name := [ &quot;inactive_delegate&quot; ] in
@@ -88116,7 +88449,10 @@ Module Contract.
           Storage_sigs.NAME.name := name
         |}).
   
-  Definition Delegate_desactivation :=
+  Definition Delegate_desactivation :
+    {_ : unit &amp;
+      Indexed_data_storage.signature (|Raw_context|).(Raw_context.T.t)
+        Contract_repr.t Cycle_repr.t} :=
     ((|Indexed_context|).(Storage_sigs.Indexed_raw_context.Make_map)
       (let name := [ &quot;delegate_desactivation&quot; ] in
       existT (A := unit) (fun _ =&gt; _) tt
@@ -88128,7 +88464,11 @@ Module Contract.
           Storage_sigs.VALUE.encoding := Cycle_repr.encoding
         |}).
   
-  Definition Delegated :=
+  Definition Delegated :
+    {_ : unit &amp;
+      Data_set_storage.signature
+        ((|Raw_context|).(Raw_context.T.t) * Contract_repr.t) Contract_repr.t}
+    :=
     (Storage_functors.Make_data_set_storage
       (let functor_result :=
         ((Storage_functors.Make_subcontext
@@ -88145,7 +88485,10 @@ Module Contract.
         Make_index (existT (A := Set) _ _ (|Contract_repr.Index|)) in
       existT (A := [Set ** Set -&gt; Set]) _ [_, _] (|functor_result|)).
   
-  Definition Counter :=
+  Definition Counter :
+    {_ : unit &amp;
+      Indexed_data_storage.signature (|Raw_context|).(Raw_context.T.t)
+        Contract_repr.t Z.t} :=
     ((|Indexed_context|).(Storage_sigs.Indexed_raw_context.Make_map)
       (let name := [ &quot;counter&quot; ] in
       existT (A := unit) (fun _ =&gt; _) tt
@@ -88301,7 +88644,11 @@ Module Contract.
               (|Raw_context|).(Raw_context.T.t) Contract_repr.t
               Script_repr.lazy_expr}).
   
-  Definition Code :=
+  Definition Code :
+    {_ : unit &amp;
+      Non_iterable_indexed_carbonated_data_storage.signature
+        (|Raw_context|).(Raw_context.T.t) Contract_repr.t Script_repr.lazy_expr}
+    :=
     Make_carbonated_map_expr
       (let name := [ &quot;code&quot; ] in
       existT (A := unit) (fun _ =&gt; _) tt
@@ -88309,7 +88656,11 @@ Module Contract.
           Storage_sigs.NAME.name := name
         |}).
   
-  Definition Storage :=
+  Definition Storage :
+    {_ : unit &amp;
+      Non_iterable_indexed_carbonated_data_storage.signature
+        (|Raw_context|).(Raw_context.T.t) Contract_repr.t Script_repr.lazy_expr}
+    :=
     Make_carbonated_map_expr
       (let name := [ &quot;storage&quot; ] in
       existT (A := unit) (fun _ =&gt; _) tt
@@ -88317,7 +88668,10 @@ Module Contract.
           Storage_sigs.NAME.name := name
         |}).
   
-  Definition Paid_storage_space :=
+  Definition Paid_storage_space :
+    {_ : unit &amp;
+      Indexed_data_storage.signature (|Raw_context|).(Raw_context.T.t)
+        Contract_repr.t Z.t} :=
     ((|Indexed_context|).(Storage_sigs.Indexed_raw_context.Make_map)
       (let name := [ &quot;paid_bytes&quot; ] in
       existT (A := unit) (fun _ =&gt; _) tt
@@ -88325,7 +88679,10 @@ Module Contract.
           Storage_sigs.NAME.name := name
         |})) (existT (A := Set) _ _ (|Z_value|)).
   
-  Definition Used_storage_space :=
+  Definition Used_storage_space :
+    {_ : unit &amp;
+      Indexed_data_storage.signature (|Raw_context|).(Raw_context.T.t)
+        Contract_repr.t Z.t} :=
     ((|Indexed_context|).(Storage_sigs.Indexed_raw_context.Make_map)
       (let name := [ &quot;used_bytes&quot; ] in
       existT (A := unit) (fun _ =&gt; _) tt
@@ -88913,6 +89270,27 @@ Definition Delegates_with_frozen_balance :=
           |}) in
     existT (A := [Set ** Set -&gt; Set]) _ [_, _] (|functor_result|)).
 
+Module unrevealed_nonce.
+  Record record : Set := Build {
+    nonce_hash : Nonce_hash.t;
+    delegate : (|Signature.Public_key_hash|).(S.SPublic_key_hash.t);
+    rewards : Tez_repr.t;
+    fees : Tez_repr.t }.
+  Definition with_nonce_hash nonce_hash (r : record) :=
+    Build nonce_hash r.(delegate) r.(rewards) r.(fees).
+  Definition with_delegate delegate (r : record) :=
+    Build r.(nonce_hash) delegate r.(rewards) r.(fees).
+  Definition with_rewards rewards (r : record) :=
+    Build r.(nonce_hash) r.(delegate) rewards r.(fees).
+  Definition with_fees fees (r : record) :=
+    Build r.(nonce_hash) r.(delegate) r.(rewards) fees.
+End unrevealed_nonce.
+Definition unrevealed_nonce := unrevealed_nonce.record.
+
+Inductive nonce_status : Set :=
+| Unrevealed : unrevealed_nonce -&gt; nonce_status
+| Revealed : Seed_repr.nonce -&gt; nonce_status.
+
 Module Cycle.
   Definition Indexed_context :=
     (Storage_functors.Make_indexed_subcontext
@@ -88978,27 +89356,6 @@ Module Cycle.
         {|
           Storage_sigs.NAME.name := name
         |})) (existT (A := Set) _ _ (|Int|)).
-  
-  Module unrevealed_nonce.
-    Record record : Set := Build {
-      nonce_hash : Nonce_hash.t;
-      delegate : (|Signature.Public_key_hash|).(S.SPublic_key_hash.t);
-      rewards : Tez_repr.t;
-      fees : Tez_repr.t }.
-    Definition with_nonce_hash nonce_hash (r : record) :=
-      Build nonce_hash r.(delegate) r.(rewards) r.(fees).
-    Definition with_delegate delegate (r : record) :=
-      Build r.(nonce_hash) delegate r.(rewards) r.(fees).
-    Definition with_rewards rewards (r : record) :=
-      Build r.(nonce_hash) r.(delegate) rewards r.(fees).
-    Definition with_fees fees (r : record) :=
-      Build r.(nonce_hash) r.(delegate) r.(rewards) fees.
-  End unrevealed_nonce.
-  Definition unrevealed_nonce := unrevealed_nonce.record.
-  
-  Inductive nonce_status : Set :=
-  | Unrevealed : unrevealed_nonce -&gt; nonce_status
-  | Revealed : Seed_repr.nonce -&gt; nonce_status.
   
   Definition nonce_status_encoding : Data_encoding.encoding nonce_status :=
     Data_encoding.union None
@@ -89123,7 +89480,10 @@ Module Roll.
         Make_index (existT (A := Set) _ _ (|Roll_repr.Index|)) in
       existT (A := [Set ** Set -&gt; Set]) _ [_, _] (|functor_result|)).
   
-  Definition Next :=
+  Definition Next :
+    {_ : unit &amp;
+      Single_data_storage.signature (|Raw_context|).(Raw_context.T.t)
+        Roll_repr.t} :=
     (((Storage_functors.Make_single_data_storage
       (existT (A := unit) (fun _ =&gt; _) tt (|Storage_functors.Registered|)))
       (existT (A := Set) _ _ (|Raw_context|)))
@@ -89137,7 +89497,10 @@ Module Roll.
           Storage_sigs.VALUE.encoding := Roll_repr.encoding
         |}).
   
-  Definition Limbo :=
+  Definition Limbo :
+    {_ : unit &amp;
+      Single_data_storage.signature (|Raw_context|).(Raw_context.T.t)
+        Roll_repr.t} :=
     (((Storage_functors.Make_single_data_storage
       (existT (A := unit) (fun _ =&gt; _) tt (|Storage_functors.Registered|)))
       (existT (A := Set) _ _ (|Raw_context|)))
@@ -89151,7 +89514,10 @@ Module Roll.
           Storage_sigs.VALUE.encoding := Roll_repr.encoding
         |}).
   
-  Definition Delegate_roll_list :=
+  Definition Delegate_roll_list :
+    {_ : unit &amp;
+      Indexed_data_storage.signature (|Raw_context|).(Raw_context.T.t)
+        (|Signature.Public_key_hash|).(S.SPublic_key_hash.t) Roll_repr.t} :=
     (Storage_functors.Wrap_indexed_data_storage
       (existT (A := [Set ** Set ** Set]) _ [_, _, _] (|Contract.Roll_list|)))
       (let t : Set := (|Signature.Public_key_hash|).(S.SPublic_key_hash.t) in
@@ -89163,7 +89529,10 @@ Module Roll.
           Storage_functors.WRAPPER.unwrap := unwrap
         |}).
   
-  Definition Successor :=
+  Definition Successor :
+    {_ : unit &amp;
+      Indexed_data_storage.signature (|Raw_context|).(Raw_context.T.t)
+        Roll_repr.t Roll_repr.t} :=
     ((|Indexed_context|).(Storage_sigs.Indexed_raw_context.Make_map)
       (let name := [ &quot;successor&quot; ] in
       existT (A := unit) (fun _ =&gt; _) tt
@@ -89175,7 +89544,10 @@ Module Roll.
           Storage_sigs.VALUE.encoding := Roll_repr.encoding
         |}).
   
-  Definition Delegate_change :=
+  Definition Delegate_change :
+    {_ : unit &amp;
+      Indexed_data_storage.signature (|Raw_context|).(Raw_context.T.t)
+        (|Signature.Public_key_hash|).(S.SPublic_key_hash.t) Tez_repr.t} :=
     (Storage_functors.Wrap_indexed_data_storage
       (existT (A := [Set ** Set ** Set]) _ [_, _, _] (|Contract.Change|)))
       (let t : Set := (|Signature.Public_key_hash|).(S.SPublic_key_hash.t) in
@@ -89242,7 +89614,11 @@ Module Roll.
       fun x =&gt; x.
   End Snapshoted_owner_index.
   
-  Definition Owner :=
+  Definition Owner :
+    {_ : unit &amp;
+      Indexed_data_snapshotable_storage.signature (Cycle_repr.t * int)
+        Roll_repr.t (|Raw_context|).(Raw_context.T.t)
+        (|Signature.Public_key|).(S.SPublic_key.t)} :=
     (((Storage_functors.Make_indexed_data_snapshotable_storage
       (let functor_result :=
         ((Storage_functors.Make_subcontext
@@ -89273,10 +89649,16 @@ Module Roll.
             (|Signature.Public_key|).(S.SPublic_key.encoding)
         |}).
   
-  Definition Snapshot_for_cycle :=
+  Definition Snapshot_for_cycle :
+    {_ : unit &amp;
+      Indexed_data_storage.signature (|Raw_context|).(Raw_context.T.t)
+        Cycle_repr.t int} :=
     existT (A := unit) (fun _ =&gt; _) tt (|Cycle.Roll_snapshot|).
   
-  Definition Last_for_snapshot :=
+  Definition Last_for_snapshot :
+    {_ : unit &amp;
+      Indexed_data_storage.signature
+        ((|Raw_context|).(Raw_context.T.t) * Cycle_repr.t) int Roll_repr.t} :=
     existT (A := unit) (fun _ =&gt; _) tt (|Cycle.Last_roll|).
   
   Definition clear
@@ -89522,14 +89904,27 @@ Module Vote.
         |}).
 End Vote.
 
+Module For_cycle_sig.
+  Record signature : Set := {
+    init :
+      Raw_context.t -&gt; Cycle_repr.t -&gt; Seed_repr.seed -&gt;
+      Lwt.t (Error_monad.tzresult Raw_context.t);
+    get :
+      Raw_context.t -&gt; Cycle_repr.t -&gt;
+      Lwt.t (Error_monad.tzresult Seed_repr.seed);
+    delete :
+      Raw_context.t -&gt; Cycle_repr.t -&gt;
+      Lwt.t (Error_monad.tzresult Raw_context.t);
+  }.
+End For_cycle_sig.
+
 Module Seed.
-  Definition unrevealed_nonce : Set := Cycle.unrevealed_nonce.
-  
-  Definition nonce_status : Set := Cycle.nonce_status.
-  
-  Definition Nonce :=
-    ((* ❌ open *)
-    (let tag_Non_iterable_indexed_data_storage := tt in
+  Definition Nonce :
+    {_ : unit &amp;
+      Storage_sigs.Non_iterable_indexed_data_storage.signature Raw_context.t
+        Level_repr.t nonce_status} :=
+    (* ❌ open *)
+    let tag_Non_iterable_indexed_data_storage := tt in
     let context : Set := Raw_context.t in
     let mem
       (ctxt : (|Cycle.Indexed_context|).(Storage_sigs.Indexed_raw_context.t))
@@ -89603,13 +89998,18 @@ Module Seed.
         Storage_sigs.Non_iterable_indexed_data_storage.set_option := set_option;
         Storage_sigs.Non_iterable_indexed_data_storage.delete := delete;
         Storage_sigs.Non_iterable_indexed_data_storage.remove := remove
-      |})
-      :
-        {_ : unit &amp;
-          Storage_sigs.Non_iterable_indexed_data_storage.signature Raw_context.t
-            Level_repr.t nonce_status}).
+      |}.
   
-  Definition For_cycle := existT (A := unit) (fun _ =&gt; _) tt (|Cycle.Seed|).
+  Definition For_cycle : {_ : unit &amp; For_cycle_sig.signature} :=
+    existT (A := unit) (fun _ =&gt; _) tt
+      {|
+        For_cycle_sig.init :=
+          (|Cycle.Seed|).(Storage_sigs.Indexed_data_storage.init);
+        For_cycle_sig.get :=
+          (|Cycle.Seed|).(Storage_sigs.Indexed_data_storage.get);
+        For_cycle_sig.delete :=
+          (|Cycle.Seed|).(Storage_sigs.Indexed_data_storage.delete)
+      |}.
 End Seed.
 
 Definition Commitments :=
@@ -89752,8 +90152,8 @@ End Ramp_up.
   <div style="margin: 20px;">
     <h3>Storage_mli</h3>
     <ul>
-      <li>OCaml size: 396 lines</li>
-      <li>Coq size: 306 lines (-23% compared to&nbsp;OCaml)</li>
+      <li>OCaml size: 398 lines</li>
+      <li>Coq size: 308 lines (-23% compared to&nbsp;OCaml)</li>
     </ul>
   </div>
   <div class="col-md-6">
@@ -90096,20 +90496,32 @@ end
 
 (** Seed *)
 
+type unrevealed_nonce = {
+  nonce_hash : Nonce_hash.t;
+  delegate : Signature.Public_key_hash.t;
+  rewards : Tez_repr.t;
+  fees : Tez_repr.t;
+}
+
+type nonce_status =
+  | Unrevealed of unrevealed_nonce
+  | Revealed of Seed_repr.nonce
+
+module type For_cycle_sig = sig
+  val init :
+    Raw_context.t -&gt;
+    Cycle_repr.t -&gt;
+    Seed_repr.seed -&gt;
+    Raw_context.t tzresult Lwt.t
+
+  val get : Raw_context.t -&gt; Cycle_repr.t -&gt; Seed_repr.seed tzresult Lwt.t
+
+  val delete : Raw_context.t -&gt; Cycle_repr.t -&gt; Raw_context.t tzresult Lwt.t
+end
+
 module Seed : sig
   (** Storage from this submodule must only be accessed through the
       module `Seed`. *)
-
-  type unrevealed_nonce = {
-    nonce_hash : Nonce_hash.t;
-    delegate : Signature.Public_key_hash.t;
-    rewards : Tez_repr.t;
-    fees : Tez_repr.t;
-  }
-
-  type nonce_status =
-    | Unrevealed of unrevealed_nonce
-    | Revealed of Seed_repr.nonce
 
   module Nonce :
     Non_iterable_indexed_data_storage
@@ -90117,17 +90529,7 @@ module Seed : sig
        and type value := nonce_status
        and type t := Raw_context.t
 
-  module For_cycle : sig
-    val init :
-      Raw_context.t -&gt;
-      Cycle_repr.t -&gt;
-      Seed_repr.seed -&gt;
-      Raw_context.t tzresult Lwt.t
-
-    val get : Raw_context.t -&gt; Cycle_repr.t -&gt; Seed_repr.seed tzresult Lwt.t
-
-    val delete : Raw_context.t -&gt; Cycle_repr.t -&gt; Raw_context.t tzresult Lwt.t
-  end
+  module For_cycle : For_cycle_sig
 end
 
 (** Commitments *)
@@ -90407,46 +90809,48 @@ Module Vote.
         (|Signature.Public_key_hash|).(S.SPublic_key_hash.t) Vote_repr.ballot}.
 End Vote.
 
+Module unrevealed_nonce.
+  Record record : Set := Build {
+    nonce_hash : Nonce_hash.t;
+    delegate : (|Signature.Public_key_hash|).(S.SPublic_key_hash.t);
+    rewards : Tez_repr.t;
+    fees : Tez_repr.t }.
+  Definition with_nonce_hash nonce_hash (r : record) :=
+    Build nonce_hash r.(delegate) r.(rewards) r.(fees).
+  Definition with_delegate delegate (r : record) :=
+    Build r.(nonce_hash) delegate r.(rewards) r.(fees).
+  Definition with_rewards rewards (r : record) :=
+    Build r.(nonce_hash) r.(delegate) rewards r.(fees).
+  Definition with_fees fees (r : record) :=
+    Build r.(nonce_hash) r.(delegate) r.(rewards) fees.
+End unrevealed_nonce.
+Definition unrevealed_nonce := unrevealed_nonce.record.
+
+Inductive nonce_status : Set :=
+| Unrevealed : unrevealed_nonce -&gt; nonce_status
+| Revealed : Seed_repr.nonce -&gt; nonce_status.
+
+Module For_cycle_sig.
+  Record signature : Set := {
+    init :
+      Raw_context.t -&gt; Cycle_repr.t -&gt; Seed_repr.seed -&gt;
+      Lwt.t (Error_monad.tzresult Raw_context.t);
+    get :
+      Raw_context.t -&gt; Cycle_repr.t -&gt;
+      Lwt.t (Error_monad.tzresult Seed_repr.seed);
+    delete :
+      Raw_context.t -&gt; Cycle_repr.t -&gt;
+      Lwt.t (Error_monad.tzresult Raw_context.t);
+  }.
+End For_cycle_sig.
+
 Module Seed.
-  Module unrevealed_nonce.
-    Record record : Set := Build {
-      nonce_hash : Nonce_hash.t;
-      delegate : (|Signature.Public_key_hash|).(S.SPublic_key_hash.t);
-      rewards : Tez_repr.t;
-      fees : Tez_repr.t }.
-    Definition with_nonce_hash nonce_hash (r : record) :=
-      Build nonce_hash r.(delegate) r.(rewards) r.(fees).
-    Definition with_delegate delegate (r : record) :=
-      Build r.(nonce_hash) delegate r.(rewards) r.(fees).
-    Definition with_rewards rewards (r : record) :=
-      Build r.(nonce_hash) r.(delegate) rewards r.(fees).
-    Definition with_fees fees (r : record) :=
-      Build r.(nonce_hash) r.(delegate) r.(rewards) fees.
-  End unrevealed_nonce.
-  Definition unrevealed_nonce := unrevealed_nonce.record.
-  
-  Inductive nonce_status : Set :=
-  | Unrevealed : unrevealed_nonce -&gt; nonce_status
-  | Revealed : Seed_repr.nonce -&gt; nonce_status.
-  
   Parameter Nonce :
     {_ : unit &amp;
       Non_iterable_indexed_data_storage.signature Raw_context.t Level_repr.t
         nonce_status}.
   
-  Module For_cycle.
-    Parameter init :
-      Raw_context.t -&gt; Cycle_repr.t -&gt; Seed_repr.seed -&gt;
-      Lwt.t (Error_monad.tzresult Raw_context.t).
-    
-    Parameter get :
-      Raw_context.t -&gt; Cycle_repr.t -&gt;
-      Lwt.t (Error_monad.tzresult Seed_repr.seed).
-    
-    Parameter delete :
-      Raw_context.t -&gt; Cycle_repr.t -&gt;
-      Lwt.t (Error_monad.tzresult Raw_context.t).
-  End For_cycle.
+  Parameter For_cycle : {_ : unit &amp; For_cycle_sig.signature}.
 End Seed.
 
 Parameter Commitments :
@@ -90474,8 +90878,8 @@ End Ramp_up.
   <div style="margin: 20px;">
     <h3>Storage_description</h3>
     <ul>
-      <li>OCaml size: 347 lines</li>
-      <li>Coq size: 597 lines (+72% compared to&nbsp;OCaml)</li>
+      <li>OCaml size: 339 lines</li>
+      <li>Coq size: 679 lines (+100% compared to&nbsp;OCaml)</li>
     </ul>
   </div>
   <div class="col-md-6">
@@ -90505,8 +90909,6 @@ End Ramp_up.
 (* DEALINGS IN THE SOFTWARE.                                                 *)
 (*                                                                           *)
 (*****************************************************************************)
-
-let depends_on_me () = ()
 
 module StringMap = Map.Make (String)
 
@@ -90568,39 +90970,35 @@ type (_, _, _) args =
       ('key, 'a, 'inter_key) args * ('inter_key, 'b, 'sub_key) args
       -&gt; ('key, 'a * 'b, 'sub_key) args
 
-let[@coq_axiom] rec unpack : type a b c. (a, b, c) args -&gt; c -&gt; a * b =
+let rec unpack : type a b c. (a, b, c) args -&gt; c -&gt; a * b =
  fun v x -&gt;
-  match[@coq_match_gadt] v with
+  match[@coq_match_gadt_with_result] v with
   | One _ -&gt;
       x
   | Pair (l, r) -&gt;
-      let unpack_l = unpack l in
-      let unpack_r = unpack r in
-      let (c, d) = unpack_r x in
-      let (b, a) = unpack_l c in
+      let (c, d) = (unpack [@coq_implicit &quot;(a := unit) (b := unit)&quot;]) r x in
+      let (b, a) = (unpack [@coq_implicit &quot;(a := unit) (b := unit)&quot;]) l c in
       (b, (a, d))
 
-let[@coq_axiom] rec pack : type a b c. (a, b, c) args -&gt; a -&gt; b -&gt; c =
+let rec pack : type a b c. (a, b, c) args -&gt; a -&gt; b -&gt; c =
  fun v x y -&gt;
-  match[@coq_match_gadt] (v, y) with
+  match[@coq_match_gadt_with_result] (v, y) with
   | (One _, _) -&gt;
       (x, y)
   | (Pair (l, r), (y : _ * _)) -&gt;
-      let pack_l = pack l in
-      let pack_r = pack r in
       let (a, d) = y in
-      let c = pack_l x a in
-      pack_r c d
+      let c = (pack [@coq_implicit &quot;(c := unit)&quot;]) l x a in
+      (pack [@coq_implicit &quot;(c := unit)&quot;]) r c d
 
-let[@coq_axiom] rec compare : type a b c. (a, b, c) args -&gt; b -&gt; b -&gt; int =
-  function[@coq_match_gadt]
-  | One {compare = compare'; _} -&gt;
-      compare'
-  | Pair (l, r) -&gt; (
-      let compare_l = compare l in
-      let compare_r = compare r in
-      fun (a1, b1) (a2, b2) -&gt;
-        match compare_l a1 a2 with 0 -&gt; compare_r b1 b2 | x -&gt; x )
+let rec compare : type a b c. (a, b, c) args -&gt; b -&gt; b -&gt; int =
+ fun v x1 x2 -&gt;
+  match[@coq_match_gadt] (v, x1, x2) with
+  | (One {compare = compare'; _}, _, _) -&gt;
+      compare' x1 x2
+  | (Pair (l, r), (x1 : _ * _), (x2 : _ * _)) -&gt; (
+      let (a1, b1) = x1 in
+      let (a2, b2) = x2 in
+      match compare l a1 a2 with 0 -&gt; compare r b1 b2 | x -&gt; x )
 
 let destutter equal l =
   match l with
@@ -90615,7 +91013,7 @@ let destutter equal l =
       in
       loop [i] i l
 
-let[@coq_axiom] rec register_indexed_subcontext :
+let rec register_indexed_subcontext :
     type r a b.
     r t -&gt; list:(r -&gt; a list tzresult Lwt.t) -&gt; (r, a, b) args -&gt; b t =
  fun dir ~list path -&gt;
@@ -90624,15 +91022,13 @@ let[@coq_axiom] rec register_indexed_subcontext :
       let compare_left = compare left in
       let equal_left x y = Compare.Int.(compare_left x y = 0) in
       let list_left r = list r &gt;&gt;=? fun l -&gt; return (destutter equal_left l) in
-      let list_right r =
-        let (a, k) = unpack left r in
-        list a
-        &gt;&gt;=? fun l -&gt;
-        return (List.map snd (List.filter (fun (x, _) -&gt; equal_left x k) l))
-      in
       register_indexed_subcontext
         (register_indexed_subcontext dir ~list:list_left left)
-        ~list:list_right
+        ~list:(fun r -&gt;
+          let (a, k) = (unpack [@coq_implicit &quot;(c := unit)&quot;]) left r in
+          list a
+          &gt;&gt;=? fun l -&gt;
+          return (List.map snd (List.filter (fun (x, _) -&gt; equal_left x k) l)))
         right
   | (One {rpc_arg = arg; encoding = arg_encoding; _}, _) -&gt; (
     match !dir with
@@ -90647,7 +91043,7 @@ let[@coq_axiom] rec register_indexed_subcontext :
 Alternative: use a monad to sequence side-effects.">dir := IndexedDir {arg; arg_encoding; list; subdir}</abbr> ;
         subdir
     | IndexedDir {arg = inner_arg; subdir; _} -&gt; (
-      match[@coq_match_gadt] RPC_arg.eq arg inner_arg with
+      match[@coq_match_gadt_with_result] RPC_arg.eq arg inner_arg with
       | None -&gt;
           (invalid_arg [@coq_implicit &quot;(a := t b)&quot;]) &quot;&quot;
       | Some RPC_arg.Eq -&gt;
@@ -90914,10 +91310,6 @@ Unset Guard Checking.
 Require Import Tezos.Environment.
 Import Environment.Notations.
 
-Definition depends_on_me (function_parameter : unit) : unit :=
-  let '_ := function_parameter in
-  tt.
-
 Definition StringMap :=
   Map.Make
     (existT (A := Set) _ _
@@ -91063,12 +91455,47 @@ Module args.
   Definition One := 'args.One.
 End args.
 
-Fixpoint unpack {a b c : Set} (v : args) (x : c) {struct v} : a * b := axiom.
+Fixpoint unpack {a b c : Set} (v : args) (x : c) {struct v} : a * b :=
+  match v with
+  | One _ =&gt; obj_magic (a * b) x
+  | Pair l __r_value =&gt;
+    let '[l, __r_value] := obj_magic [args ** args] [l, __r_value] in
+    obj_magic (a * b)
+    (let '(c, d) := (unpack (a := unit) (b := unit)) __r_value x in
+    let '(__b_value, __a_value) := (unpack (a := unit) (b := unit)) l c in
+    (__b_value, (__a_value, d)))
+  end.
 
-Fixpoint __pack {a b c : Set} (v : args) (x : a) (y : b) {struct v} : c := axiom.
+Fixpoint __pack {a b c : Set} (v : args) (x : a) (y : b) {struct v} : c :=
+  match (v, y) with
+  | (One _, _) =&gt; obj_magic c (x, y)
+  | (Pair l __r_value, _ as y) =&gt;
+    let 'existT _ [__0, __1] [l, __r_value, y] :=
+      obj_magic_exists (Es := [Set ** Set])
+        (fun '[__0, __1] =&gt; [args ** args ** __0 * __1]) [l, __r_value, y] in
+    obj_magic c
+    (let '(__a_value, d) := y in
+    let c := (__pack (c := unit)) l x __a_value in
+    (__pack (c := unit)) __r_value c d)
+  end.
 
-Fixpoint compare {b : Set} (function_parameter : args)
-  {struct function_parameter} : b -&gt; b -&gt; int := axiom.
+Fixpoint compare {b : Set} (v : args) (x1 : b) (x2 : b) {struct v} : int :=
+  match (v, x1, x2) with
+  | (One {| args.One.compare := compare' |}, _, _) =&gt;
+    let compare' := obj_magic (b -&gt; b -&gt; int) compare' in
+    compare' x1 x2
+  | (Pair l __r_value, _ as x1, _ as x2) =&gt;
+    let 'existT _ [__0, __1] [l, __r_value, x1, x2] :=
+      obj_magic_exists (Es := [Set ** Set])
+        (fun '[__0, __1] =&gt; [args ** args ** __0 * __1 ** __0 * __1])
+        [l, __r_value, x1, x2] in
+    let '(a1, b1) := x1 in
+    let '(a2, b2) := x2 in
+    match compare l a1 a2 with
+    | 0 =&gt; compare __r_value b1 b2
+    | x =&gt; x
+    end
+  end.
 
 Definition destutter {A B : Set} (equal : A -&gt; A -&gt; bool) (l : list (A * B))
   : list A :=
@@ -91091,7 +91518,58 @@ Definition destutter {A B : Set} (equal : A -&gt; A -&gt; bool) (l : list (A * B
 
 Fixpoint register_indexed_subcontext {a b r : Set}
   (dir : t r) (__list_value : r -&gt; Lwt.t (Error_monad.tzresult (list a)))
-  (path : args) {struct dir} : t b := axiom.
+  (path : args) {struct dir} : t b :=
+  match (path, __list_value) with
+  | (Pair __left __right, _ as __list_value) =&gt;
+    let 'existT _ [__0, __1] [__left, __right, __list_value] :=
+      obj_magic_exists (Es := [Set ** Set])
+        (fun '[__0, __1] =&gt;
+          [args ** args ** r -&gt; Lwt.t (Error_monad.tzresult (list (__0 * __1)))])
+        [__left, __right, __list_value] in
+    let compare_left := compare __left in
+    let equal_left (x : __0) (y : __0) : bool :=
+      (|Compare.Int|).(Compare.S.op_eq) (compare_left x y) 0 in
+    let list_left (__r_value : r) : Lwt.t (Error_monad.tzresult (list __0)) :=
+      let=? l := __list_value __r_value in
+      Error_monad.__return (destutter equal_left l) in
+    register_indexed_subcontext
+      (register_indexed_subcontext dir list_left __left)
+      (fun __r_value =&gt;
+        let '(__a_value, k) := (unpack (c := unit)) __left __r_value in
+        let=? l := __list_value __a_value in
+        Error_monad.__return
+          (List.map Pervasives.snd
+            (List.filter
+              (fun function_parameter =&gt;
+                let '(x, _) := function_parameter in
+                equal_left x k) l))) __right
+  | (One {| args.One.rpc_arg := arg; args.One.encoding := arg_encoding |}, _) =&gt;
+    let '[arg, arg_encoding] :=
+      obj_magic [RPC_arg.t a ** Data_encoding.t a] [arg, arg_encoding] in
+    match Pervasives.op_exclamation dir with
+    | Value _ =&gt; Pervasives.invalid_arg &quot;&quot;
+    | NamedDir _ =&gt; Pervasives.invalid_arg &quot;&quot;
+    | Empty =&gt;
+      let subdir := Pervasives.__ref_value Empty in
+      (* ❌ Sequences of instructions are ignored (operator &quot;;&quot;) *)
+      (* ❌ instruction_sequence &quot;;&quot; *)
+      subdir
+    |
+      IndexedDir {|
+        description.IndexedDir.arg := inner_arg;
+          description.IndexedDir.subdir := subdir
+          |} =&gt;
+      let 'existT _ __IndexedDir_'a [inner_arg, subdir] :=
+        existT (A := Set)
+          (fun __IndexedDir_'a =&gt;
+            [RPC_arg.t __IndexedDir_'a ** t (r * __IndexedDir_'a)]) _
+          [inner_arg, subdir] in
+      match RPC_arg.__eq_value arg inner_arg with
+      | None =&gt; obj_magic (t b) ((Pervasives.invalid_arg (a := t b)) &quot;&quot;)
+      | Some RPC_arg.Eq =&gt; obj_magic (t b) subdir
+      end
+    end
+  end.
 
 Definition register_value {a b : Set}
   (dir : t a) (get : a -&gt; Lwt.t (Error_monad.tzresult (option b)))
@@ -91506,8 +91984,8 @@ Definition build_directory {key : Set} (dir : t key) : RPC_directory.t key :=
   <div style="margin: 20px;">
     <h3>Storage_description_mli</h3>
     <ul>
-      <li>OCaml size: 97 lines</li>
-      <li>Coq size: 85 lines (-13% compared to&nbsp;OCaml)</li>
+      <li>OCaml size: 95 lines</li>
+      <li>Coq size: 83 lines (-13% compared to&nbsp;OCaml)</li>
     </ul>
   </div>
   <div class="col-md-6">
@@ -91537,8 +92015,6 @@ Definition build_directory {key : Set} (dir : t key) : RPC_directory.t key :=
 (* DEALINGS IN THE SOFTWARE.                                                 *)
 (*                                                                           *)
 (*****************************************************************************)
-
-val depends_on_me : unit -&gt; unit
 
 (** Typed description of the key-value context. *)
 type 'key t
@@ -91625,8 +92101,6 @@ Import ListNotations.
 
 Require Import Tezos.Environment.
 Import Environment.Notations.
-
-Parameter depends_on_me : unit -&gt; unit.
 
 Parameter t : forall (key : Set), Set.
 

@@ -856,7 +856,58 @@ Module Encoding.
         case.Case.inj :=
           fun level => Endorsement {| contents.Endorsement.level := level |} |}.
   
-  Definition endorsement_encoding : Data_encoding.encoding operation := axiom.
+  Definition endorsement_encoding : Data_encoding.encoding operation :=
+    let make (function_parameter : case) : Data_encoding.case contents :=
+      let
+        'Case {|
+          case.Case.tag := tag;
+            case.Case.name := name;
+            case.Case.encoding := encoding;
+            case.Case.select := _;
+            case.Case.proj := proj;
+            case.Case.inj := inj
+            |} := function_parameter in
+      let 'existT _ __Case_'a [tag, name, encoding, proj, inj] :=
+        existT (A := Set)
+          (fun __Case_'a =>
+            [int ** string ** Data_encoding.t __Case_'a ** contents -> __Case_'a
+              ** __Case_'a -> contents]) _ [tag, name, encoding, proj, inj] in
+      __case_value (Data_encoding.Tag tag) name encoding
+        (fun o => Some (proj o)) (fun x => inj x) in
+    let to_list (function_parameter : contents_list) : contents :=
+      match function_parameter with
+      | Single o => o
+      | _ => unreachable_gadt_branch
+      end in
+    let of_list (o : contents) : contents_list :=
+      Single o in
+    (let arg := Data_encoding.def "inlined.endorsement" in
+    fun eta => arg None None eta)
+      (Data_encoding.conv
+        (fun function_parameter =>
+          let '{|
+            operation.shell := shell;
+              operation.protocol_data := {|
+                protocol_data.contents := contents;
+                  protocol_data.signature := signature
+                  |}
+              |} := function_parameter in
+          (shell, (contents, signature)))
+        (fun function_parameter =>
+          let '(shell, (contents, signature)) := function_parameter in
+          {| operation.shell := shell;
+            operation.protocol_data :=
+              {| protocol_data.contents := contents;
+                protocol_data.signature := signature |} |}) None
+        (Data_encoding.merge_objs Operation.shell_header_encoding
+          (Data_encoding.obj2
+            (Data_encoding.req None None "operations"
+              ((let arg := Data_encoding.conv to_list of_list in
+              fun eta => arg None eta)
+                ((let arg := Data_encoding.def "inlined.endorsement.contents" in
+                fun eta => arg None None eta)
+                  (Data_encoding.union None [ make endorsement_case ]))))
+            (Data_encoding.varopt None None "signature" Signature.encoding)))).
   
   Definition seed_nonce_revelation_case : case :=
     Case

@@ -17,7 +17,19 @@ Import Alpha_context.
 
 Import Data_encoding.
 
-Definition error_encoding : Data_encoding.encoding Error_monad.__error := axiom.
+Definition error_encoding : Data_encoding.encoding Error_monad.__error :=
+  (let arg :=
+    Data_encoding.def "error"
+      (Some
+        "The full list of RPC errors would be too long to include.\nIt is available at RPC `/errors` (GET).\nErrors specific to protocol Alpha have an id that starts with `proto.alpha`.")
+    in
+  fun eta => arg None eta)
+    (Data_encoding.splitted
+      (Data_encoding.conv
+        (fun err => Data_encoding.Json.construct Error_monad.error_encoding err)
+        (fun __json_value =>
+          Data_encoding.Json.destruct Error_monad.error_encoding __json_value)
+        None Data_encoding.__json_value) Error_monad.error_encoding).
 
 Module ConstructorRecords_successful_manager_operation_result.
   Module successful_manager_operation_result.

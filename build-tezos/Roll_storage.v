@@ -138,7 +138,8 @@ Definition freeze_rolls_for_cycle
   let=? max_index :=
     (|Storage.Roll.Snapshot_for_cycle|).(Storage_sigs.Indexed_data_storage.get)
       ctxt cycle in
-  let=? __seed_value := Storage.Seed.For_cycle.get ctxt cycle in
+  let=? __seed_value :=
+    (|Storage.Seed.For_cycle|).(Storage.For_cycle_sig.get) ctxt cycle in
   let rd :=
     Seed_repr.initialize_new __seed_value [ MBytes.of_string "roll_snapshot" ]
     in

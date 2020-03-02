@@ -246,46 +246,48 @@ Module Vote.
         (|Signature.Public_key_hash|).(S.SPublic_key_hash.t) Vote_repr.ballot}.
 End Vote.
 
+Module unrevealed_nonce.
+  Record record : Set := Build {
+    nonce_hash : Nonce_hash.t;
+    delegate : (|Signature.Public_key_hash|).(S.SPublic_key_hash.t);
+    rewards : Tez_repr.t;
+    fees : Tez_repr.t }.
+  Definition with_nonce_hash nonce_hash (r : record) :=
+    Build nonce_hash r.(delegate) r.(rewards) r.(fees).
+  Definition with_delegate delegate (r : record) :=
+    Build r.(nonce_hash) delegate r.(rewards) r.(fees).
+  Definition with_rewards rewards (r : record) :=
+    Build r.(nonce_hash) r.(delegate) rewards r.(fees).
+  Definition with_fees fees (r : record) :=
+    Build r.(nonce_hash) r.(delegate) r.(rewards) fees.
+End unrevealed_nonce.
+Definition unrevealed_nonce := unrevealed_nonce.record.
+
+Inductive nonce_status : Set :=
+| Unrevealed : unrevealed_nonce -> nonce_status
+| Revealed : Seed_repr.nonce -> nonce_status.
+
+Module For_cycle_sig.
+  Record signature : Set := {
+    init :
+      Raw_context.t -> Cycle_repr.t -> Seed_repr.seed ->
+      Lwt.t (Error_monad.tzresult Raw_context.t);
+    get :
+      Raw_context.t -> Cycle_repr.t ->
+      Lwt.t (Error_monad.tzresult Seed_repr.seed);
+    delete :
+      Raw_context.t -> Cycle_repr.t ->
+      Lwt.t (Error_monad.tzresult Raw_context.t);
+  }.
+End For_cycle_sig.
+
 Module Seed.
-  Module unrevealed_nonce.
-    Record record : Set := Build {
-      nonce_hash : Nonce_hash.t;
-      delegate : (|Signature.Public_key_hash|).(S.SPublic_key_hash.t);
-      rewards : Tez_repr.t;
-      fees : Tez_repr.t }.
-    Definition with_nonce_hash nonce_hash (r : record) :=
-      Build nonce_hash r.(delegate) r.(rewards) r.(fees).
-    Definition with_delegate delegate (r : record) :=
-      Build r.(nonce_hash) delegate r.(rewards) r.(fees).
-    Definition with_rewards rewards (r : record) :=
-      Build r.(nonce_hash) r.(delegate) rewards r.(fees).
-    Definition with_fees fees (r : record) :=
-      Build r.(nonce_hash) r.(delegate) r.(rewards) fees.
-  End unrevealed_nonce.
-  Definition unrevealed_nonce := unrevealed_nonce.record.
-  
-  Inductive nonce_status : Set :=
-  | Unrevealed : unrevealed_nonce -> nonce_status
-  | Revealed : Seed_repr.nonce -> nonce_status.
-  
   Parameter Nonce :
     {_ : unit &
       Non_iterable_indexed_data_storage.signature Raw_context.t Level_repr.t
         nonce_status}.
   
-  Module For_cycle.
-    Parameter init :
-      Raw_context.t -> Cycle_repr.t -> Seed_repr.seed ->
-      Lwt.t (Error_monad.tzresult Raw_context.t).
-    
-    Parameter get :
-      Raw_context.t -> Cycle_repr.t ->
-      Lwt.t (Error_monad.tzresult Seed_repr.seed).
-    
-    Parameter delete :
-      Raw_context.t -> Cycle_repr.t ->
-      Lwt.t (Error_monad.tzresult Raw_context.t).
-  End For_cycle.
+  Parameter For_cycle : {_ : unit & For_cycle_sig.signature}.
 End Seed.
 
 Parameter Commitments :

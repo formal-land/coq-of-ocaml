@@ -32,6 +32,8 @@ Require Tezos.Voting_period_repr.
 
 Import Storage_functors.
 
+Import Storage_sigs.
+
 Definition Int :=
   let t : Set := int in
   let encoding := Data_encoding.uint16 in
@@ -151,7 +153,7 @@ Definition Block_priority :=
       |})) (existT (A := Set) _ _ (|Int|)).
 
 Module Contract.
-  Definition Raw_context :=
+  Definition Raw_context : {_ : unit & Raw_context.T.signature Raw_context.t} :=
     ((Storage_functors.Make_subcontext
       (existT (A := unit) (fun _ => _) tt (|Storage_functors.Registered|)))
       (existT (A := Set) _ _
@@ -220,7 +222,10 @@ Module Contract.
     Lwt.t (list (|Indexed_context|).(Storage_sigs.Indexed_raw_context.key)) :=
     (|Indexed_context|).(Storage_sigs.Indexed_raw_context.keys).
   
-  Definition Balance :=
+  Definition Balance :
+    {_ : unit &
+      Indexed_data_storage.signature (|Raw_context|).(Raw_context.T.t)
+        Contract_repr.t Tez_repr.t} :=
     ((|Indexed_context|).(Storage_sigs.Indexed_raw_context.Make_map)
       (let name := [ "balance" ] in
       existT (A := unit) (fun _ => _) tt
@@ -249,7 +254,11 @@ Module Contract.
         Make_index (existT (A := Set) _ _ (|Cycle_repr.Index|)) in
       existT (A := [Set ** Set -> Set]) _ [_, _] (|functor_result|)).
   
-  Definition Frozen_deposits :=
+  Definition Frozen_deposits :
+    {_ : unit &
+      Indexed_data_storage.signature
+        ((|Raw_context|).(Raw_context.T.t) * Contract_repr.t) Cycle_repr.t
+        Tez_repr.t} :=
     ((|Frozen_balance_index|).(Storage_sigs.Indexed_raw_context.Make_map)
       (let name := [ "deposits" ] in
       existT (A := unit) (fun _ => _) tt
@@ -261,7 +270,11 @@ Module Contract.
           Storage_sigs.VALUE.encoding := Tez_repr.encoding
         |}).
   
-  Definition Frozen_fees :=
+  Definition Frozen_fees :
+    {_ : unit &
+      Indexed_data_storage.signature
+        ((|Raw_context|).(Raw_context.T.t) * Contract_repr.t) Cycle_repr.t
+        Tez_repr.t} :=
     ((|Frozen_balance_index|).(Storage_sigs.Indexed_raw_context.Make_map)
       (let name := [ "fees" ] in
       existT (A := unit) (fun _ => _) tt
@@ -273,7 +286,11 @@ Module Contract.
           Storage_sigs.VALUE.encoding := Tez_repr.encoding
         |}).
   
-  Definition Frozen_rewards :=
+  Definition Frozen_rewards :
+    {_ : unit &
+      Indexed_data_storage.signature
+        ((|Raw_context|).(Raw_context.T.t) * Contract_repr.t) Cycle_repr.t
+        Tez_repr.t} :=
     ((|Frozen_balance_index|).(Storage_sigs.Indexed_raw_context.Make_map)
       (let name := [ "rewards" ] in
       existT (A := unit) (fun _ => _) tt
@@ -285,7 +302,10 @@ Module Contract.
           Storage_sigs.VALUE.encoding := Tez_repr.encoding
         |}).
   
-  Definition Manager :=
+  Definition Manager :
+    {_ : unit &
+      Indexed_data_storage.signature (|Raw_context|).(Raw_context.T.t)
+        Contract_repr.t Manager_repr.t} :=
     ((|Indexed_context|).(Storage_sigs.Indexed_raw_context.Make_map)
       (let name := [ "manager" ] in
       existT (A := unit) (fun _ => _) tt
@@ -297,7 +317,10 @@ Module Contract.
           Storage_sigs.VALUE.encoding := Manager_repr.encoding
         |}).
   
-  Definition Delegate :=
+  Definition Delegate :
+    {_ : unit &
+      Indexed_data_storage.signature (|Raw_context|).(Raw_context.T.t)
+        Contract_repr.t (|Signature.Public_key_hash|).(S.SPublic_key_hash.t)} :=
     ((|Indexed_context|).(Storage_sigs.Indexed_raw_context.Make_map)
       (let name := [ "delegate" ] in
       existT (A := unit) (fun _ => _) tt
@@ -310,7 +333,10 @@ Module Contract.
             (|Signature.Public_key_hash|).(S.SPublic_key_hash.encoding)
         |}).
   
-  Definition Inactive_delegate :=
+  Definition Inactive_delegate :
+    {_ : unit &
+      Data_set_storage.signature (|Raw_context|).(Raw_context.T.t)
+        Contract_repr.t} :=
     ((|Indexed_context|).(Storage_sigs.Indexed_raw_context.Make_set)
       (existT (A := unit) (fun _ => _) tt (|Storage_functors.Registered|)))
       (let name := [ "inactive_delegate" ] in
@@ -319,7 +345,10 @@ Module Contract.
           Storage_sigs.NAME.name := name
         |}).
   
-  Definition Delegate_desactivation :=
+  Definition Delegate_desactivation :
+    {_ : unit &
+      Indexed_data_storage.signature (|Raw_context|).(Raw_context.T.t)
+        Contract_repr.t Cycle_repr.t} :=
     ((|Indexed_context|).(Storage_sigs.Indexed_raw_context.Make_map)
       (let name := [ "delegate_desactivation" ] in
       existT (A := unit) (fun _ => _) tt
@@ -331,7 +360,11 @@ Module Contract.
           Storage_sigs.VALUE.encoding := Cycle_repr.encoding
         |}).
   
-  Definition Delegated :=
+  Definition Delegated :
+    {_ : unit &
+      Data_set_storage.signature
+        ((|Raw_context|).(Raw_context.T.t) * Contract_repr.t) Contract_repr.t}
+    :=
     (Storage_functors.Make_data_set_storage
       (let functor_result :=
         ((Storage_functors.Make_subcontext
@@ -348,7 +381,10 @@ Module Contract.
         Make_index (existT (A := Set) _ _ (|Contract_repr.Index|)) in
       existT (A := [Set ** Set -> Set]) _ [_, _] (|functor_result|)).
   
-  Definition Counter :=
+  Definition Counter :
+    {_ : unit &
+      Indexed_data_storage.signature (|Raw_context|).(Raw_context.T.t)
+        Contract_repr.t Z.t} :=
     ((|Indexed_context|).(Storage_sigs.Indexed_raw_context.Make_map)
       (let name := [ "counter" ] in
       existT (A := unit) (fun _ => _) tt
@@ -504,7 +540,11 @@ Module Contract.
               (|Raw_context|).(Raw_context.T.t) Contract_repr.t
               Script_repr.lazy_expr}).
   
-  Definition Code :=
+  Definition Code :
+    {_ : unit &
+      Non_iterable_indexed_carbonated_data_storage.signature
+        (|Raw_context|).(Raw_context.T.t) Contract_repr.t Script_repr.lazy_expr}
+    :=
     Make_carbonated_map_expr
       (let name := [ "code" ] in
       existT (A := unit) (fun _ => _) tt
@@ -512,7 +552,11 @@ Module Contract.
           Storage_sigs.NAME.name := name
         |}).
   
-  Definition Storage :=
+  Definition Storage :
+    {_ : unit &
+      Non_iterable_indexed_carbonated_data_storage.signature
+        (|Raw_context|).(Raw_context.T.t) Contract_repr.t Script_repr.lazy_expr}
+    :=
     Make_carbonated_map_expr
       (let name := [ "storage" ] in
       existT (A := unit) (fun _ => _) tt
@@ -520,7 +564,10 @@ Module Contract.
           Storage_sigs.NAME.name := name
         |}).
   
-  Definition Paid_storage_space :=
+  Definition Paid_storage_space :
+    {_ : unit &
+      Indexed_data_storage.signature (|Raw_context|).(Raw_context.T.t)
+        Contract_repr.t Z.t} :=
     ((|Indexed_context|).(Storage_sigs.Indexed_raw_context.Make_map)
       (let name := [ "paid_bytes" ] in
       existT (A := unit) (fun _ => _) tt
@@ -528,7 +575,10 @@ Module Contract.
           Storage_sigs.NAME.name := name
         |})) (existT (A := Set) _ _ (|Z_value|)).
   
-  Definition Used_storage_space :=
+  Definition Used_storage_space :
+    {_ : unit &
+      Indexed_data_storage.signature (|Raw_context|).(Raw_context.T.t)
+        Contract_repr.t Z.t} :=
     ((|Indexed_context|).(Storage_sigs.Indexed_raw_context.Make_map)
       (let name := [ "used_bytes" ] in
       existT (A := unit) (fun _ => _) tt
@@ -1116,6 +1166,27 @@ Definition Delegates_with_frozen_balance :=
           |}) in
     existT (A := [Set ** Set -> Set]) _ [_, _] (|functor_result|)).
 
+Module unrevealed_nonce.
+  Record record : Set := Build {
+    nonce_hash : Nonce_hash.t;
+    delegate : (|Signature.Public_key_hash|).(S.SPublic_key_hash.t);
+    rewards : Tez_repr.t;
+    fees : Tez_repr.t }.
+  Definition with_nonce_hash nonce_hash (r : record) :=
+    Build nonce_hash r.(delegate) r.(rewards) r.(fees).
+  Definition with_delegate delegate (r : record) :=
+    Build r.(nonce_hash) delegate r.(rewards) r.(fees).
+  Definition with_rewards rewards (r : record) :=
+    Build r.(nonce_hash) r.(delegate) rewards r.(fees).
+  Definition with_fees fees (r : record) :=
+    Build r.(nonce_hash) r.(delegate) r.(rewards) fees.
+End unrevealed_nonce.
+Definition unrevealed_nonce := unrevealed_nonce.record.
+
+Inductive nonce_status : Set :=
+| Unrevealed : unrevealed_nonce -> nonce_status
+| Revealed : Seed_repr.nonce -> nonce_status.
+
 Module Cycle.
   Definition Indexed_context :=
     (Storage_functors.Make_indexed_subcontext
@@ -1181,27 +1252,6 @@ Module Cycle.
         {|
           Storage_sigs.NAME.name := name
         |})) (existT (A := Set) _ _ (|Int|)).
-  
-  Module unrevealed_nonce.
-    Record record : Set := Build {
-      nonce_hash : Nonce_hash.t;
-      delegate : (|Signature.Public_key_hash|).(S.SPublic_key_hash.t);
-      rewards : Tez_repr.t;
-      fees : Tez_repr.t }.
-    Definition with_nonce_hash nonce_hash (r : record) :=
-      Build nonce_hash r.(delegate) r.(rewards) r.(fees).
-    Definition with_delegate delegate (r : record) :=
-      Build r.(nonce_hash) delegate r.(rewards) r.(fees).
-    Definition with_rewards rewards (r : record) :=
-      Build r.(nonce_hash) r.(delegate) rewards r.(fees).
-    Definition with_fees fees (r : record) :=
-      Build r.(nonce_hash) r.(delegate) r.(rewards) fees.
-  End unrevealed_nonce.
-  Definition unrevealed_nonce := unrevealed_nonce.record.
-  
-  Inductive nonce_status : Set :=
-  | Unrevealed : unrevealed_nonce -> nonce_status
-  | Revealed : Seed_repr.nonce -> nonce_status.
   
   Definition nonce_status_encoding : Data_encoding.encoding nonce_status :=
     Data_encoding.union None
@@ -1326,7 +1376,10 @@ Module Roll.
         Make_index (existT (A := Set) _ _ (|Roll_repr.Index|)) in
       existT (A := [Set ** Set -> Set]) _ [_, _] (|functor_result|)).
   
-  Definition Next :=
+  Definition Next :
+    {_ : unit &
+      Single_data_storage.signature (|Raw_context|).(Raw_context.T.t)
+        Roll_repr.t} :=
     (((Storage_functors.Make_single_data_storage
       (existT (A := unit) (fun _ => _) tt (|Storage_functors.Registered|)))
       (existT (A := Set) _ _ (|Raw_context|)))
@@ -1340,7 +1393,10 @@ Module Roll.
           Storage_sigs.VALUE.encoding := Roll_repr.encoding
         |}).
   
-  Definition Limbo :=
+  Definition Limbo :
+    {_ : unit &
+      Single_data_storage.signature (|Raw_context|).(Raw_context.T.t)
+        Roll_repr.t} :=
     (((Storage_functors.Make_single_data_storage
       (existT (A := unit) (fun _ => _) tt (|Storage_functors.Registered|)))
       (existT (A := Set) _ _ (|Raw_context|)))
@@ -1354,7 +1410,10 @@ Module Roll.
           Storage_sigs.VALUE.encoding := Roll_repr.encoding
         |}).
   
-  Definition Delegate_roll_list :=
+  Definition Delegate_roll_list :
+    {_ : unit &
+      Indexed_data_storage.signature (|Raw_context|).(Raw_context.T.t)
+        (|Signature.Public_key_hash|).(S.SPublic_key_hash.t) Roll_repr.t} :=
     (Storage_functors.Wrap_indexed_data_storage
       (existT (A := [Set ** Set ** Set]) _ [_, _, _] (|Contract.Roll_list|)))
       (let t : Set := (|Signature.Public_key_hash|).(S.SPublic_key_hash.t) in
@@ -1366,7 +1425,10 @@ Module Roll.
           Storage_functors.WRAPPER.unwrap := unwrap
         |}).
   
-  Definition Successor :=
+  Definition Successor :
+    {_ : unit &
+      Indexed_data_storage.signature (|Raw_context|).(Raw_context.T.t)
+        Roll_repr.t Roll_repr.t} :=
     ((|Indexed_context|).(Storage_sigs.Indexed_raw_context.Make_map)
       (let name := [ "successor" ] in
       existT (A := unit) (fun _ => _) tt
@@ -1378,7 +1440,10 @@ Module Roll.
           Storage_sigs.VALUE.encoding := Roll_repr.encoding
         |}).
   
-  Definition Delegate_change :=
+  Definition Delegate_change :
+    {_ : unit &
+      Indexed_data_storage.signature (|Raw_context|).(Raw_context.T.t)
+        (|Signature.Public_key_hash|).(S.SPublic_key_hash.t) Tez_repr.t} :=
     (Storage_functors.Wrap_indexed_data_storage
       (existT (A := [Set ** Set ** Set]) _ [_, _, _] (|Contract.Change|)))
       (let t : Set := (|Signature.Public_key_hash|).(S.SPublic_key_hash.t) in
@@ -1445,7 +1510,11 @@ Module Roll.
       fun x => x.
   End Snapshoted_owner_index.
   
-  Definition Owner :=
+  Definition Owner :
+    {_ : unit &
+      Indexed_data_snapshotable_storage.signature (Cycle_repr.t * int)
+        Roll_repr.t (|Raw_context|).(Raw_context.T.t)
+        (|Signature.Public_key|).(S.SPublic_key.t)} :=
     (((Storage_functors.Make_indexed_data_snapshotable_storage
       (let functor_result :=
         ((Storage_functors.Make_subcontext
@@ -1476,10 +1545,16 @@ Module Roll.
             (|Signature.Public_key|).(S.SPublic_key.encoding)
         |}).
   
-  Definition Snapshot_for_cycle :=
+  Definition Snapshot_for_cycle :
+    {_ : unit &
+      Indexed_data_storage.signature (|Raw_context|).(Raw_context.T.t)
+        Cycle_repr.t int} :=
     existT (A := unit) (fun _ => _) tt (|Cycle.Roll_snapshot|).
   
-  Definition Last_for_snapshot :=
+  Definition Last_for_snapshot :
+    {_ : unit &
+      Indexed_data_storage.signature
+        ((|Raw_context|).(Raw_context.T.t) * Cycle_repr.t) int Roll_repr.t} :=
     existT (A := unit) (fun _ => _) tt (|Cycle.Last_roll|).
   
   Definition clear
@@ -1725,14 +1800,27 @@ Module Vote.
         |}).
 End Vote.
 
+Module For_cycle_sig.
+  Record signature : Set := {
+    init :
+      Raw_context.t -> Cycle_repr.t -> Seed_repr.seed ->
+      Lwt.t (Error_monad.tzresult Raw_context.t);
+    get :
+      Raw_context.t -> Cycle_repr.t ->
+      Lwt.t (Error_monad.tzresult Seed_repr.seed);
+    delete :
+      Raw_context.t -> Cycle_repr.t ->
+      Lwt.t (Error_monad.tzresult Raw_context.t);
+  }.
+End For_cycle_sig.
+
 Module Seed.
-  Definition unrevealed_nonce : Set := Cycle.unrevealed_nonce.
-  
-  Definition nonce_status : Set := Cycle.nonce_status.
-  
-  Definition Nonce :=
-    ((* ❌ open *)
-    (let tag_Non_iterable_indexed_data_storage := tt in
+  Definition Nonce :
+    {_ : unit &
+      Storage_sigs.Non_iterable_indexed_data_storage.signature Raw_context.t
+        Level_repr.t nonce_status} :=
+    (* ❌ open *)
+    let tag_Non_iterable_indexed_data_storage := tt in
     let context : Set := Raw_context.t in
     let mem
       (ctxt : (|Cycle.Indexed_context|).(Storage_sigs.Indexed_raw_context.t))
@@ -1806,13 +1894,18 @@ Module Seed.
         Storage_sigs.Non_iterable_indexed_data_storage.set_option := set_option;
         Storage_sigs.Non_iterable_indexed_data_storage.delete := delete;
         Storage_sigs.Non_iterable_indexed_data_storage.remove := remove
-      |})
-      :
-        {_ : unit &
-          Storage_sigs.Non_iterable_indexed_data_storage.signature Raw_context.t
-            Level_repr.t nonce_status}).
+      |}.
   
-  Definition For_cycle := existT (A := unit) (fun _ => _) tt (|Cycle.Seed|).
+  Definition For_cycle : {_ : unit & For_cycle_sig.signature} :=
+    existT (A := unit) (fun _ => _) tt
+      {|
+        For_cycle_sig.init :=
+          (|Cycle.Seed|).(Storage_sigs.Indexed_data_storage.init);
+        For_cycle_sig.get :=
+          (|Cycle.Seed|).(Storage_sigs.Indexed_data_storage.get);
+        For_cycle_sig.delete :=
+          (|Cycle.Seed|).(Storage_sigs.Indexed_data_storage.delete)
+      |}.
 End Seed.
 
 Definition Commitments :=

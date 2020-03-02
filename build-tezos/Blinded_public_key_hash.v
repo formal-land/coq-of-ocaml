@@ -125,8 +125,8 @@ Definition activation_code_of_hex (h : string) : MBytes.t :=
   (* ❌ instruction_sequence ";" *)
   MBytes.of_hex (MBytes.Hex h).
 
-Definition Index :=
-  ((existT (A := unit) (fun _ => _) tt
+Definition Index : {_ : unit & Storage_description.INDEX.signature t} :=
+  existT (A := unit) (fun _ => _) tt
     {|
       Storage_description.INDEX.path_length := (|H|).(S.HASH.path_length);
       Storage_description.INDEX.to_path := (|H|).(S.HASH.to_path);
@@ -134,4 +134,4 @@ Definition Index :=
       Storage_description.INDEX.rpc_arg := (|H|).(S.HASH.rpc_arg);
       Storage_description.INDEX.encoding := (|H|).(S.HASH.encoding);
       Storage_description.INDEX.compare := (|H|).(S.HASH.compare)
-    |}) : {_ : unit & Storage_description.INDEX.signature t}).
+    |}.

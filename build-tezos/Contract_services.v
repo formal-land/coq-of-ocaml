@@ -206,7 +206,127 @@ Module S.
       custom_root.
 End S.
 
-Definition register (function_parameter : unit) : unit := axiom.
+Definition register (function_parameter : unit) : unit :=
+  let '_ := function_parameter in
+  (* ❌ Sequences of instructions are ignored (operator ";") *)
+  (* ❌ instruction_sequence ";" *)
+  let register_field {A : Set}
+    (s :
+      RPC_service.t Updater.rpc_context
+        (Updater.rpc_context * Alpha_context.Contract.contract) unit unit A)
+    (f :
+      Alpha_context.t -> Alpha_context.Contract.contract ->
+      Lwt.t (Error_monad.tzresult A)) : unit :=
+    Services_registration.register1 s
+      (fun ctxt =>
+        fun contract =>
+          fun function_parameter =>
+            let '_ := function_parameter in
+            fun function_parameter =>
+              let '_ := function_parameter in
+              let=? function_parameter :=
+                Alpha_context.Contract.__exists ctxt contract in
+              match function_parameter with
+              | true => f ctxt contract
+              | false => Pervasives.raise extensible_type_value
+              end) in
+  let register_opt_field {A : Set}
+    (s :
+      RPC_service.t Updater.rpc_context
+        (Updater.rpc_context * Alpha_context.Contract.contract) unit unit A)
+    (f :
+      Alpha_context.t -> Alpha_context.Contract.contract ->
+      Lwt.t (Error_monad.tzresult (option A))) : unit :=
+    register_field s
+      (fun ctxt =>
+        fun a1 =>
+          let=? function_parameter := f ctxt a1 in
+          match function_parameter with
+          | None => Pervasives.raise extensible_type_value
+          | Some v => Error_monad.__return v
+          end) in
+  let do_big_map_get
+    (ctxt : Alpha_context.context) (id : Alpha_context.Big_map.id)
+    (__key_value : Script_expr_hash.t)
+    : Lwt.t
+      (Error_monad.tzresult (Micheline.canonical Alpha_context.Script.prim)) :=
+    let ctxt := Alpha_context.Gas.set_unlimited ctxt in
+    let=? '(ctxt, types) := Alpha_context.Big_map.__exists ctxt id in
+    match types with
+    | None => Pervasives.raise extensible_type_value
+    | Some (_, value_type) =>
+      let=? '(Script_ir_translator.Ex_ty value_type, ctxt) :=
+        Lwt.__return
+          (Script_ir_translator.parse_ty ctxt true false false true
+            (Micheline.root value_type)) in
+      let=? '(_ctxt, value) := Alpha_context.Big_map.get_opt ctxt id __key_value
+        in
+      match value with
+      | None => Pervasives.raise extensible_type_value
+      | Some value =>
+        let=? '(value, ctxt) :=
+          Script_ir_translator.parse_data None ctxt true value_type
+            (Micheline.root value) in
+        let=? '(value, _ctxt) :=
+          Script_ir_translator.unparse_data ctxt Script_ir_translator.Readable
+            value_type value in
+        Error_monad.__return (Micheline.strip_locations value)
+      end
+    end in
+  (* ❌ Sequences of instructions are ignored (operator ";") *)
+  (* ❌ instruction_sequence ";" *)
+  (* ❌ Sequences of instructions are ignored (operator ";") *)
+  (* ❌ instruction_sequence ";" *)
+  (* ❌ Sequences of instructions are ignored (operator ";") *)
+  (* ❌ instruction_sequence ";" *)
+  (* ❌ Sequences of instructions are ignored (operator ";") *)
+  (* ❌ instruction_sequence ";" *)
+  (* ❌ Sequences of instructions are ignored (operator ";") *)
+  (* ❌ instruction_sequence ";" *)
+  (* ❌ Sequences of instructions are ignored (operator ";") *)
+  (* ❌ instruction_sequence ";" *)
+  (* ❌ Sequences of instructions are ignored (operator ";") *)
+  (* ❌ instruction_sequence ";" *)
+  (* ❌ Sequences of instructions are ignored (operator ";") *)
+  (* ❌ instruction_sequence ";" *)
+  (* ❌ Sequences of instructions are ignored (operator ";") *)
+  (* ❌ instruction_sequence ";" *)
+  (* ❌ Sequences of instructions are ignored (operator ";") *)
+  (* ❌ instruction_sequence ";" *)
+  register_field S.__info_value
+    (fun ctxt =>
+      fun contract =>
+        let=? balance := Alpha_context.Contract.get_balance ctxt contract in
+        let=? delegate := Alpha_context.Delegate.get ctxt contract in
+        let=? counter :=
+          match Alpha_context.Contract.is_implicit contract with
+          | Some manager =>
+            let=? counter := Alpha_context.Contract.get_counter ctxt manager in
+            Error_monad.return_some counter
+          | None => Error_monad.__return None
+          end in
+        let=? '(ctxt, script) := Alpha_context.Contract.get_script ctxt contract
+          in
+        let=? '(script, _ctxt) :=
+          match script with
+          | None => Error_monad.__return (None, ctxt)
+          | Some script =>
+            let ctxt := Alpha_context.Gas.set_unlimited ctxt in
+            let=? '(Script_ir_translator.Ex_script script, ctxt) :=
+              Script_ir_translator.parse_script None ctxt true script in
+            let 'existT _ __Ex_script_'b2 [script, ctxt] :=
+              existT (A := Set)
+                (fun __Ex_script_'b2 =>
+                  [Script_typed_ir.script __Ex_script_'b2 **
+                    Alpha_context.context]) _ [script, ctxt] in
+            let=? '(script, ctxt) :=
+              Script_ir_translator.unparse_script ctxt
+                Script_ir_translator.Readable script in
+            Error_monad.__return ((Some script), ctxt)
+          end in
+        Error_monad.__return
+          {| info.balance := balance; info.delegate := delegate;
+            info.counter := counter; info.script := script |}).
 
 Definition __list_value {D E G I K L a b c i o q : Set}
   (ctxt :

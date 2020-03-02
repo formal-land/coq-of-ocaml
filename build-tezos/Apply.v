@@ -1309,10 +1309,10 @@ Definition finalize_application
     | None => Error_monad.__return ctxt
     | Some nonce_hash =>
       Alpha_context.Nonce.record_hash ctxt
-        {| Storage.Seed.unrevealed_nonce.nonce_hash := nonce_hash;
-          Storage.Seed.unrevealed_nonce.delegate := delegate;
-          Storage.Seed.unrevealed_nonce.rewards := rewards;
-          Storage.Seed.unrevealed_nonce.fees := fees |}
+        {| Storage.unrevealed_nonce.nonce_hash := nonce_hash;
+          Storage.unrevealed_nonce.delegate := delegate;
+          Storage.unrevealed_nonce.rewards := rewards;
+          Storage.unrevealed_nonce.fees := fees |}
     end in
   let=? ctxt := may_snapshot_roll ctxt in
   let=? '(ctxt, balance_updates, deactivated) := may_start_new_cycle ctxt in

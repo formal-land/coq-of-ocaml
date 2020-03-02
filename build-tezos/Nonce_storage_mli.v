@@ -23,7 +23,7 @@ Definition nonce : Set := t.
 
 Parameter encoding : Data_encoding.t nonce.
 
-Definition unrevealed : Set := Storage.Seed.unrevealed_nonce.
+Definition unrevealed : Set := Storage.unrevealed_nonce.
 
 Inductive status : Set :=
 | Unrevealed : unrevealed -> status

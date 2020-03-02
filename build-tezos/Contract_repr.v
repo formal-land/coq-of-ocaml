@@ -83,7 +83,40 @@ Definition pp_short (ppf : Format.formatter) (function_parameter : t) : unit :=
   | Originated h => Contract_hash.pp_short ppf h
   end.
 
-Definition encoding : Data_encoding.encoding t := axiom.
+Definition encoding : Data_encoding.encoding t :=
+  (Data_encoding.def "contract_id" (Some "A contract handle")
+    (Some
+      "A contract notation as given to an RPC or inside scripts. Can be a base58 implicit contract hash or a base58 originated contract hash."))
+    (Data_encoding.splitted
+      (Data_encoding.conv to_b58check
+        (fun s =>
+          match of_b58check s with
+          | Pervasives.Ok s => s
+          | Pervasives.Error _ =>
+            Data_encoding.Json.cannot_destruct
+              (CamlinternalFormatBasics.Format
+                (CamlinternalFormatBasics.String_literal
+                  "Invalid contract notation."
+                  CamlinternalFormatBasics.End_of_format)
+                "Invalid contract notation.")
+          end) None Data_encoding.__string_value)
+      (Data_encoding.union (Some Data_encoding.Uint8)
+        [
+          Data_encoding.__case_value "Implicit" None (Data_encoding.Tag 0)
+            (|Signature.Public_key_hash|).(S.SPublic_key_hash.encoding)
+            (fun function_parameter =>
+              match function_parameter with
+              | Implicit k => Some k
+              | _ => None
+              end) (fun k => Implicit k);
+          Data_encoding.__case_value "Originated" None (Data_encoding.Tag 1)
+            (Data_encoding.Fixed.add_padding Contract_hash.encoding 1)
+            (fun function_parameter =>
+              match function_parameter with
+              | Originated k => Some k
+              | _ => None
+              end) (fun k => Originated k)
+        ])).
 
 (* ❌ Top-level evaluations are ignored *)
 (* top_level_evaluation *)
@@ -193,8 +226,8 @@ Definition rpc_arg : RPC_arg.arg t :=
   RPC_arg.make (Some "A contract identifier encoded in b58check.") "contract_id"
     destruct construct tt.
 
-Definition Index :=
-  ((let t : Set := contract in
+Definition Index : {_ : unit & Storage_description.INDEX.signature contract} :=
+  let t : Set := contract in
   let path_length := 7 in
   let to_path (c : t) (l : list string) : list string :=
     let raw_key := Data_encoding.Binary.to_bytes_exn encoding c in
@@ -245,4 +278,4 @@ Definition Index :=
       Storage_description.INDEX.rpc_arg := rpc_arg;
       Storage_description.INDEX.encoding := encoding;
       Storage_description.INDEX.compare := compare
-    |}) : {_ : unit & Storage_description.INDEX.signature contract}).
+    |}.

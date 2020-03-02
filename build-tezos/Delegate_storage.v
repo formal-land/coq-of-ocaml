@@ -629,18 +629,17 @@ Definition cycle_end
           fun u =>
             let=? '(ctxt, balance_updates) := acc in
             let=? ctxt :=
-              burn_fees ctxt u.(Storage.Seed.unrevealed_nonce.delegate)
-                revealed_cycle u.(Storage.Seed.unrevealed_nonce.fees) in
+              burn_fees ctxt u.(Storage.unrevealed_nonce.delegate)
+                revealed_cycle u.(Storage.unrevealed_nonce.fees) in
             let=? ctxt :=
-              burn_rewards ctxt u.(Storage.Seed.unrevealed_nonce.delegate)
-                revealed_cycle u.(Storage.Seed.unrevealed_nonce.rewards) in
+              burn_rewards ctxt u.(Storage.unrevealed_nonce.delegate)
+                revealed_cycle u.(Storage.unrevealed_nonce.rewards) in
             let bus :=
               [
-                ((Fees u.(Storage.Seed.unrevealed_nonce.delegate) revealed_cycle),
-                  (Debited u.(Storage.Seed.unrevealed_nonce.fees)));
-                ((Rewards u.(Storage.Seed.unrevealed_nonce.delegate)
-                  revealed_cycle),
-                  (Debited u.(Storage.Seed.unrevealed_nonce.rewards)))
+                ((Fees u.(Storage.unrevealed_nonce.delegate) revealed_cycle),
+                  (Debited u.(Storage.unrevealed_nonce.fees)));
+                ((Rewards u.(Storage.unrevealed_nonce.delegate) revealed_cycle),
+                  (Debited u.(Storage.unrevealed_nonce.rewards)))
               ] in
             Error_monad.__return (ctxt, (Pervasives.op_at bus balance_updates)))
         (Error_monad.__return (ctxt, nil)) unrevealed

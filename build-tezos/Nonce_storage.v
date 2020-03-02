@@ -32,7 +32,7 @@ Definition encoding : Data_encoding.t Seed_repr.nonce :=
 (* top_level_evaluation *)
 
 Definition get_unrevealed (ctxt : Raw_context.t) (level : Level_repr.t)
-  : Lwt.t (Error_monad.tzresult Storage.Seed.unrevealed_nonce) :=
+  : Lwt.t (Error_monad.tzresult Storage.unrevealed_nonce) :=
   let cur_level := Level_storage.current ctxt in
   match Cycle_repr.pred cur_level.(Level_repr.t.cycle) with
   | None => Error_monad.fail extensible_type_value
@@ -47,17 +47,17 @@ Definition get_unrevealed (ctxt : Raw_context.t) (level : Level_repr.t)
           (|Storage.Seed.Nonce|).(Storage_sigs.Non_iterable_indexed_data_storage.get)
             ctxt level in
         match function_parameter with
-        | Storage.Seed.Revealed _ => Error_monad.fail extensible_type_value
-        | Storage.Seed.Unrevealed status => Error_monad.__return status
+        | Storage.Revealed _ => Error_monad.fail extensible_type_value
+        | Storage.Unrevealed status => Error_monad.__return status
         end
   end.
 
 Definition record_hash
-  (ctxt : Raw_context.t) (unrevealed : Storage.Seed.unrevealed_nonce)
+  (ctxt : Raw_context.t) (unrevealed : Storage.unrevealed_nonce)
   : Lwt.t (Error_monad.tzresult Raw_context.t) :=
   let level := Level_storage.current ctxt in
   (|Storage.Seed.Nonce|).(Storage_sigs.Non_iterable_indexed_data_storage.init)
-    ctxt level (Storage.Seed.Unrevealed unrevealed).
+    ctxt level (Storage.Unrevealed unrevealed).
 
 Definition reveal
   (ctxt : Raw_context.t) (level : Level_repr.t)
@@ -67,20 +67,20 @@ Definition reveal
   let=? '_ :=
     Error_monad.fail_unless
       (Seed_repr.check_hash __nonce_value
-        unrevealed.(Storage.Seed.unrevealed_nonce.nonce_hash))
-      extensible_type_value in
+        unrevealed.(Storage.unrevealed_nonce.nonce_hash)) extensible_type_value
+    in
   let=? ctxt :=
     (|Storage.Seed.Nonce|).(Storage_sigs.Non_iterable_indexed_data_storage.set)
-      ctxt level (Storage.Seed.Revealed __nonce_value) in
+      ctxt level (Storage.Revealed __nonce_value) in
   Error_monad.__return ctxt.
 
-Definition unrevealed : Set := Storage.Seed.unrevealed_nonce.
+Definition unrevealed : Set := Storage.unrevealed_nonce.
 
-Definition status : Set := Storage.Seed.nonce_status.
+Definition status : Set := Storage.nonce_status.
 
 Definition get
   : (|Storage.Seed.Nonce|).(Storage_sigs.Non_iterable_indexed_data_storage.context)
-  -> Level_repr.t -> Lwt.t (Error_monad.tzresult Storage.Seed.nonce_status) :=
+  -> Level_repr.t -> Lwt.t (Error_monad.tzresult Storage.nonce_status) :=
   (|Storage.Seed.Nonce|).(Storage_sigs.Non_iterable_indexed_data_storage.get).
 
 Definition of_bytes : MBytes.t -> Error_monad.tzresult Seed_repr.nonce :=
