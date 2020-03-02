@@ -178,14 +178,12 @@ let rec of_expression (typ_vars : Name.t Name.Map.t) (e : expression)
     return (Function (x, e))
   | Texp_apply (e_f, e_xs) ->
     of_expression typ_vars e_f >>= fun e_f ->
-    (e_xs |> Monad.List.map (fun (_, e_x) ->
+    (e_xs |> Monad.List.filter_map (fun (_, e_x) ->
       match e_x with
-      | Some e_x -> of_expression typ_vars e_x
-      | None ->
-        error_message
-          (Error "expected_argument")
-          Unexpected
-          "expected an argument"
+      | Some e_x ->
+        of_expression typ_vars e_x >>= fun e_x ->
+        return (Some e_x)
+      | None -> return None
     )) >>= fun e_xs ->
     return (Apply (e_f, e_xs))
   | Texp_match (e, cases, exception_cases, _) ->
