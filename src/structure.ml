@@ -125,74 +125,36 @@ let rec of_structure (structure : structure) : t list Monad.t =
     | Tstr_open open_description ->
       let o = Open.of_ocaml open_description in
       return [Open o]
-    | Tstr_module {
-        mb_id = name;
-        mb_expr = {
-          mod_desc = Tmod_structure structure;
-          mod_type;
-          _
-        };
-        _
-      }
-    | Tstr_module {
-        mb_id = name;
-        mb_expr = {
-          mod_desc = Tmod_constraint ({ mod_desc = Tmod_structure structure; _ }, _, _, _);
-          mod_type;
-          _
-        };
-        _
-      } ->
-      let name = Name.of_ident false name in
-      IsFirstClassModule.is_module_typ_first_class mod_type >>= fun is_first_class ->
-      begin match is_first_class with
-      | Found md_type_path ->
-        Exp.of_structure
-          Name.Map.empty
-          md_type_path
-          mod_type
-          structure.str_items
-          structure.str_final_env >>= fun module_exp ->
-        return [ModuleExp (name, module_exp)]
-      | Not_found _ ->
-        of_structure structure >>= fun structures ->
-        return [Module (name, structures)]
-      end
-    | Tstr_module {
-        mb_id = name;
-        mb_expr = {
-          mod_desc = Tmod_ident (path, _);
-          mod_type;
-          _
-        };
-        _
-      } ->
-      let name = Name.of_ident false name in
-      let reference = PathName.of_path_with_convert false path in
-      IsFirstClassModule.is_module_typ_first_class mod_type >>= fun is_first_class ->
+    | Tstr_module { mb_id; mb_expr; _ } ->
+      let name = Name.of_ident false mb_id in
+      IsFirstClassModule.is_module_typ_first_class mb_expr.mod_type
+        >>= fun is_first_class ->
       begin match is_first_class with
       | Found _ ->
-        return [
-          ModuleExp (name, Exp.Variable (MixedPath.PathName reference, []))
-        ]
-      | Not_found _ -> return [ModuleSynonym (name, reference)]
+        Exp.of_module_expr
+          Name.Map.empty mb_expr (Some mb_expr.mod_type) >>= fun module_exp ->
+        return [ModuleExp (name, module_exp)]
+      | Not_found reason ->
+        begin match mb_expr.mod_desc with
+        | Tmod_structure structure ->
+          of_structure structure >>= fun structures ->
+          return [Module (name, structures)]
+        | Tmod_ident (path, _) ->
+          let reference = PathName.of_path_with_convert false path in
+          return [ModuleSynonym (name, reference)]
+        | Tmod_apply _ | Tmod_functor _ ->
+          Exp.of_module_expr Name.Map.empty mb_expr None >>= fun module_exp ->
+          return [ModuleExp (name, module_exp)]
+        | _ ->
+          raise
+            []
+            FirstClassModule
+            (
+              "We expected to find a signature name for this module.\n\n" ^
+              "Reason:\n" ^ reason
+            )
+        end
       end
-    | Tstr_module {
-        mb_id;
-        mb_expr = { mod_desc = (Tmod_apply _ | Tmod_functor _); _ } as mb_expr;
-        _
-      } ->
-      let name = Name.of_ident false mb_id in
-      Exp.of_module_expr
-        Name.Map.empty
-        mb_expr
-        None >>= fun module_exp ->
-      return [ModuleExp (name, module_exp)]
-    | Tstr_module _ ->
-      error_message
-        (Error "unhandled_module")
-        NotSupported
-        "This kind of module is not handled."
     | Tstr_modtype { mtd_type = None; _ } ->
       error_message
         (Error "abstract_module_type")

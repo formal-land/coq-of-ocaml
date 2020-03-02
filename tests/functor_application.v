@@ -26,12 +26,12 @@ Module Target.
 End Target.
 
 Definition M :=
-  let t : Set := Z in
+  ((let t : Set := Z in
   let x := 12 in
   existT (A := Set) _ _
     {|
       Source.x := x
-    |}.
+    |}) : {t : Set & Source.signature t}).
 
 Definition F :=
   fun (X : {t : Set & Source.signature t}) =>
