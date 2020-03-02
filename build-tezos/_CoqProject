@@ -110,7 +110,7 @@ State_hash.v
 Storage_description_mli.v
 Storage_description.v
 Storage_functors_mli.v
-#Storage_functors.v
+Storage_functors.v
 Storage_mli.v
 Storage_sigs.v
 #Storage.v

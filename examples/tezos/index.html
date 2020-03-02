@@ -59,8 +59,8 @@
     <pre><code>opam repo add coq-released https://coq.inria.fr/opam/released
 opam pin add https://github.com/clarus/coq-of-ocaml.git#master</code></pre>
     <ul>
-      <li>OCaml size: 36028 lines</li>
-      <li>Coq size: 45766 lines (+27% compared to&nbsp;OCaml)</li>
+      <li>OCaml size: 36040 lines</li>
+      <li>Coq size: 45788 lines (+27% compared to&nbsp;OCaml)</li>
       <li>Warnings from coq-of-ocaml: 4341</li>
     </ul>
     
@@ -116,6 +116,7 @@ opam pin add https://github.com/clarus/coq-of-ocaml.git#master</code></pre>
           26259,
           26259,
           28609,
+          30494,
         ],
         generated: [
           47563,
@@ -166,6 +167,7 @@ opam pin add https://github.com/clarus/coq-of-ocaml.git#master</code></pre>
           46049,
           46049,
           45766,
+          45788,
         ],
         labels: [
           "01-14",
@@ -216,6 +218,7 @@ opam pin add https://github.com/clarus/coq-of-ocaml.git#master</code></pre>
           "02-28",
           "02-29",
           "03-01",
+          "03-02",
         ]
       }
 ;
@@ -86737,8 +86740,8 @@ Definition path_length := (|Blake2BModule|).(S.HASH.path_length).
   <div style="margin: 20px;">
     <h3>Storage</h3>
     <ul>
-      <li>OCaml size: 901 lines</li>
-      <li>Coq size: 1923 lines (+113% compared to&nbsp;OCaml)</li>
+      <li>OCaml size: 907 lines</li>
+      <li>Coq size: 1937 lines (+113% compared to&nbsp;OCaml)</li>
     </ul>
   </div>
   <div class="col-md-6">
@@ -86811,6 +86814,8 @@ module Int_index = struct
         encoding = Data_encoding.int31;
         compare = Compare.Int.compare;
       }
+
+  let infer_ipath (_ : 'a ipath) (x : 'a) : 'a = x
 end
 
 module Make_index (H : Storage_description.INDEX) :
@@ -86820,6 +86825,8 @@ module Make_index (H : Storage_description.INDEX) :
   type 'a ipath = 'a * t
 
   let args () = Storage_description.One {rpc_arg; encoding; compare}
+
+  let infer_ipath (_ : 'a ipath) (x : 'a) : 'a = x
 end
 
 module Block_priority =
@@ -87470,6 +87477,8 @@ module Roll = struct
         }
 
     let args () = Storage_description.(Pair (left_args, right_args))
+
+    let infer_ipath (_ : 'a ipath) (x : 'a) : 'a = x
   end
 
   module Owner =
@@ -87686,7 +87695,7 @@ Require Tezos.Script_expr_hash.
 Require Tezos.Script_repr.
 Require Tezos.Seed_repr.
 Require Tezos.Storage_description.
-Require Tezos.Storage_functors_mli. Module Storage_functors := Storage_functors_mli.
+Require Tezos.Storage_functors.
 Require Tezos.Storage_sigs.
 Require Tezos.Tez_repr.
 Require Tezos.Vote_repr.
@@ -87736,12 +87745,16 @@ Definition Int_index :=
         Storage_description.args.One.encoding := Data_encoding.int31;
         Storage_description.args.One.compare :=
           (|Compare.Int|).(Compare.S.compare) |} in
+  let infer_ipath {a : Set} (function_parameter : ipath a) : a -&gt; a :=
+    let '_ := function_parameter in
+    fun x =&gt; x in
   existT (A := unit) (fun _ =&gt; _) tt
     {|
       Storage_functors.INDEX.path_length := path_length;
       Storage_functors.INDEX.to_path := to_path;
       Storage_functors.INDEX.of_path := of_path;
-      Storage_functors.INDEX.args := args
+      Storage_functors.INDEX.args := args;
+      Storage_functors.INDEX.infer_ipath {_} := infer_ipath
     |}.
 
 Definition Make_index :=
@@ -87760,12 +87773,16 @@ Definition Make_index :=
         {| Storage_description.args.One.rpc_arg := rpc_arg;
           Storage_description.args.One.encoding := encoding;
           Storage_description.args.One.compare := compare |} in
+    let infer_ipath {a : Set} (function_parameter : ipath a) : a -&gt; a :=
+      let '_ := function_parameter in
+      fun x =&gt; x in
     existT (A := unit) (fun _ =&gt; _) tt
       {|
         Storage_functors.INDEX.path_length := path_length;
         Storage_functors.INDEX.to_path := to_path;
         Storage_functors.INDEX.of_path := of_path;
-        Storage_functors.INDEX.args := args
+        Storage_functors.INDEX.args := args;
+        Storage_functors.INDEX.infer_ipath {_} := infer_ipath
       |})
       :
         {_ : unit &amp;
@@ -89089,6 +89106,10 @@ Module Roll.
     Definition args (function_parameter : unit) : Storage_description.args :=
       let '_ := function_parameter in
       Storage_description.Pair left_args right_args.
+    
+    Definition infer_ipath {a : Set} (function_parameter : ipath a) : a -&gt; a :=
+      let '_ := function_parameter in
+      fun x =&gt; x.
   End Snapshoted_owner_index.
   
   Definition Owner :=
@@ -89109,7 +89130,9 @@ Module Roll.
             Snapshoted_owner_index.path_length;
           Storage_functors.INDEX.to_path := Snapshoted_owner_index.to_path;
           Storage_functors.INDEX.of_path := Snapshoted_owner_index.of_path;
-          Storage_functors.INDEX.args := Snapshoted_owner_index.args
+          Storage_functors.INDEX.args := Snapshoted_owner_index.args;
+          Storage_functors.INDEX.infer_ipath {_} :=
+            Snapshoted_owner_index.infer_ipath
         |}))
       (let functor_result :=
         Make_index (existT (A := Set) _ _ (|Roll_repr.Index|)) in
@@ -91546,8 +91569,8 @@ End INDEX.
   <div style="margin: 20px;">
     <h3>Storage_functors</h3>
     <ul>
-      <li>OCaml size: 1209 lines</li>
-      <li>Coq size: 1877 lines (+55% compared to&nbsp;OCaml)</li>
+      <li>OCaml size: 1213 lines</li>
+      <li>Coq size: 1884 lines (+55% compared to&nbsp;OCaml)</li>
     </ul>
   </div>
   <div class="col-md-6">
@@ -91773,6 +91796,8 @@ module type INDEX = sig
   type 'a ipath
 
   val args : unit -&gt; ('a, t, 'a ipath) Storage_description.args
+
+  val infer_ipath : 'a ipath -&gt; 'a -&gt; 'a
 end
 
 module Pair (I1 : INDEX) (I2 : INDEX) : INDEX with type t = I1.t * I2.t =
@@ -91797,6 +91822,8 @@ struct
   type 'a ipath = 'a I1.ipath I2.ipath
 
   let args () = Storage_description.Pair (I1.args (), I2.args ())
+
+  let infer_ipath (_ : 'a ipath) (x : 'a) : 'a = x
 end
 
 module Make_data_set_storage (C : Raw_context.T) (I : INDEX) :
@@ -92801,6 +92828,7 @@ Local Open Scope string_scope.
 Local Open Scope Z_scope.
 Local Open Scope type_scope.
 Import ListNotations.
+Unset Guard Checking.
 
 Require Import Tezos.Environment.
 Import Environment.Notations.
@@ -93105,6 +93133,7 @@ Module INDEX.
     of_path : list string -&gt; option t;
     ipath := ipath;
     args : unit -&gt; Storage_description.args;
+    infer_ipath : forall {a : Set}, ipath a -&gt; a -&gt; a;
   }.
   Arguments signature : clear implicits.
 End INDEX.
@@ -93136,12 +93165,16 @@ Definition Pair :=
         let '_ := function_parameter in
         Storage_description.Pair ((|I1|).(INDEX.args) tt)
           ((|I2|).(INDEX.args) tt) in
+      let infer_ipath {a : Set} (function_parameter : ipath a) : a -&gt; a :=
+        let '_ := function_parameter in
+        fun x =&gt; x in
       existT (A := Set -&gt; Set) _ _
         {|
           INDEX.path_length := path_length;
           INDEX.to_path := to_path;
           INDEX.of_path := of_path;
-          INDEX.args := args
+          INDEX.args := args;
+          INDEX.infer_ipath {_} := infer_ipath
         |})
         :
           {ipath : Set -&gt; Set &amp;
@@ -93184,7 +93217,7 @@ Definition Make_data_set_storage :=
         (f : (|I|).(INDEX.t) -&gt; A -&gt; Lwt.t A) : Lwt.t A :=
         let fix dig
           (i : (|Compare.Int|).(Compare.S.t)) (path : Raw_context.key) (acc : A)
-          : Lwt.t A :=
+          {struct i} : Lwt.t A :=
           if (|Compare.Int|).(Compare.S.op_lteq) i 1 then
             (|C|).(Raw_context.T.fold) s path acc
               (fun k =&gt;
@@ -93316,7 +93349,7 @@ Definition Make_indexed_data_storage :=
           (f : (|I|).(INDEX.t) -&gt; A -&gt; Lwt.t A) : Lwt.t A :=
           let fix dig
             (i : (|Compare.Int|).(Compare.S.t)) (path : Raw_context.key)
-            (acc : A) : Lwt.t A :=
+            (acc : A) {struct i} : Lwt.t A :=
             if (|Compare.Int|).(Compare.S.op_lteq) i 1 then
               (|C|).(Raw_context.T.fold) s path acc
                 (fun k =&gt;
@@ -93555,7 +93588,7 @@ Definition Make_indexed_carbonated_data_storage :=
           (f : (|I|).(INDEX.t) -&gt; A -&gt; Lwt.t A) : Lwt.t A :=
           let fix dig
             (i : (|Compare.Int|).(Compare.S.t)) (path : Raw_context.key)
-            (acc : A) : Lwt.t A :=
+            (acc : A) {struct i} : Lwt.t A :=
             if (|Compare.Int|).(Compare.S.op_lteq) i 0 then
               (|C|).(Raw_context.T.fold) s path acc
                 (fun k =&gt;
@@ -93778,7 +93811,7 @@ Definition Make_indexed_subcontext :=
         (f : (|I|).(INDEX.t) -&gt; A -&gt; Lwt.t A) : Lwt.t A :=
         let fix dig
           (i : (|Compare.Int|).(Compare.S.t)) (path : Raw_context.key) (acc : A)
-          : Lwt.t A :=
+          {struct i} : Lwt.t A :=
           if (|Compare.Int|).(Compare.S.op_lteq) i 0 then
             match (|I|).(INDEX.of_path) path with
             | None =&gt;
@@ -93993,7 +94026,8 @@ Definition Make_indexed_subcontext :=
         : Lwt.t (list (|I|).(INDEX.t)) :=
         let fix loop
           (i : (|Compare.Int|).(Compare.S.t)) (prefix : Raw_context.key)
-          (function_parameter : list string) : Lwt.t (list (|I|).(INDEX.t)) :=
+          (function_parameter : list string) {struct i}
+          : Lwt.t (list (|I|).(INDEX.t)) :=
           match
             (function_parameter,
               match function_parameter with
@@ -94680,8 +94714,8 @@ Definition Wrap_indexed_data_storage :=
   <div style="margin: 20px;">
     <h3>Storage_functors_mli</h3>
     <ul>
-      <li>OCaml size: 110 lines</li>
-      <li>Coq size: 116 lines (+5% compared to&nbsp;OCaml)</li>
+      <li>OCaml size: 112 lines</li>
+      <li>Coq size: 117 lines (+4% compared to&nbsp;OCaml)</li>
     </ul>
   </div>
   <div class="col-md-6">
@@ -94741,6 +94775,8 @@ module type INDEX = sig
   type 'a ipath
 
   val args : unit -&gt; ('a, t, 'a ipath) Storage_description.args
+
+  val infer_ipath : 'a ipath -&gt; 'a -&gt; 'a
 end
 
 module Pair (I1 : INDEX) (I2 : INDEX) : INDEX with type t = I1.t * I2.t
@@ -94844,6 +94880,7 @@ Module INDEX.
     of_path : list string -&gt; option t;
     ipath := ipath;
     args : unit -&gt; Storage_description.args;
+    infer_ipath : forall {a : Set}, ipath a -&gt; a -&gt; a;
   }.
   Arguments signature : clear implicits.
 End INDEX.

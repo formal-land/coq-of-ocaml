@@ -5,6 +5,7 @@ Local Open Scope string_scope.
 Local Open Scope Z_scope.
 Local Open Scope type_scope.
 Import ListNotations.
+Unset Guard Checking.
 
 Require Import Tezos.Environment.
 Import Environment.Notations.
@@ -309,6 +310,7 @@ Module INDEX.
     of_path : list string -> option t;
     ipath := ipath;
     args : unit -> Storage_description.args;
+    infer_ipath : forall {a : Set}, ipath a -> a -> a;
   }.
   Arguments signature : clear implicits.
 End INDEX.
@@ -340,12 +342,16 @@ Definition Pair :=
         let '_ := function_parameter in
         Storage_description.Pair ((|I1|).(INDEX.args) tt)
           ((|I2|).(INDEX.args) tt) in
+      let infer_ipath {a : Set} (function_parameter : ipath a) : a -> a :=
+        let '_ := function_parameter in
+        fun x => x in
       existT (A := Set -> Set) _ _
         {|
           INDEX.path_length := path_length;
           INDEX.to_path := to_path;
           INDEX.of_path := of_path;
-          INDEX.args := args
+          INDEX.args := args;
+          INDEX.infer_ipath {_} := infer_ipath
         |})
         :
           {ipath : Set -> Set &
@@ -388,7 +394,7 @@ Definition Make_data_set_storage :=
         (f : (|I|).(INDEX.t) -> A -> Lwt.t A) : Lwt.t A :=
         let fix dig
           (i : (|Compare.Int|).(Compare.S.t)) (path : Raw_context.key) (acc : A)
-          : Lwt.t A :=
+          {struct i} : Lwt.t A :=
           if (|Compare.Int|).(Compare.S.op_lteq) i 1 then
             (|C|).(Raw_context.T.fold) s path acc
               (fun k =>
@@ -520,7 +526,7 @@ Definition Make_indexed_data_storage :=
           (f : (|I|).(INDEX.t) -> A -> Lwt.t A) : Lwt.t A :=
           let fix dig
             (i : (|Compare.Int|).(Compare.S.t)) (path : Raw_context.key)
-            (acc : A) : Lwt.t A :=
+            (acc : A) {struct i} : Lwt.t A :=
             if (|Compare.Int|).(Compare.S.op_lteq) i 1 then
               (|C|).(Raw_context.T.fold) s path acc
                 (fun k =>
@@ -759,7 +765,7 @@ Definition Make_indexed_carbonated_data_storage :=
           (f : (|I|).(INDEX.t) -> A -> Lwt.t A) : Lwt.t A :=
           let fix dig
             (i : (|Compare.Int|).(Compare.S.t)) (path : Raw_context.key)
-            (acc : A) : Lwt.t A :=
+            (acc : A) {struct i} : Lwt.t A :=
             if (|Compare.Int|).(Compare.S.op_lteq) i 0 then
               (|C|).(Raw_context.T.fold) s path acc
                 (fun k =>
@@ -982,7 +988,7 @@ Definition Make_indexed_subcontext :=
         (f : (|I|).(INDEX.t) -> A -> Lwt.t A) : Lwt.t A :=
         let fix dig
           (i : (|Compare.Int|).(Compare.S.t)) (path : Raw_context.key) (acc : A)
-          : Lwt.t A :=
+          {struct i} : Lwt.t A :=
           if (|Compare.Int|).(Compare.S.op_lteq) i 0 then
             match (|I|).(INDEX.of_path) path with
             | None =>
@@ -1197,7 +1203,8 @@ Definition Make_indexed_subcontext :=
         : Lwt.t (list (|I|).(INDEX.t)) :=
         let fix loop
           (i : (|Compare.Int|).(Compare.S.t)) (prefix : Raw_context.key)
-          (function_parameter : list string) : Lwt.t (list (|I|).(INDEX.t)) :=
+          (function_parameter : list string) {struct i}
+          : Lwt.t (list (|I|).(INDEX.t)) :=
           match
             (function_parameter,
               match function_parameter with

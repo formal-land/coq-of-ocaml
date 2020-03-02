@@ -23,7 +23,7 @@ Require Tezos.Script_expr_hash.
 Require Tezos.Script_repr.
 Require Tezos.Seed_repr.
 Require Tezos.Storage_description.
-Require Tezos.Storage_functors_mli. Module Storage_functors := Storage_functors_mli.
+Require Tezos.Storage_functors.
 Require Tezos.Storage_sigs.
 Require Tezos.Tez_repr.
 Require Tezos.Vote_repr.
@@ -73,12 +73,16 @@ Definition Int_index :=
         Storage_description.args.One.encoding := Data_encoding.int31;
         Storage_description.args.One.compare :=
           (|Compare.Int|).(Compare.S.compare) |} in
+  let infer_ipath {a : Set} (function_parameter : ipath a) : a -> a :=
+    let '_ := function_parameter in
+    fun x => x in
   existT (A := unit) (fun _ => _) tt
     {|
       Storage_functors.INDEX.path_length := path_length;
       Storage_functors.INDEX.to_path := to_path;
       Storage_functors.INDEX.of_path := of_path;
-      Storage_functors.INDEX.args := args
+      Storage_functors.INDEX.args := args;
+      Storage_functors.INDEX.infer_ipath {_} := infer_ipath
     |}.
 
 Definition Make_index :=
@@ -97,12 +101,16 @@ Definition Make_index :=
         {| Storage_description.args.One.rpc_arg := rpc_arg;
           Storage_description.args.One.encoding := encoding;
           Storage_description.args.One.compare := compare |} in
+    let infer_ipath {a : Set} (function_parameter : ipath a) : a -> a :=
+      let '_ := function_parameter in
+      fun x => x in
     existT (A := unit) (fun _ => _) tt
       {|
         Storage_functors.INDEX.path_length := path_length;
         Storage_functors.INDEX.to_path := to_path;
         Storage_functors.INDEX.of_path := of_path;
-        Storage_functors.INDEX.args := args
+        Storage_functors.INDEX.args := args;
+        Storage_functors.INDEX.infer_ipath {_} := infer_ipath
       |})
       :
         {_ : unit &
@@ -1426,6 +1434,10 @@ Module Roll.
     Definition args (function_parameter : unit) : Storage_description.args :=
       let '_ := function_parameter in
       Storage_description.Pair left_args right_args.
+    
+    Definition infer_ipath {a : Set} (function_parameter : ipath a) : a -> a :=
+      let '_ := function_parameter in
+      fun x => x.
   End Snapshoted_owner_index.
   
   Definition Owner :=
@@ -1446,7 +1458,9 @@ Module Roll.
             Snapshoted_owner_index.path_length;
           Storage_functors.INDEX.to_path := Snapshoted_owner_index.to_path;
           Storage_functors.INDEX.of_path := Snapshoted_owner_index.of_path;
-          Storage_functors.INDEX.args := Snapshoted_owner_index.args
+          Storage_functors.INDEX.args := Snapshoted_owner_index.args;
+          Storage_functors.INDEX.infer_ipath {_} :=
+            Snapshoted_owner_index.infer_ipath
         |}))
       (let functor_result :=
         Make_index (existT (A := Set) _ _ (|Roll_repr.Index|)) in
