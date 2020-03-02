@@ -113,7 +113,7 @@ Storage_functors_mli.v
 Storage_functors.v
 Storage_mli.v
 Storage_sigs.v
-#Storage.v
+Storage.v
 Tez_repr_mli.v
 Tez_repr.v
 Time_repr_mli.v
