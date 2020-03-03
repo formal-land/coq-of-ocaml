@@ -15,7 +15,7 @@ Require Tezos.Constants_repr.
 Require Tezos.Contract_services_mli. Module Contract_services := Contract_services_mli.
 Require Tezos.Michelson_v1_primitives.
 Require Tezos.Nonce_hash.
-Require Tezos.Script_ir_translator_mli. Module Script_ir_translator := Script_ir_translator_mli.
+Require Tezos.Script_ir_translator.
 Require Tezos.Script_tc_errors_registration.
 Require Tezos.Script_typed_ir.
 Require Tezos.Services_registration.
@@ -309,19 +309,18 @@ Module Scripts.
                         cons (entry, (Micheline.strip_locations ty)) acc) map
                   nil))).
   
-  Definition run_code {D E G I K L a b c i o q : Set}
+  Definition run_code {D H a b c i o q : Set}
     (ctxt :
-      (((RPC_service.t RPC_context.t RPC_context.t q i o -> D -> q -> i ->
-      Lwt.t (Error_monad.shell_tzresult o)) * (E * q * i * o)) *
-        (((RPC_service.t RPC_context.t (RPC_context.t * a) q i o -> D -> a ->
-        q -> i -> Lwt.t (Error_monad.shell_tzresult o)) * (G * a * q * i * o)) *
-          (((RPC_service.t RPC_context.t ((RPC_context.t * a) * b) q i o -> D ->
+      ((RPC_service.t RPC_context.t RPC_context.t q i o -> D -> q -> i ->
+      Lwt.t (Error_monad.shell_tzresult o)) *
+        ((RPC_service.t RPC_context.t (RPC_context.t * a) q i o -> D -> a ->
+        q -> i -> Lwt.t (Error_monad.shell_tzresult o)) *
+          ((RPC_service.t RPC_context.t ((RPC_context.t * a) * b) q i o -> D ->
           a -> b -> q -> i -> Lwt.t (Error_monad.shell_tzresult o)) *
-            (I * a * b * q * i * o)) *
-            (((RPC_service.t RPC_context.t (((RPC_context.t * a) * b) * c) q i o
+            ((RPC_service.t RPC_context.t (((RPC_context.t * a) * b) * c) q i o
             -> D -> a -> b -> c -> q -> i ->
-            Lwt.t (Error_monad.shell_tzresult o)) * (K * a * b * c * q * i * o))
-              * L)))) * L * D) (block : D) (code : Alpha_context.Script.expr)
+            Lwt.t (Error_monad.shell_tzresult o)) * H)))) * H * D) (block : D)
+    (code : Alpha_context.Script.expr)
     (function_parameter :
       Alpha_context.Script.expr * Alpha_context.Script.expr *
         Alpha_context.Tez.t * (|Chain_id|).(S.HASH.t) *
@@ -337,19 +336,18 @@ Module Scripts.
     RPC_context.make_call0 S.run_code ctxt block tt
       (code, storage, input, amount, chain_id, source, payer, gas, entrypoint).
   
-  Definition trace_code {D E G I K L a b c i o q : Set}
+  Definition trace_code {D H a b c i o q : Set}
     (ctxt :
-      (((RPC_service.t RPC_context.t RPC_context.t q i o -> D -> q -> i ->
-      Lwt.t (Error_monad.shell_tzresult o)) * (E * q * i * o)) *
-        (((RPC_service.t RPC_context.t (RPC_context.t * a) q i o -> D -> a ->
-        q -> i -> Lwt.t (Error_monad.shell_tzresult o)) * (G * a * q * i * o)) *
-          (((RPC_service.t RPC_context.t ((RPC_context.t * a) * b) q i o -> D ->
+      ((RPC_service.t RPC_context.t RPC_context.t q i o -> D -> q -> i ->
+      Lwt.t (Error_monad.shell_tzresult o)) *
+        ((RPC_service.t RPC_context.t (RPC_context.t * a) q i o -> D -> a ->
+        q -> i -> Lwt.t (Error_monad.shell_tzresult o)) *
+          ((RPC_service.t RPC_context.t ((RPC_context.t * a) * b) q i o -> D ->
           a -> b -> q -> i -> Lwt.t (Error_monad.shell_tzresult o)) *
-            (I * a * b * q * i * o)) *
-            (((RPC_service.t RPC_context.t (((RPC_context.t * a) * b) * c) q i o
+            ((RPC_service.t RPC_context.t (((RPC_context.t * a) * b) * c) q i o
             -> D -> a -> b -> c -> q -> i ->
-            Lwt.t (Error_monad.shell_tzresult o)) * (K * a * b * c * q * i * o))
-              * L)))) * L * D) (block : D) (code : Alpha_context.Script.expr)
+            Lwt.t (Error_monad.shell_tzresult o)) * H)))) * H * D) (block : D)
+    (code : Alpha_context.Script.expr)
     (function_parameter :
       Alpha_context.Script.expr * Alpha_context.Script.expr *
         Alpha_context.Tez.t * (|Chain_id|).(S.HASH.t) *
@@ -368,19 +366,17 @@ Module Scripts.
     RPC_context.make_call0 S.trace_code ctxt block tt
       (code, storage, input, amount, chain_id, source, payer, gas, entrypoint).
   
-  Definition typecheck_code {D E G I K L a b c i o q : Set}
+  Definition typecheck_code {D H a b c i o q : Set}
     (ctxt :
-      (((RPC_service.t RPC_context.t RPC_context.t q i o -> D -> q -> i ->
-      Lwt.t (Error_monad.shell_tzresult o)) * (E * q * i * o)) *
-        (((RPC_service.t RPC_context.t (RPC_context.t * a) q i o -> D -> a ->
-        q -> i -> Lwt.t (Error_monad.shell_tzresult o)) * (G * a * q * i * o)) *
-          (((RPC_service.t RPC_context.t ((RPC_context.t * a) * b) q i o -> D ->
+      ((RPC_service.t RPC_context.t RPC_context.t q i o -> D -> q -> i ->
+      Lwt.t (Error_monad.shell_tzresult o)) *
+        ((RPC_service.t RPC_context.t (RPC_context.t * a) q i o -> D -> a ->
+        q -> i -> Lwt.t (Error_monad.shell_tzresult o)) *
+          ((RPC_service.t RPC_context.t ((RPC_context.t * a) * b) q i o -> D ->
           a -> b -> q -> i -> Lwt.t (Error_monad.shell_tzresult o)) *
-            (I * a * b * q * i * o)) *
-            (((RPC_service.t RPC_context.t (((RPC_context.t * a) * b) * c) q i o
+            ((RPC_service.t RPC_context.t (((RPC_context.t * a) * b) * c) q i o
             -> D -> a -> b -> c -> q -> i ->
-            Lwt.t (Error_monad.shell_tzresult o)) * (K * a * b * c * q * i * o))
-              * L)))) * L * D) (block : D)
+            Lwt.t (Error_monad.shell_tzresult o)) * H)))) * H * D) (block : D)
     : Alpha_context.Script.expr * option Z.t ->
     Lwt.t
       (Error_monad.shell_tzresult
@@ -391,53 +387,47 @@ Module Scripts.
           Alpha_context.Gas.t)) :=
     RPC_context.make_call0 S.typecheck_code ctxt block tt.
   
-  Definition typecheck_data {D E G I K L a b c i o q : Set}
+  Definition typecheck_data {D H a b c i o q : Set}
     (ctxt :
-      (((RPC_service.t RPC_context.t RPC_context.t q i o -> D -> q -> i ->
-      Lwt.t (Error_monad.shell_tzresult o)) * (E * q * i * o)) *
-        (((RPC_service.t RPC_context.t (RPC_context.t * a) q i o -> D -> a ->
-        q -> i -> Lwt.t (Error_monad.shell_tzresult o)) * (G * a * q * i * o)) *
-          (((RPC_service.t RPC_context.t ((RPC_context.t * a) * b) q i o -> D ->
+      ((RPC_service.t RPC_context.t RPC_context.t q i o -> D -> q -> i ->
+      Lwt.t (Error_monad.shell_tzresult o)) *
+        ((RPC_service.t RPC_context.t (RPC_context.t * a) q i o -> D -> a ->
+        q -> i -> Lwt.t (Error_monad.shell_tzresult o)) *
+          ((RPC_service.t RPC_context.t ((RPC_context.t * a) * b) q i o -> D ->
           a -> b -> q -> i -> Lwt.t (Error_monad.shell_tzresult o)) *
-            (I * a * b * q * i * o)) *
-            (((RPC_service.t RPC_context.t (((RPC_context.t * a) * b) * c) q i o
+            ((RPC_service.t RPC_context.t (((RPC_context.t * a) * b) * c) q i o
             -> D -> a -> b -> c -> q -> i ->
-            Lwt.t (Error_monad.shell_tzresult o)) * (K * a * b * c * q * i * o))
-              * L)))) * L * D) (block : D)
+            Lwt.t (Error_monad.shell_tzresult o)) * H)))) * H * D) (block : D)
     : Alpha_context.Script.expr * Alpha_context.Script.expr * option Z.t ->
     Lwt.t (Error_monad.shell_tzresult Alpha_context.Gas.t) :=
     RPC_context.make_call0 S.typecheck_data ctxt block tt.
   
-  Definition pack_data {D E G I K L a b c i o q : Set}
+  Definition pack_data {D H a b c i o q : Set}
     (ctxt :
-      (((RPC_service.t RPC_context.t RPC_context.t q i o -> D -> q -> i ->
-      Lwt.t (Error_monad.shell_tzresult o)) * (E * q * i * o)) *
-        (((RPC_service.t RPC_context.t (RPC_context.t * a) q i o -> D -> a ->
-        q -> i -> Lwt.t (Error_monad.shell_tzresult o)) * (G * a * q * i * o)) *
-          (((RPC_service.t RPC_context.t ((RPC_context.t * a) * b) q i o -> D ->
+      ((RPC_service.t RPC_context.t RPC_context.t q i o -> D -> q -> i ->
+      Lwt.t (Error_monad.shell_tzresult o)) *
+        ((RPC_service.t RPC_context.t (RPC_context.t * a) q i o -> D -> a ->
+        q -> i -> Lwt.t (Error_monad.shell_tzresult o)) *
+          ((RPC_service.t RPC_context.t ((RPC_context.t * a) * b) q i o -> D ->
           a -> b -> q -> i -> Lwt.t (Error_monad.shell_tzresult o)) *
-            (I * a * b * q * i * o)) *
-            (((RPC_service.t RPC_context.t (((RPC_context.t * a) * b) * c) q i o
+            ((RPC_service.t RPC_context.t (((RPC_context.t * a) * b) * c) q i o
             -> D -> a -> b -> c -> q -> i ->
-            Lwt.t (Error_monad.shell_tzresult o)) * (K * a * b * c * q * i * o))
-              * L)))) * L * D) (block : D)
+            Lwt.t (Error_monad.shell_tzresult o)) * H)))) * H * D) (block : D)
     : Alpha_context.Script.expr * Alpha_context.Script.expr * option Z.t ->
     Lwt.t (Error_monad.shell_tzresult (MBytes.t * Alpha_context.Gas.t)) :=
     RPC_context.make_call0 S.pack_data ctxt block tt.
   
-  Definition run_operation {D E G I K L a b c i o q : Set}
+  Definition run_operation {D H a b c i o q : Set}
     (ctxt :
-      (((RPC_service.t RPC_context.t RPC_context.t q i o -> D -> q -> i ->
-      Lwt.t (Error_monad.shell_tzresult o)) * (E * q * i * o)) *
-        (((RPC_service.t RPC_context.t (RPC_context.t * a) q i o -> D -> a ->
-        q -> i -> Lwt.t (Error_monad.shell_tzresult o)) * (G * a * q * i * o)) *
-          (((RPC_service.t RPC_context.t ((RPC_context.t * a) * b) q i o -> D ->
+      ((RPC_service.t RPC_context.t RPC_context.t q i o -> D -> q -> i ->
+      Lwt.t (Error_monad.shell_tzresult o)) *
+        ((RPC_service.t RPC_context.t (RPC_context.t * a) q i o -> D -> a ->
+        q -> i -> Lwt.t (Error_monad.shell_tzresult o)) *
+          ((RPC_service.t RPC_context.t ((RPC_context.t * a) * b) q i o -> D ->
           a -> b -> q -> i -> Lwt.t (Error_monad.shell_tzresult o)) *
-            (I * a * b * q * i * o)) *
-            (((RPC_service.t RPC_context.t (((RPC_context.t * a) * b) * c) q i o
+            ((RPC_service.t RPC_context.t (((RPC_context.t * a) * b) * c) q i o
             -> D -> a -> b -> c -> q -> i ->
-            Lwt.t (Error_monad.shell_tzresult o)) * (K * a * b * c * q * i * o))
-              * L)))) * L * D) (block : D)
+            Lwt.t (Error_monad.shell_tzresult o)) * H)))) * H * D) (block : D)
     : Alpha_context.Operation.packed * (|Chain_id|).(S.HASH.t) ->
     Lwt.t
       (Error_monad.shell_tzresult
@@ -445,36 +435,32 @@ Module Scripts.
           Apply_results.packed_operation_metadata)) :=
     RPC_context.make_call0 S.run_operation ctxt block tt.
   
-  Definition entrypoint_type {D E G I K L a b c i o q : Set}
+  Definition entrypoint_type {D H a b c i o q : Set}
     (ctxt :
-      (((RPC_service.t RPC_context.t RPC_context.t q i o -> D -> q -> i ->
-      Lwt.t (Error_monad.shell_tzresult o)) * (E * q * i * o)) *
-        (((RPC_service.t RPC_context.t (RPC_context.t * a) q i o -> D -> a ->
-        q -> i -> Lwt.t (Error_monad.shell_tzresult o)) * (G * a * q * i * o)) *
-          (((RPC_service.t RPC_context.t ((RPC_context.t * a) * b) q i o -> D ->
+      ((RPC_service.t RPC_context.t RPC_context.t q i o -> D -> q -> i ->
+      Lwt.t (Error_monad.shell_tzresult o)) *
+        ((RPC_service.t RPC_context.t (RPC_context.t * a) q i o -> D -> a ->
+        q -> i -> Lwt.t (Error_monad.shell_tzresult o)) *
+          ((RPC_service.t RPC_context.t ((RPC_context.t * a) * b) q i o -> D ->
           a -> b -> q -> i -> Lwt.t (Error_monad.shell_tzresult o)) *
-            (I * a * b * q * i * o)) *
-            (((RPC_service.t RPC_context.t (((RPC_context.t * a) * b) * c) q i o
+            ((RPC_service.t RPC_context.t (((RPC_context.t * a) * b) * c) q i o
             -> D -> a -> b -> c -> q -> i ->
-            Lwt.t (Error_monad.shell_tzresult o)) * (K * a * b * c * q * i * o))
-              * L)))) * L * D) (block : D)
+            Lwt.t (Error_monad.shell_tzresult o)) * H)))) * H * D) (block : D)
     : Alpha_context.Script.expr * string ->
     Lwt.t (Error_monad.shell_tzresult Alpha_context.Script.expr) :=
     RPC_context.make_call0 S.entrypoint_type ctxt block tt.
   
-  Definition list_entrypoints {D E G I K L a b c i o q : Set}
+  Definition list_entrypoints {D H a b c i o q : Set}
     (ctxt :
-      (((RPC_service.t RPC_context.t RPC_context.t q i o -> D -> q -> i ->
-      Lwt.t (Error_monad.shell_tzresult o)) * (E * q * i * o)) *
-        (((RPC_service.t RPC_context.t (RPC_context.t * a) q i o -> D -> a ->
-        q -> i -> Lwt.t (Error_monad.shell_tzresult o)) * (G * a * q * i * o)) *
-          (((RPC_service.t RPC_context.t ((RPC_context.t * a) * b) q i o -> D ->
+      ((RPC_service.t RPC_context.t RPC_context.t q i o -> D -> q -> i ->
+      Lwt.t (Error_monad.shell_tzresult o)) *
+        ((RPC_service.t RPC_context.t (RPC_context.t * a) q i o -> D -> a ->
+        q -> i -> Lwt.t (Error_monad.shell_tzresult o)) *
+          ((RPC_service.t RPC_context.t ((RPC_context.t * a) * b) q i o -> D ->
           a -> b -> q -> i -> Lwt.t (Error_monad.shell_tzresult o)) *
-            (I * a * b * q * i * o)) *
-            (((RPC_service.t RPC_context.t (((RPC_context.t * a) * b) * c) q i o
+            ((RPC_service.t RPC_context.t (((RPC_context.t * a) * b) * c) q i o
             -> D -> a -> b -> c -> q -> i ->
-            Lwt.t (Error_monad.shell_tzresult o)) * (K * a * b * c * q * i * o))
-              * L)))) * L * D) (block : D)
+            Lwt.t (Error_monad.shell_tzresult o)) * H)))) * H * D) (block : D)
     : Alpha_context.Script.expr ->
     Lwt.t
       (Error_monad.shell_tzresult
@@ -539,20 +525,17 @@ Module Forge.
                   proof_of_work_nonce |})).
   
   Module Manager.
-    Definition operations {D E G I K L a b c i o q : Set}
+    Definition operations {D H a b c i o q : Set}
       (ctxt :
-        (((RPC_service.t RPC_context.t RPC_context.t q i o -> D -> q -> i ->
-        Lwt.t (Error_monad.shell_tzresult o)) * (E * q * i * o)) *
-          (((RPC_service.t RPC_context.t (RPC_context.t * a) q i o -> D -> a ->
-          q -> i -> Lwt.t (Error_monad.shell_tzresult o)) * (G * a * q * i * o))
-            *
-            (((RPC_service.t RPC_context.t ((RPC_context.t * a) * b) q i o ->
+        ((RPC_service.t RPC_context.t RPC_context.t q i o -> D -> q -> i ->
+        Lwt.t (Error_monad.shell_tzresult o)) *
+          ((RPC_service.t RPC_context.t (RPC_context.t * a) q i o -> D -> a ->
+          q -> i -> Lwt.t (Error_monad.shell_tzresult o)) *
+            ((RPC_service.t RPC_context.t ((RPC_context.t * a) * b) q i o ->
             D -> a -> b -> q -> i -> Lwt.t (Error_monad.shell_tzresult o)) *
-              (I * a * b * q * i * o)) *
-              (((RPC_service.t RPC_context.t (((RPC_context.t * a) * b) * c) q i
+              ((RPC_service.t RPC_context.t (((RPC_context.t * a) * b) * c) q i
                 o -> D -> a -> b -> c -> q -> i ->
-              Lwt.t (Error_monad.shell_tzresult o)) *
-                (K * a * b * c * q * i * o)) * L)))) * L * D) (block : D)
+              Lwt.t (Error_monad.shell_tzresult o)) * H)))) * H * D) (block : D)
       (branch : (|Block_hash|).(S.HASH.t))
       (source : Alpha_context.public_key_hash)
       (sourcePubKey : option (|Signature.Public_key|).(S.SPublic_key.t))
@@ -603,20 +586,17 @@ Module Forge.
             (Alpha_context.Operation.of_list ops))
       end.
     
-    Definition reveal {D E G I K L a b c i o q : Set}
+    Definition reveal {D H a b c i o q : Set}
       (ctxt :
-        (((RPC_service.t RPC_context.t RPC_context.t q i o -> D -> q -> i ->
-        Lwt.t (Error_monad.shell_tzresult o)) * (E * q * i * o)) *
-          (((RPC_service.t RPC_context.t (RPC_context.t * a) q i o -> D -> a ->
-          q -> i -> Lwt.t (Error_monad.shell_tzresult o)) * (G * a * q * i * o))
-            *
-            (((RPC_service.t RPC_context.t ((RPC_context.t * a) * b) q i o ->
+        ((RPC_service.t RPC_context.t RPC_context.t q i o -> D -> q -> i ->
+        Lwt.t (Error_monad.shell_tzresult o)) *
+          ((RPC_service.t RPC_context.t (RPC_context.t * a) q i o -> D -> a ->
+          q -> i -> Lwt.t (Error_monad.shell_tzresult o)) *
+            ((RPC_service.t RPC_context.t ((RPC_context.t * a) * b) q i o ->
             D -> a -> b -> q -> i -> Lwt.t (Error_monad.shell_tzresult o)) *
-              (I * a * b * q * i * o)) *
-              (((RPC_service.t RPC_context.t (((RPC_context.t * a) * b) * c) q i
+              ((RPC_service.t RPC_context.t (((RPC_context.t * a) * b) * c) q i
                 o -> D -> a -> b -> c -> q -> i ->
-              Lwt.t (Error_monad.shell_tzresult o)) *
-                (K * a * b * c * q * i * o)) * L)))) * L * D) (block : D)
+              Lwt.t (Error_monad.shell_tzresult o)) * H)))) * H * D) (block : D)
       (branch : (|Block_hash|).(S.HASH.t))
       (source : Alpha_context.public_key_hash)
       (sourcePubKey : (|Signature.Public_key|).(S.SPublic_key.t))
@@ -627,20 +607,17 @@ Module Forge.
       operations ctxt block branch source (Some sourcePubKey) counter fee Z.zero
         Z.zero nil.
     
-    Definition transaction {D E G I K L a b c i o q : Set}
+    Definition transaction {D H a b c i o q : Set}
       (ctxt :
-        (((RPC_service.t RPC_context.t RPC_context.t q i o -> D -> q -> i ->
-        Lwt.t (Error_monad.shell_tzresult o)) * (E * q * i * o)) *
-          (((RPC_service.t RPC_context.t (RPC_context.t * a) q i o -> D -> a ->
-          q -> i -> Lwt.t (Error_monad.shell_tzresult o)) * (G * a * q * i * o))
-            *
-            (((RPC_service.t RPC_context.t ((RPC_context.t * a) * b) q i o ->
+        ((RPC_service.t RPC_context.t RPC_context.t q i o -> D -> q -> i ->
+        Lwt.t (Error_monad.shell_tzresult o)) *
+          ((RPC_service.t RPC_context.t (RPC_context.t * a) q i o -> D -> a ->
+          q -> i -> Lwt.t (Error_monad.shell_tzresult o)) *
+            ((RPC_service.t RPC_context.t ((RPC_context.t * a) * b) q i o ->
             D -> a -> b -> q -> i -> Lwt.t (Error_monad.shell_tzresult o)) *
-              (I * a * b * q * i * o)) *
-              (((RPC_service.t RPC_context.t (((RPC_context.t * a) * b) * c) q i
+              ((RPC_service.t RPC_context.t (((RPC_context.t * a) * b) * c) q i
                 o -> D -> a -> b -> c -> q -> i ->
-              Lwt.t (Error_monad.shell_tzresult o)) *
-                (K * a * b * c * q * i * o)) * L)))) * L * D) (block : D)
+              Lwt.t (Error_monad.shell_tzresult o)) * H)))) * H * D) (block : D)
       (branch : (|Block_hash|).(S.HASH.t))
       (source : Alpha_context.public_key_hash)
       (sourcePubKey : option (|Signature.Public_key|).(S.SPublic_key.t))
@@ -681,20 +658,17 @@ Module Forge.
                           |})
                   ].
     
-    Definition origination {D E G I K L a b c i o q : Set}
+    Definition origination {D H a b c i o q : Set}
       (ctxt :
-        (((RPC_service.t RPC_context.t RPC_context.t q i o -> D -> q -> i ->
-        Lwt.t (Error_monad.shell_tzresult o)) * (E * q * i * o)) *
-          (((RPC_service.t RPC_context.t (RPC_context.t * a) q i o -> D -> a ->
-          q -> i -> Lwt.t (Error_monad.shell_tzresult o)) * (G * a * q * i * o))
-            *
-            (((RPC_service.t RPC_context.t ((RPC_context.t * a) * b) q i o ->
+        ((RPC_service.t RPC_context.t RPC_context.t q i o -> D -> q -> i ->
+        Lwt.t (Error_monad.shell_tzresult o)) *
+          ((RPC_service.t RPC_context.t (RPC_context.t * a) q i o -> D -> a ->
+          q -> i -> Lwt.t (Error_monad.shell_tzresult o)) *
+            ((RPC_service.t RPC_context.t ((RPC_context.t * a) * b) q i o ->
             D -> a -> b -> q -> i -> Lwt.t (Error_monad.shell_tzresult o)) *
-              (I * a * b * q * i * o)) *
-              (((RPC_service.t RPC_context.t (((RPC_context.t * a) * b) * c) q i
+              ((RPC_service.t RPC_context.t (((RPC_context.t * a) * b) * c) q i
                 o -> D -> a -> b -> c -> q -> i ->
-              Lwt.t (Error_monad.shell_tzresult o)) *
-                (K * a * b * c * q * i * o)) * L)))) * L * D) (block : D)
+              Lwt.t (Error_monad.shell_tzresult o)) * H)))) * H * D) (block : D)
       (branch : (|Block_hash|).(S.HASH.t))
       (source : Alpha_context.public_key_hash)
       (sourcePubKey : option (|Signature.Public_key|).(S.SPublic_key.t))
@@ -721,20 +695,17 @@ Module Forge.
                   None |})
         ].
     
-    Definition delegation {D E G I K L a b c i o q : Set}
+    Definition delegation {D H a b c i o q : Set}
       (ctxt :
-        (((RPC_service.t RPC_context.t RPC_context.t q i o -> D -> q -> i ->
-        Lwt.t (Error_monad.shell_tzresult o)) * (E * q * i * o)) *
-          (((RPC_service.t RPC_context.t (RPC_context.t * a) q i o -> D -> a ->
-          q -> i -> Lwt.t (Error_monad.shell_tzresult o)) * (G * a * q * i * o))
-            *
-            (((RPC_service.t RPC_context.t ((RPC_context.t * a) * b) q i o ->
+        ((RPC_service.t RPC_context.t RPC_context.t q i o -> D -> q -> i ->
+        Lwt.t (Error_monad.shell_tzresult o)) *
+          ((RPC_service.t RPC_context.t (RPC_context.t * a) q i o -> D -> a ->
+          q -> i -> Lwt.t (Error_monad.shell_tzresult o)) *
+            ((RPC_service.t RPC_context.t ((RPC_context.t * a) * b) q i o ->
             D -> a -> b -> q -> i -> Lwt.t (Error_monad.shell_tzresult o)) *
-              (I * a * b * q * i * o)) *
-              (((RPC_service.t RPC_context.t (((RPC_context.t * a) * b) * c) q i
+              ((RPC_service.t RPC_context.t (((RPC_context.t * a) * b) * c) q i
                 o -> D -> a -> b -> c -> q -> i ->
-              Lwt.t (Error_monad.shell_tzresult o)) *
-                (K * a * b * c * q * i * o)) * L)))) * L * D) (block : D)
+              Lwt.t (Error_monad.shell_tzresult o)) * H)))) * H * D) (block : D)
       (branch : (|Block_hash|).(S.HASH.t))
       (source : Alpha_context.public_key_hash)
       (sourcePubKey : option (|Signature.Public_key|).(S.SPublic_key.t))
@@ -745,59 +716,54 @@ Module Forge.
         [ Alpha_context.Manager (Alpha_context.Delegation delegate) ].
   End Manager.
   
-  Definition operation {D E G I K L a b c i o q : Set}
+  Definition operation {D H a b c i o q : Set}
     (ctxt :
-      (((RPC_service.t RPC_context.t RPC_context.t q i o -> D -> q -> i ->
-      Lwt.t (Error_monad.shell_tzresult o)) * (E * q * i * o)) *
-        (((RPC_service.t RPC_context.t (RPC_context.t * a) q i o -> D -> a ->
-        q -> i -> Lwt.t (Error_monad.shell_tzresult o)) * (G * a * q * i * o)) *
-          (((RPC_service.t RPC_context.t ((RPC_context.t * a) * b) q i o -> D ->
+      ((RPC_service.t RPC_context.t RPC_context.t q i o -> D -> q -> i ->
+      Lwt.t (Error_monad.shell_tzresult o)) *
+        ((RPC_service.t RPC_context.t (RPC_context.t * a) q i o -> D -> a ->
+        q -> i -> Lwt.t (Error_monad.shell_tzresult o)) *
+          ((RPC_service.t RPC_context.t ((RPC_context.t * a) * b) q i o -> D ->
           a -> b -> q -> i -> Lwt.t (Error_monad.shell_tzresult o)) *
-            (I * a * b * q * i * o)) *
-            (((RPC_service.t RPC_context.t (((RPC_context.t * a) * b) * c) q i o
+            ((RPC_service.t RPC_context.t (((RPC_context.t * a) * b) * c) q i o
             -> D -> a -> b -> c -> q -> i ->
-            Lwt.t (Error_monad.shell_tzresult o)) * (K * a * b * c * q * i * o))
-              * L)))) * L * D) (block : D) (branch : (|Block_hash|).(S.HASH.t))
-    (operation : Alpha_context.contents)
+            Lwt.t (Error_monad.shell_tzresult o)) * H)))) * H * D) (block : D)
+    (branch : (|Block_hash|).(S.HASH.t)) (operation : Alpha_context.contents)
     : Lwt.t (Error_monad.shell_tzresult MBytes.t) :=
     RPC_context.make_call0 S.operations ctxt block tt
       ({| Operation.shell_header.branch := branch |},
         (Alpha_context.Contents_list (Alpha_context.Single operation))).
   
-  Definition endorsement {D E G I K L a b c i o q : Set}
+  Definition endorsement {D H a b c i o q : Set}
     (ctxt :
-      (((RPC_service.t RPC_context.t RPC_context.t q i o -> D -> q -> i ->
-      Lwt.t (Error_monad.shell_tzresult o)) * (E * q * i * o)) *
-        (((RPC_service.t RPC_context.t (RPC_context.t * a) q i o -> D -> a ->
-        q -> i -> Lwt.t (Error_monad.shell_tzresult o)) * (G * a * q * i * o)) *
-          (((RPC_service.t RPC_context.t ((RPC_context.t * a) * b) q i o -> D ->
+      ((RPC_service.t RPC_context.t RPC_context.t q i o -> D -> q -> i ->
+      Lwt.t (Error_monad.shell_tzresult o)) *
+        ((RPC_service.t RPC_context.t (RPC_context.t * a) q i o -> D -> a ->
+        q -> i -> Lwt.t (Error_monad.shell_tzresult o)) *
+          ((RPC_service.t RPC_context.t ((RPC_context.t * a) * b) q i o -> D ->
           a -> b -> q -> i -> Lwt.t (Error_monad.shell_tzresult o)) *
-            (I * a * b * q * i * o)) *
-            (((RPC_service.t RPC_context.t (((RPC_context.t * a) * b) * c) q i o
+            ((RPC_service.t RPC_context.t (((RPC_context.t * a) * b) * c) q i o
             -> D -> a -> b -> c -> q -> i ->
-            Lwt.t (Error_monad.shell_tzresult o)) * (K * a * b * c * q * i * o))
-              * L)))) * L * D) (__b_value : D)
-    (branch : (|Block_hash|).(S.HASH.t)) (level : Alpha_context.Raw_level.t)
-    (function_parameter : unit) : Lwt.t (Error_monad.shell_tzresult MBytes.t) :=
+            Lwt.t (Error_monad.shell_tzresult o)) * H)))) * H * D)
+    (__b_value : D) (branch : (|Block_hash|).(S.HASH.t))
+    (level : Alpha_context.Raw_level.t) (function_parameter : unit)
+    : Lwt.t (Error_monad.shell_tzresult MBytes.t) :=
     let '_ := function_parameter in
     operation ctxt __b_value branch
       (Alpha_context.Endorsement
         {| Alpha_context.contents.Endorsement.level := level |}).
   
-  Definition proposals {D E G I K L a b c i o q : Set}
+  Definition proposals {D H a b c i o q : Set}
     (ctxt :
-      (((RPC_service.t RPC_context.t RPC_context.t q i o -> D -> q -> i ->
-      Lwt.t (Error_monad.shell_tzresult o)) * (E * q * i * o)) *
-        (((RPC_service.t RPC_context.t (RPC_context.t * a) q i o -> D -> a ->
-        q -> i -> Lwt.t (Error_monad.shell_tzresult o)) * (G * a * q * i * o)) *
-          (((RPC_service.t RPC_context.t ((RPC_context.t * a) * b) q i o -> D ->
+      ((RPC_service.t RPC_context.t RPC_context.t q i o -> D -> q -> i ->
+      Lwt.t (Error_monad.shell_tzresult o)) *
+        ((RPC_service.t RPC_context.t (RPC_context.t * a) q i o -> D -> a ->
+        q -> i -> Lwt.t (Error_monad.shell_tzresult o)) *
+          ((RPC_service.t RPC_context.t ((RPC_context.t * a) * b) q i o -> D ->
           a -> b -> q -> i -> Lwt.t (Error_monad.shell_tzresult o)) *
-            (I * a * b * q * i * o)) *
-            (((RPC_service.t RPC_context.t (((RPC_context.t * a) * b) * c) q i o
+            ((RPC_service.t RPC_context.t (((RPC_context.t * a) * b) * c) q i o
             -> D -> a -> b -> c -> q -> i ->
-            Lwt.t (Error_monad.shell_tzresult o)) * (K * a * b * c * q * i * o))
-              * L)))) * L * D) (__b_value : D)
-    (branch : (|Block_hash|).(S.HASH.t))
+            Lwt.t (Error_monad.shell_tzresult o)) * H)))) * H * D)
+    (__b_value : D) (branch : (|Block_hash|).(S.HASH.t))
     (source : (|Signature.Public_key_hash|).(S.SPublic_key_hash.t))
     (period : Alpha_context.Voting_period.t)
     (proposals : list (|Protocol_hash|).(S.HASH.t)) (function_parameter : unit)
@@ -809,20 +775,18 @@ Module Forge.
           Alpha_context.contents.Proposals.period := period;
           Alpha_context.contents.Proposals.proposals := proposals |}).
   
-  Definition ballot {D E G I K L a b c i o q : Set}
+  Definition ballot {D H a b c i o q : Set}
     (ctxt :
-      (((RPC_service.t RPC_context.t RPC_context.t q i o -> D -> q -> i ->
-      Lwt.t (Error_monad.shell_tzresult o)) * (E * q * i * o)) *
-        (((RPC_service.t RPC_context.t (RPC_context.t * a) q i o -> D -> a ->
-        q -> i -> Lwt.t (Error_monad.shell_tzresult o)) * (G * a * q * i * o)) *
-          (((RPC_service.t RPC_context.t ((RPC_context.t * a) * b) q i o -> D ->
+      ((RPC_service.t RPC_context.t RPC_context.t q i o -> D -> q -> i ->
+      Lwt.t (Error_monad.shell_tzresult o)) *
+        ((RPC_service.t RPC_context.t (RPC_context.t * a) q i o -> D -> a ->
+        q -> i -> Lwt.t (Error_monad.shell_tzresult o)) *
+          ((RPC_service.t RPC_context.t ((RPC_context.t * a) * b) q i o -> D ->
           a -> b -> q -> i -> Lwt.t (Error_monad.shell_tzresult o)) *
-            (I * a * b * q * i * o)) *
-            (((RPC_service.t RPC_context.t (((RPC_context.t * a) * b) * c) q i o
+            ((RPC_service.t RPC_context.t (((RPC_context.t * a) * b) * c) q i o
             -> D -> a -> b -> c -> q -> i ->
-            Lwt.t (Error_monad.shell_tzresult o)) * (K * a * b * c * q * i * o))
-              * L)))) * L * D) (__b_value : D)
-    (branch : (|Block_hash|).(S.HASH.t))
+            Lwt.t (Error_monad.shell_tzresult o)) * H)))) * H * D)
+    (__b_value : D) (branch : (|Block_hash|).(S.HASH.t))
     (source : (|Signature.Public_key_hash|).(S.SPublic_key_hash.t))
     (period : Alpha_context.Voting_period.t)
     (proposal : (|Protocol_hash|).(S.HASH.t))
@@ -836,63 +800,60 @@ Module Forge.
           Alpha_context.contents.Ballot.proposal := proposal;
           Alpha_context.contents.Ballot.ballot := ballot |}).
   
-  Definition seed_nonce_revelation {D E G I K L a b c i o q : Set}
+  Definition seed_nonce_revelation {D H a b c i o q : Set}
     (ctxt :
-      (((RPC_service.t RPC_context.t RPC_context.t q i o -> D -> q -> i ->
-      Lwt.t (Error_monad.shell_tzresult o)) * (E * q * i * o)) *
-        (((RPC_service.t RPC_context.t (RPC_context.t * a) q i o -> D -> a ->
-        q -> i -> Lwt.t (Error_monad.shell_tzresult o)) * (G * a * q * i * o)) *
-          (((RPC_service.t RPC_context.t ((RPC_context.t * a) * b) q i o -> D ->
+      ((RPC_service.t RPC_context.t RPC_context.t q i o -> D -> q -> i ->
+      Lwt.t (Error_monad.shell_tzresult o)) *
+        ((RPC_service.t RPC_context.t (RPC_context.t * a) q i o -> D -> a ->
+        q -> i -> Lwt.t (Error_monad.shell_tzresult o)) *
+          ((RPC_service.t RPC_context.t ((RPC_context.t * a) * b) q i o -> D ->
           a -> b -> q -> i -> Lwt.t (Error_monad.shell_tzresult o)) *
-            (I * a * b * q * i * o)) *
-            (((RPC_service.t RPC_context.t (((RPC_context.t * a) * b) * c) q i o
+            ((RPC_service.t RPC_context.t (((RPC_context.t * a) * b) * c) q i o
             -> D -> a -> b -> c -> q -> i ->
-            Lwt.t (Error_monad.shell_tzresult o)) * (K * a * b * c * q * i * o))
-              * L)))) * L * D) (block : D) (branch : (|Block_hash|).(S.HASH.t))
-    (level : Alpha_context.Raw_level.t) (__nonce_value : Alpha_context.Nonce.t)
-    (function_parameter : unit) : Lwt.t (Error_monad.shell_tzresult MBytes.t) :=
+            Lwt.t (Error_monad.shell_tzresult o)) * H)))) * H * D) (block : D)
+    (branch : (|Block_hash|).(S.HASH.t)) (level : Alpha_context.Raw_level.t)
+    (__nonce_value : Alpha_context.Nonce.t) (function_parameter : unit)
+    : Lwt.t (Error_monad.shell_tzresult MBytes.t) :=
     let '_ := function_parameter in
     operation ctxt block branch
       (Alpha_context.Seed_nonce_revelation
         {| Alpha_context.contents.Seed_nonce_revelation.level := level;
           Alpha_context.contents.Seed_nonce_revelation.nonce := __nonce_value |}).
   
-  Definition double_baking_evidence {D E G I K L a b c i o q : Set}
+  Definition double_baking_evidence {D H a b c i o q : Set}
     (ctxt :
-      (((RPC_service.t RPC_context.t RPC_context.t q i o -> D -> q -> i ->
-      Lwt.t (Error_monad.shell_tzresult o)) * (E * q * i * o)) *
-        (((RPC_service.t RPC_context.t (RPC_context.t * a) q i o -> D -> a ->
-        q -> i -> Lwt.t (Error_monad.shell_tzresult o)) * (G * a * q * i * o)) *
-          (((RPC_service.t RPC_context.t ((RPC_context.t * a) * b) q i o -> D ->
+      ((RPC_service.t RPC_context.t RPC_context.t q i o -> D -> q -> i ->
+      Lwt.t (Error_monad.shell_tzresult o)) *
+        ((RPC_service.t RPC_context.t (RPC_context.t * a) q i o -> D -> a ->
+        q -> i -> Lwt.t (Error_monad.shell_tzresult o)) *
+          ((RPC_service.t RPC_context.t ((RPC_context.t * a) * b) q i o -> D ->
           a -> b -> q -> i -> Lwt.t (Error_monad.shell_tzresult o)) *
-            (I * a * b * q * i * o)) *
-            (((RPC_service.t RPC_context.t (((RPC_context.t * a) * b) * c) q i o
+            ((RPC_service.t RPC_context.t (((RPC_context.t * a) * b) * c) q i o
             -> D -> a -> b -> c -> q -> i ->
-            Lwt.t (Error_monad.shell_tzresult o)) * (K * a * b * c * q * i * o))
-              * L)))) * L * D) (block : D) (branch : (|Block_hash|).(S.HASH.t))
-    (bh1 : Alpha_context.Block_header.t) (bh2 : Alpha_context.Block_header.t)
-    (function_parameter : unit) : Lwt.t (Error_monad.shell_tzresult MBytes.t) :=
+            Lwt.t (Error_monad.shell_tzresult o)) * H)))) * H * D) (block : D)
+    (branch : (|Block_hash|).(S.HASH.t)) (bh1 : Alpha_context.Block_header.t)
+    (bh2 : Alpha_context.Block_header.t) (function_parameter : unit)
+    : Lwt.t (Error_monad.shell_tzresult MBytes.t) :=
     let '_ := function_parameter in
     operation ctxt block branch
       (Alpha_context.Double_baking_evidence
         {| Alpha_context.contents.Double_baking_evidence.bh1 := bh1;
           Alpha_context.contents.Double_baking_evidence.bh2 := bh2 |}).
   
-  Definition double_endorsement_evidence {D E G I K L a b c i o q : Set}
+  Definition double_endorsement_evidence {D H a b c i o q : Set}
     (ctxt :
-      (((RPC_service.t RPC_context.t RPC_context.t q i o -> D -> q -> i ->
-      Lwt.t (Error_monad.shell_tzresult o)) * (E * q * i * o)) *
-        (((RPC_service.t RPC_context.t (RPC_context.t * a) q i o -> D -> a ->
-        q -> i -> Lwt.t (Error_monad.shell_tzresult o)) * (G * a * q * i * o)) *
-          (((RPC_service.t RPC_context.t ((RPC_context.t * a) * b) q i o -> D ->
+      ((RPC_service.t RPC_context.t RPC_context.t q i o -> D -> q -> i ->
+      Lwt.t (Error_monad.shell_tzresult o)) *
+        ((RPC_service.t RPC_context.t (RPC_context.t * a) q i o -> D -> a ->
+        q -> i -> Lwt.t (Error_monad.shell_tzresult o)) *
+          ((RPC_service.t RPC_context.t ((RPC_context.t * a) * b) q i o -> D ->
           a -> b -> q -> i -> Lwt.t (Error_monad.shell_tzresult o)) *
-            (I * a * b * q * i * o)) *
-            (((RPC_service.t RPC_context.t (((RPC_context.t * a) * b) * c) q i o
+            ((RPC_service.t RPC_context.t (((RPC_context.t * a) * b) * c) q i o
             -> D -> a -> b -> c -> q -> i ->
-            Lwt.t (Error_monad.shell_tzresult o)) * (K * a * b * c * q * i * o))
-              * L)))) * L * D) (block : D) (branch : (|Block_hash|).(S.HASH.t))
-    (op1 : Alpha_context.operation) (op2 : Alpha_context.operation)
-    (function_parameter : unit) : Lwt.t (Error_monad.shell_tzresult MBytes.t) :=
+            Lwt.t (Error_monad.shell_tzresult o)) * H)))) * H * D) (block : D)
+    (branch : (|Block_hash|).(S.HASH.t)) (op1 : Alpha_context.operation)
+    (op2 : Alpha_context.operation) (function_parameter : unit)
+    : Lwt.t (Error_monad.shell_tzresult MBytes.t) :=
     let '_ := function_parameter in
     operation ctxt block branch
       (Alpha_context.Double_endorsement_evidence
@@ -903,20 +864,19 @@ Module Forge.
     MBytes.of_string
       (String.make Constants_repr.proof_of_work_nonce_size "000" % char).
   
-  Definition protocol_data {D E G I K L a b c i o q : Set}
+  Definition protocol_data {D H a b c i o q : Set}
     (ctxt :
-      (((RPC_service.t RPC_context.t RPC_context.t q i o -> D -> q -> i ->
-      Lwt.t (Error_monad.shell_tzresult o)) * (E * q * i * o)) *
-        (((RPC_service.t RPC_context.t (RPC_context.t * a) q i o -> D -> a ->
-        q -> i -> Lwt.t (Error_monad.shell_tzresult o)) * (G * a * q * i * o)) *
-          (((RPC_service.t RPC_context.t ((RPC_context.t * a) * b) q i o -> D ->
+      ((RPC_service.t RPC_context.t RPC_context.t q i o -> D -> q -> i ->
+      Lwt.t (Error_monad.shell_tzresult o)) *
+        ((RPC_service.t RPC_context.t (RPC_context.t * a) q i o -> D -> a ->
+        q -> i -> Lwt.t (Error_monad.shell_tzresult o)) *
+          ((RPC_service.t RPC_context.t ((RPC_context.t * a) * b) q i o -> D ->
           a -> b -> q -> i -> Lwt.t (Error_monad.shell_tzresult o)) *
-            (I * a * b * q * i * o)) *
-            (((RPC_service.t RPC_context.t (((RPC_context.t * a) * b) * c) q i o
+            ((RPC_service.t RPC_context.t (((RPC_context.t * a) * b) * c) q i o
             -> D -> a -> b -> c -> q -> i ->
-            Lwt.t (Error_monad.shell_tzresult o)) * (K * a * b * c * q * i * o))
-              * L)))) * L * D) (block : D) (priority : int)
-    (seed_nonce_hash : option Nonce_hash.t) (op_staroptstar : option MBytes.t)
+            Lwt.t (Error_monad.shell_tzresult o)) * H)))) * H * D) (block : D)
+    (priority : int) (seed_nonce_hash : option Nonce_hash.t)
+    (op_staroptstar : option MBytes.t)
     : unit -> Lwt.t (Error_monad.shell_tzresult MBytes.t) :=
     let proof_of_work_nonce :=
       match op_staroptstar with
@@ -980,37 +940,33 @@ Module Parse.
         fun raw_block =>
           parse_protocol_data raw_block.(Block_header.t.protocol_data)).
   
-  Definition operations {D E G I K L a b c i o q : Set}
+  Definition operations {D H a b c i o q : Set}
     (ctxt :
-      (((RPC_service.t RPC_context.t RPC_context.t q i o -> D -> q -> i ->
-      Lwt.t (Error_monad.shell_tzresult o)) * (E * q * i * o)) *
-        (((RPC_service.t RPC_context.t (RPC_context.t * a) q i o -> D -> a ->
-        q -> i -> Lwt.t (Error_monad.shell_tzresult o)) * (G * a * q * i * o)) *
-          (((RPC_service.t RPC_context.t ((RPC_context.t * a) * b) q i o -> D ->
+      ((RPC_service.t RPC_context.t RPC_context.t q i o -> D -> q -> i ->
+      Lwt.t (Error_monad.shell_tzresult o)) *
+        ((RPC_service.t RPC_context.t (RPC_context.t * a) q i o -> D -> a ->
+        q -> i -> Lwt.t (Error_monad.shell_tzresult o)) *
+          ((RPC_service.t RPC_context.t ((RPC_context.t * a) * b) q i o -> D ->
           a -> b -> q -> i -> Lwt.t (Error_monad.shell_tzresult o)) *
-            (I * a * b * q * i * o)) *
-            (((RPC_service.t RPC_context.t (((RPC_context.t * a) * b) * c) q i o
+            ((RPC_service.t RPC_context.t (((RPC_context.t * a) * b) * c) q i o
             -> D -> a -> b -> c -> q -> i ->
-            Lwt.t (Error_monad.shell_tzresult o)) * (K * a * b * c * q * i * o))
-              * L)))) * L * D) (block : D) (check : option bool)
-    (operations : list Alpha_context.Operation.raw)
+            Lwt.t (Error_monad.shell_tzresult o)) * H)))) * H * D) (block : D)
+    (check : option bool) (operations : list Alpha_context.Operation.raw)
     : Lwt.t (Error_monad.shell_tzresult (list Alpha_context.Operation.packed)) :=
     RPC_context.make_call0 S.operations ctxt block tt (operations, check).
   
-  Definition block {D E G I K L a b c i o q : Set}
+  Definition block {D H a b c i o q : Set}
     (ctxt :
-      (((RPC_service.t RPC_context.t RPC_context.t q i o -> D -> q -> i ->
-      Lwt.t (Error_monad.shell_tzresult o)) * (E * q * i * o)) *
-        (((RPC_service.t RPC_context.t (RPC_context.t * a) q i o -> D -> a ->
-        q -> i -> Lwt.t (Error_monad.shell_tzresult o)) * (G * a * q * i * o)) *
-          (((RPC_service.t RPC_context.t ((RPC_context.t * a) * b) q i o -> D ->
+      ((RPC_service.t RPC_context.t RPC_context.t q i o -> D -> q -> i ->
+      Lwt.t (Error_monad.shell_tzresult o)) *
+        ((RPC_service.t RPC_context.t (RPC_context.t * a) q i o -> D -> a ->
+        q -> i -> Lwt.t (Error_monad.shell_tzresult o)) *
+          ((RPC_service.t RPC_context.t ((RPC_context.t * a) * b) q i o -> D ->
           a -> b -> q -> i -> Lwt.t (Error_monad.shell_tzresult o)) *
-            (I * a * b * q * i * o)) *
-            (((RPC_service.t RPC_context.t (((RPC_context.t * a) * b) * c) q i o
+            ((RPC_service.t RPC_context.t (((RPC_context.t * a) * b) * c) q i o
             -> D -> a -> b -> c -> q -> i ->
-            Lwt.t (Error_monad.shell_tzresult o)) * (K * a * b * c * q * i * o))
-              * L)))) * L * D) (block : D) (shell : Block_header.shell_header)
-    (protocol_data : MBytes.t)
+            Lwt.t (Error_monad.shell_tzresult o)) * H)))) * H * D) (block : D)
+    (shell : Block_header.shell_header) (protocol_data : MBytes.t)
     : Lwt.t
       (Error_monad.shell_tzresult Alpha_context.Block_header.protocol_data) :=
     RPC_context.make_call0 S.block ctxt block tt
@@ -1085,19 +1041,17 @@ Definition register (function_parameter : unit) : unit :=
                 last.(Alpha_context.Level.t.level))
           end).
 
-Definition current_level {D E G I K L a b c i o q : Set}
+Definition current_level {D H a b c i o q : Set}
   (ctxt :
-    (((RPC_service.t RPC_context.t RPC_context.t q i o -> D -> q -> i ->
-    Lwt.t (Error_monad.shell_tzresult o)) * (E * q * i * o)) *
-      (((RPC_service.t RPC_context.t (RPC_context.t * a) q i o -> D -> a -> q ->
-      i -> Lwt.t (Error_monad.shell_tzresult o)) * (G * a * q * i * o)) *
-        (((RPC_service.t RPC_context.t ((RPC_context.t * a) * b) q i o -> D ->
+    ((RPC_service.t RPC_context.t RPC_context.t q i o -> D -> q -> i ->
+    Lwt.t (Error_monad.shell_tzresult o)) *
+      ((RPC_service.t RPC_context.t (RPC_context.t * a) q i o -> D -> a -> q ->
+      i -> Lwt.t (Error_monad.shell_tzresult o)) *
+        ((RPC_service.t RPC_context.t ((RPC_context.t * a) * b) q i o -> D ->
         a -> b -> q -> i -> Lwt.t (Error_monad.shell_tzresult o)) *
-          (I * a * b * q * i * o)) *
-          (((RPC_service.t RPC_context.t (((RPC_context.t * a) * b) * c) q i o
-          -> D -> a -> b -> c -> q -> i -> Lwt.t (Error_monad.shell_tzresult o))
-            * (K * a * b * c * q * i * o)) * L)))) * L * D)
-  (op_staroptstar : option int32)
+          ((RPC_service.t RPC_context.t (((RPC_context.t * a) * b) * c) q i o ->
+          D -> a -> b -> c -> q -> i -> Lwt.t (Error_monad.shell_tzresult o)) *
+            H)))) * H * D) (op_staroptstar : option int32)
   : D -> Lwt.t (Error_monad.shell_tzresult Alpha_context.Level.t) :=
   let offset :=
     match op_staroptstar with
@@ -1110,19 +1064,17 @@ Definition current_level {D E G I K L a b c i o q : Set}
     RPC_context.make_call0 S.current_level ctxt block
       {| S.level_query.offset := offset |} tt.
 
-Definition levels_in_current_cycle {D E G I K L a b c i o q : Set}
+Definition levels_in_current_cycle {D H a b c i o q : Set}
   (ctxt :
-    (((RPC_service.t RPC_context.t RPC_context.t q i o -> D -> q -> i ->
-    Lwt.t (Error_monad.shell_tzresult o)) * (E * q * i * o)) *
-      (((RPC_service.t RPC_context.t (RPC_context.t * a) q i o -> D -> a -> q ->
-      i -> Lwt.t (Error_monad.shell_tzresult o)) * (G * a * q * i * o)) *
-        (((RPC_service.t RPC_context.t ((RPC_context.t * a) * b) q i o -> D ->
+    ((RPC_service.t RPC_context.t RPC_context.t q i o -> D -> q -> i ->
+    Lwt.t (Error_monad.shell_tzresult o)) *
+      ((RPC_service.t RPC_context.t (RPC_context.t * a) q i o -> D -> a -> q ->
+      i -> Lwt.t (Error_monad.shell_tzresult o)) *
+        ((RPC_service.t RPC_context.t ((RPC_context.t * a) * b) q i o -> D ->
         a -> b -> q -> i -> Lwt.t (Error_monad.shell_tzresult o)) *
-          (I * a * b * q * i * o)) *
-          (((RPC_service.t RPC_context.t (((RPC_context.t * a) * b) * c) q i o
-          -> D -> a -> b -> c -> q -> i -> Lwt.t (Error_monad.shell_tzresult o))
-            * (K * a * b * c * q * i * o)) * L)))) * L * D)
-  (op_staroptstar : option int32)
+          ((RPC_service.t RPC_context.t (((RPC_context.t * a) * b) * c) q i o ->
+          D -> a -> b -> c -> q -> i -> Lwt.t (Error_monad.shell_tzresult o)) *
+            H)))) * H * D) (op_staroptstar : option int32)
   : D ->
   Lwt.t
     (Error_monad.shell_tzresult

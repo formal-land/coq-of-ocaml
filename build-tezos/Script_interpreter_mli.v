@@ -10,7 +10,7 @@ Import ListNotations.
 Require Import Tezos.Environment.
 Import Environment.Notations.
 Require Tezos.Alpha_context.
-Require Tezos.Script_ir_translator_mli. Module Script_ir_translator := Script_ir_translator_mli.
+Require Tezos.Script_ir_translator.
 Require Tezos.Script_typed_ir.
 
 Import Alpha_context.

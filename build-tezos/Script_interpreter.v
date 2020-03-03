@@ -13,7 +13,7 @@ Import Environment.Notations.
 Require Tezos.Alpha_context.
 Require Tezos.Michelson_v1_gas.
 Require Tezos.Script_ir_annot.
-Require Tezos.Script_ir_translator_mli. Module Script_ir_translator := Script_ir_translator_mli.
+Require Tezos.Script_ir_translator.
 Require Tezos.Script_repr.
 Require Tezos.Script_typed_ir.
 
@@ -681,7 +681,7 @@ Fixpoint step
         Lwt.__return (Alpha_context.Gas.consume ctxt Interp_costs.empty_map) in
       logged_return
         ((Item
-          ((Script_ir_translator.empty_big_map (a := unit) (b := unit)) tk tv)
+          ((Script_ir_translator.empty_big_map (A := unit) (B := unit)) tk tv)
           rest), ctxt)
     
     | (Script_typed_ir.Big_map_mem, Item __key_value (Item map rest)) =>
@@ -2091,7 +2091,7 @@ Definition execute
     Alpha_context.Script.force_decode_in_context ctxt
       unparsed_script.(Alpha_context.Script.t.code) in
   let=? '(to_duplicate, ctxt) :=
-    (Script_ir_translator.collect_big_maps (a := unit)) ctxt arg_type arg in
+    (Script_ir_translator.collect_big_maps (A := unit)) ctxt arg_type arg in
   let=? '(to_update, ctxt) :=
     Script_ir_translator.collect_big_maps ctxt storage_type storage in
   let=? '((ops, storage), ctxt) :=

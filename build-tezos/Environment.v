@@ -3339,197 +3339,189 @@ Module RPC_context.
   
   (* class_type *)
   
-  Parameter make_call0 : forall {E G I K L a b c i o pr q : Set},
+  Parameter make_call0 : forall {H a b c i o pr q : Set},
     RPC_service.t
       ((* `PUT *) unit + (* `GET *) unit + (* `DELETE *) unit + (* `POST *) unit
         + (* `PATCH *) unit) t t q i o ->
-    (((RPC_service.t
+    ((RPC_service.t
       ((* `PUT *) unit + (* `GET *) unit + (* `DELETE *) unit + (* `POST *) unit
         + (* `PATCH *) unit) t t q i o -> pr -> q -> i ->
-    Lwt.t (Error_monad.shell_tzresult o)) * (E * q * i * o)) *
-      (((RPC_service.t
+    Lwt.t (Error_monad.shell_tzresult o)) *
+      ((RPC_service.t
         ((* `PUT *) unit + (* `GET *) unit + (* `DELETE *) unit +
           (* `POST *) unit + (* `PATCH *) unit) t (t * a) q i o -> pr -> a ->
-      q -> i -> Lwt.t (Error_monad.shell_tzresult o)) * (G * a * q * i * o)) *
-        (((RPC_service.t
+      q -> i -> Lwt.t (Error_monad.shell_tzresult o)) *
+        ((RPC_service.t
           ((* `PUT *) unit + (* `GET *) unit + (* `DELETE *) unit +
             (* `POST *) unit + (* `PATCH *) unit) t ((t * a) * b) q i o -> pr ->
         a -> b -> q -> i -> Lwt.t (Error_monad.shell_tzresult o)) *
-          (I * a * b * q * i * o)) *
-          (((RPC_service.t
+          ((RPC_service.t
             ((* `PUT *) unit + (* `GET *) unit + (* `DELETE *) unit +
               (* `POST *) unit + (* `PATCH *) unit) t (((t * a) * b) * c) q i o
           -> pr -> a -> b -> c -> q -> i -> Lwt.t (Error_monad.shell_tzresult o))
-            * (K * a * b * c * q * i * o)) * L)))) * L * pr -> pr -> q -> i ->
+            * H)))) * H * pr -> pr -> q -> i ->
     Lwt.t (Error_monad.shell_tzresult o).
   
-  Parameter make_call1 : forall {F G I K L a b c i o pr q : Set},
+  Parameter make_call1 : forall {H a b c i o pr q : Set},
     RPC_service.t
       ((* `PUT *) unit + (* `GET *) unit + (* `DELETE *) unit + (* `POST *) unit
         + (* `PATCH *) unit) t (t * a) q i o ->
-    (((RPC_service.t
+    ((RPC_service.t
       ((* `PUT *) unit + (* `GET *) unit + (* `DELETE *) unit + (* `POST *) unit
         + (* `PATCH *) unit) t t q i o -> pr -> q -> i ->
-    Lwt.t (Error_monad.shell_tzresult o)) * (F * q * i * o)) *
-      (((RPC_service.t
+    Lwt.t (Error_monad.shell_tzresult o)) *
+      ((RPC_service.t
         ((* `PUT *) unit + (* `GET *) unit + (* `DELETE *) unit +
           (* `POST *) unit + (* `PATCH *) unit) t (t * a) q i o -> pr -> a ->
-      q -> i -> Lwt.t (Error_monad.shell_tzresult o)) * (G * a * q * i * o)) *
-        (((RPC_service.t
+      q -> i -> Lwt.t (Error_monad.shell_tzresult o)) *
+        ((RPC_service.t
           ((* `PUT *) unit + (* `GET *) unit + (* `DELETE *) unit +
             (* `POST *) unit + (* `PATCH *) unit) t ((t * a) * b) q i o -> pr ->
         a -> b -> q -> i -> Lwt.t (Error_monad.shell_tzresult o)) *
-          (I * a * b * q * i * o)) *
-          (((RPC_service.t
+          ((RPC_service.t
             ((* `PUT *) unit + (* `GET *) unit + (* `DELETE *) unit +
               (* `POST *) unit + (* `PATCH *) unit) t (((t * a) * b) * c) q i o
           -> pr -> a -> b -> c -> q -> i -> Lwt.t (Error_monad.shell_tzresult o))
-            * (K * a * b * c * q * i * o)) * L)))) * L * pr -> pr -> a -> q ->
-    i -> Lwt.t (Error_monad.shell_tzresult o).
+            * H)))) * H * pr -> pr -> a -> q -> i ->
+    Lwt.t (Error_monad.shell_tzresult o).
   
-  Parameter make_call2 : forall {G H I K L a b c i o pr q : Set},
+  Parameter make_call2 : forall {H a b c i o pr q : Set},
     RPC_service.t
       ((* `PUT *) unit + (* `GET *) unit + (* `DELETE *) unit + (* `POST *) unit
         + (* `PATCH *) unit) t ((t * a) * b) q i o ->
-    (((RPC_service.t
+    ((RPC_service.t
       ((* `PUT *) unit + (* `GET *) unit + (* `DELETE *) unit + (* `POST *) unit
         + (* `PATCH *) unit) t t q i o -> pr -> q -> i ->
-    Lwt.t (Error_monad.shell_tzresult o)) * (G * q * i * o)) *
-      (((RPC_service.t
+    Lwt.t (Error_monad.shell_tzresult o)) *
+      ((RPC_service.t
         ((* `PUT *) unit + (* `GET *) unit + (* `DELETE *) unit +
           (* `POST *) unit + (* `PATCH *) unit) t (t * a) q i o -> pr -> a ->
-      q -> i -> Lwt.t (Error_monad.shell_tzresult o)) * (H * a * q * i * o)) *
-        (((RPC_service.t
+      q -> i -> Lwt.t (Error_monad.shell_tzresult o)) *
+        ((RPC_service.t
           ((* `PUT *) unit + (* `GET *) unit + (* `DELETE *) unit +
             (* `POST *) unit + (* `PATCH *) unit) t ((t * a) * b) q i o -> pr ->
         a -> b -> q -> i -> Lwt.t (Error_monad.shell_tzresult o)) *
-          (I * a * b * q * i * o)) *
-          (((RPC_service.t
+          ((RPC_service.t
             ((* `PUT *) unit + (* `GET *) unit + (* `DELETE *) unit +
               (* `POST *) unit + (* `PATCH *) unit) t (((t * a) * b) * c) q i o
           -> pr -> a -> b -> c -> q -> i -> Lwt.t (Error_monad.shell_tzresult o))
-            * (K * a * b * c * q * i * o)) * L)))) * L * pr -> pr -> a -> b ->
-    q -> i -> Lwt.t (Error_monad.shell_tzresult o).
+            * H)))) * H * pr -> pr -> a -> b -> q -> i ->
+    Lwt.t (Error_monad.shell_tzresult o).
   
-  Parameter make_call3 : forall {H I J K L a b c i o pr q : Set},
+  Parameter make_call3 : forall {H a b c i o pr q : Set},
     RPC_service.t
       ((* `PUT *) unit + (* `GET *) unit + (* `DELETE *) unit + (* `POST *) unit
         + (* `PATCH *) unit) t (((t * a) * b) * c) q i o ->
-    (((RPC_service.t
+    ((RPC_service.t
       ((* `PUT *) unit + (* `GET *) unit + (* `DELETE *) unit + (* `POST *) unit
         + (* `PATCH *) unit) t t q i o -> pr -> q -> i ->
-    Lwt.t (Error_monad.shell_tzresult o)) * (H * q * i * o)) *
-      (((RPC_service.t
+    Lwt.t (Error_monad.shell_tzresult o)) *
+      ((RPC_service.t
         ((* `PUT *) unit + (* `GET *) unit + (* `DELETE *) unit +
           (* `POST *) unit + (* `PATCH *) unit) t (t * a) q i o -> pr -> a ->
-      q -> i -> Lwt.t (Error_monad.shell_tzresult o)) * (I * a * q * i * o)) *
-        (((RPC_service.t
+      q -> i -> Lwt.t (Error_monad.shell_tzresult o)) *
+        ((RPC_service.t
           ((* `PUT *) unit + (* `GET *) unit + (* `DELETE *) unit +
             (* `POST *) unit + (* `PATCH *) unit) t ((t * a) * b) q i o -> pr ->
         a -> b -> q -> i -> Lwt.t (Error_monad.shell_tzresult o)) *
-          (J * a * b * q * i * o)) *
-          (((RPC_service.t
+          ((RPC_service.t
             ((* `PUT *) unit + (* `GET *) unit + (* `DELETE *) unit +
               (* `POST *) unit + (* `PATCH *) unit) t (((t * a) * b) * c) q i o
           -> pr -> a -> b -> c -> q -> i -> Lwt.t (Error_monad.shell_tzresult o))
-            * (K * a * b * c * q * i * o)) * L)))) * L * pr -> pr -> a -> b ->
-    c -> q -> i -> Lwt.t (Error_monad.shell_tzresult o).
+            * H)))) * H * pr -> pr -> a -> b -> c -> q -> i ->
+    Lwt.t (Error_monad.shell_tzresult o).
   
-  Parameter make_opt_call0 : forall {E G I K L a b c i o pr q : Set},
+  Parameter make_opt_call0 : forall {H a b c i o pr q : Set},
     RPC_service.t
       ((* `PUT *) unit + (* `GET *) unit + (* `DELETE *) unit + (* `POST *) unit
         + (* `PATCH *) unit) t t q i o ->
-    (((RPC_service.t
+    ((RPC_service.t
       ((* `PUT *) unit + (* `GET *) unit + (* `DELETE *) unit + (* `POST *) unit
         + (* `PATCH *) unit) t t q i o -> pr -> q -> i ->
-    Lwt.t (Error_monad.shell_tzresult o)) * (E * q * i * o)) *
-      (((RPC_service.t
+    Lwt.t (Error_monad.shell_tzresult o)) *
+      ((RPC_service.t
         ((* `PUT *) unit + (* `GET *) unit + (* `DELETE *) unit +
           (* `POST *) unit + (* `PATCH *) unit) t (t * a) q i o -> pr -> a ->
-      q -> i -> Lwt.t (Error_monad.shell_tzresult o)) * (G * a * q * i * o)) *
-        (((RPC_service.t
+      q -> i -> Lwt.t (Error_monad.shell_tzresult o)) *
+        ((RPC_service.t
           ((* `PUT *) unit + (* `GET *) unit + (* `DELETE *) unit +
             (* `POST *) unit + (* `PATCH *) unit) t ((t * a) * b) q i o -> pr ->
         a -> b -> q -> i -> Lwt.t (Error_monad.shell_tzresult o)) *
-          (I * a * b * q * i * o)) *
-          (((RPC_service.t
+          ((RPC_service.t
             ((* `PUT *) unit + (* `GET *) unit + (* `DELETE *) unit +
               (* `POST *) unit + (* `PATCH *) unit) t (((t * a) * b) * c) q i o
           -> pr -> a -> b -> c -> q -> i -> Lwt.t (Error_monad.shell_tzresult o))
-            * (K * a * b * c * q * i * o)) * L)))) * L * pr -> pr -> q -> i ->
+            * H)))) * H * pr -> pr -> q -> i ->
     Lwt.t (Error_monad.shell_tzresult (option o)).
   
-  Parameter make_opt_call1 : forall {F G I K L a b c i o pr q : Set},
+  Parameter make_opt_call1 : forall {H a b c i o pr q : Set},
     RPC_service.t
       ((* `PUT *) unit + (* `GET *) unit + (* `DELETE *) unit + (* `POST *) unit
         + (* `PATCH *) unit) t (t * a) q i o ->
-    (((RPC_service.t
+    ((RPC_service.t
       ((* `PUT *) unit + (* `GET *) unit + (* `DELETE *) unit + (* `POST *) unit
         + (* `PATCH *) unit) t t q i o -> pr -> q -> i ->
-    Lwt.t (Error_monad.shell_tzresult o)) * (F * q * i * o)) *
-      (((RPC_service.t
+    Lwt.t (Error_monad.shell_tzresult o)) *
+      ((RPC_service.t
         ((* `PUT *) unit + (* `GET *) unit + (* `DELETE *) unit +
           (* `POST *) unit + (* `PATCH *) unit) t (t * a) q i o -> pr -> a ->
-      q -> i -> Lwt.t (Error_monad.shell_tzresult o)) * (G * a * q * i * o)) *
-        (((RPC_service.t
+      q -> i -> Lwt.t (Error_monad.shell_tzresult o)) *
+        ((RPC_service.t
           ((* `PUT *) unit + (* `GET *) unit + (* `DELETE *) unit +
             (* `POST *) unit + (* `PATCH *) unit) t ((t * a) * b) q i o -> pr ->
         a -> b -> q -> i -> Lwt.t (Error_monad.shell_tzresult o)) *
-          (I * a * b * q * i * o)) *
-          (((RPC_service.t
+          ((RPC_service.t
             ((* `PUT *) unit + (* `GET *) unit + (* `DELETE *) unit +
               (* `POST *) unit + (* `PATCH *) unit) t (((t * a) * b) * c) q i o
           -> pr -> a -> b -> c -> q -> i -> Lwt.t (Error_monad.shell_tzresult o))
-            * (K * a * b * c * q * i * o)) * L)))) * L * pr -> pr -> a -> q ->
-    i -> Lwt.t (Error_monad.shell_tzresult (option o)).
+            * H)))) * H * pr -> pr -> a -> q -> i ->
+    Lwt.t (Error_monad.shell_tzresult (option o)).
   
-  Parameter make_opt_call2 : forall {G H I K L a b c i o pr q : Set},
+  Parameter make_opt_call2 : forall {H a b c i o pr q : Set},
     RPC_service.t
       ((* `PUT *) unit + (* `GET *) unit + (* `DELETE *) unit + (* `POST *) unit
         + (* `PATCH *) unit) t ((t * a) * b) q i o ->
-    (((RPC_service.t
+    ((RPC_service.t
       ((* `PUT *) unit + (* `GET *) unit + (* `DELETE *) unit + (* `POST *) unit
         + (* `PATCH *) unit) t t q i o -> pr -> q -> i ->
-    Lwt.t (Error_monad.shell_tzresult o)) * (G * q * i * o)) *
-      (((RPC_service.t
+    Lwt.t (Error_monad.shell_tzresult o)) *
+      ((RPC_service.t
         ((* `PUT *) unit + (* `GET *) unit + (* `DELETE *) unit +
           (* `POST *) unit + (* `PATCH *) unit) t (t * a) q i o -> pr -> a ->
-      q -> i -> Lwt.t (Error_monad.shell_tzresult o)) * (H * a * q * i * o)) *
-        (((RPC_service.t
+      q -> i -> Lwt.t (Error_monad.shell_tzresult o)) *
+        ((RPC_service.t
           ((* `PUT *) unit + (* `GET *) unit + (* `DELETE *) unit +
             (* `POST *) unit + (* `PATCH *) unit) t ((t * a) * b) q i o -> pr ->
         a -> b -> q -> i -> Lwt.t (Error_monad.shell_tzresult o)) *
-          (I * a * b * q * i * o)) *
-          (((RPC_service.t
+          ((RPC_service.t
             ((* `PUT *) unit + (* `GET *) unit + (* `DELETE *) unit +
               (* `POST *) unit + (* `PATCH *) unit) t (((t * a) * b) * c) q i o
           -> pr -> a -> b -> c -> q -> i -> Lwt.t (Error_monad.shell_tzresult o))
-            * (K * a * b * c * q * i * o)) * L)))) * L * pr -> pr -> a -> b ->
-    q -> i -> Lwt.t (Error_monad.shell_tzresult (option o)).
+            * H)))) * H * pr -> pr -> a -> b -> q -> i ->
+    Lwt.t (Error_monad.shell_tzresult (option o)).
   
-  Parameter make_opt_call3 : forall {H I J K L a b c i o pr q : Set},
+  Parameter make_opt_call3 : forall {H a b c i o pr q : Set},
     RPC_service.t
       ((* `PUT *) unit + (* `GET *) unit + (* `DELETE *) unit + (* `POST *) unit
         + (* `PATCH *) unit) t (((t * a) * b) * c) q i o ->
-    (((RPC_service.t
+    ((RPC_service.t
       ((* `PUT *) unit + (* `GET *) unit + (* `DELETE *) unit + (* `POST *) unit
         + (* `PATCH *) unit) t t q i o -> pr -> q -> i ->
-    Lwt.t (Error_monad.shell_tzresult o)) * (H * q * i * o)) *
-      (((RPC_service.t
+    Lwt.t (Error_monad.shell_tzresult o)) *
+      ((RPC_service.t
         ((* `PUT *) unit + (* `GET *) unit + (* `DELETE *) unit +
           (* `POST *) unit + (* `PATCH *) unit) t (t * a) q i o -> pr -> a ->
-      q -> i -> Lwt.t (Error_monad.shell_tzresult o)) * (I * a * q * i * o)) *
-        (((RPC_service.t
+      q -> i -> Lwt.t (Error_monad.shell_tzresult o)) *
+        ((RPC_service.t
           ((* `PUT *) unit + (* `GET *) unit + (* `DELETE *) unit +
             (* `POST *) unit + (* `PATCH *) unit) t ((t * a) * b) q i o -> pr ->
         a -> b -> q -> i -> Lwt.t (Error_monad.shell_tzresult o)) *
-          (J * a * b * q * i * o)) *
-          (((RPC_service.t
+          ((RPC_service.t
             ((* `PUT *) unit + (* `GET *) unit + (* `DELETE *) unit +
               (* `POST *) unit + (* `PATCH *) unit) t (((t * a) * b) * c) q i o
           -> pr -> a -> b -> c -> q -> i -> Lwt.t (Error_monad.shell_tzresult o))
-            * (K * a * b * c * q * i * o)) * L)))) * L * pr -> pr -> a -> b ->
-    c -> q -> i -> Lwt.t (Error_monad.shell_tzresult (option o)).
+            * H)))) * H * pr -> pr -> a -> b -> c -> q -> i ->
+    Lwt.t (Error_monad.shell_tzresult (option o)).
 End RPC_context.
 
 Module Notations.

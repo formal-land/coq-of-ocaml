@@ -118,21 +118,17 @@ Import ConstructorRecords_judgement.
 
 Reserved Notation "'judgement.Failed".
 
-Inductive judgement (bef : Set) : Set :=
-| Typed : Script_typed_ir.descr -> judgement bef
-| Failed : forall {aft : Set}, 'judgement.Failed aft -> judgement bef
+Inductive judgement : Set :=
+| Typed : Script_typed_ir.descr -> judgement
+| Failed : 'judgement.Failed -> judgement
 
-where "'judgement.Failed" := (fun (t_aft : Set) =>
-  judgement.Failed_skeleton
-    ((Script_typed_ir.stack_ty -> Script_typed_ir.descr) * t_aft)).
+where "'judgement.Failed" :=
+  (judgement.Failed_skeleton (Script_typed_ir.stack_ty -> Script_typed_ir.descr)).
 
 Module judgement.
   Include ConstructorRecords_judgement.judgement.
   Definition Failed := 'judgement.Failed.
 End judgement.
-
-Arguments Typed {_}.
-Arguments Failed {_ _}.
 
 Inductive unparsing_mode : Set :=
 | Optimized : unparsing_mode
@@ -210,10 +206,10 @@ Parameter unparse_data : forall {a : Set},
   Lwt.t
     (Error_monad.tzresult (Alpha_context.Script.node * Alpha_context.context)).
 
-Parameter parse_instr : forall {bef : Set},
+Parameter parse_instr :
   option type_logger -> tc_context -> Alpha_context.context -> bool ->
   Alpha_context.Script.node -> Script_typed_ir.stack_ty ->
-  Lwt.t (Error_monad.tzresult (judgement bef * Alpha_context.context)).
+  Lwt.t (Error_monad.tzresult (judgement * Alpha_context.context)).
 
 Parameter parse_ty :
   Alpha_context.context -> bool -> bool -> bool -> bool ->
