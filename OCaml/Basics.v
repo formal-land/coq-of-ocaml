@@ -53,16 +53,16 @@ Parameter axiom : forall {A : Set}, A.
 
 Parameter assert : forall (A : Set), bool -> A.
 
-Axiom obj_magic : forall {A : Set} (B : Set), A -> B.
+Axiom cast : forall {A : Set} (B : Set), A -> B.
 
-Axiom obj_magic_exists : forall {A : Set} {Es : Type} (T : Es -> Set),
+Axiom cast_exists : forall {A : Set} {Es : Type} (T : Es -> Set),
   A -> {vs : Es & T vs}.
 
-Axiom obj_magic_eval : forall {A : Set} {x : A}, obj_magic A x = x.
+Axiom cast_eval : forall {A : Set} {x : A}, cast A x = x.
 
-Axiom obj_magic_exists_eval
+Axiom cast_exists_eval
   : forall {Es : Type} {T : Es -> Set} {vs : Es} {x : T vs},
-  obj_magic_exists T x = existT _ vs x.
+  cast_exists T x = existT _ vs x.
 
 Parameter unreachable_gadt_branch : forall {A : Set}, A.
 

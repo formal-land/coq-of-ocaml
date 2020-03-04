@@ -1,4 +1,5 @@
 ## [Unreleased]
+* Rename `obj_magic` as `cast`.
 * Set the primitive projection flag.
 * Add support for the `with` operator on constructor records.
 * Add an attribute `@coq_match_gadt_with_result` for GADT matches with casts for the results.
@@ -27,7 +28,7 @@
 * Add basic support for includes of module types with sub-modules.
 * Add `with` notation for records.
 * Ignore patterns with extensible types.
-* Replace the generation of `Export` by `Included` (fix).
+* Replace the generation of `Export` by `Include` (fix).
 * Add support of `include` in first-class module values.
 * Add support of functor definitions.
 * Add an annotation mechanism `[@axiom]` to ignore the content of some definitions.

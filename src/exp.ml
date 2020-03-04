@@ -1269,7 +1269,7 @@ and to_coq_cast_existentials
     | Some { return_typ; cast_result = true; _ } ->
       group (
         nest (
-          !^ "obj_magic" ^^
+          !^ "cast" ^^
           Type.to_coq None (Some Type.Context.Apply) return_typ
         ) ^^
         to_coq true e
@@ -1301,7 +1301,7 @@ and to_coq_cast_existentials
           | _ -> !^ "'" ^-^ variable_names in
         nest (
           !^ "let" ^^ variable_names_pattern ^^ !^ ":=" ^^
-          nest (!^ "obj_magic" ^^ variable_typ true ^^ variable_names) ^^
+          nest (!^ "cast" ^^ variable_typ true ^^ variable_names) ^^
           !^ "in" ^^ newline ^^
           e
         )
@@ -1318,7 +1318,7 @@ and to_coq_cast_existentials
         nest (
           let (operator, option) =
             if use_axioms then
-              ("obj_magic_exists", "Es")
+              ("cast_exists", "Es")
             else
               ("existT", "A") in
           !^ operator ^^
