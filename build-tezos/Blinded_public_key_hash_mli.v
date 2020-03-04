@@ -13,7 +13,7 @@ Require Tezos.Storage_description.
 
 Parameter Included_HASH :
   {'[t, __Set_t, Map_t] : [Set ** Set ** Set -> Set] &
-    S.HASH.signature t __Set_t Map_t}.
+    S.HASH.signature (t := t) (__Set_t := __Set_t) (Map_t := Map_t)}.
 
 Definition t := (|Included_HASH|).(S.HASH.t).
 
@@ -110,4 +110,4 @@ Parameter of_ed25519_pkh :
 
 Parameter activation_code_of_hex : string -> activation_code.
 
-Parameter Index : {_ : unit & Storage_description.INDEX.signature t}.
+Parameter Index : {_ : unit & Storage_description.INDEX.signature (t := t)}.

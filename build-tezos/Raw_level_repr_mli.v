@@ -21,7 +21,7 @@ Parameter rpc_arg : RPC_arg.arg raw_level.
 
 Parameter pp : Format.formatter -> raw_level -> unit.
 
-Parameter Included_S : {_ : unit & Compare.S.signature raw_level}.
+Parameter Included_S : {_ : unit & Compare.S.signature (t := raw_level)}.
 
 Definition op_eq : raw_level -> raw_level -> bool :=
   (|Included_S|).(Compare.S.op_eq).
@@ -67,4 +67,5 @@ Parameter succ : raw_level -> raw_level.
 
 Parameter pred : raw_level -> option raw_level.
 
-Parameter Index : {_ : unit & Storage_description.INDEX.signature raw_level}.
+Parameter Index :
+  {_ : unit & Storage_description.INDEX.signature (t := raw_level)}.

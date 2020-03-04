@@ -155,9 +155,13 @@ Definition operation : Set := Alpha_context.packed_operation.
 
 Parameter Included_PROTOCOL :
   {'[block_header, operation] : [Set ** Set] &
-    Updater.PROTOCOL.signature Alpha_context.Block_header.protocol_data
-      block_header Apply_results.block_metadata operation_data
-      Apply_results.packed_operation_metadata operation validation_state}.
+    Updater.PROTOCOL.signature
+      (block_header_data := Alpha_context.Block_header.protocol_data)
+      (block_header := block_header)
+      (block_header_metadata := Apply_results.block_metadata)
+      (operation_data := operation_data)
+      (operation_receipt := Apply_results.packed_operation_metadata)
+      (operation := operation) (validation_state := validation_state)}.
 
 Definition max_block_length : int :=
   (|Included_PROTOCOL|).(Updater.PROTOCOL.max_block_length).

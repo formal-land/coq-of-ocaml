@@ -18,7 +18,7 @@ Inductive t : Set :=
 
 Definition contract : Set := t.
 
-Parameter Included_S : {_ : unit & Compare.S.signature contract}.
+Parameter Included_S : {_ : unit & Compare.S.signature (t := contract)}.
 
 Definition op_eq : contract -> contract -> bool :=
   (|Included_S|).(Compare.S.op_eq).
@@ -86,4 +86,4 @@ Parameter origination_nonce_encoding : Data_encoding.t origination_nonce.
 
 Parameter rpc_arg : RPC_arg.arg contract.
 
-Parameter Index : {_ : unit & Storage_description.INDEX.signature t}.
+Parameter Index : {_ : unit & Storage_description.INDEX.signature (t := t)}.

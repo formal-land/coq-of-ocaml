@@ -829,7 +829,6 @@ Module T.
       context -> Gas_limit_repr.cost -> Error_monad.tzresult unit;
     description : Storage_description.t context;
   }.
-  Arguments signature : clear implicits.
 End T.
 
 Definition mem (ctxt : t) (k : Context.key) : Lwt.t bool :=

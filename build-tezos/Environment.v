@@ -897,7 +897,6 @@ Module Compare.
       t := t;
       compare : t -> t -> int;
     }.
-    Arguments signature : clear implicits.
   End COMPARABLE.
   
   Module S.
@@ -914,40 +913,39 @@ Module Compare.
       max : t -> t -> t;
       min : t -> t -> t;
     }.
-    Arguments signature : clear implicits.
   End S.
   
   Parameter Make :
-    forall (P : {t : Set & COMPARABLE.signature t}),
-      {_ : unit & S.signature (|P|).(COMPARABLE.t)}.
+    forall (P : {t : Set & COMPARABLE.signature (t := t)}),
+      {_ : unit & S.signature (t := (|P|).(COMPARABLE.t))}.
   
-  Parameter Char : {_ : unit & S.signature ascii}.
+  Parameter Char : {_ : unit & S.signature (t := ascii)}.
   
-  Parameter Bool : {_ : unit & S.signature bool}.
+  Parameter Bool : {_ : unit & S.signature (t := bool)}.
   
-  Parameter Int : {_ : unit & S.signature int}.
+  Parameter Int : {_ : unit & S.signature (t := int)}.
   
-  Parameter Int32 : {_ : unit & S.signature int32}.
+  Parameter Int32 : {_ : unit & S.signature (t := int32)}.
   
-  Parameter Uint32 : {_ : unit & S.signature int32}.
+  Parameter Uint32 : {_ : unit & S.signature (t := int32)}.
   
-  Parameter Int64 : {_ : unit & S.signature int64}.
+  Parameter Int64 : {_ : unit & S.signature (t := int64)}.
   
-  Parameter Uint64 : {_ : unit & S.signature int64}.
+  Parameter Uint64 : {_ : unit & S.signature (t := int64)}.
   
-  Parameter Float : {_ : unit & S.signature float}.
+  Parameter Float : {_ : unit & S.signature (t := float)}.
   
-  Parameter String : {_ : unit & S.signature string}.
+  Parameter String : {_ : unit & S.signature (t := string)}.
   
-  Parameter Z : {_ : unit & S.signature Z.t}.
+  Parameter Z : {_ : unit & S.signature (t := Z.t)}.
   
   Parameter List :
-    forall (P : {t : Set & COMPARABLE.signature t}),
-      {_ : unit & S.signature (list (|P|).(COMPARABLE.t))}.
+    forall (P : {t : Set & COMPARABLE.signature (t := t)}),
+      {_ : unit & S.signature (t := (list (|P|).(COMPARABLE.t)))}.
   
   Parameter Option :
-    forall (P : {t : Set & COMPARABLE.signature t}),
-      {_ : unit & S.signature (option (|P|).(COMPARABLE.t))}.
+    forall (P : {t : Set & COMPARABLE.signature (t := t)}),
+      {_ : unit & S.signature (t := (option (|P|).(COMPARABLE.t)))}.
 End Compare.
 
 Module Data_encoding.
@@ -1592,7 +1590,7 @@ End Logging.
 Module Time.
   Parameter t : Set.
   
-  Parameter Included_S : {_ : unit & Compare.S.signature t}.
+  Parameter Included_S : {_ : unit & Compare.S.signature (t := t)}.
   
   Definition op_eq : t -> t -> bool := (|Included_S|).(Compare.S.op_eq).
   
@@ -2194,7 +2192,6 @@ Module S.
       to_bytes : t -> MBytes.t;
       of_bytes : MBytes.t -> option t;
     }.
-    Arguments signature : clear implicits.
   End T.
   
   Module HASHABLE.
@@ -2218,7 +2215,6 @@ Module S.
       __hash_value : t -> hash;
       hash_raw : MBytes.t -> hash;
     }.
-    Arguments signature : clear implicits.
   End HASHABLE.
   
   Module MINIMAL_HASH.
@@ -2242,7 +2238,6 @@ Module S.
       hash_string : option string -> list string -> t;
       zero : t;
     }.
-    Arguments signature : clear implicits.
   End MINIMAL_HASH.
   
   Module RAW_DATA.
@@ -2253,7 +2248,6 @@ Module S.
       of_bytes_opt : MBytes.t -> option t;
       of_bytes_exn : MBytes.t -> t;
     }.
-    Arguments signature : clear implicits.
   End RAW_DATA.
   
   Module B58_DATA.
@@ -2266,7 +2260,6 @@ Module S.
       (* extensible_type data *)
       b58check_encoding : Base58.encoding t;
     }.
-    Arguments signature : clear implicits.
   End B58_DATA.
   
   Module ENCODER.
@@ -2275,7 +2268,6 @@ Module S.
       encoding : Data_encoding.t t;
       rpc_arg : RPC_arg.t t;
     }.
-    Arguments signature : clear implicits.
   End ENCODER.
   
   Module SET.
@@ -2312,7 +2304,6 @@ Module S.
       find_last_opt : (elt -> bool) -> t -> option elt;
       of_list : list elt -> t;
     }.
-    Arguments signature : clear implicits.
   End SET.
   
   Module MAP.
@@ -2352,7 +2343,6 @@ Module S.
       map : forall {a b : Set}, (a -> b) -> t a -> t b;
       mapi : forall {a b : Set}, (key -> a -> b) -> t a -> t b;
     }.
-    Arguments signature : clear implicits.
   End MAP.
   
   Module INDEXES_Set.
@@ -2400,7 +2390,6 @@ Module S.
       of_seq : OCaml.Seq.t elt -> t;
       encoding : Data_encoding.t t;
     }.
-    Arguments signature : clear implicits.
   End INDEXES_Set.
   
   Module INDEXES_Map.
@@ -2451,7 +2440,6 @@ Module S.
       of_seq : forall {a : Set}, OCaml.Seq.t (key * a) -> t a;
       encoding : forall {a : Set}, Data_encoding.t a -> Data_encoding.t (t a);
     }.
-    Arguments signature : clear implicits.
   End INDEXES_Map.
   
   Module INDEXES.
@@ -2462,10 +2450,9 @@ Module S.
       of_path_exn : list string -> t;
       prefix_path : string -> list string;
       path_length : int;
-      __Set : INDEXES_Set.signature t __Set_t;
-      Map : INDEXES_Map.signature t Map_t;
+      __Set : INDEXES_Set.signature (elt := t) (t := __Set_t);
+      Map : INDEXES_Map.signature (key := t) (t := Map_t);
     }.
-    Arguments signature : clear implicits.
   End INDEXES.
   
   Module HASH.
@@ -2505,10 +2492,9 @@ Module S.
       of_path_exn : list string -> t;
       prefix_path : string -> list string;
       path_length : int;
-      __Set : INDEXES_Set.signature t __Set_t;
-      Map : INDEXES_Map.signature t Map_t;
+      __Set : INDEXES_Set.signature (elt := t) (t := __Set_t);
+      Map : INDEXES_Map.signature (key := t) (t := Map_t);
     }.
-    Arguments signature : clear implicits.
   End HASH.
   
   Module MERKLE_TREE.
@@ -2550,8 +2536,8 @@ Module S.
       of_path_exn : list string -> t;
       prefix_path : string -> list string;
       path_length : int;
-      __Set : INDEXES_Set.signature t __Set_t;
-      Map : INDEXES_Map.signature t Map_t;
+      __Set : INDEXES_Set.signature (elt := t) (t := __Set_t);
+      Map : INDEXES_Map.signature (key := t) (t := Map_t);
       compute : list elt -> t;
       empty : t;
       path := path;
@@ -2559,7 +2545,6 @@ Module S.
       check_path : path -> elt -> t * int;
       path_encoding : Data_encoding.t path;
     }.
-    Arguments signature : clear implicits.
   End MERKLE_TREE.
   
   Module SPublic_key_hash.
@@ -2594,11 +2579,10 @@ Module S.
       of_path_exn : list string -> t;
       prefix_path : string -> list string;
       path_length : int;
-      __Set : INDEXES_Set.signature t __Set_t;
-      Map : INDEXES_Map.signature t Map_t;
+      __Set : INDEXES_Set.signature (elt := t) (t := __Set_t);
+      Map : INDEXES_Map.signature (key := t) (t := Map_t);
       zero : t;
     }.
-    Arguments signature : clear implicits.
   End SPublic_key_hash.
   
   Module SPublic_key.
@@ -2626,7 +2610,6 @@ Module S.
       public_key_hash_t := public_key_hash_t;
       __hash_value : t -> public_key_hash_t;
     }.
-    Arguments signature : clear implicits.
   End SPublic_key.
   
   Module SIGNATURE.
@@ -2634,10 +2617,11 @@ Module S.
       {Public_key_hash_Map_t : Set -> Set} {Public_key_t t watermark : Set}
       : Set := {
       Public_key_hash :
-        SPublic_key_hash.signature Public_key_hash_t Public_key_hash___Set_t
-          Public_key_hash_Map_t;
+        SPublic_key_hash.signature (t := Public_key_hash_t)
+          (__Set_t := Public_key_hash___Set_t) (Map_t := Public_key_hash_Map_t);
       Public_key :
-        SPublic_key.signature Public_key_t Public_key_hash.(SPublic_key_hash.t);
+        SPublic_key.signature (t := Public_key_t)
+          (public_key_hash_t := Public_key_hash.(SPublic_key_hash.t));
       t := t;
       pp : Format.formatter -> t -> unit;
       size : int;
@@ -2667,20 +2651,21 @@ Module S.
       check :
         option watermark -> Public_key.(SPublic_key.t) -> t -> MBytes.t -> bool;
     }.
-    Arguments signature : clear implicits.
   End SIGNATURE.
 End S.
 
 Module __Set.
   Parameter Make :
-    forall (Ord : {t : Set & Compare.COMPARABLE.signature t}),
-      {t : Set & S.SET.signature (|Ord|).(Compare.COMPARABLE.t) t}.
+    forall (Ord : {t : Set & Compare.COMPARABLE.signature (t := t)}),
+      {t : Set &
+        S.SET.signature (elt := (|Ord|).(Compare.COMPARABLE.t)) (t := t)}.
 End __Set.
 
 Module Map.
   Parameter Make :
-    forall (Ord : {t : Set & Compare.COMPARABLE.signature t}),
-      {t : Set -> Set & S.MAP.signature (|Ord|).(Compare.COMPARABLE.t) t}.
+    forall (Ord : {t : Set & Compare.COMPARABLE.signature (t := t)}),
+      {t : Set -> Set &
+        S.MAP.signature (key := (|Ord|).(Compare.COMPARABLE.t)) (t := t)}.
 End Map.
 
 Module Blake2B.
@@ -2703,7 +2688,7 @@ Module Blake2B.
   
   Parameter Make_minimal :
     forall (Name : {_ : unit & Name.signature}),
-      {t : Set & S.MINIMAL_HASH.signature t}.
+      {t : Set & S.MINIMAL_HASH.signature (t := t)}.
   
   Module SRegister.
     Record signature : Set := {
@@ -2717,30 +2702,36 @@ Module Blake2B.
     forall (Register : {_ : unit & SRegister.signature}),
       (forall (Name : {_ : unit & PrefixedName.signature}),
         {'[t, __Set_t, Map_t] : [Set ** Set ** Set -> Set] &
-          S.HASH.signature t __Set_t Map_t}).
+          S.HASH.signature (t := t) (__Set_t := __Set_t) (Map_t := Map_t)}).
 End Blake2B.
 
 Parameter Ed25519 :
   {'[Public_key_hash_t, Public_key_hash___Set_t, Public_key_hash_Map_t,
     Public_key_t, t] : [Set ** Set ** Set -> Set ** Set ** Set] &
-    S.SIGNATURE.signature Public_key_hash_t Public_key_hash___Set_t
-      Public_key_hash_Map_t Public_key_t t MBytes.t}.
+    S.SIGNATURE.signature (Public_key_hash_t := Public_key_hash_t)
+      (Public_key_hash___Set_t := Public_key_hash___Set_t)
+      (Public_key_hash_Map_t := Public_key_hash_Map_t)
+      (Public_key_t := Public_key_t) (t := t) (watermark := MBytes.t)}.
 
 Parameter Secp256k1 :
   {'[Public_key_hash_t, Public_key_hash___Set_t, Public_key_hash_Map_t,
     Public_key_t, t] : [Set ** Set ** Set -> Set ** Set ** Set] &
-    S.SIGNATURE.signature Public_key_hash_t Public_key_hash___Set_t
-      Public_key_hash_Map_t Public_key_t t MBytes.t}.
+    S.SIGNATURE.signature (Public_key_hash_t := Public_key_hash_t)
+      (Public_key_hash___Set_t := Public_key_hash___Set_t)
+      (Public_key_hash_Map_t := Public_key_hash_Map_t)
+      (Public_key_t := Public_key_t) (t := t) (watermark := MBytes.t)}.
 
 Parameter P256 :
   {'[Public_key_hash_t, Public_key_hash___Set_t, Public_key_hash_Map_t,
     Public_key_t, t] : [Set ** Set ** Set -> Set ** Set ** Set] &
-    S.SIGNATURE.signature Public_key_hash_t Public_key_hash___Set_t
-      Public_key_hash_Map_t Public_key_t t MBytes.t}.
+    S.SIGNATURE.signature (Public_key_hash_t := Public_key_hash_t)
+      (Public_key_hash___Set_t := Public_key_hash___Set_t)
+      (Public_key_hash_Map_t := Public_key_hash_Map_t)
+      (Public_key_t := Public_key_t) (t := t) (watermark := MBytes.t)}.
 
 Parameter Chain_id :
   {'[t, __Set_t, Map_t] : [Set ** Set ** Set -> Set] &
-    S.HASH.signature t __Set_t Map_t}.
+    S.HASH.signature (t := t) (__Set_t := __Set_t) (Map_t := Map_t)}.
 
 Module Signature.
   Parameter signature_module_tag : unit.
@@ -2772,8 +2763,10 @@ Module Signature.
   Parameter Included_SIGNATURE :
     {'[Public_key_hash___Set_t, Public_key_hash_Map_t, t] :
       [Set ** Set -> Set ** Set] &
-      S.SIGNATURE.signature public_key Public_key_hash___Set_t
-        Public_key_hash_Map_t public_key t watermark}.
+      S.SIGNATURE.signature (Public_key_hash_t := public_key)
+        (Public_key_hash___Set_t := Public_key_hash___Set_t)
+        (Public_key_hash_Map_t := Public_key_hash_Map_t)
+        (Public_key_t := public_key) (t := t) (watermark := watermark)}.
   
   Definition Public_key_hash :=
     existT (fun _ => _) tt (|Included_SIGNATURE|).(S.SIGNATURE.Public_key_hash).
@@ -2855,28 +2848,29 @@ End Signature.
 
 Parameter Block_hash :
   {'[t, __Set_t, Map_t] : [Set ** Set ** Set -> Set] &
-    S.HASH.signature t __Set_t Map_t}.
+    S.HASH.signature (t := t) (__Set_t := __Set_t) (Map_t := Map_t)}.
 
 Parameter Operation_hash :
   {'[t, __Set_t, Map_t] : [Set ** Set ** Set -> Set] &
-    S.HASH.signature t __Set_t Map_t}.
+    S.HASH.signature (t := t) (__Set_t := __Set_t) (Map_t := Map_t)}.
 
 Parameter Operation_list_hash :
   {'[t, __Set_t, Map_t, path] : [Set ** Set ** Set -> Set ** Set] &
-    S.MERKLE_TREE.signature (|Operation_hash|).(S.HASH.t) t __Set_t Map_t path}.
+    S.MERKLE_TREE.signature (elt := (|Operation_hash|).(S.HASH.t)) (t := t)
+      (__Set_t := __Set_t) (Map_t := Map_t) (path := path)}.
 
 Parameter Operation_list_list_hash :
   {'[t, __Set_t, Map_t, path] : [Set ** Set ** Set -> Set ** Set] &
-    S.MERKLE_TREE.signature (|Operation_list_hash|).(S.MERKLE_TREE.t) t __Set_t
-      Map_t path}.
+    S.MERKLE_TREE.signature (elt := (|Operation_list_hash|).(S.MERKLE_TREE.t))
+      (t := t) (__Set_t := __Set_t) (Map_t := Map_t) (path := path)}.
 
 Parameter Protocol_hash :
   {'[t, __Set_t, Map_t] : [Set ** Set ** Set -> Set] &
-    S.HASH.signature t __Set_t Map_t}.
+    S.HASH.signature (t := t) (__Set_t := __Set_t) (Map_t := Map_t)}.
 
 Parameter Context_hash :
   {'[t, __Set_t, Map_t] : [Set ** Set ** Set -> Set] &
-    S.HASH.signature t __Set_t Map_t}.
+    S.HASH.signature (t := t) (__Set_t := __Set_t) (Map_t := Map_t)}.
 
 Module Micheline.
   Definition annot : Set := list string.
@@ -2974,7 +2968,8 @@ Module Block_header.
   Definition t := t.record.
   
   Parameter Included_HASHABLE :
-    {_ : unit & S.HASHABLE.signature t (|Block_hash|).(S.HASH.t)}.
+    {_ : unit &
+      S.HASHABLE.signature (t := t) (hash := (|Block_hash|).(S.HASH.t))}.
   
   Definition op_eq : t -> t -> bool := (|Included_HASHABLE|).(S.HASHABLE.op_eq).
   
@@ -3019,7 +3014,7 @@ Module Block_header.
     (|Included_HASHABLE|).(S.HASHABLE.hash_raw).
 End Block_header.
 
-Parameter Fitness : {_ : unit & S.T.signature (list MBytes.t)}.
+Parameter Fitness : {_ : unit & S.T.signature (t := (list MBytes.t))}.
 
 Module Operation.
   Module shell_header.
@@ -3044,7 +3039,8 @@ Module Operation.
   Definition t := t.record.
   
   Parameter Included_HASHABLE :
-    {_ : unit & S.HASHABLE.signature t (|Operation_hash|).(S.HASH.t)}.
+    {_ : unit &
+      S.HASHABLE.signature (t := t) (hash := (|Operation_hash|).(S.HASH.t))}.
   
   Definition op_eq : t -> t -> bool := (|Included_HASHABLE|).(S.HASHABLE.op_eq).
   
@@ -3142,7 +3138,8 @@ Module Protocol.
   Parameter env_version_encoding : Data_encoding.t env_version.
   
   Parameter Included_HASHABLE :
-    {_ : unit & S.HASHABLE.signature t (|Protocol_hash|).(S.HASH.t)}.
+    {_ : unit &
+      S.HASHABLE.signature (t := t) (hash := (|Protocol_hash|).(S.HASH.t))}.
   
   Definition op_eq : t -> t -> bool := (|Included_HASHABLE|).(S.HASHABLE.op_eq).
   
@@ -3324,7 +3321,6 @@ Module Updater.
         Context.t -> Block_header.shell_header ->
         Lwt.t (Error_monad.tzresult validation_result);
     }.
-    Arguments signature : clear implicits.
   End PROTOCOL.
   
   Parameter activate :

@@ -15,7 +15,7 @@ Parameter t : Set.
 
 Definition tez : Set := t.
 
-Parameter Included_S : {_ : unit & Qty_repr.S.signature t}.
+Parameter Included_S : {_ : unit & Qty_repr.S.signature (qty := t)}.
 
 Definition id : string := (|Included_S|).(Qty_repr.S.id).
 

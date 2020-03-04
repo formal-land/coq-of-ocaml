@@ -35,7 +35,6 @@ Module BASIC_DATA.
     encoding : Data_encoding.t t;
     pp : Format.formatter -> t -> unit;
   }.
-  Arguments signature : clear implicits.
 End BASIC_DATA.
 
 Parameter t : Set.
@@ -50,7 +49,8 @@ Definition public_key_hash : Set :=
 Definition signature : Set := Signature.t.
 
 Module Tez.
-  Parameter Included_BASIC_DATA : {_ : unit & BASIC_DATA.signature Tez_repr.t}.
+  Parameter Included_BASIC_DATA :
+    {_ : unit & BASIC_DATA.signature (t := Tez_repr.t)}.
   
   Definition t := (|Included_BASIC_DATA|).(BASIC_DATA.t).
   
@@ -118,7 +118,7 @@ Module Tez.
 End Tez.
 
 Module Period.
-  Parameter Included_BASIC_DATA : {t : Set & BASIC_DATA.signature t}.
+  Parameter Included_BASIC_DATA : {t : Set & BASIC_DATA.signature (t := t)}.
   
   Definition t := (|Included_BASIC_DATA|).(BASIC_DATA.t).
   
@@ -176,7 +176,8 @@ Module Period.
 End Period.
 
 Module Timestamp.
-  Parameter Included_BASIC_DATA : {_ : unit & BASIC_DATA.signature Time.t}.
+  Parameter Included_BASIC_DATA :
+    {_ : unit & BASIC_DATA.signature (t := Time.t)}.
   
   Definition t := (|Included_BASIC_DATA|).(BASIC_DATA.t).
   
@@ -232,7 +233,7 @@ Module Timestamp.
 End Timestamp.
 
 Module Raw_level.
-  Parameter Included_BASIC_DATA : {t : Set & BASIC_DATA.signature t}.
+  Parameter Included_BASIC_DATA : {t : Set & BASIC_DATA.signature (t := t)}.
   
   Definition t := (|Included_BASIC_DATA|).(BASIC_DATA.t).
   
@@ -288,7 +289,7 @@ Module Raw_level.
 End Raw_level.
 
 Module Cycle.
-  Parameter Included_BASIC_DATA : {t : Set & BASIC_DATA.signature t}.
+  Parameter Included_BASIC_DATA : {t : Set & BASIC_DATA.signature (t := t)}.
   
   Definition t := (|Included_BASIC_DATA|).(BASIC_DATA.t).
   
@@ -342,7 +343,7 @@ Module Cycle.
   
   Parameter to_int32 : cycle -> int32.
   
-  Parameter Map : {t : Set -> Set & S.MAP.signature cycle t}.
+  Parameter Map : {t : Set -> Set & S.MAP.signature (key := cycle) (t := t)}.
 End Cycle.
 
 Module Gas.
@@ -1051,7 +1052,7 @@ Module Constants.
 End Constants.
 
 Module Voting_period.
-  Parameter Included_BASIC_DATA : {t : Set & BASIC_DATA.signature t}.
+  Parameter Included_BASIC_DATA : {t : Set & BASIC_DATA.signature (t := t)}.
   
   Definition t := (|Included_BASIC_DATA|).(BASIC_DATA.t).
   
@@ -1143,7 +1144,7 @@ Module Level.
   End t.
   Definition t := t.record.
   
-  Parameter Included_BASIC_DATA : {_ : unit & BASIC_DATA.signature t}.
+  Parameter Included_BASIC_DATA : {_ : unit & BASIC_DATA.signature (t := t)}.
   
   Definition op_eq : t -> t -> bool :=
     (|Included_BASIC_DATA|).(BASIC_DATA.op_eq).
@@ -1312,7 +1313,7 @@ Module Big_map.
 End Big_map.
 
 Module Contract.
-  Parameter Included_BASIC_DATA : {t : Set & BASIC_DATA.signature t}.
+  Parameter Included_BASIC_DATA : {t : Set & BASIC_DATA.signature (t := t)}.
   
   Definition t := (|Included_BASIC_DATA|).(BASIC_DATA.t).
   

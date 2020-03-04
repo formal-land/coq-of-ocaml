@@ -170,10 +170,9 @@ Module T.
       context -> Gas_limit_repr.cost -> Error_monad.tzresult unit;
     description : Storage_description.t context;
   }.
-  Arguments signature : clear implicits.
 End T.
 
-Parameter Included_T : {_ : unit & T.signature t}.
+Parameter Included_T : {_ : unit & T.signature (t := t)}.
 
 Definition mem : context -> key -> Lwt.t bool := (|Included_T|).(T.mem).
 

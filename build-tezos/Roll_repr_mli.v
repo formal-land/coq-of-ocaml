@@ -30,4 +30,4 @@ Parameter to_int32 : roll -> Int32.t.
 
 Parameter op_eq : roll -> roll -> bool.
 
-Parameter Index : {_ : unit & Storage_description.INDEX.signature roll}.
+Parameter Index : {_ : unit & Storage_description.INDEX.signature (t := roll)}.

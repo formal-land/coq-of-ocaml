@@ -69,7 +69,6 @@ Module BASIC_DATA.
     encoding : Data_encoding.t t;
     pp : Format.formatter -> t -> unit;
   }.
-  Arguments signature : clear implicits.
 End BASIC_DATA.
 
 Module Tez := Tez_repr.

@@ -273,7 +273,8 @@ Parameter find_entrypoint :
   Error_monad.tzresult
     ((Alpha_context.Script.node -> Alpha_context.Script.node) * ex_ty).
 
-Parameter Entrypoints_map : {t : Set -> Set & S.MAP.signature string t}.
+Parameter Entrypoints_map :
+  {t : Set -> Set & S.MAP.signature (key := string) (t := t)}.
 
 Parameter list_entrypoints :
   Script_typed_ir.ty -> Alpha_context.context -> option string ->

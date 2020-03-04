@@ -6699,8 +6699,9 @@ Fixpoint extract_big_map_updates {a : Set}
         |})
         :
           {OPS_t : Set -> Set &
-            Boxed_map.signature M.(Script_typed_ir.Boxed_map.key)
-              M.(Script_typed_ir.Boxed_map.value) OPS_t}) in
+            Boxed_map.signature (key := M.(Script_typed_ir.Boxed_map.key))
+              (value := M.(Script_typed_ir.Boxed_map.value)) (OPS_t := OPS_t)})
+      in
     (Error_monad.__return
       (a := context * Script_typed_ir.map __8 __9 * big_map_ids * list Contract.big_map_diff))
       (ctxt, (pack (existT (A := Set -> Set) _ _ (|M|))), ids, acc))

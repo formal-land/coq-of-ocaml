@@ -103,7 +103,8 @@ Definition of_int32_exn (l : (|Compare.Int32|).(Compare.S.t))
   else
     Pervasives.invalid_arg "Level_repr.Cycle.of_int32".
 
-Definition Index : {_ : unit & Storage_description.INDEX.signature cycle} :=
+Definition Index : {_ : unit & Storage_description.INDEX.signature (t := cycle)}
+  :=
   let t : Set := cycle in
   let path_length := 1 in
   let to_path (c : int32) (l : list string) : list string :=

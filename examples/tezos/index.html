@@ -52,7 +52,7 @@
       </small>
     </h2>
     <p>These are the sources of the <a href="https://gitlab.com/tezos/tezos/tree/master/src/proto_alpha/lib_protocol">protocol</a> of <a href="https://tezos.com/">Tezos</a> imported to <a href="https://coq.inria.fr/">Coq</a> by the current development version of <a href="https://github.com/clarus/coq-of-ocaml">coq-of-ocaml</a>. Tezos is a crypto-currency with smart-contracts and an upgradable protocol. To see the valid generated Coq files, go on <a href="https://clarus.github.io/coq-of-ocaml/build-tezos/html/toc.html">coq-of-ocaml/build-tezos/html/toc.html</a>.</p>
-    <blockquote class="blockquote"><p class="mb-0" style="font-size: 16px;">(2020-03-04) We now import all the Tezos protocol to Coq, apart from the RPC calls. Working on the Coq proofs.</p></blockquote>
+    <blockquote class="blockquote"><p class="mb-0" style="font-size: 16px;">(2020-03-04) We now import most of the Tezos protocol to Coq, apart from the RPC calls. Working on the Coq proofs.</p></blockquote>
 
     <p>We show the original&nbsp;<a href="https://ocaml.org/">OCaml</a> code on the left and the imported&nbsp;<a href="https://coq.inria.fr/">Coq</a> code on the right. The imported code does not necessarily compile. Warnings reported on the&nbsp;OCaml side are due to either various incompleteness in our tool, or to side-effects in the source code. Go on the <a href="https://gitter.im/clarus/coq-of-ocaml">Gitter chat</a> for more information. Work currently made at <a href="https://www.nomadic-labs.com/">Nomadic Labs</a>.</p>
     <p>To install the latest development version of <a href="https://clarus.github.io/coq-of-ocaml/">coq-of-ocaml</a> with <a href="https://opam.ocaml.org/">opam</a>:</p>
@@ -60,7 +60,7 @@
 opam pin add https://github.com/clarus/coq-of-ocaml.git#master</code></pre>
     <ul>
       <li>OCaml size: 36246 lines</li>
-      <li>Coq size: 46644 lines (+28% compared to&nbsp;OCaml)</li>
+      <li>Coq size: 46729 lines (+28% compared to&nbsp;OCaml)</li>
       <li>Warnings from coq-of-ocaml: 4337</li>
     </ul>
     
@@ -118,7 +118,7 @@ opam pin add https://github.com/clarus/coq-of-ocaml.git#master</code></pre>
           28609,
           32833,
           39901,
-          39901,
+          39960,
         ],
         generated: [
           47563,
@@ -171,7 +171,7 @@ opam pin add https://github.com/clarus/coq-of-ocaml.git#master</code></pre>
           45766,
           46649,
           46664,
-          46664,
+          46729,
         ],
         labels: [
           "01-14",
@@ -757,7 +757,7 @@ opam pin add https://github.com/clarus/coq-of-ocaml.git#master</code></pre>
     <h3>Alpha_context</h3>
     <ul>
       <li>OCaml size: 279 lines</li>
-      <li>Coq size: 458 lines (+64% compared to&nbsp;OCaml)</li>
+      <li>Coq size: 457 lines (+63% compared to&nbsp;OCaml)</li>
     </ul>
   </div>
   <div class="col-md-6">
@@ -1117,7 +1117,6 @@ Module BASIC_DATA.
     encoding : Data_encoding.t t;
     pp : Format.formatter -&gt; t -&gt; unit;
   }.
-  Arguments signature : clear implicits.
 End BASIC_DATA.
 
 Module Tez := Tez_repr.
@@ -1514,7 +1513,7 @@ Definition description : Storage_description.t Raw_context.context :=
     <h3>Alpha_context_mli</h3>
     <ul>
       <li>OCaml size: 1389 lines</li>
-      <li>Coq size: 2588 lines (+86% compared to&nbsp;OCaml)</li>
+      <li>Coq size: 2589 lines (+86% compared to&nbsp;OCaml)</li>
     </ul>
   </div>
   <div class="col-md-6">
@@ -2950,7 +2949,6 @@ Module BASIC_DATA.
     encoding : Data_encoding.t t;
     pp : Format.formatter -&gt; t -&gt; unit;
   }.
-  Arguments signature : clear implicits.
 End BASIC_DATA.
 
 Parameter t : Set.
@@ -2965,7 +2963,8 @@ Definition public_key_hash : Set :=
 Definition signature : Set := Signature.t.
 
 Module Tez.
-  Parameter Included_BASIC_DATA : {_ : unit &amp; BASIC_DATA.signature Tez_repr.t}.
+  Parameter Included_BASIC_DATA :
+    {_ : unit &amp; BASIC_DATA.signature (t := Tez_repr.t)}.
   
   Definition t := (|Included_BASIC_DATA|).(BASIC_DATA.t).
   
@@ -3033,7 +3032,7 @@ Module Tez.
 End Tez.
 
 Module Period.
-  Parameter Included_BASIC_DATA : {t : Set &amp; BASIC_DATA.signature t}.
+  Parameter Included_BASIC_DATA : {t : Set &amp; BASIC_DATA.signature (t := t)}.
   
   Definition t := (|Included_BASIC_DATA|).(BASIC_DATA.t).
   
@@ -3091,7 +3090,8 @@ Module Period.
 End Period.
 
 Module Timestamp.
-  Parameter Included_BASIC_DATA : {_ : unit &amp; BASIC_DATA.signature Time.t}.
+  Parameter Included_BASIC_DATA :
+    {_ : unit &amp; BASIC_DATA.signature (t := Time.t)}.
   
   Definition t := (|Included_BASIC_DATA|).(BASIC_DATA.t).
   
@@ -3147,7 +3147,7 @@ Module Timestamp.
 End Timestamp.
 
 Module Raw_level.
-  Parameter Included_BASIC_DATA : {t : Set &amp; BASIC_DATA.signature t}.
+  Parameter Included_BASIC_DATA : {t : Set &amp; BASIC_DATA.signature (t := t)}.
   
   Definition t := (|Included_BASIC_DATA|).(BASIC_DATA.t).
   
@@ -3203,7 +3203,7 @@ Module Raw_level.
 End Raw_level.
 
 Module Cycle.
-  Parameter Included_BASIC_DATA : {t : Set &amp; BASIC_DATA.signature t}.
+  Parameter Included_BASIC_DATA : {t : Set &amp; BASIC_DATA.signature (t := t)}.
   
   Definition t := (|Included_BASIC_DATA|).(BASIC_DATA.t).
   
@@ -3257,7 +3257,7 @@ Module Cycle.
   
   Parameter to_int32 : cycle -&gt; int32.
   
-  Parameter Map : {t : Set -&gt; Set &amp; S.MAP.signature cycle t}.
+  Parameter Map : {t : Set -&gt; Set &amp; S.MAP.signature (key := cycle) (t := t)}.
 End Cycle.
 
 Module Gas.
@@ -3966,7 +3966,7 @@ Module Constants.
 End Constants.
 
 Module Voting_period.
-  Parameter Included_BASIC_DATA : {t : Set &amp; BASIC_DATA.signature t}.
+  Parameter Included_BASIC_DATA : {t : Set &amp; BASIC_DATA.signature (t := t)}.
   
   Definition t := (|Included_BASIC_DATA|).(BASIC_DATA.t).
   
@@ -4058,7 +4058,7 @@ Module Level.
   End t.
   Definition t := t.record.
   
-  Parameter Included_BASIC_DATA : {_ : unit &amp; BASIC_DATA.signature t}.
+  Parameter Included_BASIC_DATA : {_ : unit &amp; BASIC_DATA.signature (t := t)}.
   
   Definition op_eq : t -&gt; t -&gt; bool :=
     (|Included_BASIC_DATA|).(BASIC_DATA.op_eq).
@@ -4227,7 +4227,7 @@ Module Big_map.
 End Big_map.
 
 Module Contract.
-  Parameter Included_BASIC_DATA : {t : Set &amp; BASIC_DATA.signature t}.
+  Parameter Included_BASIC_DATA : {t : Set &amp; BASIC_DATA.signature (t := t)}.
   
   Definition t := (|Included_BASIC_DATA|).(BASIC_DATA.t).
   
@@ -7127,7 +7127,7 @@ Parameter record_ballot :
     <h3>Apply</h3>
     <ul>
       <li>OCaml size: 1487 lines</li>
-      <li>Coq size: 1347 lines (-10% compared to&nbsp;OCaml)</li>
+      <li>Coq size: 1349 lines (-10% compared to&nbsp;OCaml)</li>
     </ul>
   </div>
   <div class="col-md-6">
@@ -8710,6 +8710,7 @@ Local Open Scope string_scope.
 Local Open Scope Z_scope.
 Local Open Scope type_scope.
 Import ListNotations.
+Unset Guard Checking.
 
 Require Import Tezos.Environment.
 Import Environment.Notations.
@@ -9054,7 +9055,7 @@ Definition apply_internal_manager_operations
   let fix apply
     (ctxt : Alpha_context.context)
     (applied : list Apply_results.packed_internal_operation_result)
-    (worklist : list Alpha_context.packed_internal_operation)
+    (worklist : list Alpha_context.packed_internal_operation) {struct ctxt}
     : Lwt.t
       ((* `Success *) Alpha_context.context *
         list Apply_results.packed_internal_operation_result) :=
@@ -9247,7 +9248,7 @@ Definition skipped_operation_result
 Fixpoint mark_skipped
   (baker : (|Signature.Public_key_hash|).(S.SPublic_key_hash.t))
   (level : Alpha_context.Level.t)
-  (function_parameter : Alpha_context.contents_list)
+  (function_parameter : Alpha_context.contents_list) {struct baker}
   : Apply_results.contents_result_list :=
   match function_parameter with
   |
@@ -9303,7 +9304,7 @@ Fixpoint mark_skipped
 Fixpoint precheck_manager_contents_list
   (ctxt : Alpha_context.t) (chain_id : (|Chain_id|).(S.HASH.t))
   (raw_operation : Alpha_context.Operation.t)
-  (contents_list : Alpha_context.contents_list)
+  (contents_list : Alpha_context.contents_list) {struct ctxt}
   : Lwt.t (Error_monad.tzresult Alpha_context.context) :=
   match contents_list with
   | Alpha_context.Single ((Alpha_context.Manager_operation _) as op) =&gt;
@@ -9316,7 +9317,7 @@ Fixpoint precheck_manager_contents_list
 Fixpoint apply_manager_contents_list_rec
   (ctxt : Alpha_context.t) (mode : Script_ir_translator.unparsing_mode)
   (baker : Alpha_context.public_key_hash) (chain_id : (|Chain_id|).(S.HASH.t))
-  (contents_list : Alpha_context.contents_list)
+  (contents_list : Alpha_context.contents_list) {struct ctxt}
   : Lwt.t
     (((* `Failure *) unit + (* `Success *) Alpha_context.context) *
       Apply_results.contents_result_list) :=
@@ -9406,7 +9407,7 @@ Definition mark_backtracked (results : Apply_results.contents_result_list)
   : Apply_results.contents_result_list :=
   let fix mark_contents_list
     (function_parameter : Apply_results.contents_result_list)
-    : Apply_results.contents_result_list :=
+    {struct function_parameter} : Apply_results.contents_result_list :=
     match function_parameter with
     | Apply_results.Single_result (Apply_results.Manager_operation_result op) =&gt;
       Apply_results.Single_result
@@ -9438,6 +9439,7 @@ Definition mark_backtracked (results : Apply_results.contents_result_list)
     end
   with mark_internal_operation_results
     (function_parameter : Apply_results.packed_internal_operation_result)
+    {struct function_parameter}
     : Apply_results.packed_internal_operation_result :=
     let 'Apply_results.Internal_operation_result kind __result_value :=
       function_parameter in
@@ -9445,7 +9447,7 @@ Definition mark_backtracked (results : Apply_results.contents_result_list)
       (mark_manager_operation_result __result_value)
   with mark_manager_operation_result
     (function_parameter : Apply_results.manager_operation_result)
-    : Apply_results.manager_operation_result :=
+    {struct function_parameter} : Apply_results.manager_operation_result :=
     match function_parameter with
     |
       (Apply_results.Failed _ _ | Apply_results.Skipped _ |
@@ -15457,7 +15459,7 @@ Definition activation_code_of_hex (h : string) : MBytes.t :=
   (* ❌ instruction_sequence &quot;;&quot; *)
   MBytes.of_hex (MBytes.Hex h).
 
-Definition Index : {_ : unit &amp; Storage_description.INDEX.signature t} :=
+Definition Index : {_ : unit &amp; Storage_description.INDEX.signature (t := t)} :=
   existT (A := unit) (fun _ =&gt; _) tt
     {|
       Storage_description.INDEX.path_length := (|H|).(S.HASH.path_length);
@@ -15538,7 +15540,7 @@ Require Tezos.Storage_description.
 
 Parameter Included_HASH :
   {'[t, __Set_t, Map_t] : [Set ** Set ** Set -&gt; Set] &amp;
-    S.HASH.signature t __Set_t Map_t}.
+    S.HASH.signature (t := t) (__Set_t := __Set_t) (Map_t := Map_t)}.
 
 Definition t := (|Included_HASH|).(S.HASH.t).
 
@@ -15635,7 +15637,7 @@ Parameter of_ed25519_pkh :
 
 Parameter activation_code_of_hex : string -&gt; activation_code.
 
-Parameter Index : {_ : unit &amp; Storage_description.INDEX.signature t}.
+Parameter Index : {_ : unit &amp; Storage_description.INDEX.signature (t := t)}.
 </pre>
   </div>
 </div>
@@ -18916,7 +18918,7 @@ Definition path_length := (|Blake2BModule|).(S.HASH.path_length).
     <h3>Contract_repr</h3>
     <ul>
       <li>OCaml size: 232 lines</li>
-      <li>Coq size: 281 lines (+21% compared to&nbsp;OCaml)</li>
+      <li>Coq size: 282 lines (+21% compared to&nbsp;OCaml)</li>
     </ul>
   </div>
   <div class="col-md-6">
@@ -19402,7 +19404,8 @@ Definition rpc_arg : RPC_arg.arg t :=
   RPC_arg.make (Some &quot;A contract identifier encoded in b58check.&quot;) &quot;contract_id&quot;
     destruct construct tt.
 
-Definition Index : {_ : unit &amp; Storage_description.INDEX.signature contract} :=
+Definition Index :
+  {_ : unit &amp; Storage_description.INDEX.signature (t := contract)} :=
   let t : Set := contract in
   let path_length := 7 in
   let to_path (c : t) (l : list string) : list string :=
@@ -19575,7 +19578,7 @@ Inductive t : Set :=
 
 Definition contract : Set := t.
 
-Parameter Included_S : {_ : unit &amp; Compare.S.signature contract}.
+Parameter Included_S : {_ : unit &amp; Compare.S.signature (t := contract)}.
 
 Definition op_eq : contract -&gt; contract -&gt; bool :=
   (|Included_S|).(Compare.S.op_eq).
@@ -19643,7 +19646,7 @@ Parameter origination_nonce_encoding : Data_encoding.t origination_nonce.
 
 Parameter rpc_arg : RPC_arg.arg contract.
 
-Parameter Index : {_ : unit &amp; Storage_description.INDEX.signature t}.
+Parameter Index : {_ : unit &amp; Storage_description.INDEX.signature (t := t)}.
 </pre>
   </div>
 </div>
@@ -26128,7 +26131,7 @@ Parameter set_paid_storage_space_and_return_fees_to_pay :
     <h3>Cycle_repr</h3>
     <ul>
       <li>OCaml size: 93 lines</li>
-      <li>Coq size: 126 lines (+35% compared to&nbsp;OCaml)</li>
+      <li>Coq size: 127 lines (+36% compared to&nbsp;OCaml)</li>
     </ul>
   </div>
   <div class="col-md-6">
@@ -26342,7 +26345,8 @@ Definition of_int32_exn (l : (|Compare.Int32|).(Compare.S.t))
   else
     Pervasives.invalid_arg &quot;Level_repr.Cycle.of_int32&quot;.
 
-Definition Index : {_ : unit &amp; Storage_description.INDEX.signature cycle} :=
+Definition Index : {_ : unit &amp; Storage_description.INDEX.signature (t := cycle)}
+  :=
   let t : Set := cycle in
   let path_length := 1 in
   let to_path (c : int32) (l : list string) : list string :=
@@ -26454,7 +26458,7 @@ Parameter t : Set.
 
 Definition cycle : Set := t.
 
-Parameter Included_S : {_ : unit &amp; Compare.S.signature t}.
+Parameter Included_S : {_ : unit &amp; Compare.S.signature (t := t)}.
 
 Definition op_eq : t -&gt; t -&gt; bool := (|Included_S|).(Compare.S.op_eq).
 
@@ -26496,9 +26500,9 @@ Parameter to_int32 : cycle -&gt; int32.
 
 Parameter of_int32_exn : int32 -&gt; cycle.
 
-Parameter Map : {t : Set -&gt; Set &amp; S.MAP.signature cycle t}.
+Parameter Map : {t : Set -&gt; Set &amp; S.MAP.signature (key := cycle) (t := t)}.
 
-Parameter Index : {_ : unit &amp; Storage_description.INDEX.signature cycle}.
+Parameter Index : {_ : unit &amp; Storage_description.INDEX.signature (t := cycle)}.
 </pre>
   </div>
 </div>
@@ -46063,7 +46067,7 @@ Definition t := t.record.
 
 Definition level : Set := t.
 
-Parameter Included_S : {_ : unit &amp; Compare.S.signature level}.
+Parameter Included_S : {_ : unit &amp; Compare.S.signature (t := level)}.
 
 Definition op_eq : level -&gt; level -&gt; bool := (|Included_S|).(Compare.S.op_eq).
 
@@ -47500,7 +47504,7 @@ Definition init (ctxt : Context.t) (block_header : Block_header.shell_header)
     <h3>Main_mli</h3>
     <ul>
       <li>OCaml size: 69 lines</li>
-      <li>Coq size: 244 lines (+253% compared to&nbsp;OCaml)</li>
+      <li>Coq size: 248 lines (+259% compared to&nbsp;OCaml)</li>
     </ul>
   </div>
   <div class="col-md-6">
@@ -47740,9 +47744,13 @@ Definition operation : Set := Alpha_context.packed_operation.
 
 Parameter Included_PROTOCOL :
   {'[block_header, operation] : [Set ** Set] &amp;
-    Updater.PROTOCOL.signature Alpha_context.Block_header.protocol_data
-      block_header Apply_results.block_metadata operation_data
-      Apply_results.packed_operation_metadata operation validation_state}.
+    Updater.PROTOCOL.signature
+      (block_header_data := Alpha_context.Block_header.protocol_data)
+      (block_header := block_header)
+      (block_header_metadata := Apply_results.block_metadata)
+      (operation_data := operation_data)
+      (operation_receipt := Apply_results.packed_operation_metadata)
+      (operation := operation) (validation_state := validation_state)}.
 
 Definition max_block_length : int :=
   (|Included_PROTOCOL|).(Updater.PROTOCOL.max_block_length).
@@ -57350,7 +57358,7 @@ Parameter t : Set.
 
 Definition period : Set := t.
 
-Parameter Included_S : {_ : unit &amp; Compare.S.signature t}.
+Parameter Included_S : {_ : unit &amp; Compare.S.signature (t := t)}.
 
 Definition op_eq : t -&gt; t -&gt; bool := (|Included_S|).(Compare.S.op_eq).
 
@@ -57403,7 +57411,7 @@ Parameter one_hour : period.
     <h3>Qty_repr</h3>
     <ul>
       <li>OCaml size: 337 lines</li>
-      <li>Coq size: 377 lines (+11% compared to&nbsp;OCaml)</li>
+      <li>Coq size: 376 lines (+11% compared to&nbsp;OCaml)</li>
     </ul>
   </div>
   <div class="col-md-6">
@@ -57818,7 +57826,6 @@ Module S.
     of_string : string -&gt; option qty;
     to_string : qty -&gt; string;
   }.
-  Arguments signature : clear implicits.
 End S.
 
 Definition Make :=
@@ -58140,7 +58147,7 @@ Definition Make :=
         S.pp := pp;
         S.of_string := of_string;
         S.to_string := to_string
-      |}) : {qty : Set &amp; S.signature qty}).
+      |}) : {qty : Set &amp; S.signature (qty := qty)}).
 </pre>
   </div>
 </div>
@@ -58151,7 +58158,7 @@ Definition Make :=
     <h3>Raw_context</h3>
     <ul>
       <li>OCaml size: 754 lines</li>
-      <li>Coq size: 947 lines (+25% compared to&nbsp;OCaml)</li>
+      <li>Coq size: 946 lines (+25% compared to&nbsp;OCaml)</li>
     </ul>
   </div>
   <div class="col-md-6">
@@ -59758,7 +59765,6 @@ Module T.
       context -&gt; Gas_limit_repr.cost -&gt; Error_monad.tzresult unit;
     description : Storage_description.t context;
   }.
-  Arguments signature : clear implicits.
 End T.
 
 Definition mem (ctxt : t) (k : Context.key) : Lwt.t bool :=
@@ -59884,7 +59890,7 @@ Definition temporary_big_maps {A : Set}
     <h3>Raw_context_mli</h3>
     <ul>
       <li>OCaml size: 293 lines</li>
-      <li>Coq size: 268 lines (-9% compared to&nbsp;OCaml)</li>
+      <li>Coq size: 267 lines (-9% compared to&nbsp;OCaml)</li>
     </ul>
   </div>
   <div class="col-md-6">
@@ -60359,10 +60365,9 @@ Module T.
       context -&gt; Gas_limit_repr.cost -&gt; Error_monad.tzresult unit;
     description : Storage_description.t context;
   }.
-  Arguments signature : clear implicits.
 End T.
 
-Parameter Included_T : {_ : unit &amp; T.signature t}.
+Parameter Included_T : {_ : unit &amp; T.signature (t := t)}.
 
 Definition mem : context -&gt; key -&gt; Lwt.t bool := (|Included_T|).(T.mem).
 
@@ -60708,7 +60713,7 @@ Definition Index :=
     <h3>Raw_level_repr_mli</h3>
     <ul>
       <li>OCaml size: 55 lines</li>
-      <li>Coq size: 70 lines (+27% compared to&nbsp;OCaml)</li>
+      <li>Coq size: 71 lines (+29% compared to&nbsp;OCaml)</li>
     </ul>
   </div>
   <div class="col-md-6">
@@ -60796,7 +60801,7 @@ Parameter rpc_arg : RPC_arg.arg raw_level.
 
 Parameter pp : Format.formatter -&gt; raw_level -&gt; unit.
 
-Parameter Included_S : {_ : unit &amp; Compare.S.signature raw_level}.
+Parameter Included_S : {_ : unit &amp; Compare.S.signature (t := raw_level)}.
 
 Definition op_eq : raw_level -&gt; raw_level -&gt; bool :=
   (|Included_S|).(Compare.S.op_eq).
@@ -60842,7 +60847,8 @@ Parameter succ : raw_level -&gt; raw_level.
 
 Parameter pred : raw_level -&gt; option raw_level.
 
-Parameter Index : {_ : unit &amp; Storage_description.INDEX.signature raw_level}.
+Parameter Index :
+  {_ : unit &amp; Storage_description.INDEX.signature (t := raw_level)}.
 </pre>
   </div>
 </div>
@@ -61106,7 +61112,7 @@ Parameter to_int32 : roll -&gt; Int32.t.
 
 Parameter op_eq : roll -&gt; roll -&gt; bool.
 
-Parameter Index : {_ : unit &amp; Storage_description.INDEX.signature roll}.
+Parameter Index : {_ : unit &amp; Storage_description.INDEX.signature (t := roll)}.
 </pre>
   </div>
 </div>
@@ -69069,7 +69075,7 @@ Parameter parse_var_type_annot :
     <h3>Script_ir_translator</h3>
     <ul>
       <li>OCaml size: 6115 lines</li>
-      <li>Coq size: 7063 lines (+15% compared to&nbsp;OCaml)</li>
+      <li>Coq size: 7064 lines (+15% compared to&nbsp;OCaml)</li>
     </ul>
   </div>
   <div class="col-md-6">
@@ -82257,8 +82263,9 @@ Fixpoint extract_big_map_updates {a : Set}
         |})
         :
           {OPS_t : Set -&gt; Set &amp;
-            Boxed_map.signature M.(Script_typed_ir.Boxed_map.key)
-              M.(Script_typed_ir.Boxed_map.value) OPS_t}) in
+            Boxed_map.signature (key := M.(Script_typed_ir.Boxed_map.key))
+              (value := M.(Script_typed_ir.Boxed_map.value)) (OPS_t := OPS_t)})
+      in
     (Error_monad.__return
       (a := context * Script_typed_ir.map __8 __9 * big_map_ids * list Contract.big_map_diff))
       (ctxt, (pack (existT (A := Set -&gt; Set) _ _ (|M|))), ids, acc))
@@ -82629,7 +82636,7 @@ Definition list_of_big_map_ids (ids : (|Ids|).(S.SET.t))
     <h3>Script_ir_translator_mli</h3>
     <ul>
       <li>OCaml size: 273 lines</li>
-      <li>Coq size: 308 lines (+12% compared to&nbsp;OCaml)</li>
+      <li>Coq size: 309 lines (+13% compared to&nbsp;OCaml)</li>
     </ul>
   </div>
   <div class="col-md-6">
@@ -83187,7 +83194,8 @@ Parameter find_entrypoint :
   Error_monad.tzresult
     ((Alpha_context.Script.node -&gt; Alpha_context.Script.node) * ex_ty).
 
-Parameter Entrypoints_map : {t : Set -&gt; Set &amp; S.MAP.signature string t}.
+Parameter Entrypoints_map :
+  {t : Set -&gt; Set &amp; S.MAP.signature (key := string) (t := t)}.
 
 Parameter list_entrypoints :
   Script_typed_ir.ty -&gt; Alpha_context.context -&gt; option string -&gt;
@@ -85307,7 +85315,7 @@ Parameter of_zint : Z.t -&gt; t.
     <h3>Script_typed_ir</h3>
     <ul>
       <li>OCaml size: 407 lines</li>
-      <li>Coq size: 377 lines (-8% compared to&nbsp;OCaml)</li>
+      <li>Coq size: 376 lines (-8% compared to&nbsp;OCaml)</li>
     </ul>
   </div>
   <div class="col-md-6">
@@ -85788,29 +85796,28 @@ Module Boxed_set.
   Record signature {elt OPS_t : Set} : Set := {
     elt := elt;
     elt_ty : comparable_ty;
-    OPS : S.SET.signature elt OPS_t;
+    OPS : S.SET.signature (elt := elt) (t := OPS_t);
     boxed : OPS.(S.SET.t);
     size : int;
   }.
-  Arguments signature : clear implicits.
 End Boxed_set.
 
 Definition set (elt : Set) : Set :=
-  {OPS_t : Set @ Boxed_set.signature elt OPS_t}.
+  {OPS_t : Set @ Boxed_set.signature (elt := elt) (OPS_t := OPS_t)}.
 
 Module Boxed_map.
   Record signature {key value : Set} {OPS_t : Set -&gt; Set} : Set := {
     key := key;
     value := value;
     key_ty : comparable_ty;
-    OPS : S.MAP.signature key OPS_t;
+    OPS : S.MAP.signature (key := key) (t := OPS_t);
     boxed : OPS.(S.MAP.t) value * int;
   }.
-  Arguments signature : clear implicits.
 End Boxed_map.
 
 Definition map (key value : Set) : Set :=
-  {OPS_t : Set -&gt; Set @ Boxed_map.signature key value OPS_t}.
+  {OPS_t : Set -&gt; Set @
+    Boxed_map.signature (key := key) (value := value) (OPS_t := OPS_t)}.
 
 Definition operation : Set :=
   Alpha_context.packed_internal_operation *
@@ -87536,7 +87543,7 @@ Definition path_length := (|Blake2BModule|).(S.HASH.path_length).
     <h3>Storage</h3>
     <ul>
       <li>OCaml size: 999 lines</li>
-      <li>Coq size: 2041 lines (+104% compared to&nbsp;OCaml)</li>
+      <li>Coq size: 2048 lines (+105% compared to&nbsp;OCaml)</li>
     </ul>
   </div>
   <div class="col-md-6">
@@ -88648,7 +88655,7 @@ Definition Int_index :=
     |}.
 
 Definition Make_index :=
-  fun (H : {t : Set &amp; Storage_description.INDEX.signature t}) =&gt;
+  fun (H : {t : Set &amp; Storage_description.INDEX.signature (t := t)}) =&gt;
     ((let t := (|H|).(Storage_description.INDEX.t) in
     let path_length := (|H|).(Storage_description.INDEX.path_length) in
     let to_path := (|H|).(Storage_description.INDEX.to_path) in
@@ -88676,8 +88683,9 @@ Definition Make_index :=
       |})
       :
         {_ : unit &amp;
-          INDEX.signature (|H|).(Storage_description.INDEX.t)
-            (fun (a : Set) =&gt; a * (|H|).(Storage_description.INDEX.t))}).
+          INDEX.signature (t := (|H|).(Storage_description.INDEX.t))
+            (ipath :=
+              (fun (a : Set) =&gt; a * (|H|).(Storage_description.INDEX.t)))}).
 
 Definition Block_priority :=
   (((Storage_functors.Make_single_data_storage
@@ -88712,7 +88720,8 @@ Definition Block_priority :=
       |})) (existT (A := Set) _ _ (|Int|)).
 
 Module Contract.
-  Definition Raw_context : {_ : unit &amp; Raw_context.T.signature Raw_context.t} :=
+  Definition Raw_context :
+    {_ : unit &amp; Raw_context.T.signature (t := Raw_context.t)} :=
     ((Storage_functors.Make_subcontext
       (existT (A := unit) (fun _ =&gt; _) tt (|Storage_functors.Registered|)))
       (existT (A := Set) _ _
@@ -88783,8 +88792,8 @@ Module Contract.
   
   Definition Balance :
     {_ : unit &amp;
-      Indexed_data_storage.signature (|Raw_context|).(Raw_context.T.t)
-        Contract_repr.t Tez_repr.t} :=
+      Indexed_data_storage.signature (t := (|Raw_context|).(Raw_context.T.t))
+        (key := Contract_repr.t) (value := Tez_repr.t)} :=
     ((|Indexed_context|).(Storage_sigs.Indexed_raw_context.Make_map)
       (let name := [ &quot;balance&quot; ] in
       existT (A := unit) (fun _ =&gt; _) tt
@@ -88816,8 +88825,8 @@ Module Contract.
   Definition Frozen_deposits :
     {_ : unit &amp;
       Indexed_data_storage.signature
-        ((|Raw_context|).(Raw_context.T.t) * Contract_repr.t) Cycle_repr.t
-        Tez_repr.t} :=
+        (t := ((|Raw_context|).(Raw_context.T.t) * Contract_repr.t))
+        (key := Cycle_repr.t) (value := Tez_repr.t)} :=
     ((|Frozen_balance_index|).(Storage_sigs.Indexed_raw_context.Make_map)
       (let name := [ &quot;deposits&quot; ] in
       existT (A := unit) (fun _ =&gt; _) tt
@@ -88832,8 +88841,8 @@ Module Contract.
   Definition Frozen_fees :
     {_ : unit &amp;
       Indexed_data_storage.signature
-        ((|Raw_context|).(Raw_context.T.t) * Contract_repr.t) Cycle_repr.t
-        Tez_repr.t} :=
+        (t := ((|Raw_context|).(Raw_context.T.t) * Contract_repr.t))
+        (key := Cycle_repr.t) (value := Tez_repr.t)} :=
     ((|Frozen_balance_index|).(Storage_sigs.Indexed_raw_context.Make_map)
       (let name := [ &quot;fees&quot; ] in
       existT (A := unit) (fun _ =&gt; _) tt
@@ -88848,8 +88857,8 @@ Module Contract.
   Definition Frozen_rewards :
     {_ : unit &amp;
       Indexed_data_storage.signature
-        ((|Raw_context|).(Raw_context.T.t) * Contract_repr.t) Cycle_repr.t
-        Tez_repr.t} :=
+        (t := ((|Raw_context|).(Raw_context.T.t) * Contract_repr.t))
+        (key := Cycle_repr.t) (value := Tez_repr.t)} :=
     ((|Frozen_balance_index|).(Storage_sigs.Indexed_raw_context.Make_map)
       (let name := [ &quot;rewards&quot; ] in
       existT (A := unit) (fun _ =&gt; _) tt
@@ -88863,8 +88872,8 @@ Module Contract.
   
   Definition Manager :
     {_ : unit &amp;
-      Indexed_data_storage.signature (|Raw_context|).(Raw_context.T.t)
-        Contract_repr.t Manager_repr.t} :=
+      Indexed_data_storage.signature (t := (|Raw_context|).(Raw_context.T.t))
+        (key := Contract_repr.t) (value := Manager_repr.t)} :=
     ((|Indexed_context|).(Storage_sigs.Indexed_raw_context.Make_map)
       (let name := [ &quot;manager&quot; ] in
       existT (A := unit) (fun _ =&gt; _) tt
@@ -88878,8 +88887,9 @@ Module Contract.
   
   Definition Delegate :
     {_ : unit &amp;
-      Indexed_data_storage.signature (|Raw_context|).(Raw_context.T.t)
-        Contract_repr.t (|Signature.Public_key_hash|).(S.SPublic_key_hash.t)} :=
+      Indexed_data_storage.signature (t := (|Raw_context|).(Raw_context.T.t))
+        (key := Contract_repr.t)
+        (value := (|Signature.Public_key_hash|).(S.SPublic_key_hash.t))} :=
     ((|Indexed_context|).(Storage_sigs.Indexed_raw_context.Make_map)
       (let name := [ &quot;delegate&quot; ] in
       existT (A := unit) (fun _ =&gt; _) tt
@@ -88894,8 +88904,8 @@ Module Contract.
   
   Definition Inactive_delegate :
     {_ : unit &amp;
-      Data_set_storage.signature (|Raw_context|).(Raw_context.T.t)
-        Contract_repr.t} :=
+      Data_set_storage.signature (t := (|Raw_context|).(Raw_context.T.t))
+        (elt := Contract_repr.t)} :=
     ((|Indexed_context|).(Storage_sigs.Indexed_raw_context.Make_set)
       (existT (A := unit) (fun _ =&gt; _) tt (|Storage_functors.Registered|)))
       (let name := [ &quot;inactive_delegate&quot; ] in
@@ -88906,8 +88916,8 @@ Module Contract.
   
   Definition Delegate_desactivation :
     {_ : unit &amp;
-      Indexed_data_storage.signature (|Raw_context|).(Raw_context.T.t)
-        Contract_repr.t Cycle_repr.t} :=
+      Indexed_data_storage.signature (t := (|Raw_context|).(Raw_context.T.t))
+        (key := Contract_repr.t) (value := Cycle_repr.t)} :=
     ((|Indexed_context|).(Storage_sigs.Indexed_raw_context.Make_map)
       (let name := [ &quot;delegate_desactivation&quot; ] in
       existT (A := unit) (fun _ =&gt; _) tt
@@ -88922,8 +88932,8 @@ Module Contract.
   Definition Delegated :
     {_ : unit &amp;
       Data_set_storage.signature
-        ((|Raw_context|).(Raw_context.T.t) * Contract_repr.t) Contract_repr.t}
-    :=
+        (t := ((|Raw_context|).(Raw_context.T.t) * Contract_repr.t))
+        (elt := Contract_repr.t)} :=
     (Storage_functors.Make_data_set_storage
       (let functor_result :=
         ((Storage_functors.Make_subcontext
@@ -88942,8 +88952,8 @@ Module Contract.
   
   Definition Counter :
     {_ : unit &amp;
-      Indexed_data_storage.signature (|Raw_context|).(Raw_context.T.t)
-        Contract_repr.t Z.t} :=
+      Indexed_data_storage.signature (t := (|Raw_context|).(Raw_context.T.t))
+        (key := Contract_repr.t) (value := Z.t)} :=
     ((|Indexed_context|).(Storage_sigs.Indexed_raw_context.Make_map)
       (let name := [ &quot;counter&quot; ] in
       existT (A := unit) (fun _ =&gt; _) tt
@@ -89096,14 +89106,14 @@ Module Contract.
         :
           {_ : unit &amp;
             Storage_sigs.Non_iterable_indexed_carbonated_data_storage.signature
-              (|Raw_context|).(Raw_context.T.t) Contract_repr.t
-              Script_repr.lazy_expr}).
+              (t := (|Raw_context|).(Raw_context.T.t)) (key := Contract_repr.t)
+              (value := Script_repr.lazy_expr)}).
   
   Definition Code :
     {_ : unit &amp;
       Non_iterable_indexed_carbonated_data_storage.signature
-        (|Raw_context|).(Raw_context.T.t) Contract_repr.t Script_repr.lazy_expr}
-    :=
+        (t := (|Raw_context|).(Raw_context.T.t)) (key := Contract_repr.t)
+        (value := Script_repr.lazy_expr)} :=
     Make_carbonated_map_expr
       (let name := [ &quot;code&quot; ] in
       existT (A := unit) (fun _ =&gt; _) tt
@@ -89114,8 +89124,8 @@ Module Contract.
   Definition Storage :
     {_ : unit &amp;
       Non_iterable_indexed_carbonated_data_storage.signature
-        (|Raw_context|).(Raw_context.T.t) Contract_repr.t Script_repr.lazy_expr}
-    :=
+        (t := (|Raw_context|).(Raw_context.T.t)) (key := Contract_repr.t)
+        (value := Script_repr.lazy_expr)} :=
     Make_carbonated_map_expr
       (let name := [ &quot;storage&quot; ] in
       existT (A := unit) (fun _ =&gt; _) tt
@@ -89125,8 +89135,8 @@ Module Contract.
   
   Definition Paid_storage_space :
     {_ : unit &amp;
-      Indexed_data_storage.signature (|Raw_context|).(Raw_context.T.t)
-        Contract_repr.t Z.t} :=
+      Indexed_data_storage.signature (t := (|Raw_context|).(Raw_context.T.t))
+        (key := Contract_repr.t) (value := Z.t)} :=
     ((|Indexed_context|).(Storage_sigs.Indexed_raw_context.Make_map)
       (let name := [ &quot;paid_bytes&quot; ] in
       existT (A := unit) (fun _ =&gt; _) tt
@@ -89136,8 +89146,8 @@ Module Contract.
   
   Definition Used_storage_space :
     {_ : unit &amp;
-      Indexed_data_storage.signature (|Raw_context|).(Raw_context.T.t)
-        Contract_repr.t Z.t} :=
+      Indexed_data_storage.signature (t := (|Raw_context|).(Raw_context.T.t))
+        (key := Contract_repr.t) (value := Z.t)} :=
     ((|Indexed_context|).(Storage_sigs.Indexed_raw_context.Make_map)
       (let name := [ &quot;used_bytes&quot; ] in
       existT (A := unit) (fun _ =&gt; _) tt
@@ -89937,8 +89947,8 @@ Module Roll.
   
   Definition Next :
     {_ : unit &amp;
-      Single_data_storage.signature (|Raw_context|).(Raw_context.T.t)
-        Roll_repr.t} :=
+      Single_data_storage.signature (t := (|Raw_context|).(Raw_context.T.t))
+        (value := Roll_repr.t)} :=
     (((Storage_functors.Make_single_data_storage
       (existT (A := unit) (fun _ =&gt; _) tt (|Storage_functors.Registered|)))
       (existT (A := Set) _ _ (|Raw_context|)))
@@ -89954,8 +89964,8 @@ Module Roll.
   
   Definition Limbo :
     {_ : unit &amp;
-      Single_data_storage.signature (|Raw_context|).(Raw_context.T.t)
-        Roll_repr.t} :=
+      Single_data_storage.signature (t := (|Raw_context|).(Raw_context.T.t))
+        (value := Roll_repr.t)} :=
     (((Storage_functors.Make_single_data_storage
       (existT (A := unit) (fun _ =&gt; _) tt (|Storage_functors.Registered|)))
       (existT (A := Set) _ _ (|Raw_context|)))
@@ -89971,8 +89981,9 @@ Module Roll.
   
   Definition Delegate_roll_list :
     {_ : unit &amp;
-      Indexed_data_storage.signature (|Raw_context|).(Raw_context.T.t)
-        (|Signature.Public_key_hash|).(S.SPublic_key_hash.t) Roll_repr.t} :=
+      Indexed_data_storage.signature (t := (|Raw_context|).(Raw_context.T.t))
+        (key := (|Signature.Public_key_hash|).(S.SPublic_key_hash.t))
+        (value := Roll_repr.t)} :=
     (Storage_functors.Wrap_indexed_data_storage
       (existT (A := [Set ** Set ** Set]) _ [_, _, _] (|Contract.Roll_list|)))
       (let t : Set := (|Signature.Public_key_hash|).(S.SPublic_key_hash.t) in
@@ -89986,8 +89997,8 @@ Module Roll.
   
   Definition Successor :
     {_ : unit &amp;
-      Indexed_data_storage.signature (|Raw_context|).(Raw_context.T.t)
-        Roll_repr.t Roll_repr.t} :=
+      Indexed_data_storage.signature (t := (|Raw_context|).(Raw_context.T.t))
+        (key := Roll_repr.t) (value := Roll_repr.t)} :=
     ((|Indexed_context|).(Storage_sigs.Indexed_raw_context.Make_map)
       (let name := [ &quot;successor&quot; ] in
       existT (A := unit) (fun _ =&gt; _) tt
@@ -90001,8 +90012,9 @@ Module Roll.
   
   Definition Delegate_change :
     {_ : unit &amp;
-      Indexed_data_storage.signature (|Raw_context|).(Raw_context.T.t)
-        (|Signature.Public_key_hash|).(S.SPublic_key_hash.t) Tez_repr.t} :=
+      Indexed_data_storage.signature (t := (|Raw_context|).(Raw_context.T.t))
+        (key := (|Signature.Public_key_hash|).(S.SPublic_key_hash.t))
+        (value := Tez_repr.t)} :=
     (Storage_functors.Wrap_indexed_data_storage
       (existT (A := [Set ** Set ** Set]) _ [_, _, _] (|Contract.Change|)))
       (let t : Set := (|Signature.Public_key_hash|).(S.SPublic_key_hash.t) in
@@ -90071,9 +90083,10 @@ Module Roll.
   
   Definition Owner :
     {_ : unit &amp;
-      Indexed_data_snapshotable_storage.signature (Cycle_repr.t * int)
-        Roll_repr.t (|Raw_context|).(Raw_context.T.t)
-        (|Signature.Public_key|).(S.SPublic_key.t)} :=
+      Indexed_data_snapshotable_storage.signature
+        (snapshot := (Cycle_repr.t * int)) (key := Roll_repr.t)
+        (t := (|Raw_context|).(Raw_context.T.t))
+        (value := (|Signature.Public_key|).(S.SPublic_key.t))} :=
     (((Storage_functors.Make_indexed_data_snapshotable_storage
       (let functor_result :=
         ((Storage_functors.Make_subcontext
@@ -90106,14 +90119,15 @@ Module Roll.
   
   Definition Snapshot_for_cycle :
     {_ : unit &amp;
-      Indexed_data_storage.signature (|Raw_context|).(Raw_context.T.t)
-        Cycle_repr.t int} :=
+      Indexed_data_storage.signature (t := (|Raw_context|).(Raw_context.T.t))
+        (key := Cycle_repr.t) (value := int)} :=
     existT (A := unit) (fun _ =&gt; _) tt (|Cycle.Roll_snapshot|).
   
   Definition Last_for_snapshot :
     {_ : unit &amp;
       Indexed_data_storage.signature
-        ((|Raw_context|).(Raw_context.T.t) * Cycle_repr.t) int Roll_repr.t} :=
+        (t := ((|Raw_context|).(Raw_context.T.t) * Cycle_repr.t)) (key := int)
+        (value := Roll_repr.t)} :=
     existT (A := unit) (fun _ =&gt; _) tt (|Cycle.Last_roll|).
   
   Definition clear
@@ -90376,8 +90390,8 @@ End For_cycle_sig.
 Module Seed.
   Definition Nonce :
     {_ : unit &amp;
-      Storage_sigs.Non_iterable_indexed_data_storage.signature Raw_context.t
-        Level_repr.t nonce_status} :=
+      Storage_sigs.Non_iterable_indexed_data_storage.signature
+        (t := Raw_context.t) (key := Level_repr.t) (value := nonce_status)} :=
     (* ❌ open *)
     let tag_Non_iterable_indexed_data_storage := tt in
     let context : Set := Raw_context.t in
@@ -90608,7 +90622,7 @@ End Ramp_up.
     <h3>Storage_mli</h3>
     <ul>
       <li>OCaml size: 398 lines</li>
-      <li>Coq size: 308 lines (-23% compared to&nbsp;OCaml)</li>
+      <li>Coq size: 338 lines (-16% compared to&nbsp;OCaml)</li>
     </ul>
   </div>
   <div class="col-md-6">
@@ -91058,38 +91072,47 @@ End Block_priority.
 Module Roll.
   Parameter Owner :
     {_ : unit &amp;
-      Indexed_data_snapshotable_storage.signature (Cycle_repr.t * int)
-        Roll_repr.t Raw_context.t (|Signature.Public_key|).(S.SPublic_key.t)}.
+      Indexed_data_snapshotable_storage.signature
+        (snapshot := (Cycle_repr.t * int)) (key := Roll_repr.t)
+        (t := Raw_context.t)
+        (value := (|Signature.Public_key|).(S.SPublic_key.t))}.
   
   Parameter clear : Raw_context.t -&gt; Lwt.t Raw_context.t.
   
   Parameter Next :
-    {_ : unit &amp; Single_data_storage.signature Raw_context.t Roll_repr.t}.
+    {_ : unit &amp;
+      Single_data_storage.signature (t := Raw_context.t) (value := Roll_repr.t)}.
   
   Parameter Limbo :
-    {_ : unit &amp; Single_data_storage.signature Raw_context.t Roll_repr.t}.
+    {_ : unit &amp;
+      Single_data_storage.signature (t := Raw_context.t) (value := Roll_repr.t)}.
   
   Parameter Delegate_roll_list :
     {_ : unit &amp;
-      Indexed_data_storage.signature Raw_context.t
-        (|Signature.Public_key_hash|).(S.SPublic_key_hash.t) Roll_repr.t}.
+      Indexed_data_storage.signature (t := Raw_context.t)
+        (key := (|Signature.Public_key_hash|).(S.SPublic_key_hash.t))
+        (value := Roll_repr.t)}.
   
   Parameter Successor :
     {_ : unit &amp;
-      Indexed_data_storage.signature Raw_context.t Roll_repr.t Roll_repr.t}.
+      Indexed_data_storage.signature (t := Raw_context.t) (key := Roll_repr.t)
+        (value := Roll_repr.t)}.
   
   Parameter Delegate_change :
     {_ : unit &amp;
-      Indexed_data_storage.signature Raw_context.t
-        (|Signature.Public_key_hash|).(S.SPublic_key_hash.t) Tez_repr.t}.
+      Indexed_data_storage.signature (t := Raw_context.t)
+        (key := (|Signature.Public_key_hash|).(S.SPublic_key_hash.t))
+        (value := Tez_repr.t)}.
   
   Parameter Snapshot_for_cycle :
-    {_ : unit &amp; Indexed_data_storage.signature Raw_context.t Cycle_repr.t int}.
+    {_ : unit &amp;
+      Indexed_data_storage.signature (t := Raw_context.t) (key := Cycle_repr.t)
+        (value := int)}.
   
   Parameter Last_for_snapshot :
     {_ : unit &amp;
-      Indexed_data_storage.signature (Raw_context.t * Cycle_repr.t) int
-        Roll_repr.t}.
+      Indexed_data_storage.signature (t := (Raw_context.t * Cycle_repr.t))
+        (key := int) (value := Roll_repr.t)}.
 End Roll.
 
 Module Contract.
@@ -91110,66 +91133,75 @@ Module Contract.
   
   Parameter Balance :
     {_ : unit &amp;
-      Indexed_data_storage.signature Raw_context.t Contract_repr.t Tez_repr.t}.
+      Indexed_data_storage.signature (t := Raw_context.t)
+        (key := Contract_repr.t) (value := Tez_repr.t)}.
   
   Parameter Frozen_deposits :
     {_ : unit &amp;
-      Indexed_data_storage.signature (Raw_context.t * Contract_repr.t)
-        Cycle_repr.t Tez_repr.t}.
+      Indexed_data_storage.signature (t := (Raw_context.t * Contract_repr.t))
+        (key := Cycle_repr.t) (value := Tez_repr.t)}.
   
   Parameter Frozen_fees :
     {_ : unit &amp;
-      Indexed_data_storage.signature (Raw_context.t * Contract_repr.t)
-        Cycle_repr.t Tez_repr.t}.
+      Indexed_data_storage.signature (t := (Raw_context.t * Contract_repr.t))
+        (key := Cycle_repr.t) (value := Tez_repr.t)}.
   
   Parameter Frozen_rewards :
     {_ : unit &amp;
-      Indexed_data_storage.signature (Raw_context.t * Contract_repr.t)
-        Cycle_repr.t Tez_repr.t}.
+      Indexed_data_storage.signature (t := (Raw_context.t * Contract_repr.t))
+        (key := Cycle_repr.t) (value := Tez_repr.t)}.
   
   Parameter Manager :
     {_ : unit &amp;
-      Indexed_data_storage.signature Raw_context.t Contract_repr.t
-        Manager_repr.t}.
+      Indexed_data_storage.signature (t := Raw_context.t)
+        (key := Contract_repr.t) (value := Manager_repr.t)}.
   
   Parameter Delegate :
     {_ : unit &amp;
-      Indexed_data_storage.signature Raw_context.t Contract_repr.t
-        (|Signature.Public_key_hash|).(S.SPublic_key_hash.t)}.
+      Indexed_data_storage.signature (t := Raw_context.t)
+        (key := Contract_repr.t)
+        (value := (|Signature.Public_key_hash|).(S.SPublic_key_hash.t))}.
   
   Parameter Delegated :
     {_ : unit &amp;
-      Data_set_storage.signature (Raw_context.t * Contract_repr.t)
-        Contract_repr.t}.
+      Data_set_storage.signature (t := (Raw_context.t * Contract_repr.t))
+        (elt := Contract_repr.t)}.
   
   Parameter Inactive_delegate :
-    {_ : unit &amp; Data_set_storage.signature Raw_context.t Contract_repr.t}.
+    {_ : unit &amp;
+      Data_set_storage.signature (t := Raw_context.t) (elt := Contract_repr.t)}.
   
   Parameter Delegate_desactivation :
     {_ : unit &amp;
-      Indexed_data_storage.signature Raw_context.t Contract_repr.t Cycle_repr.t}.
+      Indexed_data_storage.signature (t := Raw_context.t)
+        (key := Contract_repr.t) (value := Cycle_repr.t)}.
   
   Parameter Counter :
     {_ : unit &amp;
-      Indexed_data_storage.signature Raw_context.t Contract_repr.t Z.t}.
+      Indexed_data_storage.signature (t := Raw_context.t)
+        (key := Contract_repr.t) (value := Z.t)}.
   
   Parameter Code :
     {_ : unit &amp;
-      Non_iterable_indexed_carbonated_data_storage.signature Raw_context.t
-        Contract_repr.t Script_repr.lazy_expr}.
+      Non_iterable_indexed_carbonated_data_storage.signature
+        (t := Raw_context.t) (key := Contract_repr.t)
+        (value := Script_repr.lazy_expr)}.
   
   Parameter Storage :
     {_ : unit &amp;
-      Non_iterable_indexed_carbonated_data_storage.signature Raw_context.t
-        Contract_repr.t Script_repr.lazy_expr}.
+      Non_iterable_indexed_carbonated_data_storage.signature
+        (t := Raw_context.t) (key := Contract_repr.t)
+        (value := Script_repr.lazy_expr)}.
   
   Parameter Used_storage_space :
     {_ : unit &amp;
-      Indexed_data_storage.signature Raw_context.t Contract_repr.t Z.t}.
+      Indexed_data_storage.signature (t := Raw_context.t)
+        (key := Contract_repr.t) (value := Z.t)}.
   
   Parameter Paid_storage_space :
     {_ : unit &amp;
-      Indexed_data_storage.signature Raw_context.t Contract_repr.t Z.t}.
+      Indexed_data_storage.signature (t := Raw_context.t)
+        (key := Contract_repr.t) (value := Z.t)}.
 End Contract.
 
 Module Big_map.
@@ -91197,71 +91229,83 @@ Module Big_map.
   
   Parameter Contents :
     {_ : unit &amp;
-      Non_iterable_indexed_carbonated_data_storage.signature key
-        Script_expr_hash.t Script_repr.expr}.
+      Non_iterable_indexed_carbonated_data_storage.signature (t := key)
+        (key := Script_expr_hash.t) (value := Script_repr.expr)}.
   
   Parameter Total_bytes :
-    {_ : unit &amp; Indexed_data_storage.signature Raw_context.t Z.t Z.t}.
+    {_ : unit &amp;
+      Indexed_data_storage.signature (t := Raw_context.t) (key := Z.t)
+        (value := Z.t)}.
   
   Parameter Key_type :
     {_ : unit &amp;
-      Indexed_data_storage.signature Raw_context.t Z.t Script_repr.expr}.
+      Indexed_data_storage.signature (t := Raw_context.t) (key := Z.t)
+        (value := Script_repr.expr)}.
   
   Parameter Value_type :
     {_ : unit &amp;
-      Indexed_data_storage.signature Raw_context.t Z.t Script_repr.expr}.
+      Indexed_data_storage.signature (t := Raw_context.t) (key := Z.t)
+        (value := Script_repr.expr)}.
 End Big_map.
 
 Parameter Delegates :
   {_ : unit &amp;
-    Data_set_storage.signature Raw_context.t
-      (|Signature.Public_key_hash|).(S.SPublic_key_hash.t)}.
+    Data_set_storage.signature (t := Raw_context.t)
+      (elt := (|Signature.Public_key_hash|).(S.SPublic_key_hash.t))}.
 
 Parameter Active_delegates_with_rolls :
   {_ : unit &amp;
-    Data_set_storage.signature Raw_context.t
-      (|Signature.Public_key_hash|).(S.SPublic_key_hash.t)}.
+    Data_set_storage.signature (t := Raw_context.t)
+      (elt := (|Signature.Public_key_hash|).(S.SPublic_key_hash.t))}.
 
 Parameter Delegates_with_frozen_balance :
   {_ : unit &amp;
-    Data_set_storage.signature (Raw_context.t * Cycle_repr.t)
-      (|Signature.Public_key_hash|).(S.SPublic_key_hash.t)}.
+    Data_set_storage.signature (t := (Raw_context.t * Cycle_repr.t))
+      (elt := (|Signature.Public_key_hash|).(S.SPublic_key_hash.t))}.
 
 Module Vote.
   Parameter Current_period_kind :
     {_ : unit &amp;
-      Single_data_storage.signature Raw_context.t Voting_period_repr.kind}.
+      Single_data_storage.signature (t := Raw_context.t)
+        (value := Voting_period_repr.kind)}.
   
   Parameter Participation_ema :
-    {_ : unit &amp; Single_data_storage.signature Raw_context.t int32}.
+    {_ : unit &amp;
+      Single_data_storage.signature (t := Raw_context.t) (value := int32)}.
   
   Parameter Current_proposal :
     {_ : unit &amp;
-      Single_data_storage.signature Raw_context.t (|Protocol_hash|).(S.HASH.t)}.
+      Single_data_storage.signature (t := Raw_context.t)
+        (value := (|Protocol_hash|).(S.HASH.t))}.
   
   Parameter Listings_size :
-    {_ : unit &amp; Single_data_storage.signature Raw_context.t int32}.
+    {_ : unit &amp;
+      Single_data_storage.signature (t := Raw_context.t) (value := int32)}.
   
   Parameter Listings :
     {_ : unit &amp;
-      Indexed_data_storage.signature Raw_context.t
-        (|Signature.Public_key_hash|).(S.SPublic_key_hash.t) int32}.
+      Indexed_data_storage.signature (t := Raw_context.t)
+        (key := (|Signature.Public_key_hash|).(S.SPublic_key_hash.t))
+        (value := int32)}.
   
   Parameter Proposals :
     {_ : unit &amp;
-      Data_set_storage.signature Raw_context.t
-        ((|Protocol_hash|).(S.HASH.t) *
-          (|Signature.Public_key_hash|).(S.SPublic_key_hash.t))}.
+      Data_set_storage.signature (t := Raw_context.t)
+        (elt :=
+          ((|Protocol_hash|).(S.HASH.t) *
+            (|Signature.Public_key_hash|).(S.SPublic_key_hash.t)))}.
   
   Parameter Proposals_count :
     {_ : unit &amp;
-      Indexed_data_storage.signature Raw_context.t
-        (|Signature.Public_key_hash|).(S.SPublic_key_hash.t) int}.
+      Indexed_data_storage.signature (t := Raw_context.t)
+        (key := (|Signature.Public_key_hash|).(S.SPublic_key_hash.t))
+        (value := int)}.
   
   Parameter Ballots :
     {_ : unit &amp;
-      Indexed_data_storage.signature Raw_context.t
-        (|Signature.Public_key_hash|).(S.SPublic_key_hash.t) Vote_repr.ballot}.
+      Indexed_data_storage.signature (t := Raw_context.t)
+        (key := (|Signature.Public_key_hash|).(S.SPublic_key_hash.t))
+        (value := Vote_repr.ballot)}.
 End Vote.
 
 Module unrevealed_nonce.
@@ -91302,27 +91346,27 @@ End For_cycle_sig.
 Module Seed.
   Parameter Nonce :
     {_ : unit &amp;
-      Non_iterable_indexed_data_storage.signature Raw_context.t Level_repr.t
-        nonce_status}.
+      Non_iterable_indexed_data_storage.signature (t := Raw_context.t)
+        (key := Level_repr.t) (value := nonce_status)}.
   
   Parameter For_cycle : {_ : unit &amp; For_cycle_sig.signature}.
 End Seed.
 
 Parameter Commitments :
   {_ : unit &amp;
-    Indexed_data_storage.signature Raw_context.t Blinded_public_key_hash.t
-      Tez_repr.t}.
+    Indexed_data_storage.signature (t := Raw_context.t)
+      (key := Blinded_public_key_hash.t) (value := Tez_repr.t)}.
 
 Module Ramp_up.
   Parameter Rewards :
     {_ : unit &amp;
-      Indexed_data_storage.signature Raw_context.t Cycle_repr.t
-        (Tez_repr.t * Tez_repr.t)}.
+      Indexed_data_storage.signature (t := Raw_context.t) (key := Cycle_repr.t)
+        (value := (Tez_repr.t * Tez_repr.t))}.
   
   Parameter Security_deposits :
     {_ : unit &amp;
-      Indexed_data_storage.signature Raw_context.t Cycle_repr.t
-        (Tez_repr.t * Tez_repr.t)}.
+      Indexed_data_storage.signature (t := Raw_context.t) (key := Cycle_repr.t)
+        (value := (Tez_repr.t * Tez_repr.t))}.
 End Ramp_up.
 </pre>
   </div>
@@ -91334,7 +91378,7 @@ End Ramp_up.
     <h3>Storage_description</h3>
     <ul>
       <li>OCaml size: 339 lines</li>
-      <li>Coq size: 679 lines (+100% compared to&nbsp;OCaml)</li>
+      <li>Coq size: 678 lines (+100% compared to&nbsp;OCaml)</li>
     </ul>
   </div>
   <div class="col-md-6">
@@ -92123,7 +92167,6 @@ Module INDEX.
     encoding : Data_encoding.t t;
     compare : t -&gt; t -&gt; int;
   }.
-  Arguments signature : clear implicits.
 End INDEX.
 
 Module ConstructorRecords_handler.
@@ -92440,7 +92483,7 @@ Definition build_directory {key : Set} (dir : t key) : RPC_directory.t key :=
     <h3>Storage_description_mli</h3>
     <ul>
       <li>OCaml size: 95 lines</li>
-      <li>Coq size: 83 lines (-13% compared to&nbsp;OCaml)</li>
+      <li>Coq size: 82 lines (-14% compared to&nbsp;OCaml)</li>
     </ul>
   </div>
   <div class="col-md-6">
@@ -92626,7 +92669,6 @@ Module INDEX.
     encoding : Data_encoding.t t;
     compare : t -&gt; t -&gt; int;
   }.
-  Arguments signature : clear implicits.
 End INDEX.
 </pre>
   </div>
@@ -92638,7 +92680,7 @@ End INDEX.
     <h3>Storage_functors</h3>
     <ul>
       <li>OCaml size: 1213 lines</li>
-      <li>Coq size: 1885 lines (+55% compared to&nbsp;OCaml)</li>
+      <li>Coq size: 1915 lines (+57% compared to&nbsp;OCaml)</li>
     </ul>
   </div>
   <div class="col-md-6">
@@ -93929,11 +93971,10 @@ Module ENCODER.
     of_bytes : list string -&gt; MBytes.t -&gt; Error_monad.tzresult t;
     to_bytes : t -&gt; MBytes.t;
   }.
-  Arguments signature : clear implicits.
 End ENCODER.
 
 Definition Make_encoder :=
-  fun (V : {t : Set &amp; VALUE.signature t}) =&gt;
+  fun (V : {t : Set &amp; VALUE.signature (t := t)}) =&gt;
     ((let of_bytes (__key_value : list string) (__b_value : MBytes.t)
       : Error_monad.tzresult (|V|).(Storage_sigs.VALUE.t) :=
       match
@@ -93952,7 +93993,7 @@ Definition Make_encoder :=
       {|
         ENCODER.of_bytes := of_bytes;
         ENCODER.to_bytes := to_bytes
-      |}) : {_ : unit &amp; ENCODER.signature (|V|).(Storage_sigs.VALUE.t)}).
+      |}) : {_ : unit &amp; ENCODER.signature (t := (|V|).(Storage_sigs.VALUE.t))}).
 
 Definition len_name : string := &quot;len&quot;.
 
@@ -93979,7 +94020,7 @@ Definition map_key
 
 Definition Make_subcontext :=
   fun (R : {_ : unit &amp; REGISTER.signature}) =&gt;
-    fun (C : {t : Set &amp; Raw_context.T.signature t}) =&gt;
+    fun (C : {t : Set &amp; Raw_context.T.signature (t := t)}) =&gt;
       fun (N : {_ : unit &amp; NAME.signature}) =&gt;
         ((let t : Set := (|C|).(Raw_context.T.t) in
         let context : Set := t in
@@ -94087,13 +94128,14 @@ Definition Make_subcontext :=
             Raw_context.T.consume_gas := consume_gas;
             Raw_context.T.check_enough_gas := check_enough_gas;
             Raw_context.T.description := description
-          |}) : {_ : unit &amp; Raw_context.T.signature (|C|).(Raw_context.T.t)}).
+          |})
+          : {_ : unit &amp; Raw_context.T.signature (t := (|C|).(Raw_context.T.t))}).
 
 Definition Make_single_data_storage :=
   fun (R : {_ : unit &amp; REGISTER.signature}) =&gt;
-    fun (C : {t : Set &amp; Raw_context.T.signature t}) =&gt;
+    fun (C : {t : Set &amp; Raw_context.T.signature (t := t)}) =&gt;
       fun (N : {_ : unit &amp; NAME.signature}) =&gt;
-        fun (V : {t : Set &amp; VALUE.signature t}) =&gt;
+        fun (V : {t : Set &amp; VALUE.signature (t := t)}) =&gt;
           ((let tag_Single_data_storage := tt in
           let t : Set := (|C|).(Raw_context.T.t) in
           let context : Set := t in
@@ -94191,8 +94233,8 @@ Definition Make_single_data_storage :=
             |})
             :
               {_ : unit &amp;
-                Single_data_storage.signature (|C|).(Raw_context.T.t)
-                  (|V|).(Storage_sigs.VALUE.t)}).
+                Single_data_storage.signature (t := (|C|).(Raw_context.T.t))
+                  (value := (|V|).(Storage_sigs.VALUE.t))}).
 
 Module INDEX.
   Record signature {t : Set} {ipath : Set -&gt; Set} : Set := {
@@ -94204,12 +94246,17 @@ Module INDEX.
     args : unit -&gt; Storage_description.args;
     infer_ipath : forall {a : Set}, ipath a -&gt; a -&gt; a;
   }.
-  Arguments signature : clear implicits.
 End INDEX.
 
 Definition Pair :=
-  fun (I1 : {'[t, ipath] : [Set ** Set -&gt; Set] &amp; INDEX.signature t ipath}) =&gt;
-    fun (I2 : {'[t, ipath] : [Set ** Set -&gt; Set] &amp; INDEX.signature t ipath}) =&gt;
+  fun
+    (I1 :
+      {'[t, ipath] : [Set ** Set -&gt; Set] &amp;
+        INDEX.signature (t := t) (ipath := ipath)}) =&gt;
+    fun
+      (I2 :
+        {'[t, ipath] : [Set ** Set -&gt; Set] &amp;
+          INDEX.signature (t := t) (ipath := ipath)}) =&gt;
       ((let t : Set := (|I1|).(INDEX.t) * (|I2|).(INDEX.t) in
       let path_length :=
         Pervasives.op_plus (|I1|).(INDEX.path_length) (|I2|).(INDEX.path_length)
@@ -94247,11 +94294,15 @@ Definition Pair :=
         |})
         :
           {ipath : Set -&gt; Set &amp;
-            INDEX.signature ((|I1|).(INDEX.t) * (|I2|).(INDEX.t)) ipath}).
+            INDEX.signature (t := ((|I1|).(INDEX.t) * (|I2|).(INDEX.t)))
+              (ipath := ipath)}).
 
 Definition Make_data_set_storage :=
-  fun (C : {t : Set &amp; Raw_context.T.signature t}) =&gt;
-    fun (I : {'[t, ipath] : [Set ** Set -&gt; Set] &amp; INDEX.signature t ipath}) =&gt;
+  fun (C : {t : Set &amp; Raw_context.T.signature (t := t)}) =&gt;
+    fun
+      (I :
+        {'[t, ipath] : [Set ** Set -&gt; Set] &amp;
+          INDEX.signature (t := t) (ipath := ipath)}) =&gt;
       ((let t : Set := (|C|).(Raw_context.T.t) in
       let context : Set := t in
       let elt : Set := (|I|).(INDEX.t) in
@@ -94327,12 +94378,16 @@ Definition Make_data_set_storage :=
         |})
         :
           {_ : unit &amp;
-            Data_set_storage.signature (|C|).(Raw_context.T.t) (|I|).(INDEX.t)}).
+            Data_set_storage.signature (t := (|C|).(Raw_context.T.t))
+              (elt := (|I|).(INDEX.t))}).
 
 Definition Make_indexed_data_storage :=
-  fun (C : {t : Set &amp; Raw_context.T.signature t}) =&gt;
-    fun (I : {'[t, ipath] : [Set ** Set -&gt; Set] &amp; INDEX.signature t ipath}) =&gt;
-      fun (V : {t : Set &amp; VALUE.signature t}) =&gt;
+  fun (C : {t : Set &amp; Raw_context.T.signature (t := t)}) =&gt;
+    fun
+      (I :
+        {'[t, ipath] : [Set ** Set -&gt; Set] &amp;
+          INDEX.signature (t := t) (ipath := ipath)}) =&gt;
+      fun (V : {t : Set &amp; VALUE.signature (t := t)}) =&gt;
         ((let tag_Non_iterable_indexed_data_storage := tt in
         let t : Set := (|C|).(Raw_context.T.t) in
         let context : Set := t in
@@ -94484,13 +94539,16 @@ Definition Make_indexed_data_storage :=
           |})
           :
             {_ : unit &amp;
-              Indexed_data_storage.signature (|C|).(Raw_context.T.t)
-                (|I|).(INDEX.t) (|V|).(Storage_sigs.VALUE.t)}).
+              Indexed_data_storage.signature (t := (|C|).(Raw_context.T.t))
+                (key := (|I|).(INDEX.t)) (value := (|V|).(Storage_sigs.VALUE.t))}).
 
 Definition Make_indexed_carbonated_data_storage :=
-  fun (C : {t : Set &amp; Raw_context.T.signature t}) =&gt;
-    fun (I : {'[t, ipath] : [Set ** Set -&gt; Set] &amp; INDEX.signature t ipath}) =&gt;
-      fun (V : {t : Set &amp; VALUE.signature t}) =&gt;
+  fun (C : {t : Set &amp; Raw_context.T.signature (t := t)}) =&gt;
+    fun
+      (I :
+        {'[t, ipath] : [Set ** Set -&gt; Set] &amp;
+          INDEX.signature (t := t) (ipath := ipath)}) =&gt;
+      fun (V : {t : Set &amp; VALUE.signature (t := t)}) =&gt;
         ((let tag_Non_iterable_indexed_carbonated_data_storage := tt in
         let t : Set := (|C|).(Raw_context.T.t) in
         let context : Set := t in
@@ -94728,16 +94786,20 @@ Definition Make_indexed_carbonated_data_storage :=
           :
             {_ : unit &amp;
               Non_iterable_indexed_carbonated_data_storage.signature
-                (|C|).(Raw_context.T.t) (|I|).(INDEX.t)
-                (|V|).(Storage_sigs.VALUE.t)}).
+                (t := (|C|).(Raw_context.T.t)) (key := (|I|).(INDEX.t))
+                (value := (|V|).(Storage_sigs.VALUE.t))}).
 
 Definition Make_indexed_data_snapshotable_storage :=
-  fun (C : {t : Set &amp; Raw_context.T.signature t}) =&gt;
+  fun (C : {t : Set &amp; Raw_context.T.signature (t := t)}) =&gt;
     fun
       (Snapshot_index :
-        {'[t, ipath] : [Set ** Set -&gt; Set] &amp; INDEX.signature t ipath}) =&gt;
-      fun (I : {'[t, ipath] : [Set ** Set -&gt; Set] &amp; INDEX.signature t ipath}) =&gt;
-        fun (V : {t : Set &amp; VALUE.signature t}) =&gt;
+        {'[t, ipath] : [Set ** Set -&gt; Set] &amp;
+          INDEX.signature (t := t) (ipath := ipath)}) =&gt;
+      fun
+        (I :
+          {'[t, ipath] : [Set ** Set -&gt; Set] &amp;
+            INDEX.signature (t := t) (ipath := ipath)}) =&gt;
+        fun (V : {t : Set &amp; VALUE.signature (t := t)}) =&gt;
           ((let snapshot : Set := (|Snapshot_index|).(INDEX.t) in
           let data_name := [ &quot;current&quot; ] in
           let snapshot_name := [ &quot;snapshot&quot; ] in
@@ -94861,12 +94923,16 @@ Definition Make_indexed_data_snapshotable_storage :=
             :
               {_ : unit &amp;
                 Indexed_data_snapshotable_storage.signature
-                  (|Snapshot_index|).(INDEX.t) (|I|).(INDEX.t)
-                  (|C|).(Raw_context.T.t) (|V|).(Storage_sigs.VALUE.t)}).
+                  (snapshot := (|Snapshot_index|).(INDEX.t))
+                  (key := (|I|).(INDEX.t)) (t := (|C|).(Raw_context.T.t))
+                  (value := (|V|).(Storage_sigs.VALUE.t))}).
 
 Definition Make_indexed_subcontext :=
-  fun (C : {t : Set &amp; Raw_context.T.signature t}) =&gt;
-    fun (I : {'[t, ipath] : [Set ** Set -&gt; Set] &amp; INDEX.signature t ipath}) =&gt;
+  fun (C : {t : Set &amp; Raw_context.T.signature (t := t)}) =&gt;
+    fun
+      (I :
+        {'[t, ipath] : [Set ** Set -&gt; Set] &amp;
+          INDEX.signature (t := t) (ipath := ipath)}) =&gt;
       ((let t : Set := (|C|).(Raw_context.T.t) in
       let context : Set := t in
       let key : Set := (|I|).(INDEX.t) in
@@ -95089,7 +95155,7 @@ Definition Make_indexed_subcontext :=
             Raw_context.T.consume_gas := consume_gas;
             Raw_context.T.check_enough_gas := check_enough_gas;
             Raw_context.T.description := description
-          |}) : {_ : unit &amp; Raw_context.T.signature (ipath t)}) in
+          |}) : {_ : unit &amp; Raw_context.T.signature (t := (ipath t))}) in
       let resolve
         (__t_value : (|C|).(Raw_context.T.context)) (prefix : list string)
         : Lwt.t (list (|I|).(INDEX.t)) :=
@@ -95232,10 +95298,12 @@ Definition Make_indexed_subcontext :=
                 Storage_sigs.Data_set_storage.elements := elements;
                 Storage_sigs.Data_set_storage.fold {_} := fold;
                 Storage_sigs.Data_set_storage.clear := clear
-              |}) : {_ : unit &amp; Data_set_storage.signature t key}) in
+              |})
+              : {_ : unit &amp; Data_set_storage.signature (t := t) (elt := key)})
+        in
       let Make_map :=
         fun (N : {_ : unit &amp; NAME.signature}) =&gt;
-          fun (V : {t : Set &amp; VALUE.signature t}) =&gt;
+          fun (V : {t : Set &amp; VALUE.signature (t := t)}) =&gt;
             ((let tag_Non_iterable_indexed_data_storage := tt in
             let t : Set := (|C|).(Raw_context.T.t) in
             let context : Set := t in
@@ -95394,11 +95462,11 @@ Definition Make_indexed_subcontext :=
               |})
               :
                 {_ : unit &amp;
-                  Indexed_data_storage.signature t key
-                    (|V|).(Storage_sigs.VALUE.t)}) in
+                  Indexed_data_storage.signature (t := t) (key := key)
+                    (value := (|V|).(Storage_sigs.VALUE.t))}) in
       let Make_carbonated_map :=
         fun (N : {_ : unit &amp; NAME.signature}) =&gt;
-          fun (V : {t : Set &amp; VALUE.signature t}) =&gt;
+          fun (V : {t : Set &amp; VALUE.signature (t := t)}) =&gt;
             ((let tag_Non_iterable_indexed_carbonated_data_storage := tt in
             let t : Set := (|C|).(Raw_context.T.t) in
             let context : Set := t in
@@ -95609,8 +95677,9 @@ Definition Make_indexed_subcontext :=
               |})
               :
                 {_ : unit &amp;
-                  Non_iterable_indexed_carbonated_data_storage.signature t key
-                    (|V|).(Storage_sigs.VALUE.t)}) in
+                  Non_iterable_indexed_carbonated_data_storage.signature
+                    (t := t) (key := key)
+                    (value := (|V|).(Storage_sigs.VALUE.t))}) in
       existT (A := unit) (fun _ =&gt; _) tt
         {|
           Storage_sigs.Indexed_raw_context.clear := clear;
@@ -95627,8 +95696,9 @@ Definition Make_indexed_subcontext :=
         |})
         :
           {_ : unit &amp;
-            Indexed_raw_context.signature (|C|).(Raw_context.T.t)
-              (|I|).(INDEX.t) (fun (a : Set) =&gt; (|I|).(INDEX.ipath) a)}).
+            Indexed_raw_context.signature (t := (|C|).(Raw_context.T.t))
+              (key := (|I|).(INDEX.t))
+              (ipath := (fun (a : Set) =&gt; (|I|).(INDEX.ipath) a))}).
 
 Module WRAPPER.
   Record signature {t key : Set} : Set := {
@@ -95637,18 +95707,19 @@ Module WRAPPER.
     wrap : t -&gt; key;
     unwrap : key -&gt; option t;
   }.
-  Arguments signature : clear implicits.
 End WRAPPER.
 
 Definition Wrap_indexed_data_storage :=
   fun
     (C :
       {'[t, key, value] : [Set ** Set ** Set] &amp;
-        Indexed_data_storage.signature t key value}) =&gt;
+        Indexed_data_storage.signature (t := t) (key := key) (value := value)})
+    =&gt;
     fun
       (K :
         {t : Set &amp;
-          WRAPPER.signature t (|C|).(Storage_sigs.Indexed_data_storage.key)}) =&gt;
+          WRAPPER.signature (t := t)
+            (key := (|C|).(Storage_sigs.Indexed_data_storage.key))}) =&gt;
       ((let tag_Non_iterable_indexed_data_storage := tt in
       let t : Set := (|C|).(Storage_sigs.Indexed_data_storage.t) in
       let context : Set := (|C|).(Storage_sigs.Indexed_data_storage.t) in
@@ -95772,8 +95843,9 @@ Definition Wrap_indexed_data_storage :=
         :
           {_ : unit &amp;
             Indexed_data_storage.signature
-              (|C|).(Storage_sigs.Indexed_data_storage.t) (|K|).(WRAPPER.t)
-              (|C|).(Storage_sigs.Indexed_data_storage.value)}).
+              (t := (|C|).(Storage_sigs.Indexed_data_storage.t))
+              (key := (|K|).(WRAPPER.t))
+              (value := (|C|).(Storage_sigs.Indexed_data_storage.value))}).
 </pre>
   </div>
 </div>
@@ -95784,7 +95856,7 @@ Definition Wrap_indexed_data_storage :=
     <h3>Storage_functors_mli</h3>
     <ul>
       <li>OCaml size: 112 lines</li>
-      <li>Coq size: 118 lines (+5% compared to&nbsp;OCaml)</li>
+      <li>Coq size: 136 lines (+21% compared to&nbsp;OCaml)</li>
     </ul>
   </div>
   <div class="col-md-6">
@@ -95929,18 +96001,18 @@ Parameter Ghost : {_ : unit &amp; REGISTER.signature}.
 
 Parameter Make_subcontext :
   forall (R : {_ : unit &amp; REGISTER.signature}),
-    (forall (C : {t : Set &amp; Raw_context.T.signature t}),
+    (forall (C : {t : Set &amp; Raw_context.T.signature (t := t)}),
       (forall (N : {_ : unit &amp; NAME.signature}),
-        {_ : unit &amp; Raw_context.T.signature (|C|).(Raw_context.T.t)})).
+        {_ : unit &amp; Raw_context.T.signature (t := (|C|).(Raw_context.T.t))})).
 
 Parameter Make_single_data_storage :
   forall (R : {_ : unit &amp; REGISTER.signature}),
-    (forall (C : {t : Set &amp; Raw_context.T.signature t}),
+    (forall (C : {t : Set &amp; Raw_context.T.signature (t := t)}),
       (forall (N : {_ : unit &amp; NAME.signature}),
-        (forall (V : {t : Set &amp; VALUE.signature t}),
+        (forall (V : {t : Set &amp; VALUE.signature (t := t)}),
           {_ : unit &amp;
-            Single_data_storage.signature (|C|).(Raw_context.T.t)
-              (|V|).(Storage_sigs.VALUE.t)}))).
+            Single_data_storage.signature (t := (|C|).(Raw_context.T.t))
+              (value := (|V|).(Storage_sigs.VALUE.t))}))).
 
 Module INDEX.
   Record signature {t : Set} {ipath : Set -&gt; Set} : Set := {
@@ -95952,56 +96024,73 @@ Module INDEX.
     args : unit -&gt; Storage_description.args;
     infer_ipath : forall {a : Set}, ipath a -&gt; a -&gt; a;
   }.
-  Arguments signature : clear implicits.
 End INDEX.
 
 Parameter Pair :
-  forall (I1 : {'[t, ipath] : [Set ** Set -&gt; Set] &amp; INDEX.signature t ipath}),
+  forall (I1 :
+    {'[t, ipath] : [Set ** Set -&gt; Set] &amp;
+      INDEX.signature (t := t) (ipath := ipath)}),
     (forall (I2 :
-      {'[t, ipath] : [Set ** Set -&gt; Set] &amp; INDEX.signature t ipath}),
+      {'[t, ipath] : [Set ** Set -&gt; Set] &amp;
+        INDEX.signature (t := t) (ipath := ipath)}),
       {ipath : Set -&gt; Set &amp;
-        INDEX.signature ((|I1|).(INDEX.t) * (|I2|).(INDEX.t)) ipath}).
+        INDEX.signature (t := ((|I1|).(INDEX.t) * (|I2|).(INDEX.t)))
+          (ipath := ipath)}).
 
 Parameter Make_data_set_storage :
-  forall (C : {t : Set &amp; Raw_context.T.signature t}),
-    (forall (I : {'[t, ipath] : [Set ** Set -&gt; Set] &amp; INDEX.signature t ipath}),
+  forall (C : {t : Set &amp; Raw_context.T.signature (t := t)}),
+    (forall (I :
+      {'[t, ipath] : [Set ** Set -&gt; Set] &amp;
+        INDEX.signature (t := t) (ipath := ipath)}),
       {_ : unit &amp;
-        Data_set_storage.signature (|C|).(Raw_context.T.t) (|I|).(INDEX.t)}).
+        Data_set_storage.signature (t := (|C|).(Raw_context.T.t))
+          (elt := (|I|).(INDEX.t))}).
 
 Parameter Make_indexed_data_storage :
-  forall (C : {t : Set &amp; Raw_context.T.signature t}),
-    (forall (I : {'[t, ipath] : [Set ** Set -&gt; Set] &amp; INDEX.signature t ipath}),
-      (forall (V : {t : Set &amp; VALUE.signature t}),
+  forall (C : {t : Set &amp; Raw_context.T.signature (t := t)}),
+    (forall (I :
+      {'[t, ipath] : [Set ** Set -&gt; Set] &amp;
+        INDEX.signature (t := t) (ipath := ipath)}),
+      (forall (V : {t : Set &amp; VALUE.signature (t := t)}),
         {_ : unit &amp;
-          Indexed_data_storage.signature (|C|).(Raw_context.T.t) (|I|).(INDEX.t)
-            (|V|).(Storage_sigs.VALUE.t)})).
+          Indexed_data_storage.signature (t := (|C|).(Raw_context.T.t))
+            (key := (|I|).(INDEX.t)) (value := (|V|).(Storage_sigs.VALUE.t))})).
 
 Parameter Make_indexed_carbonated_data_storage :
-  forall (C : {t : Set &amp; Raw_context.T.signature t}),
-    (forall (I : {'[t, ipath] : [Set ** Set -&gt; Set] &amp; INDEX.signature t ipath}),
-      (forall (V : {t : Set &amp; VALUE.signature t}),
+  forall (C : {t : Set &amp; Raw_context.T.signature (t := t)}),
+    (forall (I :
+      {'[t, ipath] : [Set ** Set -&gt; Set] &amp;
+        INDEX.signature (t := t) (ipath := ipath)}),
+      (forall (V : {t : Set &amp; VALUE.signature (t := t)}),
         {_ : unit &amp;
           Non_iterable_indexed_carbonated_data_storage.signature
-            (|C|).(Raw_context.T.t) (|I|).(INDEX.t) (|V|).(Storage_sigs.VALUE.t)})).
+            (t := (|C|).(Raw_context.T.t)) (key := (|I|).(INDEX.t))
+            (value := (|V|).(Storage_sigs.VALUE.t))})).
 
 Parameter Make_indexed_data_snapshotable_storage :
-  forall (C : {t : Set &amp; Raw_context.T.signature t}),
+  forall (C : {t : Set &amp; Raw_context.T.signature (t := t)}),
     (forall (Snapshot :
-      {'[t, ipath] : [Set ** Set -&gt; Set] &amp; INDEX.signature t ipath}),
+      {'[t, ipath] : [Set ** Set -&gt; Set] &amp;
+        INDEX.signature (t := t) (ipath := ipath)}),
       (forall (I :
-        {'[t, ipath] : [Set ** Set -&gt; Set] &amp; INDEX.signature t ipath}),
-        (forall (V : {t : Set &amp; VALUE.signature t}),
+        {'[t, ipath] : [Set ** Set -&gt; Set] &amp;
+          INDEX.signature (t := t) (ipath := ipath)}),
+        (forall (V : {t : Set &amp; VALUE.signature (t := t)}),
           {_ : unit &amp;
-            Indexed_data_snapshotable_storage.signature (|Snapshot|).(INDEX.t)
-              (|I|).(INDEX.t) (|C|).(Raw_context.T.t)
-              (|V|).(Storage_sigs.VALUE.t)}))).
+            Indexed_data_snapshotable_storage.signature
+              (snapshot := (|Snapshot|).(INDEX.t)) (key := (|I|).(INDEX.t))
+              (t := (|C|).(Raw_context.T.t))
+              (value := (|V|).(Storage_sigs.VALUE.t))}))).
 
 Parameter Make_indexed_subcontext :
-  forall (C : {t : Set &amp; Raw_context.T.signature t}),
-    (forall (I : {'[t, ipath] : [Set ** Set -&gt; Set] &amp; INDEX.signature t ipath}),
+  forall (C : {t : Set &amp; Raw_context.T.signature (t := t)}),
+    (forall (I :
+      {'[t, ipath] : [Set ** Set -&gt; Set] &amp;
+        INDEX.signature (t := t) (ipath := ipath)}),
       {_ : unit &amp;
-        Indexed_raw_context.signature (|C|).(Raw_context.T.t) (|I|).(INDEX.t)
-          (fun (a : Set) =&gt; (|I|).(INDEX.ipath) a)}).
+        Indexed_raw_context.signature (t := (|C|).(Raw_context.T.t))
+          (key := (|I|).(INDEX.t))
+          (ipath := (fun (a : Set) =&gt; (|I|).(INDEX.ipath) a))}).
 
 Module WRAPPER.
   Record signature {t key : Set} : Set := {
@@ -96010,20 +96099,21 @@ Module WRAPPER.
     wrap : t -&gt; key;
     unwrap : key -&gt; option t;
   }.
-  Arguments signature : clear implicits.
 End WRAPPER.
 
 Parameter Wrap_indexed_data_storage :
   forall (C :
     {'[t, key, value] : [Set ** Set ** Set] &amp;
-      Indexed_data_storage.signature t key value}),
+      Indexed_data_storage.signature (t := t) (key := key) (value := value)}),
     (forall (K :
       {t : Set &amp;
-        WRAPPER.signature t (|C|).(Storage_sigs.Indexed_data_storage.key)}),
+        WRAPPER.signature (t := t)
+          (key := (|C|).(Storage_sigs.Indexed_data_storage.key))}),
       {_ : unit &amp;
         Indexed_data_storage.signature
-          (|C|).(Storage_sigs.Indexed_data_storage.t) (|K|).(WRAPPER.t)
-          (|C|).(Storage_sigs.Indexed_data_storage.value)}).
+          (t := (|C|).(Storage_sigs.Indexed_data_storage.t))
+          (key := (|K|).(WRAPPER.t))
+          (value := (|C|).(Storage_sigs.Indexed_data_storage.value))}).
 </pre>
   </div>
 </div>
@@ -96034,7 +96124,7 @@ Parameter Wrap_indexed_data_storage :
     <h3>Storage_sigs</h3>
     <ul>
       <li>OCaml size: 422 lines</li>
-      <li>Coq size: 247 lines (-42% compared to&nbsp;OCaml)</li>
+      <li>Coq size: 242 lines (-43% compared to&nbsp;OCaml)</li>
     </ul>
   </div>
   <div class="col-md-6">
@@ -96499,7 +96589,6 @@ Module Single_data_storage.
     delete : context -&gt; Lwt.t (Error_monad.tzresult Raw_context.t);
     remove : context -&gt; Lwt.t Raw_context.t;
   }.
-  Arguments signature : clear implicits.
 End Single_data_storage.
 
 Module Single_carbonated_data_storage.
@@ -96526,7 +96615,6 @@ Module Single_carbonated_data_storage.
     remove :
       context -&gt; Lwt.t (Error_monad.tzresult (Raw_context.t * int * bool));
   }.
-  Arguments signature : clear implicits.
 End Single_carbonated_data_storage.
 
 Module Non_iterable_indexed_data_storage.
@@ -96547,7 +96635,6 @@ Module Non_iterable_indexed_data_storage.
     delete : context -&gt; key -&gt; Lwt.t (Error_monad.tzresult Raw_context.t);
     remove : context -&gt; key -&gt; Lwt.t Raw_context.t;
   }.
-  Arguments signature : clear implicits.
 End Non_iterable_indexed_data_storage.
 
 Module Non_iterable_indexed_carbonated_data_storage.
@@ -96581,7 +96668,6 @@ Module Non_iterable_indexed_carbonated_data_storage.
       context -&gt; key -&gt;
       Lwt.t (Error_monad.tzresult (Raw_context.t * int * bool));
   }.
-  Arguments signature : clear implicits.
 End Non_iterable_indexed_carbonated_data_storage.
 
 Module Indexed_data_storage.
@@ -96609,7 +96695,6 @@ Module Indexed_data_storage.
     fold_keys : forall {a : Set},
       context -&gt; a -&gt; (key -&gt; a -&gt; Lwt.t a) -&gt; Lwt.t a;
   }.
-  Arguments signature : clear implicits.
 End Indexed_data_storage.
 
 Module Indexed_data_snapshotable_storage.
@@ -96637,13 +96722,14 @@ Module Indexed_data_snapshotable_storage.
       context -&gt; a -&gt; (key -&gt; value -&gt; a -&gt; Lwt.t a) -&gt; Lwt.t a;
     fold_keys : forall {a : Set},
       context -&gt; a -&gt; (key -&gt; a -&gt; Lwt.t a) -&gt; Lwt.t a;
-    Snapshot : Indexed_data_storage.signature t (snapshot * key) value;
+    Snapshot :
+      Indexed_data_storage.signature (t := t) (key := (snapshot * key))
+        (value := value);
     snapshot_exists : context -&gt; snapshot -&gt; Lwt.t bool;
     __snapshot_value :
       context -&gt; snapshot -&gt; Lwt.t (Error_monad.tzresult Raw_context.t);
     delete_snapshot : context -&gt; snapshot -&gt; Lwt.t Raw_context.t;
   }.
-  Arguments signature : clear implicits.
 End Indexed_data_snapshotable_storage.
 
 Module Data_set_storage.
@@ -96659,7 +96745,6 @@ Module Data_set_storage.
     fold : forall {a : Set}, context -&gt; a -&gt; (elt -&gt; a -&gt; Lwt.t a) -&gt; Lwt.t a;
     clear : context -&gt; Lwt.t Raw_context.t;
   }.
-  Arguments signature : clear implicits.
 End Data_set_storage.
 
 Module NAME.
@@ -96673,7 +96758,6 @@ Module VALUE.
     t := t;
     encoding : Data_encoding.t t;
   }.
-  Arguments signature : clear implicits.
 End VALUE.
 
 Module REGISTER.
@@ -96698,20 +96782,21 @@ Module Indexed_raw_context.
     Make_set :
       forall (R : {_ : unit &amp; REGISTER.signature}),
         (forall (N : {_ : unit &amp; NAME.signature}),
-          {_ : unit &amp; Data_set_storage.signature t key});
+          {_ : unit &amp; Data_set_storage.signature (t := t) (elt := key)});
     Make_map :
       forall (N : {_ : unit &amp; NAME.signature}),
-        (forall (V : {t : Set &amp; VALUE.signature t}),
-          {_ : unit &amp; Indexed_data_storage.signature t key (|V|).(VALUE.t)});
+        (forall (V : {t : Set &amp; VALUE.signature (t := t)}),
+          {_ : unit &amp;
+            Indexed_data_storage.signature (t := t) (key := key)
+              (value := (|V|).(VALUE.t))});
     Make_carbonated_map :
       forall (N : {_ : unit &amp; NAME.signature}),
-        (forall (V : {t : Set &amp; VALUE.signature t}),
+        (forall (V : {t : Set &amp; VALUE.signature (t := t)}),
           {_ : unit &amp;
-            Non_iterable_indexed_carbonated_data_storage.signature t key
-              (|V|).(VALUE.t)});
-    Raw_context : Raw_context.T.signature (ipath t);
+            Non_iterable_indexed_carbonated_data_storage.signature (t := t)
+              (key := key) (value := (|V|).(VALUE.t))});
+    Raw_context : Raw_context.T.signature (t := (ipath t));
   }.
-  Arguments signature : clear implicits.
 End Indexed_raw_context.
 </pre>
   </div>
@@ -96944,7 +97029,7 @@ Parameter t : Set.
 
 Definition tez : Set := t.
 
-Parameter Included_S : {_ : unit &amp; Qty_repr.S.signature t}.
+Parameter Included_S : {_ : unit &amp; Qty_repr.S.signature (qty := t)}.
 
 Definition id : string := (|Included_S|).(Qty_repr.S.id).
 
@@ -98524,7 +98609,7 @@ Parameter rpc_arg : RPC_arg.arg voting_period.
 
 Parameter pp : Format.formatter -&gt; voting_period -&gt; unit.
 
-Parameter Included_S : {_ : unit &amp; Compare.S.signature voting_period}.
+Parameter Included_S : {_ : unit &amp; Compare.S.signature (t := voting_period)}.
 
 Definition op_eq : voting_period -&gt; voting_period -&gt; bool :=
   (|Included_S|).(Compare.S.op_eq).

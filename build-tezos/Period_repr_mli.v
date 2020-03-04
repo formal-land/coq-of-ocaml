@@ -14,7 +14,7 @@ Parameter t : Set.
 
 Definition period : Set := t.
 
-Parameter Included_S : {_ : unit & Compare.S.signature t}.
+Parameter Included_S : {_ : unit & Compare.S.signature (t := t)}.
 
 Definition op_eq : t -> t -> bool := (|Included_S|).(Compare.S.op_eq).
 

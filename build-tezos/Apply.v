@@ -6,6 +6,7 @@ Local Open Scope string_scope.
 Local Open Scope Z_scope.
 Local Open Scope type_scope.
 Import ListNotations.
+Unset Guard Checking.
 
 Require Import Tezos.Environment.
 Import Environment.Notations.
@@ -350,7 +351,7 @@ Definition apply_internal_manager_operations
   let fix apply
     (ctxt : Alpha_context.context)
     (applied : list Apply_results.packed_internal_operation_result)
-    (worklist : list Alpha_context.packed_internal_operation)
+    (worklist : list Alpha_context.packed_internal_operation) {struct ctxt}
     : Lwt.t
       ((* `Success *) Alpha_context.context *
         list Apply_results.packed_internal_operation_result) :=
@@ -543,7 +544,7 @@ Definition skipped_operation_result
 Fixpoint mark_skipped
   (baker : (|Signature.Public_key_hash|).(S.SPublic_key_hash.t))
   (level : Alpha_context.Level.t)
-  (function_parameter : Alpha_context.contents_list)
+  (function_parameter : Alpha_context.contents_list) {struct baker}
   : Apply_results.contents_result_list :=
   match function_parameter with
   |
@@ -599,7 +600,7 @@ Fixpoint mark_skipped
 Fixpoint precheck_manager_contents_list
   (ctxt : Alpha_context.t) (chain_id : (|Chain_id|).(S.HASH.t))
   (raw_operation : Alpha_context.Operation.t)
-  (contents_list : Alpha_context.contents_list)
+  (contents_list : Alpha_context.contents_list) {struct ctxt}
   : Lwt.t (Error_monad.tzresult Alpha_context.context) :=
   match contents_list with
   | Alpha_context.Single ((Alpha_context.Manager_operation _) as op) =>
@@ -612,7 +613,7 @@ Fixpoint precheck_manager_contents_list
 Fixpoint apply_manager_contents_list_rec
   (ctxt : Alpha_context.t) (mode : Script_ir_translator.unparsing_mode)
   (baker : Alpha_context.public_key_hash) (chain_id : (|Chain_id|).(S.HASH.t))
-  (contents_list : Alpha_context.contents_list)
+  (contents_list : Alpha_context.contents_list) {struct ctxt}
   : Lwt.t
     (((* `Failure *) unit + (* `Success *) Alpha_context.context) *
       Apply_results.contents_result_list) :=
@@ -702,7 +703,7 @@ Definition mark_backtracked (results : Apply_results.contents_result_list)
   : Apply_results.contents_result_list :=
   let fix mark_contents_list
     (function_parameter : Apply_results.contents_result_list)
-    : Apply_results.contents_result_list :=
+    {struct function_parameter} : Apply_results.contents_result_list :=
     match function_parameter with
     | Apply_results.Single_result (Apply_results.Manager_operation_result op) =>
       Apply_results.Single_result
@@ -734,6 +735,7 @@ Definition mark_backtracked (results : Apply_results.contents_result_list)
     end
   with mark_internal_operation_results
     (function_parameter : Apply_results.packed_internal_operation_result)
+    {struct function_parameter}
     : Apply_results.packed_internal_operation_result :=
     let 'Apply_results.Internal_operation_result kind __result_value :=
       function_parameter in
@@ -741,7 +743,7 @@ Definition mark_backtracked (results : Apply_results.contents_result_list)
       (mark_manager_operation_result __result_value)
   with mark_manager_operation_result
     (function_parameter : Apply_results.manager_operation_result)
-    : Apply_results.manager_operation_result :=
+    {struct function_parameter} : Apply_results.manager_operation_result :=
     match function_parameter with
     |
       (Apply_results.Failed _ _ | Apply_results.Skipped _ |

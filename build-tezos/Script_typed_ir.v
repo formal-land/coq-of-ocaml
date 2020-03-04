@@ -62,29 +62,28 @@ Module Boxed_set.
   Record signature {elt OPS_t : Set} : Set := {
     elt := elt;
     elt_ty : comparable_ty;
-    OPS : S.SET.signature elt OPS_t;
+    OPS : S.SET.signature (elt := elt) (t := OPS_t);
     boxed : OPS.(S.SET.t);
     size : int;
   }.
-  Arguments signature : clear implicits.
 End Boxed_set.
 
 Definition set (elt : Set) : Set :=
-  {OPS_t : Set @ Boxed_set.signature elt OPS_t}.
+  {OPS_t : Set @ Boxed_set.signature (elt := elt) (OPS_t := OPS_t)}.
 
 Module Boxed_map.
   Record signature {key value : Set} {OPS_t : Set -> Set} : Set := {
     key := key;
     value := value;
     key_ty : comparable_ty;
-    OPS : S.MAP.signature key OPS_t;
+    OPS : S.MAP.signature (key := key) (t := OPS_t);
     boxed : OPS.(S.MAP.t) value * int;
   }.
-  Arguments signature : clear implicits.
 End Boxed_map.
 
 Definition map (key value : Set) : Set :=
-  {OPS_t : Set -> Set @ Boxed_map.signature key value OPS_t}.
+  {OPS_t : Set -> Set @
+    Boxed_map.signature (key := key) (value := value) (OPS_t := OPS_t)}.
 
 Definition operation : Set :=
   Alpha_context.packed_internal_operation *

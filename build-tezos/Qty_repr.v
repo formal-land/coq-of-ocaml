@@ -52,7 +52,6 @@ Module S.
     of_string : string -> option qty;
     to_string : qty -> string;
   }.
-  Arguments signature : clear implicits.
 End S.
 
 Definition Make :=
@@ -374,4 +373,4 @@ Definition Make :=
         S.pp := pp;
         S.of_string := of_string;
         S.to_string := to_string
-      |}) : {qty : Set & S.signature qty}).
+      |}) : {qty : Set & S.signature (qty := qty)}).

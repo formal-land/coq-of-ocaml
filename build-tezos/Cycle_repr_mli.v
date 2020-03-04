@@ -15,7 +15,7 @@ Parameter t : Set.
 
 Definition cycle : Set := t.
 
-Parameter Included_S : {_ : unit & Compare.S.signature t}.
+Parameter Included_S : {_ : unit & Compare.S.signature (t := t)}.
 
 Definition op_eq : t -> t -> bool := (|Included_S|).(Compare.S.op_eq).
 
@@ -57,6 +57,6 @@ Parameter to_int32 : cycle -> int32.
 
 Parameter of_int32_exn : int32 -> cycle.
 
-Parameter Map : {t : Set -> Set & S.MAP.signature cycle t}.
+Parameter Map : {t : Set -> Set & S.MAP.signature (key := cycle) (t := t)}.
 
-Parameter Index : {_ : unit & Storage_description.INDEX.signature cycle}.
+Parameter Index : {_ : unit & Storage_description.INDEX.signature (t := cycle)}.

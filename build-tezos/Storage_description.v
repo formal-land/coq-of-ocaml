@@ -370,7 +370,6 @@ Module INDEX.
     encoding : Data_encoding.t t;
     compare : t -> t -> int;
   }.
-  Arguments signature : clear implicits.
 End INDEX.
 
 Module ConstructorRecords_handler.

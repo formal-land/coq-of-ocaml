@@ -31,7 +31,6 @@ Module Single_data_storage.
     delete : context -> Lwt.t (Error_monad.tzresult Raw_context.t);
     remove : context -> Lwt.t Raw_context.t;
   }.
-  Arguments signature : clear implicits.
 End Single_data_storage.
 
 Module Single_carbonated_data_storage.
@@ -58,7 +57,6 @@ Module Single_carbonated_data_storage.
     remove :
       context -> Lwt.t (Error_monad.tzresult (Raw_context.t * int * bool));
   }.
-  Arguments signature : clear implicits.
 End Single_carbonated_data_storage.
 
 Module Non_iterable_indexed_data_storage.
@@ -79,7 +77,6 @@ Module Non_iterable_indexed_data_storage.
     delete : context -> key -> Lwt.t (Error_monad.tzresult Raw_context.t);
     remove : context -> key -> Lwt.t Raw_context.t;
   }.
-  Arguments signature : clear implicits.
 End Non_iterable_indexed_data_storage.
 
 Module Non_iterable_indexed_carbonated_data_storage.
@@ -113,7 +110,6 @@ Module Non_iterable_indexed_carbonated_data_storage.
       context -> key ->
       Lwt.t (Error_monad.tzresult (Raw_context.t * int * bool));
   }.
-  Arguments signature : clear implicits.
 End Non_iterable_indexed_carbonated_data_storage.
 
 Module Indexed_data_storage.
@@ -141,7 +137,6 @@ Module Indexed_data_storage.
     fold_keys : forall {a : Set},
       context -> a -> (key -> a -> Lwt.t a) -> Lwt.t a;
   }.
-  Arguments signature : clear implicits.
 End Indexed_data_storage.
 
 Module Indexed_data_snapshotable_storage.
@@ -169,13 +164,14 @@ Module Indexed_data_snapshotable_storage.
       context -> a -> (key -> value -> a -> Lwt.t a) -> Lwt.t a;
     fold_keys : forall {a : Set},
       context -> a -> (key -> a -> Lwt.t a) -> Lwt.t a;
-    Snapshot : Indexed_data_storage.signature t (snapshot * key) value;
+    Snapshot :
+      Indexed_data_storage.signature (t := t) (key := (snapshot * key))
+        (value := value);
     snapshot_exists : context -> snapshot -> Lwt.t bool;
     __snapshot_value :
       context -> snapshot -> Lwt.t (Error_monad.tzresult Raw_context.t);
     delete_snapshot : context -> snapshot -> Lwt.t Raw_context.t;
   }.
-  Arguments signature : clear implicits.
 End Indexed_data_snapshotable_storage.
 
 Module Data_set_storage.
@@ -191,7 +187,6 @@ Module Data_set_storage.
     fold : forall {a : Set}, context -> a -> (elt -> a -> Lwt.t a) -> Lwt.t a;
     clear : context -> Lwt.t Raw_context.t;
   }.
-  Arguments signature : clear implicits.
 End Data_set_storage.
 
 Module NAME.
@@ -205,7 +200,6 @@ Module VALUE.
     t := t;
     encoding : Data_encoding.t t;
   }.
-  Arguments signature : clear implicits.
 End VALUE.
 
 Module REGISTER.
@@ -230,18 +224,19 @@ Module Indexed_raw_context.
     Make_set :
       forall (R : {_ : unit & REGISTER.signature}),
         (forall (N : {_ : unit & NAME.signature}),
-          {_ : unit & Data_set_storage.signature t key});
+          {_ : unit & Data_set_storage.signature (t := t) (elt := key)});
     Make_map :
       forall (N : {_ : unit & NAME.signature}),
-        (forall (V : {t : Set & VALUE.signature t}),
-          {_ : unit & Indexed_data_storage.signature t key (|V|).(VALUE.t)});
+        (forall (V : {t : Set & VALUE.signature (t := t)}),
+          {_ : unit &
+            Indexed_data_storage.signature (t := t) (key := key)
+              (value := (|V|).(VALUE.t))});
     Make_carbonated_map :
       forall (N : {_ : unit & NAME.signature}),
-        (forall (V : {t : Set & VALUE.signature t}),
+        (forall (V : {t : Set & VALUE.signature (t := t)}),
           {_ : unit &
-            Non_iterable_indexed_carbonated_data_storage.signature t key
-              (|V|).(VALUE.t)});
-    Raw_context : Raw_context.T.signature (ipath t);
+            Non_iterable_indexed_carbonated_data_storage.signature (t := t)
+              (key := key) (value := (|V|).(VALUE.t))});
+    Raw_context : Raw_context.T.signature (t := (ipath t));
   }.
-  Arguments signature : clear implicits.
 End Indexed_raw_context.

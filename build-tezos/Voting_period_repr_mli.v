@@ -20,7 +20,7 @@ Parameter rpc_arg : RPC_arg.arg voting_period.
 
 Parameter pp : Format.formatter -> voting_period -> unit.
 
-Parameter Included_S : {_ : unit & Compare.S.signature voting_period}.
+Parameter Included_S : {_ : unit & Compare.S.signature (t := voting_period)}.
 
 Definition op_eq : voting_period -> voting_period -> bool :=
   (|Included_S|).(Compare.S.op_eq).

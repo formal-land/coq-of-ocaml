@@ -48,7 +48,7 @@ Definition t := t.record.
 
 Definition level : Set := t.
 
-Parameter Included_S : {_ : unit & Compare.S.signature level}.
+Parameter Included_S : {_ : unit & Compare.S.signature (t := level)}.
 
 Definition op_eq : level -> level -> bool := (|Included_S|).(Compare.S.op_eq).
 

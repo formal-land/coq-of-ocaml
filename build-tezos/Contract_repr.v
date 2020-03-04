@@ -226,7 +226,8 @@ Definition rpc_arg : RPC_arg.arg t :=
   RPC_arg.make (Some "A contract identifier encoded in b58check.") "contract_id"
     destruct construct tt.
 
-Definition Index : {_ : unit & Storage_description.INDEX.signature contract} :=
+Definition Index :
+  {_ : unit & Storage_description.INDEX.signature (t := contract)} :=
   let t : Set := contract in
   let path_length := 7 in
   let to_path (c : t) (l : list string) : list string :=

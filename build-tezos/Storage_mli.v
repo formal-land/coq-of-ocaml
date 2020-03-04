@@ -40,38 +40,47 @@ End Block_priority.
 Module Roll.
   Parameter Owner :
     {_ : unit &
-      Indexed_data_snapshotable_storage.signature (Cycle_repr.t * int)
-        Roll_repr.t Raw_context.t (|Signature.Public_key|).(S.SPublic_key.t)}.
+      Indexed_data_snapshotable_storage.signature
+        (snapshot := (Cycle_repr.t * int)) (key := Roll_repr.t)
+        (t := Raw_context.t)
+        (value := (|Signature.Public_key|).(S.SPublic_key.t))}.
   
   Parameter clear : Raw_context.t -> Lwt.t Raw_context.t.
   
   Parameter Next :
-    {_ : unit & Single_data_storage.signature Raw_context.t Roll_repr.t}.
+    {_ : unit &
+      Single_data_storage.signature (t := Raw_context.t) (value := Roll_repr.t)}.
   
   Parameter Limbo :
-    {_ : unit & Single_data_storage.signature Raw_context.t Roll_repr.t}.
+    {_ : unit &
+      Single_data_storage.signature (t := Raw_context.t) (value := Roll_repr.t)}.
   
   Parameter Delegate_roll_list :
     {_ : unit &
-      Indexed_data_storage.signature Raw_context.t
-        (|Signature.Public_key_hash|).(S.SPublic_key_hash.t) Roll_repr.t}.
+      Indexed_data_storage.signature (t := Raw_context.t)
+        (key := (|Signature.Public_key_hash|).(S.SPublic_key_hash.t))
+        (value := Roll_repr.t)}.
   
   Parameter Successor :
     {_ : unit &
-      Indexed_data_storage.signature Raw_context.t Roll_repr.t Roll_repr.t}.
+      Indexed_data_storage.signature (t := Raw_context.t) (key := Roll_repr.t)
+        (value := Roll_repr.t)}.
   
   Parameter Delegate_change :
     {_ : unit &
-      Indexed_data_storage.signature Raw_context.t
-        (|Signature.Public_key_hash|).(S.SPublic_key_hash.t) Tez_repr.t}.
+      Indexed_data_storage.signature (t := Raw_context.t)
+        (key := (|Signature.Public_key_hash|).(S.SPublic_key_hash.t))
+        (value := Tez_repr.t)}.
   
   Parameter Snapshot_for_cycle :
-    {_ : unit & Indexed_data_storage.signature Raw_context.t Cycle_repr.t int}.
+    {_ : unit &
+      Indexed_data_storage.signature (t := Raw_context.t) (key := Cycle_repr.t)
+        (value := int)}.
   
   Parameter Last_for_snapshot :
     {_ : unit &
-      Indexed_data_storage.signature (Raw_context.t * Cycle_repr.t) int
-        Roll_repr.t}.
+      Indexed_data_storage.signature (t := (Raw_context.t * Cycle_repr.t))
+        (key := int) (value := Roll_repr.t)}.
 End Roll.
 
 Module Contract.
@@ -92,66 +101,75 @@ Module Contract.
   
   Parameter Balance :
     {_ : unit &
-      Indexed_data_storage.signature Raw_context.t Contract_repr.t Tez_repr.t}.
+      Indexed_data_storage.signature (t := Raw_context.t)
+        (key := Contract_repr.t) (value := Tez_repr.t)}.
   
   Parameter Frozen_deposits :
     {_ : unit &
-      Indexed_data_storage.signature (Raw_context.t * Contract_repr.t)
-        Cycle_repr.t Tez_repr.t}.
+      Indexed_data_storage.signature (t := (Raw_context.t * Contract_repr.t))
+        (key := Cycle_repr.t) (value := Tez_repr.t)}.
   
   Parameter Frozen_fees :
     {_ : unit &
-      Indexed_data_storage.signature (Raw_context.t * Contract_repr.t)
-        Cycle_repr.t Tez_repr.t}.
+      Indexed_data_storage.signature (t := (Raw_context.t * Contract_repr.t))
+        (key := Cycle_repr.t) (value := Tez_repr.t)}.
   
   Parameter Frozen_rewards :
     {_ : unit &
-      Indexed_data_storage.signature (Raw_context.t * Contract_repr.t)
-        Cycle_repr.t Tez_repr.t}.
+      Indexed_data_storage.signature (t := (Raw_context.t * Contract_repr.t))
+        (key := Cycle_repr.t) (value := Tez_repr.t)}.
   
   Parameter Manager :
     {_ : unit &
-      Indexed_data_storage.signature Raw_context.t Contract_repr.t
-        Manager_repr.t}.
+      Indexed_data_storage.signature (t := Raw_context.t)
+        (key := Contract_repr.t) (value := Manager_repr.t)}.
   
   Parameter Delegate :
     {_ : unit &
-      Indexed_data_storage.signature Raw_context.t Contract_repr.t
-        (|Signature.Public_key_hash|).(S.SPublic_key_hash.t)}.
+      Indexed_data_storage.signature (t := Raw_context.t)
+        (key := Contract_repr.t)
+        (value := (|Signature.Public_key_hash|).(S.SPublic_key_hash.t))}.
   
   Parameter Delegated :
     {_ : unit &
-      Data_set_storage.signature (Raw_context.t * Contract_repr.t)
-        Contract_repr.t}.
+      Data_set_storage.signature (t := (Raw_context.t * Contract_repr.t))
+        (elt := Contract_repr.t)}.
   
   Parameter Inactive_delegate :
-    {_ : unit & Data_set_storage.signature Raw_context.t Contract_repr.t}.
+    {_ : unit &
+      Data_set_storage.signature (t := Raw_context.t) (elt := Contract_repr.t)}.
   
   Parameter Delegate_desactivation :
     {_ : unit &
-      Indexed_data_storage.signature Raw_context.t Contract_repr.t Cycle_repr.t}.
+      Indexed_data_storage.signature (t := Raw_context.t)
+        (key := Contract_repr.t) (value := Cycle_repr.t)}.
   
   Parameter Counter :
     {_ : unit &
-      Indexed_data_storage.signature Raw_context.t Contract_repr.t Z.t}.
+      Indexed_data_storage.signature (t := Raw_context.t)
+        (key := Contract_repr.t) (value := Z.t)}.
   
   Parameter Code :
     {_ : unit &
-      Non_iterable_indexed_carbonated_data_storage.signature Raw_context.t
-        Contract_repr.t Script_repr.lazy_expr}.
+      Non_iterable_indexed_carbonated_data_storage.signature
+        (t := Raw_context.t) (key := Contract_repr.t)
+        (value := Script_repr.lazy_expr)}.
   
   Parameter Storage :
     {_ : unit &
-      Non_iterable_indexed_carbonated_data_storage.signature Raw_context.t
-        Contract_repr.t Script_repr.lazy_expr}.
+      Non_iterable_indexed_carbonated_data_storage.signature
+        (t := Raw_context.t) (key := Contract_repr.t)
+        (value := Script_repr.lazy_expr)}.
   
   Parameter Used_storage_space :
     {_ : unit &
-      Indexed_data_storage.signature Raw_context.t Contract_repr.t Z.t}.
+      Indexed_data_storage.signature (t := Raw_context.t)
+        (key := Contract_repr.t) (value := Z.t)}.
   
   Parameter Paid_storage_space :
     {_ : unit &
-      Indexed_data_storage.signature Raw_context.t Contract_repr.t Z.t}.
+      Indexed_data_storage.signature (t := Raw_context.t)
+        (key := Contract_repr.t) (value := Z.t)}.
 End Contract.
 
 Module Big_map.
@@ -179,71 +197,83 @@ Module Big_map.
   
   Parameter Contents :
     {_ : unit &
-      Non_iterable_indexed_carbonated_data_storage.signature key
-        Script_expr_hash.t Script_repr.expr}.
+      Non_iterable_indexed_carbonated_data_storage.signature (t := key)
+        (key := Script_expr_hash.t) (value := Script_repr.expr)}.
   
   Parameter Total_bytes :
-    {_ : unit & Indexed_data_storage.signature Raw_context.t Z.t Z.t}.
+    {_ : unit &
+      Indexed_data_storage.signature (t := Raw_context.t) (key := Z.t)
+        (value := Z.t)}.
   
   Parameter Key_type :
     {_ : unit &
-      Indexed_data_storage.signature Raw_context.t Z.t Script_repr.expr}.
+      Indexed_data_storage.signature (t := Raw_context.t) (key := Z.t)
+        (value := Script_repr.expr)}.
   
   Parameter Value_type :
     {_ : unit &
-      Indexed_data_storage.signature Raw_context.t Z.t Script_repr.expr}.
+      Indexed_data_storage.signature (t := Raw_context.t) (key := Z.t)
+        (value := Script_repr.expr)}.
 End Big_map.
 
 Parameter Delegates :
   {_ : unit &
-    Data_set_storage.signature Raw_context.t
-      (|Signature.Public_key_hash|).(S.SPublic_key_hash.t)}.
+    Data_set_storage.signature (t := Raw_context.t)
+      (elt := (|Signature.Public_key_hash|).(S.SPublic_key_hash.t))}.
 
 Parameter Active_delegates_with_rolls :
   {_ : unit &
-    Data_set_storage.signature Raw_context.t
-      (|Signature.Public_key_hash|).(S.SPublic_key_hash.t)}.
+    Data_set_storage.signature (t := Raw_context.t)
+      (elt := (|Signature.Public_key_hash|).(S.SPublic_key_hash.t))}.
 
 Parameter Delegates_with_frozen_balance :
   {_ : unit &
-    Data_set_storage.signature (Raw_context.t * Cycle_repr.t)
-      (|Signature.Public_key_hash|).(S.SPublic_key_hash.t)}.
+    Data_set_storage.signature (t := (Raw_context.t * Cycle_repr.t))
+      (elt := (|Signature.Public_key_hash|).(S.SPublic_key_hash.t))}.
 
 Module Vote.
   Parameter Current_period_kind :
     {_ : unit &
-      Single_data_storage.signature Raw_context.t Voting_period_repr.kind}.
+      Single_data_storage.signature (t := Raw_context.t)
+        (value := Voting_period_repr.kind)}.
   
   Parameter Participation_ema :
-    {_ : unit & Single_data_storage.signature Raw_context.t int32}.
+    {_ : unit &
+      Single_data_storage.signature (t := Raw_context.t) (value := int32)}.
   
   Parameter Current_proposal :
     {_ : unit &
-      Single_data_storage.signature Raw_context.t (|Protocol_hash|).(S.HASH.t)}.
+      Single_data_storage.signature (t := Raw_context.t)
+        (value := (|Protocol_hash|).(S.HASH.t))}.
   
   Parameter Listings_size :
-    {_ : unit & Single_data_storage.signature Raw_context.t int32}.
+    {_ : unit &
+      Single_data_storage.signature (t := Raw_context.t) (value := int32)}.
   
   Parameter Listings :
     {_ : unit &
-      Indexed_data_storage.signature Raw_context.t
-        (|Signature.Public_key_hash|).(S.SPublic_key_hash.t) int32}.
+      Indexed_data_storage.signature (t := Raw_context.t)
+        (key := (|Signature.Public_key_hash|).(S.SPublic_key_hash.t))
+        (value := int32)}.
   
   Parameter Proposals :
     {_ : unit &
-      Data_set_storage.signature Raw_context.t
-        ((|Protocol_hash|).(S.HASH.t) *
-          (|Signature.Public_key_hash|).(S.SPublic_key_hash.t))}.
+      Data_set_storage.signature (t := Raw_context.t)
+        (elt :=
+          ((|Protocol_hash|).(S.HASH.t) *
+            (|Signature.Public_key_hash|).(S.SPublic_key_hash.t)))}.
   
   Parameter Proposals_count :
     {_ : unit &
-      Indexed_data_storage.signature Raw_context.t
-        (|Signature.Public_key_hash|).(S.SPublic_key_hash.t) int}.
+      Indexed_data_storage.signature (t := Raw_context.t)
+        (key := (|Signature.Public_key_hash|).(S.SPublic_key_hash.t))
+        (value := int)}.
   
   Parameter Ballots :
     {_ : unit &
-      Indexed_data_storage.signature Raw_context.t
-        (|Signature.Public_key_hash|).(S.SPublic_key_hash.t) Vote_repr.ballot}.
+      Indexed_data_storage.signature (t := Raw_context.t)
+        (key := (|Signature.Public_key_hash|).(S.SPublic_key_hash.t))
+        (value := Vote_repr.ballot)}.
 End Vote.
 
 Module unrevealed_nonce.
@@ -284,25 +314,25 @@ End For_cycle_sig.
 Module Seed.
   Parameter Nonce :
     {_ : unit &
-      Non_iterable_indexed_data_storage.signature Raw_context.t Level_repr.t
-        nonce_status}.
+      Non_iterable_indexed_data_storage.signature (t := Raw_context.t)
+        (key := Level_repr.t) (value := nonce_status)}.
   
   Parameter For_cycle : {_ : unit & For_cycle_sig.signature}.
 End Seed.
 
 Parameter Commitments :
   {_ : unit &
-    Indexed_data_storage.signature Raw_context.t Blinded_public_key_hash.t
-      Tez_repr.t}.
+    Indexed_data_storage.signature (t := Raw_context.t)
+      (key := Blinded_public_key_hash.t) (value := Tez_repr.t)}.
 
 Module Ramp_up.
   Parameter Rewards :
     {_ : unit &
-      Indexed_data_storage.signature Raw_context.t Cycle_repr.t
-        (Tez_repr.t * Tez_repr.t)}.
+      Indexed_data_storage.signature (t := Raw_context.t) (key := Cycle_repr.t)
+        (value := (Tez_repr.t * Tez_repr.t))}.
   
   Parameter Security_deposits :
     {_ : unit &
-      Indexed_data_storage.signature Raw_context.t Cycle_repr.t
-        (Tez_repr.t * Tez_repr.t)}.
+      Indexed_data_storage.signature (t := Raw_context.t) (key := Cycle_repr.t)
+        (value := (Tez_repr.t * Tez_repr.t))}.
 End Ramp_up.
