@@ -149,17 +149,13 @@ Module validation_state.
 End validation_state.
 Definition validation_state := validation_state.record.
 
-Definition operation_data : Set := Alpha_context.packed_protocol_data.
-
-Definition operation : Set := Alpha_context.packed_operation.
-
 Parameter Included_PROTOCOL :
   {'[block_header, operation] : [Set ** Set] &
     Updater.PROTOCOL.signature
       (block_header_data := Alpha_context.Block_header.protocol_data)
       (block_header := block_header)
       (block_header_metadata := Apply_results.block_metadata)
-      (operation_data := operation_data)
+      (operation_data := Alpha_context.packed_protocol_data)
       (operation_receipt := Apply_results.packed_operation_metadata)
       (operation := operation) (validation_state := validation_state)}.
 
@@ -188,8 +184,13 @@ Definition block_header_metadata_encoding :
   Data_encoding.t block_header_metadata :=
   (|Included_PROTOCOL|).(Updater.PROTOCOL.block_header_metadata_encoding).
 
+Definition operation_data :=
+  (|Included_PROTOCOL|).(Updater.PROTOCOL.operation_data).
+
 Definition operation_receipt :=
   (|Included_PROTOCOL|).(Updater.PROTOCOL.operation_receipt).
+
+Definition operation := (|Included_PROTOCOL|).(Updater.PROTOCOL.operation).
 
 Definition operation_data_encoding : Data_encoding.t operation_data :=
   (|Included_PROTOCOL|).(Updater.PROTOCOL.operation_data_encoding).

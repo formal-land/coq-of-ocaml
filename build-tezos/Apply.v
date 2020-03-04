@@ -341,20 +341,22 @@ Definition apply_manager_operation_content
               Alpha_context.Gas.consumed before_operation ctxt |}), nil)
   end.
 
+Inductive success_or_failure : Set :=
+| Success : Alpha_context.t -> success_or_failure
+| Failure : success_or_failure.
+
 Definition apply_internal_manager_operations
-  (ctxt : Alpha_context.context) (mode : Script_ir_translator.unparsing_mode)
+  (ctxt : Alpha_context.t) (mode : Script_ir_translator.unparsing_mode)
   (payer : Alpha_context.Contract.t) (chain_id : (|Chain_id|).(S.HASH.t))
   (ops : list Alpha_context.packed_internal_operation)
   : Lwt.t
-    (((* `Success *) Alpha_context.context + (* `Failure *) unit) *
-      list Apply_results.packed_internal_operation_result) :=
+    (success_or_failure * list Apply_results.packed_internal_operation_result) :=
   let fix apply
-    (ctxt : Alpha_context.context)
+    (ctxt : Alpha_context.t)
     (applied : list Apply_results.packed_internal_operation_result)
     (worklist : list Alpha_context.packed_internal_operation) {struct ctxt}
     : Lwt.t
-      ((* `Success *) Alpha_context.context *
-        list Apply_results.packed_internal_operation_result) :=
+      (success_or_failure * list Apply_results.packed_internal_operation_result) :=
     match worklist with
     | [] => Lwt.__return ((Success ctxt), (List.rev applied))
     |
@@ -404,128 +406,136 @@ Definition precheck_manager_contents
   (ctxt : Alpha_context.context) (chain_id : (|Chain_id|).(S.HASH.t))
   (raw_operation : Alpha_context.operation) (op : Alpha_context.contents)
   : Lwt.t (Error_monad.tzresult Alpha_context.context) :=
-  let
-    'Alpha_context.Manager_operation {|
+  match op with
+  |
+    Alpha_context.Manager_operation {|
       Alpha_context.contents.Manager_operation.source := source;
         Alpha_context.contents.Manager_operation.fee := fee;
         Alpha_context.contents.Manager_operation.counter := counter;
         Alpha_context.contents.Manager_operation.operation := operation;
         Alpha_context.contents.Manager_operation.gas_limit := gas_limit;
         Alpha_context.contents.Manager_operation.storage_limit := storage_limit
-        |} := op in
-  let=? '_ := Lwt.__return (Alpha_context.Gas.check_limit ctxt gas_limit) in
-  let ctxt := Alpha_context.Gas.set_limit ctxt gas_limit in
-  let=? '_ :=
-    Lwt.__return (Alpha_context.Fees.check_storage_limit ctxt storage_limit) in
-  let=? '_ :=
-    Alpha_context.Contract.must_be_allocated ctxt
-      (Alpha_context.Contract.implicit_contract source) in
-  let=? '_ := Alpha_context.Contract.check_counter_increment ctxt source counter
-    in
-  let=? ctxt :=
-    match operation with
-    | Alpha_context.Reveal pk =>
-      Alpha_context.Contract.reveal_manager_key ctxt source pk
-    |
-      Alpha_context.Transaction {|
-        Alpha_context.manager_operation.Transaction.parameters := parameters
-          |} =>
-      let=? '_ :=
-        Lwt.__return
-          ((Error_monad.record_trace extensible_type_value)
-            (Alpha_context.Gas.check_enough ctxt
-              (Alpha_context.Script.minimal_deserialize_cost parameters))) in
-      Error_monad.op_gtgtpipequestion
-        ((Error_monad.trace extensible_type_value)
-          (Alpha_context.Script.force_decode_in_context ctxt parameters))
-        (fun function_parameter =>
-          let '(_arg, ctxt) := function_parameter in
-          ctxt)
-    |
-      Alpha_context.Origination {|
-        Alpha_context.manager_operation.Origination.script := script |} =>
-      let=? '_ :=
-        Lwt.__return
-          ((Error_monad.record_trace extensible_type_value)
-            (let? ctxt :=
-              Alpha_context.Gas.consume ctxt
+        |} =>
+    let=? '_ := Lwt.__return (Alpha_context.Gas.check_limit ctxt gas_limit) in
+    let ctxt := Alpha_context.Gas.set_limit ctxt gas_limit in
+    let=? '_ :=
+      Lwt.__return (Alpha_context.Fees.check_storage_limit ctxt storage_limit)
+      in
+    let=? '_ :=
+      Alpha_context.Contract.must_be_allocated ctxt
+        (Alpha_context.Contract.implicit_contract source) in
+    let=? '_ :=
+      Alpha_context.Contract.check_counter_increment ctxt source counter in
+    let=? ctxt :=
+      match operation with
+      | Alpha_context.Reveal pk =>
+        Alpha_context.Contract.reveal_manager_key ctxt source pk
+      |
+        Alpha_context.Transaction {|
+          Alpha_context.manager_operation.Transaction.parameters := parameters
+            |} =>
+        let=? '_ :=
+          Lwt.__return
+            ((Error_monad.record_trace extensible_type_value)
+              (Alpha_context.Gas.check_enough ctxt
+                (Alpha_context.Script.minimal_deserialize_cost parameters))) in
+        Error_monad.op_gtgtpipequestion
+          ((Error_monad.trace extensible_type_value)
+            (Alpha_context.Script.force_decode_in_context ctxt parameters))
+          (fun function_parameter =>
+            let '(_arg, ctxt) := function_parameter in
+            ctxt)
+      |
+        Alpha_context.Origination {|
+          Alpha_context.manager_operation.Origination.script := script |} =>
+        let=? '_ :=
+          Lwt.__return
+            ((Error_monad.record_trace extensible_type_value)
+              (let? ctxt :=
+                Alpha_context.Gas.consume ctxt
+                  (Alpha_context.Script.minimal_deserialize_cost
+                    script.(Alpha_context.Script.t.code)) in
+              Alpha_context.Gas.check_enough ctxt
                 (Alpha_context.Script.minimal_deserialize_cost
-                  script.(Alpha_context.Script.t.code)) in
-            Alpha_context.Gas.check_enough ctxt
-              (Alpha_context.Script.minimal_deserialize_cost
-                script.(Alpha_context.Script.t.storage)))) in
-      let=? '(_code, ctxt) :=
-        (Error_monad.trace extensible_type_value)
-          (Alpha_context.Script.force_decode_in_context ctxt
-            script.(Alpha_context.Script.t.code)) in
-      Error_monad.op_gtgtpipequestion
-        ((Error_monad.trace extensible_type_value)
-          (Alpha_context.Script.force_decode_in_context ctxt
-            script.(Alpha_context.Script.t.storage)))
-        (fun function_parameter =>
-          let '(_storage, ctxt) := function_parameter in
-          ctxt)
-    | _ => Error_monad.__return ctxt
-    end in
-  let=? public_key := Alpha_context.Contract.get_manager_key ctxt source in
-  let=? '_ :=
-    Alpha_context.Operation.check_signature public_key chain_id raw_operation in
-  let=? ctxt := Alpha_context.Contract.increment_counter ctxt source in
-  let=? ctxt :=
-    Alpha_context.Contract.spend ctxt
-      (Alpha_context.Contract.implicit_contract source) fee in
-  let=? ctxt := Alpha_context.add_fees ctxt fee in
-  Error_monad.__return ctxt.
+                  script.(Alpha_context.Script.t.storage)))) in
+        let=? '(_code, ctxt) :=
+          (Error_monad.trace extensible_type_value)
+            (Alpha_context.Script.force_decode_in_context ctxt
+              script.(Alpha_context.Script.t.code)) in
+        Error_monad.op_gtgtpipequestion
+          ((Error_monad.trace extensible_type_value)
+            (Alpha_context.Script.force_decode_in_context ctxt
+              script.(Alpha_context.Script.t.storage)))
+          (fun function_parameter =>
+            let '(_storage, ctxt) := function_parameter in
+            ctxt)
+      | _ => Error_monad.__return ctxt
+      end in
+    let=? public_key := Alpha_context.Contract.get_manager_key ctxt source in
+    let=? '_ :=
+      Alpha_context.Operation.check_signature public_key chain_id raw_operation
+      in
+    let=? ctxt := Alpha_context.Contract.increment_counter ctxt source in
+    let=? ctxt :=
+      Alpha_context.Contract.spend ctxt
+        (Alpha_context.Contract.implicit_contract source) fee in
+    let=? ctxt := Alpha_context.add_fees ctxt fee in
+    Error_monad.__return ctxt
+  | _ => unreachable_gadt_branch
+  end.
 
 Definition apply_manager_contents
   (ctxt : Alpha_context.context) (mode : Script_ir_translator.unparsing_mode)
   (chain_id : (|Chain_id|).(S.HASH.t)) (op : Alpha_context.contents)
   : Lwt.t
-    (((* `Failure *) unit + (* `Success *) Alpha_context.context) *
-      Apply_results.manager_operation_result *
+    (success_or_failure * Apply_results.manager_operation_result *
       list Apply_results.packed_internal_operation_result) :=
-  let
-    'Alpha_context.Manager_operation {|
+  match op with
+  |
+    Alpha_context.Manager_operation {|
       Alpha_context.contents.Manager_operation.source := source;
         Alpha_context.contents.Manager_operation.operation := operation;
         Alpha_context.contents.Manager_operation.gas_limit := gas_limit;
         Alpha_context.contents.Manager_operation.storage_limit := storage_limit
-        |} := op in
-  let ctxt := Alpha_context.Gas.set_limit ctxt gas_limit in
-  let ctxt := Alpha_context.Fees.start_counting_storage_fees ctxt in
-  let source := Alpha_context.Contract.implicit_contract source in
-  let= function_parameter :=
-    apply_manager_operation_content ctxt mode source source chain_id false
-      operation in
-  match function_parameter with
-  | Pervasives.Ok (ctxt, operation_results, internal_operations) =>
+        |} =>
+    let ctxt := Alpha_context.Gas.set_limit ctxt gas_limit in
+    let ctxt := Alpha_context.Fees.start_counting_storage_fees ctxt in
+    let source := Alpha_context.Contract.implicit_contract source in
     let= function_parameter :=
-      apply_internal_manager_operations ctxt mode source chain_id
-        internal_operations in
+      apply_manager_operation_content ctxt mode source source chain_id false
+        operation in
     match function_parameter with
-    | (Success ctxt, internal_operations_results) =>
+    | Pervasives.Ok (ctxt, operation_results, internal_operations) =>
       let= function_parameter :=
-        Alpha_context.Fees.burn_storage_fees ctxt storage_limit source in
+        apply_internal_manager_operations ctxt mode source chain_id
+          internal_operations in
       match function_parameter with
-      | Pervasives.Ok ctxt =>
+      | (Success ctxt, internal_operations_results) =>
+        let= function_parameter :=
+          Alpha_context.Fees.burn_storage_fees ctxt storage_limit source in
+        match function_parameter with
+        | Pervasives.Ok ctxt =>
+          Lwt.__return
+            ((Success ctxt), (Apply_results.Applied operation_results),
+              internal_operations_results)
+        | Pervasives.Error errors =>
+          Lwt.__return
+            (Failure,
+              (Apply_results.Backtracked operation_results (Some errors)),
+              internal_operations_results)
+        end
+      | (Failure, internal_operations_results) =>
         Lwt.__return
-          ((Success ctxt), (Apply_results.Applied operation_results),
-            internal_operations_results)
-      | Pervasives.Error errors =>
-        Lwt.__return
-          (Failure, (Apply_results.Backtracked operation_results (Some errors)),
+          (Failure, (Apply_results.Applied operation_results),
             internal_operations_results)
       end
-    | (Failure, internal_operations_results) =>
+    | Pervasives.Error errors =>
       Lwt.__return
-        (Failure, (Apply_results.Applied operation_results),
-          internal_operations_results)
+        (Failure,
+          (Apply_results.Failed (Alpha_context.manager_kind operation) errors),
+          nil)
     end
-  | Pervasives.Error errors =>
-    Lwt.__return
-      (Failure,
-        (Apply_results.Failed (Alpha_context.manager_kind operation) errors),
-        nil)
+  | _ => unreachable_gadt_branch
   end.
 
 Definition skipped_operation_result
@@ -595,6 +605,7 @@ Fixpoint mark_skipped
             skipped_operation_result operation;
           Apply_results.contents_result.Manager_operation_result.internal_operation_results :=
             nil |}) (mark_skipped baker level rest)
+  | _ => unreachable_gadt_branch
   end.
 
 Fixpoint precheck_manager_contents_list
@@ -608,15 +619,14 @@ Fixpoint precheck_manager_contents_list
   | Alpha_context.Cons ((Alpha_context.Manager_operation _) as op) rest =>
     let=? ctxt := precheck_manager_contents ctxt chain_id raw_operation op in
     precheck_manager_contents_list ctxt chain_id raw_operation rest
+  | _ => unreachable_gadt_branch
   end.
 
 Fixpoint apply_manager_contents_list_rec
   (ctxt : Alpha_context.t) (mode : Script_ir_translator.unparsing_mode)
   (baker : Alpha_context.public_key_hash) (chain_id : (|Chain_id|).(S.HASH.t))
   (contents_list : Alpha_context.contents_list) {struct ctxt}
-  : Lwt.t
-    (((* `Failure *) unit + (* `Success *) Alpha_context.context) *
-      Apply_results.contents_result_list) :=
+  : Lwt.t (success_or_failure * Apply_results.contents_result_list) :=
   let level := Alpha_context.Level.current ctxt in
   match contents_list with
   |
@@ -697,10 +707,30 @@ Fixpoint apply_manager_contents_list_rec
       Lwt.__return
         (ctxt_result, (Apply_results.Cons_result __result_value results))
     end
+  | _ => unreachable_gadt_branch
   end.
 
 Definition mark_backtracked (results : Apply_results.contents_result_list)
   : Apply_results.contents_result_list :=
+  let mark_manager_operation_result
+    (function_parameter : Apply_results.manager_operation_result)
+    : Apply_results.manager_operation_result :=
+    match function_parameter with
+    |
+      (Apply_results.Failed _ _ | Apply_results.Skipped _ |
+      Apply_results.Backtracked _ _) as __result_value => __result_value
+    | (Apply_results.Applied (Apply_results.Reveal_result _)) as __result_value
+      => __result_value
+    | Apply_results.Applied __result_value =>
+      Apply_results.Backtracked __result_value None
+    end in
+  let mark_internal_operation_results
+    (function_parameter : Apply_results.packed_internal_operation_result)
+    : Apply_results.packed_internal_operation_result :=
+    let 'Apply_results.Internal_operation_result kind __result_value :=
+      function_parameter in
+    Apply_results.Internal_operation_result kind
+      (mark_manager_operation_result __result_value) in
   let fix mark_contents_list
     (function_parameter : Apply_results.contents_result_list)
     {struct function_parameter} : Apply_results.contents_result_list :=
@@ -732,26 +762,7 @@ Definition mark_backtracked (results : Apply_results.contents_result_list)
               List.map mark_internal_operation_results
                 op.(Apply_results.contents_result.Manager_operation_result.internal_operation_results)
             |}) (mark_contents_list rest)
-    end
-  with mark_internal_operation_results
-    (function_parameter : Apply_results.packed_internal_operation_result)
-    {struct function_parameter}
-    : Apply_results.packed_internal_operation_result :=
-    let 'Apply_results.Internal_operation_result kind __result_value :=
-      function_parameter in
-    Apply_results.Internal_operation_result kind
-      (mark_manager_operation_result __result_value)
-  with mark_manager_operation_result
-    (function_parameter : Apply_results.manager_operation_result)
-    {struct function_parameter} : Apply_results.manager_operation_result :=
-    match function_parameter with
-    |
-      (Apply_results.Failed _ _ | Apply_results.Skipped _ |
-      Apply_results.Backtracked _ _) as __result_value => __result_value
-    | (Apply_results.Applied (Apply_results.Reveal_result _)) as __result_value
-      => __result_value
-    | Apply_results.Applied __result_value =>
-      Apply_results.Backtracked __result_value None
+    | _ => unreachable_gadt_branch
     end in
   mark_contents_list results.
 
@@ -1125,6 +1136,7 @@ Definition apply_contents_list
     let= '(ctxt, __result_value) :=
       apply_manager_contents_list ctxt mode baker chain_id op in
     Error_monad.__return (ctxt, __result_value)
+  | _ => unreachable_gadt_branch
   end.
 
 Definition apply_operation

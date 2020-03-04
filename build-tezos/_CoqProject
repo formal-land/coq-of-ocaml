@@ -11,7 +11,7 @@ Amendment_mli.v
 Amendment.v
 Apply_results_mli.v
 Apply_results.v
-#Apply.v
+Apply.v
 Baking_mli.v
 Baking.v
 Blinded_public_key_hash_mli.v
@@ -57,7 +57,7 @@ Level_repr_mli.v
 Level_repr.v
 Level_storage_mli.v
 Level_storage.v
-#Main_mli.v
+Main_mli.v
 #Main.v
 Manager_repr_mli.v
 Manager_repr.v

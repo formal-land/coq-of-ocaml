@@ -2763,7 +2763,7 @@ Module Signature.
   Parameter Included_SIGNATURE :
     {'[Public_key_hash___Set_t, Public_key_hash_Map_t, t] :
       [Set ** Set -> Set ** Set] &
-      S.SIGNATURE.signature (Public_key_hash_t := public_key)
+      S.SIGNATURE.signature (Public_key_hash_t := public_key_hash)
         (Public_key_hash___Set_t := Public_key_hash___Set_t)
         (Public_key_hash_Map_t := Public_key_hash_Map_t)
         (Public_key_t := public_key) (t := t) (watermark := watermark)}.

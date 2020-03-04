@@ -59,9 +59,9 @@
     <pre><code>opam repo add coq-released https://coq.inria.fr/opam/released
 opam pin add https://github.com/clarus/coq-of-ocaml.git#master</code></pre>
     <ul>
-      <li>OCaml size: 36246 lines</li>
-      <li>Coq size: 46729 lines (+28% compared to&nbsp;OCaml)</li>
-      <li>Warnings from coq-of-ocaml: 4337</li>
+      <li>OCaml size: 36245 lines</li>
+      <li>Coq size: 46742 lines (+28% compared to&nbsp;OCaml)</li>
+      <li>Warnings from coq-of-ocaml: 4298</li>
     </ul>
     
       <canvas id="chart" width="400" height="400"></canvas>
@@ -118,7 +118,7 @@ opam pin add https://github.com/clarus/coq-of-ocaml.git#master</code></pre>
           28609,
           32833,
           39901,
-          39960,
+          41570,
         ],
         generated: [
           47563,
@@ -171,7 +171,7 @@ opam pin add https://github.com/clarus/coq-of-ocaml.git#master</code></pre>
           45766,
           46649,
           46664,
-          46729,
+          46742,
         ],
         labels: [
           "01-14",
@@ -270,7 +270,7 @@ opam pin add https://github.com/clarus/coq-of-ocaml.git#master</code></pre>
       </li>
       
       <li>
-        <a href="#apply.ml">apply.ml</a>&nbsp;<span class="label label-warning">89</span>
+        <a href="#apply.ml">apply.ml</a>&nbsp;<span class="label label-warning">51</span>
       </li>
       
       <li>
@@ -468,7 +468,7 @@ opam pin add https://github.com/clarus/coq-of-ocaml.git#master</code></pre>
       </li>
       
       <li>
-        <a href="#main.mli">main.mli</a>&nbsp;<span class="label label-warning">3</span>
+        <a href="#main.mli">main.mli</a>&nbsp;<span class="label label-warning">2</span>
       </li>
       
       <li>
@@ -7126,12 +7126,12 @@ Parameter record_ballot :
   <div style="margin: 20px;">
     <h3>Apply</h3>
     <ul>
-      <li>OCaml size: 1487 lines</li>
-      <li>Coq size: 1349 lines (-10% compared to&nbsp;OCaml)</li>
+      <li>OCaml size: 1493 lines</li>
+      <li>Coq size: 1361 lines (-9% compared to&nbsp;OCaml)</li>
     </ul>
   </div>
   <div class="col-md-6">
-    <a href="#apply.ml"><code>apply.ml</code></a>&nbsp;<span class="label label-warning">89 warnings</span>
+    <a href="#apply.ml"><code>apply.ml</code></a>&nbsp;<span class="label label-warning">51 warnings</span>
     
     <pre>(*****************************************************************************)
 (*                                                                           *)
@@ -7870,12 +7870,14 @@ Alternative: use a monad to sequence side-effects.">assert internal</abbr> ;
             {consumed_gas = Gas.consumed ~since:before_operation ~until:ctxt},
           [] )
 
-let <abbr class="mark-warning" title="No type known for the following variants: `Success, `Failure">apply_internal_manager_operations</abbr> ctxt mode ~payer ~chain_id ops =
-  let rec <abbr class="mark-warning" title="No type known for the following variants: `Success">apply</abbr> ctxt applied worklist =
+type success_or_failure = Success of t | Failure
+
+let apply_internal_manager_operations ctxt mode ~payer ~chain_id ops =
+  let rec apply ctxt applied worklist =
     match worklist with
-    | <abbr class="mark-warning" title="No type known for the following variants: `Success">[]</abbr> -&gt;
-        Lwt.return (<abbr class="mark-warning" title="Constructor of the variant `Success unknown">`Success ctxt</abbr>, List.rev applied)
-    | <abbr class="mark-warning" title="No type known for the following variants: `Success">Internal_operation ({source; operation; nonce} as op) :: rest</abbr> -&gt; (
+    | [] -&gt;
+        Lwt.return (Success ctxt, List.rev applied)
+    | Internal_operation ({source; operation; nonce} as op) :: rest -&gt; (
         ( if internal_nonce_already_recorded ctxt nonce then
           fail <abbr class="mark-warning" title="Values of extensible types are ignored.
 
@@ -7891,7 +7893,7 @@ They are sent to a unit type.">(Internal_operation_replay (Internal_operation op
             ~internal:true
             operation )
         &gt;&gt;= function
-        | <abbr class="mark-warning" title="No type known for the following variants: `Success, `Failure">Error errors</abbr> -&gt;
+        | Error errors -&gt;
             let result =
               Internal_operation_result
                 (op, Failed (manager_kind op.operation, errors))
@@ -7903,8 +7905,8 @@ They are sent to a unit type.">(Internal_operation_replay (Internal_operation op
                     (op, Skipped (manager_kind op.operation)))
                 rest
             in
-            Lwt.return (<abbr class="mark-warning" title="Constructor of the variant `Failure unknown">`Failure</abbr>, List.rev (skipped @ (result :: applied)))
-        | <abbr class="mark-warning" title="No type known for the following variants: `Success, `Failure">Ok (ctxt, result, emitted)</abbr> -&gt;
+            Lwt.return (Failure, List.rev (skipped @ (result :: applied)))
+        | Ok (ctxt, result, emitted) -&gt;
             apply
               ctxt
               (Internal_operation_result (op, Applied result) :: applied)
@@ -7914,128 +7916,122 @@ They are sent to a unit type.">(Internal_operation_replay (Internal_operation op
 
 let precheck_manager_contents (type kind) ctxt chain_id raw_operation
     (op : kind Kind.manager contents) : context tzresult Lwt.t =
-  let (Manager_operation
-        {source; fee; counter; operation; gas_limit; storage_limit}) =
-    op
-  in
-  Lwt.return (Gas.check_limit ctxt gas_limit)
-  &gt;&gt;=? fun () -&gt;
-  let ctxt = Gas.set_limit ctxt gas_limit in
-  Lwt.return (Fees.check_storage_limit ctxt storage_limit)
-  &gt;&gt;=? fun () -&gt;
-  Contract.must_be_allocated ctxt (Contract.implicit_contract source)
-  &gt;&gt;=? fun () -&gt;
-  Contract.check_counter_increment ctxt source counter
-  &gt;&gt;=? fun () -&gt;
-  ( match operation with
-  | Reveal pk -&gt;
-      Contract.reveal_manager_key ctxt source pk
-  | Transaction {parameters; _} -&gt;
-      (* Fail quickly if not enough gas for minimal deserialization cost *)
-      Lwt.return
-      @@ record_trace <abbr class="mark-warning" title="Values of extensible types are ignored.
-
-They are sent to a unit type.">Gas_quota_exceeded_init_deserialize</abbr>
-      @@ Gas.check_enough ctxt (Script.minimal_deserialize_cost parameters)
+  match[@coq_match_with_default] op with
+  | Manager_operation
+      {source; fee; counter; operation; gas_limit; storage_limit} -&gt;
+      Lwt.return (Gas.check_limit ctxt gas_limit)
       &gt;&gt;=? fun () -&gt;
-      (* Fail if not enough gas for complete deserialization cost *)
-      trace <abbr class="mark-warning" title="Values of extensible types are ignored.
-
-They are sent to a unit type.">Gas_quota_exceeded_init_deserialize</abbr>
-      @@ Script.force_decode_in_context ctxt parameters
-      &gt;&gt;|? fun (_arg, ctxt) -&gt; ctxt
-  | Origination {script; _} -&gt;
-      (* Fail quickly if not enough gas for minimal deserialization cost *)
-      Lwt.return
-      @@ record_trace <abbr class="mark-warning" title="Values of extensible types are ignored.
-
-They are sent to a unit type.">Gas_quota_exceeded_init_deserialize</abbr>
-      @@ ( Gas.consume ctxt (Script.minimal_deserialize_cost script.code)
-         &gt;&gt;? fun ctxt -&gt;
-         Gas.check_enough ctxt (Script.minimal_deserialize_cost script.storage)
-         )
+      let ctxt = Gas.set_limit ctxt gas_limit in
+      Lwt.return (Fees.check_storage_limit ctxt storage_limit)
       &gt;&gt;=? fun () -&gt;
-      (* Fail if not enough gas for complete deserialization cost *)
-      trace <abbr class="mark-warning" title="Values of extensible types are ignored.
+      Contract.must_be_allocated ctxt (Contract.implicit_contract source)
+      &gt;&gt;=? fun () -&gt;
+      Contract.check_counter_increment ctxt source counter
+      &gt;&gt;=? fun () -&gt;
+      ( match operation with
+      | Reveal pk -&gt;
+          Contract.reveal_manager_key ctxt source pk
+      | Transaction {parameters; _} -&gt;
+          (* Fail quickly if not enough gas for minimal deserialization cost *)
+          Lwt.return
+          @@ record_trace <abbr class="mark-warning" title="Values of extensible types are ignored.
 
 They are sent to a unit type.">Gas_quota_exceeded_init_deserialize</abbr>
-      @@ Script.force_decode_in_context ctxt script.code
-      &gt;&gt;=? fun (_code, ctxt) -&gt;
-      trace <abbr class="mark-warning" title="Values of extensible types are ignored.
+          @@ Gas.check_enough ctxt (Script.minimal_deserialize_cost parameters)
+          &gt;&gt;=? fun () -&gt;
+          (* Fail if not enough gas for complete deserialization cost *)
+          trace <abbr class="mark-warning" title="Values of extensible types are ignored.
 
 They are sent to a unit type.">Gas_quota_exceeded_init_deserialize</abbr>
-      @@ Script.force_decode_in_context ctxt script.storage
-      &gt;&gt;|? fun (_storage, ctxt) -&gt; ctxt
-  | _ -&gt;
-      return ctxt )
-  &gt;&gt;=? fun ctxt -&gt;
-  Contract.get_manager_key ctxt source
-  &gt;&gt;=? fun public_key -&gt;
-  (* Currently, the `raw_operation` only contains one signature, so
+          @@ Script.force_decode_in_context ctxt parameters
+          &gt;&gt;|? fun (_arg, ctxt) -&gt; ctxt
+      | Origination {script; _} -&gt;
+          (* Fail quickly if not enough gas for minimal deserialization cost *)
+          Lwt.return
+          @@ record_trace <abbr class="mark-warning" title="Values of extensible types are ignored.
+
+They are sent to a unit type.">Gas_quota_exceeded_init_deserialize</abbr>
+          @@ ( Gas.consume ctxt (Script.minimal_deserialize_cost script.code)
+             &gt;&gt;? fun ctxt -&gt;
+             Gas.check_enough
+               ctxt
+               (Script.minimal_deserialize_cost script.storage) )
+          &gt;&gt;=? fun () -&gt;
+          (* Fail if not enough gas for complete deserialization cost *)
+          trace <abbr class="mark-warning" title="Values of extensible types are ignored.
+
+They are sent to a unit type.">Gas_quota_exceeded_init_deserialize</abbr>
+          @@ Script.force_decode_in_context ctxt script.code
+          &gt;&gt;=? fun (_code, ctxt) -&gt;
+          trace <abbr class="mark-warning" title="Values of extensible types are ignored.
+
+They are sent to a unit type.">Gas_quota_exceeded_init_deserialize</abbr>
+          @@ Script.force_decode_in_context ctxt script.storage
+          &gt;&gt;|? fun (_storage, ctxt) -&gt; ctxt
+      | _ -&gt;
+          return ctxt )
+      &gt;&gt;=? fun ctxt -&gt;
+      Contract.get_manager_key ctxt source
+      &gt;&gt;=? fun public_key -&gt;
+      (* Currently, the `raw_operation` only contains one signature, so
      all operations are required to be from the same manager. This may
      change in the future, allowing several managers to group-sign a
      sequence of transactions.  *)
-  Operation.check_signature public_key chain_id raw_operation
-  &gt;&gt;=? fun () -&gt;
-  Contract.increment_counter ctxt source
-  &gt;&gt;=? fun ctxt -&gt;
-  Contract.spend ctxt (Contract.implicit_contract source) fee
-  &gt;&gt;=? fun ctxt -&gt; add_fees ctxt fee &gt;&gt;=? fun ctxt -&gt; return ctxt
+      Operation.check_signature public_key chain_id raw_operation
+      &gt;&gt;=? fun () -&gt;
+      Contract.increment_counter ctxt source
+      &gt;&gt;=? fun ctxt -&gt;
+      Contract.spend ctxt (Contract.implicit_contract source) fee
+      &gt;&gt;=? fun ctxt -&gt; add_fees ctxt fee &gt;&gt;=? fun ctxt -&gt; return ctxt
 
-let <abbr class="mark-warning" title="No type known for the following variants: `Failure, `Success">apply_manager_contents</abbr> (type kind) ctxt mode chain_id
+let apply_manager_contents (type kind) ctxt mode chain_id
     (op : kind Kind.manager contents) :
-    ( [`Success of context | `Failure]
+    ( success_or_failure
     * kind manager_operation_result
     * packed_internal_operation_result list )
     Lwt.t =
-  let <abbr class="mark-warning" title="No type known for the following variants: `Failure, `Success">(Manager_operation {source; operation; gas_limit; storage_limit})</abbr> = op in
-  let ctxt = Gas.set_limit ctxt gas_limit in
-  let ctxt = Fees.start_counting_storage_fees ctxt in
-  let source = Contract.implicit_contract source in
-  apply_manager_operation_content
-    ctxt
-    mode
-    ~source
-    ~payer:source
-    ~internal:false
-    ~chain_id
-    operation
-  &gt;&gt;= function
-  | <abbr class="mark-warning" title="No type known for the following variants: `Failure, `Success">Ok (ctxt, operation_results, internal_operations)</abbr> -&gt; (
-      apply_internal_manager_operations
+  match[@coq_match_with_default] op with
+  | Manager_operation {source; operation; gas_limit; storage_limit} -&gt; (
+      let ctxt = Gas.set_limit ctxt gas_limit in
+      let ctxt = Fees.start_counting_storage_fees ctxt in
+      let source = Contract.implicit_contract source in
+      apply_manager_operation_content
         ctxt
         mode
+        ~source
         ~payer:source
+        ~internal:false
         ~chain_id
-        internal_operations
+        operation
       &gt;&gt;= function
-      | <abbr class="mark-warning" title="No type known for the following variants: `Failure, `Success">(</abbr><abbr class="mark-warning" title="Constructor of the variant `Success unknown
-
-——————————
-
-No type known for the following variants: `Failure, `Success">`Success ctxt</abbr><abbr class="mark-warning" title="No type known for the following variants: `Failure, `Success">, internal_operations_results)</abbr> -&gt; (
-          Fees.burn_storage_fees ctxt ~storage_limit ~payer:source
+      | Ok (ctxt, operation_results, internal_operations) -&gt; (
+          apply_internal_manager_operations
+            ctxt
+            mode
+            ~payer:source
+            ~chain_id
+            internal_operations
           &gt;&gt;= function
-          | <abbr class="mark-warning" title="No type known for the following variants: `Failure, `Success">Ok ctxt</abbr> -&gt;
+          | (Success ctxt, internal_operations_results) -&gt; (
+              Fees.burn_storage_fees ctxt ~storage_limit ~payer:source
+              &gt;&gt;= function
+              | Ok ctxt -&gt;
+                  Lwt.return
+                    ( Success ctxt,
+                      Applied operation_results,
+                      internal_operations_results )
+              | Error errors -&gt;
+                  Lwt.return
+                    ( Failure,
+                      Backtracked (operation_results, Some errors),
+                      internal_operations_results ) )
+          | (Failure, internal_operations_results) -&gt;
               Lwt.return
-                ( <abbr class="mark-warning" title="Constructor of the variant `Success unknown">`Success ctxt</abbr>,
+                ( Failure,
                   Applied operation_results,
-                  internal_operations_results )
-          | <abbr class="mark-warning" title="No type known for the following variants: `Failure, `Success">Error errors</abbr> -&gt;
-              Lwt.return
-                ( <abbr class="mark-warning" title="Constructor of the variant `Failure unknown">`Failure</abbr>,
-                  Backtracked (operation_results, Some errors),
                   internal_operations_results ) )
-      | <abbr class="mark-warning" title="No type known for the following variants: `Failure, `Success">(</abbr><abbr class="mark-warning" title="Constructor of the variant `Failure unknown
-
-——————————
-
-No type known for the following variants: `Failure, `Success">`Failure</abbr><abbr class="mark-warning" title="No type known for the following variants: `Failure, `Success">, internal_operations_results)</abbr> -&gt;
-          Lwt.return
-            (<abbr class="mark-warning" title="Constructor of the variant `Failure unknown">`Failure</abbr>, Applied operation_results, internal_operations_results)
-      )
-  | <abbr class="mark-warning" title="No type known for the following variants: `Failure, `Success">Error errors</abbr> -&gt;
-      Lwt.return (<abbr class="mark-warning" title="Constructor of the variant `Failure unknown">`Failure</abbr>, Failed (manager_kind operation, errors), [])
+      | Error errors -&gt;
+          Lwt.return (Failure, Failed (manager_kind operation, errors), []) )
 
 let skipped_operation_result :
     type kind. kind manager_operation -&gt; kind manager_operation_result =
@@ -8055,7 +8051,7 @@ let rec mark_skipped :
     Level.t -&gt;
     kind Kind.manager contents_list -&gt;
     kind Kind.manager contents_result_list =
- fun ~baker level -&gt; function
+ fun ~baker level -&gt; function[@coq_match_with_default]
   | Single (Manager_operation {source; fee; operation}) -&gt;
       let source = Contract.implicit_contract source in
       Single_result
@@ -8090,7 +8086,7 @@ let rec precheck_manager_contents_list :
     kind Kind.manager contents_list -&gt;
     context tzresult Lwt.t =
  fun ctxt chain_id raw_operation contents_list -&gt;
-  match contents_list with
+  match[@coq_match_with_default] contents_list with
   | Single (Manager_operation _ as op) -&gt;
       precheck_manager_contents ctxt chain_id raw_operation op
   | Cons ((Manager_operation _ as op), rest) -&gt;
@@ -8098,26 +8094,21 @@ let rec precheck_manager_contents_list :
       &gt;&gt;=? fun ctxt -&gt;
       precheck_manager_contents_list ctxt chain_id raw_operation rest
 
-let rec <abbr class="mark-warning" title="No type known for the following variants: `Failure, `Success">apply_manager_contents_list_rec</abbr> :
+let rec apply_manager_contents_list_rec :
     type kind.
     Alpha_context.t -&gt;
     Script_ir_translator.unparsing_mode -&gt;
     public_key_hash -&gt;
     Chain_id.t -&gt;
     kind Kind.manager contents_list -&gt;
-    ([`Success of context | `Failure] * kind Kind.manager contents_result_list)
-    Lwt.t =
+    (success_or_failure * kind Kind.manager contents_result_list) Lwt.t =
  fun ctxt mode baker chain_id contents_list -&gt;
   let level = Level.current ctxt in
-  match contents_list with
-  | <abbr class="mark-warning" title="No type known for the following variants: `Failure, `Success">Single (Manager_operation {source; fee; _} as op)</abbr> -&gt;
+  match[@coq_match_with_default] contents_list with
+  | Single (Manager_operation {source; fee; _} as op) -&gt;
       let source = Contract.implicit_contract source in
       apply_manager_contents ctxt mode chain_id op
-      &gt;&gt;= fun <abbr class="mark-warning" title="No type known for the following variants: `Failure, `Success
-
-——————————
-
-No type known for the following variants: `Failure, `Success">(ctxt_result, operation_result, internal_operation_results)</abbr> -&gt;
+      &gt;&gt;= fun (ctxt_result, operation_result, internal_operation_results) -&gt;
       let result =
         Manager_operation_result
           {
@@ -8130,15 +8121,11 @@ No type known for the following variants: `Failure, `Success">(ctxt_result, oper
           }
       in
       Lwt.return (ctxt_result, Single_result result)
-  | <abbr class="mark-warning" title="No type known for the following variants: `Failure, `Success">Cons ((Manager_operation {source; fee; _} as op), rest)</abbr> -&gt; (
+  | Cons ((Manager_operation {source; fee; _} as op), rest) -&gt; (
       let source = Contract.implicit_contract source in
       apply_manager_contents ctxt mode chain_id op
       &gt;&gt;= function
-      | <abbr class="mark-warning" title="No type known for the following variants: `Failure, `Success">(</abbr><abbr class="mark-warning" title="Constructor of the variant `Failure unknown
-
-——————————
-
-No type known for the following variants: `Failure, `Success">`Failure</abbr><abbr class="mark-warning" title="No type known for the following variants: `Failure, `Success">, operation_result, internal_operation_results)</abbr> -&gt;
+      | (Failure, operation_result, internal_operation_results) -&gt;
           let result =
             Manager_operation_result
               {
@@ -8151,12 +8138,8 @@ No type known for the following variants: `Failure, `Success">`Failure</abbr><ab
               }
           in
           Lwt.return
-            (<abbr class="mark-warning" title="Constructor of the variant `Failure unknown">`Failure</abbr>, Cons_result (result, mark_skipped ~baker level rest))
-      | <abbr class="mark-warning" title="No type known for the following variants: `Failure, `Success">(</abbr><abbr class="mark-warning" title="Constructor of the variant `Success unknown
-
-——————————
-
-No type known for the following variants: `Failure, `Success">`Success ctxt</abbr><abbr class="mark-warning" title="No type known for the following variants: `Failure, `Success">, operation_result, internal_operation_results)</abbr> -&gt;
+            (Failure, Cons_result (result, mark_skipped ~baker level rest))
+      | (Success ctxt, operation_result, internal_operation_results) -&gt;
           let result =
             Manager_operation_result
               {
@@ -8169,18 +8152,29 @@ No type known for the following variants: `Failure, `Success">`Success ctxt</abb
               }
           in
           apply_manager_contents_list_rec ctxt mode baker chain_id rest
-          &gt;&gt;= fun <abbr class="mark-warning" title="No type known for the following variants: `Failure, `Success
-
-——————————
-
-No type known for the following variants: `Failure, `Success">(ctxt_result, results)</abbr> -&gt;
+          &gt;&gt;= fun (ctxt_result, results) -&gt;
           Lwt.return (ctxt_result, Cons_result (result, results)) )
 
 let mark_backtracked results =
-  <abbr class="mark-warning" title="Mutually recursive definition are only handled at top-level">let rec mark_contents_list :
+  let mark_manager_operation_result :
+      type kind. kind manager_operation_result -&gt; kind manager_operation_result
+      = function
+    | (Failed _ | Skipped _ | Backtracked _) as result -&gt;
+        result
+    | Applied (Reveal_result _) as result -&gt;
+        result
+    | Applied result -&gt;
+        Backtracked (result, None)
+  in
+  let mark_internal_operation_results
+      (Internal_operation_result (kind, result)) =
+    Internal_operation_result (kind, mark_manager_operation_result result)
+  in
+  let rec mark_contents_list :
       type kind.
       kind Kind.manager contents_result_list -&gt;
-      kind Kind.manager contents_result_list = function
+      kind Kind.manager contents_result_list =
+    function[@coq_match_with_default]
     | Single_result (Manager_operation_result op) -&gt;
         Single_result
           (Manager_operation_result
@@ -8206,34 +8200,22 @@ let mark_backtracked results =
                     op.internal_operation_results;
               },
             mark_contents_list rest )
-  and mark_internal_operation_results
-      (Internal_operation_result (kind, result)) =
-    Internal_operation_result (kind, mark_manager_operation_result result)
-  and mark_manager_operation_result :
-      type kind. kind manager_operation_result -&gt; kind manager_operation_result
-      = function
-    | (Failed _ | Skipped _ | Backtracked _) as result -&gt;
-        result
-    | Applied (Reveal_result _) as result -&gt;
-        result
-    | Applied result -&gt;
-        Backtracked (result, None)
   in
-  mark_contents_list results</abbr>
+  mark_contents_list results
 
 let apply_manager_contents_list ctxt mode baker chain_id contents_list =
   apply_manager_contents_list_rec ctxt mode baker chain_id contents_list
-  &gt;&gt;= fun <abbr class="mark-warning" title="No type known for the following variants: `Failure, `Success">(ctxt_result, results)</abbr> -&gt;
+  &gt;&gt;= fun (ctxt_result, results) -&gt;
   match ctxt_result with
-  | <abbr class="mark-warning" title="Constructor of the variant `Failure unknown">`Failure</abbr> -&gt;
+  | Failure -&gt;
       Lwt.return (ctxt (* backtracked *), mark_backtracked results)
-  | <abbr class="mark-warning" title="Constructor of the variant `Success unknown">`Success ctxt</abbr> -&gt;
+  | Success ctxt -&gt;
       Big_map.cleanup_temporary ctxt &gt;&gt;= fun ctxt -&gt; Lwt.return (ctxt, results)
 
 let apply_contents_list (type kind) ctxt chain_id mode pred_block baker
     (operation : kind operation) (contents_list : kind contents_list) :
     (context * kind contents_result_list) tzresult Lwt.t =
-  match contents_list with
+  match[@coq_match_with_default] contents_list with
   | Single (Endorsement {level}) -&gt;
       let block = operation.shell.branch in
       fail_unless
@@ -9045,20 +9027,22 @@ Definition apply_manager_operation_content
               Alpha_context.Gas.consumed before_operation ctxt |}), nil)
   end.
 
+Inductive success_or_failure : Set :=
+| Success : Alpha_context.t -&gt; success_or_failure
+| Failure : success_or_failure.
+
 Definition apply_internal_manager_operations
-  (ctxt : Alpha_context.context) (mode : Script_ir_translator.unparsing_mode)
+  (ctxt : Alpha_context.t) (mode : Script_ir_translator.unparsing_mode)
   (payer : Alpha_context.Contract.t) (chain_id : (|Chain_id|).(S.HASH.t))
   (ops : list Alpha_context.packed_internal_operation)
   : Lwt.t
-    (((* `Success *) Alpha_context.context + (* `Failure *) unit) *
-      list Apply_results.packed_internal_operation_result) :=
+    (success_or_failure * list Apply_results.packed_internal_operation_result) :=
   let fix apply
-    (ctxt : Alpha_context.context)
+    (ctxt : Alpha_context.t)
     (applied : list Apply_results.packed_internal_operation_result)
     (worklist : list Alpha_context.packed_internal_operation) {struct ctxt}
     : Lwt.t
-      ((* `Success *) Alpha_context.context *
-        list Apply_results.packed_internal_operation_result) :=
+      (success_or_failure * list Apply_results.packed_internal_operation_result) :=
     match worklist with
     | [] =&gt; Lwt.__return ((Success ctxt), (List.rev applied))
     |
@@ -9108,128 +9092,136 @@ Definition precheck_manager_contents
   (ctxt : Alpha_context.context) (chain_id : (|Chain_id|).(S.HASH.t))
   (raw_operation : Alpha_context.operation) (op : Alpha_context.contents)
   : Lwt.t (Error_monad.tzresult Alpha_context.context) :=
-  let
-    'Alpha_context.Manager_operation {|
+  match op with
+  |
+    Alpha_context.Manager_operation {|
       Alpha_context.contents.Manager_operation.source := source;
         Alpha_context.contents.Manager_operation.fee := fee;
         Alpha_context.contents.Manager_operation.counter := counter;
         Alpha_context.contents.Manager_operation.operation := operation;
         Alpha_context.contents.Manager_operation.gas_limit := gas_limit;
         Alpha_context.contents.Manager_operation.storage_limit := storage_limit
-        |} := op in
-  let=? '_ := Lwt.__return (Alpha_context.Gas.check_limit ctxt gas_limit) in
-  let ctxt := Alpha_context.Gas.set_limit ctxt gas_limit in
-  let=? '_ :=
-    Lwt.__return (Alpha_context.Fees.check_storage_limit ctxt storage_limit) in
-  let=? '_ :=
-    Alpha_context.Contract.must_be_allocated ctxt
-      (Alpha_context.Contract.implicit_contract source) in
-  let=? '_ := Alpha_context.Contract.check_counter_increment ctxt source counter
-    in
-  let=? ctxt :=
-    match operation with
-    | Alpha_context.Reveal pk =&gt;
-      Alpha_context.Contract.reveal_manager_key ctxt source pk
-    |
-      Alpha_context.Transaction {|
-        Alpha_context.manager_operation.Transaction.parameters := parameters
-          |} =&gt;
-      let=? '_ :=
-        Lwt.__return
-          ((Error_monad.record_trace extensible_type_value)
-            (Alpha_context.Gas.check_enough ctxt
-              (Alpha_context.Script.minimal_deserialize_cost parameters))) in
-      Error_monad.op_gtgtpipequestion
-        ((Error_monad.trace extensible_type_value)
-          (Alpha_context.Script.force_decode_in_context ctxt parameters))
-        (fun function_parameter =&gt;
-          let '(_arg, ctxt) := function_parameter in
-          ctxt)
-    |
-      Alpha_context.Origination {|
-        Alpha_context.manager_operation.Origination.script := script |} =&gt;
-      let=? '_ :=
-        Lwt.__return
-          ((Error_monad.record_trace extensible_type_value)
-            (let? ctxt :=
-              Alpha_context.Gas.consume ctxt
+        |} =&gt;
+    let=? '_ := Lwt.__return (Alpha_context.Gas.check_limit ctxt gas_limit) in
+    let ctxt := Alpha_context.Gas.set_limit ctxt gas_limit in
+    let=? '_ :=
+      Lwt.__return (Alpha_context.Fees.check_storage_limit ctxt storage_limit)
+      in
+    let=? '_ :=
+      Alpha_context.Contract.must_be_allocated ctxt
+        (Alpha_context.Contract.implicit_contract source) in
+    let=? '_ :=
+      Alpha_context.Contract.check_counter_increment ctxt source counter in
+    let=? ctxt :=
+      match operation with
+      | Alpha_context.Reveal pk =&gt;
+        Alpha_context.Contract.reveal_manager_key ctxt source pk
+      |
+        Alpha_context.Transaction {|
+          Alpha_context.manager_operation.Transaction.parameters := parameters
+            |} =&gt;
+        let=? '_ :=
+          Lwt.__return
+            ((Error_monad.record_trace extensible_type_value)
+              (Alpha_context.Gas.check_enough ctxt
+                (Alpha_context.Script.minimal_deserialize_cost parameters))) in
+        Error_monad.op_gtgtpipequestion
+          ((Error_monad.trace extensible_type_value)
+            (Alpha_context.Script.force_decode_in_context ctxt parameters))
+          (fun function_parameter =&gt;
+            let '(_arg, ctxt) := function_parameter in
+            ctxt)
+      |
+        Alpha_context.Origination {|
+          Alpha_context.manager_operation.Origination.script := script |} =&gt;
+        let=? '_ :=
+          Lwt.__return
+            ((Error_monad.record_trace extensible_type_value)
+              (let? ctxt :=
+                Alpha_context.Gas.consume ctxt
+                  (Alpha_context.Script.minimal_deserialize_cost
+                    script.(Alpha_context.Script.t.code)) in
+              Alpha_context.Gas.check_enough ctxt
                 (Alpha_context.Script.minimal_deserialize_cost
-                  script.(Alpha_context.Script.t.code)) in
-            Alpha_context.Gas.check_enough ctxt
-              (Alpha_context.Script.minimal_deserialize_cost
-                script.(Alpha_context.Script.t.storage)))) in
-      let=? '(_code, ctxt) :=
-        (Error_monad.trace extensible_type_value)
-          (Alpha_context.Script.force_decode_in_context ctxt
-            script.(Alpha_context.Script.t.code)) in
-      Error_monad.op_gtgtpipequestion
-        ((Error_monad.trace extensible_type_value)
-          (Alpha_context.Script.force_decode_in_context ctxt
-            script.(Alpha_context.Script.t.storage)))
-        (fun function_parameter =&gt;
-          let '(_storage, ctxt) := function_parameter in
-          ctxt)
-    | _ =&gt; Error_monad.__return ctxt
-    end in
-  let=? public_key := Alpha_context.Contract.get_manager_key ctxt source in
-  let=? '_ :=
-    Alpha_context.Operation.check_signature public_key chain_id raw_operation in
-  let=? ctxt := Alpha_context.Contract.increment_counter ctxt source in
-  let=? ctxt :=
-    Alpha_context.Contract.spend ctxt
-      (Alpha_context.Contract.implicit_contract source) fee in
-  let=? ctxt := Alpha_context.add_fees ctxt fee in
-  Error_monad.__return ctxt.
+                  script.(Alpha_context.Script.t.storage)))) in
+        let=? '(_code, ctxt) :=
+          (Error_monad.trace extensible_type_value)
+            (Alpha_context.Script.force_decode_in_context ctxt
+              script.(Alpha_context.Script.t.code)) in
+        Error_monad.op_gtgtpipequestion
+          ((Error_monad.trace extensible_type_value)
+            (Alpha_context.Script.force_decode_in_context ctxt
+              script.(Alpha_context.Script.t.storage)))
+          (fun function_parameter =&gt;
+            let '(_storage, ctxt) := function_parameter in
+            ctxt)
+      | _ =&gt; Error_monad.__return ctxt
+      end in
+    let=? public_key := Alpha_context.Contract.get_manager_key ctxt source in
+    let=? '_ :=
+      Alpha_context.Operation.check_signature public_key chain_id raw_operation
+      in
+    let=? ctxt := Alpha_context.Contract.increment_counter ctxt source in
+    let=? ctxt :=
+      Alpha_context.Contract.spend ctxt
+        (Alpha_context.Contract.implicit_contract source) fee in
+    let=? ctxt := Alpha_context.add_fees ctxt fee in
+    Error_monad.__return ctxt
+  | _ =&gt; unreachable_gadt_branch
+  end.
 
 Definition apply_manager_contents
   (ctxt : Alpha_context.context) (mode : Script_ir_translator.unparsing_mode)
   (chain_id : (|Chain_id|).(S.HASH.t)) (op : Alpha_context.contents)
   : Lwt.t
-    (((* `Failure *) unit + (* `Success *) Alpha_context.context) *
-      Apply_results.manager_operation_result *
+    (success_or_failure * Apply_results.manager_operation_result *
       list Apply_results.packed_internal_operation_result) :=
-  let
-    'Alpha_context.Manager_operation {|
+  match op with
+  |
+    Alpha_context.Manager_operation {|
       Alpha_context.contents.Manager_operation.source := source;
         Alpha_context.contents.Manager_operation.operation := operation;
         Alpha_context.contents.Manager_operation.gas_limit := gas_limit;
         Alpha_context.contents.Manager_operation.storage_limit := storage_limit
-        |} := op in
-  let ctxt := Alpha_context.Gas.set_limit ctxt gas_limit in
-  let ctxt := Alpha_context.Fees.start_counting_storage_fees ctxt in
-  let source := Alpha_context.Contract.implicit_contract source in
-  let= function_parameter :=
-    apply_manager_operation_content ctxt mode source source chain_id false
-      operation in
-  match function_parameter with
-  | Pervasives.Ok (ctxt, operation_results, internal_operations) =&gt;
+        |} =&gt;
+    let ctxt := Alpha_context.Gas.set_limit ctxt gas_limit in
+    let ctxt := Alpha_context.Fees.start_counting_storage_fees ctxt in
+    let source := Alpha_context.Contract.implicit_contract source in
     let= function_parameter :=
-      apply_internal_manager_operations ctxt mode source chain_id
-        internal_operations in
+      apply_manager_operation_content ctxt mode source source chain_id false
+        operation in
     match function_parameter with
-    | (Success ctxt, internal_operations_results) =&gt;
+    | Pervasives.Ok (ctxt, operation_results, internal_operations) =&gt;
       let= function_parameter :=
-        Alpha_context.Fees.burn_storage_fees ctxt storage_limit source in
+        apply_internal_manager_operations ctxt mode source chain_id
+          internal_operations in
       match function_parameter with
-      | Pervasives.Ok ctxt =&gt;
+      | (Success ctxt, internal_operations_results) =&gt;
+        let= function_parameter :=
+          Alpha_context.Fees.burn_storage_fees ctxt storage_limit source in
+        match function_parameter with
+        | Pervasives.Ok ctxt =&gt;
+          Lwt.__return
+            ((Success ctxt), (Apply_results.Applied operation_results),
+              internal_operations_results)
+        | Pervasives.Error errors =&gt;
+          Lwt.__return
+            (Failure,
+              (Apply_results.Backtracked operation_results (Some errors)),
+              internal_operations_results)
+        end
+      | (Failure, internal_operations_results) =&gt;
         Lwt.__return
-          ((Success ctxt), (Apply_results.Applied operation_results),
-            internal_operations_results)
-      | Pervasives.Error errors =&gt;
-        Lwt.__return
-          (Failure, (Apply_results.Backtracked operation_results (Some errors)),
+          (Failure, (Apply_results.Applied operation_results),
             internal_operations_results)
       end
-    | (Failure, internal_operations_results) =&gt;
+    | Pervasives.Error errors =&gt;
       Lwt.__return
-        (Failure, (Apply_results.Applied operation_results),
-          internal_operations_results)
+        (Failure,
+          (Apply_results.Failed (Alpha_context.manager_kind operation) errors),
+          nil)
     end
-  | Pervasives.Error errors =&gt;
-    Lwt.__return
-      (Failure,
-        (Apply_results.Failed (Alpha_context.manager_kind operation) errors),
-        nil)
+  | _ =&gt; unreachable_gadt_branch
   end.
 
 Definition skipped_operation_result
@@ -9299,6 +9291,7 @@ Fixpoint mark_skipped
             skipped_operation_result operation;
           Apply_results.contents_result.Manager_operation_result.internal_operation_results :=
             nil |}) (mark_skipped baker level rest)
+  | _ =&gt; unreachable_gadt_branch
   end.
 
 Fixpoint precheck_manager_contents_list
@@ -9312,15 +9305,14 @@ Fixpoint precheck_manager_contents_list
   | Alpha_context.Cons ((Alpha_context.Manager_operation _) as op) rest =&gt;
     let=? ctxt := precheck_manager_contents ctxt chain_id raw_operation op in
     precheck_manager_contents_list ctxt chain_id raw_operation rest
+  | _ =&gt; unreachable_gadt_branch
   end.
 
 Fixpoint apply_manager_contents_list_rec
   (ctxt : Alpha_context.t) (mode : Script_ir_translator.unparsing_mode)
   (baker : Alpha_context.public_key_hash) (chain_id : (|Chain_id|).(S.HASH.t))
   (contents_list : Alpha_context.contents_list) {struct ctxt}
-  : Lwt.t
-    (((* `Failure *) unit + (* `Success *) Alpha_context.context) *
-      Apply_results.contents_result_list) :=
+  : Lwt.t (success_or_failure * Apply_results.contents_result_list) :=
   let level := Alpha_context.Level.current ctxt in
   match contents_list with
   |
@@ -9401,10 +9393,30 @@ Fixpoint apply_manager_contents_list_rec
       Lwt.__return
         (ctxt_result, (Apply_results.Cons_result __result_value results))
     end
+  | _ =&gt; unreachable_gadt_branch
   end.
 
 Definition mark_backtracked (results : Apply_results.contents_result_list)
   : Apply_results.contents_result_list :=
+  let mark_manager_operation_result
+    (function_parameter : Apply_results.manager_operation_result)
+    : Apply_results.manager_operation_result :=
+    match function_parameter with
+    |
+      (Apply_results.Failed _ _ | Apply_results.Skipped _ |
+      Apply_results.Backtracked _ _) as __result_value =&gt; __result_value
+    | (Apply_results.Applied (Apply_results.Reveal_result _)) as __result_value
+      =&gt; __result_value
+    | Apply_results.Applied __result_value =&gt;
+      Apply_results.Backtracked __result_value None
+    end in
+  let mark_internal_operation_results
+    (function_parameter : Apply_results.packed_internal_operation_result)
+    : Apply_results.packed_internal_operation_result :=
+    let 'Apply_results.Internal_operation_result kind __result_value :=
+      function_parameter in
+    Apply_results.Internal_operation_result kind
+      (mark_manager_operation_result __result_value) in
   let fix mark_contents_list
     (function_parameter : Apply_results.contents_result_list)
     {struct function_parameter} : Apply_results.contents_result_list :=
@@ -9436,26 +9448,7 @@ Definition mark_backtracked (results : Apply_results.contents_result_list)
               List.map mark_internal_operation_results
                 op.(Apply_results.contents_result.Manager_operation_result.internal_operation_results)
             |}) (mark_contents_list rest)
-    end
-  with mark_internal_operation_results
-    (function_parameter : Apply_results.packed_internal_operation_result)
-    {struct function_parameter}
-    : Apply_results.packed_internal_operation_result :=
-    let 'Apply_results.Internal_operation_result kind __result_value :=
-      function_parameter in
-    Apply_results.Internal_operation_result kind
-      (mark_manager_operation_result __result_value)
-  with mark_manager_operation_result
-    (function_parameter : Apply_results.manager_operation_result)
-    {struct function_parameter} : Apply_results.manager_operation_result :=
-    match function_parameter with
-    |
-      (Apply_results.Failed _ _ | Apply_results.Skipped _ |
-      Apply_results.Backtracked _ _) as __result_value =&gt; __result_value
-    | (Apply_results.Applied (Apply_results.Reveal_result _)) as __result_value
-      =&gt; __result_value
-    | Apply_results.Applied __result_value =&gt;
-      Apply_results.Backtracked __result_value None
+    | _ =&gt; unreachable_gadt_branch
     end in
   mark_contents_list results.
 
@@ -9829,6 +9822,7 @@ Definition apply_contents_list
     let= '(ctxt, __result_value) :=
       apply_manager_contents_list ctxt mode baker chain_id op in
     Error_monad.__return (ctxt, __result_value)
+  | _ =&gt; unreachable_gadt_branch
   end.
 
 Definition apply_operation
@@ -47503,12 +47497,12 @@ Definition init (ctxt : Context.t) (block_header : Block_header.shell_header)
   <div style="margin: 20px;">
     <h3>Main_mli</h3>
     <ul>
-      <li>OCaml size: 69 lines</li>
-      <li>Coq size: 248 lines (+259% compared to&nbsp;OCaml)</li>
+      <li>OCaml size: 62 lines</li>
+      <li>Coq size: 249 lines (+301% compared to&nbsp;OCaml)</li>
     </ul>
   </div>
   <div class="col-md-6">
-    <a href="#main.mli"><code>main.mli</code></a>&nbsp;<span class="label label-warning">3 warnings</span>
+    <a href="#main.mli"><code>main.mli</code></a>&nbsp;<span class="label label-warning">2 warnings</span>
     
     <pre>(*****************************************************************************)
 (*                                                                           *)
@@ -47563,13 +47557,6 @@ type validation_state = {
   op_count : int;
 }
 
-type operation_data = Alpha_context.packed_protocol_data
-
-<abbr class="mark-warning" title="We do not handle types with both a synonym and a type definition">type operation = Alpha_context.packed_operation = {
-  shell : Operation.shell_header;
-  protocol_data : operation_data;
-}</abbr>
-
 include
   <abbr class="mark-warning" title="Can only do `with` on types in module types using type expressions rather than type definitions
 
@@ -47579,9 +47566,9 @@ Can only do `with` on types in module types using type expressions rather than t
     with type block_header_data = Alpha_context.Block_header.protocol_data
      and type block_header_metadata = Apply_results.block_metadata
      and type block_header = Alpha_context.Block_header.t
-     and type operation_data := operation_data
+     and type operation_data = Alpha_context.packed_protocol_data
      and type operation_receipt = Apply_results.packed_operation_metadata
-     and type operation := operation
+     and type operation = Alpha_context.packed_operation
      and type validation_state := validation_state</abbr>
 </pre>
   </div>
@@ -47738,17 +47725,13 @@ Module validation_state.
 End validation_state.
 Definition validation_state := validation_state.record.
 
-Definition operation_data : Set := Alpha_context.packed_protocol_data.
-
-Definition operation : Set := Alpha_context.packed_operation.
-
 Parameter Included_PROTOCOL :
   {'[block_header, operation] : [Set ** Set] &amp;
     Updater.PROTOCOL.signature
       (block_header_data := Alpha_context.Block_header.protocol_data)
       (block_header := block_header)
       (block_header_metadata := Apply_results.block_metadata)
-      (operation_data := operation_data)
+      (operation_data := Alpha_context.packed_protocol_data)
       (operation_receipt := Apply_results.packed_operation_metadata)
       (operation := operation) (validation_state := validation_state)}.
 
@@ -47777,8 +47760,13 @@ Definition block_header_metadata_encoding :
   Data_encoding.t block_header_metadata :=
   (|Included_PROTOCOL|).(Updater.PROTOCOL.block_header_metadata_encoding).
 
+Definition operation_data :=
+  (|Included_PROTOCOL|).(Updater.PROTOCOL.operation_data).
+
 Definition operation_receipt :=
   (|Included_PROTOCOL|).(Updater.PROTOCOL.operation_receipt).
+
+Definition operation := (|Included_PROTOCOL|).(Updater.PROTOCOL.operation).
 
 Definition operation_data_encoding : Data_encoding.t operation_data :=
   (|Included_PROTOCOL|).(Updater.PROTOCOL.operation_data_encoding).
