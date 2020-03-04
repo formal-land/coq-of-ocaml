@@ -71,19 +71,19 @@ Definition unparse_stack
       (Error_monad.tzresult (list (Alpha_context.Script.expr * option string))) :=
     match function_parameter with
     | (Empty, Script_typed_ir.Empty_t) =>
-      obj_magic
+      cast
         (Lwt.t
           (Error_monad.tzresult
             (list (Alpha_context.Script.expr * option string))))
       (Error_monad.return_nil (a := unit))
     | (Item v rest, Script_typed_ir.Item_t ty rest_ty annot) =>
       let 'existT _ __0 [v, rest, ty, rest_ty, annot] :=
-        obj_magic_exists (Es := Set)
+        cast_exists (Es := Set)
           (fun __0 =>
             [__0 ** stack ** Script_typed_ir.ty ** Script_typed_ir.stack_ty **
               option Script_typed_ir.var_annot]) [v, rest, ty, rest_ty, annot]
         in
-      obj_magic
+      cast
         (Lwt.t
           (Error_monad.tzresult
             (list (Alpha_context.Script.expr * option string))))
@@ -118,7 +118,7 @@ Fixpoint interp_stack_prefix_preserving_operation {result : Set}
         (Script_typed_ir.Prefix (Script_typed_ir.Prefix n))),
       Item v0 (Item v1 (Item v2 (Item v3 rest)))) =>
     let 'existT _ [__0, __3, __6, __9] [n, v0, v1, v2, v3, rest] :=
-      obj_magic_exists (Es := [Set ** Set ** Set ** Set])
+      cast_exists (Es := [Set ** Set ** Set ** Set])
         (fun '[__0, __3, __6, __9] =>
           [Script_typed_ir.stack_prefix_preservation_witness ** __0 ** __3 **
             __6 ** __9 ** stack]) [n, v0, v1, v2, v3, rest] in
@@ -128,7 +128,7 @@ Fixpoint interp_stack_prefix_preserving_operation {result : Set}
       ((Item v0 (Item v1 (Item v2 (Item v3 rest')))), __result_value)
   | (Script_typed_ir.Prefix n, Item v rest) =>
     let 'existT _ __12 [n, v, rest] :=
-      obj_magic_exists (Es := Set)
+      cast_exists (Es := Set)
         (fun __12 =>
           [Script_typed_ir.stack_prefix_preservation_witness ** __12 ** stack])
         [n, v, rest] in
@@ -136,7 +136,7 @@ Fixpoint interp_stack_prefix_preserving_operation {result : Set}
       interp_stack_prefix_preserving_operation f n rest in
     Error_monad.__return ((Item v rest'), __result_value)
   | (Script_typed_ir.Rest, v) =>
-    let v := obj_magic stack v in
+    let v := cast stack v in
     f v
   | _ => unreachable_gadt_branch
   end.
@@ -236,21 +236,21 @@ Fixpoint step
     let logged_return := logged_return __descr_value in
     match (instr, __stack_value) with
     | (Script_typed_ir.Drop, Item _ rest) =>
-      let rest := obj_magic stack rest in
+      let rest := cast stack rest in
       let=? ctxt :=
         Lwt.__return (Alpha_context.Gas.consume ctxt Interp_costs.stack_op) in
       logged_return (rest, ctxt)
     
     | (Script_typed_ir.Dup, Item v rest) =>
       let 'existT _ __2 [v, rest] :=
-        obj_magic_exists (Es := Set) (fun __2 => [__2 ** stack]) [v, rest] in
+        cast_exists (Es := Set) (fun __2 => [__2 ** stack]) [v, rest] in
       let=? ctxt :=
         Lwt.__return (Alpha_context.Gas.consume ctxt Interp_costs.stack_op) in
       logged_return ((Item v (Item v rest)), ctxt)
     
     | (Script_typed_ir.Swap, Item vi (Item vo rest)) =>
       let 'existT _ [__4, __5] [vi, vo, rest] :=
-        obj_magic_exists (Es := [Set ** Set])
+        cast_exists (Es := [Set ** Set])
           (fun '[__4, __5] => [__4 ** __5 ** stack]) [vi, vo, rest] in
       let=? ctxt :=
         Lwt.__return (Alpha_context.Gas.consume ctxt Interp_costs.stack_op) in
@@ -258,20 +258,20 @@ Fixpoint step
     
     | (Script_typed_ir.Const v, rest) =>
       let 'existT _ __7 [v, rest] :=
-        obj_magic_exists (Es := Set) (fun __7 => [__7 ** stack]) [v, rest] in
+        cast_exists (Es := Set) (fun __7 => [__7 ** stack]) [v, rest] in
       let=? ctxt :=
         Lwt.__return (Alpha_context.Gas.consume ctxt Interp_costs.push) in
       logged_return ((Item v rest), ctxt)
     
     | (Script_typed_ir.Cons_some, Item v rest) =>
       let 'existT _ __8 [v, rest] :=
-        obj_magic_exists (Es := Set) (fun __8 => [__8 ** stack]) [v, rest] in
+        cast_exists (Es := Set) (fun __8 => [__8 ** stack]) [v, rest] in
       let=? ctxt :=
         Lwt.__return (Alpha_context.Gas.consume ctxt Interp_costs.wrap) in
       logged_return ((Item (Some v) rest), ctxt)
     
     | (Script_typed_ir.Cons_none _, rest) =>
-      let rest := obj_magic stack rest in
+      let rest := cast stack rest in
       let=? ctxt :=
         Lwt.__return
           (Alpha_context.Gas.consume ctxt Interp_costs.variant_no_data) in
@@ -279,7 +279,7 @@ Fixpoint step
     
     | (Script_typed_ir.If_none bt bf, Item v rest) =>
       let 'existT _ __11 [bt, bf, v, rest] :=
-        obj_magic_exists (Es := Set)
+        cast_exists (Es := Set)
           (fun __11 =>
             [Script_typed_ir.descr ** Script_typed_ir.descr ** option __11 **
               stack]) [bt, bf, v, rest] in
@@ -296,7 +296,7 @@ Fixpoint step
     
     | (Script_typed_ir.Cons_pair, Item __a_value (Item __b_value rest)) =>
       let 'existT _ [__13, __14] [__a_value, __b_value, rest] :=
-        obj_magic_exists (Es := [Set ** Set])
+        cast_exists (Es := [Set ** Set])
           (fun '[__13, __14] => [__13 ** __14 ** stack])
           [__a_value, __b_value, rest] in
       let=? ctxt :=
@@ -324,7 +324,7 @@ Fixpoint step
               |}
           |}, Item (_ as pair) rest) =>
       let 'existT _ [__18, __19] [pair, rest] :=
-        obj_magic_exists (Es := [Set ** Set])
+        cast_exists (Es := [Set ** Set])
           (fun '[__18, __19] => [Script_typed_ir.pair __18 __19 ** stack])
           [pair, rest] in
       let '(__a_value, __b_value) := pair in
@@ -335,7 +335,7 @@ Fixpoint step
     
     | (Script_typed_ir.Car, Item pair rest) =>
       let 'existT _ [__21, __22] [pair, rest] :=
-        obj_magic_exists (Es := [Set ** Set])
+        cast_exists (Es := [Set ** Set])
           (fun '[__21, __22] => [Script_typed_ir.pair __21 __22 ** stack])
           [pair, rest] in
       let '(__a_value, _) := pair in
@@ -346,7 +346,7 @@ Fixpoint step
     
     | (Script_typed_ir.Cdr, Item pair rest) =>
       let 'existT _ [__24, __25] [pair, rest] :=
-        obj_magic_exists (Es := [Set ** Set])
+        cast_exists (Es := [Set ** Set])
           (fun '[__24, __25] => [Script_typed_ir.pair __24 __25 ** stack])
           [pair, rest] in
       let '(_, __b_value) := pair in
@@ -357,21 +357,21 @@ Fixpoint step
     
     | (Script_typed_ir.Left, Item v rest) =>
       let 'existT _ __27 [v, rest] :=
-        obj_magic_exists (Es := Set) (fun __27 => [__27 ** stack]) [v, rest] in
+        cast_exists (Es := Set) (fun __27 => [__27 ** stack]) [v, rest] in
       let=? ctxt :=
         Lwt.__return (Alpha_context.Gas.consume ctxt Interp_costs.wrap) in
       logged_return ((Item (Script_typed_ir.L (b := unit) v) rest), ctxt)
     
     | (Script_typed_ir.Right, Item v rest) =>
       let 'existT _ __30 [v, rest] :=
-        obj_magic_exists (Es := Set) (fun __30 => [__30 ** stack]) [v, rest] in
+        cast_exists (Es := Set) (fun __30 => [__30 ** stack]) [v, rest] in
       let=? ctxt :=
         Lwt.__return (Alpha_context.Gas.consume ctxt Interp_costs.wrap) in
       logged_return ((Item (Script_typed_ir.R (a := unit) v) rest), ctxt)
     
     | (Script_typed_ir.If_left bt bf, Item v rest) =>
       let 'existT _ [__33, __34] [bt, bf, v, rest] :=
-        obj_magic_exists (Es := [Set ** Set])
+        cast_exists (Es := [Set ** Set])
           (fun '[__33, __34] =>
             [Script_typed_ir.descr ** Script_typed_ir.descr **
               Script_typed_ir.union __33 __34 ** stack]) [bt, bf, v, rest] in
@@ -388,7 +388,7 @@ Fixpoint step
     
     | (Script_typed_ir.Cons_list, Item hd (Item tl rest)) =>
       let 'existT _ __36 [hd, tl, rest] :=
-        obj_magic_exists (Es := Set) (fun __36 => [__36 ** list __36 ** stack])
+        cast_exists (Es := Set) (fun __36 => [__36 ** list __36 ** stack])
           [hd, tl, rest] in
       let=? ctxt :=
         Lwt.__return (Alpha_context.Gas.consume ctxt Interp_costs.__cons_value)
@@ -396,7 +396,7 @@ Fixpoint step
       logged_return ((Item (cons hd tl) rest), ctxt)
     
     | (Script_typed_ir.Nil, rest) =>
-      let rest := obj_magic stack rest in
+      let rest := cast stack rest in
       let=? ctxt :=
         Lwt.__return
           (Alpha_context.Gas.consume ctxt Interp_costs.variant_no_data) in
@@ -404,7 +404,7 @@ Fixpoint step
     
     | (Script_typed_ir.If_cons bt bf, Item l rest) =>
       let 'existT _ __39 [bt, bf, l, rest] :=
-        obj_magic_exists (Es := Set)
+        cast_exists (Es := Set)
           (fun __39 =>
             [Script_typed_ir.descr ** Script_typed_ir.descr ** list __39 **
               stack]) [bt, bf, l, rest] in
@@ -421,7 +421,7 @@ Fixpoint step
     
     | (Script_typed_ir.List_map body, Item l rest) =>
       let 'existT _ __41 [body, l, rest] :=
-        obj_magic_exists (Es := Set)
+        cast_exists (Es := Set)
           (fun __41 => [Script_typed_ir.descr ** list __41 ** stack])
           [body, l, rest] in
       let fix loop {A B : Set}
@@ -438,8 +438,7 @@ Fixpoint step
           match function_parameter with
           | (Item hd rest, ctxt) =>
             let '[hd, rest, ctxt] :=
-              obj_magic [B ** stack ** Alpha_context.context] [hd, rest, ctxt]
-              in
+              cast [B ** stack ** Alpha_context.context] [hd, rest, ctxt] in
             loop body rest ctxt tl (cons hd acc)
           | _ => unreachable_gadt_branch
           end
@@ -449,7 +448,7 @@ Fixpoint step
     
     | (Script_typed_ir.List_size, Item __list_value rest) =>
       let 'existT _ __44 [__list_value, rest] :=
-        obj_magic_exists (Es := Set) (fun __44 => [list __44 ** stack])
+        cast_exists (Es := Set) (fun __44 => [list __44 ** stack])
           [__list_value, rest] in
       let=? '(len, ctxt) :=
         Lwt.__return
@@ -469,7 +468,7 @@ Fixpoint step
     
     | (Script_typed_ir.List_iter body, Item l init) =>
       let 'existT _ __46 [body, l, init] :=
-        obj_magic_exists (Es := Set)
+        cast_exists (Es := Set)
           (fun __46 => [Script_typed_ir.descr ** list __46 ** stack])
           [body, l, init] in
       let fix loop
@@ -491,7 +490,7 @@ Fixpoint step
     
     | (Script_typed_ir.Empty_set __t_value, rest) =>
       let '[__t_value, rest] :=
-        obj_magic [Script_typed_ir.comparable_ty ** stack] [__t_value, rest] in
+        cast [Script_typed_ir.comparable_ty ** stack] [__t_value, rest] in
       let=? ctxt :=
         Lwt.__return (Alpha_context.Gas.consume ctxt Interp_costs.empty_set) in
       logged_return
@@ -500,7 +499,7 @@ Fixpoint step
     
     | (Script_typed_ir.Set_iter body, Item set init) =>
       let 'existT _ __49 [body, set, init] :=
-        obj_magic_exists (Es := Set)
+        cast_exists (Es := Set)
           (fun __49 =>
             [Script_typed_ir.descr ** Script_typed_ir.set __49 ** stack])
           [body, set, init] in
@@ -530,7 +529,7 @@ Fixpoint step
     
     | (Script_typed_ir.Set_mem, Item v (Item set rest)) =>
       let 'existT _ __51 [v, set, rest] :=
-        obj_magic_exists (Es := Set)
+        cast_exists (Es := Set)
           (fun __51 => [__51 ** Script_typed_ir.set __51 ** stack])
           [v, set, rest] in
       consume_gas_binop __descr_value (Script_ir_translator.set_mem, v, set)
@@ -538,7 +537,7 @@ Fixpoint step
     
     | (Script_typed_ir.Set_update, Item v (Item presence (Item set rest))) =>
       let 'existT _ __53 [v, presence, set, rest] :=
-        obj_magic_exists (Es := Set)
+        cast_exists (Es := Set)
           (fun __53 => [__53 ** bool ** Script_typed_ir.set __53 ** stack])
           [v, presence, set, rest] in
       consume_gas_terop __descr_value
@@ -547,7 +546,7 @@ Fixpoint step
     
     | (Script_typed_ir.Set_size, Item set rest) =>
       let 'existT _ __55 [set, rest] :=
-        obj_magic_exists (Es := Set)
+        cast_exists (Es := Set)
           (fun __55 => [Script_typed_ir.set __55 ** stack]) [set, rest] in
       consume_gas_unop __descr_value (Script_ir_translator.set_size, set)
         (fun function_parameter =>
@@ -556,7 +555,7 @@ Fixpoint step
     
     | (Script_typed_ir.Empty_map __t_value _, rest) =>
       let '[__t_value, rest] :=
-        obj_magic [Script_typed_ir.comparable_ty ** stack] [__t_value, rest] in
+        cast [Script_typed_ir.comparable_ty ** stack] [__t_value, rest] in
       let=? ctxt :=
         Lwt.__return (Alpha_context.Gas.consume ctxt Interp_costs.empty_map) in
       logged_return
@@ -566,7 +565,7 @@ Fixpoint step
     
     | (Script_typed_ir.Map_map body, Item map rest) =>
       let 'existT _ [__59, __60] [body, map, rest] :=
-        obj_magic_exists (Es := [Set ** Set])
+        cast_exists (Es := [Set ** Set])
           (fun '[__59, __60] =>
             [Script_typed_ir.descr ** Script_typed_ir.map __59 __60 ** stack])
           [body, map, rest] in
@@ -594,8 +593,7 @@ Fixpoint step
           match function_parameter with
           | (Item hd rest, ctxt) =>
             let '[hd, rest, ctxt] :=
-              obj_magic [C ** stack ** Alpha_context.context] [hd, rest, ctxt]
-              in
+              cast [C ** stack ** Alpha_context.context] [hd, rest, ctxt] in
             loop body rest ctxt tl
               (Script_ir_translator.map_update k (Some hd) acc)
           | _ => unreachable_gadt_branch
@@ -609,7 +607,7 @@ Fixpoint step
     
     | (Script_typed_ir.Map_iter body, Item map init) =>
       let 'existT _ [__63, __64] [body, map, init] :=
-        obj_magic_exists (Es := [Set ** Set])
+        cast_exists (Es := [Set ** Set])
           (fun '[__63, __64] =>
             [Script_typed_ir.descr ** Script_typed_ir.map __63 __64 ** stack])
           [body, map, init] in
@@ -639,7 +637,7 @@ Fixpoint step
     
     | (Script_typed_ir.Map_mem, Item v (Item map rest)) =>
       let 'existT _ [__66, __67] [v, map, rest] :=
-        obj_magic_exists (Es := [Set ** Set])
+        cast_exists (Es := [Set ** Set])
           (fun '[__66, __67] => [__66 ** Script_typed_ir.map __66 __67 ** stack])
           [v, map, rest] in
       consume_gas_binop __descr_value (Script_ir_translator.map_mem, v, map)
@@ -647,7 +645,7 @@ Fixpoint step
     
     | (Script_typed_ir.Map_get, Item v (Item map rest)) =>
       let 'existT _ [__69, __70] [v, map, rest] :=
-        obj_magic_exists (Es := [Set ** Set])
+        cast_exists (Es := [Set ** Set])
           (fun '[__69, __70] => [__69 ** Script_typed_ir.map __69 __70 ** stack])
           [v, map, rest] in
       consume_gas_binop __descr_value (Script_ir_translator.map_get, v, map)
@@ -655,7 +653,7 @@ Fixpoint step
     
     | (Script_typed_ir.Map_update, Item k (Item v (Item map rest))) =>
       let 'existT _ [__72, __73] [k, v, map, rest] :=
-        obj_magic_exists (Es := [Set ** Set])
+        cast_exists (Es := [Set ** Set])
           (fun '[__72, __73] =>
             [__72 ** option __73 ** Script_typed_ir.map __72 __73 ** stack])
           [k, v, map, rest] in
@@ -665,7 +663,7 @@ Fixpoint step
     
     | (Script_typed_ir.Map_size, Item map rest) =>
       let 'existT _ [__75, __76] [map, rest] :=
-        obj_magic_exists (Es := [Set ** Set])
+        cast_exists (Es := [Set ** Set])
           (fun '[__75, __76] => [Script_typed_ir.map __75 __76 ** stack])
           [map, rest] in
       consume_gas_unop __descr_value (Script_ir_translator.map_size, map)
@@ -675,7 +673,7 @@ Fixpoint step
     
     | (Script_typed_ir.Empty_big_map tk tv, rest) =>
       let '[tk, tv, rest] :=
-        obj_magic [Script_typed_ir.comparable_ty ** Script_typed_ir.ty ** stack]
+        cast [Script_typed_ir.comparable_ty ** Script_typed_ir.ty ** stack]
           [tk, tv, rest] in
       let=? ctxt :=
         Lwt.__return (Alpha_context.Gas.consume ctxt Interp_costs.empty_map) in
@@ -686,7 +684,7 @@ Fixpoint step
     
     | (Script_typed_ir.Big_map_mem, Item __key_value (Item map rest)) =>
       let 'existT _ [__80, __81] [__key_value, map, rest] :=
-        obj_magic_exists (Es := [Set ** Set])
+        cast_exists (Es := [Set ** Set])
           (fun '[__80, __81] =>
             [__80 ** Script_typed_ir.big_map __80 __81 ** stack])
           [__key_value, map, rest] in
@@ -701,7 +699,7 @@ Fixpoint step
     
     | (Script_typed_ir.Big_map_get, Item __key_value (Item map rest)) =>
       let 'existT _ [__83, __84] [__key_value, map, rest] :=
-        obj_magic_exists (Es := [Set ** Set])
+        cast_exists (Es := [Set ** Set])
           (fun '[__83, __84] =>
             [__83 ** Script_typed_ir.big_map __83 __84 ** stack])
           [__key_value, map, rest] in
@@ -718,7 +716,7 @@ Fixpoint step
       (Script_typed_ir.Big_map_update,
         Item __key_value (Item maybe_value (Item map rest))) =>
       let 'existT _ [__86, __87] [__key_value, maybe_value, map, rest] :=
-        obj_magic_exists (Es := [Set ** Set])
+        cast_exists (Es := [Set ** Set])
           (fun '[__86, __87] =>
             [__86 ** option __87 ** Script_typed_ir.big_map __86 __87 ** stack])
           [__key_value, maybe_value, map, rest] in
@@ -733,7 +731,7 @@ Fixpoint step
     | (Script_typed_ir.Add_seconds_to_timestamp, Item n (Item __t_value rest))
       =>
       let '[n, __t_value, rest] :=
-        obj_magic
+        cast
           [Alpha_context.Script_int.num ** Alpha_context.Script_timestamp.t **
             stack] [n, __t_value, rest] in
       consume_gas_binop __descr_value
@@ -743,7 +741,7 @@ Fixpoint step
     | (Script_typed_ir.Add_timestamp_to_seconds, Item __t_value (Item n rest))
       =>
       let '[__t_value, n, rest] :=
-        obj_magic
+        cast
           [Alpha_context.Script_timestamp.t ** Alpha_context.Script_int.num **
             stack] [__t_value, n, rest] in
       consume_gas_binop __descr_value
@@ -752,7 +750,7 @@ Fixpoint step
     
     | (Script_typed_ir.Sub_timestamp_seconds, Item __t_value (Item s rest)) =>
       let '[__t_value, s, rest] :=
-        obj_magic
+        cast
           [Alpha_context.Script_timestamp.t ** Alpha_context.Script_int.num **
             stack] [__t_value, s, rest] in
       consume_gas_binop __descr_value
@@ -761,7 +759,7 @@ Fixpoint step
     
     | (Script_typed_ir.Diff_timestamps, Item t1 (Item t2 rest)) =>
       let '[t1, t2, rest] :=
-        obj_magic
+        cast
           [Alpha_context.Script_timestamp.t ** Alpha_context.Script_timestamp.t
             ** stack] [t1, t2, rest] in
       consume_gas_binop __descr_value
@@ -769,7 +767,7 @@ Fixpoint step
         Interp_costs.diff_timestamps rest ctxt
     
     | (Script_typed_ir.Concat_string_pair, Item x (Item y rest)) =>
-      let '[x, y, rest] := obj_magic [string ** string ** stack] [x, y, rest] in
+      let '[x, y, rest] := cast [string ** string ** stack] [x, y, rest] in
       let=? ctxt :=
         Lwt.__return
           (Alpha_context.Gas.consume ctxt (Interp_costs.concat_string [ x; y ]))
@@ -778,7 +776,7 @@ Fixpoint step
       logged_return ((Item s rest), ctxt)
     
     | (Script_typed_ir.Concat_string, Item ss rest) =>
-      let '[ss, rest] := obj_magic [list string ** stack] [ss, rest] in
+      let '[ss, rest] := cast [list string ** stack] [ss, rest] in
       let=? ctxt :=
         Lwt.__return
           (Alpha_context.Gas.consume ctxt (Interp_costs.concat_string ss)) in
@@ -787,7 +785,7 @@ Fixpoint step
     
     | (Script_typed_ir.Slice_string, Item offset (Item length (Item s rest))) =>
       let '[offset, length, s, rest] :=
-        obj_magic
+        cast
           [Alpha_context.Script_int.num ** Alpha_context.Script_int.num **
             string ** stack] [offset, length, s, rest] in
       let s_length := Z.of_int (String.length s) in
@@ -811,7 +809,7 @@ Fixpoint step
         logged_return ((Item (None (A := unit)) rest), ctxt)
     
     | (Script_typed_ir.String_size, Item s rest) =>
-      let '[s, rest] := obj_magic [string ** stack] [s, rest] in
+      let '[s, rest] := cast [string ** stack] [s, rest] in
       let=? ctxt :=
         Lwt.__return (Alpha_context.Gas.consume ctxt Interp_costs.push) in
       logged_return
@@ -820,8 +818,7 @@ Fixpoint step
             (Alpha_context.Script_int.of_int (String.length s))) rest), ctxt)
     
     | (Script_typed_ir.Concat_bytes_pair, Item x (Item y rest)) =>
-      let '[x, y, rest] :=
-        obj_magic [MBytes.t ** MBytes.t ** stack] [x, y, rest] in
+      let '[x, y, rest] := cast [MBytes.t ** MBytes.t ** stack] [x, y, rest] in
       let=? ctxt :=
         Lwt.__return
           (Alpha_context.Gas.consume ctxt (Interp_costs.concat_bytes [ x; y ]))
@@ -830,7 +827,7 @@ Fixpoint step
       logged_return ((Item s rest), ctxt)
     
     | (Script_typed_ir.Concat_bytes, Item ss rest) =>
-      let '[ss, rest] := obj_magic [list MBytes.t ** stack] [ss, rest] in
+      let '[ss, rest] := cast [list MBytes.t ** stack] [ss, rest] in
       let=? ctxt :=
         Lwt.__return
           (Alpha_context.Gas.consume ctxt (Interp_costs.concat_bytes ss)) in
@@ -839,7 +836,7 @@ Fixpoint step
     
     | (Script_typed_ir.Slice_bytes, Item offset (Item length (Item s rest))) =>
       let '[offset, length, s, rest] :=
-        obj_magic
+        cast
           [Alpha_context.Script_int.num ** Alpha_context.Script_int.num **
             MBytes.t ** stack] [offset, length, s, rest] in
       let s_length := Z.of_int (MBytes.length s) in
@@ -863,7 +860,7 @@ Fixpoint step
         logged_return ((Item (None (A := unit)) rest), ctxt)
     
     | (Script_typed_ir.Bytes_size, Item s rest) =>
-      let '[s, rest] := obj_magic [MBytes.t ** stack] [s, rest] in
+      let '[s, rest] := cast [MBytes.t ** stack] [s, rest] in
       let=? ctxt :=
         Lwt.__return (Alpha_context.Gas.consume ctxt Interp_costs.push) in
       logged_return
@@ -873,8 +870,8 @@ Fixpoint step
     
     | (Script_typed_ir.Add_tez, Item x (Item y rest)) =>
       let '[x, y, rest] :=
-        obj_magic [Alpha_context.Tez.t ** Alpha_context.Tez.t ** stack]
-          [x, y, rest] in
+        cast [Alpha_context.Tez.t ** Alpha_context.Tez.t ** stack] [x, y, rest]
+        in
       let=? ctxt :=
         Lwt.__return (Alpha_context.Gas.consume ctxt Interp_costs.int64_op) in
       let=? res := Lwt.__return (Alpha_context.Tez.op_plusquestion x y) in
@@ -882,8 +879,8 @@ Fixpoint step
     
     | (Script_typed_ir.Sub_tez, Item x (Item y rest)) =>
       let '[x, y, rest] :=
-        obj_magic [Alpha_context.Tez.t ** Alpha_context.Tez.t ** stack]
-          [x, y, rest] in
+        cast [Alpha_context.Tez.t ** Alpha_context.Tez.t ** stack] [x, y, rest]
+        in
       let=? ctxt :=
         Lwt.__return (Alpha_context.Gas.consume ctxt Interp_costs.int64_op) in
       let=? res := Lwt.__return (Alpha_context.Tez.op_minusquestion x y) in
@@ -891,7 +888,7 @@ Fixpoint step
     
     | (Script_typed_ir.Mul_teznat, Item x (Item y rest)) =>
       let '[x, y, rest] :=
-        obj_magic [Alpha_context.Tez.t ** Alpha_context.Script_int.num ** stack]
+        cast [Alpha_context.Tez.t ** Alpha_context.Script_int.num ** stack]
           [x, y, rest] in
       let=? ctxt :=
         Lwt.__return (Alpha_context.Gas.consume ctxt Interp_costs.int64_op) in
@@ -906,7 +903,7 @@ Fixpoint step
     
     | (Script_typed_ir.Mul_nattez, Item y (Item x rest)) =>
       let '[y, x, rest] :=
-        obj_magic [Alpha_context.Script_int.num ** Alpha_context.Tez.t ** stack]
+        cast [Alpha_context.Script_int.num ** Alpha_context.Tez.t ** stack]
           [y, x, rest] in
       let=? ctxt :=
         Lwt.__return (Alpha_context.Gas.consume ctxt Interp_costs.int64_op) in
@@ -920,59 +917,59 @@ Fixpoint step
       end
     
     | (Script_typed_ir.Or, Item x (Item y rest)) =>
-      let '[x, y, rest] := obj_magic [bool ** bool ** stack] [x, y, rest] in
+      let '[x, y, rest] := cast [bool ** bool ** stack] [x, y, rest] in
       consume_gas_binop __descr_value (Pervasives.op_pipepipe, x, y)
         Interp_costs.bool_binop rest ctxt
     
     | (Script_typed_ir.And, Item x (Item y rest)) =>
-      let '[x, y, rest] := obj_magic [bool ** bool ** stack] [x, y, rest] in
+      let '[x, y, rest] := cast [bool ** bool ** stack] [x, y, rest] in
       consume_gas_binop __descr_value (Pervasives.op_andand, x, y)
         Interp_costs.bool_binop rest ctxt
     
     | (Script_typed_ir.Xor, Item x (Item y rest)) =>
-      let '[x, y, rest] := obj_magic [bool ** bool ** stack] [x, y, rest] in
+      let '[x, y, rest] := cast [bool ** bool ** stack] [x, y, rest] in
       consume_gas_binop __descr_value
         ((|Compare.Bool|).(Compare.S.op_ltgt), x, y) Interp_costs.bool_binop
         rest ctxt
     
     | (Script_typed_ir.Not, Item x rest) =>
-      let '[x, rest] := obj_magic [bool ** stack] [x, rest] in
+      let '[x, rest] := cast [bool ** stack] [x, rest] in
       consume_gas_unop __descr_value (Pervasives.not, x) Interp_costs.bool_unop
         rest ctxt
     
     | (Script_typed_ir.Is_nat, Item x rest) =>
-      let '[x, rest] :=
-        obj_magic [Alpha_context.Script_int.num ** stack] [x, rest] in
+      let '[x, rest] := cast [Alpha_context.Script_int.num ** stack] [x, rest]
+        in
       consume_gas_unop __descr_value (Alpha_context.Script_int.is_nat, x)
         Interp_costs.abs rest ctxt
     
     | (Script_typed_ir.Abs_int, Item x rest) =>
-      let '[x, rest] :=
-        obj_magic [Alpha_context.Script_int.num ** stack] [x, rest] in
+      let '[x, rest] := cast [Alpha_context.Script_int.num ** stack] [x, rest]
+        in
       consume_gas_unop __descr_value (Alpha_context.Script_int.abs, x)
         Interp_costs.abs rest ctxt
     
     | (Script_typed_ir.Int_nat, Item x rest) =>
-      let '[x, rest] :=
-        obj_magic [Alpha_context.Script_int.num ** stack] [x, rest] in
+      let '[x, rest] := cast [Alpha_context.Script_int.num ** stack] [x, rest]
+        in
       consume_gas_unop __descr_value (Alpha_context.Script_int.__int_value, x)
         Interp_costs.__int_value rest ctxt
     
     | (Script_typed_ir.Neg_int, Item x rest) =>
-      let '[x, rest] :=
-        obj_magic [Alpha_context.Script_int.num ** stack] [x, rest] in
+      let '[x, rest] := cast [Alpha_context.Script_int.num ** stack] [x, rest]
+        in
       consume_gas_unop __descr_value (Alpha_context.Script_int.neg, x)
         Interp_costs.neg rest ctxt
     
     | (Script_typed_ir.Neg_nat, Item x rest) =>
-      let '[x, rest] :=
-        obj_magic [Alpha_context.Script_int.num ** stack] [x, rest] in
+      let '[x, rest] := cast [Alpha_context.Script_int.num ** stack] [x, rest]
+        in
       consume_gas_unop __descr_value (Alpha_context.Script_int.neg, x)
         Interp_costs.neg rest ctxt
     
     | (Script_typed_ir.Add_intint, Item x (Item y rest)) =>
       let '[x, y, rest] :=
-        obj_magic
+        cast
           [Alpha_context.Script_int.num ** Alpha_context.Script_int.num **
             stack] [x, y, rest] in
       consume_gas_binop __descr_value (Alpha_context.Script_int.add, x, y)
@@ -980,7 +977,7 @@ Fixpoint step
     
     | (Script_typed_ir.Add_intnat, Item x (Item y rest)) =>
       let '[x, y, rest] :=
-        obj_magic
+        cast
           [Alpha_context.Script_int.num ** Alpha_context.Script_int.num **
             stack] [x, y, rest] in
       consume_gas_binop __descr_value (Alpha_context.Script_int.add, x, y)
@@ -988,7 +985,7 @@ Fixpoint step
     
     | (Script_typed_ir.Add_natint, Item x (Item y rest)) =>
       let '[x, y, rest] :=
-        obj_magic
+        cast
           [Alpha_context.Script_int.num ** Alpha_context.Script_int.num **
             stack] [x, y, rest] in
       consume_gas_binop __descr_value (Alpha_context.Script_int.add, x, y)
@@ -996,7 +993,7 @@ Fixpoint step
     
     | (Script_typed_ir.Add_natnat, Item x (Item y rest)) =>
       let '[x, y, rest] :=
-        obj_magic
+        cast
           [Alpha_context.Script_int.num ** Alpha_context.Script_int.num **
             stack] [x, y, rest] in
       consume_gas_binop __descr_value (Alpha_context.Script_int.add_n, x, y)
@@ -1004,7 +1001,7 @@ Fixpoint step
     
     | (Script_typed_ir.Sub_int, Item x (Item y rest)) =>
       let '[x, y, rest] :=
-        obj_magic
+        cast
           [Alpha_context.Script_int.num ** Alpha_context.Script_int.num **
             stack] [x, y, rest] in
       consume_gas_binop __descr_value (Alpha_context.Script_int.sub, x, y)
@@ -1012,7 +1009,7 @@ Fixpoint step
     
     | (Script_typed_ir.Mul_intint, Item x (Item y rest)) =>
       let '[x, y, rest] :=
-        obj_magic
+        cast
           [Alpha_context.Script_int.num ** Alpha_context.Script_int.num **
             stack] [x, y, rest] in
       consume_gas_binop __descr_value (Alpha_context.Script_int.mul, x, y)
@@ -1020,7 +1017,7 @@ Fixpoint step
     
     | (Script_typed_ir.Mul_intnat, Item x (Item y rest)) =>
       let '[x, y, rest] :=
-        obj_magic
+        cast
           [Alpha_context.Script_int.num ** Alpha_context.Script_int.num **
             stack] [x, y, rest] in
       consume_gas_binop __descr_value (Alpha_context.Script_int.mul, x, y)
@@ -1028,7 +1025,7 @@ Fixpoint step
     
     | (Script_typed_ir.Mul_natint, Item x (Item y rest)) =>
       let '[x, y, rest] :=
-        obj_magic
+        cast
           [Alpha_context.Script_int.num ** Alpha_context.Script_int.num **
             stack] [x, y, rest] in
       consume_gas_binop __descr_value (Alpha_context.Script_int.mul, x, y)
@@ -1036,7 +1033,7 @@ Fixpoint step
     
     | (Script_typed_ir.Mul_natnat, Item x (Item y rest)) =>
       let '[x, y, rest] :=
-        obj_magic
+        cast
           [Alpha_context.Script_int.num ** Alpha_context.Script_int.num **
             stack] [x, y, rest] in
       consume_gas_binop __descr_value (Alpha_context.Script_int.mul_n, x, y)
@@ -1044,7 +1041,7 @@ Fixpoint step
     
     | (Script_typed_ir.Ediv_teznat, Item x (Item y rest)) =>
       let '[x, y, rest] :=
-        obj_magic [Alpha_context.Tez.t ** Alpha_context.Script_int.num ** stack]
+        cast [Alpha_context.Tez.t ** Alpha_context.Script_int.num ** stack]
           [x, y, rest] in
       let=? ctxt :=
         Lwt.__return (Alpha_context.Gas.consume ctxt Interp_costs.int64_to_z) in
@@ -1079,8 +1076,8 @@ Fixpoint step
     
     | (Script_typed_ir.Ediv_tez, Item x (Item y rest)) =>
       let '[x, y, rest] :=
-        obj_magic [Alpha_context.Tez.t ** Alpha_context.Tez.t ** stack]
-          [x, y, rest] in
+        cast [Alpha_context.Tez.t ** Alpha_context.Tez.t ** stack] [x, y, rest]
+        in
       let=? ctxt :=
         Lwt.__return (Alpha_context.Gas.consume ctxt Interp_costs.int64_to_z) in
       let=? ctxt :=
@@ -1118,7 +1115,7 @@ Fixpoint step
     
     | (Script_typed_ir.Ediv_intint, Item x (Item y rest)) =>
       let '[x, y, rest] :=
-        obj_magic
+        cast
           [Alpha_context.Script_int.num ** Alpha_context.Script_int.num **
             stack] [x, y, rest] in
       consume_gas_binop __descr_value (Alpha_context.Script_int.ediv, x, y)
@@ -1126,7 +1123,7 @@ Fixpoint step
     
     | (Script_typed_ir.Ediv_intnat, Item x (Item y rest)) =>
       let '[x, y, rest] :=
-        obj_magic
+        cast
           [Alpha_context.Script_int.num ** Alpha_context.Script_int.num **
             stack] [x, y, rest] in
       consume_gas_binop __descr_value (Alpha_context.Script_int.ediv, x, y)
@@ -1134,7 +1131,7 @@ Fixpoint step
     
     | (Script_typed_ir.Ediv_natint, Item x (Item y rest)) =>
       let '[x, y, rest] :=
-        obj_magic
+        cast
           [Alpha_context.Script_int.num ** Alpha_context.Script_int.num **
             stack] [x, y, rest] in
       consume_gas_binop __descr_value (Alpha_context.Script_int.ediv, x, y)
@@ -1142,7 +1139,7 @@ Fixpoint step
     
     | (Script_typed_ir.Ediv_natnat, Item x (Item y rest)) =>
       let '[x, y, rest] :=
-        obj_magic
+        cast
           [Alpha_context.Script_int.num ** Alpha_context.Script_int.num **
             stack] [x, y, rest] in
       consume_gas_binop __descr_value (Alpha_context.Script_int.ediv_n, x, y)
@@ -1150,7 +1147,7 @@ Fixpoint step
     
     | (Script_typed_ir.Lsl_nat, Item x (Item y rest)) =>
       let '[x, y, rest] :=
-        obj_magic
+        cast
           [Alpha_context.Script_int.num ** Alpha_context.Script_int.num **
             stack] [x, y, rest] in
       let=? ctxt :=
@@ -1163,7 +1160,7 @@ Fixpoint step
     
     | (Script_typed_ir.Lsr_nat, Item x (Item y rest)) =>
       let '[x, y, rest] :=
-        obj_magic
+        cast
           [Alpha_context.Script_int.num ** Alpha_context.Script_int.num **
             stack] [x, y, rest] in
       let=? ctxt :=
@@ -1176,7 +1173,7 @@ Fixpoint step
     
     | (Script_typed_ir.Or_nat, Item x (Item y rest)) =>
       let '[x, y, rest] :=
-        obj_magic
+        cast
           [Alpha_context.Script_int.num ** Alpha_context.Script_int.num **
             stack] [x, y, rest] in
       consume_gas_binop __descr_value (Alpha_context.Script_int.logor, x, y)
@@ -1184,7 +1181,7 @@ Fixpoint step
     
     | (Script_typed_ir.And_nat, Item x (Item y rest)) =>
       let '[x, y, rest] :=
-        obj_magic
+        cast
           [Alpha_context.Script_int.num ** Alpha_context.Script_int.num **
             stack] [x, y, rest] in
       consume_gas_binop __descr_value (Alpha_context.Script_int.logand, x, y)
@@ -1192,7 +1189,7 @@ Fixpoint step
     
     | (Script_typed_ir.And_int_nat, Item x (Item y rest)) =>
       let '[x, y, rest] :=
-        obj_magic
+        cast
           [Alpha_context.Script_int.num ** Alpha_context.Script_int.num **
             stack] [x, y, rest] in
       consume_gas_binop __descr_value (Alpha_context.Script_int.logand, x, y)
@@ -1200,35 +1197,34 @@ Fixpoint step
     
     | (Script_typed_ir.Xor_nat, Item x (Item y rest)) =>
       let '[x, y, rest] :=
-        obj_magic
+        cast
           [Alpha_context.Script_int.num ** Alpha_context.Script_int.num **
             stack] [x, y, rest] in
       consume_gas_binop __descr_value (Alpha_context.Script_int.logxor, x, y)
         Interp_costs.logxor rest ctxt
     
     | (Script_typed_ir.Not_int, Item x rest) =>
-      let '[x, rest] :=
-        obj_magic [Alpha_context.Script_int.num ** stack] [x, rest] in
+      let '[x, rest] := cast [Alpha_context.Script_int.num ** stack] [x, rest]
+        in
       consume_gas_unop __descr_value (Alpha_context.Script_int.lognot, x)
         Interp_costs.lognot rest ctxt
     
     | (Script_typed_ir.Not_nat, Item x rest) =>
-      let '[x, rest] :=
-        obj_magic [Alpha_context.Script_int.num ** stack] [x, rest] in
+      let '[x, rest] := cast [Alpha_context.Script_int.num ** stack] [x, rest]
+        in
       consume_gas_unop __descr_value (Alpha_context.Script_int.lognot, x)
         Interp_costs.lognot rest ctxt
     
     | (Script_typed_ir.Seq hd tl, __stack_value) =>
       let '[hd, tl, __stack_value] :=
-        obj_magic [Script_typed_ir.descr ** Script_typed_ir.descr ** stack]
+        cast [Script_typed_ir.descr ** Script_typed_ir.descr ** stack]
           [hd, tl, __stack_value] in
       let=? '(trans, ctxt) := step log ctxt step_constants hd __stack_value in
       step log ctxt step_constants tl trans
     
     | (Script_typed_ir.If bt bf, Item __b_value rest) =>
       let '[bt, bf, __b_value, rest] :=
-        obj_magic
-          [Script_typed_ir.descr ** Script_typed_ir.descr ** bool ** stack]
+        cast [Script_typed_ir.descr ** Script_typed_ir.descr ** bool ** stack]
           [bt, bf, __b_value, rest] in
       if __b_value then
         let=? ctxt :=
@@ -1241,8 +1237,7 @@ Fixpoint step
     
     | (Script_typed_ir.Loop body, Item __b_value rest) =>
       let '[body, __b_value, rest] :=
-        obj_magic [Script_typed_ir.descr ** bool ** stack]
-          [body, __b_value, rest] in
+        cast [Script_typed_ir.descr ** bool ** stack] [body, __b_value, rest] in
       if __b_value then
         let=? ctxt :=
           Lwt.__return (Alpha_context.Gas.consume ctxt Interp_costs.loop_cycle)
@@ -1254,7 +1249,7 @@ Fixpoint step
     
     | (Script_typed_ir.Loop_left body, Item v rest) =>
       let 'existT _ [__139, __140] [body, v, rest] :=
-        obj_magic_exists (Es := [Set ** Set])
+        cast_exists (Es := [Set ** Set])
           (fun '[__139, __140] =>
             [Script_typed_ir.descr ** Script_typed_ir.union __139 __140 **
               stack]) [body, v, rest] in
@@ -1275,7 +1270,7 @@ Fixpoint step
     
     | (Script_typed_ir.Dip __b_value, Item ign rest) =>
       let 'existT _ __142 [__b_value, ign, rest] :=
-        obj_magic_exists (Es := Set)
+        cast_exists (Es := Set)
           (fun __142 => [Script_typed_ir.descr ** __142 ** stack])
           [__b_value, ign, rest] in
       let=? ctxt :=
@@ -1285,7 +1280,7 @@ Fixpoint step
     
     | (Script_typed_ir.Exec, Item arg (Item lam rest)) =>
       let 'existT _ __145 [arg, lam, rest] :=
-        obj_magic_exists (Es := Set)
+        cast_exists (Es := Set)
           (fun __145 => [__145 ** Script_typed_ir.lambda ** stack])
           [arg, lam, rest] in
       let=? ctxt :=
@@ -1295,7 +1290,7 @@ Fixpoint step
     
     | (Script_typed_ir.Apply capture_ty, Item capture (Item lam rest)) =>
       let 'existT _ __148 [capture_ty, capture, lam, rest] :=
-        obj_magic_exists (Es := Set)
+        cast_exists (Es := Set)
           (fun __148 =>
             [Script_typed_ir.ty ** __148 ** Script_typed_ir.lambda ** stack])
           [capture_ty, capture, lam, rest] in
@@ -1315,8 +1310,8 @@ Fixpoint step
       match full_arg_ty with
       | Script_typed_ir.Pair_t (capture_ty, _, _) (arg_ty, _, _) _ _ =>
         let '[capture_ty, arg_ty] :=
-          obj_magic [Script_typed_ir.ty ** Script_typed_ir.ty]
-            [capture_ty, arg_ty] in
+          cast [Script_typed_ir.ty ** Script_typed_ir.ty] [capture_ty, arg_ty]
+          in
         let arg_stack_ty :=
           Script_typed_ir.Item_t arg_ty Script_typed_ir.Empty_t None in
         let const_descr :=
@@ -1372,16 +1367,15 @@ Fixpoint step
       end
     
     | (Script_typed_ir.Lambda lam, rest) =>
-      let '[lam, rest] :=
-        obj_magic [Script_typed_ir.lambda ** stack] [lam, rest] in
+      let '[lam, rest] := cast [Script_typed_ir.lambda ** stack] [lam, rest] in
       let=? ctxt :=
         Lwt.__return (Alpha_context.Gas.consume ctxt Interp_costs.push) in
       logged_return ((Item lam rest), ctxt)
     
     | (Script_typed_ir.Failwith tv, Item v _) =>
       let 'existT _ __154 [tv, v] :=
-        obj_magic_exists (Es := Set)
-          (fun __154 => [Script_typed_ir.ty ** __154]) [tv, v] in
+        cast_exists (Es := Set) (fun __154 => [Script_typed_ir.ty ** __154])
+          [tv, v] in
       let=? '(v, _ctxt) :=
         Error_monad.trace extensible_type_value
           (Script_ir_translator.unparse_data ctxt Script_ir_translator.Optimized
@@ -1390,12 +1384,12 @@ Fixpoint step
       Error_monad.fail extensible_type_value
     
     | (Script_typed_ir.Nop, __stack_value) =>
-      let __stack_value := obj_magic stack __stack_value in
+      let __stack_value := cast stack __stack_value in
       logged_return (__stack_value, ctxt)
     
     | (Script_typed_ir.Compare ty, Item __a_value (Item __b_value rest)) =>
       let 'existT _ __156 [ty, __a_value, __b_value, rest] :=
-        obj_magic_exists (Es := Set)
+        cast_exists (Es := Set)
           (fun __156 =>
             [Script_typed_ir.comparable_ty ** __156 ** __156 ** stack])
           [ty, __a_value, __b_value, rest] in
@@ -1411,7 +1405,7 @@ Fixpoint step
     
     | (Script_typed_ir.Eq, Item cmpres rest) =>
       let '[cmpres, rest] :=
-        obj_magic [Alpha_context.Script_int.num ** stack] [cmpres, rest] in
+        cast [Alpha_context.Script_int.num ** stack] [cmpres, rest] in
       let cmpres :=
         Alpha_context.Script_int.compare cmpres Alpha_context.Script_int.zero in
       let cmpres := (|Compare.Int|).(Compare.S.op_eq) cmpres 0 in
@@ -1422,7 +1416,7 @@ Fixpoint step
     
     | (Script_typed_ir.Neq, Item cmpres rest) =>
       let '[cmpres, rest] :=
-        obj_magic [Alpha_context.Script_int.num ** stack] [cmpres, rest] in
+        cast [Alpha_context.Script_int.num ** stack] [cmpres, rest] in
       let cmpres :=
         Alpha_context.Script_int.compare cmpres Alpha_context.Script_int.zero in
       let cmpres := (|Compare.Int|).(Compare.S.op_ltgt) cmpres 0 in
@@ -1433,7 +1427,7 @@ Fixpoint step
     
     | (Script_typed_ir.Lt, Item cmpres rest) =>
       let '[cmpres, rest] :=
-        obj_magic [Alpha_context.Script_int.num ** stack] [cmpres, rest] in
+        cast [Alpha_context.Script_int.num ** stack] [cmpres, rest] in
       let cmpres :=
         Alpha_context.Script_int.compare cmpres Alpha_context.Script_int.zero in
       let cmpres := (|Compare.Int|).(Compare.S.op_lt) cmpres 0 in
@@ -1444,7 +1438,7 @@ Fixpoint step
     
     | (Script_typed_ir.Le, Item cmpres rest) =>
       let '[cmpres, rest] :=
-        obj_magic [Alpha_context.Script_int.num ** stack] [cmpres, rest] in
+        cast [Alpha_context.Script_int.num ** stack] [cmpres, rest] in
       let cmpres :=
         Alpha_context.Script_int.compare cmpres Alpha_context.Script_int.zero in
       let cmpres := (|Compare.Int|).(Compare.S.op_lteq) cmpres 0 in
@@ -1455,7 +1449,7 @@ Fixpoint step
     
     | (Script_typed_ir.Gt, Item cmpres rest) =>
       let '[cmpres, rest] :=
-        obj_magic [Alpha_context.Script_int.num ** stack] [cmpres, rest] in
+        cast [Alpha_context.Script_int.num ** stack] [cmpres, rest] in
       let cmpres :=
         Alpha_context.Script_int.compare cmpres Alpha_context.Script_int.zero in
       let cmpres := (|Compare.Int|).(Compare.S.op_gt) cmpres 0 in
@@ -1466,7 +1460,7 @@ Fixpoint step
     
     | (Script_typed_ir.Ge, Item cmpres rest) =>
       let '[cmpres, rest] :=
-        obj_magic [Alpha_context.Script_int.num ** stack] [cmpres, rest] in
+        cast [Alpha_context.Script_int.num ** stack] [cmpres, rest] in
       let cmpres :=
         Alpha_context.Script_int.compare cmpres Alpha_context.Script_int.zero in
       let cmpres := (|Compare.Int|).(Compare.S.op_gteq) cmpres 0 in
@@ -1477,7 +1471,7 @@ Fixpoint step
     
     | (Script_typed_ir.Pack __t_value, Item value rest) =>
       let 'existT _ __164 [__t_value, value, rest] :=
-        obj_magic_exists (Es := Set)
+        cast_exists (Es := Set)
           (fun __164 => [Script_typed_ir.ty ** __164 ** stack])
           [__t_value, value, rest] in
       let=? '(__bytes_value, ctxt) :=
@@ -1486,7 +1480,7 @@ Fixpoint step
     
     | (Script_typed_ir.Unpack __t_value, Item __bytes_value rest) =>
       let '[__t_value, __bytes_value, rest] :=
-        obj_magic [Script_typed_ir.ty ** MBytes.t ** stack]
+        cast [Script_typed_ir.ty ** MBytes.t ** stack]
           [__t_value, __bytes_value, rest] in
       let=? '_ :=
         Lwt.__return
@@ -1533,7 +1527,7 @@ Fixpoint step
     
     | (Script_typed_ir.Address, Item pair rest) =>
       let '[pair, rest] :=
-        obj_magic [Script_typed_ir.typed_contract ** stack] [pair, rest] in
+        cast [Script_typed_ir.typed_contract ** stack] [pair, rest] in
       let '(_, address) := pair in
       let=? ctxt :=
         Lwt.__return (Alpha_context.Gas.consume ctxt Interp_costs.address) in
@@ -1541,8 +1535,7 @@ Fixpoint step
     
     | (Script_typed_ir.Contract __t_value entrypoint, Item contract rest) =>
       let '[__t_value, entrypoint, contract, rest] :=
-        obj_magic
-          [Script_typed_ir.ty ** string ** Script_typed_ir.address ** stack]
+        cast [Script_typed_ir.ty ** string ** Script_typed_ir.address ** stack]
           [__t_value, entrypoint, contract, rest] in
       let=? ctxt :=
         Lwt.__return (Alpha_context.Gas.consume ctxt Interp_costs.contract) in
@@ -1561,7 +1554,7 @@ Fixpoint step
       (Script_typed_ir.Transfer_tokens,
         Item __p_value (Item amount (Item triple rest))) =>
       let 'existT _ __172 [__p_value, amount, triple, rest] :=
-        obj_magic_exists (Es := Set)
+        cast_exists (Es := Set)
           (fun __172 =>
             [__172 ** Alpha_context.Tez.t ** Script_typed_ir.typed_contract **
               stack]) [__p_value, amount, triple, rest] in
@@ -1603,7 +1596,7 @@ Fixpoint step
       (Script_typed_ir.Create_account,
         Item manager (Item delegate (Item _delegatable (Item credit rest)))) =>
       let '[manager, delegate, _delegatable, credit, rest] :=
-        obj_magic
+        cast
           [Alpha_context.public_key_hash ** option Alpha_context.public_key_hash
             ** bool ** Alpha_context.Tez.t ** stack]
           [manager, delegate, _delegatable, credit, rest] in
@@ -1644,8 +1637,7 @@ Fixpoint step
     
     | (Script_typed_ir.Implicit_account, Item __key_value rest) =>
       let '[__key_value, rest] :=
-        obj_magic [Alpha_context.public_key_hash ** stack] [__key_value, rest]
-        in
+        cast [Alpha_context.public_key_hash ** stack] [__key_value, rest] in
       let=? ctxt :=
         Lwt.__return
           (Alpha_context.Gas.consume ctxt Interp_costs.implicit_account) in
@@ -1664,7 +1656,7 @@ Fixpoint step
       let 'existT _ __176
         [storage_type, param_type, code, root_name, manager, delegate,
           spendable, delegatable, credit, init, rest] :=
-        obj_magic_exists (Es := Set)
+        cast_exists (Es := Set)
           (fun __176 =>
             [Script_typed_ir.ty ** Script_typed_ir.ty **
               Alpha_context.Script.node ** option string **
@@ -1753,7 +1745,7 @@ Fixpoint step
       let 'existT _ __178
         [storage_type, param_type, code, root_name, delegate, credit, init,
           rest] :=
-        obj_magic_exists (Es := Set)
+        cast_exists (Es := Set)
           (fun __178 =>
             [Script_typed_ir.ty ** Script_typed_ir.ty **
               Alpha_context.Script.node ** option string **
@@ -1821,8 +1813,7 @@ Fixpoint step
     
     | (Script_typed_ir.Set_delegate, Item delegate rest) =>
       let '[delegate, rest] :=
-        obj_magic [option Alpha_context.public_key_hash ** stack]
-          [delegate, rest] in
+        cast [option Alpha_context.public_key_hash ** stack] [delegate, rest] in
       let=? ctxt :=
         Lwt.__return
           (Alpha_context.Gas.consume ctxt Interp_costs.create_account) in
@@ -1840,7 +1831,7 @@ Fixpoint step
             (None (A := unit))) rest), ctxt)
     
     | (Script_typed_ir.Balance, rest) =>
-      let rest := obj_magic stack rest in
+      let rest := cast stack rest in
       let=? ctxt :=
         Lwt.__return (Alpha_context.Gas.consume ctxt Interp_costs.balance) in
       let=? balance :=
@@ -1849,7 +1840,7 @@ Fixpoint step
       logged_return ((Item balance rest), ctxt)
     
     | (Script_typed_ir.Now, rest) =>
-      let rest := obj_magic stack rest in
+      let rest := cast stack rest in
       let=? ctxt :=
         Lwt.__return (Alpha_context.Gas.consume ctxt Interp_costs.now) in
       let now := Alpha_context.Script_timestamp.now ctxt in
@@ -1859,7 +1850,7 @@ Fixpoint step
       (Script_typed_ir.Check_signature,
         Item __key_value (Item signature (Item message rest))) =>
       let '[__key_value, signature, message, rest] :=
-        obj_magic
+        cast
           [Alpha_context.public_key ** Alpha_context.signature ** MBytes.t **
             stack] [__key_value, signature, message, rest] in
       let=? ctxt :=
@@ -1871,7 +1862,7 @@ Fixpoint step
     
     | (Script_typed_ir.Hash_key, Item __key_value rest) =>
       let '[__key_value, rest] :=
-        obj_magic [Alpha_context.public_key ** stack] [__key_value, rest] in
+        cast [Alpha_context.public_key ** stack] [__key_value, rest] in
       let=? ctxt :=
         Lwt.__return (Alpha_context.Gas.consume ctxt Interp_costs.hash_key) in
       logged_return
@@ -1881,7 +1872,7 @@ Fixpoint step
     
     | (Script_typed_ir.Blake2b, Item __bytes_value rest) =>
       let '[__bytes_value, rest] :=
-        obj_magic [MBytes.t ** stack] [__bytes_value, rest] in
+        cast [MBytes.t ** stack] [__bytes_value, rest] in
       let=? ctxt :=
         Lwt.__return
           (Alpha_context.Gas.consume ctxt
@@ -1891,7 +1882,7 @@ Fixpoint step
     
     | (Script_typed_ir.Sha256, Item __bytes_value rest) =>
       let '[__bytes_value, rest] :=
-        obj_magic [MBytes.t ** stack] [__bytes_value, rest] in
+        cast [MBytes.t ** stack] [__bytes_value, rest] in
       let=? ctxt :=
         Lwt.__return
           (Alpha_context.Gas.consume ctxt
@@ -1901,7 +1892,7 @@ Fixpoint step
     
     | (Script_typed_ir.Sha512, Item __bytes_value rest) =>
       let '[__bytes_value, rest] :=
-        obj_magic [MBytes.t ** stack] [__bytes_value, rest] in
+        cast [MBytes.t ** stack] [__bytes_value, rest] in
       let=? ctxt :=
         Lwt.__return
           (Alpha_context.Gas.consume ctxt
@@ -1910,7 +1901,7 @@ Fixpoint step
       logged_return ((Item __hash_value rest), ctxt)
     
     | (Script_typed_ir.Steps_to_quota, rest) =>
-      let rest := obj_magic stack rest in
+      let rest := cast stack rest in
       let=? ctxt :=
         Lwt.__return
           (Alpha_context.Gas.consume ctxt Interp_costs.steps_to_quota) in
@@ -1928,14 +1919,14 @@ Fixpoint step
           rest), ctxt)
     
     | (Script_typed_ir.Source, rest) =>
-      let rest := obj_magic stack rest in
+      let rest := cast stack rest in
       let=? ctxt :=
         Lwt.__return (Alpha_context.Gas.consume ctxt Interp_costs.source) in
       logged_return
         ((Item (step_constants.(step_constants.payer), "default") rest), ctxt)
     
     | (Script_typed_ir.Sender, rest) =>
-      let rest := obj_magic stack rest in
+      let rest := cast stack rest in
       let=? ctxt :=
         Lwt.__return (Alpha_context.Gas.consume ctxt Interp_costs.source) in
       logged_return
@@ -1943,7 +1934,7 @@ Fixpoint step
     
     | (Script_typed_ir.Self __t_value entrypoint, rest) =>
       let '[__t_value, entrypoint, rest] :=
-        obj_magic [Script_typed_ir.ty ** string ** stack]
+        cast [Script_typed_ir.ty ** string ** stack]
           [__t_value, entrypoint, rest] in
       let=? ctxt :=
         Lwt.__return (Alpha_context.Gas.consume ctxt Interp_costs.self) in
@@ -1952,15 +1943,14 @@ Fixpoint step
           rest), ctxt)
     
     | (Script_typed_ir.Amount, rest) =>
-      let rest := obj_magic stack rest in
+      let rest := cast stack rest in
       let=? ctxt :=
         Lwt.__return (Alpha_context.Gas.consume ctxt Interp_costs.amount) in
       logged_return ((Item step_constants.(step_constants.amount) rest), ctxt)
     
     | (Script_typed_ir.Dig n n', __stack_value) =>
       let '[n, n', __stack_value] :=
-        obj_magic
-          [int ** Script_typed_ir.stack_prefix_preservation_witness ** stack]
+        cast [int ** Script_typed_ir.stack_prefix_preservation_witness ** stack]
           [n, n', __stack_value] in
       let=? ctxt :=
         Lwt.__return
@@ -1971,7 +1961,7 @@ Fixpoint step
           (fun function_parameter =>
             match function_parameter with
             | Item v rest =>
-              let '[v, rest] := obj_magic [A ** stack] [v, rest] in
+              let '[v, rest] := cast [A ** stack] [v, rest] in
               Error_monad.__return (rest, v)
             | _ => unreachable_gadt_branch
             end) n' __stack_value in
@@ -1980,7 +1970,7 @@ Fixpoint step
     
     | (Script_typed_ir.Dug n n', Item v rest) =>
       let 'existT _ __189 [n, n', v, rest] :=
-        obj_magic_exists (Es := Set)
+        cast_exists (Es := Set)
           (fun __189 =>
             [int ** Script_typed_ir.stack_prefix_preservation_witness ** __189
               ** stack]) [n, n', v, rest] in
@@ -1994,7 +1984,7 @@ Fixpoint step
     
     | (Script_typed_ir.Dipn n n' __b_value, __stack_value) =>
       let '[n, n', __b_value, __stack_value] :=
-        obj_magic
+        cast
           [int ** Script_typed_ir.stack_prefix_preservation_witness **
             Script_typed_ir.descr ** stack] [n, n', __b_value, __stack_value] in
       let=? ctxt :=
@@ -2009,8 +1999,7 @@ Fixpoint step
     
     | (Script_typed_ir.Dropn n n', __stack_value) =>
       let '[n, n', __stack_value] :=
-        obj_magic
-          [int ** Script_typed_ir.stack_prefix_preservation_witness ** stack]
+        cast [int ** Script_typed_ir.stack_prefix_preservation_witness ** stack]
           [n, n', __stack_value] in
       let=? ctxt :=
         Lwt.__return
@@ -2021,7 +2010,7 @@ Fixpoint step
       logged_return (rest, ctxt)
     
     | (Script_typed_ir.ChainId, rest) =>
-      let rest := obj_magic stack rest in
+      let rest := cast stack rest in
       let=? ctxt :=
         Lwt.__return (Alpha_context.Gas.consume ctxt Interp_costs.chain_id) in
       logged_return ((Item step_constants.(step_constants.chain_id) rest), ctxt)
@@ -2034,7 +2023,7 @@ with interp {p r : Set}
   {struct log} : Lwt.t (Error_monad.tzresult (r * Alpha_context.context)) :=
   let __stack_value := Item arg Empty in
   let '{| Script_typed_ir.lambda.lam := (code, _) |} := lam in
-  let code := obj_magic Script_typed_ir.descr code in
+  let code := cast Script_typed_ir.descr code in
   let=? '_ :=
     match log with
     | None => Error_monad.return_unit
@@ -2050,7 +2039,7 @@ with interp {p r : Set}
   let=? function_parameter := step log ctxt step_constants code __stack_value in
   match function_parameter with
   | (Item ret Empty, ctxt) =>
-    let '[ret, ctxt] := obj_magic [r ** Alpha_context.context] [ret, ctxt] in
+    let '[ret, ctxt] := cast [r ** Alpha_context.context] [ret, ctxt] in
     Error_monad.__return (ret, ctxt)
   | _ => unreachable_gadt_branch
   end.
@@ -2075,7 +2064,7 @@ Definition execute
     Script_ir_translator.parse_script None ctxt true unparsed_script in
   let 'existT _ __Ex_script_'b
     [code, arg_type, storage, storage_type, root_name, ctxt] :=
-    obj_magic_exists (Es := Set)
+    cast_exists (Es := Set)
       (fun __Ex_script_'b =>
         [Script_typed_ir.lambda ** Script_typed_ir.ty ** __Ex_script_'b **
           Script_typed_ir.ty ** option string ** Alpha_context.context])

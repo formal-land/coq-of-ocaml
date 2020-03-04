@@ -43,19 +43,19 @@ Module Cost_of.
     (wit : Script_typed_ir.comparable_struct) (v : a) {struct wit} : int :=
     match (wit, v) with
     | (Script_typed_ir.Int_key _, _ as v) =>
-      let v := obj_magic Script_int_repr.num v in
+      let v := cast Script_int_repr.num v in
       int_bytes v
     
     | (Script_typed_ir.Nat_key _, _ as v) =>
-      let v := obj_magic Script_int_repr.num v in
+      let v := cast Script_int_repr.num v in
       int_bytes v
     
     | (Script_typed_ir.String_key _, _ as v) =>
-      let v := obj_magic string v in
+      let v := cast string v in
       String.length v
     
     | (Script_typed_ir.Bytes_key _, _ as v) =>
-      let v := obj_magic MBytes.t v in
+      let v := cast MBytes.t v in
       MBytes.length v
     
     | (Script_typed_ir.Bool_key _, _) => 8
@@ -64,7 +64,7 @@ Module Cost_of.
       (|Signature.Public_key_hash|).(S.SPublic_key_hash.size)
     
     | (Script_typed_ir.Timestamp_key _, _ as v) =>
-      let v := obj_magic Alpha_context.Script_timestamp.t v in
+      let v := cast Alpha_context.Script_timestamp.t v in
       timestamp_bytes v
     
     | (Script_typed_ir.Address_key _, _) =>
@@ -74,7 +74,7 @@ Module Cost_of.
     
     | (Script_typed_ir.Pair_key (l, _) (__r_value, _) _, _ as v) =>
       let 'existT _ [__0, __1] [l, __r_value, v] :=
-        obj_magic_exists (Es := [Set ** Set])
+        cast_exists (Es := [Set ** Set])
           (fun '[__0, __1] =>
             [Script_typed_ir.comparable_struct **
               Script_typed_ir.comparable_struct ** __0 * __1]) [l, __r_value, v]
@@ -580,49 +580,49 @@ Module Cost_of.
       : Alpha_context.Gas.cost :=
       match (ty, x, y) with
       | (Script_typed_ir.Bool_key _, _ as x, _ as y) =>
-        let '[x, y] := obj_magic [bool ** bool] [x, y] in
+        let '[x, y] := cast [bool ** bool] [x, y] in
         compare_bool x y
       
       | (Script_typed_ir.String_key _, _ as x, _ as y) =>
-        let '[x, y] := obj_magic [string ** string] [x, y] in
+        let '[x, y] := cast [string ** string] [x, y] in
         compare_string x y
       
       | (Script_typed_ir.Bytes_key _, _ as x, _ as y) =>
-        let '[x, y] := obj_magic [MBytes.t ** MBytes.t] [x, y] in
+        let '[x, y] := cast [MBytes.t ** MBytes.t] [x, y] in
         compare_bytes x y
       
       | (Script_typed_ir.Mutez_key _, x, y) =>
-        let '[x, y] := obj_magic [a ** a] [x, y] in
+        let '[x, y] := cast [a ** a] [x, y] in
         compare_tez x y
       
       | (Script_typed_ir.Int_key _, _ as x, _ as y) =>
-        let '[x, y] :=
-          obj_magic [Script_int_repr.num ** Script_int_repr.num] [x, y] in
+        let '[x, y] := cast [Script_int_repr.num ** Script_int_repr.num] [x, y]
+          in
         compare_zint x y
       
       | (Script_typed_ir.Nat_key _, _ as x, _ as y) =>
-        let '[x, y] :=
-          obj_magic [Script_int_repr.num ** Script_int_repr.num] [x, y] in
+        let '[x, y] := cast [Script_int_repr.num ** Script_int_repr.num] [x, y]
+          in
         compare_zint x y
       
       | (Script_typed_ir.Key_hash_key _, x, y) =>
-        let '[x, y] := obj_magic [a ** a] [x, y] in
+        let '[x, y] := cast [a ** a] [x, y] in
         compare_key_hash x y
       
       | (Script_typed_ir.Timestamp_key _, _ as x, _ as y) =>
         let '[x, y] :=
-          obj_magic
+          cast
             [Alpha_context.Script_timestamp.t **
               Alpha_context.Script_timestamp.t] [x, y] in
         compare_timestamp x y
       
       | (Script_typed_ir.Address_key _, x, y) =>
-        let '[x, y] := obj_magic [a ** a] [x, y] in
+        let '[x, y] := cast [a ** a] [x, y] in
         compare_address x y
       
       | (Script_typed_ir.Pair_key (tl, _) (tr, _) _, _ as x, _ as y) =>
         let 'existT _ [__0, __1] [tl, tr, x, y] :=
-          obj_magic_exists (Es := [Set ** Set])
+          cast_exists (Es := [Set ** Set])
             (fun '[__0, __1] =>
               [Script_typed_ir.comparable_struct **
                 Script_typed_ir.comparable_struct ** __0 * __1 ** __0 * __1])

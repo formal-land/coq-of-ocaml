@@ -156,7 +156,7 @@ File.open("tezos/index.html", "w") do |file|
     :tezos,
     "Protocol of Tezos",
     "These are the sources of the <a href=\"https://gitlab.com/tezos/tezos/tree/master/src/proto_alpha/lib_protocol\">protocol</a> of <a href=\"https://tezos.com/\">Tezos</a> imported to <a href=\"https://coq.inria.fr/\">Coq</a> by the current development version of <a href=\"https://github.com/clarus/coq-of-ocaml\">coq-of-ocaml</a>. Tezos is a crypto-currency with smart-contracts and an upgradable protocol. To see the valid generated Coq files, go on <a href=\"https://clarus.github.io/coq-of-ocaml/build-tezos/html/toc.html\">coq-of-ocaml/build-tezos/html/toc.html</a>.",
-    "(2020-03-04) We now import all the Tezos protocol to Coq, apart from the RPC calls. Working on the Coq proofs.",
+    "(2020-03-04) We now import most of the Tezos protocol to Coq, apart from the RPC calls. Working on the Coq proofs.",
     tezos_directory,
     :active_development,
     <<-END

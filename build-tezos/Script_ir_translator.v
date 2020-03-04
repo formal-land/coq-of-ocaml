@@ -463,46 +463,45 @@ Fixpoint compare_comparable {a : Set}
   : int :=
   match (kind, x, y) with
   | (Script_typed_ir.String_key _, _ as x, _ as y) =>
-    let '[x, y] := obj_magic [string ** string] [x, y] in
+    let '[x, y] := cast [string ** string] [x, y] in
     wrap_compare (|Compare.String|).(Compare.S.compare) x y
   
   | (Script_typed_ir.Bool_key _, _ as x, _ as y) =>
-    let '[x, y] := obj_magic [bool ** bool] [x, y] in
+    let '[x, y] := cast [bool ** bool] [x, y] in
     wrap_compare (|Compare.Bool|).(Compare.S.compare) x y
   
   | (Script_typed_ir.Mutez_key _, _ as x, _ as y) =>
-    let '[x, y] := obj_magic [Alpha_context.Tez.t ** Alpha_context.Tez.t] [x, y]
-      in
+    let '[x, y] := cast [Alpha_context.Tez.t ** Alpha_context.Tez.t] [x, y] in
     wrap_compare Alpha_context.Tez.compare x y
   
   | (Script_typed_ir.Key_hash_key _, _ as x, _ as y) =>
     let '[x, y] :=
-      obj_magic [Alpha_context.public_key_hash ** Alpha_context.public_key_hash]
+      cast [Alpha_context.public_key_hash ** Alpha_context.public_key_hash]
         [x, y] in
     wrap_compare (|Signature.Public_key_hash|).(S.SPublic_key_hash.compare) x y
   
   | (Script_typed_ir.Int_key _, _ as x, _ as y) =>
     let '[x, y] :=
-      obj_magic [Alpha_context.Script_int.num ** Alpha_context.Script_int.num]
-        [x, y] in
+      cast [Alpha_context.Script_int.num ** Alpha_context.Script_int.num] [x, y]
+      in
     wrap_compare Alpha_context.Script_int.compare x y
   
   | (Script_typed_ir.Nat_key _, _ as x, _ as y) =>
     let '[x, y] :=
-      obj_magic [Alpha_context.Script_int.num ** Alpha_context.Script_int.num]
-        [x, y] in
+      cast [Alpha_context.Script_int.num ** Alpha_context.Script_int.num] [x, y]
+      in
     wrap_compare Alpha_context.Script_int.compare x y
   
   | (Script_typed_ir.Timestamp_key _, _ as x, _ as y) =>
     let '[x, y] :=
-      obj_magic
+      cast
         [Alpha_context.Script_timestamp.t ** Alpha_context.Script_timestamp.t]
         [x, y] in
     wrap_compare Alpha_context.Script_timestamp.compare x y
   
   | (Script_typed_ir.Address_key _, _ as x, _ as y) =>
     let '[x, y] :=
-      obj_magic [Script_typed_ir.address ** Script_typed_ir.address] [x, y] in
+      cast [Script_typed_ir.address ** Script_typed_ir.address] [x, y] in
     (wrap_compare
       (fun function_parameter =>
         let '(x, ex) := function_parameter in
@@ -515,12 +514,12 @@ Fixpoint compare_comparable {a : Set}
             lres)) x y
   
   | (Script_typed_ir.Bytes_key _, _ as x, _ as y) =>
-    let '[x, y] := obj_magic [MBytes.t ** MBytes.t] [x, y] in
+    let '[x, y] := cast [MBytes.t ** MBytes.t] [x, y] in
     wrap_compare MBytes.compare x y
   
   | (Script_typed_ir.Pair_key (tl, _) (tr, _) _, _ as x, _ as y) =>
     let 'existT _ [__0, __1] [tl, tr, x, y] :=
-      obj_magic_exists (Es := [Set ** Set])
+      cast_exists (Es := [Set ** Set])
         (fun '[__0, __1] =>
           [Script_typed_ir.comparable_struct **
             Script_typed_ir.comparable_struct ** __0 * __1 ** __0 * __1])
@@ -2321,9 +2320,8 @@ Fixpoint parse_data {a : Set}
     (Script_typed_ir.Unit_t _,
       Micheline.Prim loc Alpha_context.Script.D_Unit [] annot) =>
     let '[loc, annot] :=
-      obj_magic [Alpha_context.Script.location ** Micheline.annot] [loc, annot]
-      in
-    obj_magic (Lwt.t (Error_monad.tzresult (a * Alpha_context.context)))
+      cast [Alpha_context.Script.location ** Micheline.annot] [loc, annot] in
+    cast (Lwt.t (Error_monad.tzresult (a * Alpha_context.context)))
     (let=? '_ :=
       if legacy then
         Error_monad.__return tt
@@ -2338,17 +2336,17 @@ Fixpoint parse_data {a : Set}
     (Script_typed_ir.Unit_t _,
       Micheline.Prim loc Alpha_context.Script.D_Unit l _) =>
     let '[loc, l] :=
-      obj_magic
+      cast
         [Alpha_context.Script.location **
           list
             (Micheline.node Alpha_context.Script.location
               Alpha_context.Script.prim)] [loc, l] in
-    obj_magic (Lwt.t (Error_monad.tzresult (a * Alpha_context.context)))
+    cast (Lwt.t (Error_monad.tzresult (a * Alpha_context.context)))
     ((traced (B := unit)) (Error_monad.fail extensible_type_value))
   
   | (Script_typed_ir.Unit_t _, expr) =>
-    let expr := obj_magic Alpha_context.Script.node expr in
-    obj_magic (Lwt.t (Error_monad.tzresult (a * Alpha_context.context)))
+    let expr := cast Alpha_context.Script.node expr in
+    cast (Lwt.t (Error_monad.tzresult (a * Alpha_context.context)))
     ((traced (B := unit))
       (Error_monad.fail
         (unexpected expr nil Script_tc_errors.Constant_namespace
@@ -2358,9 +2356,8 @@ Fixpoint parse_data {a : Set}
     (Script_typed_ir.Bool_t _,
       Micheline.Prim loc Alpha_context.Script.D_True [] annot) =>
     let '[loc, annot] :=
-      obj_magic [Alpha_context.Script.location ** Micheline.annot] [loc, annot]
-      in
-    obj_magic (Lwt.t (Error_monad.tzresult (a * Alpha_context.context)))
+      cast [Alpha_context.Script.location ** Micheline.annot] [loc, annot] in
+    cast (Lwt.t (Error_monad.tzresult (a * Alpha_context.context)))
     (let=? '_ :=
       if legacy then
         Error_monad.__return tt
@@ -2375,9 +2372,8 @@ Fixpoint parse_data {a : Set}
     (Script_typed_ir.Bool_t _,
       Micheline.Prim loc Alpha_context.Script.D_False [] annot) =>
     let '[loc, annot] :=
-      obj_magic [Alpha_context.Script.location ** Micheline.annot] [loc, annot]
-      in
-    obj_magic (Lwt.t (Error_monad.tzresult (a * Alpha_context.context)))
+      cast [Alpha_context.Script.location ** Micheline.annot] [loc, annot] in
+    cast (Lwt.t (Error_monad.tzresult (a * Alpha_context.context)))
     (let=? '_ :=
       if legacy then
         Error_monad.__return tt
@@ -2394,25 +2390,25 @@ Fixpoint parse_data {a : Set}
         ((Alpha_context.Script.D_True | Alpha_context.Script.D_False) as c) l _)
     =>
     let '[loc, c, l] :=
-      obj_magic
+      cast
         [Alpha_context.Script.location ** Alpha_context.Script.prim **
           list
             (Micheline.node Alpha_context.Script.location
               Alpha_context.Script.prim)] [loc, c, l] in
-    obj_magic (Lwt.t (Error_monad.tzresult (a * Alpha_context.context)))
+    cast (Lwt.t (Error_monad.tzresult (a * Alpha_context.context)))
     ((traced (B := unit)) (Error_monad.fail extensible_type_value))
   
   | (Script_typed_ir.Bool_t _, expr) =>
-    let expr := obj_magic Alpha_context.Script.node expr in
-    obj_magic (Lwt.t (Error_monad.tzresult (a * Alpha_context.context)))
+    let expr := cast Alpha_context.Script.node expr in
+    cast (Lwt.t (Error_monad.tzresult (a * Alpha_context.context)))
     ((traced (B := unit))
       (Error_monad.fail
         (unexpected expr nil Script_tc_errors.Constant_namespace
           [ Alpha_context.Script.D_True; Alpha_context.Script.D_False ])))
   
   | (Script_typed_ir.String_t _, Micheline.String _ v) =>
-    let v := obj_magic string v in
-    obj_magic (Lwt.t (Error_monad.tzresult (a * Alpha_context.context)))
+    let v := cast string v in
+    cast (Lwt.t (Error_monad.tzresult (a * Alpha_context.context)))
     (let=? ctxt :=
       Lwt.__return
         (Alpha_context.Gas.consume ctxt
@@ -2452,13 +2448,13 @@ Fixpoint parse_data {a : Set}
       Error_monad.op_gtgteqquestion (__error_value tt) Error_monad.fail)
   
   | (Script_typed_ir.String_t _, expr) =>
-    let expr := obj_magic Alpha_context.Script.node expr in
-    obj_magic (Lwt.t (Error_monad.tzresult (a * Alpha_context.context)))
+    let expr := cast Alpha_context.Script.node expr in
+    cast (Lwt.t (Error_monad.tzresult (a * Alpha_context.context)))
     ((traced (B := unit)) (Error_monad.fail extensible_type_value))
   
   | (Script_typed_ir.Bytes_t _, Micheline.Bytes _ v) =>
-    let v := obj_magic MBytes.t v in
-    obj_magic (Lwt.t (Error_monad.tzresult (a * Alpha_context.context)))
+    let v := cast MBytes.t v in
+    cast (Lwt.t (Error_monad.tzresult (a * Alpha_context.context)))
     (let=? ctxt :=
       Lwt.__return
         (Alpha_context.Gas.consume ctxt
@@ -2466,20 +2462,20 @@ Fixpoint parse_data {a : Set}
     Error_monad.__return (v, ctxt))
   
   | (Script_typed_ir.Bytes_t _, expr) =>
-    let expr := obj_magic Alpha_context.Script.node expr in
-    obj_magic (Lwt.t (Error_monad.tzresult (a * Alpha_context.context)))
+    let expr := cast Alpha_context.Script.node expr in
+    cast (Lwt.t (Error_monad.tzresult (a * Alpha_context.context)))
     ((traced (B := unit)) (Error_monad.fail extensible_type_value))
   
   | (Script_typed_ir.Int_t _, Micheline.Int _ v) =>
-    let v := obj_magic Z.t v in
-    obj_magic (Lwt.t (Error_monad.tzresult (a * Alpha_context.context)))
+    let v := cast Z.t v in
+    cast (Lwt.t (Error_monad.tzresult (a * Alpha_context.context)))
     (let=? ctxt :=
       Lwt.__return (Alpha_context.Gas.consume ctxt (Typecheck_costs.z v)) in
     Error_monad.__return ((Alpha_context.Script_int.of_zint v), ctxt))
   
   | (Script_typed_ir.Nat_t _, Micheline.Int _ v) =>
-    let v := obj_magic Z.t v in
-    obj_magic (Lwt.t (Error_monad.tzresult (a * Alpha_context.context)))
+    let v := cast Z.t v in
+    cast (Lwt.t (Error_monad.tzresult (a * Alpha_context.context)))
     (let=? ctxt :=
       Lwt.__return (Alpha_context.Gas.consume ctxt (Typecheck_costs.z v)) in
     let v := Alpha_context.Script_int.of_zint v in
@@ -2492,18 +2488,18 @@ Fixpoint parse_data {a : Set}
       Error_monad.op_gtgteqquestion (__error_value tt) Error_monad.fail)
   
   | (Script_typed_ir.Int_t _, expr) =>
-    let expr := obj_magic Alpha_context.Script.node expr in
-    obj_magic (Lwt.t (Error_monad.tzresult (a * Alpha_context.context)))
+    let expr := cast Alpha_context.Script.node expr in
+    cast (Lwt.t (Error_monad.tzresult (a * Alpha_context.context)))
     ((traced (B := unit)) (Error_monad.fail extensible_type_value))
   
   | (Script_typed_ir.Nat_t _, expr) =>
-    let expr := obj_magic Alpha_context.Script.node expr in
-    obj_magic (Lwt.t (Error_monad.tzresult (a * Alpha_context.context)))
+    let expr := cast Alpha_context.Script.node expr in
+    cast (Lwt.t (Error_monad.tzresult (a * Alpha_context.context)))
     ((traced (B := unit)) (Error_monad.fail extensible_type_value))
   
   | (Script_typed_ir.Mutez_t _, Micheline.Int _ v) =>
-    let v := obj_magic Z.t v in
-    obj_magic (Lwt.t (Error_monad.tzresult (a * Alpha_context.context)))
+    let v := cast Z.t v in
+    cast (Lwt.t (Error_monad.tzresult (a * Alpha_context.context)))
     (let=? ctxt :=
       Lwt.__return
         (let? ctxt := Alpha_context.Gas.consume ctxt Typecheck_costs.tez in
@@ -2517,20 +2513,20 @@ Fixpoint parse_data {a : Set}
       end)
   
   | (Script_typed_ir.Mutez_t _, expr) =>
-    let expr := obj_magic Alpha_context.Script.node expr in
-    obj_magic (Lwt.t (Error_monad.tzresult (a * Alpha_context.context)))
+    let expr := cast Alpha_context.Script.node expr in
+    cast (Lwt.t (Error_monad.tzresult (a * Alpha_context.context)))
     ((traced (B := unit)) (Error_monad.fail extensible_type_value))
   
   | (Script_typed_ir.Timestamp_t _, Micheline.Int _ v) =>
-    let v := obj_magic Z.t v in
-    obj_magic (Lwt.t (Error_monad.tzresult (a * Alpha_context.context)))
+    let v := cast Z.t v in
+    cast (Lwt.t (Error_monad.tzresult (a * Alpha_context.context)))
     (let=? ctxt :=
       Lwt.__return (Alpha_context.Gas.consume ctxt (Typecheck_costs.z v)) in
     Error_monad.__return ((Alpha_context.Script_timestamp.of_zint v), ctxt))
   
   | (Script_typed_ir.Timestamp_t _, Micheline.String _ s) =>
-    let s := obj_magic string s in
-    obj_magic (Lwt.t (Error_monad.tzresult (a * Alpha_context.context)))
+    let s := cast string s in
+    cast (Lwt.t (Error_monad.tzresult (a * Alpha_context.context)))
     (let=? ctxt :=
       Lwt.__return
         (Alpha_context.Gas.consume ctxt Typecheck_costs.string_timestamp) in
@@ -2540,13 +2536,13 @@ Fixpoint parse_data {a : Set}
     end)
   
   | (Script_typed_ir.Timestamp_t _, expr) =>
-    let expr := obj_magic Alpha_context.Script.node expr in
-    obj_magic (Lwt.t (Error_monad.tzresult (a * Alpha_context.context)))
+    let expr := cast Alpha_context.Script.node expr in
+    cast (Lwt.t (Error_monad.tzresult (a * Alpha_context.context)))
     ((traced (B := unit)) (Error_monad.fail extensible_type_value))
   
   | (Script_typed_ir.Key_t _, Micheline.Bytes _ __bytes_value) =>
-    let __bytes_value := obj_magic MBytes.t __bytes_value in
-    obj_magic (Lwt.t (Error_monad.tzresult (a * Alpha_context.context)))
+    let __bytes_value := cast MBytes.t __bytes_value in
+    cast (Lwt.t (Error_monad.tzresult (a * Alpha_context.context)))
     (let=? ctxt :=
       Lwt.__return (Alpha_context.Gas.consume ctxt Typecheck_costs.__key_value)
       in
@@ -2558,8 +2554,8 @@ Fixpoint parse_data {a : Set}
     end)
   
   | (Script_typed_ir.Key_t _, Micheline.String _ s) =>
-    let s := obj_magic string s in
-    obj_magic (Lwt.t (Error_monad.tzresult (a * Alpha_context.context)))
+    let s := cast string s in
+    cast (Lwt.t (Error_monad.tzresult (a * Alpha_context.context)))
     (let=? ctxt :=
       Lwt.__return (Alpha_context.Gas.consume ctxt Typecheck_costs.__key_value)
       in
@@ -2569,13 +2565,13 @@ Fixpoint parse_data {a : Set}
     end)
   
   | (Script_typed_ir.Key_t _, expr) =>
-    let expr := obj_magic Alpha_context.Script.node expr in
-    obj_magic (Lwt.t (Error_monad.tzresult (a * Alpha_context.context)))
+    let expr := cast Alpha_context.Script.node expr in
+    cast (Lwt.t (Error_monad.tzresult (a * Alpha_context.context)))
     ((traced (B := unit)) (Error_monad.fail extensible_type_value))
   
   | (Script_typed_ir.Key_hash_t _, Micheline.Bytes _ __bytes_value) =>
-    let __bytes_value := obj_magic MBytes.t __bytes_value in
-    obj_magic (Lwt.t (Error_monad.tzresult (a * Alpha_context.context)))
+    let __bytes_value := cast MBytes.t __bytes_value in
+    cast (Lwt.t (Error_monad.tzresult (a * Alpha_context.context)))
     (let=? ctxt :=
       Lwt.__return (Alpha_context.Gas.consume ctxt Typecheck_costs.key_hash) in
     match
@@ -2587,8 +2583,8 @@ Fixpoint parse_data {a : Set}
     end)
   
   | (Script_typed_ir.Key_hash_t _, Micheline.String _ s) =>
-    let s := obj_magic string s in
-    obj_magic (Lwt.t (Error_monad.tzresult (a * Alpha_context.context)))
+    let s := cast string s in
+    cast (Lwt.t (Error_monad.tzresult (a * Alpha_context.context)))
     (let=? ctxt :=
       Lwt.__return (Alpha_context.Gas.consume ctxt Typecheck_costs.key_hash) in
     match (|Signature.Public_key_hash|).(S.SPublic_key_hash.of_b58check_opt) s
@@ -2598,13 +2594,13 @@ Fixpoint parse_data {a : Set}
     end)
   
   | (Script_typed_ir.Key_hash_t _, expr) =>
-    let expr := obj_magic Alpha_context.Script.node expr in
-    obj_magic (Lwt.t (Error_monad.tzresult (a * Alpha_context.context)))
+    let expr := cast Alpha_context.Script.node expr in
+    cast (Lwt.t (Error_monad.tzresult (a * Alpha_context.context)))
     ((traced (B := unit)) (Error_monad.fail extensible_type_value))
   
   | (Script_typed_ir.Signature_t _, Micheline.Bytes _ __bytes_value) =>
-    let __bytes_value := obj_magic MBytes.t __bytes_value in
-    obj_magic (Lwt.t (Error_monad.tzresult (a * Alpha_context.context)))
+    let __bytes_value := cast MBytes.t __bytes_value in
+    cast (Lwt.t (Error_monad.tzresult (a * Alpha_context.context)))
     (let=? ctxt :=
       Lwt.__return (Alpha_context.Gas.consume ctxt Typecheck_costs.signature) in
     match Data_encoding.Binary.of_bytes Signature.encoding __bytes_value with
@@ -2613,8 +2609,8 @@ Fixpoint parse_data {a : Set}
     end)
   
   | (Script_typed_ir.Signature_t _, Micheline.String _ s) =>
-    let s := obj_magic string s in
-    obj_magic (Lwt.t (Error_monad.tzresult (a * Alpha_context.context)))
+    let s := cast string s in
+    cast (Lwt.t (Error_monad.tzresult (a * Alpha_context.context)))
     (let=? ctxt :=
       Lwt.__return (Alpha_context.Gas.consume ctxt Typecheck_costs.signature) in
     match Signature.of_b58check_opt s with
@@ -2623,18 +2619,18 @@ Fixpoint parse_data {a : Set}
     end)
   
   | (Script_typed_ir.Signature_t _, expr) =>
-    let expr := obj_magic Alpha_context.Script.node expr in
-    obj_magic (Lwt.t (Error_monad.tzresult (a * Alpha_context.context)))
+    let expr := cast Alpha_context.Script.node expr in
+    cast (Lwt.t (Error_monad.tzresult (a * Alpha_context.context)))
     ((traced (B := unit)) (Error_monad.fail extensible_type_value))
   
   | (Script_typed_ir.Operation_t _, _) =>
-    obj_magic (Lwt.t (Error_monad.tzresult (a * Alpha_context.context)))
+    cast (Lwt.t (Error_monad.tzresult (a * Alpha_context.context)))
     (* ❌ Assert instruction is not handled. *)
     (assert (Lwt.t (Error_monad.tzresult (a * Alpha_context.context))) false)
   
   | (Script_typed_ir.Chain_id_t _, Micheline.Bytes _ __bytes_value) =>
-    let __bytes_value := obj_magic MBytes.t __bytes_value in
-    obj_magic (Lwt.t (Error_monad.tzresult (a * Alpha_context.context)))
+    let __bytes_value := cast MBytes.t __bytes_value in
+    cast (Lwt.t (Error_monad.tzresult (a * Alpha_context.context)))
     (let=? ctxt :=
       Lwt.__return (Alpha_context.Gas.consume ctxt Typecheck_costs.chain_id) in
     match
@@ -2645,8 +2641,8 @@ Fixpoint parse_data {a : Set}
     end)
   
   | (Script_typed_ir.Chain_id_t _, Micheline.String _ s) =>
-    let s := obj_magic string s in
-    obj_magic (Lwt.t (Error_monad.tzresult (a * Alpha_context.context)))
+    let s := cast string s in
+    cast (Lwt.t (Error_monad.tzresult (a * Alpha_context.context)))
     (let=? ctxt :=
       Lwt.__return (Alpha_context.Gas.consume ctxt Typecheck_costs.chain_id) in
     match (|Chain_id|).(S.HASH.of_b58check_opt) s with
@@ -2655,15 +2651,14 @@ Fixpoint parse_data {a : Set}
     end)
   
   | (Script_typed_ir.Chain_id_t _, expr) =>
-    let expr := obj_magic Alpha_context.Script.node expr in
-    obj_magic (Lwt.t (Error_monad.tzresult (a * Alpha_context.context)))
+    let expr := cast Alpha_context.Script.node expr in
+    cast (Lwt.t (Error_monad.tzresult (a * Alpha_context.context)))
     ((traced (B := unit)) (Error_monad.fail extensible_type_value))
   
   | (Script_typed_ir.Address_t _, Micheline.Bytes loc __bytes_value) =>
     let '[loc, __bytes_value] :=
-      obj_magic [Alpha_context.Script.location ** MBytes.t] [loc, __bytes_value]
-      in
-    obj_magic (Lwt.t (Error_monad.tzresult (a * Alpha_context.context)))
+      cast [Alpha_context.Script.location ** MBytes.t] [loc, __bytes_value] in
+    cast (Lwt.t (Error_monad.tzresult (a * Alpha_context.context)))
     (let=? ctxt :=
       Lwt.__return (Alpha_context.Gas.consume ctxt Typecheck_costs.contract) in
     match
@@ -2685,9 +2680,8 @@ Fixpoint parse_data {a : Set}
     end)
   
   | (Script_typed_ir.Address_t _, Micheline.String loc s) =>
-    let '[loc, s] :=
-      obj_magic [Alpha_context.Script.location ** string] [loc, s] in
-    obj_magic (Lwt.t (Error_monad.tzresult (a * Alpha_context.context)))
+    let '[loc, s] := cast [Alpha_context.Script.location ** string] [loc, s] in
+    cast (Lwt.t (Error_monad.tzresult (a * Alpha_context.context)))
     (let=? ctxt :=
       Lwt.__return (Alpha_context.Gas.consume ctxt Typecheck_costs.contract) in
     let=? '(addr, entrypoint) :=
@@ -2709,16 +2703,15 @@ Fixpoint parse_data {a : Set}
     Error_monad.__return ((c, entrypoint), ctxt))
   
   | (Script_typed_ir.Address_t _, expr) =>
-    let expr := obj_magic Alpha_context.Script.node expr in
-    obj_magic (Lwt.t (Error_monad.tzresult (a * Alpha_context.context)))
+    let expr := cast Alpha_context.Script.node expr in
+    cast (Lwt.t (Error_monad.tzresult (a * Alpha_context.context)))
     ((traced (B := unit)) (Error_monad.fail extensible_type_value))
   
   | (Script_typed_ir.Contract_t ty _, Micheline.Bytes loc __bytes_value) =>
     let '[ty, loc, __bytes_value] :=
-      obj_magic
-        [Script_typed_ir.ty ** Alpha_context.Script.location ** MBytes.t]
+      cast [Script_typed_ir.ty ** Alpha_context.Script.location ** MBytes.t]
         [ty, loc, __bytes_value] in
-    obj_magic (Lwt.t (Error_monad.tzresult (a * Alpha_context.context)))
+    cast (Lwt.t (Error_monad.tzresult (a * Alpha_context.context)))
     (let=? ctxt :=
       Lwt.__return (Alpha_context.Gas.consume ctxt Typecheck_costs.contract) in
     match
@@ -2743,9 +2736,9 @@ Fixpoint parse_data {a : Set}
   
   | (Script_typed_ir.Contract_t ty _, Micheline.String loc s) =>
     let '[ty, loc, s] :=
-      obj_magic [Script_typed_ir.ty ** Alpha_context.Script.location ** string]
+      cast [Script_typed_ir.ty ** Alpha_context.Script.location ** string]
         [ty, loc, s] in
-    obj_magic (Lwt.t (Error_monad.tzresult (a * Alpha_context.context)))
+    cast (Lwt.t (Error_monad.tzresult (a * Alpha_context.context)))
     (let=? ctxt :=
       Lwt.__return (Alpha_context.Gas.consume ctxt Typecheck_costs.contract) in
     let=? '(addr, entrypoint) :=
@@ -2769,8 +2762,8 @@ Fixpoint parse_data {a : Set}
     Error_monad.__return ((ty, (c, entrypoint)), ctxt))
   
   | (Script_typed_ir.Contract_t _ _, expr) =>
-    let expr := obj_magic Alpha_context.Script.node expr in
-    obj_magic (Lwt.t (Error_monad.tzresult (a * Alpha_context.context)))
+    let expr := cast Alpha_context.Script.node expr in
+    cast (Lwt.t (Error_monad.tzresult (a * Alpha_context.context)))
     ((traced (B := unit)) (Error_monad.fail extensible_type_value))
   
   |
@@ -2778,14 +2771,14 @@ Fixpoint parse_data {a : Set}
       Micheline.Prim loc Alpha_context.Script.D_Pair (cons va (cons vb []))
         annot) =>
     let '[ta, tb, loc, va, vb, annot] :=
-      obj_magic
+      cast
         [Script_typed_ir.ty ** Script_typed_ir.ty **
           Alpha_context.Script.location **
           Micheline.node Alpha_context.Script.location Alpha_context.Script.prim
           **
           Micheline.node Alpha_context.Script.location Alpha_context.Script.prim
           ** Micheline.annot] [ta, tb, loc, va, vb, annot] in
-    obj_magic (Lwt.t (Error_monad.tzresult (a * Alpha_context.context)))
+    cast (Lwt.t (Error_monad.tzresult (a * Alpha_context.context)))
     (let=? '_ :=
       if legacy then
         Error_monad.__return tt
@@ -2803,17 +2796,17 @@ Fixpoint parse_data {a : Set}
     (Script_typed_ir.Pair_t _ _ _ _,
       Micheline.Prim loc Alpha_context.Script.D_Pair l _) =>
     let '[loc, l] :=
-      obj_magic
+      cast
         [Alpha_context.Script.location **
           list
             (Micheline.node Alpha_context.Script.location
               Alpha_context.Script.prim)] [loc, l] in
-    obj_magic (Lwt.t (Error_monad.tzresult (a * Alpha_context.context)))
+    cast (Lwt.t (Error_monad.tzresult (a * Alpha_context.context)))
     ((Error_monad.fail (a := unit)) extensible_type_value)
   
   | (Script_typed_ir.Pair_t _ _ _ _, expr) =>
-    let expr := obj_magic Alpha_context.Script.node expr in
-    obj_magic (Lwt.t (Error_monad.tzresult (a * Alpha_context.context)))
+    let expr := cast Alpha_context.Script.node expr in
+    cast (Lwt.t (Error_monad.tzresult (a * Alpha_context.context)))
     ((traced (B := unit))
       (Error_monad.fail
         (unexpected expr nil Script_tc_errors.Constant_namespace
@@ -2823,11 +2816,11 @@ Fixpoint parse_data {a : Set}
     (Script_typed_ir.Union_t (tl, _) _ _ _,
       Micheline.Prim loc Alpha_context.Script.D_Left (cons v []) annot) =>
     let '[tl, loc, v, annot] :=
-      obj_magic
+      cast
         [Script_typed_ir.ty ** Alpha_context.Script.location **
           Micheline.node Alpha_context.Script.location Alpha_context.Script.prim
           ** Micheline.annot] [tl, loc, v, annot] in
-    obj_magic (Lwt.t (Error_monad.tzresult (a * Alpha_context.context)))
+    cast (Lwt.t (Error_monad.tzresult (a * Alpha_context.context)))
     (let=? '_ :=
       if legacy then
         Error_monad.__return tt
@@ -2843,23 +2836,23 @@ Fixpoint parse_data {a : Set}
     (Script_typed_ir.Union_t _ _ _ _,
       Micheline.Prim loc Alpha_context.Script.D_Left l _) =>
     let '[loc, l] :=
-      obj_magic
+      cast
         [Alpha_context.Script.location **
           list
             (Micheline.node Alpha_context.Script.location
               Alpha_context.Script.prim)] [loc, l] in
-    obj_magic (Lwt.t (Error_monad.tzresult (a * Alpha_context.context)))
+    cast (Lwt.t (Error_monad.tzresult (a * Alpha_context.context)))
     ((Error_monad.fail (a := unit)) extensible_type_value)
   
   |
     (Script_typed_ir.Union_t _ (tr, _) _ _,
       Micheline.Prim loc Alpha_context.Script.D_Right (cons v []) annot) =>
     let '[tr, loc, v, annot] :=
-      obj_magic
+      cast
         [Script_typed_ir.ty ** Alpha_context.Script.location **
           Micheline.node Alpha_context.Script.location Alpha_context.Script.prim
           ** Micheline.annot] [tr, loc, v, annot] in
-    obj_magic (Lwt.t (Error_monad.tzresult (a * Alpha_context.context)))
+    cast (Lwt.t (Error_monad.tzresult (a * Alpha_context.context)))
     (let=? '_ := Script_ir_annot.fail_unexpected_annot loc annot in
     let=? ctxt :=
       Lwt.__return (Alpha_context.Gas.consume ctxt Typecheck_costs.union) in
@@ -2871,17 +2864,17 @@ Fixpoint parse_data {a : Set}
     (Script_typed_ir.Union_t _ _ _ _,
       Micheline.Prim loc Alpha_context.Script.D_Right l _) =>
     let '[loc, l] :=
-      obj_magic
+      cast
         [Alpha_context.Script.location **
           list
             (Micheline.node Alpha_context.Script.location
               Alpha_context.Script.prim)] [loc, l] in
-    obj_magic (Lwt.t (Error_monad.tzresult (a * Alpha_context.context)))
+    cast (Lwt.t (Error_monad.tzresult (a * Alpha_context.context)))
     ((Error_monad.fail (a := unit)) extensible_type_value)
   
   | (Script_typed_ir.Union_t _ _ _ _, expr) =>
-    let expr := obj_magic Alpha_context.Script.node expr in
-    obj_magic (Lwt.t (Error_monad.tzresult (a * Alpha_context.context)))
+    let expr := cast Alpha_context.Script.node expr in
+    cast (Lwt.t (Error_monad.tzresult (a * Alpha_context.context)))
     ((traced (B := unit))
       (Error_monad.fail
         (unexpected expr nil Script_tc_errors.Constant_namespace
@@ -2891,12 +2884,12 @@ Fixpoint parse_data {a : Set}
     (Script_typed_ir.Lambda_t ta tr _ty_name,
       (Micheline.Seq _loc _) as script_instr) =>
     let '[ta, tr, _ty_name, _loc, script_instr] :=
-      obj_magic
+      cast
         [Script_typed_ir.ty ** Script_typed_ir.ty **
           option Script_typed_ir.type_annot ** Alpha_context.Script.location **
           Micheline.node Alpha_context.Script.location Alpha_context.Script.prim]
         [ta, tr, _ty_name, _loc, script_instr] in
-    obj_magic (Lwt.t (Error_monad.tzresult (a * Alpha_context.context)))
+    cast (Lwt.t (Error_monad.tzresult (a * Alpha_context.context)))
     (let=? ctxt :=
       Lwt.__return (Alpha_context.Gas.consume ctxt Typecheck_costs.lambda) in
     traced
@@ -2904,19 +2897,19 @@ Fixpoint parse_data {a : Set}
         (ta, (Some (Script_typed_ir.Var_annot "@arg"))) tr script_instr))
   
   | (Script_typed_ir.Lambda_t _ _ _, expr) =>
-    let expr := obj_magic Alpha_context.Script.node expr in
-    obj_magic (Lwt.t (Error_monad.tzresult (a * Alpha_context.context)))
+    let expr := cast Alpha_context.Script.node expr in
+    cast (Lwt.t (Error_monad.tzresult (a * Alpha_context.context)))
     ((traced (B := unit)) (Error_monad.fail extensible_type_value))
   
   |
     (Script_typed_ir.Option_t __t_value _ _,
       Micheline.Prim loc Alpha_context.Script.D_Some (cons v []) annot) =>
     let '[__t_value, loc, v, annot] :=
-      obj_magic
+      cast
         [Script_typed_ir.ty ** Alpha_context.Script.location **
           Micheline.node Alpha_context.Script.location Alpha_context.Script.prim
           ** Micheline.annot] [__t_value, loc, v, annot] in
-    obj_magic (Lwt.t (Error_monad.tzresult (a * Alpha_context.context)))
+    cast (Lwt.t (Error_monad.tzresult (a * Alpha_context.context)))
     (let=? '_ :=
       if legacy then
         Error_monad.__return tt
@@ -2934,21 +2927,20 @@ Fixpoint parse_data {a : Set}
     (Script_typed_ir.Option_t _ _ _,
       Micheline.Prim loc Alpha_context.Script.D_Some l _) =>
     let '[loc, l] :=
-      obj_magic
+      cast
         [Alpha_context.Script.location **
           list
             (Micheline.node Alpha_context.Script.location
               Alpha_context.Script.prim)] [loc, l] in
-    obj_magic (Lwt.t (Error_monad.tzresult (a * Alpha_context.context)))
+    cast (Lwt.t (Error_monad.tzresult (a * Alpha_context.context)))
     ((Error_monad.fail (a := unit)) extensible_type_value)
   
   |
     (Script_typed_ir.Option_t _ _ _,
       Micheline.Prim loc Alpha_context.Script.D_None [] annot) =>
     let '[loc, annot] :=
-      obj_magic [Alpha_context.Script.location ** Micheline.annot] [loc, annot]
-      in
-    obj_magic (Lwt.t (Error_monad.tzresult (a * Alpha_context.context)))
+      cast [Alpha_context.Script.location ** Micheline.annot] [loc, annot] in
+    cast (Lwt.t (Error_monad.tzresult (a * Alpha_context.context)))
     (let=? '_ :=
       if legacy then
         Error_monad.__return tt
@@ -2962,17 +2954,17 @@ Fixpoint parse_data {a : Set}
     (Script_typed_ir.Option_t _ _ _,
       Micheline.Prim loc Alpha_context.Script.D_None l _) =>
     let '[loc, l] :=
-      obj_magic
+      cast
         [Alpha_context.Script.location **
           list
             (Micheline.node Alpha_context.Script.location
               Alpha_context.Script.prim)] [loc, l] in
-    obj_magic (Lwt.t (Error_monad.tzresult (a * Alpha_context.context)))
+    cast (Lwt.t (Error_monad.tzresult (a * Alpha_context.context)))
     ((Error_monad.fail (a := unit)) extensible_type_value)
   
   | (Script_typed_ir.Option_t _ _ _, expr) =>
-    let expr := obj_magic Alpha_context.Script.node expr in
-    obj_magic (Lwt.t (Error_monad.tzresult (a * Alpha_context.context)))
+    let expr := cast Alpha_context.Script.node expr in
+    cast (Lwt.t (Error_monad.tzresult (a * Alpha_context.context)))
     ((traced (B := unit))
       (Error_monad.fail
         (unexpected expr nil Script_tc_errors.Constant_namespace
@@ -2980,13 +2972,13 @@ Fixpoint parse_data {a : Set}
   
   | (Script_typed_ir.List_t __t_value _ty_name _, Micheline.Seq _loc items) =>
     let '[__t_value, _ty_name, _loc, items] :=
-      obj_magic
+      cast
         [Script_typed_ir.ty ** option Script_typed_ir.type_annot **
           Alpha_context.Script.location **
           list
             (Micheline.node Alpha_context.Script.location
               Alpha_context.Script.prim)] [__t_value, _ty_name, _loc, items] in
-    obj_magic (Lwt.t (Error_monad.tzresult (a * Alpha_context.context)))
+    cast (Lwt.t (Error_monad.tzresult (a * Alpha_context.context)))
     (traced
       (Error_monad.fold_right_s
         (fun v =>
@@ -3001,14 +2993,14 @@ Fixpoint parse_data {a : Set}
             Error_monad.__return ((cons v rest), ctxt)) items (nil, ctxt)))
   
   | (Script_typed_ir.List_t _ _ _, expr) =>
-    let expr := obj_magic Alpha_context.Script.node expr in
-    obj_magic (Lwt.t (Error_monad.tzresult (a * Alpha_context.context)))
+    let expr := cast Alpha_context.Script.node expr in
+    cast (Lwt.t (Error_monad.tzresult (a * Alpha_context.context)))
     ((traced (B := unit)) (Error_monad.fail extensible_type_value))
   
   | (Script_typed_ir.Set_t __t_value _ty_name, (Micheline.Seq loc vs) as expr)
     =>
     let '[__t_value, _ty_name, loc, vs, expr] :=
-      obj_magic
+      cast
         [Script_typed_ir.comparable_ty ** option Script_typed_ir.type_annot **
           Alpha_context.Script.location **
           list
@@ -3016,7 +3008,7 @@ Fixpoint parse_data {a : Set}
               Alpha_context.Script.prim) **
           Micheline.node Alpha_context.Script.location Alpha_context.Script.prim]
         [__t_value, _ty_name, loc, vs, expr] in
-    obj_magic (Lwt.t (Error_monad.tzresult (a * Alpha_context.context)))
+    cast (Lwt.t (Error_monad.tzresult (a * Alpha_context.context)))
     (let length := List.length vs in
     Error_monad.op_gtgtpipequestion
       (traced
@@ -3058,13 +3050,13 @@ Fixpoint parse_data {a : Set}
         (set, ctxt)))
   
   | (Script_typed_ir.Set_t _ _, expr) =>
-    let expr := obj_magic Alpha_context.Script.node expr in
-    obj_magic (Lwt.t (Error_monad.tzresult (a * Alpha_context.context)))
+    let expr := cast Alpha_context.Script.node expr in
+    cast (Lwt.t (Error_monad.tzresult (a * Alpha_context.context)))
     ((traced (B := unit)) (Error_monad.fail extensible_type_value))
   
   | (Script_typed_ir.Map_t tk tv _ty_name _, (Micheline.Seq loc vs) as expr) =>
     let '[tk, tv, _ty_name, loc, vs, expr] :=
-      obj_magic
+      cast
         [Script_typed_ir.comparable_ty ** Script_typed_ir.ty **
           option Script_typed_ir.type_annot ** Alpha_context.Script.location **
           list
@@ -3072,19 +3064,19 @@ Fixpoint parse_data {a : Set}
               Alpha_context.Script.prim) **
           Micheline.node Alpha_context.Script.location Alpha_context.Script.prim]
         [tk, tv, _ty_name, loc, vs, expr] in
-    obj_magic (Lwt.t (Error_monad.tzresult (a * Alpha_context.context)))
+    cast (Lwt.t (Error_monad.tzresult (a * Alpha_context.context)))
     ((parse_items (D := option unit) (E := unit)) __type_logger_value loc ctxt
       expr tk tv vs (fun x => x))
   
   | (Script_typed_ir.Map_t _ _ _ _, expr) =>
-    let expr := obj_magic Alpha_context.Script.node expr in
-    obj_magic (Lwt.t (Error_monad.tzresult (a * Alpha_context.context)))
+    let expr := cast Alpha_context.Script.node expr in
+    cast (Lwt.t (Error_monad.tzresult (a * Alpha_context.context)))
     ((traced (B := unit)) (Error_monad.fail extensible_type_value))
   
   | (Script_typed_ir.Big_map_t tk tv _ty_name, (Micheline.Seq loc vs) as expr)
     =>
     let '[tk, tv, _ty_name, loc, vs, expr] :=
-      obj_magic
+      cast
         [Script_typed_ir.comparable_ty ** Script_typed_ir.ty **
           option Script_typed_ir.type_annot ** Alpha_context.Script.location **
           list
@@ -3092,7 +3084,7 @@ Fixpoint parse_data {a : Set}
               Alpha_context.Script.prim) **
           Micheline.node Alpha_context.Script.location Alpha_context.Script.prim]
         [tk, tv, _ty_name, loc, vs, expr] in
-    obj_magic (Lwt.t (Error_monad.tzresult (a * Alpha_context.context)))
+    cast (Lwt.t (Error_monad.tzresult (a * Alpha_context.context)))
     (Error_monad.op_gtgtpipequestion
       ((parse_items (D := option unit) (E := unit)) __type_logger_value loc ctxt
         expr tk tv vs (fun x => Some x))
@@ -3105,11 +3097,11 @@ Fixpoint parse_data {a : Set}
   
   | (Script_typed_ir.Big_map_t tk tv _ty_name, Micheline.Int loc id) =>
     let '[tk, tv, _ty_name, loc, id] :=
-      obj_magic
+      cast
         [Script_typed_ir.comparable_ty ** Script_typed_ir.ty **
           option Script_typed_ir.type_annot ** Alpha_context.Script.location **
           Z.t] [tk, tv, _ty_name, loc, id] in
-    obj_magic (Lwt.t (Error_monad.tzresult (a * Alpha_context.context)))
+    cast (Lwt.t (Error_monad.tzresult (a * Alpha_context.context)))
     (let=? function_parameter := Alpha_context.Big_map.__exists ctxt id in
     match function_parameter with
     | (_, None) => traced (Error_monad.fail extensible_type_value)
@@ -3131,10 +3123,10 @@ Fixpoint parse_data {a : Set}
   
   | (Script_typed_ir.Big_map_t _tk _tv _, expr) =>
     let '[_tk, _tv, expr] :=
-      obj_magic
+      cast
         [Script_typed_ir.comparable_ty ** Script_typed_ir.ty **
           Alpha_context.Script.node] [_tk, _tv, expr] in
-    obj_magic (Lwt.t (Error_monad.tzresult (a * Alpha_context.context)))
+    cast (Lwt.t (Error_monad.tzresult (a * Alpha_context.context)))
     ((traced (B := unit)) (Error_monad.fail extensible_type_value))
   end
 
@@ -5884,7 +5876,7 @@ Fixpoint unparse_data {a : Set}
       ((Micheline.Prim (-1) Alpha_context.Script.D_Unit nil nil), ctxt)
   
   | (Script_typed_ir.Int_t _, _ as v) =>
-    let v := obj_magic Alpha_context.Script_int.num v in
+    let v := cast Alpha_context.Script_int.num v in
     let=? ctxt :=
       Lwt.__return
         (Alpha_context.Gas.consume ctxt (Unparse_costs.__int_value v)) in
@@ -5892,7 +5884,7 @@ Fixpoint unparse_data {a : Set}
       ((Micheline.Int (-1) (Alpha_context.Script_int.to_zint v)), ctxt)
   
   | (Script_typed_ir.Nat_t _, _ as v) =>
-    let v := obj_magic Alpha_context.Script_int.num v in
+    let v := cast Alpha_context.Script_int.num v in
     let=? ctxt :=
       Lwt.__return
         (Alpha_context.Gas.consume ctxt (Unparse_costs.__int_value v)) in
@@ -5900,21 +5892,21 @@ Fixpoint unparse_data {a : Set}
       ((Micheline.Int (-1) (Alpha_context.Script_int.to_zint v)), ctxt)
   
   | (Script_typed_ir.String_t _, _ as s) =>
-    let s := obj_magic string s in
+    let s := cast string s in
     let=? ctxt :=
       Lwt.__return
         (Alpha_context.Gas.consume ctxt (Unparse_costs.__string_value s)) in
     Error_monad.__return ((Micheline.String (-1) s), ctxt)
   
   | (Script_typed_ir.Bytes_t _, _ as s) =>
-    let s := obj_magic MBytes.t s in
+    let s := cast MBytes.t s in
     let=? ctxt :=
       Lwt.__return
         (Alpha_context.Gas.consume ctxt (Unparse_costs.__bytes_value s)) in
     Error_monad.__return ((Micheline.Bytes (-1) s), ctxt)
   
   | (Script_typed_ir.Bool_t _, _ as __b_value) =>
-    let __b_value := obj_magic bool __b_value in
+    let __b_value := cast bool __b_value in
     let=? ctxt :=
       Lwt.__return (Alpha_context.Gas.consume ctxt Unparse_costs.__bool_value)
       in
@@ -5926,7 +5918,7 @@ Fixpoint unparse_data {a : Set}
         ((Micheline.Prim (-1) Alpha_context.Script.D_False nil nil), ctxt)
   
   | (Script_typed_ir.Timestamp_t _, _ as __t_value) =>
-    let __t_value := obj_magic Alpha_context.Script_timestamp.t __t_value in
+    let __t_value := cast Alpha_context.Script_timestamp.t __t_value in
     let=? ctxt :=
       Lwt.__return
         (Alpha_context.Gas.consume ctxt (Unparse_costs.timestamp __t_value)) in
@@ -5946,7 +5938,7 @@ Fixpoint unparse_data {a : Set}
     end
   
   | (Script_typed_ir.Address_t _, _ as __a_value) =>
-    let __a_value := obj_magic Script_typed_ir.address __a_value in
+    let __a_value := cast Script_typed_ir.address __a_value in
     let '(c, entrypoint) := __a_value in
     let=? ctxt :=
       Lwt.__return (Alpha_context.Gas.consume ctxt Unparse_costs.contract) in
@@ -5974,7 +5966,7 @@ Fixpoint unparse_data {a : Set}
     end
   
   | (Script_typed_ir.Contract_t _ _, _ as __a_value) =>
-    let __a_value := obj_magic Script_typed_ir.typed_contract __a_value in
+    let __a_value := cast Script_typed_ir.typed_contract __a_value in
     let '(_, (c, entrypoint)) := __a_value in
     let=? ctxt :=
       Lwt.__return (Alpha_context.Gas.consume ctxt Unparse_costs.contract) in
@@ -6002,7 +5994,7 @@ Fixpoint unparse_data {a : Set}
     end
   
   | (Script_typed_ir.Signature_t _, _ as s) =>
-    let s := obj_magic Alpha_context.signature s in
+    let s := cast Alpha_context.signature s in
     let=? ctxt :=
       Lwt.__return (Alpha_context.Gas.consume ctxt Unparse_costs.signature) in
     match mode with
@@ -6016,14 +6008,14 @@ Fixpoint unparse_data {a : Set}
     end
   
   | (Script_typed_ir.Mutez_t _, _ as v) =>
-    let v := obj_magic Alpha_context.Tez.t v in
+    let v := cast Alpha_context.Tez.t v in
     let=? ctxt :=
       Lwt.__return (Alpha_context.Gas.consume ctxt Unparse_costs.tez) in
     Error_monad.__return
       ((Micheline.Int (-1) (Z.of_int64 (Alpha_context.Tez.to_mutez v))), ctxt)
   
   | (Script_typed_ir.Key_t _, _ as k) =>
-    let k := obj_magic Alpha_context.public_key k in
+    let k := cast Alpha_context.public_key k in
     let=? ctxt :=
       Lwt.__return (Alpha_context.Gas.consume ctxt Unparse_costs.__key_value) in
     match mode with
@@ -6039,7 +6031,7 @@ Fixpoint unparse_data {a : Set}
     end
   
   | (Script_typed_ir.Key_hash_t _, _ as k) =>
-    let k := obj_magic Alpha_context.public_key_hash k in
+    let k := cast Alpha_context.public_key_hash k in
     let=? ctxt :=
       Lwt.__return (Alpha_context.Gas.consume ctxt Unparse_costs.key_hash) in
     match mode with
@@ -6056,7 +6048,7 @@ Fixpoint unparse_data {a : Set}
     end
   
   | (Script_typed_ir.Operation_t _, _ as __a_value) =>
-    let __a_value := obj_magic Script_typed_ir.operation __a_value in
+    let __a_value := cast Script_typed_ir.operation __a_value in
     let '(op, _big_map_diff) := __a_value in
     let __bytes_value :=
       Data_encoding.Binary.to_bytes_exn
@@ -6068,7 +6060,7 @@ Fixpoint unparse_data {a : Set}
     Error_monad.__return ((Micheline.Bytes (-1) __bytes_value), ctxt)
   
   | (Script_typed_ir.Chain_id_t _, _ as chain_id) =>
-    let chain_id := obj_magic (|Chain_id|).(S.HASH.t) chain_id in
+    let chain_id := cast (|Chain_id|).(S.HASH.t) chain_id in
     let __bytes_value :=
       Data_encoding.Binary.to_bytes_exn (|Chain_id|).(S.HASH.encoding) chain_id
       in
@@ -6080,7 +6072,7 @@ Fixpoint unparse_data {a : Set}
   
   | (Script_typed_ir.Pair_t (tl, _, _) (tr, _, _) _ _, _ as __a_value) =>
     let 'existT _ [__1, __2] [tl, tr, __a_value] :=
-      obj_magic_exists (Es := [Set ** Set])
+      cast_exists (Es := [Set ** Set])
         (fun '[__1, __2] =>
           [Script_typed_ir.ty ** Script_typed_ir.ty ** __1 * __2])
         [tl, tr, __a_value] in
@@ -6095,7 +6087,7 @@ Fixpoint unparse_data {a : Set}
   
   | (Script_typed_ir.Union_t (tl, _) (tr, _) _ _, _ as __a_value) =>
     let 'existT _ [__3, __4] [tl, tr, __a_value] :=
-      obj_magic_exists (Es := [Set ** Set])
+      cast_exists (Es := [Set ** Set])
         (fun '[__3, __4] =>
           [Script_typed_ir.ty ** Script_typed_ir.ty **
             Script_typed_ir.union __3 __4]) [tl, tr, __a_value] in
@@ -6115,9 +6107,8 @@ Fixpoint unparse_data {a : Set}
   
   | (Script_typed_ir.Option_t __t_value _ _, _ as __a_value) =>
     let 'existT _ __5 [__t_value, __a_value] :=
-      obj_magic_exists (Es := Set)
-        (fun __5 => [Script_typed_ir.ty ** option __5]) [__t_value, __a_value]
-      in
+      cast_exists (Es := Set) (fun __5 => [Script_typed_ir.ty ** option __5])
+        [__t_value, __a_value] in
     match __a_value with
     | Some v =>
       let=? ctxt :=
@@ -6134,7 +6125,7 @@ Fixpoint unparse_data {a : Set}
   
   | (Script_typed_ir.List_t __t_value _ _, _ as items) =>
     let 'existT _ __6 [__t_value, items] :=
-      obj_magic_exists (Es := Set) (fun __6 => [Script_typed_ir.ty ** list __6])
+      cast_exists (Es := Set) (fun __6 => [Script_typed_ir.ty ** list __6])
         [__t_value, items] in
     let=? '(items, ctxt) :=
       Error_monad.fold_left_s
@@ -6151,7 +6142,7 @@ Fixpoint unparse_data {a : Set}
   
   | (Script_typed_ir.Set_t __t_value _, _ as set) =>
     let 'existT _ __7 [__t_value, set] :=
-      obj_magic_exists (Es := Set)
+      cast_exists (Es := Set)
         (fun __7 => [Script_typed_ir.comparable_ty ** Script_typed_ir.set __7])
         [__t_value, set] in
     let __t_value := ty_of_comparable_ty __t_value in
@@ -6170,7 +6161,7 @@ Fixpoint unparse_data {a : Set}
   
   | (Script_typed_ir.Map_t kt vt _ _, _ as map) =>
     let 'existT _ [__8, __9] [kt, vt, map] :=
-      obj_magic_exists (Es := [Set ** Set])
+      cast_exists (Es := [Set ** Set])
         (fun '[__8, __9] =>
           [Script_typed_ir.comparable_ty ** Script_typed_ir.ty **
             Script_typed_ir.map __8 __9]) [kt, vt, map] in
@@ -6195,7 +6186,7 @@ Fixpoint unparse_data {a : Set}
   
   | (Script_typed_ir.Big_map_t kt vt _, _ as __a_value) =>
     let 'existT _ [__10, __11] [kt, vt, __a_value] :=
-      obj_magic_exists (Es := [Set ** Set])
+      cast_exists (Es := [Set ** Set])
         (fun '[__10, __11] =>
           [Script_typed_ir.comparable_ty ** Script_typed_ir.ty **
             Script_typed_ir.big_map __10 __11]) [kt, vt, __a_value] in
@@ -6248,7 +6239,7 @@ Fixpoint unparse_data {a : Set}
     end
   
   | (Script_typed_ir.Lambda_t _ _ _, _ as __a_value) =>
-    let __a_value := obj_magic Script_typed_ir.lambda __a_value in
+    let __a_value := cast Script_typed_ir.lambda __a_value in
     let '{| Script_typed_ir.lambda.lam := (_, original_code) |} := __a_value in
     unparse_code ctxt mode original_code
   end
@@ -6557,9 +6548,9 @@ Fixpoint extract_big_map_updates {a : Set}
   match (ty, x) with
   | (Script_typed_ir.Big_map_t _ _ _, _ as map) =>
     let 'existT _ [__0, __1] map :=
-      obj_magic_exists (Es := [Set ** Set])
+      cast_exists (Es := [Set ** Set])
         (fun '[__0, __1] => Script_typed_ir.big_map __0 __1) map in
-    obj_magic
+    cast
       (Lwt.t
         (Error_monad.tzresult
           (Alpha_context.context * a * (|Ids|).(S.SET.t) *
@@ -6576,11 +6567,11 @@ Fixpoint extract_big_map_updates {a : Set}
   
   | (Script_typed_ir.Pair_t (tyl, _, _) (tyr, _, _) _ true, _ as x) =>
     let 'existT _ [__2, __3] [tyl, tyr, x] :=
-      obj_magic_exists (Es := [Set ** Set])
+      cast_exists (Es := [Set ** Set])
         (fun '[__2, __3] =>
           [Script_typed_ir.ty ** Script_typed_ir.ty ** __2 * __3]) [tyl, tyr, x]
       in
-    obj_magic
+    cast
       (Lwt.t
         (Error_monad.tzresult
           (Alpha_context.context * a * (|Ids|).(S.SET.t) *
@@ -6596,11 +6587,11 @@ Fixpoint extract_big_map_updates {a : Set}
   
   | (Script_typed_ir.Union_t (ty_l, _) (ty_r, _) _ true, _ as x) =>
     let 'existT _ [__4, __5] [ty_l, ty_r, x] :=
-      obj_magic_exists (Es := [Set ** Set])
+      cast_exists (Es := [Set ** Set])
         (fun '[__4, __5] =>
           [Script_typed_ir.ty ** Script_typed_ir.ty **
             Script_typed_ir.union __4 __5]) [ty_l, ty_r, x] in
-    obj_magic
+    cast
       (Lwt.t
         (Error_monad.tzresult
           (Alpha_context.context * a * (|Ids|).(S.SET.t) *
@@ -6620,9 +6611,9 @@ Fixpoint extract_big_map_updates {a : Set}
   
   | (Script_typed_ir.Option_t ty _ true, _ as x) =>
     let 'existT _ __6 [ty, x] :=
-      obj_magic_exists (Es := Set)
-        (fun __6 => [Script_typed_ir.ty ** option __6]) [ty, x] in
-    obj_magic
+      cast_exists (Es := Set) (fun __6 => [Script_typed_ir.ty ** option __6])
+        [ty, x] in
+    cast
       (Lwt.t
         (Error_monad.tzresult
           (Alpha_context.context * a * (|Ids|).(S.SET.t) *
@@ -6639,9 +6630,9 @@ Fixpoint extract_big_map_updates {a : Set}
   
   | (Script_typed_ir.List_t ty _ true, _ as l) =>
     let 'existT _ __7 [ty, l] :=
-      obj_magic_exists (Es := Set) (fun __7 => [Script_typed_ir.ty ** list __7])
+      cast_exists (Es := Set) (fun __7 => [Script_typed_ir.ty ** list __7])
         [ty, l] in
-    obj_magic
+    cast
       (Lwt.t
         (Error_monad.tzresult
           (Alpha_context.context * a * (|Ids|).(S.SET.t) *
@@ -6662,10 +6653,10 @@ Fixpoint extract_big_map_updates {a : Set}
   
   | (Script_typed_ir.Map_t _ ty _ true, _ as m) =>
     let 'existT _ [__8, __9] [ty, m] :=
-      obj_magic_exists (Es := [Set ** Set])
+      cast_exists (Es := [Set ** Set])
         (fun '[__8, __9] => [Script_typed_ir.ty ** Script_typed_ir.map __8 __9])
         [ty, m] in
-    obj_magic
+    cast
       (Lwt.t
         (Error_monad.tzresult
           (Alpha_context.context * a * (|Ids|).(S.SET.t) *
@@ -6715,8 +6706,8 @@ Fixpoint extract_big_map_updates {a : Set}
       (ctxt, (pack (existT (A := Set -> Set) _ _ (|M|))), ids, acc))
   
   | (Script_typed_ir.List_t _ _ false, v) =>
-    let v := obj_magic a v in
-    obj_magic
+    let v := cast a v in
+    cast
       (Lwt.t
         (Error_monad.tzresult
           (Alpha_context.context * a * (|Ids|).(S.SET.t) *
@@ -6724,8 +6715,8 @@ Fixpoint extract_big_map_updates {a : Set}
     (Error_monad.__return (ctxt, v, ids, acc))
   
   | (Script_typed_ir.Map_t _ _ _ false, v) =>
-    let v := obj_magic a v in
-    obj_magic
+    let v := cast a v in
+    cast
       (Lwt.t
         (Error_monad.tzresult
           (Alpha_context.context * a * (|Ids|).(S.SET.t) *
@@ -6733,8 +6724,8 @@ Fixpoint extract_big_map_updates {a : Set}
     (Error_monad.__return (ctxt, v, ids, acc))
   
   | (Script_typed_ir.Pair_t _ _ _ false, v) =>
-    let v := obj_magic a v in
-    obj_magic
+    let v := cast a v in
+    cast
       (Lwt.t
         (Error_monad.tzresult
           (Alpha_context.context * a * (|Ids|).(S.SET.t) *
@@ -6742,8 +6733,8 @@ Fixpoint extract_big_map_updates {a : Set}
     (Error_monad.__return (ctxt, v, ids, acc))
   
   | (Script_typed_ir.Union_t _ _ _ false, v) =>
-    let v := obj_magic a v in
-    obj_magic
+    let v := cast a v in
+    cast
       (Lwt.t
         (Error_monad.tzresult
           (Alpha_context.context * a * (|Ids|).(S.SET.t) *
@@ -6751,8 +6742,8 @@ Fixpoint extract_big_map_updates {a : Set}
     (Error_monad.__return (ctxt, v, ids, acc))
   
   | (Script_typed_ir.Option_t _ _ false, v) =>
-    let v := obj_magic a v in
-    obj_magic
+    let v := cast a v in
+    cast
       (Lwt.t
         (Error_monad.tzresult
           (Alpha_context.context * a * (|Ids|).(S.SET.t) *
@@ -6760,8 +6751,8 @@ Fixpoint extract_big_map_updates {a : Set}
     (Error_monad.__return (ctxt, v, ids, acc))
   
   | (Script_typed_ir.Chain_id_t _, v) =>
-    let v := obj_magic a v in
-    obj_magic
+    let v := cast a v in
+    cast
       (Lwt.t
         (Error_monad.tzresult
           (Alpha_context.context * a * (|Ids|).(S.SET.t) *
@@ -6769,8 +6760,8 @@ Fixpoint extract_big_map_updates {a : Set}
     (Error_monad.__return (ctxt, v, ids, acc))
   
   | (Script_typed_ir.Set_t _ _, v) =>
-    let v := obj_magic a v in
-    obj_magic
+    let v := cast a v in
+    cast
       (Lwt.t
         (Error_monad.tzresult
           (Alpha_context.context * a * (|Ids|).(S.SET.t) *
@@ -6778,8 +6769,8 @@ Fixpoint extract_big_map_updates {a : Set}
     (Error_monad.__return (ctxt, v, ids, acc))
   
   | (Script_typed_ir.Unit_t _, v) =>
-    let v := obj_magic a v in
-    obj_magic
+    let v := cast a v in
+    cast
       (Lwt.t
         (Error_monad.tzresult
           (Alpha_context.context * a * (|Ids|).(S.SET.t) *
@@ -6787,8 +6778,8 @@ Fixpoint extract_big_map_updates {a : Set}
     (Error_monad.__return (ctxt, v, ids, acc))
   
   | (Script_typed_ir.Int_t _, v) =>
-    let v := obj_magic a v in
-    obj_magic
+    let v := cast a v in
+    cast
       (Lwt.t
         (Error_monad.tzresult
           (Alpha_context.context * a * (|Ids|).(S.SET.t) *
@@ -6796,8 +6787,8 @@ Fixpoint extract_big_map_updates {a : Set}
     (Error_monad.__return (ctxt, v, ids, acc))
   
   | (Script_typed_ir.Nat_t _, v) =>
-    let v := obj_magic a v in
-    obj_magic
+    let v := cast a v in
+    cast
       (Lwt.t
         (Error_monad.tzresult
           (Alpha_context.context * a * (|Ids|).(S.SET.t) *
@@ -6805,8 +6796,8 @@ Fixpoint extract_big_map_updates {a : Set}
     (Error_monad.__return (ctxt, v, ids, acc))
   
   | (Script_typed_ir.Signature_t _, v) =>
-    let v := obj_magic a v in
-    obj_magic
+    let v := cast a v in
+    cast
       (Lwt.t
         (Error_monad.tzresult
           (Alpha_context.context * a * (|Ids|).(S.SET.t) *
@@ -6814,8 +6805,8 @@ Fixpoint extract_big_map_updates {a : Set}
     (Error_monad.__return (ctxt, v, ids, acc))
   
   | (Script_typed_ir.String_t _, v) =>
-    let v := obj_magic a v in
-    obj_magic
+    let v := cast a v in
+    cast
       (Lwt.t
         (Error_monad.tzresult
           (Alpha_context.context * a * (|Ids|).(S.SET.t) *
@@ -6823,8 +6814,8 @@ Fixpoint extract_big_map_updates {a : Set}
     (Error_monad.__return (ctxt, v, ids, acc))
   
   | (Script_typed_ir.Bytes_t _, v) =>
-    let v := obj_magic a v in
-    obj_magic
+    let v := cast a v in
+    cast
       (Lwt.t
         (Error_monad.tzresult
           (Alpha_context.context * a * (|Ids|).(S.SET.t) *
@@ -6832,8 +6823,8 @@ Fixpoint extract_big_map_updates {a : Set}
     (Error_monad.__return (ctxt, v, ids, acc))
   
   | (Script_typed_ir.Mutez_t _, v) =>
-    let v := obj_magic a v in
-    obj_magic
+    let v := cast a v in
+    cast
       (Lwt.t
         (Error_monad.tzresult
           (Alpha_context.context * a * (|Ids|).(S.SET.t) *
@@ -6841,8 +6832,8 @@ Fixpoint extract_big_map_updates {a : Set}
     (Error_monad.__return (ctxt, v, ids, acc))
   
   | (Script_typed_ir.Key_hash_t _, v) =>
-    let v := obj_magic a v in
-    obj_magic
+    let v := cast a v in
+    cast
       (Lwt.t
         (Error_monad.tzresult
           (Alpha_context.context * a * (|Ids|).(S.SET.t) *
@@ -6850,8 +6841,8 @@ Fixpoint extract_big_map_updates {a : Set}
     (Error_monad.__return (ctxt, v, ids, acc))
   
   | (Script_typed_ir.Key_t _, v) =>
-    let v := obj_magic a v in
-    obj_magic
+    let v := cast a v in
+    cast
       (Lwt.t
         (Error_monad.tzresult
           (Alpha_context.context * a * (|Ids|).(S.SET.t) *
@@ -6859,8 +6850,8 @@ Fixpoint extract_big_map_updates {a : Set}
     (Error_monad.__return (ctxt, v, ids, acc))
   
   | (Script_typed_ir.Timestamp_t _, v) =>
-    let v := obj_magic a v in
-    obj_magic
+    let v := cast a v in
+    cast
       (Lwt.t
         (Error_monad.tzresult
           (Alpha_context.context * a * (|Ids|).(S.SET.t) *
@@ -6868,8 +6859,8 @@ Fixpoint extract_big_map_updates {a : Set}
     (Error_monad.__return (ctxt, v, ids, acc))
   
   | (Script_typed_ir.Address_t _, v) =>
-    let v := obj_magic a v in
-    obj_magic
+    let v := cast a v in
+    cast
       (Lwt.t
         (Error_monad.tzresult
           (Alpha_context.context * a * (|Ids|).(S.SET.t) *
@@ -6877,8 +6868,8 @@ Fixpoint extract_big_map_updates {a : Set}
     (Error_monad.__return (ctxt, v, ids, acc))
   
   | (Script_typed_ir.Bool_t _, v) =>
-    let v := obj_magic a v in
-    obj_magic
+    let v := cast a v in
+    cast
       (Lwt.t
         (Error_monad.tzresult
           (Alpha_context.context * a * (|Ids|).(S.SET.t) *
@@ -6886,8 +6877,8 @@ Fixpoint extract_big_map_updates {a : Set}
     (Error_monad.__return (ctxt, v, ids, acc))
   
   | (Script_typed_ir.Lambda_t _ _ _, v) =>
-    let v := obj_magic a v in
-    obj_magic
+    let v := cast a v in
+    cast
       (Lwt.t
         (Error_monad.tzresult
           (Alpha_context.context * a * (|Ids|).(S.SET.t) *
@@ -6895,8 +6886,8 @@ Fixpoint extract_big_map_updates {a : Set}
     (Error_monad.__return (ctxt, v, ids, acc))
   
   | (Script_typed_ir.Contract_t _ _, v) =>
-    let v := obj_magic a v in
-    obj_magic
+    let v := cast a v in
+    cast
       (Lwt.t
         (Error_monad.tzresult
           (Alpha_context.context * a * (|Ids|).(S.SET.t) *
@@ -6904,7 +6895,7 @@ Fixpoint extract_big_map_updates {a : Set}
     (Error_monad.__return (ctxt, v, ids, acc))
   
   | (Script_typed_ir.Operation_t _, _) =>
-    obj_magic
+    cast
       (Lwt.t
         (Error_monad.tzresult
           (Alpha_context.context * a * (|Ids|).(S.SET.t) *
@@ -6927,7 +6918,7 @@ Definition collect_big_maps {A : Set}
     match (ty, x) with
     | (Script_typed_ir.Big_map_t _ _ _, _ as x) =>
       let 'existT _ [__0, __1] x :=
-        obj_magic_exists (Es := [Set ** Set])
+        cast_exists (Es := [Set ** Set])
           (fun '[__0, __1] => Script_typed_ir.big_map __0 __1) x in
       match x with
       | {| Script_typed_ir.big_map.id := Some id |} =>
@@ -6938,7 +6929,7 @@ Definition collect_big_maps {A : Set}
     
     | (Script_typed_ir.Pair_t (tyl, _, _) (tyr, _, _) _ true, _ as x) =>
       let 'existT _ [__2, __3] [tyl, tyr, x] :=
-        obj_magic_exists (Es := [Set ** Set])
+        cast_exists (Es := [Set ** Set])
           (fun '[__2, __3] =>
             [Script_typed_ir.ty ** Script_typed_ir.ty ** __2 * __3])
           [tyl, tyr, x] in
@@ -6948,7 +6939,7 @@ Definition collect_big_maps {A : Set}
     
     | (Script_typed_ir.Union_t (ty_l, _) (ty_r, _) _ true, _ as x) =>
       let 'existT _ [__4, __5] [ty_l, ty_r, x] :=
-        obj_magic_exists (Es := [Set ** Set])
+        cast_exists (Es := [Set ** Set])
           (fun '[__4, __5] =>
             [Script_typed_ir.ty ** Script_typed_ir.ty **
               Script_typed_ir.union __4 __5]) [ty_l, ty_r, x] in
@@ -6959,8 +6950,8 @@ Definition collect_big_maps {A : Set}
     
     | (Script_typed_ir.Option_t ty _ true, _ as x) =>
       let 'existT _ __6 [ty, x] :=
-        obj_magic_exists (Es := Set)
-          (fun __6 => [Script_typed_ir.ty ** option __6]) [ty, x] in
+        cast_exists (Es := Set) (fun __6 => [Script_typed_ir.ty ** option __6])
+          [ty, x] in
       match x with
       | Some x => collect ctxt ty x acc
       | None => Error_monad.ok (acc, ctxt)
@@ -6968,8 +6959,8 @@ Definition collect_big_maps {A : Set}
     
     | (Script_typed_ir.List_t ty _ true, _ as l) =>
       let 'existT _ __7 [ty, l] :=
-        obj_magic_exists (Es := Set)
-          (fun __7 => [Script_typed_ir.ty ** list __7]) [ty, l] in
+        cast_exists (Es := Set) (fun __7 => [Script_typed_ir.ty ** list __7])
+          [ty, l] in
       List.fold_left
         (fun acc =>
           fun x =>
@@ -6978,7 +6969,7 @@ Definition collect_big_maps {A : Set}
     
     | (Script_typed_ir.Map_t _ ty _ true, _ as m) =>
       let 'existT _ [__8, __9] [ty, m] :=
-        obj_magic_exists (Es := [Set ** Set])
+        cast_exists (Es := [Set ** Set])
           (fun '[__8, __9] =>
             [Script_typed_ir.ty ** Script_typed_ir.map __8 __9]) [ty, m] in
       map_fold

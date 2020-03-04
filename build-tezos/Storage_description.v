@@ -159,10 +159,10 @@ End args.
 
 Fixpoint unpack {a b c : Set} (v : args) (x : c) {struct v} : a * b :=
   match v with
-  | One _ => obj_magic (a * b) x
+  | One _ => cast (a * b) x
   | Pair l __r_value =>
-    let '[l, __r_value] := obj_magic [args ** args] [l, __r_value] in
-    obj_magic (a * b)
+    let '[l, __r_value] := cast [args ** args] [l, __r_value] in
+    cast (a * b)
     (let '(c, d) := (unpack (a := unit) (b := unit)) __r_value x in
     let '(__b_value, __a_value) := (unpack (a := unit) (b := unit)) l c in
     (__b_value, (__a_value, d)))
@@ -170,12 +170,12 @@ Fixpoint unpack {a b c : Set} (v : args) (x : c) {struct v} : a * b :=
 
 Fixpoint __pack {a b c : Set} (v : args) (x : a) (y : b) {struct v} : c :=
   match (v, y) with
-  | (One _, _) => obj_magic c (x, y)
+  | (One _, _) => cast c (x, y)
   | (Pair l __r_value, _ as y) =>
     let 'existT _ [__0, __1] [l, __r_value, y] :=
-      obj_magic_exists (Es := [Set ** Set])
+      cast_exists (Es := [Set ** Set])
         (fun '[__0, __1] => [args ** args ** __0 * __1]) [l, __r_value, y] in
-    obj_magic c
+    cast c
     (let '(__a_value, d) := y in
     let c := (__pack (c := unit)) l x __a_value in
     (__pack (c := unit)) __r_value c d)
@@ -184,11 +184,11 @@ Fixpoint __pack {a b c : Set} (v : args) (x : a) (y : b) {struct v} : c :=
 Fixpoint compare {b : Set} (v : args) (x1 : b) (x2 : b) {struct v} : int :=
   match (v, x1, x2) with
   | (One {| args.One.compare := compare' |}, _, _) =>
-    let compare' := obj_magic (b -> b -> int) compare' in
+    let compare' := cast (b -> b -> int) compare' in
     compare' x1 x2
   | (Pair l __r_value, _ as x1, _ as x2) =>
     let 'existT _ [__0, __1] [l, __r_value, x1, x2] :=
-      obj_magic_exists (Es := [Set ** Set])
+      cast_exists (Es := [Set ** Set])
         (fun '[__0, __1] => [args ** args ** __0 * __1 ** __0 * __1])
         [l, __r_value, x1, x2] in
     let '(a1, b1) := x1 in
@@ -224,7 +224,7 @@ Fixpoint register_indexed_subcontext {a b r : Set}
   match (path, __list_value) with
   | (Pair __left __right, _ as __list_value) =>
     let 'existT _ [__0, __1] [__left, __right, __list_value] :=
-      obj_magic_exists (Es := [Set ** Set])
+      cast_exists (Es := [Set ** Set])
         (fun '[__0, __1] =>
           [args ** args ** r -> Lwt.t (Error_monad.tzresult (list (__0 * __1)))])
         [__left, __right, __list_value] in
@@ -247,7 +247,7 @@ Fixpoint register_indexed_subcontext {a b r : Set}
                 equal_left x k) l))) __right
   | (One {| args.One.rpc_arg := arg; args.One.encoding := arg_encoding |}, _) =>
     let '[arg, arg_encoding] :=
-      obj_magic [RPC_arg.t a ** Data_encoding.t a] [arg, arg_encoding] in
+      cast [RPC_arg.t a ** Data_encoding.t a] [arg, arg_encoding] in
     match Pervasives.op_exclamation dir with
     | Value _ => Pervasives.invalid_arg ""
     | NamedDir _ => Pervasives.invalid_arg ""
@@ -267,8 +267,8 @@ Fixpoint register_indexed_subcontext {a b r : Set}
             [RPC_arg.t __IndexedDir_'a ** t (r * __IndexedDir_'a)]) _
           [inner_arg, subdir] in
       match RPC_arg.__eq_value arg inner_arg with
-      | None => obj_magic (t b) ((Pervasives.invalid_arg (a := t b)) "")
-      | Some RPC_arg.Eq => obj_magic (t b) subdir
+      | None => cast (t b) ((Pervasives.invalid_arg (a := t b)) "")
+      | Some RPC_arg.Eq => cast (t b) subdir
       end
     end
   end.
