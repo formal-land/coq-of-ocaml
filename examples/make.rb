@@ -155,8 +155,8 @@ File.open("tezos/index.html", "w") do |file|
   file << project(
     :tezos,
     "Protocol of Tezos",
-    "These are the sources of the <a href=\"https://gitlab.com/tezos/tezos/tree/master/src/proto_alpha/lib_protocol\">protocol</a> of <a href=\"https://tezos.com/\">Tezos</a> imported to <a href=\"https://coq.inria.fr/\">Coq</a> by the current development version of <a href=\"https://github.com/clarus/coq-of-ocaml\">coq-of-ocaml</a>. Tezos is a crypto-currency with smart-contracts and an upgradable protocol.",
-    "(2020-02-26) We continue the proofs of the interpreter and update the generated code if necessary. Holding ground around the interpreter.",
+    "These are the sources of the <a href=\"https://gitlab.com/tezos/tezos/tree/master/src/proto_alpha/lib_protocol\">protocol</a> of <a href=\"https://tezos.com/\">Tezos</a> imported to <a href=\"https://coq.inria.fr/\">Coq</a> by the current development version of <a href=\"https://github.com/clarus/coq-of-ocaml\">coq-of-ocaml</a>. Tezos is a crypto-currency with smart-contracts and an upgradable protocol. To see the valid generated Coq files, go on <a href=\"https://clarus.github.io/coq-of-ocaml/build-tezos/html/toc.html\">coq-of-ocaml/build-tezos/html/toc.html</a>.",
+    "(2020-03-04) We now import all the Tezos protocol to Coq, apart from the RPC calls. Working on the Coq proofs.",
     tezos_directory,
     :active_development,
     <<-END
@@ -212,6 +212,7 @@ File.open("tezos/index.html", "w") do |file|
           28609,
           32833,
           39901,
+          39901,
         ],
         generated: [
           47563,
@@ -263,6 +264,7 @@ File.open("tezos/index.html", "w") do |file|
           46049,
           45766,
           46649,
+          46664,
           46664,
         ],
         labels: [
@@ -316,6 +318,7 @@ File.open("tezos/index.html", "w") do |file|
           "03-01",
           "03-02",
           "03-03",
+          "03-04",
         ]
       }
     END
