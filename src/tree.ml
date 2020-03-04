@@ -18,7 +18,7 @@ let rec map_at (tree : 'a t) (path_name : PathName.t) (f : 'a -> 'a) : 'a t =
   tree |> List.map (fun item ->
     match item with
     | Item (name, x) ->
-      if name = head then
+      if name = head && tail = None then
         Item (name, f x)
       else
         item

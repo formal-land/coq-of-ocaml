@@ -1,4 +1,5 @@
 ## [Unreleased]
+* Name the arguments of the signatures.
 * Rename `obj_magic` as `cast`.
 * Set the primitive projection flag.
 * Add support for the `with` operator on constructor records.

@@ -15,7 +15,6 @@ Module COMPARABLE.
     t := t;
     compare : t -> t -> Z;
   }.
-  Arguments signature : clear implicits.
 End COMPARABLE.
 
 Module S.
@@ -32,13 +31,12 @@ Module S.
     max : t -> t -> t;
     min : t -> t -> t;
   }.
-  Arguments signature : clear implicits.
 End S.
 
 Parameter Make :
-  forall (P : {t : Set & COMPARABLE.signature t}),
-    {_ : unit & S.signature (|P|).(COMPARABLE.t)}.
+  forall (P : {t : Set & COMPARABLE.signature (t := t)}),
+    {_ : unit & S.signature (t := (|P|).(COMPARABLE.t))}.
 
-Parameter Char : {_ : unit & S.signature ascii}.
+Parameter Char : {_ : unit & S.signature (t := ascii)}.
 
-Parameter Abstract : {t : Set & S.signature t}.
+Parameter Abstract : {t : Set & S.signature (t := t)}.

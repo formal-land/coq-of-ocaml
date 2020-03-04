@@ -111,12 +111,16 @@ let to_coq (typ_variables_prefix : Name.t) (module_typ : t) : SmartPrint.t =
     nest (
       nest (PathName.to_coq path_name ^-^ !^ "." ^-^ !^ "signature") ^^
       separate space (Tree.flatten typ_values |> List.map (fun (path_name, arity_or_typ) ->
-        match arity_or_typ with
-        | Type.Typ typ -> Type.to_coq None (Some Type.Context.Apply) typ
-        | Arity _ ->
-          Name.to_coq (
-            ModuleTypParams.get_typ_param_name
-              (PathName.add_prefix typ_variables_prefix path_name)
-          )
+        let name = ModuleTypParams.get_typ_param_name path_name in
+        nest (parens (
+          Name.to_coq name ^^ !^ ":=" ^^
+          match arity_or_typ with
+          | Type.Typ typ -> Type.to_coq None (Some Type.Context.Apply) typ
+          | Arity _ ->
+            Name.to_coq (
+              ModuleTypParams.get_typ_param_name
+                (PathName.add_prefix typ_variables_prefix path_name)
+            )
+        ))
       ))
     )

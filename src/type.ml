@@ -530,10 +530,13 @@ let rec to_coq (subst : Subst.t option) (context : Context.t option) (typ : t)
         separate space (
           nest (PathName.to_coq path_name ^-^ !^ "." ^-^ !^ "signature") ::
           (Tree.flatten typ_params |> List.map (fun (path_name, typ) ->
-            match typ with
-            | Arity _ ->
-              Name.to_coq (ModuleTypParams.get_typ_param_name path_name)
-            | Typ typ -> to_coq subst (Some Context.Apply) typ
+            let name = ModuleTypParams.get_typ_param_name path_name in
+            nest (parens (
+              Name.to_coq name ^^ !^ ":=" ^^
+              match typ with
+              | Arity _ -> Name.to_coq name
+              | Typ typ -> to_coq subst (Some Context.Apply) typ
+            ))
           ))
         )
       )

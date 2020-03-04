@@ -15,7 +15,6 @@ Module Source.
     t := t;
     x : t;
   }.
-  Arguments signature : clear implicits.
 End Source.
 
 Module Target.
@@ -23,10 +22,9 @@ Module Target.
     t := t;
     y : t;
   }.
-  Arguments signature : clear implicits.
 End Target.
 
-Definition M : {t : Set & Source.signature t} :=
+Definition M : {t : Set & Source.signature (t := t)} :=
   let t : Set := Z in
   let x := 12 in
   existT (A := Set) _ _
@@ -35,28 +33,28 @@ Definition M : {t : Set & Source.signature t} :=
     |}.
 
 Definition F :=
-  fun (X : {t : Set & Source.signature t}) =>
+  fun (X : {t : Set & Source.signature (t := t)}) =>
     ((let t : Set := (|X|).(Source.t) in
     let y := (|X|).(Source.x) in
     existT (A := unit) (fun _ => _) tt
       {|
         Target.y := y
-      |}) : {_ : unit & Target.signature (|X|).(Source.t)}).
+      |}) : {_ : unit & Target.signature (t := (|X|).(Source.t))}).
 
 Definition FSubst :=
-  fun (X : {t : Set & Source.signature t}) =>
+  fun (X : {t : Set & Source.signature (t := t)}) =>
     ((let y := (|X|).(Source.x) in
     existT (A := unit) (fun _ => _) tt
       {|
         Target.y := y
-      |}) : {_ : unit & Target.signature (|X|).(Source.t)}).
+      |}) : {_ : unit & Target.signature (t := (|X|).(Source.t))}).
 
 Definition Sum :=
-  fun (X : {_ : unit & Source.signature Z}) =>
-    fun (Y : {_ : unit & Source.signature Z}) =>
+  fun (X : {_ : unit & Source.signature (t := Z)}) =>
+    fun (Y : {_ : unit & Source.signature (t := Z)}) =>
       ((let t : Set := Z in
       let y := Z.add (|X|).(Source.x) (|Y|).(Source.x) in
       existT (A := Set) _ _
         {|
           Target.y := y
-        |}) : {t : Set & Target.signature t}).
+        |}) : {t : Set & Target.signature (t := t)}).

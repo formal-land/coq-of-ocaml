@@ -45,7 +45,6 @@ Module S.
       find_last_opt : (elt -> bool) -> t -> option elt;
       of_list : list elt -> t;
     }.
-    Arguments signature : clear implicits.
   End SET.
 End S.
 
@@ -78,22 +77,20 @@ Module Boxed_set.
   Record signature {elt OPS_t : Set} : Set := {
     elt := elt;
     elt_ty : comparable_ty;
-    OPS : S.SET.signature elt OPS_t;
+    OPS : S.SET.signature (elt := elt) (t := OPS_t);
     boxed : OPS.(S.SET.t);
     size : Z;
   }.
-  Arguments signature : clear implicits.
 End Boxed_set.
 
 Definition set (elt : Set) : Set :=
-  {OPS_t : Set @ Boxed_set.signature elt OPS_t}.
+  {OPS_t : Set @ Boxed_set.signature (elt := elt) (OPS_t := OPS_t)}.
 
 Module IncludedFoo.
   Record signature {bar : Set} : Set := {
     bar := bar;
     foo : bar;
   }.
-  Arguments signature : clear implicits.
 End IncludedFoo.
 
 Module Triple.
@@ -107,11 +104,11 @@ Module Triple.
     bar := bar;
     foo : bar;
   }.
-  Arguments signature : clear implicits.
 End Triple.
 
 Definition tripe
-  : {'[a, b, c, bar] : [Set ** Set ** Set ** Set] @ Triple.signature a b c bar} :=
+  : {'[a, b, c, bar] : [Set ** Set ** Set ** Set] @
+    Triple.signature (a := a) (b := b) (c := c) (bar := bar)} :=
   (pack
     (let a : Set := Z in
     let b : Set := bool in
@@ -132,12 +129,11 @@ Definition tripe
 Module UsingTriple.
   Record signature {elt' T_a T_b T_c T_bar OPS'_elt OPS'_t : Set} : Set := {
     elt' := elt';
-    T : Triple.signature T_a T_b T_c T_bar;
-    OPS' : S.SET.signature OPS'_elt OPS'_t;
-    OPS'' : S.SET.signature elt' (list string);
+    T : Triple.signature (a := T_a) (b := T_b) (c := T_c) (bar := T_bar);
+    OPS' : S.SET.signature (elt := OPS'_elt) (t := OPS'_t);
+    OPS'' : S.SET.signature (elt := elt') (t := (list string));
     table (a : Set) := list a;
   }.
-  Arguments signature : clear implicits.
 End UsingTriple.
 
 Definition set_update {a : Set} (v : a) (b : bool) (Box : set a) : set a :=
@@ -188,5 +184,4 @@ Module MAP.
     is_empty : forall {a : Set}, t a -> bool;
     mem : forall {a : Set}, key -> t a -> bool;
   }.
-  Arguments signature : clear implicits.
 End MAP.

@@ -239,11 +239,6 @@ let to_coq_definition (name : Name.t) (signature : t) : SmartPrint.t =
       !^ ":=" ^^ !^ "{" ^^ newline ^^
       indent (separate newline (List.map to_coq_item signature.items)) ^^ newline ^^
       !^ "}" ^-^ !^ "."
-    ) ^^
-    (match typ_params with
-    | [] -> empty
-    | _ ->
-      newline ^^ !^ "Arguments" ^^ !^ "signature" ^^ !^ ":" ^^ !^ "clear" ^^ !^ "implicits" ^-^ !^ "."
     )
   ) ^^ newline ^^
   !^ "End" ^^ Name.to_coq name ^-^ !^ "."
