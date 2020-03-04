@@ -1,4 +1,15 @@
 ## [Unreleased]
+* Set the primitive projection flag.
+* Add support for the `with` operator on constructor records.
+* Add an attribute `@coq_match_gadt_with_result` for GADT matches with casts for the results.
+* Do not generate casts for the return values of the match branches with `@coq_match_gadt`.
+* Remove the rarely used `match exception when false` construct for default return value in matches.
+* Add arity annotations for the existentials.
+* Eliminate phantom types and propagate this erasing.
+* Inline the application operators `@@` and `|>`.
+* Put first-class modules in `Set`, using existentials in impredicative sets.
+* Add a `@coq_match_with_default` to generate a default branch for incomplete matches.
+* Add a `@coq_force_gadt` attribute to force a type to be defined as a GADT (without type parameters).
 * Add basic handling of module alias and typeof in `.mli` files.
 * Add more type annotations on values to better support polymorphic values.
 * Add better support for include of signatures in `.mli` files.
