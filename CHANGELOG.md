@@ -1,4 +1,5 @@
 ## [Unreleased]
+* Add a tactic `rewrite_cast_exists_eval_eq` to simplify the use of the `cast_exists` axiom in proofs.
 * Name the arguments of the signatures.
 * Rename `obj_magic` as `cast`.
 * Set the primitive projection flag.

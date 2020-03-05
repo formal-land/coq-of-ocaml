@@ -60,9 +60,18 @@ Axiom cast_exists : forall {A : Set} {Es : Type} (T : Es -> Set),
 
 Axiom cast_eval : forall {A : Set} {x : A}, cast A x = x.
 
-Axiom cast_exists_eval
-  : forall {Es : Type} {T : Es -> Set} {vs : Es} {x : T vs},
-  cast_exists T x = existT _ vs x.
+Axiom cast_exists_eval_eq
+  : forall {A : Set} {Es : Type} {T : Es -> Set} {vs : Es} {x : A}
+  (H_eq : A = T vs),
+  cast_exists (A := A) (Es := Es) T x =
+  existT T vs (eq_rect (A := Set) A (fun x => x) x (T vs) H_eq).
+
+Ltac rewrite_cast_exists_eval_eq vs :=
+  match goal with
+  | [ |- context[cast_exists ?T _] ] =>
+    rewrite (cast_exists_eval_eq (T := T) (vs := vs) eq_refl);
+    simpl
+  end.
 
 Parameter unreachable_gadt_branch : forall {A : Set}, A.
 
