@@ -8,7 +8,22 @@ module Header = struct
     name : Name.t;
     typ_vars : Name.t list;
     args : (Name.t * Type.t) list;
+    structs : string list;
     typ : Type.t option }
+
+  let to_coq_structs (is_rec : Recursivity.t) (header : t) : SmartPrint.t =
+    if Recursivity.to_bool is_rec then
+    match header.args with
+    | [] -> empty
+    | (x, _) :: _ ->
+      let structs =
+        match header.structs with
+        | [] -> Name.to_coq x
+        | _ :: _ ->
+          separate space (List.map (fun s -> !^ s) header.structs) in
+      braces (nest (!^ "struct" ^^ structs))
+  else
+    empty
 end
 
 module Definition = struct
@@ -508,6 +523,7 @@ and import_let_fun
   (cases |> Monad.List.filter_map (fun { vb_pat = p; vb_expr; vb_attributes; _ } ->
     Attribute.of_attributes vb_attributes >>= fun attributes ->
     let is_axiom = Attribute.has_axiom attributes in
+    let structs = Attribute.get_structs attributes in
     set_env vb_expr.exp_env (
     set_loc (Loc.of_location p.pat_loc) (
     Pattern.of_pattern p >>= fun p ->
@@ -528,6 +544,7 @@ and import_let_fun
         Header.name = x;
         typ_vars = Name.Set.elements new_typ_vars;
         args = List.combine args_names args_typs;
+        structs;
         typ = Some e_body_typ
       } in
       let e_body = if is_axiom then None else Some e_body in
@@ -1104,13 +1121,7 @@ let rec to_coq (paren : bool) (e : t) : SmartPrint.t =
             Name.to_coq x ^^ !^ ":" ^^ Type.to_coq None None x_typ
           )))
         )) ^^
-        (if Recursivity.to_bool def.Definition.is_rec then
-          match header.Header.args with
-          | [] -> empty
-          | (x, _) :: _ -> braces (nest (!^ "struct" ^^ Name.to_coq x))
-        else
-          empty
-        ) ^^
+        Header.to_coq_structs def.Definition.is_rec header ^^
         (match header.Header.typ with
         | None -> empty
         | Some typ -> !^ ": " ^-^ Type.to_coq None None typ) ^-^

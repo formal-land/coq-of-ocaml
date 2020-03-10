@@ -24,7 +24,7 @@ module Value = struct
           else
             !^ "with"
           end ^^
-          let { Exp.Header.name; typ_vars; args; typ } = header in
+          let { Exp.Header.name; typ_vars; args; typ; _ } = header in
           Name.to_coq name ^^
           begin match typ_vars with
           | [] -> empty
@@ -35,13 +35,7 @@ module Value = struct
           group (separate space (args |> List.map (fun (x, t) ->
             parens @@ nest (Name.to_coq x ^^ !^ ":" ^^ Type.to_coq None None t)
           ))) ^^
-          (if Recursivity.to_bool value.Exp.Definition.is_rec then
-            match args with
-            | [] -> empty
-            | (x, _) :: _ -> braces (nest (!^ "struct" ^^ Name.to_coq x))
-          else
-            empty
-          ) ^^
+          Exp.Header.to_coq_structs value.Exp.Definition.is_rec header ^^
           begin match typ with
           | None -> empty
           | Some typ -> !^ ": " ^-^ Type.to_coq None None typ

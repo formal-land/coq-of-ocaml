@@ -8,6 +8,25 @@ type t =
   | MatchGadt
   | MatchGadtWithResult
   | MatchWithDefault
+  | Struct of string
+
+let of_payload_string (id : string) (payload : Parsetree.payload)
+  : string Monad.t =
+  match payload with
+  | Parsetree.PStr [{
+      pstr_desc =
+        Pstr_eval (
+          {
+            pexp_desc = Pexp_constant (Pconst_string (payload, _));
+            _
+          },
+          _
+        );
+      _
+    }] -> return payload
+  | _ ->
+    let message = "missing_string_for_attribute " ^ id in
+    raise message Unexpected "Expected a single string parameter this attribute"
 
 let of_attributes (attributes : Typedtree.attributes) : t list Monad.t =
   attributes |> Monad.List.filter_map (fun (loc, payload) ->
@@ -17,25 +36,14 @@ let of_attributes (attributes : Typedtree.attributes) : t list Monad.t =
     | "coq_axiom" -> return (Some Axiom)
     | "coq_force_gadt" -> return (Some ForceGadt)
     | "coq_implicit" ->
-      begin match payload with
-      | Parsetree.PStr [{
-          pstr_desc =
-            Pstr_eval (
-              {
-                pexp_desc = Pexp_constant (Pconst_string (implicit, _));
-                _
-              },
-              _
-            );
-          _
-        }] ->
-        return (Some (Implicit implicit))
-      | _ ->
-        raise None Unexpected "Expected a single string parameter for attribute"
-      end
+      of_payload_string id payload >>= fun payload ->
+      return (Some (Implicit payload))
     | "coq_match_gadt" -> return (Some MatchGadt)
     | "coq_match_gadt_with_result" -> return (Some MatchGadtWithResult)
     | "coq_match_with_default" -> return (Some MatchWithDefault)
+    | "coq_struct" ->
+      of_payload_string id payload >>= fun payload ->
+      return (Some (Struct payload))
     | _ -> return None)
   )
 
@@ -73,4 +81,10 @@ let has_match_with_default (attributes : t list) : bool =
   attributes |> List.exists (function
     | MatchWithDefault -> true
     | _ -> false
+  )
+
+let get_structs (attributes : t list) : string list =
+  attributes |> Util.List.filter_map (function
+    | Struct name -> Some name
+    | _ -> None
   )
