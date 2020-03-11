@@ -19,8 +19,6 @@ Require Tezos.Services_registration.
 
 Definition block_header_data : Set := Alpha_context.Block_header.protocol_data.
 
-Definition block_header : Set := Alpha_context.Block_header.block_header.
-
 Definition block_header_data_encoding
   : Data_encoding.encoding Alpha_context.Block_header.protocol_data :=
   Alpha_context.Block_header.protocol_data_encoding.
@@ -48,8 +46,6 @@ Definition operation_data_and_receipt_encoding
     (Alpha_context.Operation.packed_protocol_data *
       Apply_results.packed_operation_metadata) :=
   Apply_results.operation_data_and_metadata_encoding.
-
-Definition operation : Set := Alpha_context.packed_operation.
 
 Definition acceptable_passes : Alpha_context.packed_operation -> list int :=
   Alpha_context.Operation.acceptable_passes.
@@ -230,11 +226,11 @@ Definition begin_partial_application
   (predecessor_fitness : Alpha_context.Fitness.t)
   (block_header : Alpha_context.Block_header.block_header)
   : Lwt.t (Error_monad.tzresult validation_state) :=
-  let level :=
-    block_header.(block_header.shell).(Block_header.shell_header.level) in
+  let '{| Alpha_context.Block_header.block_header.shell := shell |} :=
+    block_header in
+  let level := shell.(Block_header.shell_header.level) in
   let fitness := predecessor_fitness in
-  let timestamp :=
-    block_header.(block_header.shell).(Block_header.shell_header.timestamp) in
+  let timestamp := shell.(Block_header.shell_header.timestamp) in
   let=? ctxt :=
     Alpha_context.prepare ctxt level predecessor_timestamp timestamp fitness in
   let=? '(ctxt, baker, block_delay) :=
@@ -255,11 +251,11 @@ Definition begin_application
   (predecessor_fitness : Alpha_context.Fitness.t)
   (block_header : Alpha_context.Block_header.block_header)
   : Lwt.t (Error_monad.tzresult validation_state) :=
-  let level :=
-    block_header.(block_header.shell).(Block_header.shell_header.level) in
+  let '{| Alpha_context.Block_header.block_header.shell := shell |} :=
+    block_header in
+  let level := shell.(Block_header.shell_header.level) in
   let fitness := predecessor_fitness in
-  let timestamp :=
-    block_header.(block_header.shell).(Block_header.shell_header.timestamp) in
+  let timestamp := shell.(Block_header.shell_header.timestamp) in
   let=? ctxt :=
     Alpha_context.prepare ctxt level predecessor_timestamp timestamp fitness in
   let=? '(ctxt, baker, block_delay) :=
@@ -343,8 +339,9 @@ Definition apply_operation (function_parameter : validation_state)
           Apply_results.No_operation_metadata)
     | (_, _) =>
       let '{|
-        operation.shell := shell;
-          operation.protocol_data := Alpha_context.Operation_data protocol_data
+        Alpha_context.packed_operation.shell := shell;
+          Alpha_context.packed_operation.protocol_data :=
+            Alpha_context.Operation_data protocol_data
           |} := operation in
       let operation :=
         {| Alpha_context.operation.shell := shell;
@@ -354,7 +351,7 @@ Definition apply_operation (function_parameter : validation_state)
         |
           (Partial_application {|
             validation_mode.Partial_application.block_header := {|
-              block_header.shell := {|
+              Alpha_context.Block_header.block_header.shell := {|
                 Block_header.shell_header.predecessor := predecessor
                   |}
                 |};
@@ -362,7 +359,7 @@ Definition apply_operation (function_parameter : validation_state)
               |} |
           Application {|
             validation_mode.Application.block_header := {|
-              block_header.shell := {|
+              Alpha_context.Block_header.block_header.shell := {|
                 Block_header.shell_header.predecessor := predecessor
                   |}
                 |};
@@ -432,7 +429,7 @@ Definition finalize_block (function_parameter : validation_state)
     let included_endorsements := Alpha_context.included_endorsements ctxt in
     let=? '_ :=
       Apply.check_minimum_endorsements ctxt
-        block_header.(block_header.protocol_data).(Alpha_context.Block_header.protocol_data.contents)
+        block_header.(Alpha_context.Block_header.block_header.protocol_data).(Alpha_context.Block_header.protocol_data.contents)
         block_delay included_endorsements in
     let=? voting_period_kind := Alpha_context.Vote.get_current_period_kind ctxt
       in
@@ -449,7 +446,7 @@ Definition finalize_block (function_parameter : validation_state)
   |
     (Application {|
       validation_mode.Application.block_header := {|
-        block_header.protocol_data := {|
+        Alpha_context.Block_header.block_header.protocol_data := {|
           Alpha_context.Block_header.protocol_data.contents := protocol_data
             |}
           |};
@@ -563,6 +560,7 @@ Definition compare_operations
       Alpha_context.Cons (Alpha_context.Manager_operation op2) _) =>
     Z.compare op1.(Alpha_context.contents.Manager_operation.counter)
       op2.(Alpha_context.contents.Manager_operation.counter)
+  | _ => unreachable_gadt_branch
   end.
 
 Definition init (ctxt : Context.t) (block_header : Block_header.shell_header)
@@ -600,3 +598,7 @@ Definition init (ctxt : Context.t) (block_header : Block_header.shell_header)
   let=? ctxt :=
     Alpha_context.prepare_first_block ctxt typecheck level timestamp fitness in
   Error_monad.__return (Alpha_context.finalize None ctxt).
+
+Definition operation : Set := Alpha_context.packed_operation.
+
+Definition block_header : Set := Alpha_context.Block_header.block_header.

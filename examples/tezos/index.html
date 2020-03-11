@@ -48,19 +48,19 @@
         <h2>
       Protocol of Tezos in&nbsp;Coq
       <small>
-      <span class="label label-warning">Active development</span>
+      <span class="label label-success">Does compile</span>
       </small>
     </h2>
     <p>These are the sources of the <a href="https://gitlab.com/tezos/tezos/tree/master/src/proto_alpha/lib_protocol">protocol</a> of <a href="https://tezos.com/">Tezos</a> imported to <a href="https://coq.inria.fr/">Coq</a> by the current development version of <a href="https://github.com/clarus/coq-of-ocaml">coq-of-ocaml</a>. Tezos is a crypto-currency with smart-contracts and an upgradable protocol. To see the valid generated Coq files, go on <a href="https://clarus.github.io/coq-of-ocaml/build-tezos/html/toc.html">coq-of-ocaml/build-tezos/html/toc.html</a>.</p>
     <blockquote class="blockquote"><p class="mb-0" style="font-size: 16px;">(2020-03-04) We now import most of the Tezos protocol to Coq, apart from the RPC calls. Working on the Coq proofs.</p></blockquote>
 
-    <p>We show the original&nbsp;<a href="https://ocaml.org/">OCaml</a> code on the left and the imported&nbsp;<a href="https://coq.inria.fr/">Coq</a> code on the right. The imported code does not necessarily compile. Warnings reported on the&nbsp;OCaml side are due to either various incompleteness in our tool, or to side-effects in the source code. Go on the <a href="https://gitter.im/clarus/coq-of-ocaml">Gitter chat</a> for more information. Work currently made at <a href="https://www.nomadic-labs.com/">Nomadic Labs</a>.</p>
+    <p>We show the original&nbsp;<a href="https://ocaml.org/">OCaml</a> code on the left and the imported&nbsp;<a href="https://coq.inria.fr/">Coq</a> code on the right. The imported code does compile. Warnings reported on the&nbsp;OCaml side are due to either various incompleteness in our tool, or to side-effects in the source code. Go on the <a href="https://gitter.im/clarus/coq-of-ocaml">Gitter chat</a> for more information. Work currently made at <a href="https://www.nomadic-labs.com/">Nomadic Labs</a>.</p>
     <p>To install the latest development version of <a href="https://clarus.github.io/coq-of-ocaml/">coq-of-ocaml</a> with <a href="https://opam.ocaml.org/">opam</a>:</p>
     <pre><code>opam repo add coq-released https://coq.inria.fr/opam/released
 opam pin add https://github.com/clarus/coq-of-ocaml.git#master</code></pre>
     <ul>
-      <li>OCaml size: 36292 lines</li>
-      <li>Coq size: 45533 lines (+25% compared to&nbsp;OCaml)</li>
+      <li>OCaml size: 36294 lines</li>
+      <li>Coq size: 45535 lines (+25% compared to&nbsp;OCaml)</li>
       <li>Warnings from coq-of-ocaml: 1020</li>
     </ul>
     
@@ -125,7 +125,7 @@ opam pin add https://github.com/clarus/coq-of-ocaml.git#master</code></pre>
           41570,
           41570,
           41570,
-          44931,
+          45535,
         ],
         generated: [
           47563,
@@ -185,7 +185,7 @@ opam pin add https://github.com/clarus/coq-of-ocaml.git#master</code></pre>
           46742,
           46742,
           46742,
-          45533,
+          45535,
         ],
         labels: [
           "01-14",
@@ -34270,8 +34270,8 @@ Parameter last_allowed_fork_level : Raw_context.t -&gt; Raw_level_repr.t.
   <div style="margin: 20px;">
     <h3>Main</h3>
     <ul>
-      <li>OCaml size: 374 lines</li>
-      <li>Coq size: 602 lines (+60% compared to&nbsp;OCaml)</li>
+      <li>OCaml size: 376 lines</li>
+      <li>Coq size: 604 lines (+60% compared to&nbsp;OCaml)</li>
     </ul>
   </div>
   <div class="col-md-6">
@@ -34306,11 +34306,6 @@ Parameter last_allowed_fork_level : Raw_context.t -&gt; Raw_level_repr.t.
 
 type block_header_data = Alpha_context.Block_header.protocol_data
 
-<abbr class="mark-warning" title="We do not handle types with both a synonym and a type definition">type block_header = Alpha_context.Block_header.block_header = {
-  shell : Block_header.shell_header;
-  protocol_data : block_header_data;
-}</abbr>
-
 let block_header_data_encoding =
   Alpha_context.Block_header.protocol_data_encoding
 
@@ -34328,11 +34323,6 @@ let operation_receipt_encoding = Apply_results.operation_metadata_encoding
 
 let operation_data_and_receipt_encoding =
   Apply_results.operation_data_and_metadata_encoding
-
-<abbr class="mark-warning" title="We do not handle types with both a synonym and a type definition">type operation = Alpha_context.packed_operation = {
-  shell : Operation.shell_header;
-  protocol_data : operation_data;
-}</abbr>
 
 let acceptable_passes = Alpha_context.Operation.acceptable_passes
 
@@ -34396,9 +34386,10 @@ let current_context {ctxt; _} = return (Alpha_context.finalize ctxt).context
 let begin_partial_application ~chain_id ~ancestor_context:ctxt
     ~predecessor_timestamp ~predecessor_fitness
     (block_header : Alpha_context.Block_header.block_header) =
-  let level = block_header.shell.level in
+  let {Alpha_context.Block_header.shell; _} = block_header in
+  let level = shell.level in
   let fitness = predecessor_fitness in
-  let timestamp = block_header.shell.timestamp in
+  let timestamp = shell.timestamp in
   Alpha_context.prepare ~level ~predecessor_timestamp ~timestamp ~fitness ctxt
   &gt;&gt;=? fun ctxt -&gt;
   Apply.begin_application ctxt chain_id block_header predecessor_timestamp
@@ -34412,9 +34403,10 @@ let begin_partial_application ~chain_id ~ancestor_context:ctxt
 let begin_application ~chain_id ~predecessor_context:ctxt
     ~predecessor_timestamp ~predecessor_fitness
     (block_header : Alpha_context.Block_header.block_header) =
-  let level = block_header.shell.level in
+  let {Alpha_context.Block_header.shell; _} = block_header in
+  let level = shell.level in
   let fitness = predecessor_fitness in
-  let timestamp = block_header.shell.timestamp in
+  let timestamp = shell.timestamp in
   Alpha_context.prepare ~level ~predecessor_timestamp ~timestamp ~fitness ctxt
   &gt;&gt;=? fun ctxt -&gt;
   Apply.begin_application ctxt chain_id block_header predecessor_timestamp
@@ -34567,7 +34559,7 @@ let compare_operations op1 op2 =
   let open Alpha_context in
   let (Operation_data op1) = op1.protocol_data in
   let (Operation_data op2) = op2.protocol_data in
-  match (op1.contents, op2.contents) with
+  match[@coq_match_with_default] (op1.contents, op2.contents) with
   | (Single (Endorsement _), Single (Endorsement _)) -&gt;
       0
   | (_, Single (Endorsement _)) -&gt;
@@ -34652,6 +34644,16 @@ let init ctxt block_header =
   Alpha_context.prepare_first_block ~typecheck ~level ~timestamp ~fitness ctxt
   &gt;&gt;=? fun ctxt -&gt; return (Alpha_context.finalize ctxt)
 
+<abbr class="mark-warning" title="We do not handle types with both a synonym and a type definition">type operation = Alpha_context.packed_operation = {
+  shell : Operation.shell_header;
+  protocol_data : operation_data;
+}</abbr>
+
+<abbr class="mark-warning" title="We do not handle types with both a synonym and a type definition">type block_header = Alpha_context.Block_header.block_header = {
+  shell : Block_header.shell_header;
+  protocol_data : block_header_data;
+}</abbr>
+
 (* Vanity nonce: 313282890 *)
 </pre>
   </div>
@@ -34677,8 +34679,6 @@ Require Tezos.Script_typed_ir.
 Require Tezos.Services_registration.
 
 Definition block_header_data : Set := Alpha_context.Block_header.protocol_data.
-
-Definition block_header : Set := Alpha_context.Block_header.block_header.
 
 Definition block_header_data_encoding
   : Data_encoding.encoding Alpha_context.Block_header.protocol_data :=
@@ -34707,8 +34707,6 @@ Definition operation_data_and_receipt_encoding
     (Alpha_context.Operation.packed_protocol_data *
       Apply_results.packed_operation_metadata) :=
   Apply_results.operation_data_and_metadata_encoding.
-
-Definition operation : Set := Alpha_context.packed_operation.
 
 Definition acceptable_passes : Alpha_context.packed_operation -&gt; list int :=
   Alpha_context.Operation.acceptable_passes.
@@ -34889,11 +34887,11 @@ Definition begin_partial_application
   (predecessor_fitness : Alpha_context.Fitness.t)
   (block_header : Alpha_context.Block_header.block_header)
   : Lwt.t (Error_monad.tzresult validation_state) :=
-  let level :=
-    block_header.(block_header.shell).(Block_header.shell_header.level) in
+  let '{| Alpha_context.Block_header.block_header.shell := shell |} :=
+    block_header in
+  let level := shell.(Block_header.shell_header.level) in
   let fitness := predecessor_fitness in
-  let timestamp :=
-    block_header.(block_header.shell).(Block_header.shell_header.timestamp) in
+  let timestamp := shell.(Block_header.shell_header.timestamp) in
   let=? ctxt :=
     Alpha_context.prepare ctxt level predecessor_timestamp timestamp fitness in
   let=? '(ctxt, baker, block_delay) :=
@@ -34914,11 +34912,11 @@ Definition begin_application
   (predecessor_fitness : Alpha_context.Fitness.t)
   (block_header : Alpha_context.Block_header.block_header)
   : Lwt.t (Error_monad.tzresult validation_state) :=
-  let level :=
-    block_header.(block_header.shell).(Block_header.shell_header.level) in
+  let '{| Alpha_context.Block_header.block_header.shell := shell |} :=
+    block_header in
+  let level := shell.(Block_header.shell_header.level) in
   let fitness := predecessor_fitness in
-  let timestamp :=
-    block_header.(block_header.shell).(Block_header.shell_header.timestamp) in
+  let timestamp := shell.(Block_header.shell_header.timestamp) in
   let=? ctxt :=
     Alpha_context.prepare ctxt level predecessor_timestamp timestamp fitness in
   let=? '(ctxt, baker, block_delay) :=
@@ -35002,8 +35000,9 @@ Definition apply_operation (function_parameter : validation_state)
           Apply_results.No_operation_metadata)
     | (_, _) =&gt;
       let '{|
-        operation.shell := shell;
-          operation.protocol_data := Alpha_context.Operation_data protocol_data
+        Alpha_context.packed_operation.shell := shell;
+          Alpha_context.packed_operation.protocol_data :=
+            Alpha_context.Operation_data protocol_data
           |} := operation in
       let operation :=
         {| Alpha_context.operation.shell := shell;
@@ -35013,7 +35012,7 @@ Definition apply_operation (function_parameter : validation_state)
         |
           (Partial_application {|
             validation_mode.Partial_application.block_header := {|
-              block_header.shell := {|
+              Alpha_context.Block_header.block_header.shell := {|
                 Block_header.shell_header.predecessor := predecessor
                   |}
                 |};
@@ -35021,7 +35020,7 @@ Definition apply_operation (function_parameter : validation_state)
               |} |
           Application {|
             validation_mode.Application.block_header := {|
-              block_header.shell := {|
+              Alpha_context.Block_header.block_header.shell := {|
                 Block_header.shell_header.predecessor := predecessor
                   |}
                 |};
@@ -35091,7 +35090,7 @@ Definition finalize_block (function_parameter : validation_state)
     let included_endorsements := Alpha_context.included_endorsements ctxt in
     let=? '_ :=
       Apply.check_minimum_endorsements ctxt
-        block_header.(block_header.protocol_data).(Alpha_context.Block_header.protocol_data.contents)
+        block_header.(Alpha_context.Block_header.block_header.protocol_data).(Alpha_context.Block_header.protocol_data.contents)
         block_delay included_endorsements in
     let=? voting_period_kind := Alpha_context.Vote.get_current_period_kind ctxt
       in
@@ -35108,7 +35107,7 @@ Definition finalize_block (function_parameter : validation_state)
   |
     (Application {|
       validation_mode.Application.block_header := {|
-        block_header.protocol_data := {|
+        Alpha_context.Block_header.block_header.protocol_data := {|
           Alpha_context.Block_header.protocol_data.contents := protocol_data
             |}
           |};
@@ -35222,6 +35221,7 @@ Definition compare_operations
       Alpha_context.Cons (Alpha_context.Manager_operation op2) _) =&gt;
     Z.compare op1.(Alpha_context.contents.Manager_operation.counter)
       op2.(Alpha_context.contents.Manager_operation.counter)
+  | _ =&gt; unreachable_gadt_branch
   end.
 
 Definition init (ctxt : Context.t) (block_header : Block_header.shell_header)
@@ -35259,6 +35259,10 @@ Definition init (ctxt : Context.t) (block_header : Block_header.shell_header)
   let=? ctxt :=
     Alpha_context.prepare_first_block ctxt typecheck level timestamp fitness in
   Error_monad.__return (Alpha_context.finalize None ctxt).
+
+Definition operation : Set := Alpha_context.packed_operation.
+
+Definition block_header : Set := Alpha_context.Block_header.block_header.
 </pre>
   </div>
 </div>

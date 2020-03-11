@@ -58,7 +58,7 @@ Level_repr.v
 Level_storage_mli.v
 Level_storage.v
 Main_mli.v
-#Main.v
+Main.v
 Manager_repr_mli.v
 Manager_repr.v
 Michelson_v1_gas_mli.v
