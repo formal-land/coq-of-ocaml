@@ -61,7 +61,7 @@ opam pin add https://github.com/clarus/coq-of-ocaml.git#master</code></pre>
     <ul>
       <li>OCaml size: 6154 lines</li>
       <li>Coq size: 3444 lines (-45% compared to&nbsp;OCaml)</li>
-      <li>Warnings from coq-of-ocaml: 102</li>
+      <li>Warnings from coq-of-ocaml: 47</li>
     </ul>
     
       <canvas id="chart" width="400" height="400"></canvas>
@@ -109,7 +109,7 @@ opam pin add https://github.com/clarus/coq-of-ocaml.git#master</code></pre>
     </ul>
   </div>
   <div class="col-md-6">
-    <a href="#environment.mli"><code>environment.mli</code></a>&nbsp;<span class="label label-warning">102 warnings</span>
+    <a href="#environment.mli"><code>environment.mli</code></a>&nbsp;<span class="label label-warning">47 warnings</span>
     
     <pre>module Pervasives : sig
 # 1 &quot;../lib_protocol_environment/sigs/v1/pervasives.mli&quot;
@@ -4294,70 +4294,46 @@ module RPC_service : sig
 <abbr class="mark-warning" title="Expected a list of named or unspecified '_' type variables">type (+'meth, 'prefix, 'params, 'query, 'input, 'output) t
   constraint 'meth = [&lt; meth]</abbr>
 
-<abbr class="mark-warning" title="Expected a list of named or unspecified '_' type variables
-
-——————————
-
-Expected a list of named or unspecified '_' type variables">type (+'meth, 'prefix, 'params, 'query, 'input, 'output) service =
+<abbr class="mark-warning" title="Expected a list of named or unspecified '_' type variables">type (+'meth, 'prefix, 'params, 'query, 'input, 'output) service =
   ('meth, 'prefix, 'params, 'query, 'input, 'output) t</abbr>
 
-<abbr class="mark-warning" title="Expected a list of named or unspecified '_' type variables
-
-——————————
-
-Expected a list of named or unspecified '_' type variables">val get_service :
+val get_service :
   ?description:string -&gt;
   query:'query RPC_query.t -&gt;
   output:'output Data_encoding.t -&gt;
   ('prefix, 'params) RPC_path.t -&gt;
-  ([`GET], 'prefix, 'params, 'query, unit, 'output) service</abbr>
+  ([`GET], 'prefix, 'params, 'query, unit, 'output) service
 
-<abbr class="mark-warning" title="Expected a list of named or unspecified '_' type variables
-
-——————————
-
-Expected a list of named or unspecified '_' type variables">val post_service :
+val post_service :
   ?description:string -&gt;
   query:'query RPC_query.t -&gt;
   input:'input Data_encoding.t -&gt;
   output:'output Data_encoding.t -&gt;
   ('prefix, 'params) RPC_path.t -&gt;
-  ([`POST], 'prefix, 'params, 'query, 'input, 'output) service</abbr>
+  ([`POST], 'prefix, 'params, 'query, 'input, 'output) service
 
-<abbr class="mark-warning" title="Expected a list of named or unspecified '_' type variables
-
-——————————
-
-Expected a list of named or unspecified '_' type variables">val delete_service :
+val delete_service :
   ?description:string -&gt;
   query:'query RPC_query.t -&gt;
   output:'output Data_encoding.t -&gt;
   ('prefix, 'params) RPC_path.t -&gt;
-  ([`DELETE], 'prefix, 'params, 'query, unit, 'output) service</abbr>
+  ([`DELETE], 'prefix, 'params, 'query, unit, 'output) service
 
-<abbr class="mark-warning" title="Expected a list of named or unspecified '_' type variables
-
-——————————
-
-Expected a list of named or unspecified '_' type variables">val patch_service :
+val patch_service :
   ?description:string -&gt;
   query:'query RPC_query.t -&gt;
   input:'input Data_encoding.t -&gt;
   output:'output Data_encoding.t -&gt;
   ('prefix, 'params) RPC_path.t -&gt;
-  ([`PATCH], 'prefix, 'params, 'query, 'input, 'output) service</abbr>
+  ([`PATCH], 'prefix, 'params, 'query, 'input, 'output) service
 
-<abbr class="mark-warning" title="Expected a list of named or unspecified '_' type variables
-
-——————————
-
-Expected a list of named or unspecified '_' type variables">val put_service :
+val put_service :
   ?description:string -&gt;
   query:'query RPC_query.t -&gt;
   input:'input Data_encoding.t -&gt;
   output:'output Data_encoding.t -&gt;
   ('prefix, 'params) RPC_path.t -&gt;
-  ([`PUT], 'prefix, 'params, 'query, 'input, 'output) service</abbr>
+  ([`PUT], 'prefix, 'params, 'query, 'input, 'output) service
 end
 module RPC_answer : sig
 # 1 &quot;../lib_protocol_environment/sigs/v1/RPC_answer.mli&quot;
@@ -4466,67 +4442,63 @@ type conflict =
 <abbr class="mark-warning" title="Signature item `exception` not handled">exception Conflict of step list * conflict</abbr>
 
 (** Registring handler in service tree. *)
-<abbr class="mark-warning" title="Expected a list of named or unspecified '_' type variables">val register :
+val register :
   'prefix directory -&gt;
   ('meth, 'prefix, 'params, 'query, 'input, 'output) RPC_service.t -&gt;
   ('params -&gt; 'query -&gt; 'input -&gt; 'output tzresult Lwt.t) -&gt;
-  'prefix directory</abbr>
+  'prefix directory
 
-<abbr class="mark-warning" title="Expected a list of named or unspecified '_' type variables">val opt_register :
+val opt_register :
   'prefix directory -&gt;
   ('meth, 'prefix, 'params, 'query, 'input, 'output) RPC_service.t -&gt;
   ('params -&gt; 'query -&gt; 'input -&gt; 'output option tzresult Lwt.t) -&gt;
-  'prefix directory</abbr>
+  'prefix directory
 
-<abbr class="mark-warning" title="No type known for the following variants: `OkStream, `Unauthorized, `Error, `Ok, `Not_found, `Forbidden, `Created, `Conflict, `No_content
-
-——————————
-
-Expected a list of named or unspecified '_' type variables">val gen_register :
+<abbr class="mark-warning" title="No type known for the following variants: `OkStream, `Unauthorized, `Error, `Ok, `Not_found, `Forbidden, `Created, `Conflict, `No_content">val gen_register :
   'prefix directory -&gt;
   ('meth, 'prefix, 'params, 'query, 'input, 'output) RPC_service.t -&gt;
   ('params -&gt; 'query -&gt; 'input -&gt; [&lt; 'output RPC_answer.t] Lwt.t) -&gt;
   'prefix directory</abbr>
 
-<abbr class="mark-warning" title="Expected a list of named or unspecified '_' type variables">val lwt_register :
+val lwt_register :
   'prefix directory -&gt;
   ('meth, 'prefix, 'params, 'query, 'input, 'output) RPC_service.t -&gt;
   ('params -&gt; 'query -&gt; 'input -&gt; 'output Lwt.t) -&gt;
-  'prefix directory</abbr>
+  'prefix directory
 
 (** Registring handler in service tree. Curryfied variant.  *)
 
-<abbr class="mark-warning" title="Expected a list of named or unspecified '_' type variables">val register0 :
+val register0 :
   unit directory -&gt;
   ('m, unit, unit, 'q, 'i, 'o) RPC_service.t -&gt;
   ('q -&gt; 'i -&gt; 'o tzresult Lwt.t) -&gt;
-  unit directory</abbr>
+  unit directory
 
-<abbr class="mark-warning" title="Expected a list of named or unspecified '_' type variables">val register1 :
+val register1 :
   'prefix directory -&gt;
   ('m, 'prefix, unit * 'a, 'q, 'i, 'o) RPC_service.t -&gt;
   ('a -&gt; 'q -&gt; 'i -&gt; 'o tzresult Lwt.t) -&gt;
-  'prefix directory</abbr>
+  'prefix directory
 
-<abbr class="mark-warning" title="Expected a list of named or unspecified '_' type variables">val register2 :
+val register2 :
   'prefix directory -&gt;
   ('m, 'prefix, (unit * 'a) * 'b, 'q, 'i, 'o) RPC_service.t -&gt;
   ('a -&gt; 'b -&gt; 'q -&gt; 'i -&gt; 'o tzresult Lwt.t) -&gt;
-  'prefix directory</abbr>
+  'prefix directory
 
-<abbr class="mark-warning" title="Expected a list of named or unspecified '_' type variables">val register3 :
+val register3 :
   'prefix directory -&gt;
   ('m, 'prefix, ((unit * 'a) * 'b) * 'c, 'q, 'i, 'o) RPC_service.t -&gt;
   ('a -&gt; 'b -&gt; 'c -&gt; 'q -&gt; 'i -&gt; 'o tzresult Lwt.t) -&gt;
-  'prefix directory</abbr>
+  'prefix directory
 
-<abbr class="mark-warning" title="Expected a list of named or unspecified '_' type variables">val register4 :
+val register4 :
   'prefix directory -&gt;
   ('m, 'prefix, (((unit * 'a) * 'b) * 'c) * 'd, 'q, 'i, 'o) RPC_service.t -&gt;
   ('a -&gt; 'b -&gt; 'c -&gt; 'd -&gt; 'q -&gt; 'i -&gt; 'o tzresult Lwt.t) -&gt;
-  'prefix directory</abbr>
+  'prefix directory
 
-<abbr class="mark-warning" title="Expected a list of named or unspecified '_' type variables">val register5 :
+val register5 :
   'prefix directory -&gt;
   ( 'm,
     'prefix,
@@ -4536,39 +4508,39 @@ Expected a list of named or unspecified '_' type variables">val gen_register :
     'o )
   RPC_service.t -&gt;
   ('a -&gt; 'b -&gt; 'c -&gt; 'd -&gt; 'e -&gt; 'q -&gt; 'i -&gt; 'o tzresult Lwt.t) -&gt;
-  'prefix directory</abbr>
+  'prefix directory
 
-<abbr class="mark-warning" title="Expected a list of named or unspecified '_' type variables">val opt_register0 :
+val opt_register0 :
   unit directory -&gt;
   ('m, unit, unit, 'q, 'i, 'o) RPC_service.t -&gt;
   ('q -&gt; 'i -&gt; 'o option tzresult Lwt.t) -&gt;
-  unit directory</abbr>
+  unit directory
 
-<abbr class="mark-warning" title="Expected a list of named or unspecified '_' type variables">val opt_register1 :
+val opt_register1 :
   'prefix directory -&gt;
   ('m, 'prefix, unit * 'a, 'q, 'i, 'o) RPC_service.t -&gt;
   ('a -&gt; 'q -&gt; 'i -&gt; 'o option tzresult Lwt.t) -&gt;
-  'prefix directory</abbr>
+  'prefix directory
 
-<abbr class="mark-warning" title="Expected a list of named or unspecified '_' type variables">val opt_register2 :
+val opt_register2 :
   'prefix directory -&gt;
   ('m, 'prefix, (unit * 'a) * 'b, 'q, 'i, 'o) RPC_service.t -&gt;
   ('a -&gt; 'b -&gt; 'q -&gt; 'i -&gt; 'o option tzresult Lwt.t) -&gt;
-  'prefix directory</abbr>
+  'prefix directory
 
-<abbr class="mark-warning" title="Expected a list of named or unspecified '_' type variables">val opt_register3 :
+val opt_register3 :
   'prefix directory -&gt;
   ('m, 'prefix, ((unit * 'a) * 'b) * 'c, 'q, 'i, 'o) RPC_service.t -&gt;
   ('a -&gt; 'b -&gt; 'c -&gt; 'q -&gt; 'i -&gt; 'o option tzresult Lwt.t) -&gt;
-  'prefix directory</abbr>
+  'prefix directory
 
-<abbr class="mark-warning" title="Expected a list of named or unspecified '_' type variables">val opt_register4 :
+val opt_register4 :
   'prefix directory -&gt;
   ('m, 'prefix, (((unit * 'a) * 'b) * 'c) * 'd, 'q, 'i, 'o) RPC_service.t -&gt;
   ('a -&gt; 'b -&gt; 'c -&gt; 'd -&gt; 'q -&gt; 'i -&gt; 'o option tzresult Lwt.t) -&gt;
-  'prefix directory</abbr>
+  'prefix directory
 
-<abbr class="mark-warning" title="Expected a list of named or unspecified '_' type variables">val opt_register5 :
+val opt_register5 :
   'prefix directory -&gt;
   ( 'm,
     'prefix,
@@ -4578,63 +4550,39 @@ Expected a list of named or unspecified '_' type variables">val gen_register :
     'o )
   RPC_service.t -&gt;
   ('a -&gt; 'b -&gt; 'c -&gt; 'd -&gt; 'e -&gt; 'q -&gt; 'i -&gt; 'o option tzresult Lwt.t) -&gt;
-  'prefix directory</abbr>
+  'prefix directory
 
-<abbr class="mark-warning" title="No type known for the following variants: `OkStream, `Unauthorized, `Error, `Ok, `Not_found, `Forbidden, `Created, `Conflict, `No_content
-
-——————————
-
-Expected a list of named or unspecified '_' type variables">val gen_register0 :
+<abbr class="mark-warning" title="No type known for the following variants: `OkStream, `Unauthorized, `Error, `Ok, `Not_found, `Forbidden, `Created, `Conflict, `No_content">val gen_register0 :
   unit directory -&gt;
   ('m, unit, unit, 'q, 'i, 'o) RPC_service.t -&gt;
   ('q -&gt; 'i -&gt; [&lt; 'o RPC_answer.t] Lwt.t) -&gt;
   unit directory</abbr>
 
-<abbr class="mark-warning" title="No type known for the following variants: `OkStream, `Unauthorized, `Error, `Ok, `Not_found, `Forbidden, `Created, `Conflict, `No_content
-
-——————————
-
-Expected a list of named or unspecified '_' type variables">val gen_register1 :
+<abbr class="mark-warning" title="No type known for the following variants: `OkStream, `Unauthorized, `Error, `Ok, `Not_found, `Forbidden, `Created, `Conflict, `No_content">val gen_register1 :
   'prefix directory -&gt;
   ('m, 'prefix, unit * 'a, 'q, 'i, 'o) RPC_service.t -&gt;
   ('a -&gt; 'q -&gt; 'i -&gt; [&lt; 'o RPC_answer.t] Lwt.t) -&gt;
   'prefix directory</abbr>
 
-<abbr class="mark-warning" title="No type known for the following variants: `OkStream, `Unauthorized, `Error, `Ok, `Not_found, `Forbidden, `Created, `Conflict, `No_content
-
-——————————
-
-Expected a list of named or unspecified '_' type variables">val gen_register2 :
+<abbr class="mark-warning" title="No type known for the following variants: `OkStream, `Unauthorized, `Error, `Ok, `Not_found, `Forbidden, `Created, `Conflict, `No_content">val gen_register2 :
   'prefix directory -&gt;
   ('m, 'prefix, (unit * 'a) * 'b, 'q, 'i, 'o) RPC_service.t -&gt;
   ('a -&gt; 'b -&gt; 'q -&gt; 'i -&gt; [&lt; 'o RPC_answer.t] Lwt.t) -&gt;
   'prefix directory</abbr>
 
-<abbr class="mark-warning" title="No type known for the following variants: `OkStream, `Unauthorized, `Error, `Ok, `Not_found, `Forbidden, `Created, `Conflict, `No_content
-
-——————————
-
-Expected a list of named or unspecified '_' type variables">val gen_register3 :
+<abbr class="mark-warning" title="No type known for the following variants: `OkStream, `Unauthorized, `Error, `Ok, `Not_found, `Forbidden, `Created, `Conflict, `No_content">val gen_register3 :
   'prefix directory -&gt;
   ('m, 'prefix, ((unit * 'a) * 'b) * 'c, 'q, 'i, 'o) RPC_service.t -&gt;
   ('a -&gt; 'b -&gt; 'c -&gt; 'q -&gt; 'i -&gt; [&lt; 'o RPC_answer.t] Lwt.t) -&gt;
   'prefix directory</abbr>
 
-<abbr class="mark-warning" title="No type known for the following variants: `OkStream, `Unauthorized, `Error, `Ok, `Not_found, `Forbidden, `Created, `Conflict, `No_content
-
-——————————
-
-Expected a list of named or unspecified '_' type variables">val gen_register4 :
+<abbr class="mark-warning" title="No type known for the following variants: `OkStream, `Unauthorized, `Error, `Ok, `Not_found, `Forbidden, `Created, `Conflict, `No_content">val gen_register4 :
   'prefix directory -&gt;
   ('m, 'prefix, (((unit * 'a) * 'b) * 'c) * 'd, 'q, 'i, 'o) RPC_service.t -&gt;
   ('a -&gt; 'b -&gt; 'c -&gt; 'd -&gt; 'q -&gt; 'i -&gt; [&lt; 'o RPC_answer.t] Lwt.t) -&gt;
   'prefix directory</abbr>
 
-<abbr class="mark-warning" title="No type known for the following variants: `OkStream, `Unauthorized, `Error, `Ok, `Not_found, `Forbidden, `Created, `Conflict, `No_content
-
-——————————
-
-Expected a list of named or unspecified '_' type variables">val gen_register5 :
+<abbr class="mark-warning" title="No type known for the following variants: `OkStream, `Unauthorized, `Error, `Ok, `Not_found, `Forbidden, `Created, `Conflict, `No_content">val gen_register5 :
   'prefix directory -&gt;
   ( 'm,
     'prefix,
@@ -4646,37 +4594,37 @@ Expected a list of named or unspecified '_' type variables">val gen_register5 :
   ('a -&gt; 'b -&gt; 'c -&gt; 'd -&gt; 'e -&gt; 'q -&gt; 'i -&gt; [&lt; 'o RPC_answer.t] Lwt.t) -&gt;
   'prefix directory</abbr>
 
-<abbr class="mark-warning" title="Expected a list of named or unspecified '_' type variables">val lwt_register0 :
+val lwt_register0 :
   unit directory -&gt;
   ('m, unit, unit, 'q, 'i, 'o) RPC_service.t -&gt;
   ('q -&gt; 'i -&gt; 'o Lwt.t) -&gt;
-  unit directory</abbr>
+  unit directory
 
-<abbr class="mark-warning" title="Expected a list of named or unspecified '_' type variables">val lwt_register1 :
+val lwt_register1 :
   'prefix directory -&gt;
   ('m, 'prefix, unit * 'a, 'q, 'i, 'o) RPC_service.t -&gt;
   ('a -&gt; 'q -&gt; 'i -&gt; 'o Lwt.t) -&gt;
-  'prefix directory</abbr>
+  'prefix directory
 
-<abbr class="mark-warning" title="Expected a list of named or unspecified '_' type variables">val lwt_register2 :
+val lwt_register2 :
   'prefix directory -&gt;
   ('m, 'prefix, (unit * 'a) * 'b, 'q, 'i, 'o) RPC_service.t -&gt;
   ('a -&gt; 'b -&gt; 'q -&gt; 'i -&gt; 'o Lwt.t) -&gt;
-  'prefix directory</abbr>
+  'prefix directory
 
-<abbr class="mark-warning" title="Expected a list of named or unspecified '_' type variables">val lwt_register3 :
+val lwt_register3 :
   'prefix directory -&gt;
   ('m, 'prefix, ((unit * 'a) * 'b) * 'c, 'q, 'i, 'o) RPC_service.t -&gt;
   ('a -&gt; 'b -&gt; 'c -&gt; 'q -&gt; 'i -&gt; 'o Lwt.t) -&gt;
-  'prefix directory</abbr>
+  'prefix directory
 
-<abbr class="mark-warning" title="Expected a list of named or unspecified '_' type variables">val lwt_register4 :
+val lwt_register4 :
   'prefix directory -&gt;
   ('m, 'prefix, (((unit * 'a) * 'b) * 'c) * 'd, 'q, 'i, 'o) RPC_service.t -&gt;
   ('a -&gt; 'b -&gt; 'c -&gt; 'd -&gt; 'q -&gt; 'i -&gt; 'o Lwt.t) -&gt;
-  'prefix directory</abbr>
+  'prefix directory
 
-<abbr class="mark-warning" title="Expected a list of named or unspecified '_' type variables">val lwt_register5 :
+val lwt_register5 :
   'prefix directory -&gt;
   ( 'm,
     'prefix,
@@ -4686,7 +4634,7 @@ Expected a list of named or unspecified '_' type variables">val gen_register5 :
     'o )
   RPC_service.t -&gt;
   ('a -&gt; 'b -&gt; 'c -&gt; 'd -&gt; 'e -&gt; 'q -&gt; 'i -&gt; 'o Lwt.t) -&gt;
-  'prefix directory</abbr>
+  'prefix directory
 
 (** Registring dynamic subtree. *)
 val register_dynamic_directory :
@@ -6248,29 +6196,17 @@ type t = Updater.rpc_context
 
 class type ['pr] simple =
   object
-    <abbr class="mark-warning" title="Expected a list of named or unspecified '_' type variables
-
-——————————
-
-Expected a list of named or unspecified '_' type variables">method call_proto_service0 :
+    method call_proto_service0 :
       'm 'q 'i 'o.
       (([&lt; RPC_service.meth] as 'm), t, t, 'q, 'i, 'o) RPC_service.t -&gt; 'pr -&gt;
-      'q -&gt; 'i -&gt; 'o Error_monad.shell_tzresult Lwt.t</abbr>
+      'q -&gt; 'i -&gt; 'o Error_monad.shell_tzresult Lwt.t
 
-    <abbr class="mark-warning" title="Expected a list of named or unspecified '_' type variables
-
-——————————
-
-Expected a list of named or unspecified '_' type variables">method call_proto_service1 :
+    method call_proto_service1 :
       'm 'a 'q 'i 'o.
       (([&lt; RPC_service.meth] as 'm), t, t * 'a, 'q, 'i, 'o) RPC_service.t -&gt;
-      'pr -&gt; 'a -&gt; 'q -&gt; 'i -&gt; 'o Error_monad.shell_tzresult Lwt.t</abbr>
+      'pr -&gt; 'a -&gt; 'q -&gt; 'i -&gt; 'o Error_monad.shell_tzresult Lwt.t
 
-    <abbr class="mark-warning" title="Expected a list of named or unspecified '_' type variables
-
-——————————
-
-Expected a list of named or unspecified '_' type variables">method call_proto_service2 :
+    method call_proto_service2 :
       'm 'a 'b 'q 'i 'o.
       ( ([&lt; RPC_service.meth] as 'm),
         t,
@@ -6279,13 +6215,9 @@ Expected a list of named or unspecified '_' type variables">method call_proto_se
         'i,
         'o )
       RPC_service.t -&gt; 'pr -&gt; 'a -&gt; 'b -&gt; 'q -&gt; 'i -&gt;
-      'o Error_monad.shell_tzresult Lwt.t</abbr>
+      'o Error_monad.shell_tzresult Lwt.t
 
-    <abbr class="mark-warning" title="Expected a list of named or unspecified '_' type variables
-
-——————————
-
-Expected a list of named or unspecified '_' type variables">method call_proto_service3 :
+    method call_proto_service3 :
       'm 'a 'b 'c 'q 'i 'o.
       ( ([&lt; RPC_service.meth] as 'm),
         t,
@@ -6294,27 +6226,27 @@ Expected a list of named or unspecified '_' type variables">method call_proto_se
         'i,
         'o )
       RPC_service.t -&gt; 'pr -&gt; 'a -&gt; 'b -&gt; 'c -&gt; 'q -&gt; 'i -&gt;
-      'o Error_monad.shell_tzresult Lwt.t</abbr>
+      'o Error_monad.shell_tzresult Lwt.t
   end
 
-<abbr class="mark-warning" title="Expected a list of named or unspecified '_' type variables">val make_call0 :
+val make_call0 :
   ([&lt; RPC_service.meth], t, t, 'q, 'i, 'o) RPC_service.t -&gt;
   'pr #simple -&gt;
   'pr -&gt;
   'q -&gt;
   'i -&gt;
-  'o shell_tzresult Lwt.t</abbr>
+  'o shell_tzresult Lwt.t
 
-<abbr class="mark-warning" title="Expected a list of named or unspecified '_' type variables">val make_call1 :
+val make_call1 :
   ([&lt; RPC_service.meth], t, t * 'a, 'q, 'i, 'o) RPC_service.t -&gt;
   'pr #simple -&gt;
   'pr -&gt;
   'a -&gt;
   'q -&gt;
   'i -&gt;
-  'o shell_tzresult Lwt.t</abbr>
+  'o shell_tzresult Lwt.t
 
-<abbr class="mark-warning" title="Expected a list of named or unspecified '_' type variables">val make_call2 :
+val make_call2 :
   ([&lt; RPC_service.meth], t, (t * 'a) * 'b, 'q, 'i, 'o) RPC_service.t -&gt;
   'pr #simple -&gt;
   'pr -&gt;
@@ -6322,9 +6254,9 @@ Expected a list of named or unspecified '_' type variables">method call_proto_se
   'b -&gt;
   'q -&gt;
   'i -&gt;
-  'o shell_tzresult Lwt.t</abbr>
+  'o shell_tzresult Lwt.t
 
-<abbr class="mark-warning" title="Expected a list of named or unspecified '_' type variables">val make_call3 :
+val make_call3 :
   ([&lt; RPC_service.meth], t, ((t * 'a) * 'b) * 'c, 'q, 'i, 'o) RPC_service.t -&gt;
   'pr #simple -&gt;
   'pr -&gt;
@@ -6333,26 +6265,26 @@ Expected a list of named or unspecified '_' type variables">method call_proto_se
   'c -&gt;
   'q -&gt;
   'i -&gt;
-  'o shell_tzresult Lwt.t</abbr>
+  'o shell_tzresult Lwt.t
 
-<abbr class="mark-warning" title="Expected a list of named or unspecified '_' type variables">val make_opt_call0 :
+val make_opt_call0 :
   ([&lt; RPC_service.meth], t, t, 'q, 'i, 'o) RPC_service.t -&gt;
   'pr #simple -&gt;
   'pr -&gt;
   'q -&gt;
   'i -&gt;
-  'o option shell_tzresult Lwt.t</abbr>
+  'o option shell_tzresult Lwt.t
 
-<abbr class="mark-warning" title="Expected a list of named or unspecified '_' type variables">val make_opt_call1 :
+val make_opt_call1 :
   ([&lt; RPC_service.meth], t, t * 'a, 'q, 'i, 'o) RPC_service.t -&gt;
   'pr #simple -&gt;
   'pr -&gt;
   'a -&gt;
   'q -&gt;
   'i -&gt;
-  'o option shell_tzresult Lwt.t</abbr>
+  'o option shell_tzresult Lwt.t
 
-<abbr class="mark-warning" title="Expected a list of named or unspecified '_' type variables">val make_opt_call2 :
+val make_opt_call2 :
   ([&lt; RPC_service.meth], t, (t * 'a) * 'b, 'q, 'i, 'o) RPC_service.t -&gt;
   'pr #simple -&gt;
   'pr -&gt;
@@ -6360,9 +6292,9 @@ Expected a list of named or unspecified '_' type variables">method call_proto_se
   'b -&gt;
   'q -&gt;
   'i -&gt;
-  'o option shell_tzresult Lwt.t</abbr>
+  'o option shell_tzresult Lwt.t
 
-<abbr class="mark-warning" title="Expected a list of named or unspecified '_' type variables">val make_opt_call3 :
+val make_opt_call3 :
   ([&lt; RPC_service.meth], t, ((t * 'a) * 'b) * 'c, 'q, 'i, 'o) RPC_service.t -&gt;
   'pr #simple -&gt;
   'pr -&gt;
@@ -6371,7 +6303,7 @@ Expected a list of named or unspecified '_' type variables">method call_proto_se
   'c -&gt;
   'q -&gt;
   'i -&gt;
-  'o option shell_tzresult Lwt.t</abbr>
+  'o option shell_tzresult Lwt.t
 end</pre>
   </div>
   <div class="col-md-6">

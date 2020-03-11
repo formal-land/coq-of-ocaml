@@ -61,7 +61,7 @@ opam pin add https://github.com/clarus/coq-of-ocaml.git#master</code></pre>
     <ul>
       <li>OCaml size: 36294 lines</li>
       <li>Coq size: 45535 lines (+25% compared to&nbsp;OCaml)</li>
-      <li>Warnings from coq-of-ocaml: 1020</li>
+      <li>Warnings from coq-of-ocaml: 711</li>
     </ul>
     
       <canvas id="chart" width="400" height="400"></canvas>
@@ -283,7 +283,7 @@ opam pin add https://github.com/clarus/coq-of-ocaml.git#master</code></pre>
       </li>
       
       <li>
-        <a href="#alpha_services.ml">alpha_services.ml</a>&nbsp;<span class="label label-warning">16</span>
+        <a href="#alpha_services.ml">alpha_services.ml</a>&nbsp;<span class="label label-warning">6</span>
       </li>
       
       <li>
@@ -363,7 +363,7 @@ opam pin add https://github.com/clarus/coq-of-ocaml.git#master</code></pre>
       </li>
       
       <li>
-        <a href="#constants_services.ml">constants_services.ml</a>&nbsp;<span class="label label-warning">11</span>
+        <a href="#constants_services.ml">constants_services.ml</a>&nbsp;<span class="label label-warning">1</span>
       </li>
       
       <li>
@@ -387,7 +387,7 @@ opam pin add https://github.com/clarus/coq-of-ocaml.git#master</code></pre>
       </li>
       
       <li>
-        <a href="#contract_services.ml">contract_services.ml</a>&nbsp;<span class="label label-warning">83</span>
+        <a href="#contract_services.ml">contract_services.ml</a>&nbsp;<span class="label label-warning">15</span>
       </li>
       
       <li>
@@ -411,7 +411,7 @@ opam pin add https://github.com/clarus/coq-of-ocaml.git#master</code></pre>
       </li>
       
       <li>
-        <a href="#delegate_services.ml">delegate_services.ml</a>&nbsp;<span class="label label-warning">89</span>
+        <a href="#delegate_services.ml">delegate_services.ml</a>&nbsp;<span class="label label-warning">14</span>
       </li>
       
       <li>
@@ -457,7 +457,7 @@ opam pin add https://github.com/clarus/coq-of-ocaml.git#master</code></pre>
       </li>
       
       <li>
-        <a href="#helpers_services.ml">helpers_services.ml</a>&nbsp;<span class="label label-warning">88</span>
+        <a href="#helpers_services.ml">helpers_services.ml</a>&nbsp;<span class="label label-warning">18</span>
       </li>
       
       <li>
@@ -691,7 +691,7 @@ opam pin add https://github.com/clarus/coq-of-ocaml.git#master</code></pre>
       </li>
       
       <li>
-        <a href="#services_registration.ml">services_registration.ml</a>&nbsp;<span class="label label-warning">37</span>
+        <a href="#services_registration.ml">services_registration.ml</a>&nbsp;<span class="label label-warning">1</span>
       </li>
       
       <li>
@@ -707,7 +707,7 @@ opam pin add https://github.com/clarus/coq-of-ocaml.git#master</code></pre>
       </li>
       
       <li>
-        <a href="#storage_description.ml">storage_description.ml</a>&nbsp;<span class="label label-warning">13</span>
+        <a href="#storage_description.ml">storage_description.ml</a>&nbsp;<span class="label label-warning">8</span>
       </li>
       
       <li>
@@ -767,7 +767,7 @@ opam pin add https://github.com/clarus/coq-of-ocaml.git#master</code></pre>
       </li>
       
       <li>
-        <a href="#voting_services.ml">voting_services.ml</a>&nbsp;<span class="label label-warning">42</span>
+        <a href="#voting_services.ml">voting_services.ml</a>&nbsp;<span class="label label-warning">7</span>
       </li>
       
       <li>
@@ -5517,7 +5517,7 @@ Parameter description : Storage_description.t context.
     </ul>
   </div>
   <div class="col-md-6">
-    <a href="#alpha_services.ml"><code>alpha_services.ml</code></a>&nbsp;<span class="label label-warning">16 warnings</span>
+    <a href="#alpha_services.ml"><code>alpha_services.ml</code></a>&nbsp;<span class="label label-warning">6 warnings</span>
     
     <pre>(*****************************************************************************)
 (*                                                                           *)
@@ -5552,23 +5552,7 @@ module Seed = struct
   module S = struct
     open Data_encoding
 
-    let <abbr class="mark-warning" title="Expected a list of named or unspecified '_' type variables
-
-——————————
-
-Expected a list of named or unspecified '_' type variables
-
-——————————
-
-Expected a list of named or unspecified '_' type variables
-
-——————————
-
-Expected a list of named or unspecified '_' type variables
-
-——————————
-
-Expected a list of named or unspecified '_' type variables">seed</abbr> =
+    let seed =
       RPC_service.post_service
         ~description:&quot;Seed of the cycle to which the block belongs.&quot;
         ~query:RPC_query.empty
@@ -5612,23 +5596,7 @@ module Nonce = struct
           (fun () -&gt; Forgotten) ]
 
   module S = struct
-    let <abbr class="mark-warning" title="Expected a list of named or unspecified '_' type variables
-
-——————————
-
-Expected a list of named or unspecified '_' type variables
-
-——————————
-
-Expected a list of named or unspecified '_' type variables
-
-——————————
-
-Expected a list of named or unspecified '_' type variables
-
-——————————
-
-Expected a list of named or unspecified '_' type variables">get</abbr> =
+    let get =
       RPC_service.get_service
         ~description:&quot;Info about the nonce of a previous block.&quot;
         ~query:RPC_query.empty
@@ -17393,7 +17361,7 @@ Definition encoding : Data_encoding.encoding t :=
     </ul>
   </div>
   <div class="col-md-6">
-    <a href="#constants_services.ml"><code>constants_services.ml</code></a>&nbsp;<span class="label label-warning">11 warnings</span>
+    <a href="#constants_services.ml"><code>constants_services.ml</code></a>&nbsp;<span class="label label-warning">1 warning</span>
     
     <pre>(*****************************************************************************)
 (*                                                                           *)
@@ -17429,46 +17397,14 @@ let custom_root =
 module S = struct
   open Data_encoding
 
-  let <abbr class="mark-warning" title="Expected a list of named or unspecified '_' type variables
-
-——————————
-
-Expected a list of named or unspecified '_' type variables
-
-——————————
-
-Expected a list of named or unspecified '_' type variables
-
-——————————
-
-Expected a list of named or unspecified '_' type variables
-
-——————————
-
-Expected a list of named or unspecified '_' type variables">errors</abbr> =
+  let errors =
     RPC_service.get_service
       ~description:&quot;Schema for all the RPC errors from this protocol version&quot;
       ~query:RPC_query.empty
       ~output:json_schema
       RPC_path.(custom_root / &quot;errors&quot;)
 
-  let <abbr class="mark-warning" title="Expected a list of named or unspecified '_' type variables
-
-——————————
-
-Expected a list of named or unspecified '_' type variables
-
-——————————
-
-Expected a list of named or unspecified '_' type variables
-
-——————————
-
-Expected a list of named or unspecified '_' type variables
-
-——————————
-
-Expected a list of named or unspecified '_' type variables">all</abbr> =
+  let all =
     RPC_service.get_service
       ~description:&quot;All constants&quot;
       ~query:RPC_query.empty
@@ -18827,7 +18763,7 @@ Parameter Index : {_ : unit &amp; Storage_description.INDEX.signature (t := t)}.
     </ul>
   </div>
   <div class="col-md-6">
-    <a href="#contract_services.ml"><code>contract_services.ml</code></a>&nbsp;<span class="label label-warning">83 warnings</span>
+    <a href="#contract_services.ml"><code>contract_services.ml</code></a>&nbsp;<span class="label label-warning">15 warnings</span>
     
     <pre>(*****************************************************************************)
 (*                                                                           *)
@@ -18887,161 +18823,49 @@ let info_encoding =
 module S = struct
   open Data_encoding
 
-  let <abbr class="mark-warning" title="Expected a list of named or unspecified '_' type variables
-
-——————————
-
-Expected a list of named or unspecified '_' type variables
-
-——————————
-
-Expected a list of named or unspecified '_' type variables
-
-——————————
-
-Expected a list of named or unspecified '_' type variables
-
-——————————
-
-Expected a list of named or unspecified '_' type variables">balance</abbr> =
+  let balance =
     RPC_service.get_service
       ~description:&quot;Access the balance of a contract.&quot;
       ~query:RPC_query.empty
       ~output:Tez.encoding
       RPC_path.(custom_root /: Contract.rpc_arg / &quot;balance&quot;)
 
-  let <abbr class="mark-warning" title="Expected a list of named or unspecified '_' type variables
-
-——————————
-
-Expected a list of named or unspecified '_' type variables
-
-——————————
-
-Expected a list of named or unspecified '_' type variables
-
-——————————
-
-Expected a list of named or unspecified '_' type variables
-
-——————————
-
-Expected a list of named or unspecified '_' type variables">manager_key</abbr> =
+  let manager_key =
     RPC_service.get_service
       ~description:&quot;Access the manager of a contract.&quot;
       ~query:RPC_query.empty
       ~output:(option Signature.Public_key.encoding)
       RPC_path.(custom_root /: Contract.rpc_arg / &quot;manager_key&quot;)
 
-  let <abbr class="mark-warning" title="Expected a list of named or unspecified '_' type variables
-
-——————————
-
-Expected a list of named or unspecified '_' type variables
-
-——————————
-
-Expected a list of named or unspecified '_' type variables
-
-——————————
-
-Expected a list of named or unspecified '_' type variables
-
-——————————
-
-Expected a list of named or unspecified '_' type variables">delegate</abbr> =
+  let delegate =
     RPC_service.get_service
       ~description:&quot;Access the delegate of a contract, if any.&quot;
       ~query:RPC_query.empty
       ~output:Signature.Public_key_hash.encoding
       RPC_path.(custom_root /: Contract.rpc_arg / &quot;delegate&quot;)
 
-  let <abbr class="mark-warning" title="Expected a list of named or unspecified '_' type variables
-
-——————————
-
-Expected a list of named or unspecified '_' type variables
-
-——————————
-
-Expected a list of named or unspecified '_' type variables
-
-——————————
-
-Expected a list of named or unspecified '_' type variables
-
-——————————
-
-Expected a list of named or unspecified '_' type variables">counter</abbr> =
+  let counter =
     RPC_service.get_service
       ~description:&quot;Access the counter of a contract, if any.&quot;
       ~query:RPC_query.empty
       ~output:z
       RPC_path.(custom_root /: Contract.rpc_arg / &quot;counter&quot;)
 
-  let <abbr class="mark-warning" title="Expected a list of named or unspecified '_' type variables
-
-——————————
-
-Expected a list of named or unspecified '_' type variables
-
-——————————
-
-Expected a list of named or unspecified '_' type variables
-
-——————————
-
-Expected a list of named or unspecified '_' type variables
-
-——————————
-
-Expected a list of named or unspecified '_' type variables">script</abbr> =
+  let script =
     RPC_service.get_service
       ~description:&quot;Access the code and data of the contract.&quot;
       ~query:RPC_query.empty
       ~output:Script.encoding
       RPC_path.(custom_root /: Contract.rpc_arg / &quot;script&quot;)
 
-  let <abbr class="mark-warning" title="Expected a list of named or unspecified '_' type variables
-
-——————————
-
-Expected a list of named or unspecified '_' type variables
-
-——————————
-
-Expected a list of named or unspecified '_' type variables
-
-——————————
-
-Expected a list of named or unspecified '_' type variables
-
-——————————
-
-Expected a list of named or unspecified '_' type variables">storage</abbr> =
+  let storage =
     RPC_service.get_service
       ~description:&quot;Access the data of the contract.&quot;
       ~query:RPC_query.empty
       ~output:Script.expr_encoding
       RPC_path.(custom_root /: Contract.rpc_arg / &quot;storage&quot;)
 
-  let <abbr class="mark-warning" title="Expected a list of named or unspecified '_' type variables
-
-——————————
-
-Expected a list of named or unspecified '_' type variables
-
-——————————
-
-Expected a list of named or unspecified '_' type variables
-
-——————————
-
-Expected a list of named or unspecified '_' type variables
-
-——————————
-
-Expected a list of named or unspecified '_' type variables">entrypoint_type</abbr> =
+  let entrypoint_type =
     RPC_service.get_service
       ~description:&quot;Return the type of the given entrypoint of the contract&quot;
       ~query:RPC_query.empty
@@ -19049,23 +18873,7 @@ Expected a list of named or unspecified '_' type variables">entrypoint_type</abb
       RPC_path.(
         custom_root /: Contract.rpc_arg / &quot;entrypoints&quot; /: RPC_arg.string)
 
-  let <abbr class="mark-warning" title="Expected a list of named or unspecified '_' type variables
-
-——————————
-
-Expected a list of named or unspecified '_' type variables
-
-——————————
-
-Expected a list of named or unspecified '_' type variables
-
-——————————
-
-Expected a list of named or unspecified '_' type variables
-
-——————————
-
-Expected a list of named or unspecified '_' type variables">list_entrypoints</abbr> =
+  let list_entrypoints =
     RPC_service.get_service
       ~description:&quot;Return the list of entrypoints of the contract&quot;
       ~query:RPC_query.empty
@@ -19083,23 +18891,7 @@ Expected a list of named or unspecified '_' type variables">list_entrypoints</ab
            (req &quot;entrypoints&quot; (assoc Script.expr_encoding)))
       RPC_path.(custom_root /: Contract.rpc_arg / &quot;entrypoints&quot;)
 
-  let <abbr class="mark-warning" title="Expected a list of named or unspecified '_' type variables
-
-——————————
-
-Expected a list of named or unspecified '_' type variables
-
-——————————
-
-Expected a list of named or unspecified '_' type variables
-
-——————————
-
-Expected a list of named or unspecified '_' type variables
-
-——————————
-
-Expected a list of named or unspecified '_' type variables">contract_big_map_get_opt</abbr> =
+  let contract_big_map_get_opt =
     RPC_service.post_service
       ~description:
         &quot;Access the value associated with a key in a big map of the contract \
@@ -19112,69 +18904,21 @@ Expected a list of named or unspecified '_' type variables">contract_big_map_get
       ~output:(option Script.expr_encoding)
       RPC_path.(custom_root /: Contract.rpc_arg / &quot;big_map_get&quot;)
 
-  let <abbr class="mark-warning" title="Expected a list of named or unspecified '_' type variables
-
-——————————
-
-Expected a list of named or unspecified '_' type variables
-
-——————————
-
-Expected a list of named or unspecified '_' type variables
-
-——————————
-
-Expected a list of named or unspecified '_' type variables
-
-——————————
-
-Expected a list of named or unspecified '_' type variables">big_map_get</abbr> =
+  let big_map_get =
     RPC_service.get_service
       ~description:&quot;Access the value associated with a key in a big map.&quot;
       ~query:RPC_query.empty
       ~output:Script.expr_encoding
       RPC_path.(big_map_root /: Big_map.rpc_arg /: Script_expr_hash.rpc_arg)
 
-  let <abbr class="mark-warning" title="Expected a list of named or unspecified '_' type variables
-
-——————————
-
-Expected a list of named or unspecified '_' type variables
-
-——————————
-
-Expected a list of named or unspecified '_' type variables
-
-——————————
-
-Expected a list of named or unspecified '_' type variables
-
-——————————
-
-Expected a list of named or unspecified '_' type variables">info</abbr> =
+  let info =
     RPC_service.get_service
       ~description:&quot;Access the complete status of a contract.&quot;
       ~query:RPC_query.empty
       ~output:info_encoding
       RPC_path.(custom_root /: Contract.rpc_arg)
 
-  let <abbr class="mark-warning" title="Expected a list of named or unspecified '_' type variables
-
-——————————
-
-Expected a list of named or unspecified '_' type variables
-
-——————————
-
-Expected a list of named or unspecified '_' type variables
-
-——————————
-
-Expected a list of named or unspecified '_' type variables
-
-——————————
-
-Expected a list of named or unspecified '_' type variables">list</abbr> =
+  let list =
     RPC_service.get_service
       ~description:
         &quot;All existing contracts (including non-empty default contracts).&quot;
@@ -19188,38 +18932,14 @@ let register () =
   <abbr class="mark-warning" title="Sequences of instructions are ignored (operator &quot;;&quot;)
 
 Alternative: use a monad to sequence side-effects.">register0 S.list (fun ctxt () () -&gt; Contract.list ctxt &gt;&gt;= return)</abbr> ;
-  let <abbr class="mark-warning" title="Expected a list of named or unspecified '_' type variables
-
-——————————
-
-Expected a list of named or unspecified '_' type variables
-
-——————————
-
-Expected a list of named or unspecified '_' type variables
-
-——————————
-
-Expected a list of named or unspecified '_' type variables">register_field</abbr> s f =
+  let register_field s f =
     register1 s (fun ctxt contract () () -&gt;
         Contract.exists ctxt contract
         &gt;&gt;=? function true -&gt; f ctxt contract | false -&gt; raise <abbr class="mark-warning" title="Values of extensible types are ignored.
 
 They are sent to a unit type.">Not_found</abbr>)
   in
-  let <abbr class="mark-warning" title="Expected a list of named or unspecified '_' type variables
-
-——————————
-
-Expected a list of named or unspecified '_' type variables
-
-——————————
-
-Expected a list of named or unspecified '_' type variables
-
-——————————
-
-Expected a list of named or unspecified '_' type variables">register_opt_field</abbr> s f =
+  let register_opt_field s f =
     register_field s (fun ctxt a1 -&gt;
         f ctxt a1 &gt;&gt;=? function None -&gt; raise <abbr class="mark-warning" title="Values of extensible types are ignored.
 
@@ -22553,7 +22273,7 @@ Parameter Index : {_ : unit &amp; Storage_description.INDEX.signature (t := cycl
     </ul>
   </div>
   <div class="col-md-6">
-    <a href="#delegate_services.ml"><code>delegate_services.ml</code></a>&nbsp;<span class="label label-warning">89 warnings</span>
+    <a href="#delegate_services.ml"><code>delegate_services.ml</code></a>&nbsp;<span class="label label-warning">14 warnings</span>
     
     <pre>(*****************************************************************************)
 (*                                                                           *)
@@ -22654,23 +22374,7 @@ module S = struct
     |+ flag &quot;inactive&quot; (fun t -&gt; t.inactive)
     |&gt; seal
 
-  let <abbr class="mark-warning" title="Expected a list of named or unspecified '_' type variables
-
-——————————
-
-Expected a list of named or unspecified '_' type variables
-
-——————————
-
-Expected a list of named or unspecified '_' type variables
-
-——————————
-
-Expected a list of named or unspecified '_' type variables
-
-——————————
-
-Expected a list of named or unspecified '_' type variables">list_delegate</abbr> =
+  let list_delegate =
     RPC_service.get_service
       ~description:&quot;Lists all registered delegates.&quot;
       ~query:list_query
@@ -22679,46 +22383,14 @@ Expected a list of named or unspecified '_' type variables">list_delegate</abbr>
 
   let path = RPC_path.(raw_path /: Signature.Public_key_hash.rpc_arg)
 
-  let <abbr class="mark-warning" title="Expected a list of named or unspecified '_' type variables
-
-——————————
-
-Expected a list of named or unspecified '_' type variables
-
-——————————
-
-Expected a list of named or unspecified '_' type variables
-
-——————————
-
-Expected a list of named or unspecified '_' type variables
-
-——————————
-
-Expected a list of named or unspecified '_' type variables">info</abbr> =
+  let info =
     RPC_service.get_service
       ~description:&quot;Everything about a delegate.&quot;
       ~query:RPC_query.empty
       ~output:info_encoding
       path
 
-  let <abbr class="mark-warning" title="Expected a list of named or unspecified '_' type variables
-
-——————————
-
-Expected a list of named or unspecified '_' type variables
-
-——————————
-
-Expected a list of named or unspecified '_' type variables
-
-——————————
-
-Expected a list of named or unspecified '_' type variables
-
-——————————
-
-Expected a list of named or unspecified '_' type variables">balance</abbr> =
+  let balance =
     RPC_service.get_service
       ~description:
         &quot;Returns the full balance of a given delegate, including the frozen \
@@ -22727,23 +22399,7 @@ Expected a list of named or unspecified '_' type variables">balance</abbr> =
       ~output:Tez.encoding
       RPC_path.(path / &quot;balance&quot;)
 
-  let <abbr class="mark-warning" title="Expected a list of named or unspecified '_' type variables
-
-——————————
-
-Expected a list of named or unspecified '_' type variables
-
-——————————
-
-Expected a list of named or unspecified '_' type variables
-
-——————————
-
-Expected a list of named or unspecified '_' type variables
-
-——————————
-
-Expected a list of named or unspecified '_' type variables">frozen_balance</abbr> =
+  let frozen_balance =
     RPC_service.get_service
       ~description:
         &quot;Returns the total frozen balances of a given delegate, this includes \
@@ -22752,23 +22408,7 @@ Expected a list of named or unspecified '_' type variables">frozen_balance</abbr
       ~output:Tez.encoding
       RPC_path.(path / &quot;frozen_balance&quot;)
 
-  let <abbr class="mark-warning" title="Expected a list of named or unspecified '_' type variables
-
-——————————
-
-Expected a list of named or unspecified '_' type variables
-
-——————————
-
-Expected a list of named or unspecified '_' type variables
-
-——————————
-
-Expected a list of named or unspecified '_' type variables
-
-——————————
-
-Expected a list of named or unspecified '_' type variables">frozen_balance_by_cycle</abbr> =
+  let frozen_balance_by_cycle =
     RPC_service.get_service
       ~description:
         &quot;Returns the frozen balances of a given delegate, indexed by the \
@@ -22777,23 +22417,7 @@ Expected a list of named or unspecified '_' type variables">frozen_balance_by_cy
       ~output:Delegate.frozen_balance_by_cycle_encoding
       RPC_path.(path / &quot;frozen_balance_by_cycle&quot;)
 
-  let <abbr class="mark-warning" title="Expected a list of named or unspecified '_' type variables
-
-——————————
-
-Expected a list of named or unspecified '_' type variables
-
-——————————
-
-Expected a list of named or unspecified '_' type variables
-
-——————————
-
-Expected a list of named or unspecified '_' type variables
-
-——————————
-
-Expected a list of named or unspecified '_' type variables">staking_balance</abbr> =
+  let staking_balance =
     RPC_service.get_service
       ~description:
         &quot;Returns the total amount of tokens delegated to a given delegate. \
@@ -22805,23 +22429,7 @@ Expected a list of named or unspecified '_' type variables">staking_balance</abb
       ~output:Tez.encoding
       RPC_path.(path / &quot;staking_balance&quot;)
 
-  let <abbr class="mark-warning" title="Expected a list of named or unspecified '_' type variables
-
-——————————
-
-Expected a list of named or unspecified '_' type variables
-
-——————————
-
-Expected a list of named or unspecified '_' type variables
-
-——————————
-
-Expected a list of named or unspecified '_' type variables
-
-——————————
-
-Expected a list of named or unspecified '_' type variables">delegated_contracts</abbr> =
+  let delegated_contracts =
     RPC_service.get_service
       ~description:
         &quot;Returns the list of contracts that delegate to a given delegate.&quot;
@@ -22829,23 +22437,7 @@ Expected a list of named or unspecified '_' type variables">delegated_contracts<
       ~output:(list Contract_repr.encoding)
       RPC_path.(path / &quot;delegated_contracts&quot;)
 
-  let <abbr class="mark-warning" title="Expected a list of named or unspecified '_' type variables
-
-——————————
-
-Expected a list of named or unspecified '_' type variables
-
-——————————
-
-Expected a list of named or unspecified '_' type variables
-
-——————————
-
-Expected a list of named or unspecified '_' type variables
-
-——————————
-
-Expected a list of named or unspecified '_' type variables">delegated_balance</abbr> =
+  let delegated_balance =
     RPC_service.get_service
       ~description:
         &quot;Returns the balances of all the contracts that delegate to a given \
@@ -22855,23 +22447,7 @@ Expected a list of named or unspecified '_' type variables">delegated_balance</a
       ~output:Tez.encoding
       RPC_path.(path / &quot;delegated_balance&quot;)
 
-  let <abbr class="mark-warning" title="Expected a list of named or unspecified '_' type variables
-
-——————————
-
-Expected a list of named or unspecified '_' type variables
-
-——————————
-
-Expected a list of named or unspecified '_' type variables
-
-——————————
-
-Expected a list of named or unspecified '_' type variables
-
-——————————
-
-Expected a list of named or unspecified '_' type variables">deactivated</abbr> =
+  let deactivated =
     RPC_service.get_service
       ~description:
         &quot;Tells whether the delegate is currently tagged as deactivated or not.&quot;
@@ -22879,23 +22455,7 @@ Expected a list of named or unspecified '_' type variables">deactivated</abbr> =
       ~output:bool
       RPC_path.(path / &quot;deactivated&quot;)
 
-  let <abbr class="mark-warning" title="Expected a list of named or unspecified '_' type variables
-
-——————————
-
-Expected a list of named or unspecified '_' type variables
-
-——————————
-
-Expected a list of named or unspecified '_' type variables
-
-——————————
-
-Expected a list of named or unspecified '_' type variables
-
-——————————
-
-Expected a list of named or unspecified '_' type variables">grace_period</abbr> =
+  let grace_period =
     RPC_service.get_service
       ~description:
         &quot;Returns the cycle by the end of which the delegate might be \
@@ -23085,23 +22645,7 @@ module Baking_rights = struct
       |+ flag &quot;all&quot; (fun t -&gt; t.all)
       |&gt; seal
 
-    let <abbr class="mark-warning" title="Expected a list of named or unspecified '_' type variables
-
-——————————
-
-Expected a list of named or unspecified '_' type variables
-
-——————————
-
-Expected a list of named or unspecified '_' type variables
-
-——————————
-
-Expected a list of named or unspecified '_' type variables
-
-——————————
-
-Expected a list of named or unspecified '_' type variables">baking_rights</abbr> =
+    let baking_rights =
       RPC_service.get_service
         ~description:
           &quot;Retrieves the list of delegates allowed to bake a block.\n\
@@ -23237,23 +22781,7 @@ module Endorsing_rights = struct
              t.delegates)
       |&gt; seal
 
-    let <abbr class="mark-warning" title="Expected a list of named or unspecified '_' type variables
-
-——————————
-
-Expected a list of named or unspecified '_' type variables
-
-——————————
-
-Expected a list of named or unspecified '_' type variables
-
-——————————
-
-Expected a list of named or unspecified '_' type variables
-
-——————————
-
-Expected a list of named or unspecified '_' type variables">endorsing_rights</abbr> =
+    let endorsing_rights =
       RPC_service.get_service
         ~description:
           &quot;Retrieves the delegates allowed to endorse a block.\n\
@@ -23329,23 +22857,7 @@ module Endorsing_power = struct
         failwith &quot;Operation is not an endorsement&quot;
 
   module S = struct
-    let <abbr class="mark-warning" title="Expected a list of named or unspecified '_' type variables
-
-——————————
-
-Expected a list of named or unspecified '_' type variables
-
-——————————
-
-Expected a list of named or unspecified '_' type variables
-
-——————————
-
-Expected a list of named or unspecified '_' type variables
-
-——————————
-
-Expected a list of named or unspecified '_' type variables">endorsing_power</abbr> =
+    let endorsing_power =
       let open Data_encoding in
       RPC_service.post_service
         ~description:
@@ -23383,23 +22895,7 @@ module Required_endorsements = struct
              t.block_delay)
       |&gt; seal
 
-    let <abbr class="mark-warning" title="Expected a list of named or unspecified '_' type variables
-
-——————————
-
-Expected a list of named or unspecified '_' type variables
-
-——————————
-
-Expected a list of named or unspecified '_' type variables
-
-——————————
-
-Expected a list of named or unspecified '_' type variables
-
-——————————
-
-Expected a list of named or unspecified '_' type variables">required_endorsements</abbr> =
+    let required_endorsements =
       let open Data_encoding in
       RPC_service.get_service
         ~description:
@@ -23434,23 +22930,7 @@ module Minimal_valid_time = struct
       |+ field &quot;endorsing_power&quot; RPC_arg.int 0 (fun t -&gt; t.endorsing_power)
       |&gt; seal
 
-    let <abbr class="mark-warning" title="Expected a list of named or unspecified '_' type variables
-
-——————————
-
-Expected a list of named or unspecified '_' type variables
-
-——————————
-
-Expected a list of named or unspecified '_' type variables
-
-——————————
-
-Expected a list of named or unspecified '_' type variables
-
-——————————
-
-Expected a list of named or unspecified '_' type variables">minimal_valid_time</abbr> =
+    let minimal_valid_time =
       RPC_service.get_service
         ~description:
           &quot;Minimal valid time for a block given a priority and an endorsing \
@@ -28351,7 +27831,7 @@ Parameter op_plusat : cost -&gt; cost -&gt; cost.
     </ul>
   </div>
   <div class="col-md-6">
-    <a href="#helpers_services.ml"><code>helpers_services.ml</code></a>&nbsp;<span class="label label-warning">88 warnings</span>
+    <a href="#helpers_services.ml"><code>helpers_services.ml</code></a>&nbsp;<span class="label label-warning">18 warnings</span>
     
     <pre>(*****************************************************************************)
 (*                                                                           *)
@@ -28434,23 +27914,7 @@ module Scripts = struct
               (list
                  (obj2 (req &quot;item&quot; Script.expr_encoding) (opt &quot;annot&quot; string))))
 
-    let <abbr class="mark-warning" title="Expected a list of named or unspecified '_' type variables
-
-——————————
-
-Expected a list of named or unspecified '_' type variables
-
-——————————
-
-Expected a list of named or unspecified '_' type variables
-
-——————————
-
-Expected a list of named or unspecified '_' type variables
-
-——————————
-
-Expected a list of named or unspecified '_' type variables">run_code</abbr> =
+    let run_code =
       RPC_service.post_service
         ~description:&quot;Run a piece of code in the current context&quot;
         ~query:RPC_query.empty
@@ -28462,23 +27926,7 @@ Expected a list of named or unspecified '_' type variables">run_code</abbr> =
              (opt &quot;big_map_diff&quot; Contract.big_map_diff_encoding))
         RPC_path.(path / &quot;run_code&quot;)
 
-    let <abbr class="mark-warning" title="Expected a list of named or unspecified '_' type variables
-
-——————————
-
-Expected a list of named or unspecified '_' type variables
-
-——————————
-
-Expected a list of named or unspecified '_' type variables
-
-——————————
-
-Expected a list of named or unspecified '_' type variables
-
-——————————
-
-Expected a list of named or unspecified '_' type variables">trace_code</abbr> =
+    let trace_code =
       RPC_service.post_service
         ~description:
           &quot;Run a piece of code in the current context, keeping a trace&quot;
@@ -28492,23 +27940,7 @@ Expected a list of named or unspecified '_' type variables">trace_code</abbr> =
              (opt &quot;big_map_diff&quot; Contract.big_map_diff_encoding))
         RPC_path.(path / &quot;trace_code&quot;)
 
-    let <abbr class="mark-warning" title="Expected a list of named or unspecified '_' type variables
-
-——————————
-
-Expected a list of named or unspecified '_' type variables
-
-——————————
-
-Expected a list of named or unspecified '_' type variables
-
-——————————
-
-Expected a list of named or unspecified '_' type variables
-
-——————————
-
-Expected a list of named or unspecified '_' type variables">typecheck_code</abbr> =
+    let typecheck_code =
       RPC_service.post_service
         ~description:&quot;Typecheck a piece of code in the current context&quot;
         ~query:RPC_query.empty
@@ -28519,23 +27951,7 @@ Expected a list of named or unspecified '_' type variables">typecheck_code</abbr
              (req &quot;gas&quot; Gas.encoding))
         RPC_path.(path / &quot;typecheck_code&quot;)
 
-    let <abbr class="mark-warning" title="Expected a list of named or unspecified '_' type variables
-
-——————————
-
-Expected a list of named or unspecified '_' type variables
-
-——————————
-
-Expected a list of named or unspecified '_' type variables
-
-——————————
-
-Expected a list of named or unspecified '_' type variables
-
-——————————
-
-Expected a list of named or unspecified '_' type variables">typecheck_data</abbr> =
+    let typecheck_data =
       RPC_service.post_service
         ~description:
           &quot;Check that some data expression is well formed and of a given type \
@@ -28549,23 +27965,7 @@ Expected a list of named or unspecified '_' type variables">typecheck_data</abbr
         ~output:(obj1 (req &quot;gas&quot; Gas.encoding))
         RPC_path.(path / &quot;typecheck_data&quot;)
 
-    let <abbr class="mark-warning" title="Expected a list of named or unspecified '_' type variables
-
-——————————
-
-Expected a list of named or unspecified '_' type variables
-
-——————————
-
-Expected a list of named or unspecified '_' type variables
-
-——————————
-
-Expected a list of named or unspecified '_' type variables
-
-——————————
-
-Expected a list of named or unspecified '_' type variables">pack_data</abbr> =
+    let pack_data =
       RPC_service.post_service
         ~description:
           &quot;Computes the serialized version of some data expression using the \
@@ -28579,23 +27979,7 @@ Expected a list of named or unspecified '_' type variables">pack_data</abbr> =
         ~query:RPC_query.empty
         RPC_path.(path / &quot;pack_data&quot;)
 
-    let <abbr class="mark-warning" title="Expected a list of named or unspecified '_' type variables
-
-——————————
-
-Expected a list of named or unspecified '_' type variables
-
-——————————
-
-Expected a list of named or unspecified '_' type variables
-
-——————————
-
-Expected a list of named or unspecified '_' type variables
-
-——————————
-
-Expected a list of named or unspecified '_' type variables">run_operation</abbr> =
+    let run_operation =
       RPC_service.post_service
         ~description:&quot;Run an operation without signature checks&quot;
         ~query:RPC_query.empty
@@ -28606,23 +27990,7 @@ Expected a list of named or unspecified '_' type variables">run_operation</abbr>
         ~output:Apply_results.operation_data_and_metadata_encoding
         RPC_path.(path / &quot;run_operation&quot;)
 
-    let <abbr class="mark-warning" title="Expected a list of named or unspecified '_' type variables
-
-——————————
-
-Expected a list of named or unspecified '_' type variables
-
-——————————
-
-Expected a list of named or unspecified '_' type variables
-
-——————————
-
-Expected a list of named or unspecified '_' type variables
-
-——————————
-
-Expected a list of named or unspecified '_' type variables">entrypoint_type</abbr> =
+    let entrypoint_type =
       RPC_service.post_service
         ~description:&quot;Return the type of the given entrypoint&quot;
         ~query:RPC_query.empty
@@ -28633,23 +28001,7 @@ Expected a list of named or unspecified '_' type variables">entrypoint_type</abb
         ~output:(obj1 (req &quot;entrypoint_type&quot; Script.expr_encoding))
         RPC_path.(path / &quot;entrypoint&quot;)
 
-    let <abbr class="mark-warning" title="Expected a list of named or unspecified '_' type variables
-
-——————————
-
-Expected a list of named or unspecified '_' type variables
-
-——————————
-
-Expected a list of named or unspecified '_' type variables
-
-——————————
-
-Expected a list of named or unspecified '_' type variables
-
-——————————
-
-Expected a list of named or unspecified '_' type variables">list_entrypoints</abbr> =
+    let list_entrypoints =
       RPC_service.post_service
         ~description:&quot;Return the list of entrypoints of the given script&quot;
         ~query:RPC_query.empty
@@ -29065,23 +28417,7 @@ module Forge = struct
 
     let path = RPC_path.(path / &quot;forge&quot;)
 
-    let <abbr class="mark-warning" title="Expected a list of named or unspecified '_' type variables
-
-——————————
-
-Expected a list of named or unspecified '_' type variables
-
-——————————
-
-Expected a list of named or unspecified '_' type variables
-
-——————————
-
-Expected a list of named or unspecified '_' type variables
-
-——————————
-
-Expected a list of named or unspecified '_' type variables">operations</abbr> =
+    let operations =
       RPC_service.post_service
         ~description:&quot;Forge an operation&quot;
         ~query:RPC_query.empty
@@ -29093,23 +28429,7 @@ Expected a list of named or unspecified '_' type variables">operations</abbr> =
       MBytes.of_string
         (String.make Constants_repr.proof_of_work_nonce_size '\000')
 
-    let <abbr class="mark-warning" title="Expected a list of named or unspecified '_' type variables
-
-——————————
-
-Expected a list of named or unspecified '_' type variables
-
-——————————
-
-Expected a list of named or unspecified '_' type variables
-
-——————————
-
-Expected a list of named or unspecified '_' type variables
-
-——————————
-
-Expected a list of named or unspecified '_' type variables">protocol_data</abbr> =
+    let protocol_data =
       RPC_service.post_service
         ~description:&quot;Forge the protocol-specific part of a block header&quot;
         ~query:RPC_query.empty
@@ -29306,23 +28626,7 @@ module Parse = struct
 
     let path = RPC_path.(path / &quot;parse&quot;)
 
-    let <abbr class="mark-warning" title="Expected a list of named or unspecified '_' type variables
-
-——————————
-
-Expected a list of named or unspecified '_' type variables
-
-——————————
-
-Expected a list of named or unspecified '_' type variables
-
-——————————
-
-Expected a list of named or unspecified '_' type variables
-
-——————————
-
-Expected a list of named or unspecified '_' type variables">operations</abbr> =
+    let operations =
       RPC_service.post_service
         ~description:&quot;Parse operations&quot;
         ~query:RPC_query.empty
@@ -29333,23 +28637,7 @@ Expected a list of named or unspecified '_' type variables">operations</abbr> =
         ~output:(list (dynamic_size Operation.encoding))
         RPC_path.(path / &quot;operations&quot;)
 
-    let <abbr class="mark-warning" title="Expected a list of named or unspecified '_' type variables
-
-——————————
-
-Expected a list of named or unspecified '_' type variables
-
-——————————
-
-Expected a list of named or unspecified '_' type variables
-
-——————————
-
-Expected a list of named or unspecified '_' type variables
-
-——————————
-
-Expected a list of named or unspecified '_' type variables">block</abbr> =
+    let block =
       RPC_service.post_service
         ~description:&quot;Parse a block&quot;
         ~query:RPC_query.empty
@@ -29413,23 +28701,7 @@ module S = struct
     |+ field &quot;offset&quot; RPC_arg.int32 0l (fun t -&gt; t.offset)
     |&gt; seal
 
-  let <abbr class="mark-warning" title="Expected a list of named or unspecified '_' type variables
-
-——————————
-
-Expected a list of named or unspecified '_' type variables
-
-——————————
-
-Expected a list of named or unspecified '_' type variables
-
-——————————
-
-Expected a list of named or unspecified '_' type variables
-
-——————————
-
-Expected a list of named or unspecified '_' type variables">current_level</abbr> =
+  let current_level =
     RPC_service.get_service
       ~description:
         &quot;Returns the level of the interrogated block, or the one of a block \
@@ -29439,23 +28711,7 @@ Expected a list of named or unspecified '_' type variables">current_level</abbr>
       ~output:Level.encoding
       RPC_path.(path / &quot;current_level&quot;)
 
-  let <abbr class="mark-warning" title="Expected a list of named or unspecified '_' type variables
-
-——————————
-
-Expected a list of named or unspecified '_' type variables
-
-——————————
-
-Expected a list of named or unspecified '_' type variables
-
-——————————
-
-Expected a list of named or unspecified '_' type variables
-
-——————————
-
-Expected a list of named or unspecified '_' type variables">levels_in_current_cycle</abbr> =
+  let levels_in_current_cycle =
     RPC_service.get_service
       ~description:&quot;Levels of a cycle&quot;
       ~query:level_query
@@ -74747,7 +74003,7 @@ Parameter cycle_end :
     </ul>
   </div>
   <div class="col-md-6">
-    <a href="#services_registration.ml"><code>services_registration.ml</code></a>&nbsp;<span class="label label-warning">37 warnings</span>
+    <a href="#services_registration.ml"><code>services_registration.ml</code></a>&nbsp;<span class="label label-warning">1 warning</span>
     
     <pre>(*****************************************************************************)
 (*                                                                           *)
@@ -74797,146 +74053,38 @@ let rpc_init ({block_hash; block_header; context} : Updater.rpc_context) =
 let rpc_services =
   ref (RPC_directory.empty : Updater.rpc_context RPC_directory.t)
 
-let <abbr class="mark-warning" title="Expected a list of named or unspecified '_' type variables
-
-——————————
-
-Expected a list of named or unspecified '_' type variables
-
-——————————
-
-Expected a list of named or unspecified '_' type variables
-
-——————————
-
-Expected a list of named or unspecified '_' type variables">register0_fullctxt</abbr> s f =
+let register0_fullctxt s f =
   rpc_services :=
     RPC_directory.register !rpc_services s (fun ctxt q i -&gt;
         rpc_init ctxt &gt;&gt;=? fun ctxt -&gt; f ctxt q i)
 
-let <abbr class="mark-warning" title="Expected a list of named or unspecified '_' type variables
-
-——————————
-
-Expected a list of named or unspecified '_' type variables
-
-——————————
-
-Expected a list of named or unspecified '_' type variables
-
-——————————
-
-Expected a list of named or unspecified '_' type variables">opt_register0_fullctxt</abbr> s f =
+let opt_register0_fullctxt s f =
   rpc_services :=
     RPC_directory.opt_register !rpc_services s (fun ctxt q i -&gt;
         rpc_init ctxt &gt;&gt;=? fun ctxt -&gt; f ctxt q i)
 
-let <abbr class="mark-warning" title="Expected a list of named or unspecified '_' type variables
+let register0 s f = register0_fullctxt s (fun {context; _} -&gt; f context)
 
-——————————
-
-Expected a list of named or unspecified '_' type variables
-
-——————————
-
-Expected a list of named or unspecified '_' type variables
-
-——————————
-
-Expected a list of named or unspecified '_' type variables">register0</abbr> s f = register0_fullctxt s (fun {context; _} -&gt; f context)
-
-let <abbr class="mark-warning" title="Expected a list of named or unspecified '_' type variables
-
-——————————
-
-Expected a list of named or unspecified '_' type variables
-
-——————————
-
-Expected a list of named or unspecified '_' type variables
-
-——————————
-
-Expected a list of named or unspecified '_' type variables">register0_noctxt</abbr> s f =
+let register0_noctxt s f =
   rpc_services := RPC_directory.register !rpc_services s (fun _ q i -&gt; f q i)
 
-let <abbr class="mark-warning" title="Expected a list of named or unspecified '_' type variables
-
-——————————
-
-Expected a list of named or unspecified '_' type variables
-
-——————————
-
-Expected a list of named or unspecified '_' type variables
-
-——————————
-
-Expected a list of named or unspecified '_' type variables">register1_fullctxt</abbr> s f =
+let register1_fullctxt s f =
   rpc_services :=
     RPC_directory.register !rpc_services s (fun (ctxt, arg) q i -&gt;
         rpc_init ctxt &gt;&gt;=? fun ctxt -&gt; f ctxt arg q i)
 
-let <abbr class="mark-warning" title="Expected a list of named or unspecified '_' type variables
+let register1 s f = register1_fullctxt s (fun {context; _} x -&gt; f context x)
 
-——————————
-
-Expected a list of named or unspecified '_' type variables
-
-——————————
-
-Expected a list of named or unspecified '_' type variables
-
-——————————
-
-Expected a list of named or unspecified '_' type variables">register1</abbr> s f = register1_fullctxt s (fun {context; _} x -&gt; f context x)
-
-let <abbr class="mark-warning" title="Expected a list of named or unspecified '_' type variables
-
-——————————
-
-Expected a list of named or unspecified '_' type variables
-
-——————————
-
-Expected a list of named or unspecified '_' type variables
-
-——————————
-
-Expected a list of named or unspecified '_' type variables">register1_noctxt</abbr> s f =
+let register1_noctxt s f =
   rpc_services :=
     RPC_directory.register !rpc_services s (fun (_, arg) q i -&gt; f arg q i)
 
-let <abbr class="mark-warning" title="Expected a list of named or unspecified '_' type variables
-
-——————————
-
-Expected a list of named or unspecified '_' type variables
-
-——————————
-
-Expected a list of named or unspecified '_' type variables
-
-——————————
-
-Expected a list of named or unspecified '_' type variables">register2_fullctxt</abbr> s f =
+let register2_fullctxt s f =
   rpc_services :=
     RPC_directory.register !rpc_services s (fun ((ctxt, arg1), arg2) q i -&gt;
         rpc_init ctxt &gt;&gt;=? fun ctxt -&gt; f ctxt arg1 arg2 q i)
 
-let <abbr class="mark-warning" title="Expected a list of named or unspecified '_' type variables
-
-——————————
-
-Expected a list of named or unspecified '_' type variables
-
-——————————
-
-Expected a list of named or unspecified '_' type variables
-
-——————————
-
-Expected a list of named or unspecified '_' type variables">register2</abbr> s f =
+let register2 s f =
   register2_fullctxt s (fun {context; _} a1 a2 q i -&gt; f context a1 a2 q i)
 
 let get_rpc_services () =
@@ -79134,7 +78282,7 @@ End Ramp_up.
     </ul>
   </div>
   <div class="col-md-6">
-    <a href="#storage_description.ml"><code>storage_description.ml</code></a>&nbsp;<span class="label label-warning">13 warnings</span>
+    <a href="#storage_description.ml"><code>storage_description.ml</code></a>&nbsp;<span class="label label-warning">8 warnings</span>
     
     <pre>(*****************************************************************************)
 (*                                                                           *)
@@ -79391,67 +78539,15 @@ let build_directory : type key. key t -&gt; key RPC_directory.t =
       =
    fun path -&gt; function
     | Opt_handler {encoding; get} -&gt;
-        <abbr class="mark-warning" title="Expected a list of named or unspecified '_' type variables
-
-——————————
-
-Expected a list of named or unspecified '_' type variables
-
-——————————
-
-Expected a list of named or unspecified '_' type variables
-
-——————————
-
-Expected a list of named or unspecified '_' type variables
-
-——————————
-
-Expected a list of named or unspecified '_' type variables">let service =
+        let service =
           RPC_service.get_service ~query:depth_query ~output:encoding path
         in
         rpc_dir :=
           RPC_directory.register !rpc_dir service (fun k q () -&gt;
               get k (q.depth + 1)
-              &gt;&gt;=? function None -&gt; raise </abbr><abbr class="mark-warning" title="Expected a list of named or unspecified '_' type variables
+              &gt;&gt;=? function None -&gt; raise <abbr class="mark-warning" title="Values of extensible types are ignored.
 
-——————————
-
-Expected a list of named or unspecified '_' type variables
-
-——————————
-
-Expected a list of named or unspecified '_' type variables
-
-——————————
-
-Expected a list of named or unspecified '_' type variables
-
-——————————
-
-Expected a list of named or unspecified '_' type variables
-
-——————————
-
-Values of extensible types are ignored.
-
-They are sent to a unit type.">Not_found</abbr><abbr class="mark-warning" title="Expected a list of named or unspecified '_' type variables
-
-——————————
-
-Expected a list of named or unspecified '_' type variables
-
-——————————
-
-Expected a list of named or unspecified '_' type variables
-
-——————————
-
-Expected a list of named or unspecified '_' type variables
-
-——————————
-
-Expected a list of named or unspecified '_' type variables"> | Some x -&gt; return x)</abbr>
+They are sent to a unit type.">Not_found</abbr> | Some x -&gt; return x)
   in
   let rec build_handler :
       type ikey. ikey t -&gt; (key, ikey) RPC_path.t -&gt; ikey opt_handler =
@@ -86422,7 +85518,7 @@ Parameter kind_encoding : Data_encoding.t kind.
     </ul>
   </div>
   <div class="col-md-6">
-    <a href="#voting_services.ml"><code>voting_services.ml</code></a>&nbsp;<span class="label label-warning">42 warnings</span>
+    <a href="#voting_services.ml"><code>voting_services.ml</code></a>&nbsp;<span class="label label-warning">7 warnings</span>
     
     <pre>(*****************************************************************************)
 (*                                                                           *)
@@ -86454,46 +85550,14 @@ open Alpha_context
 module S = struct
   let path = RPC_path.(open_root / &quot;votes&quot;)
 
-  let <abbr class="mark-warning" title="Expected a list of named or unspecified '_' type variables
-
-——————————
-
-Expected a list of named or unspecified '_' type variables
-
-——————————
-
-Expected a list of named or unspecified '_' type variables
-
-——————————
-
-Expected a list of named or unspecified '_' type variables
-
-——————————
-
-Expected a list of named or unspecified '_' type variables">ballots</abbr> =
+  let ballots =
     RPC_service.get_service
       ~description:&quot;Sum of ballots casted so far during a voting period.&quot;
       ~query:RPC_query.empty
       ~output:Vote.ballots_encoding
       RPC_path.(path / &quot;ballots&quot;)
 
-  let <abbr class="mark-warning" title="Expected a list of named or unspecified '_' type variables
-
-——————————
-
-Expected a list of named or unspecified '_' type variables
-
-——————————
-
-Expected a list of named or unspecified '_' type variables
-
-——————————
-
-Expected a list of named or unspecified '_' type variables
-
-——————————
-
-Expected a list of named or unspecified '_' type variables">ballot_list</abbr> =
+  let ballot_list =
     RPC_service.get_service
       ~description:&quot;Ballots casted so far during a voting period.&quot;
       ~query:RPC_query.empty
@@ -86505,69 +85569,21 @@ Expected a list of named or unspecified '_' type variables">ballot_list</abbr> =
                (req &quot;ballot&quot; Vote.ballot_encoding)))
       RPC_path.(path / &quot;ballot_list&quot;)
 
-  let <abbr class="mark-warning" title="Expected a list of named or unspecified '_' type variables
-
-——————————
-
-Expected a list of named or unspecified '_' type variables
-
-——————————
-
-Expected a list of named or unspecified '_' type variables
-
-——————————
-
-Expected a list of named or unspecified '_' type variables
-
-——————————
-
-Expected a list of named or unspecified '_' type variables">current_period_kind</abbr> =
+  let current_period_kind =
     RPC_service.get_service
       ~description:&quot;Current period kind.&quot;
       ~query:RPC_query.empty
       ~output:Voting_period.kind_encoding
       RPC_path.(path / &quot;current_period_kind&quot;)
 
-  let <abbr class="mark-warning" title="Expected a list of named or unspecified '_' type variables
-
-——————————
-
-Expected a list of named or unspecified '_' type variables
-
-——————————
-
-Expected a list of named or unspecified '_' type variables
-
-——————————
-
-Expected a list of named or unspecified '_' type variables
-
-——————————
-
-Expected a list of named or unspecified '_' type variables">current_quorum</abbr> =
+  let current_quorum =
     RPC_service.get_service
       ~description:&quot;Current expected quorum.&quot;
       ~query:RPC_query.empty
       ~output:Data_encoding.int32
       RPC_path.(path / &quot;current_quorum&quot;)
 
-  let <abbr class="mark-warning" title="Expected a list of named or unspecified '_' type variables
-
-——————————
-
-Expected a list of named or unspecified '_' type variables
-
-——————————
-
-Expected a list of named or unspecified '_' type variables
-
-——————————
-
-Expected a list of named or unspecified '_' type variables
-
-——————————
-
-Expected a list of named or unspecified '_' type variables">listings</abbr> =
+  let listings =
     RPC_service.get_service
       ~description:
         &quot;List of delegates with their voting weight, in number of rolls.&quot;
@@ -86575,46 +85591,14 @@ Expected a list of named or unspecified '_' type variables">listings</abbr> =
       ~output:Vote.listings_encoding
       RPC_path.(path / &quot;listings&quot;)
 
-  let <abbr class="mark-warning" title="Expected a list of named or unspecified '_' type variables
-
-——————————
-
-Expected a list of named or unspecified '_' type variables
-
-——————————
-
-Expected a list of named or unspecified '_' type variables
-
-——————————
-
-Expected a list of named or unspecified '_' type variables
-
-——————————
-
-Expected a list of named or unspecified '_' type variables">proposals</abbr> =
+  let proposals =
     RPC_service.get_service
       ~description:&quot;List of proposals with number of supporters.&quot;
       ~query:RPC_query.empty
       ~output:(Protocol_hash.Map.encoding Data_encoding.int32)
       RPC_path.(path / &quot;proposals&quot;)
 
-  let <abbr class="mark-warning" title="Expected a list of named or unspecified '_' type variables
-
-——————————
-
-Expected a list of named or unspecified '_' type variables
-
-——————————
-
-Expected a list of named or unspecified '_' type variables
-
-——————————
-
-Expected a list of named or unspecified '_' type variables
-
-——————————
-
-Expected a list of named or unspecified '_' type variables">current_proposal</abbr> =
+  let current_proposal =
     RPC_service.get_service
       ~description:&quot;Current proposal under evaluation.&quot;
       ~query:RPC_query.empty
