@@ -44,7 +44,15 @@ let rec non_phantom_typs (path : Path.t) (typs : Types.type_expr list)
     begin match typ_declaration.type_kind with
     | Type_abstract ->
       begin match typ_declaration.type_manifest with
-      | None -> return None
+      | None ->
+        return (Some (typ_params |> List.map (function
+          | None ->
+            if Path.name path = "array" then
+              true
+            else
+              false
+          | Some _ -> true
+        )))
       (* Specific case for inductives defined with polymorphic variants. *)
       | Some { desc = Tvariant _; _ } ->
         return (Some (typ_params |> List.map (function

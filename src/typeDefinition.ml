@@ -592,7 +592,7 @@ let of_ocaml (typs : type_declaration list) : t Monad.t =
     let name = Name.of_ident false typ_id in
     TypeIsGadt.named_typ_params_expecting_variables type_params >>= fun typ_args ->
     let typ_args_with_unknowns =
-      TypeIsGadt.named_typ_params_with_unknowns typ_args in
+      TypeIsGadt.named_typ_params_without_unknowns typ_args in
     return (Abstract (name, typ_args_with_unknowns))
   | [ { typ_id; typ_type = { type_kind = Type_record (fields, _); type_params; _ }; _ } ] ->
     let name = Name.of_ident false typ_id in

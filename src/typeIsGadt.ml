@@ -39,7 +39,7 @@ let named_typ_params_expecting_variables (typs : Types.type_expr list)
   Monad.List.map (function
     | TypeVariable.Error ->
       raise
-        (Some (Name.of_string false "expected_type_variable"))
+        None
         Unexpected
         "Expected a list of named or unspecified '_' type variables"
     | Known name -> return (Some name)
@@ -50,6 +50,12 @@ let named_typ_params_with_unknowns (typ_params : TypParams.t) : Name.t list =
   typ_params |> List.map (function
     | Some typ_param -> typ_param
     | None -> Name.of_string false "_"
+  )
+
+let named_typ_params_without_unknowns (typ_params : TypParams.t) : Name.t list =
+  typ_params |> Util.List.filter_map (function
+    | Some typ_param -> Some typ_param
+    | None -> None
   )
 
 let rec merge_typ_params (params1 : TypParams.t) (params2 : TypParams.t)
