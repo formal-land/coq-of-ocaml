@@ -39,8 +39,9 @@ let rec non_phantom_typs (path : Path.t) (typs : Types.type_expr list)
   get_env >>= fun env ->
   begin match Env.find_type path env with
   | typ_declaration ->
-    TypeIsGadt.named_typ_params_expecting_variables
-      typ_declaration.type_params >>= fun typ_params ->
+    let typ_params =
+      TypeIsGadt.named_typ_params_expecting_variables_or_ignored
+        typ_declaration.type_params in
     Attribute.of_attributes typ_declaration.type_attributes >>= fun typ_attributes ->
     begin match typ_declaration.type_kind with
     | Type_abstract ->
@@ -130,7 +131,8 @@ and non_phantom_vars_of_typ (typ : Types.type_expr) : Name.Set.t Monad.t =
        definition in the phantom types analysis. *)
     return Name.Set.empty
   | Tpoly (typ, typ_args) ->
-    TypeIsGadt.named_typ_params_expecting_variables typ_args >>= fun typ_args ->
+    let typ_args =
+      TypeIsGadt.named_typ_params_expecting_variables_or_ignored typ_args in
     let typ_args =
       typ_args |>
       Util.List.filter_map (fun x -> x) |>
@@ -241,7 +243,8 @@ let rec of_typ_expr
       return (Sum (List.rev fields), typ_vars, new_typ_vars)
     end
   | Tpoly (typ, typ_args) ->
-    TypeIsGadt.named_typ_params_expecting_variables typ_args >>= fun typ_args ->
+    let typ_args =
+      TypeIsGadt.named_typ_params_expecting_variables_or_ignored typ_args in
     let typ_args = typ_args |> Util.List.filter_map (fun x -> x) in
     non_phantom_vars_of_typ typ >>= fun non_phantom_vars ->
     let typ_args = typ_args |> List.filter (fun typ_arg ->
