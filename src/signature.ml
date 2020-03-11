@@ -140,7 +140,15 @@ let items_of_signature (signature : signature) : item list Monad.t =
       raise [Error "open"] NotSupported "Signature item `open` not handled."
     | Tsig_recmodule _ ->
       raise [Error "recursive_module"] NotSupported "Recursive module signatures are not handled."
-    | Tsig_type (_, [ { typ_id; typ_type = { type_manifest = None; type_params; _ }; _ } ]) ->
+    | Tsig_type (_, [ { typ_id; typ_type = { type_manifest = None; type_kind; type_params; _ }; _ } ]) ->
+      begin match type_kind with
+      | Type_abstract -> return ()
+      | _ ->
+        raise
+          ()
+          FirstClassModule
+          "We do not handle the definition of new types in signatures"
+      end >>= fun () ->
       let name = Name.of_ident false typ_id in
       (type_params |> Monad.List.map Type.of_type_expr_variable) >>= fun typ_args ->
       return [TypExistential (name, typ_args)]
