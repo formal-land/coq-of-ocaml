@@ -65,11 +65,10 @@ Definition unparse_stack
     (Error_monad.tzresult (list (Alpha_context.Script.expr * option string))) :=
   let '(__stack_value, stack_ty) := function_parameter in
   let ctxt := Alpha_context.Gas.set_unlimited ctxt in
-  let fix unparse_stack (function_parameter : stack * Script_typed_ir.stack_ty)
-    {struct function_parameter}
+  let fix unparse_stack (s : stack) (s_ty : Script_typed_ir.stack_ty) {struct s}
     : Lwt.t
       (Error_monad.tzresult (list (Alpha_context.Script.expr * option string))) :=
-    match function_parameter with
+    match (s, s_ty) with
     | (Empty, Script_typed_ir.Empty_t) =>
       cast
         (Lwt.t
@@ -90,7 +89,7 @@ Definition unparse_stack
       (let=? '(data, _ctxt) :=
         Script_ir_translator.unparse_data ctxt Script_ir_translator.Readable ty
           v in
-      let=? rest := unparse_stack (rest, rest_ty) in
+      let=? rest := unparse_stack rest rest_ty in
       let annot :=
         match Script_ir_annot.unparse_var_annot annot with
         | [] => None
@@ -103,14 +102,14 @@ Definition unparse_stack
       Error_monad.__return (cons (data, annot) rest))
     | _ => unreachable_gadt_branch
     end in
-  unparse_stack (__stack_value, stack_ty).
+  unparse_stack __stack_value stack_ty.
 
 Module Interp_costs := Michelson_v1_gas.Cost_of.Interpreter.
 
 Fixpoint interp_stack_prefix_preserving_operation {result : Set}
   (f : stack -> Lwt.t (Error_monad.tzresult (stack * result)))
   (n : Script_typed_ir.stack_prefix_preservation_witness) (stk : stack)
-  {struct f} : Lwt.t (Error_monad.tzresult (stack * result)) :=
+  {struct n} : Lwt.t (Error_monad.tzresult (stack * result)) :=
   match (n, stk) with
   |
     (Script_typed_ir.Prefix
@@ -162,1610 +161,1430 @@ End step_constants.
 Definition step_constants := step_constants.record.
 
 Fixpoint step
+  (instr : Script_typed_ir.instr) (loc : Alpha_context.Script.location)
+  (bef : Script_typed_ir.stack_ty) (aft : Script_typed_ir.stack_ty)
   (log : option (Pervasives.ref execution_trace)) (ctxt : Alpha_context.context)
-  (step_constants : step_constants) (function_parameter : Script_typed_ir.descr)
-  {struct log}
-  : stack -> Lwt.t (Error_monad.tzresult (stack * Alpha_context.context)) :=
-  let
-    '{|
-      Script_typed_ir.descr.loc := loc;
-        Script_typed_ir.descr.instr := instr
-        |} as __descr_value := function_parameter in
-  fun __stack_value =>
-    let=? ctxt :=
-      Lwt.__return (Alpha_context.Gas.consume ctxt Interp_costs.cycle) in
-    let logged_return
-      (__descr_value : Script_typed_ir.descr)
-      (function_parameter : stack * Alpha_context.context)
-      : Lwt.t (Error_monad.tzresult (stack * Alpha_context.context)) :=
-      let '(ret, ctxt) := function_parameter in
-      match log with
-      | None => Error_monad.__return (ret, ctxt)
-      | Some log =>
-        let=? __stack_value :=
-          Error_monad.trace extensible_type_value
-            (unparse_stack ctxt (ret, __descr_value.(Script_typed_ir.descr.aft)))
-          in
-        (* ❌ Sequences of instructions are ignored (operator ";") *)
-        (* ❌ instruction_sequence ";" *)
-        Error_monad.__return (ret, ctxt)
-      end in
-    let get_log (log : option (Pervasives.ref execution_trace))
-      : option
-        (list
-          (Alpha_context.Script.location * Alpha_context.Gas.t *
-            list (Alpha_context.Script.expr * option string))) :=
-      Option.map (fun l => List.rev (Pervasives.op_exclamation l)) log in
-    let consume_gas_terop {arg1 arg2 arg3 ret : Set}
-      (__descr_value : Script_typed_ir.descr)
-      (function_parameter : (arg1 -> arg2 -> arg3 -> ret) * arg1 * arg2 * arg3)
-      : (arg1 -> arg2 -> arg3 -> Alpha_context.Gas.cost) -> stack ->
-      Lwt.t (Error_monad.tzresult (stack * Alpha_context.context)) :=
-      let '(op, x1, x2, x3) := function_parameter in
-      fun cost_func =>
-        fun rest =>
+  (step_constants : step_constants) (__stack_value : stack) {struct ctxt}
+  : Lwt.t (Error_monad.tzresult (stack * Alpha_context.context)) :=
+  let __descr_value :=
+    {| Script_typed_ir.descr.loc := loc; Script_typed_ir.descr.bef := bef;
+      Script_typed_ir.descr.aft := aft; Script_typed_ir.descr.instr := instr |}
+    in
+  let=? ctxt := Lwt.__return (Alpha_context.Gas.consume ctxt Interp_costs.cycle)
+    in
+  let logged_return
+    (__descr_value : Script_typed_ir.descr)
+    (function_parameter : stack * Alpha_context.context)
+    : Lwt.t (Error_monad.tzresult (stack * Alpha_context.context)) :=
+    let '(ret, ctxt) := function_parameter in
+    match log with
+    | None => Error_monad.__return (ret, ctxt)
+    | Some log =>
+      let=? __stack_value :=
+        Error_monad.trace extensible_type_value
+          (unparse_stack ctxt (ret, __descr_value.(Script_typed_ir.descr.aft)))
+        in
+      (* ❌ Sequences of instructions are ignored (operator ";") *)
+      (* ❌ instruction_sequence ";" *)
+      Error_monad.__return (ret, ctxt)
+    end in
+  let get_log (log : option (Pervasives.ref execution_trace))
+    : option
+      (list
+        (Alpha_context.Script.location * Alpha_context.Gas.t *
+          list (Alpha_context.Script.expr * option string))) :=
+    Option.map (fun l => List.rev (Pervasives.op_exclamation l)) log in
+  let consume_gas_terop {arg1 arg2 arg3 ret : Set}
+    (__descr_value : Script_typed_ir.descr)
+    (function_parameter : (arg1 -> arg2 -> arg3 -> ret) * arg1 * arg2 * arg3)
+    : (arg1 -> arg2 -> arg3 -> Alpha_context.Gas.cost) -> stack ->
+    Lwt.t (Error_monad.tzresult (stack * Alpha_context.context)) :=
+    let '(op, x1, x2, x3) := function_parameter in
+    fun cost_func =>
+      fun rest =>
+        let=? ctxt :=
+          Lwt.__return (Alpha_context.Gas.consume ctxt (cost_func x1 x2 x3)) in
+        logged_return __descr_value ((Item (op x1 x2 x3) rest), ctxt) in
+  let consume_gas_binop {arg1 arg2 ret : Set}
+    (__descr_value : Script_typed_ir.descr)
+    (function_parameter : (arg1 -> arg2 -> ret) * arg1 * arg2)
+    : (arg1 -> arg2 -> Alpha_context.Gas.cost) -> stack ->
+    Alpha_context.context ->
+    Lwt.t (Error_monad.tzresult (stack * Alpha_context.context)) :=
+    let '(op, x1, x2) := function_parameter in
+    fun cost_func =>
+      fun rest =>
+        fun ctxt =>
           let=? ctxt :=
-            Lwt.__return (Alpha_context.Gas.consume ctxt (cost_func x1 x2 x3))
-            in
-          logged_return __descr_value ((Item (op x1 x2 x3) rest), ctxt) in
-    let consume_gas_binop {arg1 arg2 ret : Set}
-      (__descr_value : Script_typed_ir.descr)
-      (function_parameter : (arg1 -> arg2 -> ret) * arg1 * arg2)
-      : (arg1 -> arg2 -> Alpha_context.Gas.cost) -> stack ->
-      Alpha_context.context ->
-      Lwt.t (Error_monad.tzresult (stack * Alpha_context.context)) :=
-      let '(op, x1, x2) := function_parameter in
-      fun cost_func =>
-        fun rest =>
-          fun ctxt =>
-            let=? ctxt :=
-              Lwt.__return (Alpha_context.Gas.consume ctxt (cost_func x1 x2)) in
-            logged_return __descr_value ((Item (op x1 x2) rest), ctxt) in
-    let consume_gas_unop {arg ret : Set}
-      (__descr_value : Script_typed_ir.descr)
-      (function_parameter : (arg -> ret) * arg)
-      : (arg -> Alpha_context.Gas.cost) -> stack -> Alpha_context.context ->
-      Lwt.t (Error_monad.tzresult (stack * Alpha_context.context)) :=
-      let '(op, arg) := function_parameter in
-      fun cost_func =>
-        fun rest =>
-          fun ctxt =>
-            let=? ctxt :=
-              Lwt.__return (Alpha_context.Gas.consume ctxt (cost_func arg)) in
-            logged_return __descr_value ((Item (op arg) rest), ctxt) in
-    let logged_return := logged_return __descr_value in
-    match (instr, __stack_value) with
-    | (Script_typed_ir.Drop, Item _ rest) =>
-      let rest := cast stack rest in
+            Lwt.__return (Alpha_context.Gas.consume ctxt (cost_func x1 x2)) in
+          logged_return __descr_value ((Item (op x1 x2) rest), ctxt) in
+  let consume_gas_unop {arg ret : Set}
+    (__descr_value : Script_typed_ir.descr)
+    (function_parameter : (arg -> ret) * arg)
+    : (arg -> Alpha_context.Gas.cost) -> stack -> Alpha_context.context ->
+    Lwt.t (Error_monad.tzresult (stack * Alpha_context.context)) :=
+    let '(op, arg) := function_parameter in
+    fun cost_func =>
+      fun rest =>
+        fun ctxt =>
+          let=? ctxt :=
+            Lwt.__return (Alpha_context.Gas.consume ctxt (cost_func arg)) in
+          logged_return __descr_value ((Item (op arg) rest), ctxt) in
+  let logged_return := logged_return __descr_value in
+  match (instr, __stack_value) with
+  | (Script_typed_ir.Drop, Item _ rest) =>
+    let rest := cast stack rest in
+    let=? ctxt :=
+      Lwt.__return (Alpha_context.Gas.consume ctxt Interp_costs.stack_op) in
+    logged_return (rest, ctxt)
+  
+  | (Script_typed_ir.Dup, Item v rest) =>
+    let 'existT _ __2 [v, rest] :=
+      cast_exists (Es := Set) (fun __2 => [__2 ** stack]) [v, rest] in
+    let=? ctxt :=
+      Lwt.__return (Alpha_context.Gas.consume ctxt Interp_costs.stack_op) in
+    logged_return ((Item v (Item v rest)), ctxt)
+  
+  | (Script_typed_ir.Swap, Item vi (Item vo rest)) =>
+    let 'existT _ [__4, __5] [vi, vo, rest] :=
+      cast_exists (Es := [Set ** Set])
+        (fun '[__4, __5] => [__4 ** __5 ** stack]) [vi, vo, rest] in
+    let=? ctxt :=
+      Lwt.__return (Alpha_context.Gas.consume ctxt Interp_costs.stack_op) in
+    logged_return ((Item vo (Item vi rest)), ctxt)
+  
+  | (Script_typed_ir.Const v, rest) =>
+    let 'existT _ __7 [v, rest] :=
+      cast_exists (Es := Set) (fun __7 => [__7 ** stack]) [v, rest] in
+    let=? ctxt :=
+      Lwt.__return (Alpha_context.Gas.consume ctxt Interp_costs.push) in
+    logged_return ((Item v rest), ctxt)
+  
+  | (Script_typed_ir.Cons_some, Item v rest) =>
+    let 'existT _ __8 [v, rest] :=
+      cast_exists (Es := Set) (fun __8 => [__8 ** stack]) [v, rest] in
+    let=? ctxt :=
+      Lwt.__return (Alpha_context.Gas.consume ctxt Interp_costs.wrap) in
+    logged_return ((Item (Some v) rest), ctxt)
+  
+  | (Script_typed_ir.Cons_none _, rest) =>
+    let rest := cast stack rest in
+    let=? ctxt :=
+      Lwt.__return (Alpha_context.Gas.consume ctxt Interp_costs.variant_no_data)
+      in
+    logged_return ((Item (None (A := unit)) rest), ctxt)
+  
+  | (Script_typed_ir.If_none bt bf, Item v rest) =>
+    let 'existT _ __11 [bt, bf, v, rest] :=
+      cast_exists (Es := Set)
+        (fun __11 =>
+          [Script_typed_ir.descr ** Script_typed_ir.descr ** option __11 **
+            stack]) [bt, bf, v, rest] in
+    match v with
+    | None =>
       let=? ctxt :=
-        Lwt.__return (Alpha_context.Gas.consume ctxt Interp_costs.stack_op) in
-      logged_return (rest, ctxt)
-    
-    | (Script_typed_ir.Dup, Item v rest) =>
-      let 'existT _ __2 [v, rest] :=
-        cast_exists (Es := Set) (fun __2 => [__2 ** stack]) [v, rest] in
+        Lwt.__return (Alpha_context.Gas.consume ctxt Interp_costs.branch) in
+      step_descr log ctxt step_constants bt rest
+    | Some v =>
       let=? ctxt :=
-        Lwt.__return (Alpha_context.Gas.consume ctxt Interp_costs.stack_op) in
-      logged_return ((Item v (Item v rest)), ctxt)
-    
-    | (Script_typed_ir.Swap, Item vi (Item vo rest)) =>
-      let 'existT _ [__4, __5] [vi, vo, rest] :=
-        cast_exists (Es := [Set ** Set])
-          (fun '[__4, __5] => [__4 ** __5 ** stack]) [vi, vo, rest] in
+        Lwt.__return (Alpha_context.Gas.consume ctxt Interp_costs.branch) in
+      step_descr log ctxt step_constants bf (Item v rest)
+    end
+  
+  | (Script_typed_ir.Cons_pair, Item __a_value (Item __b_value rest)) =>
+    let 'existT _ [__13, __14] [__a_value, __b_value, rest] :=
+      cast_exists (Es := [Set ** Set])
+        (fun '[__13, __14] => [__13 ** __14 ** stack])
+        [__a_value, __b_value, rest] in
+    let=? ctxt :=
+      Lwt.__return (Alpha_context.Gas.consume ctxt Interp_costs.pair) in
+    logged_return ((Item (__a_value, __b_value) rest), ctxt)
+  
+  | (Script_typed_ir.Car, Item pair rest) =>
+    let 'existT _ [__16, __17] [pair, rest] :=
+      cast_exists (Es := [Set ** Set])
+        (fun '[__16, __17] => [Script_typed_ir.pair __16 __17 ** stack])
+        [pair, rest] in
+    let '(__a_value, _) := pair in
+    let=? ctxt :=
+      Lwt.__return (Alpha_context.Gas.consume ctxt Interp_costs.pair_access) in
+    logged_return ((Item __a_value rest), ctxt)
+  
+  | (Script_typed_ir.Cdr, Item pair rest) =>
+    let 'existT _ [__19, __20] [pair, rest] :=
+      cast_exists (Es := [Set ** Set])
+        (fun '[__19, __20] => [Script_typed_ir.pair __19 __20 ** stack])
+        [pair, rest] in
+    let '(_, __b_value) := pair in
+    let=? ctxt :=
+      Lwt.__return (Alpha_context.Gas.consume ctxt Interp_costs.pair_access) in
+    logged_return ((Item __b_value rest), ctxt)
+  
+  | (Script_typed_ir.Left, Item v rest) =>
+    let 'existT _ __22 [v, rest] :=
+      cast_exists (Es := Set) (fun __22 => [__22 ** stack]) [v, rest] in
+    let=? ctxt :=
+      Lwt.__return (Alpha_context.Gas.consume ctxt Interp_costs.wrap) in
+    logged_return ((Item (Script_typed_ir.L (b := unit) v) rest), ctxt)
+  
+  | (Script_typed_ir.Right, Item v rest) =>
+    let 'existT _ __25 [v, rest] :=
+      cast_exists (Es := Set) (fun __25 => [__25 ** stack]) [v, rest] in
+    let=? ctxt :=
+      Lwt.__return (Alpha_context.Gas.consume ctxt Interp_costs.wrap) in
+    logged_return ((Item (Script_typed_ir.R (a := unit) v) rest), ctxt)
+  
+  | (Script_typed_ir.If_left bt bf, Item v rest) =>
+    let 'existT _ [__28, __29] [bt, bf, v, rest] :=
+      cast_exists (Es := [Set ** Set])
+        (fun '[__28, __29] =>
+          [Script_typed_ir.descr ** Script_typed_ir.descr **
+            Script_typed_ir.union __28 __29 ** stack]) [bt, bf, v, rest] in
+    match v with
+    | Script_typed_ir.L v =>
       let=? ctxt :=
-        Lwt.__return (Alpha_context.Gas.consume ctxt Interp_costs.stack_op) in
-      logged_return ((Item vo (Item vi rest)), ctxt)
-    
-    | (Script_typed_ir.Const v, rest) =>
-      let 'existT _ __7 [v, rest] :=
-        cast_exists (Es := Set) (fun __7 => [__7 ** stack]) [v, rest] in
+        Lwt.__return (Alpha_context.Gas.consume ctxt Interp_costs.branch) in
+      step_descr log ctxt step_constants bt (Item v rest)
+    | Script_typed_ir.R v =>
       let=? ctxt :=
-        Lwt.__return (Alpha_context.Gas.consume ctxt Interp_costs.push) in
-      logged_return ((Item v rest), ctxt)
-    
-    | (Script_typed_ir.Cons_some, Item v rest) =>
-      let 'existT _ __8 [v, rest] :=
-        cast_exists (Es := Set) (fun __8 => [__8 ** stack]) [v, rest] in
+        Lwt.__return (Alpha_context.Gas.consume ctxt Interp_costs.branch) in
+      step_descr log ctxt step_constants bf (Item v rest)
+    end
+  
+  | (Script_typed_ir.Cons_list, Item hd (Item tl rest)) =>
+    let 'existT _ __31 [hd, tl, rest] :=
+      cast_exists (Es := Set) (fun __31 => [__31 ** list __31 ** stack])
+        [hd, tl, rest] in
+    let=? ctxt :=
+      Lwt.__return (Alpha_context.Gas.consume ctxt Interp_costs.__cons_value) in
+    logged_return ((Item (cons hd tl) rest), ctxt)
+  
+  | (Script_typed_ir.Nil, rest) =>
+    let rest := cast stack rest in
+    let=? ctxt :=
+      Lwt.__return (Alpha_context.Gas.consume ctxt Interp_costs.variant_no_data)
+      in
+    logged_return ((Item (nil (A := unit)) rest), ctxt)
+  
+  | (Script_typed_ir.If_cons bt bf, Item l rest) =>
+    let 'existT _ __34 [bt, bf, l, rest] :=
+      cast_exists (Es := Set)
+        (fun __34 =>
+          [Script_typed_ir.descr ** Script_typed_ir.descr ** list __34 ** stack])
+        [bt, bf, l, rest] in
+    match l with
+    | [] =>
       let=? ctxt :=
-        Lwt.__return (Alpha_context.Gas.consume ctxt Interp_costs.wrap) in
-      logged_return ((Item (Some v) rest), ctxt)
-    
-    | (Script_typed_ir.Cons_none _, rest) =>
-      let rest := cast stack rest in
+        Lwt.__return (Alpha_context.Gas.consume ctxt Interp_costs.branch) in
+      step_descr log ctxt step_constants bf rest
+    | cons hd tl =>
       let=? ctxt :=
-        Lwt.__return
-          (Alpha_context.Gas.consume ctxt Interp_costs.variant_no_data) in
-      logged_return ((Item (None (A := unit)) rest), ctxt)
-    
-    | (Script_typed_ir.If_none bt bf, Item v rest) =>
-      let 'existT _ __11 [bt, bf, v, rest] :=
-        cast_exists (Es := Set)
-          (fun __11 =>
-            [Script_typed_ir.descr ** Script_typed_ir.descr ** option __11 **
-              stack]) [bt, bf, v, rest] in
-      match v with
-      | None =>
-        let=? ctxt :=
-          Lwt.__return (Alpha_context.Gas.consume ctxt Interp_costs.branch) in
-        step log ctxt step_constants bt rest
-      | Some v =>
-        let=? ctxt :=
-          Lwt.__return (Alpha_context.Gas.consume ctxt Interp_costs.branch) in
-        step log ctxt step_constants bf (Item v rest)
-      end
-    
-    | (Script_typed_ir.Cons_pair, Item __a_value (Item __b_value rest)) =>
-      let 'existT _ [__13, __14] [__a_value, __b_value, rest] :=
-        cast_exists (Es := [Set ** Set])
-          (fun '[__13, __14] => [__13 ** __14 ** stack])
-          [__a_value, __b_value, rest] in
+        Lwt.__return (Alpha_context.Gas.consume ctxt Interp_costs.branch) in
+      step_descr log ctxt step_constants bt (Item hd (Item tl rest))
+    end
+  
+  | (Script_typed_ir.List_map body, Item l rest) =>
+    let 'existT _ __36 [body, l, rest] :=
+      cast_exists (Es := Set)
+        (fun __36 => [Script_typed_ir.descr ** list __36 ** stack])
+        [body, l, rest] in
+    let=? '(res, ctxt) :=
+      loop_list_map log step_constants body rest ctxt l (nil (A := unit)) in
+    logged_return (res, ctxt)
+  
+  | (Script_typed_ir.List_size, Item __list_value rest) =>
+    let 'existT _ __39 [__list_value, rest] :=
+      cast_exists (Es := Set) (fun __39 => [list __39 ** stack])
+        [__list_value, rest] in
+    let=? '(len, ctxt) :=
+      Lwt.__return
+        (List.fold_left
+          (fun acc =>
+            fun function_parameter =>
+              let '_ := function_parameter in
+              let? '(size, ctxt) := acc in
+              let? ctxt := Alpha_context.Gas.consume ctxt Interp_costs.loop_size
+                in
+              Error_monad.ok ((Pervasives.op_plus size 1), ctxt))
+          (Error_monad.ok (0, ctxt)) __list_value) in
+    logged_return
+      ((Item
+        (Alpha_context.Script_int.abs (Alpha_context.Script_int.of_int len))
+        rest), ctxt)
+  
+  | (Script_typed_ir.List_iter body, Item l init) =>
+    let 'existT _ __41 [body, l, init] :=
+      cast_exists (Es := Set)
+        (fun __41 => [Script_typed_ir.descr ** list __41 ** stack])
+        [body, l, init] in
+    let fix loop
+      (ctxt : Alpha_context.context) (l : list __41) (__stack_value : stack)
+      {struct l}
+      : Lwt.t (Error_monad.tzresult (stack * Alpha_context.context)) :=
       let=? ctxt :=
-        Lwt.__return (Alpha_context.Gas.consume ctxt Interp_costs.pair) in
-      logged_return ((Item (__a_value, __b_value) rest), ctxt)
-    
-    |
-      (Script_typed_ir.Seq {|
-        Script_typed_ir.descr.instr := Script_typed_ir.Dup |} {|
-        Script_typed_ir.descr.instr :=
-          Script_typed_ir.Seq {|
-            Script_typed_ir.descr.instr := Script_typed_ir.Car
-              |} {|
-            Script_typed_ir.descr.instr :=
-              Script_typed_ir.Seq {|
-                Script_typed_ir.descr.instr :=
-                  Script_typed_ir.Dip
-                    {|
-                    Script_typed_ir.descr.instr :=
-                      Script_typed_ir.Cdr
-                      |}
-                  |} {|
-                Script_typed_ir.descr.instr := Script_typed_ir.Nop
-                  |}
-              |}
-          |}, Item (_ as pair) rest) =>
-      let 'existT _ [__18, __19] [pair, rest] :=
-        cast_exists (Es := [Set ** Set])
-          (fun '[__18, __19] => [Script_typed_ir.pair __18 __19 ** stack])
-          [pair, rest] in
-      let '(__a_value, __b_value) := pair in
-      let=? ctxt :=
-        Lwt.__return (Alpha_context.Gas.consume ctxt Interp_costs.pair_access)
-        in
-      logged_return ((Item __a_value (Item __b_value rest)), ctxt)
-    
-    | (Script_typed_ir.Car, Item pair rest) =>
-      let 'existT _ [__21, __22] [pair, rest] :=
-        cast_exists (Es := [Set ** Set])
-          (fun '[__21, __22] => [Script_typed_ir.pair __21 __22 ** stack])
-          [pair, rest] in
-      let '(__a_value, _) := pair in
-      let=? ctxt :=
-        Lwt.__return (Alpha_context.Gas.consume ctxt Interp_costs.pair_access)
-        in
-      logged_return ((Item __a_value rest), ctxt)
-    
-    | (Script_typed_ir.Cdr, Item pair rest) =>
-      let 'existT _ [__24, __25] [pair, rest] :=
-        cast_exists (Es := [Set ** Set])
-          (fun '[__24, __25] => [Script_typed_ir.pair __24 __25 ** stack])
-          [pair, rest] in
-      let '(_, __b_value) := pair in
-      let=? ctxt :=
-        Lwt.__return (Alpha_context.Gas.consume ctxt Interp_costs.pair_access)
-        in
-      logged_return ((Item __b_value rest), ctxt)
-    
-    | (Script_typed_ir.Left, Item v rest) =>
-      let 'existT _ __27 [v, rest] :=
-        cast_exists (Es := Set) (fun __27 => [__27 ** stack]) [v, rest] in
-      let=? ctxt :=
-        Lwt.__return (Alpha_context.Gas.consume ctxt Interp_costs.wrap) in
-      logged_return ((Item (Script_typed_ir.L (b := unit) v) rest), ctxt)
-    
-    | (Script_typed_ir.Right, Item v rest) =>
-      let 'existT _ __30 [v, rest] :=
-        cast_exists (Es := Set) (fun __30 => [__30 ** stack]) [v, rest] in
-      let=? ctxt :=
-        Lwt.__return (Alpha_context.Gas.consume ctxt Interp_costs.wrap) in
-      logged_return ((Item (Script_typed_ir.R (a := unit) v) rest), ctxt)
-    
-    | (Script_typed_ir.If_left bt bf, Item v rest) =>
-      let 'existT _ [__33, __34] [bt, bf, v, rest] :=
-        cast_exists (Es := [Set ** Set])
-          (fun '[__33, __34] =>
-            [Script_typed_ir.descr ** Script_typed_ir.descr **
-              Script_typed_ir.union __33 __34 ** stack]) [bt, bf, v, rest] in
-      match v with
-      | Script_typed_ir.L v =>
-        let=? ctxt :=
-          Lwt.__return (Alpha_context.Gas.consume ctxt Interp_costs.branch) in
-        step log ctxt step_constants bt (Item v rest)
-      | Script_typed_ir.R v =>
-        let=? ctxt :=
-          Lwt.__return (Alpha_context.Gas.consume ctxt Interp_costs.branch) in
-        step log ctxt step_constants bf (Item v rest)
-      end
-    
-    | (Script_typed_ir.Cons_list, Item hd (Item tl rest)) =>
-      let 'existT _ __36 [hd, tl, rest] :=
-        cast_exists (Es := Set) (fun __36 => [__36 ** list __36 ** stack])
-          [hd, tl, rest] in
-      let=? ctxt :=
-        Lwt.__return (Alpha_context.Gas.consume ctxt Interp_costs.__cons_value)
-        in
-      logged_return ((Item (cons hd tl) rest), ctxt)
-    
-    | (Script_typed_ir.Nil, rest) =>
-      let rest := cast stack rest in
-      let=? ctxt :=
-        Lwt.__return
-          (Alpha_context.Gas.consume ctxt Interp_costs.variant_no_data) in
-      logged_return ((Item (nil (A := unit)) rest), ctxt)
-    
-    | (Script_typed_ir.If_cons bt bf, Item l rest) =>
-      let 'existT _ __39 [bt, bf, l, rest] :=
-        cast_exists (Es := Set)
-          (fun __39 =>
-            [Script_typed_ir.descr ** Script_typed_ir.descr ** list __39 **
-              stack]) [bt, bf, l, rest] in
+        Lwt.__return (Alpha_context.Gas.consume ctxt Interp_costs.loop_iter) in
       match l with
-      | [] =>
-        let=? ctxt :=
-          Lwt.__return (Alpha_context.Gas.consume ctxt Interp_costs.branch) in
-        step log ctxt step_constants bf rest
+      | [] => Error_monad.__return (__stack_value, ctxt)
       | cons hd tl =>
-        let=? ctxt :=
-          Lwt.__return (Alpha_context.Gas.consume ctxt Interp_costs.branch) in
-        step log ctxt step_constants bt (Item hd (Item tl rest))
-      end
-    
-    | (Script_typed_ir.List_map body, Item l rest) =>
-      let 'existT _ __41 [body, l, rest] :=
-        cast_exists (Es := Set)
-          (fun __41 => [Script_typed_ir.descr ** list __41 ** stack])
-          [body, l, rest] in
-      let fix loop {A B : Set}
-        (body : Script_typed_ir.descr) (rest : stack)
-        (ctxt : Alpha_context.context) (l : list A) (acc : list B) {struct body}
-        : Lwt.t (Error_monad.tzresult (stack * Alpha_context.context)) :=
-        let=? ctxt :=
-          Lwt.__return (Alpha_context.Gas.consume ctxt Interp_costs.loop_map) in
-        match l with
-        | [] => Error_monad.__return ((Item (List.rev acc) rest), ctxt)
-        | cons hd tl =>
-          let=? function_parameter :=
-            step log ctxt step_constants body (Item hd rest) in
-          match function_parameter with
-          | (Item hd rest, ctxt) =>
-            let '[hd, rest, ctxt] :=
-              cast [B ** stack ** Alpha_context.context] [hd, rest, ctxt] in
-            loop body rest ctxt tl (cons hd acc)
-          | _ => unreachable_gadt_branch
-          end
-        end in
-      let=? '(res, ctxt) := loop body rest ctxt l (nil (A := unit)) in
-      logged_return (res, ctxt)
-    
-    | (Script_typed_ir.List_size, Item __list_value rest) =>
-      let 'existT _ __44 [__list_value, rest] :=
-        cast_exists (Es := Set) (fun __44 => [list __44 ** stack])
-          [__list_value, rest] in
-      let=? '(len, ctxt) :=
-        Lwt.__return
-          (List.fold_left
-            (fun acc =>
-              fun function_parameter =>
-                let '_ := function_parameter in
-                let? '(size, ctxt) := acc in
-                let? ctxt :=
-                  Alpha_context.Gas.consume ctxt Interp_costs.loop_size in
-                Error_monad.ok ((Pervasives.op_plus size 1), ctxt))
-            (Error_monad.ok (0, ctxt)) __list_value) in
-      logged_return
-        ((Item
-          (Alpha_context.Script_int.abs (Alpha_context.Script_int.of_int len))
-          rest), ctxt)
-    
-    | (Script_typed_ir.List_iter body, Item l init) =>
-      let 'existT _ __46 [body, l, init] :=
-        cast_exists (Es := Set)
-          (fun __46 => [Script_typed_ir.descr ** list __46 ** stack])
-          [body, l, init] in
-      let fix loop
-        (ctxt : Alpha_context.context) (l : list __46) (__stack_value : stack)
-        {struct ctxt}
-        : Lwt.t (Error_monad.tzresult (stack * Alpha_context.context)) :=
-        let=? ctxt :=
-          Lwt.__return (Alpha_context.Gas.consume ctxt Interp_costs.loop_iter)
-          in
-        match l with
-        | [] => Error_monad.__return (__stack_value, ctxt)
-        | cons hd tl =>
-          let=? '(__stack_value, ctxt) :=
-            step log ctxt step_constants body (Item hd __stack_value) in
-          loop ctxt tl __stack_value
-        end in
-      let=? '(res, ctxt) := loop ctxt l init in
-      logged_return (res, ctxt)
-    
-    | (Script_typed_ir.Empty_set __t_value, rest) =>
-      let '[__t_value, rest] :=
-        cast [Script_typed_ir.comparable_ty ** stack] [__t_value, rest] in
+        let=? '(__stack_value, ctxt) :=
+          step_descr log ctxt step_constants body (Item hd __stack_value) in
+        loop ctxt tl __stack_value
+      end in
+    let=? '(res, ctxt) := loop ctxt l init in
+    logged_return (res, ctxt)
+  
+  | (Script_typed_ir.Empty_set __t_value, rest) =>
+    let '[__t_value, rest] :=
+      cast [Script_typed_ir.comparable_ty ** stack] [__t_value, rest] in
+    let=? ctxt :=
+      Lwt.__return (Alpha_context.Gas.consume ctxt Interp_costs.empty_set) in
+    logged_return
+      ((Item ((Script_ir_translator.empty_set (a := unit)) __t_value) rest),
+        ctxt)
+  
+  | (Script_typed_ir.Set_iter body, Item set init) =>
+    let 'existT _ __44 [body, set, init] :=
+      cast_exists (Es := Set)
+        (fun __44 =>
+          [Script_typed_ir.descr ** Script_typed_ir.set __44 ** stack])
+        [body, set, init] in
+    let=? ctxt :=
+      Lwt.__return
+        (Alpha_context.Gas.consume ctxt (Interp_costs.set_to_list set)) in
+    let l :=
+      List.rev
+        (Script_ir_translator.set_fold (fun e => fun acc => cons e acc) set nil)
+      in
+    let fix loop
+      (ctxt : Alpha_context.context) (l : list __44) (__stack_value : stack)
+      {struct l}
+      : Lwt.t (Error_monad.tzresult (stack * Alpha_context.context)) :=
       let=? ctxt :=
-        Lwt.__return (Alpha_context.Gas.consume ctxt Interp_costs.empty_set) in
+        Lwt.__return (Alpha_context.Gas.consume ctxt Interp_costs.loop_iter) in
+      match l with
+      | [] => Error_monad.__return (__stack_value, ctxt)
+      | cons hd tl =>
+        let=? '(__stack_value, ctxt) :=
+          step_descr log ctxt step_constants body (Item hd __stack_value) in
+        loop ctxt tl __stack_value
+      end in
+    let=? '(res, ctxt) := loop ctxt l init in
+    logged_return (res, ctxt)
+  
+  | (Script_typed_ir.Set_mem, Item v (Item set rest)) =>
+    let 'existT _ __46 [v, set, rest] :=
+      cast_exists (Es := Set)
+        (fun __46 => [__46 ** Script_typed_ir.set __46 ** stack]) [v, set, rest]
+      in
+    consume_gas_binop __descr_value (Script_ir_translator.set_mem, v, set)
+      Interp_costs.set_mem rest ctxt
+  
+  | (Script_typed_ir.Set_update, Item v (Item presence (Item set rest))) =>
+    let 'existT _ __48 [v, presence, set, rest] :=
+      cast_exists (Es := Set)
+        (fun __48 => [__48 ** bool ** Script_typed_ir.set __48 ** stack])
+        [v, presence, set, rest] in
+    consume_gas_terop __descr_value
+      (Script_ir_translator.set_update, v, presence, set)
+      Interp_costs.set_update rest
+  
+  | (Script_typed_ir.Set_size, Item set rest) =>
+    let 'existT _ __50 [set, rest] :=
+      cast_exists (Es := Set) (fun __50 => [Script_typed_ir.set __50 ** stack])
+        [set, rest] in
+    consume_gas_unop __descr_value (Script_ir_translator.set_size, set)
+      (fun function_parameter =>
+        let '_ := function_parameter in
+        Interp_costs.set_size) rest ctxt
+  
+  | (Script_typed_ir.Empty_map __t_value _, rest) =>
+    let '[__t_value, rest] :=
+      cast [Script_typed_ir.comparable_ty ** stack] [__t_value, rest] in
+    let=? ctxt :=
+      Lwt.__return (Alpha_context.Gas.consume ctxt Interp_costs.empty_map) in
+    logged_return
+      ((Item
+        ((Script_ir_translator.empty_map (a := unit) (b := unit)) __t_value)
+        rest), ctxt)
+  
+  | (Script_typed_ir.Map_map body, Item map rest) =>
+    let 'existT _ [__54, __55] [body, map, rest] :=
+      cast_exists (Es := [Set ** Set])
+        (fun '[__54, __55] =>
+          [Script_typed_ir.descr ** Script_typed_ir.map __54 __55 ** stack])
+        [body, map, rest] in
+    let=? ctxt :=
+      Lwt.__return
+        (Alpha_context.Gas.consume ctxt (Interp_costs.map_to_list map)) in
+    let l :=
+      List.rev
+        (Script_ir_translator.map_fold
+          (fun k => fun v => fun acc => cons (k, v) acc) map nil) in
+    let fix loop {A B C : Set}
+      (body : Script_typed_ir.descr) (rest : stack)
+      (ctxt : Alpha_context.context) (l : list (A * B))
+      (acc : Script_typed_ir.map A C) {struct l}
+      : Lwt.t
+        (Error_monad.tzresult (Script_typed_ir.map A C * Alpha_context.context)) :=
+      let=? ctxt :=
+        Lwt.__return (Alpha_context.Gas.consume ctxt Interp_costs.loop_map) in
+      match l with
+      | [] => Error_monad.__return (acc, ctxt)
+      | cons ((k, _) as hd) tl =>
+        let=? function_parameter :=
+          step_descr log ctxt step_constants body (Item hd rest) in
+        match function_parameter with
+        | (Item hd rest, ctxt) =>
+          let '[hd, rest, ctxt] :=
+            cast [C ** stack ** Alpha_context.context] [hd, rest, ctxt] in
+          loop body rest ctxt tl
+            (Script_ir_translator.map_update k (Some hd) acc)
+        | _ => unreachable_gadt_branch
+        end
+      end in
+    let=? '(res, ctxt) :=
+      loop body rest ctxt l
+        ((Script_ir_translator.empty_map (b := unit))
+          (Script_ir_translator.map_key_ty map)) in
+    logged_return ((Item res rest), ctxt)
+  
+  | (Script_typed_ir.Map_iter body, Item map init) =>
+    let 'existT _ [__58, __59] [body, map, init] :=
+      cast_exists (Es := [Set ** Set])
+        (fun '[__58, __59] =>
+          [Script_typed_ir.descr ** Script_typed_ir.map __58 __59 ** stack])
+        [body, map, init] in
+    let=? ctxt :=
+      Lwt.__return
+        (Alpha_context.Gas.consume ctxt (Interp_costs.map_to_list map)) in
+    let l :=
+      List.rev
+        (Script_ir_translator.map_fold
+          (fun k => fun v => fun acc => cons (k, v) acc) map nil) in
+    let fix loop
+      (ctxt : Alpha_context.context) (l : list (__58 * __59))
+      (__stack_value : stack) {struct l}
+      : Lwt.t (Error_monad.tzresult (stack * Alpha_context.context)) :=
+      let=? ctxt :=
+        Lwt.__return (Alpha_context.Gas.consume ctxt Interp_costs.loop_iter) in
+      match l with
+      | [] => Error_monad.__return (__stack_value, ctxt)
+      | cons hd tl =>
+        let=? '(__stack_value, ctxt) :=
+          step_descr log ctxt step_constants body (Item hd __stack_value) in
+        loop ctxt tl __stack_value
+      end in
+    let=? '(res, ctxt) := loop ctxt l init in
+    logged_return (res, ctxt)
+  
+  | (Script_typed_ir.Map_mem, Item v (Item map rest)) =>
+    let 'existT _ [__61, __62] [v, map, rest] :=
+      cast_exists (Es := [Set ** Set])
+        (fun '[__61, __62] => [__61 ** Script_typed_ir.map __61 __62 ** stack])
+        [v, map, rest] in
+    consume_gas_binop __descr_value (Script_ir_translator.map_mem, v, map)
+      Interp_costs.map_mem rest ctxt
+  
+  | (Script_typed_ir.Map_get, Item v (Item map rest)) =>
+    let 'existT _ [__64, __65] [v, map, rest] :=
+      cast_exists (Es := [Set ** Set])
+        (fun '[__64, __65] => [__64 ** Script_typed_ir.map __64 __65 ** stack])
+        [v, map, rest] in
+    consume_gas_binop __descr_value (Script_ir_translator.map_get, v, map)
+      Interp_costs.map_get rest ctxt
+  
+  | (Script_typed_ir.Map_update, Item k (Item v (Item map rest))) =>
+    let 'existT _ [__67, __68] [k, v, map, rest] :=
+      cast_exists (Es := [Set ** Set])
+        (fun '[__67, __68] =>
+          [__67 ** option __68 ** Script_typed_ir.map __67 __68 ** stack])
+        [k, v, map, rest] in
+    consume_gas_terop __descr_value (Script_ir_translator.map_update, k, v, map)
+      Interp_costs.map_update rest
+  
+  | (Script_typed_ir.Map_size, Item map rest) =>
+    let 'existT _ [__70, __71] [map, rest] :=
+      cast_exists (Es := [Set ** Set])
+        (fun '[__70, __71] => [Script_typed_ir.map __70 __71 ** stack])
+        [map, rest] in
+    consume_gas_unop __descr_value (Script_ir_translator.map_size, map)
+      (fun function_parameter =>
+        let '_ := function_parameter in
+        Interp_costs.map_size) rest ctxt
+  
+  | (Script_typed_ir.Empty_big_map tk tv, rest) =>
+    let '[tk, tv, rest] :=
+      cast [Script_typed_ir.comparable_ty ** Script_typed_ir.ty ** stack]
+        [tk, tv, rest] in
+    let=? ctxt :=
+      Lwt.__return (Alpha_context.Gas.consume ctxt Interp_costs.empty_map) in
+    logged_return
+      ((Item
+        ((Script_ir_translator.empty_big_map (A := unit) (B := unit)) tk tv)
+        rest), ctxt)
+  
+  | (Script_typed_ir.Big_map_mem, Item __key_value (Item map rest)) =>
+    let 'existT _ [__75, __76] [__key_value, map, rest] :=
+      cast_exists (Es := [Set ** Set])
+        (fun '[__75, __76] =>
+          [__75 ** Script_typed_ir.big_map __75 __76 ** stack])
+        [__key_value, map, rest] in
+    let=? ctxt :=
+      Lwt.__return
+        (Alpha_context.Gas.consume ctxt
+          (Interp_costs.map_mem __key_value map.(Script_typed_ir.big_map.diff)))
+      in
+    let=? '(res, ctxt) := Script_ir_translator.big_map_mem ctxt __key_value map
+      in
+    logged_return ((Item res rest), ctxt)
+  
+  | (Script_typed_ir.Big_map_get, Item __key_value (Item map rest)) =>
+    let 'existT _ [__78, __79] [__key_value, map, rest] :=
+      cast_exists (Es := [Set ** Set])
+        (fun '[__78, __79] =>
+          [__78 ** Script_typed_ir.big_map __78 __79 ** stack])
+        [__key_value, map, rest] in
+    let=? ctxt :=
+      Lwt.__return
+        (Alpha_context.Gas.consume ctxt
+          (Interp_costs.map_get __key_value map.(Script_typed_ir.big_map.diff)))
+      in
+    let=? '(res, ctxt) := Script_ir_translator.big_map_get ctxt __key_value map
+      in
+    logged_return ((Item res rest), ctxt)
+  
+  |
+    (Script_typed_ir.Big_map_update,
+      Item __key_value (Item maybe_value (Item map rest))) =>
+    let 'existT _ [__81, __82] [__key_value, maybe_value, map, rest] :=
+      cast_exists (Es := [Set ** Set])
+        (fun '[__81, __82] =>
+          [__81 ** option __82 ** Script_typed_ir.big_map __81 __82 ** stack])
+        [__key_value, maybe_value, map, rest] in
+    consume_gas_terop __descr_value
+      (Script_ir_translator.big_map_update, __key_value, maybe_value, map)
+      (fun k =>
+        fun v =>
+          fun m =>
+            Interp_costs.map_update k (Some v) m.(Script_typed_ir.big_map.diff))
+      rest
+  
+  | (Script_typed_ir.Add_seconds_to_timestamp, Item n (Item __t_value rest)) =>
+    let '[n, __t_value, rest] :=
+      cast
+        [Alpha_context.Script_int.num ** Alpha_context.Script_timestamp.t **
+          stack] [n, __t_value, rest] in
+    consume_gas_binop __descr_value
+      (Alpha_context.Script_timestamp.add_delta, __t_value, n)
+      Interp_costs.add_timestamp rest ctxt
+  
+  | (Script_typed_ir.Add_timestamp_to_seconds, Item __t_value (Item n rest)) =>
+    let '[__t_value, n, rest] :=
+      cast
+        [Alpha_context.Script_timestamp.t ** Alpha_context.Script_int.num **
+          stack] [__t_value, n, rest] in
+    consume_gas_binop __descr_value
+      (Alpha_context.Script_timestamp.add_delta, __t_value, n)
+      Interp_costs.add_timestamp rest ctxt
+  
+  | (Script_typed_ir.Sub_timestamp_seconds, Item __t_value (Item s rest)) =>
+    let '[__t_value, s, rest] :=
+      cast
+        [Alpha_context.Script_timestamp.t ** Alpha_context.Script_int.num **
+          stack] [__t_value, s, rest] in
+    consume_gas_binop __descr_value
+      (Alpha_context.Script_timestamp.sub_delta, __t_value, s)
+      Interp_costs.sub_timestamp rest ctxt
+  
+  | (Script_typed_ir.Diff_timestamps, Item t1 (Item t2 rest)) =>
+    let '[t1, t2, rest] :=
+      cast
+        [Alpha_context.Script_timestamp.t ** Alpha_context.Script_timestamp.t **
+          stack] [t1, t2, rest] in
+    consume_gas_binop __descr_value
+      (Alpha_context.Script_timestamp.diff, t1, t2) Interp_costs.diff_timestamps
+      rest ctxt
+  
+  | (Script_typed_ir.Concat_string_pair, Item x (Item y rest)) =>
+    let '[x, y, rest] := cast [string ** string ** stack] [x, y, rest] in
+    let=? ctxt :=
+      Lwt.__return
+        (Alpha_context.Gas.consume ctxt (Interp_costs.concat_string [ x; y ]))
+      in
+    let s := String.concat "" [ x; y ] in
+    logged_return ((Item s rest), ctxt)
+  
+  | (Script_typed_ir.Concat_string, Item ss rest) =>
+    let '[ss, rest] := cast [list string ** stack] [ss, rest] in
+    let=? ctxt :=
+      Lwt.__return
+        (Alpha_context.Gas.consume ctxt (Interp_costs.concat_string ss)) in
+    let s := String.concat "" ss in
+    logged_return ((Item s rest), ctxt)
+  
+  | (Script_typed_ir.Slice_string, Item offset (Item length (Item s rest))) =>
+    let '[offset, length, s, rest] :=
+      cast
+        [Alpha_context.Script_int.num ** Alpha_context.Script_int.num ** string
+          ** stack] [offset, length, s, rest] in
+    let s_length := Z.of_int (String.length s) in
+    let offset := Alpha_context.Script_int.to_zint offset in
+    let length := Alpha_context.Script_int.to_zint length in
+    if
+      Pervasives.op_andand ((|Compare.Z|).(Compare.S.op_lt) offset s_length)
+        ((|Compare.Z|).(Compare.S.op_lteq) (Z.add offset length) s_length) then
+      let=? ctxt :=
+        Lwt.__return
+          (Alpha_context.Gas.consume ctxt
+            (Interp_costs.slice_string (Z.to_int length))) in
       logged_return
-        ((Item ((Script_ir_translator.empty_set (a := unit)) __t_value) rest),
+        ((Item (Some (String.sub s (Z.to_int offset) (Z.to_int length))) rest),
           ctxt)
-    
-    | (Script_typed_ir.Set_iter body, Item set init) =>
-      let 'existT _ __49 [body, set, init] :=
-        cast_exists (Es := Set)
-          (fun __49 =>
-            [Script_typed_ir.descr ** Script_typed_ir.set __49 ** stack])
-          [body, set, init] in
+    else
       let=? ctxt :=
         Lwt.__return
-          (Alpha_context.Gas.consume ctxt (Interp_costs.set_to_list set)) in
-      let l :=
-        List.rev
-          (Script_ir_translator.set_fold (fun e => fun acc => cons e acc) set
-            nil) in
-      let fix loop
-        (ctxt : Alpha_context.context) (l : list __49) (__stack_value : stack)
-        {struct ctxt}
-        : Lwt.t (Error_monad.tzresult (stack * Alpha_context.context)) :=
-        let=? ctxt :=
-          Lwt.__return (Alpha_context.Gas.consume ctxt Interp_costs.loop_iter)
-          in
-        match l with
-        | [] => Error_monad.__return (__stack_value, ctxt)
-        | cons hd tl =>
-          let=? '(__stack_value, ctxt) :=
-            step log ctxt step_constants body (Item hd __stack_value) in
-          loop ctxt tl __stack_value
-        end in
-      let=? '(res, ctxt) := loop ctxt l init in
-      logged_return (res, ctxt)
-    
-    | (Script_typed_ir.Set_mem, Item v (Item set rest)) =>
-      let 'existT _ __51 [v, set, rest] :=
-        cast_exists (Es := Set)
-          (fun __51 => [__51 ** Script_typed_ir.set __51 ** stack])
-          [v, set, rest] in
-      consume_gas_binop __descr_value (Script_ir_translator.set_mem, v, set)
-        Interp_costs.set_mem rest ctxt
-    
-    | (Script_typed_ir.Set_update, Item v (Item presence (Item set rest))) =>
-      let 'existT _ __53 [v, presence, set, rest] :=
-        cast_exists (Es := Set)
-          (fun __53 => [__53 ** bool ** Script_typed_ir.set __53 ** stack])
-          [v, presence, set, rest] in
-      consume_gas_terop __descr_value
-        (Script_ir_translator.set_update, v, presence, set)
-        Interp_costs.set_update rest
-    
-    | (Script_typed_ir.Set_size, Item set rest) =>
-      let 'existT _ __55 [set, rest] :=
-        cast_exists (Es := Set)
-          (fun __55 => [Script_typed_ir.set __55 ** stack]) [set, rest] in
-      consume_gas_unop __descr_value (Script_ir_translator.set_size, set)
-        (fun function_parameter =>
-          let '_ := function_parameter in
-          Interp_costs.set_size) rest ctxt
-    
-    | (Script_typed_ir.Empty_map __t_value _, rest) =>
-      let '[__t_value, rest] :=
-        cast [Script_typed_ir.comparable_ty ** stack] [__t_value, rest] in
-      let=? ctxt :=
-        Lwt.__return (Alpha_context.Gas.consume ctxt Interp_costs.empty_map) in
-      logged_return
-        ((Item
-          ((Script_ir_translator.empty_map (a := unit) (b := unit)) __t_value)
-          rest), ctxt)
-    
-    | (Script_typed_ir.Map_map body, Item map rest) =>
-      let 'existT _ [__59, __60] [body, map, rest] :=
-        cast_exists (Es := [Set ** Set])
-          (fun '[__59, __60] =>
-            [Script_typed_ir.descr ** Script_typed_ir.map __59 __60 ** stack])
-          [body, map, rest] in
-      let=? ctxt :=
-        Lwt.__return
-          (Alpha_context.Gas.consume ctxt (Interp_costs.map_to_list map)) in
-      let l :=
-        List.rev
-          (Script_ir_translator.map_fold
-            (fun k => fun v => fun acc => cons (k, v) acc) map nil) in
-      let fix loop {A B C : Set}
-        (body : Script_typed_ir.descr) (rest : stack)
-        (ctxt : Alpha_context.context) (l : list (A * B))
-        (acc : Script_typed_ir.map A C) {struct body}
-        : Lwt.t
-          (Error_monad.tzresult
-            (Script_typed_ir.map A C * Alpha_context.context)) :=
-        let=? ctxt :=
-          Lwt.__return (Alpha_context.Gas.consume ctxt Interp_costs.loop_map) in
-        match l with
-        | [] => Error_monad.__return (acc, ctxt)
-        | cons ((k, _) as hd) tl =>
-          let=? function_parameter :=
-            step log ctxt step_constants body (Item hd rest) in
-          match function_parameter with
-          | (Item hd rest, ctxt) =>
-            let '[hd, rest, ctxt] :=
-              cast [C ** stack ** Alpha_context.context] [hd, rest, ctxt] in
-            loop body rest ctxt tl
-              (Script_ir_translator.map_update k (Some hd) acc)
-          | _ => unreachable_gadt_branch
-          end
-        end in
-      let=? '(res, ctxt) :=
-        loop body rest ctxt l
-          ((Script_ir_translator.empty_map (b := unit))
-            (Script_ir_translator.map_key_ty map)) in
-      logged_return ((Item res rest), ctxt)
-    
-    | (Script_typed_ir.Map_iter body, Item map init) =>
-      let 'existT _ [__63, __64] [body, map, init] :=
-        cast_exists (Es := [Set ** Set])
-          (fun '[__63, __64] =>
-            [Script_typed_ir.descr ** Script_typed_ir.map __63 __64 ** stack])
-          [body, map, init] in
-      let=? ctxt :=
-        Lwt.__return
-          (Alpha_context.Gas.consume ctxt (Interp_costs.map_to_list map)) in
-      let l :=
-        List.rev
-          (Script_ir_translator.map_fold
-            (fun k => fun v => fun acc => cons (k, v) acc) map nil) in
-      let fix loop
-        (ctxt : Alpha_context.context) (l : list (__63 * __64))
-        (__stack_value : stack) {struct ctxt}
-        : Lwt.t (Error_monad.tzresult (stack * Alpha_context.context)) :=
-        let=? ctxt :=
-          Lwt.__return (Alpha_context.Gas.consume ctxt Interp_costs.loop_iter)
-          in
-        match l with
-        | [] => Error_monad.__return (__stack_value, ctxt)
-        | cons hd tl =>
-          let=? '(__stack_value, ctxt) :=
-            step log ctxt step_constants body (Item hd __stack_value) in
-          loop ctxt tl __stack_value
-        end in
-      let=? '(res, ctxt) := loop ctxt l init in
-      logged_return (res, ctxt)
-    
-    | (Script_typed_ir.Map_mem, Item v (Item map rest)) =>
-      let 'existT _ [__66, __67] [v, map, rest] :=
-        cast_exists (Es := [Set ** Set])
-          (fun '[__66, __67] => [__66 ** Script_typed_ir.map __66 __67 ** stack])
-          [v, map, rest] in
-      consume_gas_binop __descr_value (Script_ir_translator.map_mem, v, map)
-        Interp_costs.map_mem rest ctxt
-    
-    | (Script_typed_ir.Map_get, Item v (Item map rest)) =>
-      let 'existT _ [__69, __70] [v, map, rest] :=
-        cast_exists (Es := [Set ** Set])
-          (fun '[__69, __70] => [__69 ** Script_typed_ir.map __69 __70 ** stack])
-          [v, map, rest] in
-      consume_gas_binop __descr_value (Script_ir_translator.map_get, v, map)
-        Interp_costs.map_get rest ctxt
-    
-    | (Script_typed_ir.Map_update, Item k (Item v (Item map rest))) =>
-      let 'existT _ [__72, __73] [k, v, map, rest] :=
-        cast_exists (Es := [Set ** Set])
-          (fun '[__72, __73] =>
-            [__72 ** option __73 ** Script_typed_ir.map __72 __73 ** stack])
-          [k, v, map, rest] in
-      consume_gas_terop __descr_value
-        (Script_ir_translator.map_update, k, v, map) Interp_costs.map_update
-        rest
-    
-    | (Script_typed_ir.Map_size, Item map rest) =>
-      let 'existT _ [__75, __76] [map, rest] :=
-        cast_exists (Es := [Set ** Set])
-          (fun '[__75, __76] => [Script_typed_ir.map __75 __76 ** stack])
-          [map, rest] in
-      consume_gas_unop __descr_value (Script_ir_translator.map_size, map)
-        (fun function_parameter =>
-          let '_ := function_parameter in
-          Interp_costs.map_size) rest ctxt
-    
-    | (Script_typed_ir.Empty_big_map tk tv, rest) =>
-      let '[tk, tv, rest] :=
-        cast [Script_typed_ir.comparable_ty ** Script_typed_ir.ty ** stack]
-          [tk, tv, rest] in
-      let=? ctxt :=
-        Lwt.__return (Alpha_context.Gas.consume ctxt Interp_costs.empty_map) in
-      logged_return
-        ((Item
-          ((Script_ir_translator.empty_big_map (A := unit) (B := unit)) tk tv)
-          rest), ctxt)
-    
-    | (Script_typed_ir.Big_map_mem, Item __key_value (Item map rest)) =>
-      let 'existT _ [__80, __81] [__key_value, map, rest] :=
-        cast_exists (Es := [Set ** Set])
-          (fun '[__80, __81] =>
-            [__80 ** Script_typed_ir.big_map __80 __81 ** stack])
-          [__key_value, map, rest] in
+          (Alpha_context.Gas.consume ctxt (Interp_costs.slice_string 0)) in
+      logged_return ((Item (None (A := unit)) rest), ctxt)
+  
+  | (Script_typed_ir.String_size, Item s rest) =>
+    let '[s, rest] := cast [string ** stack] [s, rest] in
+    let=? ctxt :=
+      Lwt.__return (Alpha_context.Gas.consume ctxt Interp_costs.push) in
+    logged_return
+      ((Item
+        (Alpha_context.Script_int.abs
+          (Alpha_context.Script_int.of_int (String.length s))) rest), ctxt)
+  
+  | (Script_typed_ir.Concat_bytes_pair, Item x (Item y rest)) =>
+    let '[x, y, rest] := cast [MBytes.t ** MBytes.t ** stack] [x, y, rest] in
+    let=? ctxt :=
+      Lwt.__return
+        (Alpha_context.Gas.consume ctxt (Interp_costs.concat_bytes [ x; y ])) in
+    let s := MBytes.concat "" [ x; y ] in
+    logged_return ((Item s rest), ctxt)
+  
+  | (Script_typed_ir.Concat_bytes, Item ss rest) =>
+    let '[ss, rest] := cast [list MBytes.t ** stack] [ss, rest] in
+    let=? ctxt :=
+      Lwt.__return
+        (Alpha_context.Gas.consume ctxt (Interp_costs.concat_bytes ss)) in
+    let s := MBytes.concat "" ss in
+    logged_return ((Item s rest), ctxt)
+  
+  | (Script_typed_ir.Slice_bytes, Item offset (Item length (Item s rest))) =>
+    let '[offset, length, s, rest] :=
+      cast
+        [Alpha_context.Script_int.num ** Alpha_context.Script_int.num **
+          MBytes.t ** stack] [offset, length, s, rest] in
+    let s_length := Z.of_int (MBytes.length s) in
+    let offset := Alpha_context.Script_int.to_zint offset in
+    let length := Alpha_context.Script_int.to_zint length in
+    if
+      Pervasives.op_andand ((|Compare.Z|).(Compare.S.op_lt) offset s_length)
+        ((|Compare.Z|).(Compare.S.op_lteq) (Z.add offset length) s_length) then
       let=? ctxt :=
         Lwt.__return
           (Alpha_context.Gas.consume ctxt
-            (Interp_costs.map_mem __key_value map.(Script_typed_ir.big_map.diff)))
-        in
-      let=? '(res, ctxt) :=
-        Script_ir_translator.big_map_mem ctxt __key_value map in
-      logged_return ((Item res rest), ctxt)
-    
-    | (Script_typed_ir.Big_map_get, Item __key_value (Item map rest)) =>
-      let 'existT _ [__83, __84] [__key_value, map, rest] :=
-        cast_exists (Es := [Set ** Set])
-          (fun '[__83, __84] =>
-            [__83 ** Script_typed_ir.big_map __83 __84 ** stack])
-          [__key_value, map, rest] in
-      let=? ctxt :=
-        Lwt.__return
-          (Alpha_context.Gas.consume ctxt
-            (Interp_costs.map_get __key_value map.(Script_typed_ir.big_map.diff)))
-        in
-      let=? '(res, ctxt) :=
-        Script_ir_translator.big_map_get ctxt __key_value map in
-      logged_return ((Item res rest), ctxt)
-    
-    |
-      (Script_typed_ir.Big_map_update,
-        Item __key_value (Item maybe_value (Item map rest))) =>
-      let 'existT _ [__86, __87] [__key_value, maybe_value, map, rest] :=
-        cast_exists (Es := [Set ** Set])
-          (fun '[__86, __87] =>
-            [__86 ** option __87 ** Script_typed_ir.big_map __86 __87 ** stack])
-          [__key_value, maybe_value, map, rest] in
-      consume_gas_terop __descr_value
-        (Script_ir_translator.big_map_update, __key_value, maybe_value, map)
-        (fun k =>
-          fun v =>
-            fun m =>
-              Interp_costs.map_update k (Some v)
-                m.(Script_typed_ir.big_map.diff)) rest
-    
-    | (Script_typed_ir.Add_seconds_to_timestamp, Item n (Item __t_value rest))
-      =>
-      let '[n, __t_value, rest] :=
-        cast
-          [Alpha_context.Script_int.num ** Alpha_context.Script_timestamp.t **
-            stack] [n, __t_value, rest] in
-      consume_gas_binop __descr_value
-        (Alpha_context.Script_timestamp.add_delta, __t_value, n)
-        Interp_costs.add_timestamp rest ctxt
-    
-    | (Script_typed_ir.Add_timestamp_to_seconds, Item __t_value (Item n rest))
-      =>
-      let '[__t_value, n, rest] :=
-        cast
-          [Alpha_context.Script_timestamp.t ** Alpha_context.Script_int.num **
-            stack] [__t_value, n, rest] in
-      consume_gas_binop __descr_value
-        (Alpha_context.Script_timestamp.add_delta, __t_value, n)
-        Interp_costs.add_timestamp rest ctxt
-    
-    | (Script_typed_ir.Sub_timestamp_seconds, Item __t_value (Item s rest)) =>
-      let '[__t_value, s, rest] :=
-        cast
-          [Alpha_context.Script_timestamp.t ** Alpha_context.Script_int.num **
-            stack] [__t_value, s, rest] in
-      consume_gas_binop __descr_value
-        (Alpha_context.Script_timestamp.sub_delta, __t_value, s)
-        Interp_costs.sub_timestamp rest ctxt
-    
-    | (Script_typed_ir.Diff_timestamps, Item t1 (Item t2 rest)) =>
-      let '[t1, t2, rest] :=
-        cast
-          [Alpha_context.Script_timestamp.t ** Alpha_context.Script_timestamp.t
-            ** stack] [t1, t2, rest] in
-      consume_gas_binop __descr_value
-        (Alpha_context.Script_timestamp.diff, t1, t2)
-        Interp_costs.diff_timestamps rest ctxt
-    
-    | (Script_typed_ir.Concat_string_pair, Item x (Item y rest)) =>
-      let '[x, y, rest] := cast [string ** string ** stack] [x, y, rest] in
-      let=? ctxt :=
-        Lwt.__return
-          (Alpha_context.Gas.consume ctxt (Interp_costs.concat_string [ x; y ]))
-        in
-      let s := String.concat "" [ x; y ] in
-      logged_return ((Item s rest), ctxt)
-    
-    | (Script_typed_ir.Concat_string, Item ss rest) =>
-      let '[ss, rest] := cast [list string ** stack] [ss, rest] in
-      let=? ctxt :=
-        Lwt.__return
-          (Alpha_context.Gas.consume ctxt (Interp_costs.concat_string ss)) in
-      let s := String.concat "" ss in
-      logged_return ((Item s rest), ctxt)
-    
-    | (Script_typed_ir.Slice_string, Item offset (Item length (Item s rest))) =>
-      let '[offset, length, s, rest] :=
-        cast
-          [Alpha_context.Script_int.num ** Alpha_context.Script_int.num **
-            string ** stack] [offset, length, s, rest] in
-      let s_length := Z.of_int (String.length s) in
-      let offset := Alpha_context.Script_int.to_zint offset in
-      let length := Alpha_context.Script_int.to_zint length in
-      if
-        Pervasives.op_andand ((|Compare.Z|).(Compare.S.op_lt) offset s_length)
-          ((|Compare.Z|).(Compare.S.op_lteq) (Z.add offset length) s_length)
-        then
-        let=? ctxt :=
-          Lwt.__return
-            (Alpha_context.Gas.consume ctxt
-              (Interp_costs.slice_string (Z.to_int length))) in
-        logged_return
-          ((Item (Some (String.sub s (Z.to_int offset) (Z.to_int length))) rest),
-            ctxt)
-      else
-        let=? ctxt :=
-          Lwt.__return
-            (Alpha_context.Gas.consume ctxt (Interp_costs.slice_string 0)) in
-        logged_return ((Item (None (A := unit)) rest), ctxt)
-    
-    | (Script_typed_ir.String_size, Item s rest) =>
-      let '[s, rest] := cast [string ** stack] [s, rest] in
-      let=? ctxt :=
-        Lwt.__return (Alpha_context.Gas.consume ctxt Interp_costs.push) in
+            (Interp_costs.slice_string (Z.to_int length))) in
       logged_return
-        ((Item
-          (Alpha_context.Script_int.abs
-            (Alpha_context.Script_int.of_int (String.length s))) rest), ctxt)
-    
-    | (Script_typed_ir.Concat_bytes_pair, Item x (Item y rest)) =>
-      let '[x, y, rest] := cast [MBytes.t ** MBytes.t ** stack] [x, y, rest] in
+        ((Item (Some (MBytes.sub s (Z.to_int offset) (Z.to_int length))) rest),
+          ctxt)
+    else
       let=? ctxt :=
         Lwt.__return
-          (Alpha_context.Gas.consume ctxt (Interp_costs.concat_bytes [ x; y ]))
-        in
-      let s := MBytes.concat "" [ x; y ] in
-      logged_return ((Item s rest), ctxt)
-    
-    | (Script_typed_ir.Concat_bytes, Item ss rest) =>
-      let '[ss, rest] := cast [list MBytes.t ** stack] [ss, rest] in
-      let=? ctxt :=
-        Lwt.__return
-          (Alpha_context.Gas.consume ctxt (Interp_costs.concat_bytes ss)) in
-      let s := MBytes.concat "" ss in
-      logged_return ((Item s rest), ctxt)
-    
-    | (Script_typed_ir.Slice_bytes, Item offset (Item length (Item s rest))) =>
-      let '[offset, length, s, rest] :=
-        cast
-          [Alpha_context.Script_int.num ** Alpha_context.Script_int.num **
-            MBytes.t ** stack] [offset, length, s, rest] in
-      let s_length := Z.of_int (MBytes.length s) in
-      let offset := Alpha_context.Script_int.to_zint offset in
-      let length := Alpha_context.Script_int.to_zint length in
-      if
-        Pervasives.op_andand ((|Compare.Z|).(Compare.S.op_lt) offset s_length)
-          ((|Compare.Z|).(Compare.S.op_lteq) (Z.add offset length) s_length)
-        then
-        let=? ctxt :=
-          Lwt.__return
-            (Alpha_context.Gas.consume ctxt
-              (Interp_costs.slice_string (Z.to_int length))) in
-        logged_return
-          ((Item (Some (MBytes.sub s (Z.to_int offset) (Z.to_int length))) rest),
-            ctxt)
-      else
-        let=? ctxt :=
-          Lwt.__return
-            (Alpha_context.Gas.consume ctxt (Interp_costs.slice_string 0)) in
-        logged_return ((Item (None (A := unit)) rest), ctxt)
-    
-    | (Script_typed_ir.Bytes_size, Item s rest) =>
-      let '[s, rest] := cast [MBytes.t ** stack] [s, rest] in
-      let=? ctxt :=
-        Lwt.__return (Alpha_context.Gas.consume ctxt Interp_costs.push) in
-      logged_return
-        ((Item
-          (Alpha_context.Script_int.abs
-            (Alpha_context.Script_int.of_int (MBytes.length s))) rest), ctxt)
-    
-    | (Script_typed_ir.Add_tez, Item x (Item y rest)) =>
-      let '[x, y, rest] :=
-        cast [Alpha_context.Tez.t ** Alpha_context.Tez.t ** stack] [x, y, rest]
-        in
-      let=? ctxt :=
-        Lwt.__return (Alpha_context.Gas.consume ctxt Interp_costs.int64_op) in
-      let=? res := Lwt.__return (Alpha_context.Tez.op_plusquestion x y) in
+          (Alpha_context.Gas.consume ctxt (Interp_costs.slice_string 0)) in
+      logged_return ((Item (None (A := unit)) rest), ctxt)
+  
+  | (Script_typed_ir.Bytes_size, Item s rest) =>
+    let '[s, rest] := cast [MBytes.t ** stack] [s, rest] in
+    let=? ctxt :=
+      Lwt.__return (Alpha_context.Gas.consume ctxt Interp_costs.push) in
+    logged_return
+      ((Item
+        (Alpha_context.Script_int.abs
+          (Alpha_context.Script_int.of_int (MBytes.length s))) rest), ctxt)
+  
+  | (Script_typed_ir.Add_tez, Item x (Item y rest)) =>
+    let '[x, y, rest] :=
+      cast [Alpha_context.Tez.t ** Alpha_context.Tez.t ** stack] [x, y, rest] in
+    let=? ctxt :=
+      Lwt.__return (Alpha_context.Gas.consume ctxt Interp_costs.int64_op) in
+    let=? res := Lwt.__return (Alpha_context.Tez.op_plusquestion x y) in
+    logged_return ((Item res rest), ctxt)
+  
+  | (Script_typed_ir.Sub_tez, Item x (Item y rest)) =>
+    let '[x, y, rest] :=
+      cast [Alpha_context.Tez.t ** Alpha_context.Tez.t ** stack] [x, y, rest] in
+    let=? ctxt :=
+      Lwt.__return (Alpha_context.Gas.consume ctxt Interp_costs.int64_op) in
+    let=? res := Lwt.__return (Alpha_context.Tez.op_minusquestion x y) in
+    logged_return ((Item res rest), ctxt)
+  
+  | (Script_typed_ir.Mul_teznat, Item x (Item y rest)) =>
+    let '[x, y, rest] :=
+      cast [Alpha_context.Tez.t ** Alpha_context.Script_int.num ** stack]
+        [x, y, rest] in
+    let=? ctxt :=
+      Lwt.__return (Alpha_context.Gas.consume ctxt Interp_costs.int64_op) in
+    let=? ctxt :=
+      Lwt.__return (Alpha_context.Gas.consume ctxt Interp_costs.z_to_int64) in
+    match Alpha_context.Script_int.to_int64 y with
+    | None => Error_monad.fail extensible_type_value
+    | Some y =>
+      let=? res := Lwt.__return (Alpha_context.Tez.op_starquestion x y) in
       logged_return ((Item res rest), ctxt)
-    
-    | (Script_typed_ir.Sub_tez, Item x (Item y rest)) =>
-      let '[x, y, rest] :=
-        cast [Alpha_context.Tez.t ** Alpha_context.Tez.t ** stack] [x, y, rest]
-        in
-      let=? ctxt :=
-        Lwt.__return (Alpha_context.Gas.consume ctxt Interp_costs.int64_op) in
-      let=? res := Lwt.__return (Alpha_context.Tez.op_minusquestion x y) in
+    end
+  
+  | (Script_typed_ir.Mul_nattez, Item y (Item x rest)) =>
+    let '[y, x, rest] :=
+      cast [Alpha_context.Script_int.num ** Alpha_context.Tez.t ** stack]
+        [y, x, rest] in
+    let=? ctxt :=
+      Lwt.__return (Alpha_context.Gas.consume ctxt Interp_costs.int64_op) in
+    let=? ctxt :=
+      Lwt.__return (Alpha_context.Gas.consume ctxt Interp_costs.z_to_int64) in
+    match Alpha_context.Script_int.to_int64 y with
+    | None => Error_monad.fail extensible_type_value
+    | Some y =>
+      let=? res := Lwt.__return (Alpha_context.Tez.op_starquestion x y) in
       logged_return ((Item res rest), ctxt)
-    
-    | (Script_typed_ir.Mul_teznat, Item x (Item y rest)) =>
-      let '[x, y, rest] :=
-        cast [Alpha_context.Tez.t ** Alpha_context.Script_int.num ** stack]
-          [x, y, rest] in
-      let=? ctxt :=
-        Lwt.__return (Alpha_context.Gas.consume ctxt Interp_costs.int64_op) in
-      let=? ctxt :=
-        Lwt.__return (Alpha_context.Gas.consume ctxt Interp_costs.z_to_int64) in
-      match Alpha_context.Script_int.to_int64 y with
-      | None => Error_monad.fail extensible_type_value
-      | Some y =>
-        let=? res := Lwt.__return (Alpha_context.Tez.op_starquestion x y) in
-        logged_return ((Item res rest), ctxt)
-      end
-    
-    | (Script_typed_ir.Mul_nattez, Item y (Item x rest)) =>
-      let '[y, x, rest] :=
-        cast [Alpha_context.Script_int.num ** Alpha_context.Tez.t ** stack]
-          [y, x, rest] in
-      let=? ctxt :=
-        Lwt.__return (Alpha_context.Gas.consume ctxt Interp_costs.int64_op) in
-      let=? ctxt :=
-        Lwt.__return (Alpha_context.Gas.consume ctxt Interp_costs.z_to_int64) in
-      match Alpha_context.Script_int.to_int64 y with
-      | None => Error_monad.fail extensible_type_value
-      | Some y =>
-        let=? res := Lwt.__return (Alpha_context.Tez.op_starquestion x y) in
-        logged_return ((Item res rest), ctxt)
-      end
-    
-    | (Script_typed_ir.Or, Item x (Item y rest)) =>
-      let '[x, y, rest] := cast [bool ** bool ** stack] [x, y, rest] in
-      consume_gas_binop __descr_value (Pervasives.op_pipepipe, x, y)
-        Interp_costs.bool_binop rest ctxt
-    
-    | (Script_typed_ir.And, Item x (Item y rest)) =>
-      let '[x, y, rest] := cast [bool ** bool ** stack] [x, y, rest] in
-      consume_gas_binop __descr_value (Pervasives.op_andand, x, y)
-        Interp_costs.bool_binop rest ctxt
-    
-    | (Script_typed_ir.Xor, Item x (Item y rest)) =>
-      let '[x, y, rest] := cast [bool ** bool ** stack] [x, y, rest] in
-      consume_gas_binop __descr_value
-        ((|Compare.Bool|).(Compare.S.op_ltgt), x, y) Interp_costs.bool_binop
-        rest ctxt
-    
-    | (Script_typed_ir.Not, Item x rest) =>
-      let '[x, rest] := cast [bool ** stack] [x, rest] in
-      consume_gas_unop __descr_value (Pervasives.not, x) Interp_costs.bool_unop
-        rest ctxt
-    
-    | (Script_typed_ir.Is_nat, Item x rest) =>
-      let '[x, rest] := cast [Alpha_context.Script_int.num ** stack] [x, rest]
-        in
-      consume_gas_unop __descr_value (Alpha_context.Script_int.is_nat, x)
-        Interp_costs.abs rest ctxt
-    
-    | (Script_typed_ir.Abs_int, Item x rest) =>
-      let '[x, rest] := cast [Alpha_context.Script_int.num ** stack] [x, rest]
-        in
-      consume_gas_unop __descr_value (Alpha_context.Script_int.abs, x)
-        Interp_costs.abs rest ctxt
-    
-    | (Script_typed_ir.Int_nat, Item x rest) =>
-      let '[x, rest] := cast [Alpha_context.Script_int.num ** stack] [x, rest]
-        in
-      consume_gas_unop __descr_value (Alpha_context.Script_int.__int_value, x)
-        Interp_costs.__int_value rest ctxt
-    
-    | (Script_typed_ir.Neg_int, Item x rest) =>
-      let '[x, rest] := cast [Alpha_context.Script_int.num ** stack] [x, rest]
-        in
-      consume_gas_unop __descr_value (Alpha_context.Script_int.neg, x)
-        Interp_costs.neg rest ctxt
-    
-    | (Script_typed_ir.Neg_nat, Item x rest) =>
-      let '[x, rest] := cast [Alpha_context.Script_int.num ** stack] [x, rest]
-        in
-      consume_gas_unop __descr_value (Alpha_context.Script_int.neg, x)
-        Interp_costs.neg rest ctxt
-    
-    | (Script_typed_ir.Add_intint, Item x (Item y rest)) =>
-      let '[x, y, rest] :=
-        cast
-          [Alpha_context.Script_int.num ** Alpha_context.Script_int.num **
-            stack] [x, y, rest] in
-      consume_gas_binop __descr_value (Alpha_context.Script_int.add, x, y)
-        Interp_costs.add rest ctxt
-    
-    | (Script_typed_ir.Add_intnat, Item x (Item y rest)) =>
-      let '[x, y, rest] :=
-        cast
-          [Alpha_context.Script_int.num ** Alpha_context.Script_int.num **
-            stack] [x, y, rest] in
-      consume_gas_binop __descr_value (Alpha_context.Script_int.add, x, y)
-        Interp_costs.add rest ctxt
-    
-    | (Script_typed_ir.Add_natint, Item x (Item y rest)) =>
-      let '[x, y, rest] :=
-        cast
-          [Alpha_context.Script_int.num ** Alpha_context.Script_int.num **
-            stack] [x, y, rest] in
-      consume_gas_binop __descr_value (Alpha_context.Script_int.add, x, y)
-        Interp_costs.add rest ctxt
-    
-    | (Script_typed_ir.Add_natnat, Item x (Item y rest)) =>
-      let '[x, y, rest] :=
-        cast
-          [Alpha_context.Script_int.num ** Alpha_context.Script_int.num **
-            stack] [x, y, rest] in
-      consume_gas_binop __descr_value (Alpha_context.Script_int.add_n, x, y)
-        Interp_costs.add rest ctxt
-    
-    | (Script_typed_ir.Sub_int, Item x (Item y rest)) =>
-      let '[x, y, rest] :=
-        cast
-          [Alpha_context.Script_int.num ** Alpha_context.Script_int.num **
-            stack] [x, y, rest] in
-      consume_gas_binop __descr_value (Alpha_context.Script_int.sub, x, y)
-        Interp_costs.sub rest ctxt
-    
-    | (Script_typed_ir.Mul_intint, Item x (Item y rest)) =>
-      let '[x, y, rest] :=
-        cast
-          [Alpha_context.Script_int.num ** Alpha_context.Script_int.num **
-            stack] [x, y, rest] in
-      consume_gas_binop __descr_value (Alpha_context.Script_int.mul, x, y)
-        Interp_costs.mul rest ctxt
-    
-    | (Script_typed_ir.Mul_intnat, Item x (Item y rest)) =>
-      let '[x, y, rest] :=
-        cast
-          [Alpha_context.Script_int.num ** Alpha_context.Script_int.num **
-            stack] [x, y, rest] in
-      consume_gas_binop __descr_value (Alpha_context.Script_int.mul, x, y)
-        Interp_costs.mul rest ctxt
-    
-    | (Script_typed_ir.Mul_natint, Item x (Item y rest)) =>
-      let '[x, y, rest] :=
-        cast
-          [Alpha_context.Script_int.num ** Alpha_context.Script_int.num **
-            stack] [x, y, rest] in
-      consume_gas_binop __descr_value (Alpha_context.Script_int.mul, x, y)
-        Interp_costs.mul rest ctxt
-    
-    | (Script_typed_ir.Mul_natnat, Item x (Item y rest)) =>
-      let '[x, y, rest] :=
-        cast
-          [Alpha_context.Script_int.num ** Alpha_context.Script_int.num **
-            stack] [x, y, rest] in
-      consume_gas_binop __descr_value (Alpha_context.Script_int.mul_n, x, y)
-        Interp_costs.mul rest ctxt
-    
-    | (Script_typed_ir.Ediv_teznat, Item x (Item y rest)) =>
-      let '[x, y, rest] :=
-        cast [Alpha_context.Tez.t ** Alpha_context.Script_int.num ** stack]
-          [x, y, rest] in
-      let=? ctxt :=
-        Lwt.__return (Alpha_context.Gas.consume ctxt Interp_costs.int64_to_z) in
-      let x := Alpha_context.Script_int.of_int64 (Alpha_context.Tez.to_mutez x)
-        in
-      let op
-        (x : Alpha_context.Script_int.num) (y : Alpha_context.Script_int.num)
-        : option (Alpha_context.Tez.tez * Alpha_context.Tez.tez) :=
-        match Alpha_context.Script_int.ediv x y with
-        | None => None
-        | Some (q, __r_value) =>
+    end
+  
+  | (Script_typed_ir.Or, Item x (Item y rest)) =>
+    let '[x, y, rest] := cast [bool ** bool ** stack] [x, y, rest] in
+    consume_gas_binop __descr_value (Pervasives.op_pipepipe, x, y)
+      Interp_costs.bool_binop rest ctxt
+  
+  | (Script_typed_ir.And, Item x (Item y rest)) =>
+    let '[x, y, rest] := cast [bool ** bool ** stack] [x, y, rest] in
+    consume_gas_binop __descr_value (Pervasives.op_andand, x, y)
+      Interp_costs.bool_binop rest ctxt
+  
+  | (Script_typed_ir.Xor, Item x (Item y rest)) =>
+    let '[x, y, rest] := cast [bool ** bool ** stack] [x, y, rest] in
+    consume_gas_binop __descr_value ((|Compare.Bool|).(Compare.S.op_ltgt), x, y)
+      Interp_costs.bool_binop rest ctxt
+  
+  | (Script_typed_ir.Not, Item x rest) =>
+    let '[x, rest] := cast [bool ** stack] [x, rest] in
+    consume_gas_unop __descr_value (Pervasives.not, x) Interp_costs.bool_unop
+      rest ctxt
+  
+  | (Script_typed_ir.Is_nat, Item x rest) =>
+    let '[x, rest] := cast [Alpha_context.Script_int.num ** stack] [x, rest] in
+    consume_gas_unop __descr_value (Alpha_context.Script_int.is_nat, x)
+      Interp_costs.abs rest ctxt
+  
+  | (Script_typed_ir.Abs_int, Item x rest) =>
+    let '[x, rest] := cast [Alpha_context.Script_int.num ** stack] [x, rest] in
+    consume_gas_unop __descr_value (Alpha_context.Script_int.abs, x)
+      Interp_costs.abs rest ctxt
+  
+  | (Script_typed_ir.Int_nat, Item x rest) =>
+    let '[x, rest] := cast [Alpha_context.Script_int.num ** stack] [x, rest] in
+    consume_gas_unop __descr_value (Alpha_context.Script_int.__int_value, x)
+      Interp_costs.__int_value rest ctxt
+  
+  | (Script_typed_ir.Neg_int, Item x rest) =>
+    let '[x, rest] := cast [Alpha_context.Script_int.num ** stack] [x, rest] in
+    consume_gas_unop __descr_value (Alpha_context.Script_int.neg, x)
+      Interp_costs.neg rest ctxt
+  
+  | (Script_typed_ir.Neg_nat, Item x rest) =>
+    let '[x, rest] := cast [Alpha_context.Script_int.num ** stack] [x, rest] in
+    consume_gas_unop __descr_value (Alpha_context.Script_int.neg, x)
+      Interp_costs.neg rest ctxt
+  
+  | (Script_typed_ir.Add_intint, Item x (Item y rest)) =>
+    let '[x, y, rest] :=
+      cast
+        [Alpha_context.Script_int.num ** Alpha_context.Script_int.num ** stack]
+        [x, y, rest] in
+    consume_gas_binop __descr_value (Alpha_context.Script_int.add, x, y)
+      Interp_costs.add rest ctxt
+  
+  | (Script_typed_ir.Add_intnat, Item x (Item y rest)) =>
+    let '[x, y, rest] :=
+      cast
+        [Alpha_context.Script_int.num ** Alpha_context.Script_int.num ** stack]
+        [x, y, rest] in
+    consume_gas_binop __descr_value (Alpha_context.Script_int.add, x, y)
+      Interp_costs.add rest ctxt
+  
+  | (Script_typed_ir.Add_natint, Item x (Item y rest)) =>
+    let '[x, y, rest] :=
+      cast
+        [Alpha_context.Script_int.num ** Alpha_context.Script_int.num ** stack]
+        [x, y, rest] in
+    consume_gas_binop __descr_value (Alpha_context.Script_int.add, x, y)
+      Interp_costs.add rest ctxt
+  
+  | (Script_typed_ir.Add_natnat, Item x (Item y rest)) =>
+    let '[x, y, rest] :=
+      cast
+        [Alpha_context.Script_int.num ** Alpha_context.Script_int.num ** stack]
+        [x, y, rest] in
+    consume_gas_binop __descr_value (Alpha_context.Script_int.add_n, x, y)
+      Interp_costs.add rest ctxt
+  
+  | (Script_typed_ir.Sub_int, Item x (Item y rest)) =>
+    let '[x, y, rest] :=
+      cast
+        [Alpha_context.Script_int.num ** Alpha_context.Script_int.num ** stack]
+        [x, y, rest] in
+    consume_gas_binop __descr_value (Alpha_context.Script_int.sub, x, y)
+      Interp_costs.sub rest ctxt
+  
+  | (Script_typed_ir.Mul_intint, Item x (Item y rest)) =>
+    let '[x, y, rest] :=
+      cast
+        [Alpha_context.Script_int.num ** Alpha_context.Script_int.num ** stack]
+        [x, y, rest] in
+    consume_gas_binop __descr_value (Alpha_context.Script_int.mul, x, y)
+      Interp_costs.mul rest ctxt
+  
+  | (Script_typed_ir.Mul_intnat, Item x (Item y rest)) =>
+    let '[x, y, rest] :=
+      cast
+        [Alpha_context.Script_int.num ** Alpha_context.Script_int.num ** stack]
+        [x, y, rest] in
+    consume_gas_binop __descr_value (Alpha_context.Script_int.mul, x, y)
+      Interp_costs.mul rest ctxt
+  
+  | (Script_typed_ir.Mul_natint, Item x (Item y rest)) =>
+    let '[x, y, rest] :=
+      cast
+        [Alpha_context.Script_int.num ** Alpha_context.Script_int.num ** stack]
+        [x, y, rest] in
+    consume_gas_binop __descr_value (Alpha_context.Script_int.mul, x, y)
+      Interp_costs.mul rest ctxt
+  
+  | (Script_typed_ir.Mul_natnat, Item x (Item y rest)) =>
+    let '[x, y, rest] :=
+      cast
+        [Alpha_context.Script_int.num ** Alpha_context.Script_int.num ** stack]
+        [x, y, rest] in
+    consume_gas_binop __descr_value (Alpha_context.Script_int.mul_n, x, y)
+      Interp_costs.mul rest ctxt
+  
+  | (Script_typed_ir.Ediv_teznat, Item x (Item y rest)) =>
+    let '[x, y, rest] :=
+      cast [Alpha_context.Tez.t ** Alpha_context.Script_int.num ** stack]
+        [x, y, rest] in
+    let=? ctxt :=
+      Lwt.__return (Alpha_context.Gas.consume ctxt Interp_costs.int64_to_z) in
+    let x := Alpha_context.Script_int.of_int64 (Alpha_context.Tez.to_mutez x) in
+    let op (x : Alpha_context.Script_int.num) (y : Alpha_context.Script_int.num)
+      : option (Alpha_context.Tez.tez * Alpha_context.Tez.tez) :=
+      match Alpha_context.Script_int.ediv x y with
+      | None => None
+      | Some (q, __r_value) =>
+        match
+          ((Alpha_context.Script_int.to_int64 q),
+            (Alpha_context.Script_int.to_int64 __r_value)) with
+        | (Some q, Some __r_value) =>
           match
-            ((Alpha_context.Script_int.to_int64 q),
-              (Alpha_context.Script_int.to_int64 __r_value)) with
-          | (Some q, Some __r_value) =>
-            match
-              ((Alpha_context.Tez.of_mutez q),
-                (Alpha_context.Tez.of_mutez __r_value)) with
-            | (Some q, Some __r_value) => Some (q, __r_value)
-            | _ =>
-              (* ❌ Assert instruction is not handled. *)
-              assert (option (Alpha_context.Tez.tez * Alpha_context.Tez.tez))
-                false
-            end
+            ((Alpha_context.Tez.of_mutez q),
+              (Alpha_context.Tez.of_mutez __r_value)) with
+          | (Some q, Some __r_value) => Some (q, __r_value)
           | _ =>
             (* ❌ Assert instruction is not handled. *)
             assert (option (Alpha_context.Tez.tez * Alpha_context.Tez.tez))
               false
           end
-        end in
-      consume_gas_binop __descr_value (op, x, y) Interp_costs.div rest ctxt
-    
-    | (Script_typed_ir.Ediv_tez, Item x (Item y rest)) =>
-      let '[x, y, rest] :=
-        cast [Alpha_context.Tez.t ** Alpha_context.Tez.t ** stack] [x, y, rest]
-        in
-      let=? ctxt :=
-        Lwt.__return (Alpha_context.Gas.consume ctxt Interp_costs.int64_to_z) in
-      let=? ctxt :=
-        Lwt.__return (Alpha_context.Gas.consume ctxt Interp_costs.int64_to_z) in
-      let x :=
-        Alpha_context.Script_int.abs
-          (Alpha_context.Script_int.of_int64 (Alpha_context.Tez.to_mutez x)) in
-      let y :=
-        Alpha_context.Script_int.abs
-          (Alpha_context.Script_int.of_int64 (Alpha_context.Tez.to_mutez y)) in
-      let op
-        (x : Alpha_context.Script_int.num) (y : Alpha_context.Script_int.num)
-        : option (Alpha_context.Script_int.num * Alpha_context.Tez.tez) :=
-        match Alpha_context.Script_int.ediv_n x y with
-        | None => None
-        | Some (q, __r_value) =>
-          match Alpha_context.Script_int.to_int64 __r_value with
+        | _ =>
+          (* ❌ Assert instruction is not handled. *)
+          assert (option (Alpha_context.Tez.tez * Alpha_context.Tez.tez)) false
+        end
+      end in
+    consume_gas_binop __descr_value (op, x, y) Interp_costs.div rest ctxt
+  
+  | (Script_typed_ir.Ediv_tez, Item x (Item y rest)) =>
+    let '[x, y, rest] :=
+      cast [Alpha_context.Tez.t ** Alpha_context.Tez.t ** stack] [x, y, rest] in
+    let=? ctxt :=
+      Lwt.__return (Alpha_context.Gas.consume ctxt Interp_costs.int64_to_z) in
+    let=? ctxt :=
+      Lwt.__return (Alpha_context.Gas.consume ctxt Interp_costs.int64_to_z) in
+    let x :=
+      Alpha_context.Script_int.abs
+        (Alpha_context.Script_int.of_int64 (Alpha_context.Tez.to_mutez x)) in
+    let y :=
+      Alpha_context.Script_int.abs
+        (Alpha_context.Script_int.of_int64 (Alpha_context.Tez.to_mutez y)) in
+    let op (x : Alpha_context.Script_int.num) (y : Alpha_context.Script_int.num)
+      : option (Alpha_context.Script_int.num * Alpha_context.Tez.tez) :=
+      match Alpha_context.Script_int.ediv_n x y with
+      | None => None
+      | Some (q, __r_value) =>
+        match Alpha_context.Script_int.to_int64 __r_value with
+        | None =>
+          (* ❌ Assert instruction is not handled. *)
+          assert (option (Alpha_context.Script_int.num * Alpha_context.Tez.tez))
+            false
+        | Some __r_value =>
+          match Alpha_context.Tez.of_mutez __r_value with
           | None =>
             (* ❌ Assert instruction is not handled. *)
             assert
               (option (Alpha_context.Script_int.num * Alpha_context.Tez.tez))
               false
-          | Some __r_value =>
-            match Alpha_context.Tez.of_mutez __r_value with
-            | None =>
-              (* ❌ Assert instruction is not handled. *)
-              assert
-                (option (Alpha_context.Script_int.num * Alpha_context.Tez.tez))
-                false
-            | Some __r_value => Some (q, __r_value)
-            end
+          | Some __r_value => Some (q, __r_value)
           end
-        end in
-      consume_gas_binop __descr_value (op, x, y) Interp_costs.div rest ctxt
-    
-    | (Script_typed_ir.Ediv_intint, Item x (Item y rest)) =>
-      let '[x, y, rest] :=
-        cast
-          [Alpha_context.Script_int.num ** Alpha_context.Script_int.num **
-            stack] [x, y, rest] in
-      consume_gas_binop __descr_value (Alpha_context.Script_int.ediv, x, y)
-        Interp_costs.div rest ctxt
-    
-    | (Script_typed_ir.Ediv_intnat, Item x (Item y rest)) =>
-      let '[x, y, rest] :=
-        cast
-          [Alpha_context.Script_int.num ** Alpha_context.Script_int.num **
-            stack] [x, y, rest] in
-      consume_gas_binop __descr_value (Alpha_context.Script_int.ediv, x, y)
-        Interp_costs.div rest ctxt
-    
-    | (Script_typed_ir.Ediv_natint, Item x (Item y rest)) =>
-      let '[x, y, rest] :=
-        cast
-          [Alpha_context.Script_int.num ** Alpha_context.Script_int.num **
-            stack] [x, y, rest] in
-      consume_gas_binop __descr_value (Alpha_context.Script_int.ediv, x, y)
-        Interp_costs.div rest ctxt
-    
-    | (Script_typed_ir.Ediv_natnat, Item x (Item y rest)) =>
-      let '[x, y, rest] :=
-        cast
-          [Alpha_context.Script_int.num ** Alpha_context.Script_int.num **
-            stack] [x, y, rest] in
-      consume_gas_binop __descr_value (Alpha_context.Script_int.ediv_n, x, y)
-        Interp_costs.div rest ctxt
-    
-    | (Script_typed_ir.Lsl_nat, Item x (Item y rest)) =>
-      let '[x, y, rest] :=
-        cast
-          [Alpha_context.Script_int.num ** Alpha_context.Script_int.num **
-            stack] [x, y, rest] in
+        end
+      end in
+    consume_gas_binop __descr_value (op, x, y) Interp_costs.div rest ctxt
+  
+  | (Script_typed_ir.Ediv_intint, Item x (Item y rest)) =>
+    let '[x, y, rest] :=
+      cast
+        [Alpha_context.Script_int.num ** Alpha_context.Script_int.num ** stack]
+        [x, y, rest] in
+    consume_gas_binop __descr_value (Alpha_context.Script_int.ediv, x, y)
+      Interp_costs.div rest ctxt
+  
+  | (Script_typed_ir.Ediv_intnat, Item x (Item y rest)) =>
+    let '[x, y, rest] :=
+      cast
+        [Alpha_context.Script_int.num ** Alpha_context.Script_int.num ** stack]
+        [x, y, rest] in
+    consume_gas_binop __descr_value (Alpha_context.Script_int.ediv, x, y)
+      Interp_costs.div rest ctxt
+  
+  | (Script_typed_ir.Ediv_natint, Item x (Item y rest)) =>
+    let '[x, y, rest] :=
+      cast
+        [Alpha_context.Script_int.num ** Alpha_context.Script_int.num ** stack]
+        [x, y, rest] in
+    consume_gas_binop __descr_value (Alpha_context.Script_int.ediv, x, y)
+      Interp_costs.div rest ctxt
+  
+  | (Script_typed_ir.Ediv_natnat, Item x (Item y rest)) =>
+    let '[x, y, rest] :=
+      cast
+        [Alpha_context.Script_int.num ** Alpha_context.Script_int.num ** stack]
+        [x, y, rest] in
+    consume_gas_binop __descr_value (Alpha_context.Script_int.ediv_n, x, y)
+      Interp_costs.div rest ctxt
+  
+  | (Script_typed_ir.Lsl_nat, Item x (Item y rest)) =>
+    let '[x, y, rest] :=
+      cast
+        [Alpha_context.Script_int.num ** Alpha_context.Script_int.num ** stack]
+        [x, y, rest] in
+    let=? ctxt :=
+      Lwt.__return
+        (Alpha_context.Gas.consume ctxt (Interp_costs.shift_left x y)) in
+    match Alpha_context.Script_int.shift_left_n x y with
+    | None => Error_monad.fail extensible_type_value
+    | Some x => logged_return ((Item x rest), ctxt)
+    end
+  
+  | (Script_typed_ir.Lsr_nat, Item x (Item y rest)) =>
+    let '[x, y, rest] :=
+      cast
+        [Alpha_context.Script_int.num ** Alpha_context.Script_int.num ** stack]
+        [x, y, rest] in
+    let=? ctxt :=
+      Lwt.__return
+        (Alpha_context.Gas.consume ctxt (Interp_costs.shift_right x y)) in
+    match Alpha_context.Script_int.shift_right_n x y with
+    | None => Error_monad.fail extensible_type_value
+    | Some __r_value => logged_return ((Item __r_value rest), ctxt)
+    end
+  
+  | (Script_typed_ir.Or_nat, Item x (Item y rest)) =>
+    let '[x, y, rest] :=
+      cast
+        [Alpha_context.Script_int.num ** Alpha_context.Script_int.num ** stack]
+        [x, y, rest] in
+    consume_gas_binop __descr_value (Alpha_context.Script_int.logor, x, y)
+      Interp_costs.logor rest ctxt
+  
+  | (Script_typed_ir.And_nat, Item x (Item y rest)) =>
+    let '[x, y, rest] :=
+      cast
+        [Alpha_context.Script_int.num ** Alpha_context.Script_int.num ** stack]
+        [x, y, rest] in
+    consume_gas_binop __descr_value (Alpha_context.Script_int.logand, x, y)
+      Interp_costs.logand rest ctxt
+  
+  | (Script_typed_ir.And_int_nat, Item x (Item y rest)) =>
+    let '[x, y, rest] :=
+      cast
+        [Alpha_context.Script_int.num ** Alpha_context.Script_int.num ** stack]
+        [x, y, rest] in
+    consume_gas_binop __descr_value (Alpha_context.Script_int.logand, x, y)
+      Interp_costs.logand rest ctxt
+  
+  | (Script_typed_ir.Xor_nat, Item x (Item y rest)) =>
+    let '[x, y, rest] :=
+      cast
+        [Alpha_context.Script_int.num ** Alpha_context.Script_int.num ** stack]
+        [x, y, rest] in
+    consume_gas_binop __descr_value (Alpha_context.Script_int.logxor, x, y)
+      Interp_costs.logxor rest ctxt
+  
+  | (Script_typed_ir.Not_int, Item x rest) =>
+    let '[x, rest] := cast [Alpha_context.Script_int.num ** stack] [x, rest] in
+    consume_gas_unop __descr_value (Alpha_context.Script_int.lognot, x)
+      Interp_costs.lognot rest ctxt
+  
+  | (Script_typed_ir.Not_nat, Item x rest) =>
+    let '[x, rest] := cast [Alpha_context.Script_int.num ** stack] [x, rest] in
+    consume_gas_unop __descr_value (Alpha_context.Script_int.lognot, x)
+      Interp_costs.lognot rest ctxt
+  
+  | (Script_typed_ir.Seq hd tl, __stack_value) =>
+    let '[hd, tl, __stack_value] :=
+      cast [Script_typed_ir.descr ** Script_typed_ir.descr ** stack]
+        [hd, tl, __stack_value] in
+    let=? '(trans, ctxt) := step_descr log ctxt step_constants hd __stack_value
+      in
+    step_descr log ctxt step_constants tl trans
+  
+  | (Script_typed_ir.If bt bf, Item __b_value rest) =>
+    let '[bt, bf, __b_value, rest] :=
+      cast [Script_typed_ir.descr ** Script_typed_ir.descr ** bool ** stack]
+        [bt, bf, __b_value, rest] in
+    if __b_value then
       let=? ctxt :=
-        Lwt.__return
-          (Alpha_context.Gas.consume ctxt (Interp_costs.shift_left x y)) in
-      match Alpha_context.Script_int.shift_left_n x y with
-      | None => Error_monad.fail extensible_type_value
-      | Some x => logged_return ((Item x rest), ctxt)
-      end
-    
-    | (Script_typed_ir.Lsr_nat, Item x (Item y rest)) =>
-      let '[x, y, rest] :=
-        cast
-          [Alpha_context.Script_int.num ** Alpha_context.Script_int.num **
-            stack] [x, y, rest] in
+        Lwt.__return (Alpha_context.Gas.consume ctxt Interp_costs.branch) in
+      step_descr log ctxt step_constants bt rest
+    else
       let=? ctxt :=
-        Lwt.__return
-          (Alpha_context.Gas.consume ctxt (Interp_costs.shift_right x y)) in
-      match Alpha_context.Script_int.shift_right_n x y with
-      | None => Error_monad.fail extensible_type_value
-      | Some __r_value => logged_return ((Item __r_value rest), ctxt)
-      end
-    
-    | (Script_typed_ir.Or_nat, Item x (Item y rest)) =>
-      let '[x, y, rest] :=
-        cast
-          [Alpha_context.Script_int.num ** Alpha_context.Script_int.num **
-            stack] [x, y, rest] in
-      consume_gas_binop __descr_value (Alpha_context.Script_int.logor, x, y)
-        Interp_costs.logor rest ctxt
-    
-    | (Script_typed_ir.And_nat, Item x (Item y rest)) =>
-      let '[x, y, rest] :=
-        cast
-          [Alpha_context.Script_int.num ** Alpha_context.Script_int.num **
-            stack] [x, y, rest] in
-      consume_gas_binop __descr_value (Alpha_context.Script_int.logand, x, y)
-        Interp_costs.logand rest ctxt
-    
-    | (Script_typed_ir.And_int_nat, Item x (Item y rest)) =>
-      let '[x, y, rest] :=
-        cast
-          [Alpha_context.Script_int.num ** Alpha_context.Script_int.num **
-            stack] [x, y, rest] in
-      consume_gas_binop __descr_value (Alpha_context.Script_int.logand, x, y)
-        Interp_costs.logand rest ctxt
-    
-    | (Script_typed_ir.Xor_nat, Item x (Item y rest)) =>
-      let '[x, y, rest] :=
-        cast
-          [Alpha_context.Script_int.num ** Alpha_context.Script_int.num **
-            stack] [x, y, rest] in
-      consume_gas_binop __descr_value (Alpha_context.Script_int.logxor, x, y)
-        Interp_costs.logxor rest ctxt
-    
-    | (Script_typed_ir.Not_int, Item x rest) =>
-      let '[x, rest] := cast [Alpha_context.Script_int.num ** stack] [x, rest]
-        in
-      consume_gas_unop __descr_value (Alpha_context.Script_int.lognot, x)
-        Interp_costs.lognot rest ctxt
-    
-    | (Script_typed_ir.Not_nat, Item x rest) =>
-      let '[x, rest] := cast [Alpha_context.Script_int.num ** stack] [x, rest]
-        in
-      consume_gas_unop __descr_value (Alpha_context.Script_int.lognot, x)
-        Interp_costs.lognot rest ctxt
-    
-    | (Script_typed_ir.Seq hd tl, __stack_value) =>
-      let '[hd, tl, __stack_value] :=
-        cast [Script_typed_ir.descr ** Script_typed_ir.descr ** stack]
-          [hd, tl, __stack_value] in
-      let=? '(trans, ctxt) := step log ctxt step_constants hd __stack_value in
-      step log ctxt step_constants tl trans
-    
-    | (Script_typed_ir.If bt bf, Item __b_value rest) =>
-      let '[bt, bf, __b_value, rest] :=
-        cast [Script_typed_ir.descr ** Script_typed_ir.descr ** bool ** stack]
-          [bt, bf, __b_value, rest] in
-      if __b_value then
+        Lwt.__return (Alpha_context.Gas.consume ctxt Interp_costs.branch) in
+      step_descr log ctxt step_constants bf rest
+  
+  | (Script_typed_ir.Loop body, Item __b_value rest) =>
+    let '[body, __b_value, rest] :=
+      cast [Script_typed_ir.descr ** bool ** stack] [body, __b_value, rest] in
+    if __b_value then
+      let=? ctxt :=
+        Lwt.__return (Alpha_context.Gas.consume ctxt Interp_costs.loop_cycle) in
+      let=? '(trans, ctxt) := step_descr log ctxt step_constants body rest in
+      step_descr log ctxt step_constants __descr_value trans
+    else
+      logged_return (rest, ctxt)
+  
+  | (Script_typed_ir.Loop_left body, Item v rest) =>
+    let 'existT _ [__134, __135] [body, v, rest] :=
+      cast_exists (Es := [Set ** Set])
+        (fun '[__134, __135] =>
+          [Script_typed_ir.descr ** Script_typed_ir.union __134 __135 ** stack])
+        [body, v, rest] in
+    match v with
+    | Script_typed_ir.L v =>
+      let=? ctxt :=
+        Lwt.__return (Alpha_context.Gas.consume ctxt Interp_costs.loop_cycle) in
+      let=? '(trans, ctxt) :=
+        step_descr log ctxt step_constants body (Item v rest) in
+      step_descr log ctxt step_constants __descr_value trans
+    | Script_typed_ir.R v =>
+      let=? ctxt :=
+        Lwt.__return (Alpha_context.Gas.consume ctxt Interp_costs.loop_cycle) in
+      logged_return ((Item v rest), ctxt)
+    end
+  
+  | (Script_typed_ir.Dip __b_value, Item ign rest) =>
+    let 'existT _ __137 [__b_value, ign, rest] :=
+      cast_exists (Es := Set)
+        (fun __137 => [Script_typed_ir.descr ** __137 ** stack])
+        [__b_value, ign, rest] in
+    let=? ctxt :=
+      Lwt.__return (Alpha_context.Gas.consume ctxt Interp_costs.stack_op) in
+    let=? '(res, ctxt) := step_descr log ctxt step_constants __b_value rest in
+    logged_return ((Item ign res), ctxt)
+  
+  | (Script_typed_ir.Exec, Item arg (Item lam rest)) =>
+    let 'existT _ __140 [arg, lam, rest] :=
+      cast_exists (Es := Set)
+        (fun __140 => [__140 ** Script_typed_ir.lambda ** stack])
+        [arg, lam, rest] in
+    let=? ctxt :=
+      Lwt.__return (Alpha_context.Gas.consume ctxt Interp_costs.exec) in
+    let=? '(res, ctxt) := interp log ctxt step_constants lam arg in
+    logged_return ((Item (ty := unit) res rest), ctxt)
+  
+  | (Script_typed_ir.Apply capture_ty, Item capture (Item lam rest)) =>
+    let 'existT _ __143 [capture_ty, capture, lam, rest] :=
+      cast_exists (Es := Set)
+        (fun __143 =>
+          [Script_typed_ir.ty ** __143 ** Script_typed_ir.lambda ** stack])
+        [capture_ty, capture, lam, rest] in
+    let=? ctxt :=
+      Lwt.__return (Alpha_context.Gas.consume ctxt Interp_costs.apply) in
+    let '{| Script_typed_ir.lambda.lam := (__descr_value, expr) |} := lam in
+    let full_arg_ty :=
+      match __descr_value.(Script_typed_ir.descr.bef) with
+      | Script_typed_ir.Item_t full_arg_ty _ _ => full_arg_ty
+      | _ => unreachable_gadt_branch
+      end in
+    let=? '(const_expr, ctxt) :=
+      Script_ir_translator.unparse_data ctxt Script_ir_translator.Optimized
+        capture_ty capture in
+    let=? '(ty_expr, ctxt) := Script_ir_translator.unparse_ty ctxt capture_ty in
+    match full_arg_ty with
+    | Script_typed_ir.Pair_t (capture_ty, _, _) (arg_ty, _, _) _ _ =>
+      let '[capture_ty, arg_ty] :=
+        cast [Script_typed_ir.ty ** Script_typed_ir.ty] [capture_ty, arg_ty] in
+      let arg_stack_ty :=
+        Script_typed_ir.Item_t arg_ty Script_typed_ir.Empty_t None in
+      let const_descr :=
+        {|
+          Script_typed_ir.descr.loc := __descr_value.(Script_typed_ir.descr.loc);
+          Script_typed_ir.descr.bef := arg_stack_ty;
+          Script_typed_ir.descr.aft :=
+            Script_typed_ir.Item_t capture_ty arg_stack_ty None;
+          Script_typed_ir.descr.instr := Script_typed_ir.Const capture |} in
+      let pair_descr :=
+        {|
+          Script_typed_ir.descr.loc := __descr_value.(Script_typed_ir.descr.loc);
+          Script_typed_ir.descr.bef :=
+            Script_typed_ir.Item_t capture_ty arg_stack_ty None;
+          Script_typed_ir.descr.aft :=
+            Script_typed_ir.Item_t full_arg_ty Script_typed_ir.Empty_t None;
+          Script_typed_ir.descr.instr := Script_typed_ir.Cons_pair |} in
+      let seq_descr :=
+        {|
+          Script_typed_ir.descr.loc := __descr_value.(Script_typed_ir.descr.loc);
+          Script_typed_ir.descr.bef := arg_stack_ty;
+          Script_typed_ir.descr.aft :=
+            Script_typed_ir.Item_t full_arg_ty Script_typed_ir.Empty_t None;
+          Script_typed_ir.descr.instr :=
+            Script_typed_ir.Seq const_descr pair_descr |} in
+      let full_descr :=
+        {|
+          Script_typed_ir.descr.loc := __descr_value.(Script_typed_ir.descr.loc);
+          Script_typed_ir.descr.bef := arg_stack_ty;
+          Script_typed_ir.descr.aft := __descr_value.(Script_typed_ir.descr.aft);
+          Script_typed_ir.descr.instr :=
+            Script_typed_ir.Seq seq_descr __descr_value |} in
+      let full_expr :=
+        Micheline.Seq 0
+          [
+            Micheline.Prim 0 Alpha_context.Script.I_PUSH [ ty_expr; const_expr ]
+              nil;
+            Micheline.Prim 0 Alpha_context.Script.I_PAIR nil nil;
+            expr
+          ] in
+      let lam' := {| Script_typed_ir.lambda.lam := (full_descr, full_expr) |} in
+      logged_return ((Item lam' rest), ctxt)
+    | _ =>
+      (* ❌ Assert instruction is not handled. *)
+      assert (Lwt.t (Error_monad.tzresult (stack * Alpha_context.context)))
+        false
+    end
+  
+  | (Script_typed_ir.Lambda lam, rest) =>
+    let '[lam, rest] := cast [Script_typed_ir.lambda ** stack] [lam, rest] in
+    let=? ctxt :=
+      Lwt.__return (Alpha_context.Gas.consume ctxt Interp_costs.push) in
+    logged_return ((Item lam rest), ctxt)
+  
+  | (Script_typed_ir.Failwith tv, Item v _) =>
+    let 'existT _ __149 [tv, v] :=
+      cast_exists (Es := Set) (fun __149 => [Script_typed_ir.ty ** __149])
+        [tv, v] in
+    let=? '(v, _ctxt) :=
+      Error_monad.trace extensible_type_value
+        (Script_ir_translator.unparse_data ctxt Script_ir_translator.Optimized
+          tv v) in
+    let v := Micheline.strip_locations v in
+    Error_monad.fail extensible_type_value
+  
+  | (Script_typed_ir.Nop, __stack_value) =>
+    let __stack_value := cast stack __stack_value in
+    logged_return (__stack_value, ctxt)
+  
+  | (Script_typed_ir.Compare ty, Item __a_value (Item __b_value rest)) =>
+    let 'existT _ __151 [ty, __a_value, __b_value, rest] :=
+      cast_exists (Es := Set)
+        (fun __151 => [Script_typed_ir.comparable_ty ** __151 ** __151 ** stack])
+        [ty, __a_value, __b_value, rest] in
+    let=? ctxt :=
+      Lwt.__return
+        (Alpha_context.Gas.consume ctxt
+          (Interp_costs.compare ty __a_value __b_value)) in
+    logged_return
+      ((Item
+        (Alpha_context.Script_int.of_int
+          (Script_ir_translator.compare_comparable ty __a_value __b_value)) rest),
+        ctxt)
+  
+  | (Script_typed_ir.Eq, Item cmpres rest) =>
+    let '[cmpres, rest] :=
+      cast [Alpha_context.Script_int.num ** stack] [cmpres, rest] in
+    let cmpres :=
+      Alpha_context.Script_int.compare cmpres Alpha_context.Script_int.zero in
+    let cmpres := (|Compare.Int|).(Compare.S.op_eq) cmpres 0 in
+    let=? ctxt :=
+      Lwt.__return (Alpha_context.Gas.consume ctxt Interp_costs.compare_res) in
+    logged_return ((Item cmpres rest), ctxt)
+  
+  | (Script_typed_ir.Neq, Item cmpres rest) =>
+    let '[cmpres, rest] :=
+      cast [Alpha_context.Script_int.num ** stack] [cmpres, rest] in
+    let cmpres :=
+      Alpha_context.Script_int.compare cmpres Alpha_context.Script_int.zero in
+    let cmpres := (|Compare.Int|).(Compare.S.op_ltgt) cmpres 0 in
+    let=? ctxt :=
+      Lwt.__return (Alpha_context.Gas.consume ctxt Interp_costs.compare_res) in
+    logged_return ((Item cmpres rest), ctxt)
+  
+  | (Script_typed_ir.Lt, Item cmpres rest) =>
+    let '[cmpres, rest] :=
+      cast [Alpha_context.Script_int.num ** stack] [cmpres, rest] in
+    let cmpres :=
+      Alpha_context.Script_int.compare cmpres Alpha_context.Script_int.zero in
+    let cmpres := (|Compare.Int|).(Compare.S.op_lt) cmpres 0 in
+    let=? ctxt :=
+      Lwt.__return (Alpha_context.Gas.consume ctxt Interp_costs.compare_res) in
+    logged_return ((Item cmpres rest), ctxt)
+  
+  | (Script_typed_ir.Le, Item cmpres rest) =>
+    let '[cmpres, rest] :=
+      cast [Alpha_context.Script_int.num ** stack] [cmpres, rest] in
+    let cmpres :=
+      Alpha_context.Script_int.compare cmpres Alpha_context.Script_int.zero in
+    let cmpres := (|Compare.Int|).(Compare.S.op_lteq) cmpres 0 in
+    let=? ctxt :=
+      Lwt.__return (Alpha_context.Gas.consume ctxt Interp_costs.compare_res) in
+    logged_return ((Item cmpres rest), ctxt)
+  
+  | (Script_typed_ir.Gt, Item cmpres rest) =>
+    let '[cmpres, rest] :=
+      cast [Alpha_context.Script_int.num ** stack] [cmpres, rest] in
+    let cmpres :=
+      Alpha_context.Script_int.compare cmpres Alpha_context.Script_int.zero in
+    let cmpres := (|Compare.Int|).(Compare.S.op_gt) cmpres 0 in
+    let=? ctxt :=
+      Lwt.__return (Alpha_context.Gas.consume ctxt Interp_costs.compare_res) in
+    logged_return ((Item cmpres rest), ctxt)
+  
+  | (Script_typed_ir.Ge, Item cmpres rest) =>
+    let '[cmpres, rest] :=
+      cast [Alpha_context.Script_int.num ** stack] [cmpres, rest] in
+    let cmpres :=
+      Alpha_context.Script_int.compare cmpres Alpha_context.Script_int.zero in
+    let cmpres := (|Compare.Int|).(Compare.S.op_gteq) cmpres 0 in
+    let=? ctxt :=
+      Lwt.__return (Alpha_context.Gas.consume ctxt Interp_costs.compare_res) in
+    logged_return ((Item cmpres rest), ctxt)
+  
+  | (Script_typed_ir.Pack __t_value, Item value rest) =>
+    let 'existT _ __159 [__t_value, value, rest] :=
+      cast_exists (Es := Set)
+        (fun __159 => [Script_typed_ir.ty ** __159 ** stack])
+        [__t_value, value, rest] in
+    let=? '(__bytes_value, ctxt) :=
+      Script_ir_translator.pack_data ctxt __t_value value in
+    logged_return ((Item __bytes_value rest), ctxt)
+  
+  | (Script_typed_ir.Unpack __t_value, Item __bytes_value rest) =>
+    let '[__t_value, __bytes_value, rest] :=
+      cast [Script_typed_ir.ty ** MBytes.t ** stack]
+        [__t_value, __bytes_value, rest] in
+    let=? '_ :=
+      Lwt.__return
+        (Alpha_context.Gas.check_enough ctxt
+          (Alpha_context.Script.serialized_cost __bytes_value)) in
+    if
+      Pervasives.op_andand
+        ((|Compare.Int|).(Compare.S.op_gteq) (MBytes.length __bytes_value) 1)
+        ((|Compare.Int|).(Compare.S.op_eq) (MBytes.get_uint8 __bytes_value 0) 5)
+      then
+      let __bytes_value :=
+        MBytes.sub __bytes_value 1
+          (Pervasives.op_minus (MBytes.length __bytes_value) 1) in
+      match
+        Data_encoding.Binary.of_bytes Alpha_context.Script.expr_encoding
+          __bytes_value with
+      | None =>
         let=? ctxt :=
-          Lwt.__return (Alpha_context.Gas.consume ctxt Interp_costs.branch) in
-        step log ctxt step_constants bt rest
-      else
+          Lwt.__return
+            (Alpha_context.Gas.consume ctxt
+              (Interp_costs.unpack_failed __bytes_value)) in
+        logged_return ((Item (None (A := unit)) rest), ctxt)
+      | Some expr =>
         let=? ctxt :=
-          Lwt.__return (Alpha_context.Gas.consume ctxt Interp_costs.branch) in
-        step log ctxt step_constants bf rest
-    
-    | (Script_typed_ir.Loop body, Item __b_value rest) =>
-      let '[body, __b_value, rest] :=
-        cast [Script_typed_ir.descr ** bool ** stack] [body, __b_value, rest] in
-      if __b_value then
-        let=? ctxt :=
-          Lwt.__return (Alpha_context.Gas.consume ctxt Interp_costs.loop_cycle)
-          in
-        let=? '(trans, ctxt) := step log ctxt step_constants body rest in
-        step log ctxt step_constants __descr_value trans
-      else
-        logged_return (rest, ctxt)
-    
-    | (Script_typed_ir.Loop_left body, Item v rest) =>
-      let 'existT _ [__139, __140] [body, v, rest] :=
-        cast_exists (Es := [Set ** Set])
-          (fun '[__139, __140] =>
-            [Script_typed_ir.descr ** Script_typed_ir.union __139 __140 **
-              stack]) [body, v, rest] in
-      match v with
-      | Script_typed_ir.L v =>
-        let=? ctxt :=
-          Lwt.__return (Alpha_context.Gas.consume ctxt Interp_costs.loop_cycle)
-          in
-        let=? '(trans, ctxt) := step log ctxt step_constants body (Item v rest)
-          in
-        step log ctxt step_constants __descr_value trans
-      | Script_typed_ir.R v =>
-        let=? ctxt :=
-          Lwt.__return (Alpha_context.Gas.consume ctxt Interp_costs.loop_cycle)
-          in
-        logged_return ((Item v rest), ctxt)
-      end
-    
-    | (Script_typed_ir.Dip __b_value, Item ign rest) =>
-      let 'existT _ __142 [__b_value, ign, rest] :=
-        cast_exists (Es := Set)
-          (fun __142 => [Script_typed_ir.descr ** __142 ** stack])
-          [__b_value, ign, rest] in
-      let=? ctxt :=
-        Lwt.__return (Alpha_context.Gas.consume ctxt Interp_costs.stack_op) in
-      let=? '(res, ctxt) := step log ctxt step_constants __b_value rest in
-      logged_return ((Item ign res), ctxt)
-    
-    | (Script_typed_ir.Exec, Item arg (Item lam rest)) =>
-      let 'existT _ __145 [arg, lam, rest] :=
-        cast_exists (Es := Set)
-          (fun __145 => [__145 ** Script_typed_ir.lambda ** stack])
-          [arg, lam, rest] in
-      let=? ctxt :=
-        Lwt.__return (Alpha_context.Gas.consume ctxt Interp_costs.exec) in
-      let=? '(res, ctxt) := interp log ctxt step_constants lam arg in
-      logged_return ((Item (ty := unit) res rest), ctxt)
-    
-    | (Script_typed_ir.Apply capture_ty, Item capture (Item lam rest)) =>
-      let 'existT _ __148 [capture_ty, capture, lam, rest] :=
-        cast_exists (Es := Set)
-          (fun __148 =>
-            [Script_typed_ir.ty ** __148 ** Script_typed_ir.lambda ** stack])
-          [capture_ty, capture, lam, rest] in
-      let=? ctxt :=
-        Lwt.__return (Alpha_context.Gas.consume ctxt Interp_costs.apply) in
-      let '{| Script_typed_ir.lambda.lam := (__descr_value, expr) |} := lam in
-      let full_arg_ty :=
-        match __descr_value.(Script_typed_ir.descr.bef) with
-        | Script_typed_ir.Item_t full_arg_ty _ _ => full_arg_ty
-        | _ => unreachable_gadt_branch
-        end in
-      let=? '(const_expr, ctxt) :=
-        Script_ir_translator.unparse_data ctxt Script_ir_translator.Optimized
-          capture_ty capture in
-      let=? '(ty_expr, ctxt) := Script_ir_translator.unparse_ty ctxt capture_ty
-        in
-      match full_arg_ty with
-      | Script_typed_ir.Pair_t (capture_ty, _, _) (arg_ty, _, _) _ _ =>
-        let '[capture_ty, arg_ty] :=
-          cast [Script_typed_ir.ty ** Script_typed_ir.ty] [capture_ty, arg_ty]
-          in
-        let arg_stack_ty :=
-          Script_typed_ir.Item_t arg_ty Script_typed_ir.Empty_t None in
-        let const_descr :=
-          {|
-            Script_typed_ir.descr.loc :=
-              __descr_value.(Script_typed_ir.descr.loc);
-            Script_typed_ir.descr.bef := arg_stack_ty;
-            Script_typed_ir.descr.aft :=
-              Script_typed_ir.Item_t capture_ty arg_stack_ty None;
-            Script_typed_ir.descr.instr := Script_typed_ir.Const capture |} in
-        let pair_descr :=
-          {|
-            Script_typed_ir.descr.loc :=
-              __descr_value.(Script_typed_ir.descr.loc);
-            Script_typed_ir.descr.bef :=
-              Script_typed_ir.Item_t capture_ty arg_stack_ty None;
-            Script_typed_ir.descr.aft :=
-              Script_typed_ir.Item_t full_arg_ty Script_typed_ir.Empty_t None;
-            Script_typed_ir.descr.instr := Script_typed_ir.Cons_pair |} in
-        let seq_descr :=
-          {|
-            Script_typed_ir.descr.loc :=
-              __descr_value.(Script_typed_ir.descr.loc);
-            Script_typed_ir.descr.bef := arg_stack_ty;
-            Script_typed_ir.descr.aft :=
-              Script_typed_ir.Item_t full_arg_ty Script_typed_ir.Empty_t None;
-            Script_typed_ir.descr.instr :=
-              Script_typed_ir.Seq const_descr pair_descr |} in
-        let full_descr :=
-          {|
-            Script_typed_ir.descr.loc :=
-              __descr_value.(Script_typed_ir.descr.loc);
-            Script_typed_ir.descr.bef := arg_stack_ty;
-            Script_typed_ir.descr.aft :=
-              __descr_value.(Script_typed_ir.descr.aft);
-            Script_typed_ir.descr.instr :=
-              Script_typed_ir.Seq seq_descr __descr_value |} in
-        let full_expr :=
-          Micheline.Seq 0
-            [
-              Micheline.Prim 0 Alpha_context.Script.I_PUSH
-                [ ty_expr; const_expr ] nil;
-              Micheline.Prim 0 Alpha_context.Script.I_PAIR nil nil;
-              expr
-            ] in
-        let lam' := {| Script_typed_ir.lambda.lam := (full_descr, full_expr) |}
-          in
-        logged_return ((Item lam' rest), ctxt)
-      | _ =>
-        (* ❌ Assert instruction is not handled. *)
-        assert (Lwt.t (Error_monad.tzresult (stack * Alpha_context.context)))
-          false
-      end
-    
-    | (Script_typed_ir.Lambda lam, rest) =>
-      let '[lam, rest] := cast [Script_typed_ir.lambda ** stack] [lam, rest] in
-      let=? ctxt :=
-        Lwt.__return (Alpha_context.Gas.consume ctxt Interp_costs.push) in
-      logged_return ((Item lam rest), ctxt)
-    
-    | (Script_typed_ir.Failwith tv, Item v _) =>
-      let 'existT _ __154 [tv, v] :=
-        cast_exists (Es := Set) (fun __154 => [Script_typed_ir.ty ** __154])
-          [tv, v] in
-      let=? '(v, _ctxt) :=
-        Error_monad.trace extensible_type_value
-          (Script_ir_translator.unparse_data ctxt Script_ir_translator.Optimized
-            tv v) in
-      let v := Micheline.strip_locations v in
-      Error_monad.fail extensible_type_value
-    
-    | (Script_typed_ir.Nop, __stack_value) =>
-      let __stack_value := cast stack __stack_value in
-      logged_return (__stack_value, ctxt)
-    
-    | (Script_typed_ir.Compare ty, Item __a_value (Item __b_value rest)) =>
-      let 'existT _ __156 [ty, __a_value, __b_value, rest] :=
-        cast_exists (Es := Set)
-          (fun __156 =>
-            [Script_typed_ir.comparable_ty ** __156 ** __156 ** stack])
-          [ty, __a_value, __b_value, rest] in
-      let=? ctxt :=
-        Lwt.__return
-          (Alpha_context.Gas.consume ctxt
-            (Interp_costs.compare ty __a_value __b_value)) in
-      logged_return
-        ((Item
-          (Alpha_context.Script_int.of_int
-            (Script_ir_translator.compare_comparable ty __a_value __b_value))
-          rest), ctxt)
-    
-    | (Script_typed_ir.Eq, Item cmpres rest) =>
-      let '[cmpres, rest] :=
-        cast [Alpha_context.Script_int.num ** stack] [cmpres, rest] in
-      let cmpres :=
-        Alpha_context.Script_int.compare cmpres Alpha_context.Script_int.zero in
-      let cmpres := (|Compare.Int|).(Compare.S.op_eq) cmpres 0 in
-      let=? ctxt :=
-        Lwt.__return (Alpha_context.Gas.consume ctxt Interp_costs.compare_res)
-        in
-      logged_return ((Item cmpres rest), ctxt)
-    
-    | (Script_typed_ir.Neq, Item cmpres rest) =>
-      let '[cmpres, rest] :=
-        cast [Alpha_context.Script_int.num ** stack] [cmpres, rest] in
-      let cmpres :=
-        Alpha_context.Script_int.compare cmpres Alpha_context.Script_int.zero in
-      let cmpres := (|Compare.Int|).(Compare.S.op_ltgt) cmpres 0 in
-      let=? ctxt :=
-        Lwt.__return (Alpha_context.Gas.consume ctxt Interp_costs.compare_res)
-        in
-      logged_return ((Item cmpres rest), ctxt)
-    
-    | (Script_typed_ir.Lt, Item cmpres rest) =>
-      let '[cmpres, rest] :=
-        cast [Alpha_context.Script_int.num ** stack] [cmpres, rest] in
-      let cmpres :=
-        Alpha_context.Script_int.compare cmpres Alpha_context.Script_int.zero in
-      let cmpres := (|Compare.Int|).(Compare.S.op_lt) cmpres 0 in
-      let=? ctxt :=
-        Lwt.__return (Alpha_context.Gas.consume ctxt Interp_costs.compare_res)
-        in
-      logged_return ((Item cmpres rest), ctxt)
-    
-    | (Script_typed_ir.Le, Item cmpres rest) =>
-      let '[cmpres, rest] :=
-        cast [Alpha_context.Script_int.num ** stack] [cmpres, rest] in
-      let cmpres :=
-        Alpha_context.Script_int.compare cmpres Alpha_context.Script_int.zero in
-      let cmpres := (|Compare.Int|).(Compare.S.op_lteq) cmpres 0 in
-      let=? ctxt :=
-        Lwt.__return (Alpha_context.Gas.consume ctxt Interp_costs.compare_res)
-        in
-      logged_return ((Item cmpres rest), ctxt)
-    
-    | (Script_typed_ir.Gt, Item cmpres rest) =>
-      let '[cmpres, rest] :=
-        cast [Alpha_context.Script_int.num ** stack] [cmpres, rest] in
-      let cmpres :=
-        Alpha_context.Script_int.compare cmpres Alpha_context.Script_int.zero in
-      let cmpres := (|Compare.Int|).(Compare.S.op_gt) cmpres 0 in
-      let=? ctxt :=
-        Lwt.__return (Alpha_context.Gas.consume ctxt Interp_costs.compare_res)
-        in
-      logged_return ((Item cmpres rest), ctxt)
-    
-    | (Script_typed_ir.Ge, Item cmpres rest) =>
-      let '[cmpres, rest] :=
-        cast [Alpha_context.Script_int.num ** stack] [cmpres, rest] in
-      let cmpres :=
-        Alpha_context.Script_int.compare cmpres Alpha_context.Script_int.zero in
-      let cmpres := (|Compare.Int|).(Compare.S.op_gteq) cmpres 0 in
-      let=? ctxt :=
-        Lwt.__return (Alpha_context.Gas.consume ctxt Interp_costs.compare_res)
-        in
-      logged_return ((Item cmpres rest), ctxt)
-    
-    | (Script_typed_ir.Pack __t_value, Item value rest) =>
-      let 'existT _ __164 [__t_value, value, rest] :=
-        cast_exists (Es := Set)
-          (fun __164 => [Script_typed_ir.ty ** __164 ** stack])
-          [__t_value, value, rest] in
-      let=? '(__bytes_value, ctxt) :=
-        Script_ir_translator.pack_data ctxt __t_value value in
-      logged_return ((Item __bytes_value rest), ctxt)
-    
-    | (Script_typed_ir.Unpack __t_value, Item __bytes_value rest) =>
-      let '[__t_value, __bytes_value, rest] :=
-        cast [Script_typed_ir.ty ** MBytes.t ** stack]
-          [__t_value, __bytes_value, rest] in
-      let=? '_ :=
-        Lwt.__return
-          (Alpha_context.Gas.check_enough ctxt
-            (Alpha_context.Script.serialized_cost __bytes_value)) in
-      if
-        Pervasives.op_andand
-          ((|Compare.Int|).(Compare.S.op_gteq) (MBytes.length __bytes_value) 1)
-          ((|Compare.Int|).(Compare.S.op_eq) (MBytes.get_uint8 __bytes_value 0)
-            5) then
-        let __bytes_value :=
-          MBytes.sub __bytes_value 1
-            (Pervasives.op_minus (MBytes.length __bytes_value) 1) in
-        match
-          Data_encoding.Binary.of_bytes Alpha_context.Script.expr_encoding
-            __bytes_value with
-        | None =>
+          Lwt.__return
+            (Alpha_context.Gas.consume ctxt
+              (Alpha_context.Script.deserialized_cost expr)) in
+        let= function_parameter :=
+          (Script_ir_translator.parse_data (a := unit)) None ctxt false
+            __t_value (Micheline.root expr) in
+        match function_parameter with
+        | Pervasives.Ok (value, ctxt) =>
+          logged_return ((Item (Some value) rest), ctxt)
+        | Pervasives.Error _ignored =>
           let=? ctxt :=
             Lwt.__return
               (Alpha_context.Gas.consume ctxt
                 (Interp_costs.unpack_failed __bytes_value)) in
           logged_return ((Item (None (A := unit)) rest), ctxt)
-        | Some expr =>
-          let=? ctxt :=
-            Lwt.__return
-              (Alpha_context.Gas.consume ctxt
-                (Alpha_context.Script.deserialized_cost expr)) in
-          let= function_parameter :=
-            (Script_ir_translator.parse_data (a := unit)) None ctxt false
-              __t_value (Micheline.root expr) in
-          match function_parameter with
-          | Pervasives.Ok (value, ctxt) =>
-            logged_return ((Item (Some value) rest), ctxt)
-          | Pervasives.Error _ignored =>
-            let=? ctxt :=
-              Lwt.__return
-                (Alpha_context.Gas.consume ctxt
-                  (Interp_costs.unpack_failed __bytes_value)) in
-            logged_return ((Item (None (A := unit)) rest), ctxt)
-          end
         end
-      else
-        logged_return ((Item (None (A := unit)) rest), ctxt)
-    
-    | (Script_typed_ir.Address, Item pair rest) =>
-      let '[pair, rest] :=
-        cast [Script_typed_ir.typed_contract ** stack] [pair, rest] in
-      let '(_, address) := pair in
-      let=? ctxt :=
-        Lwt.__return (Alpha_context.Gas.consume ctxt Interp_costs.address) in
-      logged_return ((Item address rest), ctxt)
-    
-    | (Script_typed_ir.Contract __t_value entrypoint, Item contract rest) =>
-      let '[__t_value, entrypoint, contract, rest] :=
-        cast [Script_typed_ir.ty ** string ** Script_typed_ir.address ** stack]
-          [__t_value, entrypoint, contract, rest] in
-      let=? ctxt :=
-        Lwt.__return (Alpha_context.Gas.consume ctxt Interp_costs.contract) in
-      match (contract, entrypoint) with
-      |
-        (((contract, "default"), entrypoint) |
-        ((contract, entrypoint), "default")) =>
-        let=? '(ctxt, maybe_contract) :=
-          Script_ir_translator.parse_contract_for_script false ctxt loc
-            __t_value contract entrypoint in
-        logged_return ((Item maybe_contract rest), ctxt)
-      | _ => logged_return ((Item (None (A := unit)) rest), ctxt)
       end
-    
-    |
-      (Script_typed_ir.Transfer_tokens,
-        Item __p_value (Item amount (Item triple rest))) =>
-      let 'existT _ __172 [__p_value, amount, triple, rest] :=
-        cast_exists (Es := Set)
-          (fun __172 =>
-            [__172 ** Alpha_context.Tez.t ** Script_typed_ir.typed_contract **
-              stack]) [__p_value, amount, triple, rest] in
-      let '(tp, (destination, entrypoint)) := triple in
-      let=? ctxt :=
-        Lwt.__return (Alpha_context.Gas.consume ctxt Interp_costs.transfer) in
-      let=? '(to_duplicate, ctxt) :=
-        Script_ir_translator.collect_big_maps ctxt tp __p_value in
-      let to_update := Script_ir_translator.no_big_map_id in
-      let=? '(__p_value, big_map_diff, ctxt) :=
-        Script_ir_translator.extract_big_map_diff ctxt
-          Script_ir_translator.Optimized true to_duplicate to_update tp
-          __p_value in
-      let=? '(__p_value, ctxt) :=
-        Script_ir_translator.unparse_data ctxt Script_ir_translator.Optimized tp
-          __p_value in
-      let operation :=
-        Alpha_context.Transaction
-          {| Alpha_context.manager_operation.Transaction.amount := amount;
-            Alpha_context.manager_operation.Transaction.parameters :=
-              Alpha_context.Script.__lazy_expr_value
-                (Micheline.strip_locations __p_value);
-            Alpha_context.manager_operation.Transaction.entrypoint := entrypoint;
-            Alpha_context.manager_operation.Transaction.destination :=
-              destination |} in
-      let=? '(ctxt, __nonce_value) :=
-        Lwt.__return (Alpha_context.fresh_internal_nonce ctxt) in
-      logged_return
-        ((Item
-          ((Alpha_context.Internal_operation
-            {|
-              Alpha_context.internal_operation.source :=
-                step_constants.(step_constants.self);
-              Alpha_context.internal_operation.operation := operation;
-              Alpha_context.internal_operation.nonce := __nonce_value |}),
-            big_map_diff) rest), ctxt)
-    
-    |
-      (Script_typed_ir.Create_account,
-        Item manager (Item delegate (Item _delegatable (Item credit rest)))) =>
-      let '[manager, delegate, _delegatable, credit, rest] :=
-        cast
-          [Alpha_context.public_key_hash ** option Alpha_context.public_key_hash
-            ** bool ** Alpha_context.Tez.t ** stack]
-          [manager, delegate, _delegatable, credit, rest] in
-      let=? ctxt :=
-        Lwt.__return
-          (Alpha_context.Gas.consume ctxt Interp_costs.create_account) in
-      let=? '(ctxt, contract) :=
-        Alpha_context.Contract.fresh_contract_from_current_nonce ctxt in
-      let manager_bytes :=
-        Data_encoding.Binary.to_bytes_exn
-          (|Signature.Public_key_hash|).(S.SPublic_key_hash.encoding) manager in
-      let storage :=
-        Script_repr.__lazy_expr_value
-          (Micheline.strip_locations (Micheline.Bytes 0 manager_bytes)) in
-      let script :=
-        {|
-          Alpha_context.Script.t.code :=
-            Alpha_context.Script.Legacy_support.manager_script_code;
-          Alpha_context.Script.t.storage := storage |} in
-      let operation :=
-        Alpha_context.Origination
-          {| Alpha_context.manager_operation.Origination.delegate := delegate;
-            Alpha_context.manager_operation.Origination.script := script;
-            Alpha_context.manager_operation.Origination.credit := credit;
-            Alpha_context.manager_operation.Origination.preorigination :=
-              Some contract |} in
-      let=? '(ctxt, __nonce_value) :=
-        Lwt.__return (Alpha_context.fresh_internal_nonce ctxt) in
-      logged_return
-        ((Item
-          ((Alpha_context.Internal_operation
-            {|
-              Alpha_context.internal_operation.source :=
-                step_constants.(step_constants.self);
-              Alpha_context.internal_operation.operation := operation;
-              Alpha_context.internal_operation.nonce := __nonce_value |}),
-            (None (A := unit))) (Item (contract, "default") rest)), ctxt)
-    
-    | (Script_typed_ir.Implicit_account, Item __key_value rest) =>
-      let '[__key_value, rest] :=
-        cast [Alpha_context.public_key_hash ** stack] [__key_value, rest] in
-      let=? ctxt :=
-        Lwt.__return
-          (Alpha_context.Gas.consume ctxt Interp_costs.implicit_account) in
-      let contract := Alpha_context.Contract.implicit_contract __key_value in
-      logged_return
-        ((Item ((Script_typed_ir.Unit_t None), (contract, "default")) rest),
-          ctxt)
-    
-    |
-      (Script_typed_ir.Create_contract storage_type param_type {|
-        Script_typed_ir.lambda.lam := (_, code) |} root_name,
-        Item manager
-          (Item delegate
-            (Item spendable (Item delegatable (Item credit (Item init rest))))))
-      =>
-      let 'existT _ __176
+    else
+      logged_return ((Item (None (A := unit)) rest), ctxt)
+  
+  | (Script_typed_ir.Address, Item pair rest) =>
+    let '[pair, rest] :=
+      cast [Script_typed_ir.typed_contract ** stack] [pair, rest] in
+    let '(_, address) := pair in
+    let=? ctxt :=
+      Lwt.__return (Alpha_context.Gas.consume ctxt Interp_costs.address) in
+    logged_return ((Item address rest), ctxt)
+  
+  | (Script_typed_ir.Contract __t_value entrypoint, Item contract rest) =>
+    let '[__t_value, entrypoint, contract, rest] :=
+      cast [Script_typed_ir.ty ** string ** Script_typed_ir.address ** stack]
+        [__t_value, entrypoint, contract, rest] in
+    let=? ctxt :=
+      Lwt.__return (Alpha_context.Gas.consume ctxt Interp_costs.contract) in
+    let '(contract, entrypoint') := contract in
+    let entrypoint :=
+      match (entrypoint, entrypoint') with
+      | ("default", entrypoint) => Some entrypoint
+      | (entrypoint, "default") => Some entrypoint
+      | _ => None
+      end in
+    match entrypoint with
+    | Some entrypoint =>
+      let=? '(ctxt, maybe_contract) :=
+        Script_ir_translator.parse_contract_for_script false ctxt loc __t_value
+          contract entrypoint in
+      logged_return ((Item maybe_contract rest), ctxt)
+    | _ => logged_return ((Item (None (A := unit)) rest), ctxt)
+    end
+  
+  |
+    (Script_typed_ir.Transfer_tokens,
+      Item __p_value (Item amount (Item triple rest))) =>
+    let 'existT _ __167 [__p_value, amount, triple, rest] :=
+      cast_exists (Es := Set)
+        (fun __167 =>
+          [__167 ** Alpha_context.Tez.t ** Script_typed_ir.typed_contract **
+            stack]) [__p_value, amount, triple, rest] in
+    let '(tp, (destination, entrypoint)) := triple in
+    let=? ctxt :=
+      Lwt.__return (Alpha_context.Gas.consume ctxt Interp_costs.transfer) in
+    let=? '(to_duplicate, ctxt) :=
+      Script_ir_translator.collect_big_maps ctxt tp __p_value in
+    let to_update := Script_ir_translator.no_big_map_id in
+    let=? '(__p_value, big_map_diff, ctxt) :=
+      Script_ir_translator.extract_big_map_diff ctxt
+        Script_ir_translator.Optimized true to_duplicate to_update tp __p_value
+      in
+    let=? '(__p_value, ctxt) :=
+      Script_ir_translator.unparse_data ctxt Script_ir_translator.Optimized tp
+        __p_value in
+    let operation :=
+      Alpha_context.Transaction
+        {| Alpha_context.manager_operation.Transaction.amount := amount;
+          Alpha_context.manager_operation.Transaction.parameters :=
+            Alpha_context.Script.__lazy_expr_value
+              (Micheline.strip_locations __p_value);
+          Alpha_context.manager_operation.Transaction.entrypoint := entrypoint;
+          Alpha_context.manager_operation.Transaction.destination := destination
+          |} in
+    let=? '(ctxt, __nonce_value) :=
+      Lwt.__return (Alpha_context.fresh_internal_nonce ctxt) in
+    logged_return
+      ((Item
+        ((Alpha_context.Internal_operation
+          {|
+            Alpha_context.internal_operation.source :=
+              step_constants.(step_constants.self);
+            Alpha_context.internal_operation.operation := operation;
+            Alpha_context.internal_operation.nonce := __nonce_value |}),
+          big_map_diff) rest), ctxt)
+  
+  |
+    (Script_typed_ir.Create_account,
+      Item manager (Item delegate (Item _delegatable (Item credit rest)))) =>
+    let '[manager, delegate, _delegatable, credit, rest] :=
+      cast
+        [Alpha_context.public_key_hash ** option Alpha_context.public_key_hash
+          ** bool ** Alpha_context.Tez.t ** stack]
+        [manager, delegate, _delegatable, credit, rest] in
+    let=? ctxt :=
+      Lwt.__return (Alpha_context.Gas.consume ctxt Interp_costs.create_account)
+      in
+    let=? '(ctxt, contract) :=
+      Alpha_context.Contract.fresh_contract_from_current_nonce ctxt in
+    let manager_bytes :=
+      Data_encoding.Binary.to_bytes_exn
+        (|Signature.Public_key_hash|).(S.SPublic_key_hash.encoding) manager in
+    let storage :=
+      Script_repr.__lazy_expr_value
+        (Micheline.strip_locations (Micheline.Bytes 0 manager_bytes)) in
+    let script :=
+      {|
+        Alpha_context.Script.t.code :=
+          Alpha_context.Script.Legacy_support.manager_script_code;
+        Alpha_context.Script.t.storage := storage |} in
+    let operation :=
+      Alpha_context.Origination
+        {| Alpha_context.manager_operation.Origination.delegate := delegate;
+          Alpha_context.manager_operation.Origination.script := script;
+          Alpha_context.manager_operation.Origination.credit := credit;
+          Alpha_context.manager_operation.Origination.preorigination :=
+            Some contract |} in
+    let=? '(ctxt, __nonce_value) :=
+      Lwt.__return (Alpha_context.fresh_internal_nonce ctxt) in
+    logged_return
+      ((Item
+        ((Alpha_context.Internal_operation
+          {|
+            Alpha_context.internal_operation.source :=
+              step_constants.(step_constants.self);
+            Alpha_context.internal_operation.operation := operation;
+            Alpha_context.internal_operation.nonce := __nonce_value |}),
+          (None (A := unit))) (Item (contract, "default") rest)), ctxt)
+  
+  | (Script_typed_ir.Implicit_account, Item __key_value rest) =>
+    let '[__key_value, rest] :=
+      cast [Alpha_context.public_key_hash ** stack] [__key_value, rest] in
+    let=? ctxt :=
+      Lwt.__return
+        (Alpha_context.Gas.consume ctxt Interp_costs.implicit_account) in
+    let contract := Alpha_context.Contract.implicit_contract __key_value in
+    logged_return
+      ((Item ((Script_typed_ir.Unit_t None), (contract, "default")) rest), ctxt)
+  
+  |
+    (Script_typed_ir.Create_contract storage_type param_type {|
+      Script_typed_ir.lambda.lam := (_, code) |} root_name,
+      Item manager
+        (Item delegate
+          (Item spendable (Item delegatable (Item credit (Item init rest))))))
+    =>
+    let 'existT _ __171
+      [storage_type, param_type, code, root_name, manager, delegate, spendable,
+        delegatable, credit, init, rest] :=
+      cast_exists (Es := Set)
+        (fun __171 =>
+          [Script_typed_ir.ty ** Script_typed_ir.ty ** Alpha_context.Script.node
+            ** option string ** Alpha_context.public_key_hash **
+            option Alpha_context.public_key_hash ** bool ** bool **
+            Alpha_context.Tez.t ** __171 ** stack])
         [storage_type, param_type, code, root_name, manager, delegate,
-          spendable, delegatable, credit, init, rest] :=
-        cast_exists (Es := Set)
-          (fun __176 =>
-            [Script_typed_ir.ty ** Script_typed_ir.ty **
-              Alpha_context.Script.node ** option string **
-              Alpha_context.public_key_hash **
-              option Alpha_context.public_key_hash ** bool ** bool **
-              Alpha_context.Tez.t ** __176 ** stack])
-          [storage_type, param_type, code, root_name, manager, delegate,
-            spendable, delegatable, credit, init, rest] in
-      let=? ctxt :=
-        Lwt.__return
-          (Alpha_context.Gas.consume ctxt Interp_costs.create_contract) in
-      let=? '(unparsed_param_type, ctxt) :=
-        Script_ir_translator.unparse_ty ctxt param_type in
-      let unparsed_param_type :=
-        Script_ir_translator.add_field_annot
-          (Option.map (fun n => Script_typed_ir.Field_annot n) root_name) None
-          unparsed_param_type in
-      let=? '(unparsed_storage_type, ctxt) :=
-        Script_ir_translator.unparse_ty ctxt storage_type in
-      let code :=
-        Alpha_context.Script.__lazy_expr_value
-          (Micheline.strip_locations
-            (Micheline.Seq 0
-              [
-                Micheline.Prim 0 Alpha_context.Script.K_parameter
-                  [ unparsed_param_type ] nil;
-                Micheline.Prim 0 Alpha_context.Script.K_storage
-                  [ unparsed_storage_type ] nil;
-                Micheline.Prim 0 Alpha_context.Script.K_code [ code ] nil
-              ])) in
-      let=? '(to_duplicate, ctxt) :=
-        Script_ir_translator.collect_big_maps ctxt storage_type init in
-      let to_update := Script_ir_translator.no_big_map_id in
-      let=? '(init, big_map_diff, ctxt) :=
-        Script_ir_translator.extract_big_map_diff ctxt
-          Script_ir_translator.Optimized true to_duplicate to_update
-          storage_type init in
-      let=? '(storage, ctxt) :=
-        Script_ir_translator.unparse_data ctxt Script_ir_translator.Optimized
-          storage_type init in
-      let storage :=
-        Alpha_context.Script.__lazy_expr_value
-          (Micheline.strip_locations storage) in
-      let=? '(code, storage) :=
-        if spendable then
-          Alpha_context.Script.Legacy_support.add_do manager code storage
-        else
-          if delegatable then
-            Alpha_context.Script.Legacy_support.add_set_delegate manager code
-              storage
-          else
-            if Alpha_context.Script.Legacy_support.has_default_entrypoint code
-              then
-              let=? code :=
-                Alpha_context.Script.Legacy_support.add_root_entrypoint code in
-              Error_monad.__return (code, storage)
-            else
-              Error_monad.__return (code, storage) in
-      let=? '(ctxt, contract) :=
-        Alpha_context.Contract.fresh_contract_from_current_nonce ctxt in
-      let operation :=
-        Alpha_context.Origination
-          {| Alpha_context.manager_operation.Origination.delegate := delegate;
-            Alpha_context.manager_operation.Origination.script :=
-              {| Alpha_context.Script.t.code := code;
-                Alpha_context.Script.t.storage := storage |};
-            Alpha_context.manager_operation.Origination.credit := credit;
-            Alpha_context.manager_operation.Origination.preorigination :=
-              Some contract |} in
-      let=? '(ctxt, __nonce_value) :=
-        Lwt.__return (Alpha_context.fresh_internal_nonce ctxt) in
-      logged_return
-        ((Item
-          ((Alpha_context.Internal_operation
-            {|
-              Alpha_context.internal_operation.source :=
-                step_constants.(step_constants.self);
-              Alpha_context.internal_operation.operation := operation;
-              Alpha_context.internal_operation.nonce := __nonce_value |}),
-            big_map_diff) (Item (contract, "default") rest)), ctxt)
-    
-    |
-      (Script_typed_ir.Create_contract_2 storage_type param_type {|
-        Script_typed_ir.lambda.lam := (_, code) |} root_name,
-        Item delegate (Item credit (Item init rest))) =>
-      let 'existT _ __178
-        [storage_type, param_type, code, root_name, delegate, credit, init,
-          rest] :=
-        cast_exists (Es := Set)
-          (fun __178 =>
-            [Script_typed_ir.ty ** Script_typed_ir.ty **
-              Alpha_context.Script.node ** option string **
-              option Alpha_context.public_key_hash ** Alpha_context.Tez.t **
-              __178 ** stack])
-          [storage_type, param_type, code, root_name, delegate, credit, init,
-            rest] in
-      let=? ctxt :=
-        Lwt.__return
-          (Alpha_context.Gas.consume ctxt Interp_costs.create_contract) in
-      let=? '(unparsed_param_type, ctxt) :=
-        Script_ir_translator.unparse_ty ctxt param_type in
-      let unparsed_param_type :=
-        Script_ir_translator.add_field_annot
-          (Option.map (fun n => Script_typed_ir.Field_annot n) root_name) None
-          unparsed_param_type in
-      let=? '(unparsed_storage_type, ctxt) :=
-        Script_ir_translator.unparse_ty ctxt storage_type in
-      let code :=
-        Micheline.strip_locations
+          spendable, delegatable, credit, init, rest] in
+    let=? ctxt :=
+      Lwt.__return (Alpha_context.Gas.consume ctxt Interp_costs.create_contract)
+      in
+    let=? '(unparsed_param_type, ctxt) :=
+      Script_ir_translator.unparse_ty ctxt param_type in
+    let unparsed_param_type :=
+      Script_ir_translator.add_field_annot
+        (Option.map (fun n => Script_typed_ir.Field_annot n) root_name) None
+        unparsed_param_type in
+    let=? '(unparsed_storage_type, ctxt) :=
+      Script_ir_translator.unparse_ty ctxt storage_type in
+    let code :=
+      Alpha_context.Script.__lazy_expr_value
+        (Micheline.strip_locations
           (Micheline.Seq 0
             [
               Micheline.Prim 0 Alpha_context.Script.K_parameter
@@ -1773,254 +1592,371 @@ Fixpoint step
               Micheline.Prim 0 Alpha_context.Script.K_storage
                 [ unparsed_storage_type ] nil;
               Micheline.Prim 0 Alpha_context.Script.K_code [ code ] nil
-            ]) in
-      let=? '(to_duplicate, ctxt) :=
-        Script_ir_translator.collect_big_maps ctxt storage_type init in
-      let to_update := Script_ir_translator.no_big_map_id in
-      let=? '(init, big_map_diff, ctxt) :=
-        Script_ir_translator.extract_big_map_diff ctxt
-          Script_ir_translator.Optimized true to_duplicate to_update
-          storage_type init in
-      let=? '(storage, ctxt) :=
-        Script_ir_translator.unparse_data ctxt Script_ir_translator.Optimized
-          storage_type init in
-      let storage := Micheline.strip_locations storage in
-      let=? '(ctxt, contract) :=
-        Alpha_context.Contract.fresh_contract_from_current_nonce ctxt in
-      let operation :=
-        Alpha_context.Origination
-          {| Alpha_context.manager_operation.Origination.delegate := delegate;
-            Alpha_context.manager_operation.Origination.script :=
-              {|
-                Alpha_context.Script.t.code :=
-                  Alpha_context.Script.__lazy_expr_value code;
-                Alpha_context.Script.t.storage :=
-                  Alpha_context.Script.__lazy_expr_value storage |};
-            Alpha_context.manager_operation.Origination.credit := credit;
-            Alpha_context.manager_operation.Origination.preorigination :=
-              Some contract |} in
-      let=? '(ctxt, __nonce_value) :=
-        Lwt.__return (Alpha_context.fresh_internal_nonce ctxt) in
-      logged_return
-        ((Item
-          ((Alpha_context.Internal_operation
+            ])) in
+    let=? '(to_duplicate, ctxt) :=
+      Script_ir_translator.collect_big_maps ctxt storage_type init in
+    let to_update := Script_ir_translator.no_big_map_id in
+    let=? '(init, big_map_diff, ctxt) :=
+      Script_ir_translator.extract_big_map_diff ctxt
+        Script_ir_translator.Optimized true to_duplicate to_update storage_type
+        init in
+    let=? '(storage, ctxt) :=
+      Script_ir_translator.unparse_data ctxt Script_ir_translator.Optimized
+        storage_type init in
+    let storage :=
+      Alpha_context.Script.__lazy_expr_value (Micheline.strip_locations storage)
+      in
+    let=? '(code, storage) :=
+      if spendable then
+        Alpha_context.Script.Legacy_support.add_do manager code storage
+      else
+        if delegatable then
+          Alpha_context.Script.Legacy_support.add_set_delegate manager code
+            storage
+        else
+          if Alpha_context.Script.Legacy_support.has_default_entrypoint code
+            then
+            let=? code :=
+              Alpha_context.Script.Legacy_support.add_root_entrypoint code in
+            Error_monad.__return (code, storage)
+          else
+            Error_monad.__return (code, storage) in
+    let=? '(ctxt, contract) :=
+      Alpha_context.Contract.fresh_contract_from_current_nonce ctxt in
+    let operation :=
+      Alpha_context.Origination
+        {| Alpha_context.manager_operation.Origination.delegate := delegate;
+          Alpha_context.manager_operation.Origination.script :=
+            {| Alpha_context.Script.t.code := code;
+              Alpha_context.Script.t.storage := storage |};
+          Alpha_context.manager_operation.Origination.credit := credit;
+          Alpha_context.manager_operation.Origination.preorigination :=
+            Some contract |} in
+    let=? '(ctxt, __nonce_value) :=
+      Lwt.__return (Alpha_context.fresh_internal_nonce ctxt) in
+    logged_return
+      ((Item
+        ((Alpha_context.Internal_operation
+          {|
+            Alpha_context.internal_operation.source :=
+              step_constants.(step_constants.self);
+            Alpha_context.internal_operation.operation := operation;
+            Alpha_context.internal_operation.nonce := __nonce_value |}),
+          big_map_diff) (Item (contract, "default") rest)), ctxt)
+  
+  |
+    (Script_typed_ir.Create_contract_2 storage_type param_type {|
+      Script_typed_ir.lambda.lam := (_, code) |} root_name,
+      Item delegate (Item credit (Item init rest))) =>
+    let 'existT _ __173
+      [storage_type, param_type, code, root_name, delegate, credit, init, rest]
+      :=
+      cast_exists (Es := Set)
+        (fun __173 =>
+          [Script_typed_ir.ty ** Script_typed_ir.ty ** Alpha_context.Script.node
+            ** option string ** option Alpha_context.public_key_hash **
+            Alpha_context.Tez.t ** __173 ** stack])
+        [storage_type, param_type, code, root_name, delegate, credit, init,
+          rest] in
+    let=? ctxt :=
+      Lwt.__return (Alpha_context.Gas.consume ctxt Interp_costs.create_contract)
+      in
+    let=? '(unparsed_param_type, ctxt) :=
+      Script_ir_translator.unparse_ty ctxt param_type in
+    let unparsed_param_type :=
+      Script_ir_translator.add_field_annot
+        (Option.map (fun n => Script_typed_ir.Field_annot n) root_name) None
+        unparsed_param_type in
+    let=? '(unparsed_storage_type, ctxt) :=
+      Script_ir_translator.unparse_ty ctxt storage_type in
+    let code :=
+      Micheline.strip_locations
+        (Micheline.Seq 0
+          [
+            Micheline.Prim 0 Alpha_context.Script.K_parameter
+              [ unparsed_param_type ] nil;
+            Micheline.Prim 0 Alpha_context.Script.K_storage
+              [ unparsed_storage_type ] nil;
+            Micheline.Prim 0 Alpha_context.Script.K_code [ code ] nil
+          ]) in
+    let=? '(to_duplicate, ctxt) :=
+      Script_ir_translator.collect_big_maps ctxt storage_type init in
+    let to_update := Script_ir_translator.no_big_map_id in
+    let=? '(init, big_map_diff, ctxt) :=
+      Script_ir_translator.extract_big_map_diff ctxt
+        Script_ir_translator.Optimized true to_duplicate to_update storage_type
+        init in
+    let=? '(storage, ctxt) :=
+      Script_ir_translator.unparse_data ctxt Script_ir_translator.Optimized
+        storage_type init in
+    let storage := Micheline.strip_locations storage in
+    let=? '(ctxt, contract) :=
+      Alpha_context.Contract.fresh_contract_from_current_nonce ctxt in
+    let operation :=
+      Alpha_context.Origination
+        {| Alpha_context.manager_operation.Origination.delegate := delegate;
+          Alpha_context.manager_operation.Origination.script :=
             {|
-              Alpha_context.internal_operation.source :=
-                step_constants.(step_constants.self);
-              Alpha_context.internal_operation.operation := operation;
-              Alpha_context.internal_operation.nonce := __nonce_value |}),
-            big_map_diff) (Item (contract, "default") rest)), ctxt)
-    
-    | (Script_typed_ir.Set_delegate, Item delegate rest) =>
-      let '[delegate, rest] :=
-        cast [option Alpha_context.public_key_hash ** stack] [delegate, rest] in
-      let=? ctxt :=
-        Lwt.__return
-          (Alpha_context.Gas.consume ctxt Interp_costs.create_account) in
-      let operation := Alpha_context.Delegation delegate in
-      let=? '(ctxt, __nonce_value) :=
-        Lwt.__return (Alpha_context.fresh_internal_nonce ctxt) in
-      logged_return
-        ((Item
-          ((Alpha_context.Internal_operation
-            {|
-              Alpha_context.internal_operation.source :=
-                step_constants.(step_constants.self);
-              Alpha_context.internal_operation.operation := operation;
-              Alpha_context.internal_operation.nonce := __nonce_value |}),
-            (None (A := unit))) rest), ctxt)
-    
-    | (Script_typed_ir.Balance, rest) =>
-      let rest := cast stack rest in
-      let=? ctxt :=
-        Lwt.__return (Alpha_context.Gas.consume ctxt Interp_costs.balance) in
-      let=? balance :=
-        Alpha_context.Contract.get_balance ctxt
-          step_constants.(step_constants.self) in
-      logged_return ((Item balance rest), ctxt)
-    
-    | (Script_typed_ir.Now, rest) =>
-      let rest := cast stack rest in
-      let=? ctxt :=
-        Lwt.__return (Alpha_context.Gas.consume ctxt Interp_costs.now) in
-      let now := Alpha_context.Script_timestamp.now ctxt in
-      logged_return ((Item now rest), ctxt)
-    
-    |
-      (Script_typed_ir.Check_signature,
-        Item __key_value (Item signature (Item message rest))) =>
-      let '[__key_value, signature, message, rest] :=
-        cast
-          [Alpha_context.public_key ** Alpha_context.signature ** MBytes.t **
-            stack] [__key_value, signature, message, rest] in
-      let=? ctxt :=
-        Lwt.__return
-          (Alpha_context.Gas.consume ctxt
-            (Interp_costs.check_signature __key_value message)) in
-      let res := Signature.check None __key_value signature message in
-      logged_return ((Item res rest), ctxt)
-    
-    | (Script_typed_ir.Hash_key, Item __key_value rest) =>
-      let '[__key_value, rest] :=
-        cast [Alpha_context.public_key ** stack] [__key_value, rest] in
-      let=? ctxt :=
-        Lwt.__return (Alpha_context.Gas.consume ctxt Interp_costs.hash_key) in
-      logged_return
-        ((Item
-          ((|Signature.Public_key|).(S.SPublic_key.__hash_value) __key_value)
-          rest), ctxt)
-    
-    | (Script_typed_ir.Blake2b, Item __bytes_value rest) =>
-      let '[__bytes_value, rest] :=
-        cast [MBytes.t ** stack] [__bytes_value, rest] in
-      let=? ctxt :=
-        Lwt.__return
-          (Alpha_context.Gas.consume ctxt
-            (Interp_costs.hash_blake2b __bytes_value)) in
-      let __hash_value := Raw_hashes.blake2b __bytes_value in
-      logged_return ((Item __hash_value rest), ctxt)
-    
-    | (Script_typed_ir.Sha256, Item __bytes_value rest) =>
-      let '[__bytes_value, rest] :=
-        cast [MBytes.t ** stack] [__bytes_value, rest] in
-      let=? ctxt :=
-        Lwt.__return
-          (Alpha_context.Gas.consume ctxt
-            (Interp_costs.hash_sha256 __bytes_value)) in
-      let __hash_value := Raw_hashes.sha256 __bytes_value in
-      logged_return ((Item __hash_value rest), ctxt)
-    
-    | (Script_typed_ir.Sha512, Item __bytes_value rest) =>
-      let '[__bytes_value, rest] :=
-        cast [MBytes.t ** stack] [__bytes_value, rest] in
-      let=? ctxt :=
-        Lwt.__return
-          (Alpha_context.Gas.consume ctxt
-            (Interp_costs.hash_sha512 __bytes_value)) in
-      let __hash_value := Raw_hashes.sha512 __bytes_value in
-      logged_return ((Item __hash_value rest), ctxt)
-    
-    | (Script_typed_ir.Steps_to_quota, rest) =>
-      let rest := cast stack rest in
-      let=? ctxt :=
-        Lwt.__return
-          (Alpha_context.Gas.consume ctxt Interp_costs.steps_to_quota) in
-      let steps :=
-        match Alpha_context.Gas.level ctxt with
-        |
-          Alpha_context.Gas.Limited {|
-            Alpha_context.Gas.t.Limited.remaining := remaining |} =>
-          remaining
-        | Alpha_context.Gas.Unaccounted => Z.of_string "99999999"
-        end in
-      logged_return
-        ((Item
-          (Alpha_context.Script_int.abs (Alpha_context.Script_int.of_zint steps))
-          rest), ctxt)
-    
-    | (Script_typed_ir.Source, rest) =>
-      let rest := cast stack rest in
-      let=? ctxt :=
-        Lwt.__return (Alpha_context.Gas.consume ctxt Interp_costs.source) in
-      logged_return
-        ((Item (step_constants.(step_constants.payer), "default") rest), ctxt)
-    
-    | (Script_typed_ir.Sender, rest) =>
-      let rest := cast stack rest in
-      let=? ctxt :=
-        Lwt.__return (Alpha_context.Gas.consume ctxt Interp_costs.source) in
-      logged_return
-        ((Item (step_constants.(step_constants.source), "default") rest), ctxt)
-    
-    | (Script_typed_ir.Self __t_value entrypoint, rest) =>
-      let '[__t_value, entrypoint, rest] :=
-        cast [Script_typed_ir.ty ** string ** stack]
-          [__t_value, entrypoint, rest] in
-      let=? ctxt :=
-        Lwt.__return (Alpha_context.Gas.consume ctxt Interp_costs.self) in
-      logged_return
-        ((Item (__t_value, (step_constants.(step_constants.self), entrypoint))
-          rest), ctxt)
-    
-    | (Script_typed_ir.Amount, rest) =>
-      let rest := cast stack rest in
-      let=? ctxt :=
-        Lwt.__return (Alpha_context.Gas.consume ctxt Interp_costs.amount) in
-      logged_return ((Item step_constants.(step_constants.amount) rest), ctxt)
-    
-    | (Script_typed_ir.Dig n n', __stack_value) =>
-      let '[n, n', __stack_value] :=
-        cast [int ** Script_typed_ir.stack_prefix_preservation_witness ** stack]
-          [n, n', __stack_value] in
-      let=? ctxt :=
-        Lwt.__return
-          (Alpha_context.Gas.consume ctxt (Interp_costs.stack_n_op n)) in
-      let dig {A : Set} (n' : Script_typed_ir.stack_prefix_preservation_witness)
-        : Lwt.t (Error_monad.tzresult (stack * A)) :=
-        interp_stack_prefix_preserving_operation
-          (fun function_parameter =>
-            match function_parameter with
-            | Item v rest =>
-              let '[v, rest] := cast [A ** stack] [v, rest] in
-              Error_monad.__return (rest, v)
-            | _ => unreachable_gadt_branch
-            end) n' __stack_value in
-      let=? '(aft, x) := (dig (A := unit)) n' in
-      logged_return ((Item x aft), ctxt)
-    
-    | (Script_typed_ir.Dug n n', Item v rest) =>
-      let 'existT _ __189 [n, n', v, rest] :=
-        cast_exists (Es := Set)
-          (fun __189 =>
-            [int ** Script_typed_ir.stack_prefix_preservation_witness ** __189
-              ** stack]) [n, n', v, rest] in
-      let=? ctxt :=
-        Lwt.__return
-          (Alpha_context.Gas.consume ctxt (Interp_costs.stack_n_op n)) in
-      let=? '(aft, _) :=
-        interp_stack_prefix_preserving_operation
-          (fun stk => Error_monad.__return ((Item v stk), tt)) n' rest in
-      logged_return (aft, ctxt)
-    
-    | (Script_typed_ir.Dipn n n' __b_value, __stack_value) =>
-      let '[n, n', __b_value, __stack_value] :=
-        cast
-          [int ** Script_typed_ir.stack_prefix_preservation_witness **
-            Script_typed_ir.descr ** stack] [n, n', __b_value, __stack_value] in
-      let=? ctxt :=
-        Lwt.__return
-          (Alpha_context.Gas.consume ctxt (Interp_costs.stack_n_op n)) in
-      let=? '(aft, ctxt') :=
-        interp_stack_prefix_preserving_operation
-          (fun stk =>
-            let=? '(res, ctxt') := step log ctxt step_constants __b_value stk in
-            Error_monad.__return (res, ctxt')) n' __stack_value in
-      logged_return (aft, ctxt')
-    
-    | (Script_typed_ir.Dropn n n', __stack_value) =>
-      let '[n, n', __stack_value] :=
-        cast [int ** Script_typed_ir.stack_prefix_preservation_witness ** stack]
-          [n, n', __stack_value] in
-      let=? ctxt :=
-        Lwt.__return
-          (Alpha_context.Gas.consume ctxt (Interp_costs.stack_n_op n)) in
-      let=? '(_, rest) :=
-        interp_stack_prefix_preserving_operation
-          (fun stk => Error_monad.__return (stk, stk)) n' __stack_value in
-      logged_return (rest, ctxt)
-    
-    | (Script_typed_ir.ChainId, rest) =>
-      let rest := cast stack rest in
-      let=? ctxt :=
-        Lwt.__return (Alpha_context.Gas.consume ctxt Interp_costs.chain_id) in
-      logged_return ((Item step_constants.(step_constants.chain_id) rest), ctxt)
+              Alpha_context.Script.t.code :=
+                Alpha_context.Script.__lazy_expr_value code;
+              Alpha_context.Script.t.storage :=
+                Alpha_context.Script.__lazy_expr_value storage |};
+          Alpha_context.manager_operation.Origination.credit := credit;
+          Alpha_context.manager_operation.Origination.preorigination :=
+            Some contract |} in
+    let=? '(ctxt, __nonce_value) :=
+      Lwt.__return (Alpha_context.fresh_internal_nonce ctxt) in
+    logged_return
+      ((Item
+        ((Alpha_context.Internal_operation
+          {|
+            Alpha_context.internal_operation.source :=
+              step_constants.(step_constants.self);
+            Alpha_context.internal_operation.operation := operation;
+            Alpha_context.internal_operation.nonce := __nonce_value |}),
+          big_map_diff) (Item (contract, "default") rest)), ctxt)
+  
+  | (Script_typed_ir.Set_delegate, Item delegate rest) =>
+    let '[delegate, rest] :=
+      cast [option Alpha_context.public_key_hash ** stack] [delegate, rest] in
+    let=? ctxt :=
+      Lwt.__return (Alpha_context.Gas.consume ctxt Interp_costs.create_account)
+      in
+    let operation := Alpha_context.Delegation delegate in
+    let=? '(ctxt, __nonce_value) :=
+      Lwt.__return (Alpha_context.fresh_internal_nonce ctxt) in
+    logged_return
+      ((Item
+        ((Alpha_context.Internal_operation
+          {|
+            Alpha_context.internal_operation.source :=
+              step_constants.(step_constants.self);
+            Alpha_context.internal_operation.operation := operation;
+            Alpha_context.internal_operation.nonce := __nonce_value |}),
+          (None (A := unit))) rest), ctxt)
+  
+  | (Script_typed_ir.Balance, rest) =>
+    let rest := cast stack rest in
+    let=? ctxt :=
+      Lwt.__return (Alpha_context.Gas.consume ctxt Interp_costs.balance) in
+    let=? balance :=
+      Alpha_context.Contract.get_balance ctxt
+        step_constants.(step_constants.self) in
+    logged_return ((Item balance rest), ctxt)
+  
+  | (Script_typed_ir.Now, rest) =>
+    let rest := cast stack rest in
+    let=? ctxt := Lwt.__return (Alpha_context.Gas.consume ctxt Interp_costs.now)
+      in
+    let now := Alpha_context.Script_timestamp.now ctxt in
+    logged_return ((Item now rest), ctxt)
+  
+  |
+    (Script_typed_ir.Check_signature,
+      Item __key_value (Item signature (Item message rest))) =>
+    let '[__key_value, signature, message, rest] :=
+      cast
+        [Alpha_context.public_key ** Alpha_context.signature ** MBytes.t **
+          stack] [__key_value, signature, message, rest] in
+    let=? ctxt :=
+      Lwt.__return
+        (Alpha_context.Gas.consume ctxt
+          (Interp_costs.check_signature __key_value message)) in
+    let res := Signature.check None __key_value signature message in
+    logged_return ((Item res rest), ctxt)
+  
+  | (Script_typed_ir.Hash_key, Item __key_value rest) =>
+    let '[__key_value, rest] :=
+      cast [Alpha_context.public_key ** stack] [__key_value, rest] in
+    let=? ctxt :=
+      Lwt.__return (Alpha_context.Gas.consume ctxt Interp_costs.hash_key) in
+    logged_return
+      ((Item ((|Signature.Public_key|).(S.SPublic_key.__hash_value) __key_value)
+        rest), ctxt)
+  
+  | (Script_typed_ir.Blake2b, Item __bytes_value rest) =>
+    let '[__bytes_value, rest] := cast [MBytes.t ** stack] [__bytes_value, rest]
+      in
+    let=? ctxt :=
+      Lwt.__return
+        (Alpha_context.Gas.consume ctxt
+          (Interp_costs.hash_blake2b __bytes_value)) in
+    let __hash_value := Raw_hashes.blake2b __bytes_value in
+    logged_return ((Item __hash_value rest), ctxt)
+  
+  | (Script_typed_ir.Sha256, Item __bytes_value rest) =>
+    let '[__bytes_value, rest] := cast [MBytes.t ** stack] [__bytes_value, rest]
+      in
+    let=? ctxt :=
+      Lwt.__return
+        (Alpha_context.Gas.consume ctxt (Interp_costs.hash_sha256 __bytes_value))
+      in
+    let __hash_value := Raw_hashes.sha256 __bytes_value in
+    logged_return ((Item __hash_value rest), ctxt)
+  
+  | (Script_typed_ir.Sha512, Item __bytes_value rest) =>
+    let '[__bytes_value, rest] := cast [MBytes.t ** stack] [__bytes_value, rest]
+      in
+    let=? ctxt :=
+      Lwt.__return
+        (Alpha_context.Gas.consume ctxt (Interp_costs.hash_sha512 __bytes_value))
+      in
+    let __hash_value := Raw_hashes.sha512 __bytes_value in
+    logged_return ((Item __hash_value rest), ctxt)
+  
+  | (Script_typed_ir.Steps_to_quota, rest) =>
+    let rest := cast stack rest in
+    let=? ctxt :=
+      Lwt.__return (Alpha_context.Gas.consume ctxt Interp_costs.steps_to_quota)
+      in
+    let steps :=
+      match Alpha_context.Gas.level ctxt with
+      |
+        Alpha_context.Gas.Limited {|
+          Alpha_context.Gas.t.Limited.remaining := remaining |} => remaining
+      | Alpha_context.Gas.Unaccounted => Z.of_string "99999999"
+      end in
+    logged_return
+      ((Item
+        (Alpha_context.Script_int.abs (Alpha_context.Script_int.of_zint steps))
+        rest), ctxt)
+  
+  | (Script_typed_ir.Source, rest) =>
+    let rest := cast stack rest in
+    let=? ctxt :=
+      Lwt.__return (Alpha_context.Gas.consume ctxt Interp_costs.source) in
+    logged_return
+      ((Item (step_constants.(step_constants.payer), "default") rest), ctxt)
+  
+  | (Script_typed_ir.Sender, rest) =>
+    let rest := cast stack rest in
+    let=? ctxt :=
+      Lwt.__return (Alpha_context.Gas.consume ctxt Interp_costs.source) in
+    logged_return
+      ((Item (step_constants.(step_constants.source), "default") rest), ctxt)
+  
+  | (Script_typed_ir.Self __t_value entrypoint, rest) =>
+    let '[__t_value, entrypoint, rest] :=
+      cast [Script_typed_ir.ty ** string ** stack] [__t_value, entrypoint, rest]
+      in
+    let=? ctxt :=
+      Lwt.__return (Alpha_context.Gas.consume ctxt Interp_costs.self) in
+    logged_return
+      ((Item (__t_value, (step_constants.(step_constants.self), entrypoint))
+        rest), ctxt)
+  
+  | (Script_typed_ir.Amount, rest) =>
+    let rest := cast stack rest in
+    let=? ctxt :=
+      Lwt.__return (Alpha_context.Gas.consume ctxt Interp_costs.amount) in
+    logged_return ((Item step_constants.(step_constants.amount) rest), ctxt)
+  
+  | (Script_typed_ir.Dig n n', __stack_value) =>
+    let '[n, n', __stack_value] :=
+      cast [int ** Script_typed_ir.stack_prefix_preservation_witness ** stack]
+        [n, n', __stack_value] in
+    let=? ctxt :=
+      Lwt.__return (Alpha_context.Gas.consume ctxt (Interp_costs.stack_n_op n))
+      in
+    let dig {A : Set} (n' : Script_typed_ir.stack_prefix_preservation_witness)
+      : Lwt.t (Error_monad.tzresult (stack * A)) :=
+      interp_stack_prefix_preserving_operation
+        (fun function_parameter =>
+          match function_parameter with
+          | Item v rest =>
+            let '[v, rest] := cast [A ** stack] [v, rest] in
+            Error_monad.__return (rest, v)
+          | _ => unreachable_gadt_branch
+          end) n' __stack_value in
+    let=? '(aft, x) := (dig (A := unit)) n' in
+    logged_return ((Item x aft), ctxt)
+  
+  | (Script_typed_ir.Dug n n', Item v rest) =>
+    let 'existT _ __184 [n, n', v, rest] :=
+      cast_exists (Es := Set)
+        (fun __184 =>
+          [int ** Script_typed_ir.stack_prefix_preservation_witness ** __184 **
+            stack]) [n, n', v, rest] in
+    let=? ctxt :=
+      Lwt.__return (Alpha_context.Gas.consume ctxt (Interp_costs.stack_n_op n))
+      in
+    let=? '(aft, _) :=
+      interp_stack_prefix_preserving_operation
+        (fun stk => Error_monad.__return ((Item v stk), tt)) n' rest in
+    logged_return (aft, ctxt)
+  
+  | (Script_typed_ir.Dipn n n' __b_value, __stack_value) =>
+    let '[n, n', __b_value, __stack_value] :=
+      cast
+        [int ** Script_typed_ir.stack_prefix_preservation_witness **
+          Script_typed_ir.descr ** stack] [n, n', __b_value, __stack_value] in
+    let=? ctxt :=
+      Lwt.__return (Alpha_context.Gas.consume ctxt (Interp_costs.stack_n_op n))
+      in
+    let=? '(aft, ctxt') :=
+      interp_stack_prefix_preserving_operation
+        (fun stk =>
+          let=? '(res, ctxt') :=
+            step_descr log ctxt step_constants __b_value stk in
+          Error_monad.__return (res, ctxt')) n' __stack_value in
+    logged_return (aft, ctxt')
+  
+  | (Script_typed_ir.Dropn n n', __stack_value) =>
+    let '[n, n', __stack_value] :=
+      cast [int ** Script_typed_ir.stack_prefix_preservation_witness ** stack]
+        [n, n', __stack_value] in
+    let=? ctxt :=
+      Lwt.__return (Alpha_context.Gas.consume ctxt (Interp_costs.stack_n_op n))
+      in
+    let=? '(_, rest) :=
+      interp_stack_prefix_preserving_operation
+        (fun stk => Error_monad.__return (stk, stk)) n' __stack_value in
+    logged_return (rest, ctxt)
+  
+  | (Script_typed_ir.ChainId, rest) =>
+    let rest := cast stack rest in
+    let=? ctxt :=
+      Lwt.__return (Alpha_context.Gas.consume ctxt Interp_costs.chain_id) in
+    logged_return ((Item step_constants.(step_constants.chain_id) rest), ctxt)
+  | _ => unreachable_gadt_branch
+  end
+
+with loop_list_map {a b : Set}
+  (log : option (Pervasives.ref execution_trace))
+  (step_constants : step_constants) (body : Script_typed_ir.descr)
+  (rest : stack) (ctxt : Alpha_context.context) (l : list a) (acc : list b)
+  {struct l} : Lwt.t (Error_monad.tzresult (stack * Alpha_context.context)) :=
+  let=? ctxt :=
+    Lwt.__return (Alpha_context.Gas.consume ctxt Interp_costs.loop_map) in
+  match l with
+  | [] => Error_monad.__return ((Item (List.rev acc) rest), ctxt)
+  | cons hd tl =>
+    let=? function_parameter :=
+      step_descr log ctxt step_constants body (Item hd rest) in
+    match function_parameter with
+    | (Item hd rest, ctxt) =>
+      let '[hd, rest, ctxt] :=
+        cast [b ** stack ** Alpha_context.context] [hd, rest, ctxt] in
+      loop_list_map log step_constants body rest ctxt tl (cons hd acc)
     | _ => unreachable_gadt_branch
     end
+  end
+
+with step_descr
+  (log : option (Pervasives.ref execution_trace)) (ctxt : Alpha_context.context)
+  (step_constants : step_constants) (__descr_value : Script_typed_ir.descr)
+  (__stack_value : stack) {struct __descr_value}
+  : Lwt.t (Error_monad.tzresult (stack * Alpha_context.context)) :=
+  step __descr_value.(Script_typed_ir.descr.instr)
+    __descr_value.(Script_typed_ir.descr.loc)
+    __descr_value.(Script_typed_ir.descr.bef)
+    __descr_value.(Script_typed_ir.descr.aft) log ctxt step_constants
+    __stack_value
 
 with interp {p r : Set}
   (log : option (Pervasives.ref execution_trace)) (ctxt : Alpha_context.context)
   (step_constants : step_constants) (lam : Script_typed_ir.lambda) (arg : p)
-  {struct log} : Lwt.t (Error_monad.tzresult (r * Alpha_context.context)) :=
+  {struct lam} : Lwt.t (Error_monad.tzresult (r * Alpha_context.context)) :=
   let __stack_value := Item arg Empty in
   let '{| Script_typed_ir.lambda.lam := (code, _) |} := lam in
   let code := cast Script_typed_ir.descr code in
@@ -2036,7 +1972,8 @@ with interp {p r : Set}
       (* ❌ instruction_sequence ";" *)
       Error_monad.return_unit
     end in
-  let=? function_parameter := step log ctxt step_constants code __stack_value in
+  let=? function_parameter :=
+    step_descr log ctxt step_constants code __stack_value in
   match function_parameter with
   | (Item ret Empty, ctxt) =>
     let '[ret, ctxt] := cast [r ** Alpha_context.context] [ret, ctxt] in

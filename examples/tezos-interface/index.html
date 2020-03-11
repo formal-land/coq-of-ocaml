@@ -60,8 +60,8 @@
 opam pin add https://github.com/clarus/coq-of-ocaml.git#master</code></pre>
     <ul>
       <li>OCaml size: 6154 lines</li>
-      <li>Coq size: 3547 lines (-43% compared to&nbsp;OCaml)</li>
-      <li>Warnings from coq-of-ocaml: 265</li>
+      <li>Coq size: 3488 lines (-44% compared to&nbsp;OCaml)</li>
+      <li>Warnings from coq-of-ocaml: 196</li>
     </ul>
     
       <canvas id="chart" width="400" height="400"></canvas>
@@ -104,11 +104,11 @@ opam pin add https://github.com/clarus/coq-of-ocaml.git#master</code></pre>
     <h3>Environment_mli</h3>
     <ul>
       <li>OCaml size: 6154 lines</li>
-      <li>Coq size: 3547 lines (-43% compared to&nbsp;OCaml)</li>
+      <li>Coq size: 3488 lines (-44% compared to&nbsp;OCaml)</li>
     </ul>
   </div>
   <div class="col-md-6">
-    <a href="#environment.mli"><code>environment.mli</code></a>&nbsp;<span class="label label-warning">265 warnings</span>
+    <a href="#environment.mli"><code>environment.mli</code></a>&nbsp;<span class="label label-warning">196 warnings</span>
     
     <pre>module Pervasives : sig
 # 1 &quot;../lib_protocol_environment/sigs/v1/pervasives.mli&quot;
@@ -4293,11 +4293,7 @@ module RPC_service : sig
 <abbr class="mark-warning" title="Expected a list of named or unspecified '_' type variables">type (+'meth, 'prefix, 'params, 'query, 'input, 'output) t
   constraint 'meth = [&lt; meth]</abbr>
 
-<abbr class="mark-warning" title="No type known for the following variants: `PUT, `GET, `DELETE, `POST, `PATCH
-
-——————————
-
-Expected a list of named or unspecified '_' type variables
+<abbr class="mark-warning" title="Expected a list of named or unspecified '_' type variables
 
 ——————————
 
@@ -4469,21 +4465,13 @@ type conflict =
 <abbr class="mark-warning" title="Signature item `exception` not handled">exception Conflict of step list * conflict</abbr>
 
 (** Registring handler in service tree. *)
-<abbr class="mark-warning" title="No type known for the following variants: `PUT, `GET, `DELETE, `POST, `PATCH
-
-——————————
-
-Expected a list of named or unspecified '_' type variables">val register :
+<abbr class="mark-warning" title="Expected a list of named or unspecified '_' type variables">val register :
   'prefix directory -&gt;
   ('meth, 'prefix, 'params, 'query, 'input, 'output) RPC_service.t -&gt;
   ('params -&gt; 'query -&gt; 'input -&gt; 'output tzresult Lwt.t) -&gt;
   'prefix directory</abbr>
 
-<abbr class="mark-warning" title="No type known for the following variants: `PUT, `GET, `DELETE, `POST, `PATCH
-
-——————————
-
-Expected a list of named or unspecified '_' type variables">val opt_register :
+<abbr class="mark-warning" title="Expected a list of named or unspecified '_' type variables">val opt_register :
   'prefix directory -&gt;
   ('meth, 'prefix, 'params, 'query, 'input, 'output) RPC_service.t -&gt;
   ('params -&gt; 'query -&gt; 'input -&gt; 'output option tzresult Lwt.t) -&gt;
@@ -4493,21 +4481,13 @@ Expected a list of named or unspecified '_' type variables">val opt_register :
 
 ——————————
 
-No type known for the following variants: `PUT, `GET, `DELETE, `POST, `PATCH
-
-——————————
-
 Expected a list of named or unspecified '_' type variables">val gen_register :
   'prefix directory -&gt;
   ('meth, 'prefix, 'params, 'query, 'input, 'output) RPC_service.t -&gt;
   ('params -&gt; 'query -&gt; 'input -&gt; [&lt; 'output RPC_answer.t] Lwt.t) -&gt;
   'prefix directory</abbr>
 
-<abbr class="mark-warning" title="No type known for the following variants: `PUT, `GET, `DELETE, `POST, `PATCH
-
-——————————
-
-Expected a list of named or unspecified '_' type variables">val lwt_register :
+<abbr class="mark-warning" title="Expected a list of named or unspecified '_' type variables">val lwt_register :
   'prefix directory -&gt;
   ('meth, 'prefix, 'params, 'query, 'input, 'output) RPC_service.t -&gt;
   ('params -&gt; 'query -&gt; 'input -&gt; 'output Lwt.t) -&gt;
@@ -4515,61 +4495,37 @@ Expected a list of named or unspecified '_' type variables">val lwt_register :
 
 (** Registring handler in service tree. Curryfied variant.  *)
 
-<abbr class="mark-warning" title="No type known for the following variants: `PUT, `GET, `DELETE, `POST, `PATCH
-
-——————————
-
-Expected a list of named or unspecified '_' type variables">val register0 :
+<abbr class="mark-warning" title="Expected a list of named or unspecified '_' type variables">val register0 :
   unit directory -&gt;
   ('m, unit, unit, 'q, 'i, 'o) RPC_service.t -&gt;
   ('q -&gt; 'i -&gt; 'o tzresult Lwt.t) -&gt;
   unit directory</abbr>
 
-<abbr class="mark-warning" title="No type known for the following variants: `PUT, `GET, `DELETE, `POST, `PATCH
-
-——————————
-
-Expected a list of named or unspecified '_' type variables">val register1 :
+<abbr class="mark-warning" title="Expected a list of named or unspecified '_' type variables">val register1 :
   'prefix directory -&gt;
   ('m, 'prefix, unit * 'a, 'q, 'i, 'o) RPC_service.t -&gt;
   ('a -&gt; 'q -&gt; 'i -&gt; 'o tzresult Lwt.t) -&gt;
   'prefix directory</abbr>
 
-<abbr class="mark-warning" title="No type known for the following variants: `PUT, `GET, `DELETE, `POST, `PATCH
-
-——————————
-
-Expected a list of named or unspecified '_' type variables">val register2 :
+<abbr class="mark-warning" title="Expected a list of named or unspecified '_' type variables">val register2 :
   'prefix directory -&gt;
   ('m, 'prefix, (unit * 'a) * 'b, 'q, 'i, 'o) RPC_service.t -&gt;
   ('a -&gt; 'b -&gt; 'q -&gt; 'i -&gt; 'o tzresult Lwt.t) -&gt;
   'prefix directory</abbr>
 
-<abbr class="mark-warning" title="No type known for the following variants: `PUT, `GET, `DELETE, `POST, `PATCH
-
-——————————
-
-Expected a list of named or unspecified '_' type variables">val register3 :
+<abbr class="mark-warning" title="Expected a list of named or unspecified '_' type variables">val register3 :
   'prefix directory -&gt;
   ('m, 'prefix, ((unit * 'a) * 'b) * 'c, 'q, 'i, 'o) RPC_service.t -&gt;
   ('a -&gt; 'b -&gt; 'c -&gt; 'q -&gt; 'i -&gt; 'o tzresult Lwt.t) -&gt;
   'prefix directory</abbr>
 
-<abbr class="mark-warning" title="No type known for the following variants: `PUT, `GET, `DELETE, `POST, `PATCH
-
-——————————
-
-Expected a list of named or unspecified '_' type variables">val register4 :
+<abbr class="mark-warning" title="Expected a list of named or unspecified '_' type variables">val register4 :
   'prefix directory -&gt;
   ('m, 'prefix, (((unit * 'a) * 'b) * 'c) * 'd, 'q, 'i, 'o) RPC_service.t -&gt;
   ('a -&gt; 'b -&gt; 'c -&gt; 'd -&gt; 'q -&gt; 'i -&gt; 'o tzresult Lwt.t) -&gt;
   'prefix directory</abbr>
 
-<abbr class="mark-warning" title="No type known for the following variants: `PUT, `GET, `DELETE, `POST, `PATCH
-
-——————————
-
-Expected a list of named or unspecified '_' type variables">val register5 :
+<abbr class="mark-warning" title="Expected a list of named or unspecified '_' type variables">val register5 :
   'prefix directory -&gt;
   ( 'm,
     'prefix,
@@ -4581,61 +4537,37 @@ Expected a list of named or unspecified '_' type variables">val register5 :
   ('a -&gt; 'b -&gt; 'c -&gt; 'd -&gt; 'e -&gt; 'q -&gt; 'i -&gt; 'o tzresult Lwt.t) -&gt;
   'prefix directory</abbr>
 
-<abbr class="mark-warning" title="No type known for the following variants: `PUT, `GET, `DELETE, `POST, `PATCH
-
-——————————
-
-Expected a list of named or unspecified '_' type variables">val opt_register0 :
+<abbr class="mark-warning" title="Expected a list of named or unspecified '_' type variables">val opt_register0 :
   unit directory -&gt;
   ('m, unit, unit, 'q, 'i, 'o) RPC_service.t -&gt;
   ('q -&gt; 'i -&gt; 'o option tzresult Lwt.t) -&gt;
   unit directory</abbr>
 
-<abbr class="mark-warning" title="No type known for the following variants: `PUT, `GET, `DELETE, `POST, `PATCH
-
-——————————
-
-Expected a list of named or unspecified '_' type variables">val opt_register1 :
+<abbr class="mark-warning" title="Expected a list of named or unspecified '_' type variables">val opt_register1 :
   'prefix directory -&gt;
   ('m, 'prefix, unit * 'a, 'q, 'i, 'o) RPC_service.t -&gt;
   ('a -&gt; 'q -&gt; 'i -&gt; 'o option tzresult Lwt.t) -&gt;
   'prefix directory</abbr>
 
-<abbr class="mark-warning" title="No type known for the following variants: `PUT, `GET, `DELETE, `POST, `PATCH
-
-——————————
-
-Expected a list of named or unspecified '_' type variables">val opt_register2 :
+<abbr class="mark-warning" title="Expected a list of named or unspecified '_' type variables">val opt_register2 :
   'prefix directory -&gt;
   ('m, 'prefix, (unit * 'a) * 'b, 'q, 'i, 'o) RPC_service.t -&gt;
   ('a -&gt; 'b -&gt; 'q -&gt; 'i -&gt; 'o option tzresult Lwt.t) -&gt;
   'prefix directory</abbr>
 
-<abbr class="mark-warning" title="No type known for the following variants: `PUT, `GET, `DELETE, `POST, `PATCH
-
-——————————
-
-Expected a list of named or unspecified '_' type variables">val opt_register3 :
+<abbr class="mark-warning" title="Expected a list of named or unspecified '_' type variables">val opt_register3 :
   'prefix directory -&gt;
   ('m, 'prefix, ((unit * 'a) * 'b) * 'c, 'q, 'i, 'o) RPC_service.t -&gt;
   ('a -&gt; 'b -&gt; 'c -&gt; 'q -&gt; 'i -&gt; 'o option tzresult Lwt.t) -&gt;
   'prefix directory</abbr>
 
-<abbr class="mark-warning" title="No type known for the following variants: `PUT, `GET, `DELETE, `POST, `PATCH
-
-——————————
-
-Expected a list of named or unspecified '_' type variables">val opt_register4 :
+<abbr class="mark-warning" title="Expected a list of named or unspecified '_' type variables">val opt_register4 :
   'prefix directory -&gt;
   ('m, 'prefix, (((unit * 'a) * 'b) * 'c) * 'd, 'q, 'i, 'o) RPC_service.t -&gt;
   ('a -&gt; 'b -&gt; 'c -&gt; 'd -&gt; 'q -&gt; 'i -&gt; 'o option tzresult Lwt.t) -&gt;
   'prefix directory</abbr>
 
-<abbr class="mark-warning" title="No type known for the following variants: `PUT, `GET, `DELETE, `POST, `PATCH
-
-——————————
-
-Expected a list of named or unspecified '_' type variables">val opt_register5 :
+<abbr class="mark-warning" title="Expected a list of named or unspecified '_' type variables">val opt_register5 :
   'prefix directory -&gt;
   ( 'm,
     'prefix,
@@ -4651,10 +4583,6 @@ Expected a list of named or unspecified '_' type variables">val opt_register5 :
 
 ——————————
 
-No type known for the following variants: `PUT, `GET, `DELETE, `POST, `PATCH
-
-——————————
-
 Expected a list of named or unspecified '_' type variables">val gen_register0 :
   unit directory -&gt;
   ('m, unit, unit, 'q, 'i, 'o) RPC_service.t -&gt;
@@ -4662,10 +4590,6 @@ Expected a list of named or unspecified '_' type variables">val gen_register0 :
   unit directory</abbr>
 
 <abbr class="mark-warning" title="No type known for the following variants: `OkStream, `Unauthorized, `Error, `Ok, `Not_found, `Forbidden, `Created, `Conflict, `No_content
-
-——————————
-
-No type known for the following variants: `PUT, `GET, `DELETE, `POST, `PATCH
 
 ——————————
 
@@ -4679,10 +4603,6 @@ Expected a list of named or unspecified '_' type variables">val gen_register1 :
 
 ——————————
 
-No type known for the following variants: `PUT, `GET, `DELETE, `POST, `PATCH
-
-——————————
-
 Expected a list of named or unspecified '_' type variables">val gen_register2 :
   'prefix directory -&gt;
   ('m, 'prefix, (unit * 'a) * 'b, 'q, 'i, 'o) RPC_service.t -&gt;
@@ -4690,10 +4610,6 @@ Expected a list of named or unspecified '_' type variables">val gen_register2 :
   'prefix directory</abbr>
 
 <abbr class="mark-warning" title="No type known for the following variants: `OkStream, `Unauthorized, `Error, `Ok, `Not_found, `Forbidden, `Created, `Conflict, `No_content
-
-——————————
-
-No type known for the following variants: `PUT, `GET, `DELETE, `POST, `PATCH
 
 ——————————
 
@@ -4707,10 +4623,6 @@ Expected a list of named or unspecified '_' type variables">val gen_register3 :
 
 ——————————
 
-No type known for the following variants: `PUT, `GET, `DELETE, `POST, `PATCH
-
-——————————
-
 Expected a list of named or unspecified '_' type variables">val gen_register4 :
   'prefix directory -&gt;
   ('m, 'prefix, (((unit * 'a) * 'b) * 'c) * 'd, 'q, 'i, 'o) RPC_service.t -&gt;
@@ -4718,10 +4630,6 @@ Expected a list of named or unspecified '_' type variables">val gen_register4 :
   'prefix directory</abbr>
 
 <abbr class="mark-warning" title="No type known for the following variants: `OkStream, `Unauthorized, `Error, `Ok, `Not_found, `Forbidden, `Created, `Conflict, `No_content
-
-——————————
-
-No type known for the following variants: `PUT, `GET, `DELETE, `POST, `PATCH
 
 ——————————
 
@@ -4737,61 +4645,37 @@ Expected a list of named or unspecified '_' type variables">val gen_register5 :
   ('a -&gt; 'b -&gt; 'c -&gt; 'd -&gt; 'e -&gt; 'q -&gt; 'i -&gt; [&lt; 'o RPC_answer.t] Lwt.t) -&gt;
   'prefix directory</abbr>
 
-<abbr class="mark-warning" title="No type known for the following variants: `PUT, `GET, `DELETE, `POST, `PATCH
-
-——————————
-
-Expected a list of named or unspecified '_' type variables">val lwt_register0 :
+<abbr class="mark-warning" title="Expected a list of named or unspecified '_' type variables">val lwt_register0 :
   unit directory -&gt;
   ('m, unit, unit, 'q, 'i, 'o) RPC_service.t -&gt;
   ('q -&gt; 'i -&gt; 'o Lwt.t) -&gt;
   unit directory</abbr>
 
-<abbr class="mark-warning" title="No type known for the following variants: `PUT, `GET, `DELETE, `POST, `PATCH
-
-——————————
-
-Expected a list of named or unspecified '_' type variables">val lwt_register1 :
+<abbr class="mark-warning" title="Expected a list of named or unspecified '_' type variables">val lwt_register1 :
   'prefix directory -&gt;
   ('m, 'prefix, unit * 'a, 'q, 'i, 'o) RPC_service.t -&gt;
   ('a -&gt; 'q -&gt; 'i -&gt; 'o Lwt.t) -&gt;
   'prefix directory</abbr>
 
-<abbr class="mark-warning" title="No type known for the following variants: `PUT, `GET, `DELETE, `POST, `PATCH
-
-——————————
-
-Expected a list of named or unspecified '_' type variables">val lwt_register2 :
+<abbr class="mark-warning" title="Expected a list of named or unspecified '_' type variables">val lwt_register2 :
   'prefix directory -&gt;
   ('m, 'prefix, (unit * 'a) * 'b, 'q, 'i, 'o) RPC_service.t -&gt;
   ('a -&gt; 'b -&gt; 'q -&gt; 'i -&gt; 'o Lwt.t) -&gt;
   'prefix directory</abbr>
 
-<abbr class="mark-warning" title="No type known for the following variants: `PUT, `GET, `DELETE, `POST, `PATCH
-
-——————————
-
-Expected a list of named or unspecified '_' type variables">val lwt_register3 :
+<abbr class="mark-warning" title="Expected a list of named or unspecified '_' type variables">val lwt_register3 :
   'prefix directory -&gt;
   ('m, 'prefix, ((unit * 'a) * 'b) * 'c, 'q, 'i, 'o) RPC_service.t -&gt;
   ('a -&gt; 'b -&gt; 'c -&gt; 'q -&gt; 'i -&gt; 'o Lwt.t) -&gt;
   'prefix directory</abbr>
 
-<abbr class="mark-warning" title="No type known for the following variants: `PUT, `GET, `DELETE, `POST, `PATCH
-
-——————————
-
-Expected a list of named or unspecified '_' type variables">val lwt_register4 :
+<abbr class="mark-warning" title="Expected a list of named or unspecified '_' type variables">val lwt_register4 :
   'prefix directory -&gt;
   ('m, 'prefix, (((unit * 'a) * 'b) * 'c) * 'd, 'q, 'i, 'o) RPC_service.t -&gt;
   ('a -&gt; 'b -&gt; 'c -&gt; 'd -&gt; 'q -&gt; 'i -&gt; 'o Lwt.t) -&gt;
   'prefix directory</abbr>
 
-<abbr class="mark-warning" title="No type known for the following variants: `PUT, `GET, `DELETE, `POST, `PATCH
-
-——————————
-
-Expected a list of named or unspecified '_' type variables">val lwt_register5 :
+<abbr class="mark-warning" title="Expected a list of named or unspecified '_' type variables">val lwt_register5 :
   'prefix directory -&gt;
   ( 'm,
     'prefix,
@@ -6420,7 +6304,11 @@ We ignore polymorphic type variable quantifications
 
 ——————————
 
-No type known for the following variants: `PUT, `GET, `DELETE, `POST, `PATCH
+Expected a list of named or unspecified '_' type variables
+
+——————————
+
+We ignore polymorphic type variable quantifications
 
 ——————————
 
@@ -6432,10 +6320,6 @@ We ignore polymorphic type variable quantifications
 
 ——————————
 
-No type known for the following variants: `PUT, `GET, `DELETE, `POST, `PATCH
-
-——————————
-
 Expected a list of named or unspecified '_' type variables
 
 ——————————
@@ -6444,27 +6328,7 @@ We ignore polymorphic type variable quantifications
 
 ——————————
 
-No type known for the following variants: `PUT, `GET, `DELETE, `POST, `PATCH
-
-——————————
-
 Expected a list of named or unspecified '_' type variables
-
-——————————
-
-We ignore polymorphic type variable quantifications
-
-——————————
-
-No type known for the following variants: `PUT, `GET, `DELETE, `POST, `PATCH
-
-——————————
-
-Expected a list of named or unspecified '_' type variables
-
-——————————
-
-No type known for the following variants: `PUT, `GET, `DELETE, `POST, `PATCH
 
 ——————————
 
@@ -6500,7 +6364,11 @@ We ignore polymorphic type variable quantifications
 
 ——————————
 
-No type known for the following variants: `PUT, `GET, `DELETE, `POST, `PATCH
+Expected a list of named or unspecified '_' type variables
+
+——————————
+
+We ignore polymorphic type variable quantifications
 
 ——————————
 
@@ -6512,10 +6380,6 @@ We ignore polymorphic type variable quantifications
 
 ——————————
 
-No type known for the following variants: `PUT, `GET, `DELETE, `POST, `PATCH
-
-——————————
-
 Expected a list of named or unspecified '_' type variables
 
 ——————————
@@ -6524,27 +6388,7 @@ We ignore polymorphic type variable quantifications
 
 ——————————
 
-No type known for the following variants: `PUT, `GET, `DELETE, `POST, `PATCH
-
-——————————
-
 Expected a list of named or unspecified '_' type variables
-
-——————————
-
-We ignore polymorphic type variable quantifications
-
-——————————
-
-No type known for the following variants: `PUT, `GET, `DELETE, `POST, `PATCH
-
-——————————
-
-Expected a list of named or unspecified '_' type variables
-
-——————————
-
-No type known for the following variants: `PUT, `GET, `DELETE, `POST, `PATCH
 
 ——————————
 
@@ -6581,7 +6425,11 @@ We ignore polymorphic type variable quantifications
 
 ——————————
 
-No type known for the following variants: `PUT, `GET, `DELETE, `POST, `PATCH
+Expected a list of named or unspecified '_' type variables
+
+——————————
+
+We ignore polymorphic type variable quantifications
 
 ——————————
 
@@ -6593,10 +6441,6 @@ We ignore polymorphic type variable quantifications
 
 ——————————
 
-No type known for the following variants: `PUT, `GET, `DELETE, `POST, `PATCH
-
-——————————
-
 Expected a list of named or unspecified '_' type variables
 
 ——————————
@@ -6605,27 +6449,7 @@ We ignore polymorphic type variable quantifications
 
 ——————————
 
-No type known for the following variants: `PUT, `GET, `DELETE, `POST, `PATCH
-
-——————————
-
 Expected a list of named or unspecified '_' type variables
-
-——————————
-
-We ignore polymorphic type variable quantifications
-
-——————————
-
-No type known for the following variants: `PUT, `GET, `DELETE, `POST, `PATCH
-
-——————————
-
-Expected a list of named or unspecified '_' type variables
-
-——————————
-
-No type known for the following variants: `PUT, `GET, `DELETE, `POST, `PATCH
 
 ——————————
 
@@ -6663,7 +6487,11 @@ We ignore polymorphic type variable quantifications
 
 ——————————
 
-No type known for the following variants: `PUT, `GET, `DELETE, `POST, `PATCH
+Expected a list of named or unspecified '_' type variables
+
+——————————
+
+We ignore polymorphic type variable quantifications
 
 ——————————
 
@@ -6675,10 +6503,6 @@ We ignore polymorphic type variable quantifications
 
 ——————————
 
-No type known for the following variants: `PUT, `GET, `DELETE, `POST, `PATCH
-
-——————————
-
 Expected a list of named or unspecified '_' type variables
 
 ——————————
@@ -6687,27 +6511,7 @@ We ignore polymorphic type variable quantifications
 
 ——————————
 
-No type known for the following variants: `PUT, `GET, `DELETE, `POST, `PATCH
-
-——————————
-
 Expected a list of named or unspecified '_' type variables
-
-——————————
-
-We ignore polymorphic type variable quantifications
-
-——————————
-
-No type known for the following variants: `PUT, `GET, `DELETE, `POST, `PATCH
-
-——————————
-
-Expected a list of named or unspecified '_' type variables
-
-——————————
-
-No type known for the following variants: `PUT, `GET, `DELETE, `POST, `PATCH
 
 ——————————
 
@@ -6746,7 +6550,11 @@ We ignore polymorphic type variable quantifications
 
 ——————————
 
-No type known for the following variants: `PUT, `GET, `DELETE, `POST, `PATCH
+Expected a list of named or unspecified '_' type variables
+
+——————————
+
+We ignore polymorphic type variable quantifications
 
 ——————————
 
@@ -6758,10 +6566,6 @@ We ignore polymorphic type variable quantifications
 
 ——————————
 
-No type known for the following variants: `PUT, `GET, `DELETE, `POST, `PATCH
-
-——————————
-
 Expected a list of named or unspecified '_' type variables
 
 ——————————
@@ -6770,27 +6574,7 @@ We ignore polymorphic type variable quantifications
 
 ——————————
 
-No type known for the following variants: `PUT, `GET, `DELETE, `POST, `PATCH
-
-——————————
-
 Expected a list of named or unspecified '_' type variables
-
-——————————
-
-We ignore polymorphic type variable quantifications
-
-——————————
-
-No type known for the following variants: `PUT, `GET, `DELETE, `POST, `PATCH
-
-——————————
-
-Expected a list of named or unspecified '_' type variables
-
-——————————
-
-No type known for the following variants: `PUT, `GET, `DELETE, `POST, `PATCH
 
 ——————————
 
@@ -6826,7 +6610,11 @@ We ignore polymorphic type variable quantifications
 
 ——————————
 
-No type known for the following variants: `PUT, `GET, `DELETE, `POST, `PATCH
+Expected a list of named or unspecified '_' type variables
+
+——————————
+
+We ignore polymorphic type variable quantifications
 
 ——————————
 
@@ -6838,10 +6626,6 @@ We ignore polymorphic type variable quantifications
 
 ——————————
 
-No type known for the following variants: `PUT, `GET, `DELETE, `POST, `PATCH
-
-——————————
-
 Expected a list of named or unspecified '_' type variables
 
 ——————————
@@ -6850,27 +6634,7 @@ We ignore polymorphic type variable quantifications
 
 ——————————
 
-No type known for the following variants: `PUT, `GET, `DELETE, `POST, `PATCH
-
-——————————
-
 Expected a list of named or unspecified '_' type variables
-
-——————————
-
-We ignore polymorphic type variable quantifications
-
-——————————
-
-No type known for the following variants: `PUT, `GET, `DELETE, `POST, `PATCH
-
-——————————
-
-Expected a list of named or unspecified '_' type variables
-
-——————————
-
-No type known for the following variants: `PUT, `GET, `DELETE, `POST, `PATCH
 
 ——————————
 
@@ -6907,7 +6671,11 @@ We ignore polymorphic type variable quantifications
 
 ——————————
 
-No type known for the following variants: `PUT, `GET, `DELETE, `POST, `PATCH
+Expected a list of named or unspecified '_' type variables
+
+——————————
+
+We ignore polymorphic type variable quantifications
 
 ——————————
 
@@ -6919,10 +6687,6 @@ We ignore polymorphic type variable quantifications
 
 ——————————
 
-No type known for the following variants: `PUT, `GET, `DELETE, `POST, `PATCH
-
-——————————
-
 Expected a list of named or unspecified '_' type variables
 
 ——————————
@@ -6931,27 +6695,7 @@ We ignore polymorphic type variable quantifications
 
 ——————————
 
-No type known for the following variants: `PUT, `GET, `DELETE, `POST, `PATCH
-
-——————————
-
 Expected a list of named or unspecified '_' type variables
-
-——————————
-
-We ignore polymorphic type variable quantifications
-
-——————————
-
-No type known for the following variants: `PUT, `GET, `DELETE, `POST, `PATCH
-
-——————————
-
-Expected a list of named or unspecified '_' type variables
-
-——————————
-
-No type known for the following variants: `PUT, `GET, `DELETE, `POST, `PATCH
 
 ——————————
 
@@ -6989,7 +6733,11 @@ We ignore polymorphic type variable quantifications
 
 ——————————
 
-No type known for the following variants: `PUT, `GET, `DELETE, `POST, `PATCH
+Expected a list of named or unspecified '_' type variables
+
+——————————
+
+We ignore polymorphic type variable quantifications
 
 ——————————
 
@@ -7001,10 +6749,6 @@ We ignore polymorphic type variable quantifications
 
 ——————————
 
-No type known for the following variants: `PUT, `GET, `DELETE, `POST, `PATCH
-
-——————————
-
 Expected a list of named or unspecified '_' type variables
 
 ——————————
@@ -7013,27 +6757,7 @@ We ignore polymorphic type variable quantifications
 
 ——————————
 
-No type known for the following variants: `PUT, `GET, `DELETE, `POST, `PATCH
-
-——————————
-
 Expected a list of named or unspecified '_' type variables
-
-——————————
-
-We ignore polymorphic type variable quantifications
-
-——————————
-
-No type known for the following variants: `PUT, `GET, `DELETE, `POST, `PATCH
-
-——————————
-
-Expected a list of named or unspecified '_' type variables
-
-——————————
-
-No type known for the following variants: `PUT, `GET, `DELETE, `POST, `PATCH
 
 ——————————
 
@@ -7202,7 +6926,7 @@ End Pervasives.
 
 Import Pervasives.
 
-Module List.
+Module Type List_type.
   Parameter length : forall {a : Set}, list a -&gt; int.
   
   Parameter compare_lengths : forall {a b : Set}, list a -&gt; list b -&gt; int.
@@ -7308,7 +7032,62 @@ Module List.
   
   Parameter merge : forall {a : Set},
     (a -&gt; a -&gt; int) -&gt; list a -&gt; list a -&gt; list a.
+End List_type.
+
+Module List.
+  Parameter length : forall {a : Set}, list a -&gt; int.
+  Parameter compare_lengths : forall {a b : Set}, list a -&gt; list b -&gt; int.
+  Parameter compare_length_with : forall {a : Set}, list a -&gt; int -&gt; int.
+  Parameter __cons_value : forall {a : Set}, a -&gt; list a -&gt; list a.
+  Parameter hd : forall {a : Set}, list a -&gt; a.
+  Parameter tl : forall {a : Set}, list a -&gt; list a.
+  Parameter nth_opt : forall {a : Set}, list a -&gt; int -&gt; option a.
+  Definition rev : forall {a : Set}, list a -&gt; list a :=
+    fun {_} =&gt; List.rev.
+  Parameter init : forall {a : Set}, int -&gt; (int -&gt; a) -&gt; list a.
+  Parameter append : forall {a : Set}, list a -&gt; list a -&gt; list a.
+  Parameter rev_append : forall {a : Set}, list a -&gt; list a -&gt; list a.
+  Parameter concat : forall {a : Set}, list (list a) -&gt; list a.
+  Parameter flatten : forall {a : Set}, list (list a) -&gt; list a.
+  Parameter iter : forall {a : Set}, (a -&gt; unit) -&gt; list a -&gt; unit.
+  Parameter iteri : forall {a : Set}, (int -&gt; a -&gt; unit) -&gt; list a -&gt; unit.
+  Definition map : forall {a b : Set}, (a -&gt; b) -&gt; list a -&gt; list b :=
+    fun {_ _} =&gt; List.map.
+  Parameter mapi : forall {a b : Set}, (int -&gt; a -&gt; b) -&gt; list a -&gt; list b.
+  Parameter rev_map : forall {a b : Set}, (a -&gt; b) -&gt; list a -&gt; list b.
+  Parameter fold_left : forall {a b : Set}, (a -&gt; b -&gt; a) -&gt; a -&gt; list b -&gt; a.
+  Parameter fold_right : forall {a b : Set}, (a -&gt; b -&gt; b) -&gt; list a -&gt; b -&gt; b.
+  Parameter iter2 : forall {a b : Set}, (a -&gt; b -&gt; unit) -&gt; list a -&gt; list b -&gt; unit.
+  Parameter map2 : forall {a b c : Set}, (a -&gt; b -&gt; c) -&gt; list a -&gt; list b -&gt; list c.
+  Parameter rev_map2 : forall {a b c : Set}, (a -&gt; b -&gt; c) -&gt; list a -&gt; list b -&gt; list c.
+  Parameter fold_left2 : forall {a b c : Set}, (a -&gt; b -&gt; c -&gt; a) -&gt; a -&gt; list b -&gt; list c -&gt; a.
+  Parameter fold_right2 : forall {a b c : Set}, (a -&gt; b -&gt; c -&gt; c) -&gt; list a -&gt; list b -&gt; c -&gt; c.
+  Parameter for_all : forall {a : Set}, (a -&gt; bool) -&gt; list a -&gt; bool.
+  Parameter __exists : forall {a : Set}, (a -&gt; bool) -&gt; list a -&gt; bool.
+  Parameter for_all2 : forall {a b : Set}, (a -&gt; b -&gt; bool) -&gt; list a -&gt; list b -&gt; bool.
+  Parameter __exists2 : forall {a b : Set}, (a -&gt; b -&gt; bool) -&gt; list a -&gt; list b -&gt; bool.
+  Parameter mem : forall {a : Set}, a -&gt; list a -&gt; bool.
+  Parameter memq : forall {a : Set}, a -&gt; list a -&gt; bool.
+  Parameter find_opt : forall {a : Set}, (a -&gt; bool) -&gt; list a -&gt; option a.
+  Parameter filter : forall {a : Set}, (a -&gt; bool) -&gt; list a -&gt; list a.
+  Parameter find_all : forall {a : Set}, (a -&gt; bool) -&gt; list a -&gt; list a.
+  Parameter partition : forall {a : Set}, (a -&gt; bool) -&gt; list a -&gt; list a * list a.
+  Parameter assoc_opt : forall {a b : Set}, a -&gt; list (a * b) -&gt; option b.
+  Parameter assq_opt : forall {a b : Set}, a -&gt; list (a * b) -&gt; option b.
+  Parameter mem_assoc : forall {a b : Set}, a -&gt; list (a * b) -&gt; bool.
+  Parameter mem_assq : forall {a b : Set}, a -&gt; list (a * b) -&gt; bool.
+  Parameter remove_assoc : forall {a b : Set}, a -&gt; list (a * b) -&gt; list (a * b).
+  Parameter remove_assq : forall {a b : Set}, a -&gt; list (a * b) -&gt; list (a * b).
+  Parameter split : forall {a b : Set}, list (a * b) -&gt; list a * list b.
+  Parameter combine : forall {a b : Set}, list a -&gt; list b -&gt; list (a * b).
+  Parameter sort : forall {a : Set}, (a -&gt; a -&gt; int) -&gt; list a -&gt; list a.
+  Parameter stable_sort : forall {a : Set}, (a -&gt; a -&gt; int) -&gt; list a -&gt; list a.
+  Parameter fast_sort : forall {a : Set}, (a -&gt; a -&gt; int) -&gt; list a -&gt; list a.
+  Parameter sort_uniq : forall {a : Set}, (a -&gt; a -&gt; int) -&gt; list a -&gt; list a.
+  Parameter merge : forall {a : Set}, (a -&gt; a -&gt; int) -&gt; list a -&gt; list a -&gt; list a.
 End List.
+
+Module List_check : List_type := List.
 
 Module String.
   Parameter length : string -&gt; int.
@@ -7651,7 +7430,7 @@ Module Format.
     (string -&gt; a) -&gt; Pervasives.format4 b formatter unit a -&gt; b.
 End Format.
 
-Module MBytes.
+Module Type MBytes_type.
   Parameter t : Set.
   
   Parameter create : int -&gt; t.
@@ -7736,7 +7515,60 @@ Module MBytes.
   Parameter to_hex : t -&gt; hex.
   
   Parameter of_hex : hex -&gt; t.
+End MBytes_type.
+
+Module MBytes.
+  Definition t : Set := string.
+  Parameter create : int -&gt; t.
+  Parameter length : t -&gt; int.
+  Parameter copy : t -&gt; t.
+  Parameter sub : t -&gt; int -&gt; int -&gt; t.
+  Parameter blit : t -&gt; int -&gt; t -&gt; int -&gt; int -&gt; unit.
+  Parameter blit_of_string : string -&gt; int -&gt; t -&gt; int -&gt; int -&gt; unit.
+  Parameter blit_to_bytes : t -&gt; int -&gt; bytes -&gt; int -&gt; int -&gt; unit.
+  Definition of_string : string -&gt; t := fun s =&gt; s.
+  Definition to_string : t -&gt; string := fun b =&gt; b.
+  Parameter sub_string : t -&gt; int -&gt; int -&gt; string.
+  Parameter get_char : t -&gt; int -&gt; ascii.
+  Parameter get_uint8 : t -&gt; int -&gt; int.
+  Parameter get_int8 : t -&gt; int -&gt; int.
+  Parameter set_char : t -&gt; int -&gt; ascii -&gt; unit.
+  Parameter set_int8 : t -&gt; int -&gt; int -&gt; unit.
+  Parameter get_uint16 : t -&gt; int -&gt; int.
+  Parameter get_int16 : t -&gt; int -&gt; int.
+  Parameter get_int32 : t -&gt; int -&gt; int32.
+  Parameter get_int64 : t -&gt; int -&gt; int64.
+  Parameter set_int16 : t -&gt; int -&gt; int -&gt; unit.
+  Parameter set_int32 : t -&gt; int -&gt; int32 -&gt; unit.
+  Parameter set_int64 : t -&gt; int -&gt; int64 -&gt; unit.
+
+  Module LE.
+    Parameter get_uint16 : t -&gt; int -&gt; int.
+    Parameter get_int16 : t -&gt; int -&gt; int.
+    Parameter get_int32 : t -&gt; int -&gt; int32.
+    Parameter get_int64 : t -&gt; int -&gt; int64.
+    Parameter set_int16 : t -&gt; int -&gt; int -&gt; unit.
+    Parameter set_int32 : t -&gt; int -&gt; int32 -&gt; unit.
+    Parameter set_int64 : t -&gt; int -&gt; int64 -&gt; unit.
+  End LE.
+
+  Parameter op_eq : t -&gt; t -&gt; bool.
+  Parameter op_ltgt : t -&gt; t -&gt; bool.
+  Parameter op_lt : t -&gt; t -&gt; bool.
+  Parameter op_lteq : t -&gt; t -&gt; bool.
+  Parameter op_gteq : t -&gt; t -&gt; bool.
+  Parameter op_gt : t -&gt; t -&gt; bool.
+  Parameter compare : t -&gt; t -&gt; int.
+  Parameter concat : string -&gt; list t -&gt; t.
+  
+  Inductive hex : Set :=
+  | Hex : string -&gt; hex.
+  
+  Parameter to_hex : t -&gt; hex.
+  Parameter of_hex : hex -&gt; t.
 End MBytes.
+
+Module MBytes_check : MBytes_type := MBytes.
 
 Module Type Z_type.
   Parameter t : Set.
@@ -8820,13 +8652,10 @@ Module RPC_service.
   | POST : meth
   | PATCH : meth.
   
-  Parameter t : forall
-    (expected_type_variable prefix params query input output : Set), Set.
+  Parameter t : forall (prefix params query input output : Set), Set.
   
   Definition service (prefix params query input output : Set) : Set :=
-    t
-      ((* `PUT *) unit + (* `GET *) unit + (* `DELETE *) unit + (* `POST *) unit
-        + (* `PATCH *) unit) prefix params query input output.
+    t prefix params query input output.
   
   Parameter get_service : forall {output params prefix query : Set},
     option string -&gt; RPC_query.t query -&gt; Data_encoding.t output -&gt;
@@ -8935,26 +8764,17 @@ Module RPC_directory.
   (* exception Conflict *)
   
   Parameter register : forall {input output params prefix query : Set},
-    directory prefix -&gt;
-    RPC_service.t
-      ((* `PUT *) unit + (* `GET *) unit + (* `DELETE *) unit + (* `POST *) unit
-        + (* `PATCH *) unit) prefix params query input output -&gt;
+    directory prefix -&gt; RPC_service.t prefix params query input output -&gt;
     (params -&gt; query -&gt; input -&gt; Lwt.t (Error_monad.tzresult output)) -&gt;
     directory prefix.
   
   Parameter opt_register : forall {input output params prefix query : Set},
-    directory prefix -&gt;
-    RPC_service.t
-      ((* `PUT *) unit + (* `GET *) unit + (* `DELETE *) unit + (* `POST *) unit
-        + (* `PATCH *) unit) prefix params query input output -&gt;
+    directory prefix -&gt; RPC_service.t prefix params query input output -&gt;
     (params -&gt; query -&gt; input -&gt; Lwt.t (Error_monad.tzresult (option output)))
     -&gt; directory prefix.
   
   Parameter gen_register : forall {input output params prefix query : Set},
-    directory prefix -&gt;
-    RPC_service.t
-      ((* `PUT *) unit + (* `GET *) unit + (* `DELETE *) unit + (* `POST *) unit
-        + (* `PATCH *) unit) prefix params query input output -&gt;
+    directory prefix -&gt; RPC_service.t prefix params query input output -&gt;
     (params -&gt; query -&gt; input -&gt;
     Lwt.t
       ((* `OkStream *) RPC_answer.stream output +
@@ -8967,108 +8787,70 @@ Module RPC_directory.
         (* `No_content *) unit)) -&gt; directory prefix.
   
   Parameter lwt_register : forall {input output params prefix query : Set},
-    directory prefix -&gt;
-    RPC_service.t
-      ((* `PUT *) unit + (* `GET *) unit + (* `DELETE *) unit + (* `POST *) unit
-        + (* `PATCH *) unit) prefix params query input output -&gt;
+    directory prefix -&gt; RPC_service.t prefix params query input output -&gt;
     (params -&gt; query -&gt; input -&gt; Lwt.t output) -&gt; directory prefix.
   
   Parameter register0 : forall {i o q : Set},
-    directory unit -&gt;
-    RPC_service.t
-      ((* `PUT *) unit + (* `GET *) unit + (* `DELETE *) unit + (* `POST *) unit
-        + (* `PATCH *) unit) unit unit q i o -&gt;
+    directory unit -&gt; RPC_service.t unit unit q i o -&gt;
     (q -&gt; i -&gt; Lwt.t (Error_monad.tzresult o)) -&gt; directory unit.
   
   Parameter register1 : forall {a i o prefix q : Set},
-    directory prefix -&gt;
-    RPC_service.t
-      ((* `PUT *) unit + (* `GET *) unit + (* `DELETE *) unit + (* `POST *) unit
-        + (* `PATCH *) unit) prefix (unit * a) q i o -&gt;
+    directory prefix -&gt; RPC_service.t prefix (unit * a) q i o -&gt;
     (a -&gt; q -&gt; i -&gt; Lwt.t (Error_monad.tzresult o)) -&gt; directory prefix.
   
   Parameter register2 : forall {a b i o prefix q : Set},
-    directory prefix -&gt;
-    RPC_service.t
-      ((* `PUT *) unit + (* `GET *) unit + (* `DELETE *) unit + (* `POST *) unit
-        + (* `PATCH *) unit) prefix ((unit * a) * b) q i o -&gt;
+    directory prefix -&gt; RPC_service.t prefix ((unit * a) * b) q i o -&gt;
     (a -&gt; b -&gt; q -&gt; i -&gt; Lwt.t (Error_monad.tzresult o)) -&gt; directory prefix.
   
   Parameter register3 : forall {a b c i o prefix q : Set},
-    directory prefix -&gt;
-    RPC_service.t
-      ((* `PUT *) unit + (* `GET *) unit + (* `DELETE *) unit + (* `POST *) unit
-        + (* `PATCH *) unit) prefix (((unit * a) * b) * c) q i o -&gt;
+    directory prefix -&gt; RPC_service.t prefix (((unit * a) * b) * c) q i o -&gt;
     (a -&gt; b -&gt; c -&gt; q -&gt; i -&gt; Lwt.t (Error_monad.tzresult o)) -&gt;
     directory prefix.
   
   Parameter register4 : forall {a b c d i o prefix q : Set},
     directory prefix -&gt;
-    RPC_service.t
-      ((* `PUT *) unit + (* `GET *) unit + (* `DELETE *) unit + (* `POST *) unit
-        + (* `PATCH *) unit) prefix ((((unit * a) * b) * c) * d) q i o -&gt;
+    RPC_service.t prefix ((((unit * a) * b) * c) * d) q i o -&gt;
     (a -&gt; b -&gt; c -&gt; d -&gt; q -&gt; i -&gt; Lwt.t (Error_monad.tzresult o)) -&gt;
     directory prefix.
   
   Parameter register5 : forall {a b c d e i o prefix q : Set},
     directory prefix -&gt;
-    RPC_service.t
-      ((* `PUT *) unit + (* `GET *) unit + (* `DELETE *) unit + (* `POST *) unit
-        + (* `PATCH *) unit) prefix (((((unit * a) * b) * c) * d) * e) q i o -&gt;
+    RPC_service.t prefix (((((unit * a) * b) * c) * d) * e) q i o -&gt;
     (a -&gt; b -&gt; c -&gt; d -&gt; e -&gt; q -&gt; i -&gt; Lwt.t (Error_monad.tzresult o)) -&gt;
     directory prefix.
   
   Parameter opt_register0 : forall {i o q : Set},
-    directory unit -&gt;
-    RPC_service.t
-      ((* `PUT *) unit + (* `GET *) unit + (* `DELETE *) unit + (* `POST *) unit
-        + (* `PATCH *) unit) unit unit q i o -&gt;
+    directory unit -&gt; RPC_service.t unit unit q i o -&gt;
     (q -&gt; i -&gt; Lwt.t (Error_monad.tzresult (option o))) -&gt; directory unit.
   
   Parameter opt_register1 : forall {a i o prefix q : Set},
-    directory prefix -&gt;
-    RPC_service.t
-      ((* `PUT *) unit + (* `GET *) unit + (* `DELETE *) unit + (* `POST *) unit
-        + (* `PATCH *) unit) prefix (unit * a) q i o -&gt;
+    directory prefix -&gt; RPC_service.t prefix (unit * a) q i o -&gt;
     (a -&gt; q -&gt; i -&gt; Lwt.t (Error_monad.tzresult (option o))) -&gt; directory prefix.
   
   Parameter opt_register2 : forall {a b i o prefix q : Set},
-    directory prefix -&gt;
-    RPC_service.t
-      ((* `PUT *) unit + (* `GET *) unit + (* `DELETE *) unit + (* `POST *) unit
-        + (* `PATCH *) unit) prefix ((unit * a) * b) q i o -&gt;
+    directory prefix -&gt; RPC_service.t prefix ((unit * a) * b) q i o -&gt;
     (a -&gt; b -&gt; q -&gt; i -&gt; Lwt.t (Error_monad.tzresult (option o))) -&gt;
     directory prefix.
   
   Parameter opt_register3 : forall {a b c i o prefix q : Set},
-    directory prefix -&gt;
-    RPC_service.t
-      ((* `PUT *) unit + (* `GET *) unit + (* `DELETE *) unit + (* `POST *) unit
-        + (* `PATCH *) unit) prefix (((unit * a) * b) * c) q i o -&gt;
+    directory prefix -&gt; RPC_service.t prefix (((unit * a) * b) * c) q i o -&gt;
     (a -&gt; b -&gt; c -&gt; q -&gt; i -&gt; Lwt.t (Error_monad.tzresult (option o))) -&gt;
     directory prefix.
   
   Parameter opt_register4 : forall {a b c d i o prefix q : Set},
     directory prefix -&gt;
-    RPC_service.t
-      ((* `PUT *) unit + (* `GET *) unit + (* `DELETE *) unit + (* `POST *) unit
-        + (* `PATCH *) unit) prefix ((((unit * a) * b) * c) * d) q i o -&gt;
+    RPC_service.t prefix ((((unit * a) * b) * c) * d) q i o -&gt;
     (a -&gt; b -&gt; c -&gt; d -&gt; q -&gt; i -&gt; Lwt.t (Error_monad.tzresult (option o))) -&gt;
     directory prefix.
   
   Parameter opt_register5 : forall {a b c d e i o prefix q : Set},
     directory prefix -&gt;
-    RPC_service.t
-      ((* `PUT *) unit + (* `GET *) unit + (* `DELETE *) unit + (* `POST *) unit
-        + (* `PATCH *) unit) prefix (((((unit * a) * b) * c) * d) * e) q i o -&gt;
+    RPC_service.t prefix (((((unit * a) * b) * c) * d) * e) q i o -&gt;
     (a -&gt; b -&gt; c -&gt; d -&gt; e -&gt; q -&gt; i -&gt; Lwt.t (Error_monad.tzresult (option o)))
     -&gt; directory prefix.
   
   Parameter gen_register0 : forall {i o q : Set},
-    directory unit -&gt;
-    RPC_service.t
-      ((* `PUT *) unit + (* `GET *) unit + (* `DELETE *) unit + (* `POST *) unit
-        + (* `PATCH *) unit) unit unit q i o -&gt;
+    directory unit -&gt; RPC_service.t unit unit q i o -&gt;
     (q -&gt; i -&gt;
     Lwt.t
       ((* `OkStream *) RPC_answer.stream o +
@@ -9081,10 +8863,7 @@ Module RPC_directory.
         (* `No_content *) unit)) -&gt; directory unit.
   
   Parameter gen_register1 : forall {a i o prefix q : Set},
-    directory prefix -&gt;
-    RPC_service.t
-      ((* `PUT *) unit + (* `GET *) unit + (* `DELETE *) unit + (* `POST *) unit
-        + (* `PATCH *) unit) prefix (unit * a) q i o -&gt;
+    directory prefix -&gt; RPC_service.t prefix (unit * a) q i o -&gt;
     (a -&gt; q -&gt; i -&gt;
     Lwt.t
       ((* `OkStream *) RPC_answer.stream o +
@@ -9097,10 +8876,7 @@ Module RPC_directory.
         (* `No_content *) unit)) -&gt; directory prefix.
   
   Parameter gen_register2 : forall {a b i o prefix q : Set},
-    directory prefix -&gt;
-    RPC_service.t
-      ((* `PUT *) unit + (* `GET *) unit + (* `DELETE *) unit + (* `POST *) unit
-        + (* `PATCH *) unit) prefix ((unit * a) * b) q i o -&gt;
+    directory prefix -&gt; RPC_service.t prefix ((unit * a) * b) q i o -&gt;
     (a -&gt; b -&gt; q -&gt; i -&gt;
     Lwt.t
       ((* `OkStream *) RPC_answer.stream o +
@@ -9113,10 +8889,7 @@ Module RPC_directory.
         (* `No_content *) unit)) -&gt; directory prefix.
   
   Parameter gen_register3 : forall {a b c i o prefix q : Set},
-    directory prefix -&gt;
-    RPC_service.t
-      ((* `PUT *) unit + (* `GET *) unit + (* `DELETE *) unit + (* `POST *) unit
-        + (* `PATCH *) unit) prefix (((unit * a) * b) * c) q i o -&gt;
+    directory prefix -&gt; RPC_service.t prefix (((unit * a) * b) * c) q i o -&gt;
     (a -&gt; b -&gt; c -&gt; q -&gt; i -&gt;
     Lwt.t
       ((* `OkStream *) RPC_answer.stream o +
@@ -9130,9 +8903,7 @@ Module RPC_directory.
   
   Parameter gen_register4 : forall {a b c d i o prefix q : Set},
     directory prefix -&gt;
-    RPC_service.t
-      ((* `PUT *) unit + (* `GET *) unit + (* `DELETE *) unit + (* `POST *) unit
-        + (* `PATCH *) unit) prefix ((((unit * a) * b) * c) * d) q i o -&gt;
+    RPC_service.t prefix ((((unit * a) * b) * c) * d) q i o -&gt;
     (a -&gt; b -&gt; c -&gt; d -&gt; q -&gt; i -&gt;
     Lwt.t
       ((* `OkStream *) RPC_answer.stream o +
@@ -9146,9 +8917,7 @@ Module RPC_directory.
   
   Parameter gen_register5 : forall {a b c d e i o prefix q : Set},
     directory prefix -&gt;
-    RPC_service.t
-      ((* `PUT *) unit + (* `GET *) unit + (* `DELETE *) unit + (* `POST *) unit
-        + (* `PATCH *) unit) prefix (((((unit * a) * b) * c) * d) * e) q i o -&gt;
+    RPC_service.t prefix (((((unit * a) * b) * c) * d) * e) q i o -&gt;
     (a -&gt; b -&gt; c -&gt; d -&gt; e -&gt; q -&gt; i -&gt;
     Lwt.t
       ((* `OkStream *) RPC_answer.stream o +
@@ -9161,45 +8930,29 @@ Module RPC_directory.
         (* `No_content *) unit)) -&gt; directory prefix.
   
   Parameter lwt_register0 : forall {i o q : Set},
-    directory unit -&gt;
-    RPC_service.t
-      ((* `PUT *) unit + (* `GET *) unit + (* `DELETE *) unit + (* `POST *) unit
-        + (* `PATCH *) unit) unit unit q i o -&gt; (q -&gt; i -&gt; Lwt.t o) -&gt;
+    directory unit -&gt; RPC_service.t unit unit q i o -&gt; (q -&gt; i -&gt; Lwt.t o) -&gt;
     directory unit.
   
   Parameter lwt_register1 : forall {a i o prefix q : Set},
-    directory prefix -&gt;
-    RPC_service.t
-      ((* `PUT *) unit + (* `GET *) unit + (* `DELETE *) unit + (* `POST *) unit
-        + (* `PATCH *) unit) prefix (unit * a) q i o -&gt;
+    directory prefix -&gt; RPC_service.t prefix (unit * a) q i o -&gt;
     (a -&gt; q -&gt; i -&gt; Lwt.t o) -&gt; directory prefix.
   
   Parameter lwt_register2 : forall {a b i o prefix q : Set},
-    directory prefix -&gt;
-    RPC_service.t
-      ((* `PUT *) unit + (* `GET *) unit + (* `DELETE *) unit + (* `POST *) unit
-        + (* `PATCH *) unit) prefix ((unit * a) * b) q i o -&gt;
+    directory prefix -&gt; RPC_service.t prefix ((unit * a) * b) q i o -&gt;
     (a -&gt; b -&gt; q -&gt; i -&gt; Lwt.t o) -&gt; directory prefix.
   
   Parameter lwt_register3 : forall {a b c i o prefix q : Set},
-    directory prefix -&gt;
-    RPC_service.t
-      ((* `PUT *) unit + (* `GET *) unit + (* `DELETE *) unit + (* `POST *) unit
-        + (* `PATCH *) unit) prefix (((unit * a) * b) * c) q i o -&gt;
+    directory prefix -&gt; RPC_service.t prefix (((unit * a) * b) * c) q i o -&gt;
     (a -&gt; b -&gt; c -&gt; q -&gt; i -&gt; Lwt.t o) -&gt; directory prefix.
   
   Parameter lwt_register4 : forall {a b c d i o prefix q : Set},
     directory prefix -&gt;
-    RPC_service.t
-      ((* `PUT *) unit + (* `GET *) unit + (* `DELETE *) unit + (* `POST *) unit
-        + (* `PATCH *) unit) prefix ((((unit * a) * b) * c) * d) q i o -&gt;
+    RPC_service.t prefix ((((unit * a) * b) * c) * d) q i o -&gt;
     (a -&gt; b -&gt; c -&gt; d -&gt; q -&gt; i -&gt; Lwt.t o) -&gt; directory prefix.
   
   Parameter lwt_register5 : forall {a b c d e i o prefix q : Set},
     directory prefix -&gt;
-    RPC_service.t
-      ((* `PUT *) unit + (* `GET *) unit + (* `DELETE *) unit + (* `POST *) unit
-        + (* `PATCH *) unit) prefix (((((unit * a) * b) * c) * d) * e) q i o -&gt;
+    RPC_service.t prefix (((((unit * a) * b) * c) * d) * e) q i o -&gt;
     (a -&gt; b -&gt; c -&gt; d -&gt; e -&gt; q -&gt; i -&gt; Lwt.t o) -&gt; directory prefix.
   
   Parameter register_dynamic_directory : forall {a prefix : Set},
@@ -10389,188 +10142,100 @@ Module RPC_context.
   (* class_type *)
   
   Parameter make_call0 : forall {H a b c i o pr q : Set},
-    RPC_service.t
-      ((* `PUT *) unit + (* `GET *) unit + (* `DELETE *) unit + (* `POST *) unit
-        + (* `PATCH *) unit) t t q i o -&gt;
-    ((RPC_service.t
-      ((* `PUT *) unit + (* `GET *) unit + (* `DELETE *) unit + (* `POST *) unit
-        + (* `PATCH *) unit) t t q i o -&gt; pr -&gt; q -&gt; i -&gt;
+    RPC_service.t t t q i o -&gt;
+    ((RPC_service.t t t q i o -&gt; pr -&gt; q -&gt; i -&gt;
     Lwt.t (Error_monad.shell_tzresult o)) *
-      ((RPC_service.t
-        ((* `PUT *) unit + (* `GET *) unit + (* `DELETE *) unit +
-          (* `POST *) unit + (* `PATCH *) unit) t (t * a) q i o -&gt; pr -&gt; a -&gt;
-      q -&gt; i -&gt; Lwt.t (Error_monad.shell_tzresult o)) *
-        ((RPC_service.t
-          ((* `PUT *) unit + (* `GET *) unit + (* `DELETE *) unit +
-            (* `POST *) unit + (* `PATCH *) unit) t ((t * a) * b) q i o -&gt; pr -&gt;
-        a -&gt; b -&gt; q -&gt; i -&gt; Lwt.t (Error_monad.shell_tzresult o)) *
-          ((RPC_service.t
-            ((* `PUT *) unit + (* `GET *) unit + (* `DELETE *) unit +
-              (* `POST *) unit + (* `PATCH *) unit) t (((t * a) * b) * c) q i o
-          -&gt; pr -&gt; a -&gt; b -&gt; c -&gt; q -&gt; i -&gt; Lwt.t (Error_monad.shell_tzresult o))
-            * H)))) * H * pr -&gt; pr -&gt; q -&gt; i -&gt;
-    Lwt.t (Error_monad.shell_tzresult o).
+      ((RPC_service.t t (t * a) q i o -&gt; pr -&gt; a -&gt; q -&gt; i -&gt;
+      Lwt.t (Error_monad.shell_tzresult o)) *
+        ((RPC_service.t t ((t * a) * b) q i o -&gt; pr -&gt; a -&gt; b -&gt; q -&gt; i -&gt;
+        Lwt.t (Error_monad.shell_tzresult o)) *
+          ((RPC_service.t t (((t * a) * b) * c) q i o -&gt; pr -&gt; a -&gt; b -&gt; c -&gt;
+          q -&gt; i -&gt; Lwt.t (Error_monad.shell_tzresult o)) * H)))) * H * pr -&gt;
+    pr -&gt; q -&gt; i -&gt; Lwt.t (Error_monad.shell_tzresult o).
   
   Parameter make_call1 : forall {H a b c i o pr q : Set},
-    RPC_service.t
-      ((* `PUT *) unit + (* `GET *) unit + (* `DELETE *) unit + (* `POST *) unit
-        + (* `PATCH *) unit) t (t * a) q i o -&gt;
-    ((RPC_service.t
-      ((* `PUT *) unit + (* `GET *) unit + (* `DELETE *) unit + (* `POST *) unit
-        + (* `PATCH *) unit) t t q i o -&gt; pr -&gt; q -&gt; i -&gt;
+    RPC_service.t t (t * a) q i o -&gt;
+    ((RPC_service.t t t q i o -&gt; pr -&gt; q -&gt; i -&gt;
     Lwt.t (Error_monad.shell_tzresult o)) *
-      ((RPC_service.t
-        ((* `PUT *) unit + (* `GET *) unit + (* `DELETE *) unit +
-          (* `POST *) unit + (* `PATCH *) unit) t (t * a) q i o -&gt; pr -&gt; a -&gt;
-      q -&gt; i -&gt; Lwt.t (Error_monad.shell_tzresult o)) *
-        ((RPC_service.t
-          ((* `PUT *) unit + (* `GET *) unit + (* `DELETE *) unit +
-            (* `POST *) unit + (* `PATCH *) unit) t ((t * a) * b) q i o -&gt; pr -&gt;
-        a -&gt; b -&gt; q -&gt; i -&gt; Lwt.t (Error_monad.shell_tzresult o)) *
-          ((RPC_service.t
-            ((* `PUT *) unit + (* `GET *) unit + (* `DELETE *) unit +
-              (* `POST *) unit + (* `PATCH *) unit) t (((t * a) * b) * c) q i o
-          -&gt; pr -&gt; a -&gt; b -&gt; c -&gt; q -&gt; i -&gt; Lwt.t (Error_monad.shell_tzresult o))
-            * H)))) * H * pr -&gt; pr -&gt; a -&gt; q -&gt; i -&gt;
-    Lwt.t (Error_monad.shell_tzresult o).
+      ((RPC_service.t t (t * a) q i o -&gt; pr -&gt; a -&gt; q -&gt; i -&gt;
+      Lwt.t (Error_monad.shell_tzresult o)) *
+        ((RPC_service.t t ((t * a) * b) q i o -&gt; pr -&gt; a -&gt; b -&gt; q -&gt; i -&gt;
+        Lwt.t (Error_monad.shell_tzresult o)) *
+          ((RPC_service.t t (((t * a) * b) * c) q i o -&gt; pr -&gt; a -&gt; b -&gt; c -&gt;
+          q -&gt; i -&gt; Lwt.t (Error_monad.shell_tzresult o)) * H)))) * H * pr -&gt;
+    pr -&gt; a -&gt; q -&gt; i -&gt; Lwt.t (Error_monad.shell_tzresult o).
   
   Parameter make_call2 : forall {H a b c i o pr q : Set},
-    RPC_service.t
-      ((* `PUT *) unit + (* `GET *) unit + (* `DELETE *) unit + (* `POST *) unit
-        + (* `PATCH *) unit) t ((t * a) * b) q i o -&gt;
-    ((RPC_service.t
-      ((* `PUT *) unit + (* `GET *) unit + (* `DELETE *) unit + (* `POST *) unit
-        + (* `PATCH *) unit) t t q i o -&gt; pr -&gt; q -&gt; i -&gt;
+    RPC_service.t t ((t * a) * b) q i o -&gt;
+    ((RPC_service.t t t q i o -&gt; pr -&gt; q -&gt; i -&gt;
     Lwt.t (Error_monad.shell_tzresult o)) *
-      ((RPC_service.t
-        ((* `PUT *) unit + (* `GET *) unit + (* `DELETE *) unit +
-          (* `POST *) unit + (* `PATCH *) unit) t (t * a) q i o -&gt; pr -&gt; a -&gt;
-      q -&gt; i -&gt; Lwt.t (Error_monad.shell_tzresult o)) *
-        ((RPC_service.t
-          ((* `PUT *) unit + (* `GET *) unit + (* `DELETE *) unit +
-            (* `POST *) unit + (* `PATCH *) unit) t ((t * a) * b) q i o -&gt; pr -&gt;
-        a -&gt; b -&gt; q -&gt; i -&gt; Lwt.t (Error_monad.shell_tzresult o)) *
-          ((RPC_service.t
-            ((* `PUT *) unit + (* `GET *) unit + (* `DELETE *) unit +
-              (* `POST *) unit + (* `PATCH *) unit) t (((t * a) * b) * c) q i o
-          -&gt; pr -&gt; a -&gt; b -&gt; c -&gt; q -&gt; i -&gt; Lwt.t (Error_monad.shell_tzresult o))
-            * H)))) * H * pr -&gt; pr -&gt; a -&gt; b -&gt; q -&gt; i -&gt;
-    Lwt.t (Error_monad.shell_tzresult o).
+      ((RPC_service.t t (t * a) q i o -&gt; pr -&gt; a -&gt; q -&gt; i -&gt;
+      Lwt.t (Error_monad.shell_tzresult o)) *
+        ((RPC_service.t t ((t * a) * b) q i o -&gt; pr -&gt; a -&gt; b -&gt; q -&gt; i -&gt;
+        Lwt.t (Error_monad.shell_tzresult o)) *
+          ((RPC_service.t t (((t * a) * b) * c) q i o -&gt; pr -&gt; a -&gt; b -&gt; c -&gt;
+          q -&gt; i -&gt; Lwt.t (Error_monad.shell_tzresult o)) * H)))) * H * pr -&gt;
+    pr -&gt; a -&gt; b -&gt; q -&gt; i -&gt; Lwt.t (Error_monad.shell_tzresult o).
   
   Parameter make_call3 : forall {H a b c i o pr q : Set},
-    RPC_service.t
-      ((* `PUT *) unit + (* `GET *) unit + (* `DELETE *) unit + (* `POST *) unit
-        + (* `PATCH *) unit) t (((t * a) * b) * c) q i o -&gt;
-    ((RPC_service.t
-      ((* `PUT *) unit + (* `GET *) unit + (* `DELETE *) unit + (* `POST *) unit
-        + (* `PATCH *) unit) t t q i o -&gt; pr -&gt; q -&gt; i -&gt;
+    RPC_service.t t (((t * a) * b) * c) q i o -&gt;
+    ((RPC_service.t t t q i o -&gt; pr -&gt; q -&gt; i -&gt;
     Lwt.t (Error_monad.shell_tzresult o)) *
-      ((RPC_service.t
-        ((* `PUT *) unit + (* `GET *) unit + (* `DELETE *) unit +
-          (* `POST *) unit + (* `PATCH *) unit) t (t * a) q i o -&gt; pr -&gt; a -&gt;
-      q -&gt; i -&gt; Lwt.t (Error_monad.shell_tzresult o)) *
-        ((RPC_service.t
-          ((* `PUT *) unit + (* `GET *) unit + (* `DELETE *) unit +
-            (* `POST *) unit + (* `PATCH *) unit) t ((t * a) * b) q i o -&gt; pr -&gt;
-        a -&gt; b -&gt; q -&gt; i -&gt; Lwt.t (Error_monad.shell_tzresult o)) *
-          ((RPC_service.t
-            ((* `PUT *) unit + (* `GET *) unit + (* `DELETE *) unit +
-              (* `POST *) unit + (* `PATCH *) unit) t (((t * a) * b) * c) q i o
-          -&gt; pr -&gt; a -&gt; b -&gt; c -&gt; q -&gt; i -&gt; Lwt.t (Error_monad.shell_tzresult o))
-            * H)))) * H * pr -&gt; pr -&gt; a -&gt; b -&gt; c -&gt; q -&gt; i -&gt;
-    Lwt.t (Error_monad.shell_tzresult o).
+      ((RPC_service.t t (t * a) q i o -&gt; pr -&gt; a -&gt; q -&gt; i -&gt;
+      Lwt.t (Error_monad.shell_tzresult o)) *
+        ((RPC_service.t t ((t * a) * b) q i o -&gt; pr -&gt; a -&gt; b -&gt; q -&gt; i -&gt;
+        Lwt.t (Error_monad.shell_tzresult o)) *
+          ((RPC_service.t t (((t * a) * b) * c) q i o -&gt; pr -&gt; a -&gt; b -&gt; c -&gt;
+          q -&gt; i -&gt; Lwt.t (Error_monad.shell_tzresult o)) * H)))) * H * pr -&gt;
+    pr -&gt; a -&gt; b -&gt; c -&gt; q -&gt; i -&gt; Lwt.t (Error_monad.shell_tzresult o).
   
   Parameter make_opt_call0 : forall {H a b c i o pr q : Set},
-    RPC_service.t
-      ((* `PUT *) unit + (* `GET *) unit + (* `DELETE *) unit + (* `POST *) unit
-        + (* `PATCH *) unit) t t q i o -&gt;
-    ((RPC_service.t
-      ((* `PUT *) unit + (* `GET *) unit + (* `DELETE *) unit + (* `POST *) unit
-        + (* `PATCH *) unit) t t q i o -&gt; pr -&gt; q -&gt; i -&gt;
+    RPC_service.t t t q i o -&gt;
+    ((RPC_service.t t t q i o -&gt; pr -&gt; q -&gt; i -&gt;
     Lwt.t (Error_monad.shell_tzresult o)) *
-      ((RPC_service.t
-        ((* `PUT *) unit + (* `GET *) unit + (* `DELETE *) unit +
-          (* `POST *) unit + (* `PATCH *) unit) t (t * a) q i o -&gt; pr -&gt; a -&gt;
-      q -&gt; i -&gt; Lwt.t (Error_monad.shell_tzresult o)) *
-        ((RPC_service.t
-          ((* `PUT *) unit + (* `GET *) unit + (* `DELETE *) unit +
-            (* `POST *) unit + (* `PATCH *) unit) t ((t * a) * b) q i o -&gt; pr -&gt;
-        a -&gt; b -&gt; q -&gt; i -&gt; Lwt.t (Error_monad.shell_tzresult o)) *
-          ((RPC_service.t
-            ((* `PUT *) unit + (* `GET *) unit + (* `DELETE *) unit +
-              (* `POST *) unit + (* `PATCH *) unit) t (((t * a) * b) * c) q i o
-          -&gt; pr -&gt; a -&gt; b -&gt; c -&gt; q -&gt; i -&gt; Lwt.t (Error_monad.shell_tzresult o))
-            * H)))) * H * pr -&gt; pr -&gt; q -&gt; i -&gt;
-    Lwt.t (Error_monad.shell_tzresult (option o)).
+      ((RPC_service.t t (t * a) q i o -&gt; pr -&gt; a -&gt; q -&gt; i -&gt;
+      Lwt.t (Error_monad.shell_tzresult o)) *
+        ((RPC_service.t t ((t * a) * b) q i o -&gt; pr -&gt; a -&gt; b -&gt; q -&gt; i -&gt;
+        Lwt.t (Error_monad.shell_tzresult o)) *
+          ((RPC_service.t t (((t * a) * b) * c) q i o -&gt; pr -&gt; a -&gt; b -&gt; c -&gt;
+          q -&gt; i -&gt; Lwt.t (Error_monad.shell_tzresult o)) * H)))) * H * pr -&gt;
+    pr -&gt; q -&gt; i -&gt; Lwt.t (Error_monad.shell_tzresult (option o)).
   
   Parameter make_opt_call1 : forall {H a b c i o pr q : Set},
-    RPC_service.t
-      ((* `PUT *) unit + (* `GET *) unit + (* `DELETE *) unit + (* `POST *) unit
-        + (* `PATCH *) unit) t (t * a) q i o -&gt;
-    ((RPC_service.t
-      ((* `PUT *) unit + (* `GET *) unit + (* `DELETE *) unit + (* `POST *) unit
-        + (* `PATCH *) unit) t t q i o -&gt; pr -&gt; q -&gt; i -&gt;
+    RPC_service.t t (t * a) q i o -&gt;
+    ((RPC_service.t t t q i o -&gt; pr -&gt; q -&gt; i -&gt;
     Lwt.t (Error_monad.shell_tzresult o)) *
-      ((RPC_service.t
-        ((* `PUT *) unit + (* `GET *) unit + (* `DELETE *) unit +
-          (* `POST *) unit + (* `PATCH *) unit) t (t * a) q i o -&gt; pr -&gt; a -&gt;
-      q -&gt; i -&gt; Lwt.t (Error_monad.shell_tzresult o)) *
-        ((RPC_service.t
-          ((* `PUT *) unit + (* `GET *) unit + (* `DELETE *) unit +
-            (* `POST *) unit + (* `PATCH *) unit) t ((t * a) * b) q i o -&gt; pr -&gt;
-        a -&gt; b -&gt; q -&gt; i -&gt; Lwt.t (Error_monad.shell_tzresult o)) *
-          ((RPC_service.t
-            ((* `PUT *) unit + (* `GET *) unit + (* `DELETE *) unit +
-              (* `POST *) unit + (* `PATCH *) unit) t (((t * a) * b) * c) q i o
-          -&gt; pr -&gt; a -&gt; b -&gt; c -&gt; q -&gt; i -&gt; Lwt.t (Error_monad.shell_tzresult o))
-            * H)))) * H * pr -&gt; pr -&gt; a -&gt; q -&gt; i -&gt;
-    Lwt.t (Error_monad.shell_tzresult (option o)).
+      ((RPC_service.t t (t * a) q i o -&gt; pr -&gt; a -&gt; q -&gt; i -&gt;
+      Lwt.t (Error_monad.shell_tzresult o)) *
+        ((RPC_service.t t ((t * a) * b) q i o -&gt; pr -&gt; a -&gt; b -&gt; q -&gt; i -&gt;
+        Lwt.t (Error_monad.shell_tzresult o)) *
+          ((RPC_service.t t (((t * a) * b) * c) q i o -&gt; pr -&gt; a -&gt; b -&gt; c -&gt;
+          q -&gt; i -&gt; Lwt.t (Error_monad.shell_tzresult o)) * H)))) * H * pr -&gt;
+    pr -&gt; a -&gt; q -&gt; i -&gt; Lwt.t (Error_monad.shell_tzresult (option o)).
   
   Parameter make_opt_call2 : forall {H a b c i o pr q : Set},
-    RPC_service.t
-      ((* `PUT *) unit + (* `GET *) unit + (* `DELETE *) unit + (* `POST *) unit
-        + (* `PATCH *) unit) t ((t * a) * b) q i o -&gt;
-    ((RPC_service.t
-      ((* `PUT *) unit + (* `GET *) unit + (* `DELETE *) unit + (* `POST *) unit
-        + (* `PATCH *) unit) t t q i o -&gt; pr -&gt; q -&gt; i -&gt;
+    RPC_service.t t ((t * a) * b) q i o -&gt;
+    ((RPC_service.t t t q i o -&gt; pr -&gt; q -&gt; i -&gt;
     Lwt.t (Error_monad.shell_tzresult o)) *
-      ((RPC_service.t
-        ((* `PUT *) unit + (* `GET *) unit + (* `DELETE *) unit +
-          (* `POST *) unit + (* `PATCH *) unit) t (t * a) q i o -&gt; pr -&gt; a -&gt;
-      q -&gt; i -&gt; Lwt.t (Error_monad.shell_tzresult o)) *
-        ((RPC_service.t
-          ((* `PUT *) unit + (* `GET *) unit + (* `DELETE *) unit +
-            (* `POST *) unit + (* `PATCH *) unit) t ((t * a) * b) q i o -&gt; pr -&gt;
-        a -&gt; b -&gt; q -&gt; i -&gt; Lwt.t (Error_monad.shell_tzresult o)) *
-          ((RPC_service.t
-            ((* `PUT *) unit + (* `GET *) unit + (* `DELETE *) unit +
-              (* `POST *) unit + (* `PATCH *) unit) t (((t * a) * b) * c) q i o
-          -&gt; pr -&gt; a -&gt; b -&gt; c -&gt; q -&gt; i -&gt; Lwt.t (Error_monad.shell_tzresult o))
-            * H)))) * H * pr -&gt; pr -&gt; a -&gt; b -&gt; q -&gt; i -&gt;
-    Lwt.t (Error_monad.shell_tzresult (option o)).
+      ((RPC_service.t t (t * a) q i o -&gt; pr -&gt; a -&gt; q -&gt; i -&gt;
+      Lwt.t (Error_monad.shell_tzresult o)) *
+        ((RPC_service.t t ((t * a) * b) q i o -&gt; pr -&gt; a -&gt; b -&gt; q -&gt; i -&gt;
+        Lwt.t (Error_monad.shell_tzresult o)) *
+          ((RPC_service.t t (((t * a) * b) * c) q i o -&gt; pr -&gt; a -&gt; b -&gt; c -&gt;
+          q -&gt; i -&gt; Lwt.t (Error_monad.shell_tzresult o)) * H)))) * H * pr -&gt;
+    pr -&gt; a -&gt; b -&gt; q -&gt; i -&gt; Lwt.t (Error_monad.shell_tzresult (option o)).
   
   Parameter make_opt_call3 : forall {H a b c i o pr q : Set},
-    RPC_service.t
-      ((* `PUT *) unit + (* `GET *) unit + (* `DELETE *) unit + (* `POST *) unit
-        + (* `PATCH *) unit) t (((t * a) * b) * c) q i o -&gt;
-    ((RPC_service.t
-      ((* `PUT *) unit + (* `GET *) unit + (* `DELETE *) unit + (* `POST *) unit
-        + (* `PATCH *) unit) t t q i o -&gt; pr -&gt; q -&gt; i -&gt;
+    RPC_service.t t (((t * a) * b) * c) q i o -&gt;
+    ((RPC_service.t t t q i o -&gt; pr -&gt; q -&gt; i -&gt;
     Lwt.t (Error_monad.shell_tzresult o)) *
-      ((RPC_service.t
-        ((* `PUT *) unit + (* `GET *) unit + (* `DELETE *) unit +
-          (* `POST *) unit + (* `PATCH *) unit) t (t * a) q i o -&gt; pr -&gt; a -&gt;
-      q -&gt; i -&gt; Lwt.t (Error_monad.shell_tzresult o)) *
-        ((RPC_service.t
-          ((* `PUT *) unit + (* `GET *) unit + (* `DELETE *) unit +
-            (* `POST *) unit + (* `PATCH *) unit) t ((t * a) * b) q i o -&gt; pr -&gt;
-        a -&gt; b -&gt; q -&gt; i -&gt; Lwt.t (Error_monad.shell_tzresult o)) *
-          ((RPC_service.t
-            ((* `PUT *) unit + (* `GET *) unit + (* `DELETE *) unit +
-              (* `POST *) unit + (* `PATCH *) unit) t (((t * a) * b) * c) q i o
-          -&gt; pr -&gt; a -&gt; b -&gt; c -&gt; q -&gt; i -&gt; Lwt.t (Error_monad.shell_tzresult o))
-            * H)))) * H * pr -&gt; pr -&gt; a -&gt; b -&gt; c -&gt; q -&gt; i -&gt;
-    Lwt.t (Error_monad.shell_tzresult (option o)).
+      ((RPC_service.t t (t * a) q i o -&gt; pr -&gt; a -&gt; q -&gt; i -&gt;
+      Lwt.t (Error_monad.shell_tzresult o)) *
+        ((RPC_service.t t ((t * a) * b) q i o -&gt; pr -&gt; a -&gt; b -&gt; q -&gt; i -&gt;
+        Lwt.t (Error_monad.shell_tzresult o)) *
+          ((RPC_service.t t (((t * a) * b) * c) q i o -&gt; pr -&gt; a -&gt; b -&gt; c -&gt;
+          q -&gt; i -&gt; Lwt.t (Error_monad.shell_tzresult o)) * H)))) * H * pr -&gt;
+    pr -&gt; a -&gt; b -&gt; c -&gt; q -&gt; i -&gt; Lwt.t (Error_monad.shell_tzresult (option o)).
 End RPC_context.
 
 Module Notations.

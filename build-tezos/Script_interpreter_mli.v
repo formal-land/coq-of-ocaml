@@ -75,7 +75,7 @@ Inductive stack : Set :=
 | Item : forall {ty : Set}, ty -> stack -> stack
 | Empty : stack.
 
-Parameter step :
+Parameter step_descr :
   option (Pervasives.ref execution_trace) -> Alpha_context.context ->
   step_constants -> Script_typed_ir.descr -> stack ->
   Lwt.t (Error_monad.tzresult (stack * Alpha_context.context)).

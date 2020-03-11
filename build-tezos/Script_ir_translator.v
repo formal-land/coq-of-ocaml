@@ -1126,7 +1126,7 @@ Definition record_inconsistent_type_annotations {A : Set}
 
 Fixpoint ty_eq
   (ctxt : Alpha_context.context) (ta : Script_typed_ir.ty)
-  (tb : Script_typed_ir.ty) {struct ctxt}
+  (tb : Script_typed_ir.ty) {struct ta}
   : Error_monad.tzresult (eq * Alpha_context.context) :=
   let ok (__eq_value : eq) (ctxt : Alpha_context.context) (nb_args : int)
     : Error_monad.tzresult (eq * Alpha_context.context) :=
@@ -1560,8 +1560,8 @@ Definition merge_branches
       ((Typed (branch (descrt dbf.(Script_typed_ir.descr.aft)) dbf)), ctxt)
   end.
 
-Fixpoint parse_comparable_ty
-  (ctxt : Alpha_context.context) (ty : Alpha_context.Script.node) {struct ctxt}
+Definition parse_comparable_ty
+  (ctxt : Alpha_context.context) (ty : Alpha_context.Script.node)
   : Error_monad.tzresult (ex_comparable_ty * Alpha_context.context) :=
   let? ctxt := Alpha_context.Gas.consume ctxt Typecheck_costs.cycle in
   let? ctxt := Alpha_context.Gas.consume ctxt (Typecheck_costs.type_ 0) in
@@ -1625,9 +1625,9 @@ Fixpoint parse_comparable_ty
           Alpha_context.Script.T_key_hash;
           Alpha_context.Script.T_timestamp
         ])
-  end
+  end.
 
-with parse_packable_ty (ctxt : Alpha_context.context) (legacy : bool)
+Fixpoint parse_packable_ty (ctxt : Alpha_context.context) (legacy : bool)
   {struct ctxt}
   : Alpha_context.Script.node ->
   Error_monad.tzresult (ex_ty * Alpha_context.context) :=
@@ -1900,11 +1900,11 @@ with parse_big_map_ty
         let big_map_ty := Script_typed_ir.Big_map_t key_ty value_ty map_name in
         ((Ex_ty big_map_ty), ctxt))
   | args => Error_monad.__error_value extensible_type_value
-  end
+  end.
 
-with parse_storage_ty
+Definition parse_storage_ty
   (ctxt : Alpha_context.context) (legacy : bool)
-  (node : Alpha_context.Script.node) {struct ctxt}
+  (node : Alpha_context.Script.node)
   : Error_monad.tzresult (ex_ty * Alpha_context.context) :=
   match
     (node,
@@ -2236,10 +2236,228 @@ Definition well_formed_entrypoints
       | Some path => Error_monad.__error_value extensible_type_value
       end).
 
+Definition parse_int32
+  (n : Micheline.node Alpha_context.Script.location Alpha_context.Script.prim)
+  : Error_monad.tzresult int :=
+  let error' (function_parameter : unit) : Error_monad.__error :=
+    let '_ := function_parameter in
+    extensible_type_value in
+  match n with
+  | Micheline.Int _ n' =>
+    (* ❌ Try-with are not handled *)
+    try
+      (let n'' := Z.to_int n' in
+      if
+        Pervasives.op_andand ((|Compare.Int|).(Compare.S.op_lteq) 0 n'')
+          ((|Compare.Int|).(Compare.S.op_lteq) n'' (Int32.to_int Int32.max_int))
+        then
+        Error_monad.ok n''
+      else
+        Error_monad.__error_value (error' tt))
+  | _ => Error_monad.__error_value (error' tt)
+  end.
+
+Definition parse_toplevel (legacy : bool) (toplevel : Alpha_context.Script.expr)
+  : Error_monad.tzresult
+    (Alpha_context.Script.node * Alpha_context.Script.node *
+      Alpha_context.Script.node * option string) :=
+  (Error_monad.record_trace extensible_type_value)
+    match Micheline.root toplevel with
+    | Micheline.Int loc _ => Error_monad.__error_value extensible_type_value
+    | Micheline.String loc _ => Error_monad.__error_value extensible_type_value
+    | Micheline.Bytes loc _ => Error_monad.__error_value extensible_type_value
+    | Micheline.Prim loc _ _ _ =>
+      Error_monad.__error_value extensible_type_value
+    | Micheline.Seq _ fields =>
+      let fix find_fields
+        (__p_value :
+          option
+            (Micheline.node Alpha_context.Script.location
+              Alpha_context.Script.prim * Alpha_context.Script.location *
+              Micheline.annot))
+        (s :
+          option
+            (Micheline.node Alpha_context.Script.location
+              Alpha_context.Script.prim * Alpha_context.Script.location *
+              Micheline.annot))
+        (c :
+          option
+            (Micheline.node Alpha_context.Script.location
+              Alpha_context.Script.prim * Alpha_context.Script.location *
+              Micheline.annot))
+        (fields :
+          list
+            (Micheline.node Alpha_context.Script.location
+              Alpha_context.Script.prim)) {struct __p_value}
+        : Error_monad.tzresult
+          (option
+            (Micheline.node Alpha_context.Script.location
+              Alpha_context.Script.prim * Alpha_context.Script.location *
+              Micheline.annot) *
+            option
+              (Micheline.node Alpha_context.Script.location
+                Alpha_context.Script.prim * Alpha_context.Script.location *
+                Micheline.annot) *
+            option
+              (Micheline.node Alpha_context.Script.location
+                Alpha_context.Script.prim * Alpha_context.Script.location *
+                Micheline.annot)) :=
+        match fields with
+        | [] => Error_monad.ok (__p_value, s, c)
+        | cons (Micheline.Int loc _) _ =>
+          Error_monad.__error_value extensible_type_value
+        | cons (Micheline.String loc _) _ =>
+          Error_monad.__error_value extensible_type_value
+        | cons (Micheline.Bytes loc _) _ =>
+          Error_monad.__error_value extensible_type_value
+        | cons (Micheline.Seq loc _) _ =>
+          Error_monad.__error_value extensible_type_value
+        |
+          cons
+            (Micheline.Prim loc Alpha_context.Script.K_parameter (cons arg [])
+              annot) rest =>
+          match __p_value with
+          | None => find_fields (Some (arg, loc, annot)) s c rest
+          | Some _ => Error_monad.__error_value extensible_type_value
+          end
+        |
+          cons
+            (Micheline.Prim loc Alpha_context.Script.K_storage (cons arg [])
+              annot) rest =>
+          match s with
+          | None => find_fields __p_value (Some (arg, loc, annot)) c rest
+          | Some _ => Error_monad.__error_value extensible_type_value
+          end
+        |
+          cons
+            (Micheline.Prim loc Alpha_context.Script.K_code (cons arg []) annot)
+            rest =>
+          match c with
+          | None => find_fields __p_value s (Some (arg, loc, annot)) rest
+          | Some _ => Error_monad.__error_value extensible_type_value
+          end
+        |
+          cons
+            (Micheline.Prim loc
+              ((Alpha_context.Script.K_parameter |
+              Alpha_context.Script.K_storage | Alpha_context.Script.K_code) as
+                name) args _) _ =>
+          Error_monad.__error_value extensible_type_value
+        | cons (Micheline.Prim loc name _ _) _ =>
+          let allowed :=
+            [
+              Alpha_context.Script.K_parameter;
+              Alpha_context.Script.K_storage;
+              Alpha_context.Script.K_code
+            ] in
+          Error_monad.__error_value extensible_type_value
+        end in
+      let? function_parameter := find_fields None None None fields in
+      match function_parameter with
+      | (None, _, _) => Error_monad.__error_value extensible_type_value
+      | (Some _, None, _) => Error_monad.__error_value extensible_type_value
+      | (Some _, Some _, None) =>
+        Error_monad.__error_value extensible_type_value
+      |
+        (Some (__p_value, ploc, pannot), Some (s, sloc, sannot),
+          Some (c, cloc, carrot)) =>
+        let maybe_root_name :=
+          let? '(__p_value, root_name) :=
+            Script_ir_annot.extract_field_annot __p_value in
+          match root_name with
+          | Some (Script_typed_ir.Field_annot root_name) =>
+            Error_monad.ok (__p_value, pannot, (Some root_name))
+          | None =>
+            match
+              (pannot,
+                match pannot with
+                | cons single [] =>
+                  Pervasives.op_andand
+                    ((|Compare.Int|).(Compare.S.op_gt) (String.length single) 0)
+                    ((|Compare.Char|).(Compare.S.op_eq) (String.get single 0)
+                      "%" % char)
+                | _ => false
+                end) with
+            | (cons single [], true) =>
+              Error_monad.ok
+                (__p_value, nil,
+                  (Some
+                    (String.sub single 1
+                      (Pervasives.op_minus (String.length single) 1))))
+            | (_, _) => Error_monad.ok (__p_value, pannot, None)
+            end
+          end in
+        if legacy then
+          let '(__p_value, root_name) :=
+            match maybe_root_name with
+            | Pervasives.Ok (__p_value, _, root_name) => (__p_value, root_name)
+            | Pervasives.Error _ => (__p_value, None)
+            end in
+          Error_monad.ok (__p_value, s, c, root_name)
+        else
+          let? '(__p_value, pannot, root_name) := maybe_root_name in
+          let? '_ := Script_ir_annot.error_unexpected_annot ploc pannot in
+          let? '_ := Script_ir_annot.error_unexpected_annot cloc carrot in
+          let? '_ := Script_ir_annot.error_unexpected_annot sloc sannot in
+          Error_monad.ok (__p_value, s, c, root_name)
+      end
+    end.
+
+Definition parse_contract
+  (legacy : bool) (ctxt : Alpha_context.context)
+  (loc : Alpha_context.Script.location) (arg : Script_typed_ir.ty)
+  (contract : Alpha_context.Contract.t) (entrypoint : string)
+  : Lwt.t
+    (Error_monad.tzresult
+      (Alpha_context.context * Script_typed_ir.typed_contract)) :=
+  let=? ctxt :=
+    Lwt.__return
+      (Alpha_context.Gas.consume ctxt Typecheck_costs.contract_exists) in
+  let=? function_parameter := Alpha_context.Contract.__exists ctxt contract in
+  match function_parameter with
+  | false => Error_monad.fail extensible_type_value
+  | true =>
+    let=? ctxt :=
+      Lwt.__return (Alpha_context.Gas.consume ctxt Typecheck_costs.get_script)
+      in
+    let=? '(ctxt, code) :=
+      (Error_monad.trace extensible_type_value)
+        (Alpha_context.Contract.get_script_code ctxt contract) in
+    match code with
+    | None =>
+      Lwt.__return
+        (let? '(Eq, ctxt) := ty_eq ctxt arg (Script_typed_ir.Unit_t None) in
+        match entrypoint with
+        | "default" =>
+          let contract := (arg, (contract, entrypoint)) in
+          Error_monad.ok (ctxt, contract)
+        | entrypoint => Error_monad.__error_value extensible_type_value
+        end)
+    | Some code =>
+      let=? '(code, ctxt) :=
+        Alpha_context.Script.force_decode_in_context ctxt code in
+      Lwt.__return
+        (let? '(arg_type, _, _, root_name) := parse_toplevel true code in
+        let? '(Ex_ty targ, ctxt) := parse_parameter_ty ctxt true arg_type in
+        let __return
+          (ctxt : Alpha_context.context) (targ : Script_typed_ir.ty)
+          (entrypoint : string)
+          : Error_monad.tzresult
+            (Alpha_context.context * Script_typed_ir.typed_contract) :=
+          let? '(arg, ctxt) := merge_types legacy ctxt loc targ arg in
+          let contract := (arg, (contract, entrypoint)) in
+          Error_monad.ok (ctxt, contract) in
+        let? '(ctxt, entrypoint, targ) :=
+          find_entrypoint_for_type targ arg root_name entrypoint ctxt in
+        let? '(targ, ctxt) := merge_types legacy ctxt loc targ arg in
+        __return ctxt targ entrypoint)
+    end
+  end.
+
 Fixpoint parse_data {a : Set}
   (__type_logger_value : option type_logger) (ctxt : Alpha_context.context)
   (legacy : bool) (ty : Script_typed_ir.ty)
-  (script_data : Alpha_context.Script.node) {struct __type_logger_value}
+  (script_data : Alpha_context.Script.node) {struct ty}
   : Lwt.t (Error_monad.tzresult (a * Alpha_context.context)) :=
   let=? ctxt :=
     Lwt.__return (Alpha_context.Gas.consume ctxt Typecheck_costs.cycle) in
@@ -3192,27 +3410,6 @@ with parse_returning
                 (Script_typed_ir.Item_t ret Script_typed_ir.Empty_t None)),
                 script_instr) |}, ctxt)
       end
-
-with parse_int32
-  (n : Micheline.node Alpha_context.Script.location Alpha_context.Script.prim)
-  {struct n} : Error_monad.tzresult int :=
-  let error' (function_parameter : unit) : Error_monad.__error :=
-    let '_ := function_parameter in
-    extensible_type_value in
-  match n with
-  | Micheline.Int _ n' =>
-    (* ❌ Try-with are not handled *)
-    try
-      (let n'' := Z.to_int n' in
-      if
-        Pervasives.op_andand ((|Compare.Int|).(Compare.S.op_lteq) 0 n'')
-          ((|Compare.Int|).(Compare.S.op_lteq) n'' (Int32.to_int Int32.max_int))
-        then
-        Error_monad.ok n''
-      else
-        Error_monad.__error_value (error' tt))
-  | _ => Error_monad.__error_value (error' tt)
-  end
 
 with parse_instr
   (__type_logger_value : option type_logger) (__tc_context_value : tc_context)
@@ -5364,63 +5561,12 @@ with parse_instr
           Alpha_context.Script.I_SELF;
           Alpha_context.Script.I_LAMBDA
         ])
-  end
+  end.
 
-with parse_contract
+Definition parse_contract_for_script
   (legacy : bool) (ctxt : Alpha_context.context)
   (loc : Alpha_context.Script.location) (arg : Script_typed_ir.ty)
-  (contract : Alpha_context.Contract.t) (entrypoint : string) {struct legacy}
-  : Lwt.t
-    (Error_monad.tzresult
-      (Alpha_context.context * Script_typed_ir.typed_contract)) :=
-  let=? ctxt :=
-    Lwt.__return
-      (Alpha_context.Gas.consume ctxt Typecheck_costs.contract_exists) in
-  let=? function_parameter := Alpha_context.Contract.__exists ctxt contract in
-  match function_parameter with
-  | false => Error_monad.fail extensible_type_value
-  | true =>
-    let=? ctxt :=
-      Lwt.__return (Alpha_context.Gas.consume ctxt Typecheck_costs.get_script)
-      in
-    let=? '(ctxt, code) :=
-      (Error_monad.trace extensible_type_value)
-        (Alpha_context.Contract.get_script_code ctxt contract) in
-    match code with
-    | None =>
-      Lwt.__return
-        (let? '(Eq, ctxt) := ty_eq ctxt arg (Script_typed_ir.Unit_t None) in
-        match entrypoint with
-        | "default" =>
-          let contract := (arg, (contract, entrypoint)) in
-          Error_monad.ok (ctxt, contract)
-        | entrypoint => Error_monad.__error_value extensible_type_value
-        end)
-    | Some code =>
-      let=? '(code, ctxt) :=
-        Alpha_context.Script.force_decode_in_context ctxt code in
-      Lwt.__return
-        (let? '(arg_type, _, _, root_name) := parse_toplevel true code in
-        let? '(Ex_ty targ, ctxt) := parse_parameter_ty ctxt true arg_type in
-        let __return
-          (ctxt : Alpha_context.context) (targ : Script_typed_ir.ty)
-          (entrypoint : string)
-          : Error_monad.tzresult
-            (Alpha_context.context * Script_typed_ir.typed_contract) :=
-          let? '(arg, ctxt) := merge_types legacy ctxt loc targ arg in
-          let contract := (arg, (contract, entrypoint)) in
-          Error_monad.ok (ctxt, contract) in
-        let? '(ctxt, entrypoint, targ) :=
-          find_entrypoint_for_type targ arg root_name entrypoint ctxt in
-        let? '(targ, ctxt) := merge_types legacy ctxt loc targ arg in
-        __return ctxt targ entrypoint)
-    end
-  end
-
-with parse_contract_for_script
-  (legacy : bool) (ctxt : Alpha_context.context)
-  (loc : Alpha_context.Script.location) (arg : Script_typed_ir.ty)
-  (contract : Alpha_context.Contract.t) (entrypoint : string) {struct legacy}
+  (contract : Alpha_context.Contract.t) (entrypoint : string)
   : Lwt.t
     (Error_monad.tzresult
       (Alpha_context.context * option Script_typed_ir.typed_contract)) :=
@@ -5480,154 +5626,7 @@ with parse_contract_for_script
           end
         end
     end
-  end
-
-with parse_toplevel (legacy : bool) (toplevel : Alpha_context.Script.expr)
-  {struct legacy}
-  : Error_monad.tzresult
-    (Alpha_context.Script.node * Alpha_context.Script.node *
-      Alpha_context.Script.node * option string) :=
-  (Error_monad.record_trace extensible_type_value)
-    match Micheline.root toplevel with
-    | Micheline.Int loc _ => Error_monad.__error_value extensible_type_value
-    | Micheline.String loc _ => Error_monad.__error_value extensible_type_value
-    | Micheline.Bytes loc _ => Error_monad.__error_value extensible_type_value
-    | Micheline.Prim loc _ _ _ =>
-      Error_monad.__error_value extensible_type_value
-    | Micheline.Seq _ fields =>
-      let fix find_fields
-        (__p_value :
-          option
-            (Micheline.node Alpha_context.Script.location
-              Alpha_context.Script.prim * Alpha_context.Script.location *
-              Micheline.annot))
-        (s :
-          option
-            (Micheline.node Alpha_context.Script.location
-              Alpha_context.Script.prim * Alpha_context.Script.location *
-              Micheline.annot))
-        (c :
-          option
-            (Micheline.node Alpha_context.Script.location
-              Alpha_context.Script.prim * Alpha_context.Script.location *
-              Micheline.annot))
-        (fields :
-          list
-            (Micheline.node Alpha_context.Script.location
-              Alpha_context.Script.prim)) {struct __p_value}
-        : Error_monad.tzresult
-          (option
-            (Micheline.node Alpha_context.Script.location
-              Alpha_context.Script.prim * Alpha_context.Script.location *
-              Micheline.annot) *
-            option
-              (Micheline.node Alpha_context.Script.location
-                Alpha_context.Script.prim * Alpha_context.Script.location *
-                Micheline.annot) *
-            option
-              (Micheline.node Alpha_context.Script.location
-                Alpha_context.Script.prim * Alpha_context.Script.location *
-                Micheline.annot)) :=
-        match fields with
-        | [] => Error_monad.ok (__p_value, s, c)
-        | cons (Micheline.Int loc _) _ =>
-          Error_monad.__error_value extensible_type_value
-        | cons (Micheline.String loc _) _ =>
-          Error_monad.__error_value extensible_type_value
-        | cons (Micheline.Bytes loc _) _ =>
-          Error_monad.__error_value extensible_type_value
-        | cons (Micheline.Seq loc _) _ =>
-          Error_monad.__error_value extensible_type_value
-        |
-          cons
-            (Micheline.Prim loc Alpha_context.Script.K_parameter (cons arg [])
-              annot) rest =>
-          match __p_value with
-          | None => find_fields (Some (arg, loc, annot)) s c rest
-          | Some _ => Error_monad.__error_value extensible_type_value
-          end
-        |
-          cons
-            (Micheline.Prim loc Alpha_context.Script.K_storage (cons arg [])
-              annot) rest =>
-          match s with
-          | None => find_fields __p_value (Some (arg, loc, annot)) c rest
-          | Some _ => Error_monad.__error_value extensible_type_value
-          end
-        |
-          cons
-            (Micheline.Prim loc Alpha_context.Script.K_code (cons arg []) annot)
-            rest =>
-          match c with
-          | None => find_fields __p_value s (Some (arg, loc, annot)) rest
-          | Some _ => Error_monad.__error_value extensible_type_value
-          end
-        |
-          cons
-            (Micheline.Prim loc
-              ((Alpha_context.Script.K_parameter |
-              Alpha_context.Script.K_storage | Alpha_context.Script.K_code) as
-                name) args _) _ =>
-          Error_monad.__error_value extensible_type_value
-        | cons (Micheline.Prim loc name _ _) _ =>
-          let allowed :=
-            [
-              Alpha_context.Script.K_parameter;
-              Alpha_context.Script.K_storage;
-              Alpha_context.Script.K_code
-            ] in
-          Error_monad.__error_value extensible_type_value
-        end in
-      let? function_parameter := find_fields None None None fields in
-      match function_parameter with
-      | (None, _, _) => Error_monad.__error_value extensible_type_value
-      | (Some _, None, _) => Error_monad.__error_value extensible_type_value
-      | (Some _, Some _, None) =>
-        Error_monad.__error_value extensible_type_value
-      |
-        (Some (__p_value, ploc, pannot), Some (s, sloc, sannot),
-          Some (c, cloc, carrot)) =>
-        let maybe_root_name :=
-          let? '(__p_value, root_name) :=
-            Script_ir_annot.extract_field_annot __p_value in
-          match root_name with
-          | Some (Script_typed_ir.Field_annot root_name) =>
-            Error_monad.ok (__p_value, pannot, (Some root_name))
-          | None =>
-            match
-              (pannot,
-                match pannot with
-                | cons single [] =>
-                  Pervasives.op_andand
-                    ((|Compare.Int|).(Compare.S.op_gt) (String.length single) 0)
-                    ((|Compare.Char|).(Compare.S.op_eq) (String.get single 0)
-                      "%" % char)
-                | _ => false
-                end) with
-            | (cons single [], true) =>
-              Error_monad.ok
-                (__p_value, nil,
-                  (Some
-                    (String.sub single 1
-                      (Pervasives.op_minus (String.length single) 1))))
-            | (_, _) => Error_monad.ok (__p_value, pannot, None)
-            end
-          end in
-        if legacy then
-          let '(__p_value, root_name) :=
-            match maybe_root_name with
-            | Pervasives.Ok (__p_value, _, root_name) => (__p_value, root_name)
-            | Pervasives.Error _ => (__p_value, None)
-            end in
-          Error_monad.ok (__p_value, s, c, root_name)
-        else
-          let? '(__p_value, pannot, root_name) := maybe_root_name in
-          let? '_ := Script_ir_annot.error_unexpected_annot ploc pannot in
-          let? '_ := Script_ir_annot.error_unexpected_annot cloc carrot in
-          let? '_ := Script_ir_annot.error_unexpected_annot sloc sannot in
-          Error_monad.ok (__p_value, s, c, root_name)
-      end
-    end.
+  end.
 
 Definition parse_script
   (__type_logger_value : option type_logger) (ctxt : Alpha_context.context)
@@ -5862,7 +5861,7 @@ Definition list_entrypoints
 
 Fixpoint unparse_data {a : Set}
   (ctxt : Alpha_context.context) (mode : unparsing_mode)
-  (ty : Script_typed_ir.ty) (__a_value : a) {struct ctxt}
+  (ty : Script_typed_ir.ty) (__a_value : a) {struct ty}
   : Lwt.t
     (Error_monad.tzresult (Alpha_context.Script.node * Alpha_context.context)) :=
   let=? ctxt :=
