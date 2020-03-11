@@ -12,7 +12,7 @@ Import Environment.Notations.
 Require Tezos.Alpha_context.
 Require Tezos.Apply_results.
 Require Tezos.Constants_repr.
-Require Tezos.Contract_services_mli. Module Contract_services := Contract_services_mli.
+Require Tezos.Contract_services.
 Require Tezos.Michelson_v1_primitives.
 Require Tezos.Nonce_hash.
 Require Tezos.Script_ir_translator.
