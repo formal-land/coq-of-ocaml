@@ -1,4 +1,5 @@
 ## [Unreleased]
+* Add minimal handling of class types as records.
 * Ignore type parameters with constraints (like being a sub-type of some variants).
 * Add a `@coq_struct "param"` attribute to specify the decreasing parameter name of fixpoints.
 * Add a tactic `rewrite_cast_exists_eval_eq` to simplify the use of the `cast_exists` axiom in proofs.

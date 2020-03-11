@@ -7,6 +7,7 @@ let to_coq_record
   (typ_name : Name.t)
   (typ_args : Name.t list)
   (fields : (Name.t * Type.t) list)
+  (with_with : bool)
   : SmartPrint.t =
   nest (
     !^ "Module" ^^ Name.to_coq module_name ^-^ !^ "." ^^ newline ^^
@@ -32,37 +33,42 @@ let to_coq_record
         newline ^^ !^ "Arguments" ^^ !^ "record" ^^ !^ ":" ^^
         !^ "clear" ^^ !^ "implicits" ^-^ !^ "."
       end ^^
-      newline ^^ separate newline (fields |> List.map (fun (name, _) ->
-        let prefixed_typ_args =
-          typ_args |> List.map (fun typ_arg ->
-            Name.to_coq (Name.prefix_by_t typ_arg)
-            ) in
-        let record_typ =
-          nest (separate space (!^ "record" :: prefixed_typ_args)) in
-        nest (
-          !^ "Definition" ^^ Name.to_coq (Name.prefix_by_with name) ^^
-          begin match typ_args with
-          | [] -> empty
-          | _ :: _ -> braces (nest (separate space prefixed_typ_args))
-          end ^^
-          Name.to_coq name ^^
-          nest (parens (!^ "r" ^^ !^ ":" ^^ record_typ)) ^-^
-          !^ " :=" ^^ newline ^^
-          indent @@ nest (
-            !^ "Build" ^^
-            separate space prefixed_typ_args ^^
-            separate space (fields |> List.map (fun (name', _) ->
-              nest (
-                if Name.equal name name' then
-                  Name.to_coq name
-                else
-                !^ "r" ^-^ !^ ".(" ^-^ Name.to_coq name' ^-^ !^ ")"
-              )
-            )) ^-^ !^ "."
+      newline ^^
+      begin if with_with then
+        separate newline (fields |> List.map (fun (name, _) ->
+          let prefixed_typ_args =
+            typ_args |> List.map (fun typ_arg ->
+              Name.to_coq (Name.prefix_by_t typ_arg)
+              ) in
+          let record_typ =
+            nest (separate space (!^ "record" :: prefixed_typ_args)) in
+          nest (
+            !^ "Definition" ^^ Name.to_coq (Name.prefix_by_with name) ^^
+            begin match typ_args with
+            | [] -> empty
+            | _ :: _ -> braces (nest (separate space prefixed_typ_args))
+            end ^^
+            Name.to_coq name ^^
+            nest (parens (!^ "r" ^^ !^ ":" ^^ record_typ)) ^-^
+            !^ " :=" ^^ newline ^^
+            indent @@ nest (
+              !^ "Build" ^^
+              separate space prefixed_typ_args ^^
+              separate space (fields |> List.map (fun (name', _) ->
+                nest (
+                  if Name.equal name name' then
+                    Name.to_coq name
+                  else
+                  !^ "r" ^-^ !^ ".(" ^-^ Name.to_coq name' ^-^ !^ ")"
+                )
+              )) ^-^ !^ "."
+            )
           )
-        )
-      ))
-    ) ^^ newline ^^
+        )) ^^ newline
+      else
+        empty
+      end
+    ) ^^
     !^ "End" ^^ Name.to_coq module_name ^-^ !^ "." ^^ newline ^^
     nest (
       !^ "Definition" ^^ Name.to_coq typ_name ^^ !^ ":=" ^^
@@ -81,7 +87,7 @@ module RecordSkeleton = struct
     let { fields; module_name; typ_name } = record_skeleton in
     to_coq_record module_name typ_name fields (fields |>
       List.map (fun field -> (field, Type.Variable field))
-    )
+    ) true
 end
 
 (** The constructors of an inductive type, either in a GADT or non-GADT form. *)
@@ -536,7 +542,7 @@ end
 
 type t =
   | Inductive of Inductive.t
-  | Record of Name.t * Name.t list * (Name.t * Type.t) list
+  | Record of Name.t * Name.t list * (Name.t * Type.t) list * bool
   | Synonym of Name.t * Name.t list * Type.t
   | Abstract of Name.t * Name.t list
 
@@ -603,7 +609,7 @@ let of_ocaml (typs : type_declaration list) : t Monad.t =
     )) >>= fun fields ->
     let free_vars = Type.typ_args_of_typs (List.map snd fields) in
     let typ_args = filter_in_free_vars typ_args free_vars in
-    return (Record (name, typ_args, fields))
+    return (Record (name, typ_args, fields, true))
   | [ { typ_id; typ_type = { type_kind = Type_open; _ }; _ } ] ->
     let name = Name.of_ident false typ_id in
     let typ = Type.Apply (MixedPath.of_name (Name.of_string false "extensible_type"), []) in
@@ -717,7 +723,8 @@ let of_ocaml (typs : type_declaration list) : t Monad.t =
 let to_coq (def : t) : SmartPrint.t =
   match def with
   | Inductive inductive -> Inductive.to_coq inductive
-  | Record (name, typ_args, fields) -> to_coq_record name name typ_args fields
+  | Record (name, typ_args, fields, with_with) ->
+    to_coq_record name name typ_args fields with_with
   | Synonym (name, typ_args, value) ->
     nest (
       !^ "Definition" ^^ Name.to_coq name ^^
