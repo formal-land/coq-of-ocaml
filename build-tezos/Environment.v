@@ -3362,103 +3362,59 @@ End Updater.
 Module RPC_context.
   Definition t : Set := Updater.rpc_context.
   
-  (* class_type *)
+  Module simple.
+    Record record {pr : Set} : Set := Build {
+      call_proto_service0 :
+        forall {q i o : Set},
+          RPC_service.t t t q i o -> pr -> q -> i ->
+          Lwt.t (Error_monad.shell_tzresult o);
+      call_proto_service1 :
+        forall {a q i o : Set},
+          RPC_service.t t (t * a) q i o -> pr -> a -> q -> i ->
+          Lwt.t (Error_monad.shell_tzresult o);
+      call_proto_service2 :
+        forall {a b q i o : Set},
+          RPC_service.t t ((t * a) * b) q i o -> pr -> a -> b -> q -> i ->
+          Lwt.t (Error_monad.shell_tzresult o);
+      call_proto_service3 :
+        forall {a b c q i o : Set},
+          RPC_service.t t (((t * a) * b) * c) q i o -> pr -> a -> b -> c -> q ->
+          i -> Lwt.t (Error_monad.shell_tzresult o) }.
+    Arguments record : clear implicits.
+  End simple.
+  Definition simple := simple.record.
   
-  Parameter make_call0 : forall {H a b c i o pr q : Set},
-    RPC_service.t t t q i o ->
-    ((RPC_service.t t t q i o -> pr -> q -> i ->
-    Lwt.t (Error_monad.shell_tzresult o)) *
-      ((RPC_service.t t (t * a) q i o -> pr -> a -> q -> i ->
-      Lwt.t (Error_monad.shell_tzresult o)) *
-        ((RPC_service.t t ((t * a) * b) q i o -> pr -> a -> b -> q -> i ->
-        Lwt.t (Error_monad.shell_tzresult o)) *
-          ((RPC_service.t t (((t * a) * b) * c) q i o -> pr -> a -> b -> c ->
-          q -> i -> Lwt.t (Error_monad.shell_tzresult o)) * H)))) * H * pr ->
-    pr -> q -> i -> Lwt.t (Error_monad.shell_tzresult o).
+  Parameter make_call0 : forall {i o pr q : Set},
+    RPC_service.t t t q i o -> simple pr -> pr -> q -> i ->
+    Lwt.t (Error_monad.shell_tzresult o).
   
-  Parameter make_call1 : forall {H a b c i o pr q : Set},
-    RPC_service.t t (t * a) q i o ->
-    ((RPC_service.t t t q i o -> pr -> q -> i ->
-    Lwt.t (Error_monad.shell_tzresult o)) *
-      ((RPC_service.t t (t * a) q i o -> pr -> a -> q -> i ->
-      Lwt.t (Error_monad.shell_tzresult o)) *
-        ((RPC_service.t t ((t * a) * b) q i o -> pr -> a -> b -> q -> i ->
-        Lwt.t (Error_monad.shell_tzresult o)) *
-          ((RPC_service.t t (((t * a) * b) * c) q i o -> pr -> a -> b -> c ->
-          q -> i -> Lwt.t (Error_monad.shell_tzresult o)) * H)))) * H * pr ->
-    pr -> a -> q -> i -> Lwt.t (Error_monad.shell_tzresult o).
+  Parameter make_call1 : forall {a i o pr q : Set},
+    RPC_service.t t (t * a) q i o -> simple pr -> pr -> a -> q -> i ->
+    Lwt.t (Error_monad.shell_tzresult o).
   
-  Parameter make_call2 : forall {H a b c i o pr q : Set},
-    RPC_service.t t ((t * a) * b) q i o ->
-    ((RPC_service.t t t q i o -> pr -> q -> i ->
-    Lwt.t (Error_monad.shell_tzresult o)) *
-      ((RPC_service.t t (t * a) q i o -> pr -> a -> q -> i ->
-      Lwt.t (Error_monad.shell_tzresult o)) *
-        ((RPC_service.t t ((t * a) * b) q i o -> pr -> a -> b -> q -> i ->
-        Lwt.t (Error_monad.shell_tzresult o)) *
-          ((RPC_service.t t (((t * a) * b) * c) q i o -> pr -> a -> b -> c ->
-          q -> i -> Lwt.t (Error_monad.shell_tzresult o)) * H)))) * H * pr ->
-    pr -> a -> b -> q -> i -> Lwt.t (Error_monad.shell_tzresult o).
+  Parameter make_call2 : forall {a b i o pr q : Set},
+    RPC_service.t t ((t * a) * b) q i o -> simple pr -> pr -> a -> b -> q ->
+    i -> Lwt.t (Error_monad.shell_tzresult o).
   
-  Parameter make_call3 : forall {H a b c i o pr q : Set},
-    RPC_service.t t (((t * a) * b) * c) q i o ->
-    ((RPC_service.t t t q i o -> pr -> q -> i ->
-    Lwt.t (Error_monad.shell_tzresult o)) *
-      ((RPC_service.t t (t * a) q i o -> pr -> a -> q -> i ->
-      Lwt.t (Error_monad.shell_tzresult o)) *
-        ((RPC_service.t t ((t * a) * b) q i o -> pr -> a -> b -> q -> i ->
-        Lwt.t (Error_monad.shell_tzresult o)) *
-          ((RPC_service.t t (((t * a) * b) * c) q i o -> pr -> a -> b -> c ->
-          q -> i -> Lwt.t (Error_monad.shell_tzresult o)) * H)))) * H * pr ->
-    pr -> a -> b -> c -> q -> i -> Lwt.t (Error_monad.shell_tzresult o).
+  Parameter make_call3 : forall {a b c i o pr q : Set},
+    RPC_service.t t (((t * a) * b) * c) q i o -> simple pr -> pr -> a -> b ->
+    c -> q -> i -> Lwt.t (Error_monad.shell_tzresult o).
   
-  Parameter make_opt_call0 : forall {H a b c i o pr q : Set},
-    RPC_service.t t t q i o ->
-    ((RPC_service.t t t q i o -> pr -> q -> i ->
-    Lwt.t (Error_monad.shell_tzresult o)) *
-      ((RPC_service.t t (t * a) q i o -> pr -> a -> q -> i ->
-      Lwt.t (Error_monad.shell_tzresult o)) *
-        ((RPC_service.t t ((t * a) * b) q i o -> pr -> a -> b -> q -> i ->
-        Lwt.t (Error_monad.shell_tzresult o)) *
-          ((RPC_service.t t (((t * a) * b) * c) q i o -> pr -> a -> b -> c ->
-          q -> i -> Lwt.t (Error_monad.shell_tzresult o)) * H)))) * H * pr ->
-    pr -> q -> i -> Lwt.t (Error_monad.shell_tzresult (option o)).
+  Parameter make_opt_call0 : forall {i o pr q : Set},
+    RPC_service.t t t q i o -> simple pr -> pr -> q -> i ->
+    Lwt.t (Error_monad.shell_tzresult (option o)).
   
-  Parameter make_opt_call1 : forall {H a b c i o pr q : Set},
-    RPC_service.t t (t * a) q i o ->
-    ((RPC_service.t t t q i o -> pr -> q -> i ->
-    Lwt.t (Error_monad.shell_tzresult o)) *
-      ((RPC_service.t t (t * a) q i o -> pr -> a -> q -> i ->
-      Lwt.t (Error_monad.shell_tzresult o)) *
-        ((RPC_service.t t ((t * a) * b) q i o -> pr -> a -> b -> q -> i ->
-        Lwt.t (Error_monad.shell_tzresult o)) *
-          ((RPC_service.t t (((t * a) * b) * c) q i o -> pr -> a -> b -> c ->
-          q -> i -> Lwt.t (Error_monad.shell_tzresult o)) * H)))) * H * pr ->
-    pr -> a -> q -> i -> Lwt.t (Error_monad.shell_tzresult (option o)).
+  Parameter make_opt_call1 : forall {a i o pr q : Set},
+    RPC_service.t t (t * a) q i o -> simple pr -> pr -> a -> q -> i ->
+    Lwt.t (Error_monad.shell_tzresult (option o)).
   
-  Parameter make_opt_call2 : forall {H a b c i o pr q : Set},
-    RPC_service.t t ((t * a) * b) q i o ->
-    ((RPC_service.t t t q i o -> pr -> q -> i ->
-    Lwt.t (Error_monad.shell_tzresult o)) *
-      ((RPC_service.t t (t * a) q i o -> pr -> a -> q -> i ->
-      Lwt.t (Error_monad.shell_tzresult o)) *
-        ((RPC_service.t t ((t * a) * b) q i o -> pr -> a -> b -> q -> i ->
-        Lwt.t (Error_monad.shell_tzresult o)) *
-          ((RPC_service.t t (((t * a) * b) * c) q i o -> pr -> a -> b -> c ->
-          q -> i -> Lwt.t (Error_monad.shell_tzresult o)) * H)))) * H * pr ->
-    pr -> a -> b -> q -> i -> Lwt.t (Error_monad.shell_tzresult (option o)).
+  Parameter make_opt_call2 : forall {a b i o pr q : Set},
+    RPC_service.t t ((t * a) * b) q i o -> simple pr -> pr -> a -> b -> q ->
+    i -> Lwt.t (Error_monad.shell_tzresult (option o)).
   
-  Parameter make_opt_call3 : forall {H a b c i o pr q : Set},
-    RPC_service.t t (((t * a) * b) * c) q i o ->
-    ((RPC_service.t t t q i o -> pr -> q -> i ->
-    Lwt.t (Error_monad.shell_tzresult o)) *
-      ((RPC_service.t t (t * a) q i o -> pr -> a -> q -> i ->
-      Lwt.t (Error_monad.shell_tzresult o)) *
-        ((RPC_service.t t ((t * a) * b) q i o -> pr -> a -> b -> q -> i ->
-        Lwt.t (Error_monad.shell_tzresult o)) *
-          ((RPC_service.t t (((t * a) * b) * c) q i o -> pr -> a -> b -> c ->
-          q -> i -> Lwt.t (Error_monad.shell_tzresult o)) * H)))) * H * pr ->
-    pr -> a -> b -> c -> q -> i -> Lwt.t (Error_monad.shell_tzresult (option o)).
+  Parameter make_opt_call3 : forall {a b c i o pr q : Set},
+    RPC_service.t t (((t * a) * b) * c) q i o -> simple pr -> pr -> a -> b ->
+    c -> q -> i -> Lwt.t (Error_monad.shell_tzresult (option o)).
 End RPC_context.
 
 Module Notations.

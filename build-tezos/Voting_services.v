@@ -107,31 +107,11 @@ Definition register (function_parameter : unit) : unit :=
             Lwt.__return (Pervasives.Error __error_value)
           end).
 
-Definition ballots {D H a b c i o q : Set}
-  (ctxt :
-    ((RPC_service.t RPC_context.t RPC_context.t q i o -> D -> q -> i ->
-    Lwt.t (Error_monad.shell_tzresult o)) *
-      ((RPC_service.t RPC_context.t (RPC_context.t * a) q i o -> D -> a -> q ->
-      i -> Lwt.t (Error_monad.shell_tzresult o)) *
-        ((RPC_service.t RPC_context.t ((RPC_context.t * a) * b) q i o -> D ->
-        a -> b -> q -> i -> Lwt.t (Error_monad.shell_tzresult o)) *
-          ((RPC_service.t RPC_context.t (((RPC_context.t * a) * b) * c) q i o ->
-          D -> a -> b -> c -> q -> i -> Lwt.t (Error_monad.shell_tzresult o)) *
-            H)))) * H * D) (block : D)
+Definition ballots {A : Set} (ctxt : RPC_context.simple A) (block : A)
   : Lwt.t (Error_monad.shell_tzresult Alpha_context.Vote.ballots) :=
   RPC_context.make_call0 S.ballots ctxt block tt tt.
 
-Definition ballot_list {D H a b c i o q : Set}
-  (ctxt :
-    ((RPC_service.t RPC_context.t RPC_context.t q i o -> D -> q -> i ->
-    Lwt.t (Error_monad.shell_tzresult o)) *
-      ((RPC_service.t RPC_context.t (RPC_context.t * a) q i o -> D -> a -> q ->
-      i -> Lwt.t (Error_monad.shell_tzresult o)) *
-        ((RPC_service.t RPC_context.t ((RPC_context.t * a) * b) q i o -> D ->
-        a -> b -> q -> i -> Lwt.t (Error_monad.shell_tzresult o)) *
-          ((RPC_service.t RPC_context.t (((RPC_context.t * a) * b) * c) q i o ->
-          D -> a -> b -> c -> q -> i -> Lwt.t (Error_monad.shell_tzresult o)) *
-            H)))) * H * D) (block : D)
+Definition ballot_list {A : Set} (ctxt : RPC_context.simple A) (block : A)
   : Lwt.t
     (Error_monad.shell_tzresult
       (list
@@ -139,76 +119,27 @@ Definition ballot_list {D H a b c i o q : Set}
           Alpha_context.Vote.ballot))) :=
   RPC_context.make_call0 S.ballot_list ctxt block tt tt.
 
-Definition current_period_kind {D H a b c i o q : Set}
-  (ctxt :
-    ((RPC_service.t RPC_context.t RPC_context.t q i o -> D -> q -> i ->
-    Lwt.t (Error_monad.shell_tzresult o)) *
-      ((RPC_service.t RPC_context.t (RPC_context.t * a) q i o -> D -> a -> q ->
-      i -> Lwt.t (Error_monad.shell_tzresult o)) *
-        ((RPC_service.t RPC_context.t ((RPC_context.t * a) * b) q i o -> D ->
-        a -> b -> q -> i -> Lwt.t (Error_monad.shell_tzresult o)) *
-          ((RPC_service.t RPC_context.t (((RPC_context.t * a) * b) * c) q i o ->
-          D -> a -> b -> c -> q -> i -> Lwt.t (Error_monad.shell_tzresult o)) *
-            H)))) * H * D) (block : D)
+Definition current_period_kind {A : Set}
+  (ctxt : RPC_context.simple A) (block : A)
   : Lwt.t (Error_monad.shell_tzresult Alpha_context.Voting_period.kind) :=
   RPC_context.make_call0 S.current_period_kind ctxt block tt tt.
 
-Definition current_quorum {D H a b c i o q : Set}
-  (ctxt :
-    ((RPC_service.t RPC_context.t RPC_context.t q i o -> D -> q -> i ->
-    Lwt.t (Error_monad.shell_tzresult o)) *
-      ((RPC_service.t RPC_context.t (RPC_context.t * a) q i o -> D -> a -> q ->
-      i -> Lwt.t (Error_monad.shell_tzresult o)) *
-        ((RPC_service.t RPC_context.t ((RPC_context.t * a) * b) q i o -> D ->
-        a -> b -> q -> i -> Lwt.t (Error_monad.shell_tzresult o)) *
-          ((RPC_service.t RPC_context.t (((RPC_context.t * a) * b) * c) q i o ->
-          D -> a -> b -> c -> q -> i -> Lwt.t (Error_monad.shell_tzresult o)) *
-            H)))) * H * D) (block : D)
+Definition current_quorum {A : Set} (ctxt : RPC_context.simple A) (block : A)
   : Lwt.t (Error_monad.shell_tzresult int32) :=
   RPC_context.make_call0 S.current_quorum ctxt block tt tt.
 
-Definition listings {D H a b c i o q : Set}
-  (ctxt :
-    ((RPC_service.t RPC_context.t RPC_context.t q i o -> D -> q -> i ->
-    Lwt.t (Error_monad.shell_tzresult o)) *
-      ((RPC_service.t RPC_context.t (RPC_context.t * a) q i o -> D -> a -> q ->
-      i -> Lwt.t (Error_monad.shell_tzresult o)) *
-        ((RPC_service.t RPC_context.t ((RPC_context.t * a) * b) q i o -> D ->
-        a -> b -> q -> i -> Lwt.t (Error_monad.shell_tzresult o)) *
-          ((RPC_service.t RPC_context.t (((RPC_context.t * a) * b) * c) q i o ->
-          D -> a -> b -> c -> q -> i -> Lwt.t (Error_monad.shell_tzresult o)) *
-            H)))) * H * D) (block : D)
+Definition listings {A : Set} (ctxt : RPC_context.simple A) (block : A)
   : Lwt.t
     (Error_monad.shell_tzresult
       (list ((|Signature.Public_key_hash|).(S.SPublic_key_hash.t) * int32))) :=
   RPC_context.make_call0 S.listings ctxt block tt tt.
 
-Definition proposals {D H a b c i o q : Set}
-  (ctxt :
-    ((RPC_service.t RPC_context.t RPC_context.t q i o -> D -> q -> i ->
-    Lwt.t (Error_monad.shell_tzresult o)) *
-      ((RPC_service.t RPC_context.t (RPC_context.t * a) q i o -> D -> a -> q ->
-      i -> Lwt.t (Error_monad.shell_tzresult o)) *
-        ((RPC_service.t RPC_context.t ((RPC_context.t * a) * b) q i o -> D ->
-        a -> b -> q -> i -> Lwt.t (Error_monad.shell_tzresult o)) *
-          ((RPC_service.t RPC_context.t (((RPC_context.t * a) * b) * c) q i o ->
-          D -> a -> b -> c -> q -> i -> Lwt.t (Error_monad.shell_tzresult o)) *
-            H)))) * H * D) (block : D)
+Definition proposals {A : Set} (ctxt : RPC_context.simple A) (block : A)
   : Lwt.t
     (Error_monad.shell_tzresult
       ((|Protocol_hash|).(S.HASH.Map).(S.INDEXES_Map.t) int32)) :=
   RPC_context.make_call0 S.proposals ctxt block tt tt.
 
-Definition current_proposal {D H a b c i o q : Set}
-  (ctxt :
-    ((RPC_service.t RPC_context.t RPC_context.t q i o -> D -> q -> i ->
-    Lwt.t (Error_monad.shell_tzresult o)) *
-      ((RPC_service.t RPC_context.t (RPC_context.t * a) q i o -> D -> a -> q ->
-      i -> Lwt.t (Error_monad.shell_tzresult o)) *
-        ((RPC_service.t RPC_context.t ((RPC_context.t * a) * b) q i o -> D ->
-        a -> b -> q -> i -> Lwt.t (Error_monad.shell_tzresult o)) *
-          ((RPC_service.t RPC_context.t (((RPC_context.t * a) * b) * c) q i o ->
-          D -> a -> b -> c -> q -> i -> Lwt.t (Error_monad.shell_tzresult o)) *
-            H)))) * H * D) (block : D)
+Definition current_proposal {A : Set} (ctxt : RPC_context.simple A) (block : A)
   : Lwt.t (Error_monad.shell_tzresult (option (|Protocol_hash|).(S.HASH.t))) :=
   RPC_context.make_call0 S.current_proposal ctxt block tt tt.

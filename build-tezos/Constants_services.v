@@ -52,30 +52,10 @@ Definition register (function_parameter : unit) : unit :=
               Alpha_context.Constants.t.parametric :=
                 Alpha_context.Constants.__parametric_value ctxt |}).
 
-Definition errors {D H a b c i o q : Set}
-  (ctxt :
-    ((RPC_service.t RPC_context.t RPC_context.t q i o -> D -> q -> i ->
-    Lwt.t (Error_monad.shell_tzresult o)) *
-      ((RPC_service.t RPC_context.t (RPC_context.t * a) q i o -> D -> a -> q ->
-      i -> Lwt.t (Error_monad.shell_tzresult o)) *
-        ((RPC_service.t RPC_context.t ((RPC_context.t * a) * b) q i o -> D ->
-        a -> b -> q -> i -> Lwt.t (Error_monad.shell_tzresult o)) *
-          ((RPC_service.t RPC_context.t (((RPC_context.t * a) * b) * c) q i o ->
-          D -> a -> b -> c -> q -> i -> Lwt.t (Error_monad.shell_tzresult o)) *
-            H)))) * H * D) (block : D)
+Definition errors {A : Set} (ctxt : RPC_context.simple A) (block : A)
   : Lwt.t (Error_monad.shell_tzresult Data_encoding.json_schema) :=
   RPC_context.make_call0 S.errors ctxt block tt tt.
 
-Definition all {D H a b c i o q : Set}
-  (ctxt :
-    ((RPC_service.t RPC_context.t RPC_context.t q i o -> D -> q -> i ->
-    Lwt.t (Error_monad.shell_tzresult o)) *
-      ((RPC_service.t RPC_context.t (RPC_context.t * a) q i o -> D -> a -> q ->
-      i -> Lwt.t (Error_monad.shell_tzresult o)) *
-        ((RPC_service.t RPC_context.t ((RPC_context.t * a) * b) q i o -> D ->
-        a -> b -> q -> i -> Lwt.t (Error_monad.shell_tzresult o)) *
-          ((RPC_service.t RPC_context.t (((RPC_context.t * a) * b) * c) q i o ->
-          D -> a -> b -> c -> q -> i -> Lwt.t (Error_monad.shell_tzresult o)) *
-            H)))) * H * D) (block : D)
+Definition all {A : Set} (ctxt : RPC_context.simple A) (block : A)
   : Lwt.t (Error_monad.shell_tzresult Alpha_context.Constants.t) :=
   RPC_context.make_call0 S.all ctxt block tt tt.

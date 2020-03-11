@@ -14,16 +14,8 @@ Require Tezos.Contract_repr.
 
 Import Alpha_context.
 
-Parameter __list_value : forall {G a b c i o q : Set},
-  ((RPC_service.t RPC_context.t RPC_context.t q i o -> a -> q -> i ->
-  Lwt.t (Error_monad.shell_tzresult o)) *
-    ((RPC_service.t RPC_context.t (RPC_context.t * a) q i o -> a -> a -> q ->
-    i -> Lwt.t (Error_monad.shell_tzresult o)) *
-      ((RPC_service.t RPC_context.t ((RPC_context.t * a) * b) q i o -> a -> a ->
-      b -> q -> i -> Lwt.t (Error_monad.shell_tzresult o)) *
-        ((RPC_service.t RPC_context.t (((RPC_context.t * a) * b) * c) q i o ->
-        a -> a -> b -> c -> q -> i -> Lwt.t (Error_monad.shell_tzresult o)) * G))))
-    * G * a -> a -> option bool -> option bool -> unit ->
+Parameter __list_value : forall {a : Set},
+  RPC_context.simple a -> a -> option bool -> option bool -> unit ->
   Lwt.t
     (Error_monad.shell_tzresult
       (list (|Signature.Public_key_hash|).(S.SPublic_key_hash.t))).
@@ -78,115 +70,52 @@ Definition info := info.record.
 
 Parameter info_encoding : Data_encoding.t info.
 
-Parameter __info_value : forall {G a b c i o q : Set},
-  ((RPC_service.t RPC_context.t RPC_context.t q i o -> a -> q -> i ->
-  Lwt.t (Error_monad.shell_tzresult o)) *
-    ((RPC_service.t RPC_context.t (RPC_context.t * a) q i o -> a -> a -> q ->
-    i -> Lwt.t (Error_monad.shell_tzresult o)) *
-      ((RPC_service.t RPC_context.t ((RPC_context.t * a) * b) q i o -> a -> a ->
-      b -> q -> i -> Lwt.t (Error_monad.shell_tzresult o)) *
-        ((RPC_service.t RPC_context.t (((RPC_context.t * a) * b) * c) q i o ->
-        a -> a -> b -> c -> q -> i -> Lwt.t (Error_monad.shell_tzresult o)) * G))))
-    * G * a -> a -> (|Signature.Public_key_hash|).(S.SPublic_key_hash.t) ->
+Parameter __info_value : forall {a : Set},
+  RPC_context.simple a -> a ->
+  (|Signature.Public_key_hash|).(S.SPublic_key_hash.t) ->
   Lwt.t (Error_monad.shell_tzresult info).
 
-Parameter balance : forall {G a b c i o q : Set},
-  ((RPC_service.t RPC_context.t RPC_context.t q i o -> a -> q -> i ->
-  Lwt.t (Error_monad.shell_tzresult o)) *
-    ((RPC_service.t RPC_context.t (RPC_context.t * a) q i o -> a -> a -> q ->
-    i -> Lwt.t (Error_monad.shell_tzresult o)) *
-      ((RPC_service.t RPC_context.t ((RPC_context.t * a) * b) q i o -> a -> a ->
-      b -> q -> i -> Lwt.t (Error_monad.shell_tzresult o)) *
-        ((RPC_service.t RPC_context.t (((RPC_context.t * a) * b) * c) q i o ->
-        a -> a -> b -> c -> q -> i -> Lwt.t (Error_monad.shell_tzresult o)) * G))))
-    * G * a -> a -> (|Signature.Public_key_hash|).(S.SPublic_key_hash.t) ->
+Parameter balance : forall {a : Set},
+  RPC_context.simple a -> a ->
+  (|Signature.Public_key_hash|).(S.SPublic_key_hash.t) ->
   Lwt.t (Error_monad.shell_tzresult Alpha_context.Tez.t).
 
-Parameter __frozen_balance_value : forall {G a b c i o q : Set},
-  ((RPC_service.t RPC_context.t RPC_context.t q i o -> a -> q -> i ->
-  Lwt.t (Error_monad.shell_tzresult o)) *
-    ((RPC_service.t RPC_context.t (RPC_context.t * a) q i o -> a -> a -> q ->
-    i -> Lwt.t (Error_monad.shell_tzresult o)) *
-      ((RPC_service.t RPC_context.t ((RPC_context.t * a) * b) q i o -> a -> a ->
-      b -> q -> i -> Lwt.t (Error_monad.shell_tzresult o)) *
-        ((RPC_service.t RPC_context.t (((RPC_context.t * a) * b) * c) q i o ->
-        a -> a -> b -> c -> q -> i -> Lwt.t (Error_monad.shell_tzresult o)) * G))))
-    * G * a -> a -> (|Signature.Public_key_hash|).(S.SPublic_key_hash.t) ->
+Parameter __frozen_balance_value : forall {a : Set},
+  RPC_context.simple a -> a ->
+  (|Signature.Public_key_hash|).(S.SPublic_key_hash.t) ->
   Lwt.t (Error_monad.shell_tzresult Alpha_context.Tez.t).
 
-Parameter frozen_balance_by_cycle : forall {G a b c i o q : Set},
-  ((RPC_service.t RPC_context.t RPC_context.t q i o -> a -> q -> i ->
-  Lwt.t (Error_monad.shell_tzresult o)) *
-    ((RPC_service.t RPC_context.t (RPC_context.t * a) q i o -> a -> a -> q ->
-    i -> Lwt.t (Error_monad.shell_tzresult o)) *
-      ((RPC_service.t RPC_context.t ((RPC_context.t * a) * b) q i o -> a -> a ->
-      b -> q -> i -> Lwt.t (Error_monad.shell_tzresult o)) *
-        ((RPC_service.t RPC_context.t (((RPC_context.t * a) * b) * c) q i o ->
-        a -> a -> b -> c -> q -> i -> Lwt.t (Error_monad.shell_tzresult o)) * G))))
-    * G * a -> a -> (|Signature.Public_key_hash|).(S.SPublic_key_hash.t) ->
+Parameter frozen_balance_by_cycle : forall {a : Set},
+  RPC_context.simple a -> a ->
+  (|Signature.Public_key_hash|).(S.SPublic_key_hash.t) ->
   Lwt.t
     (Error_monad.shell_tzresult
       ((|Alpha_context.Cycle.Map|).(S.MAP.t)
         Alpha_context.Delegate.frozen_balance)).
 
-Parameter staking_balance : forall {G a b c i o q : Set},
-  ((RPC_service.t RPC_context.t RPC_context.t q i o -> a -> q -> i ->
-  Lwt.t (Error_monad.shell_tzresult o)) *
-    ((RPC_service.t RPC_context.t (RPC_context.t * a) q i o -> a -> a -> q ->
-    i -> Lwt.t (Error_monad.shell_tzresult o)) *
-      ((RPC_service.t RPC_context.t ((RPC_context.t * a) * b) q i o -> a -> a ->
-      b -> q -> i -> Lwt.t (Error_monad.shell_tzresult o)) *
-        ((RPC_service.t RPC_context.t (((RPC_context.t * a) * b) * c) q i o ->
-        a -> a -> b -> c -> q -> i -> Lwt.t (Error_monad.shell_tzresult o)) * G))))
-    * G * a -> a -> (|Signature.Public_key_hash|).(S.SPublic_key_hash.t) ->
+Parameter staking_balance : forall {a : Set},
+  RPC_context.simple a -> a ->
+  (|Signature.Public_key_hash|).(S.SPublic_key_hash.t) ->
   Lwt.t (Error_monad.shell_tzresult Alpha_context.Tez.t).
 
-Parameter delegated_contracts : forall {G a b c i o q : Set},
-  ((RPC_service.t RPC_context.t RPC_context.t q i o -> a -> q -> i ->
-  Lwt.t (Error_monad.shell_tzresult o)) *
-    ((RPC_service.t RPC_context.t (RPC_context.t * a) q i o -> a -> a -> q ->
-    i -> Lwt.t (Error_monad.shell_tzresult o)) *
-      ((RPC_service.t RPC_context.t ((RPC_context.t * a) * b) q i o -> a -> a ->
-      b -> q -> i -> Lwt.t (Error_monad.shell_tzresult o)) *
-        ((RPC_service.t RPC_context.t (((RPC_context.t * a) * b) * c) q i o ->
-        a -> a -> b -> c -> q -> i -> Lwt.t (Error_monad.shell_tzresult o)) * G))))
-    * G * a -> a -> (|Signature.Public_key_hash|).(S.SPublic_key_hash.t) ->
+Parameter delegated_contracts : forall {a : Set},
+  RPC_context.simple a -> a ->
+  (|Signature.Public_key_hash|).(S.SPublic_key_hash.t) ->
   Lwt.t (Error_monad.shell_tzresult (list Contract_repr.t)).
 
-Parameter delegated_balance : forall {G a b c i o q : Set},
-  ((RPC_service.t RPC_context.t RPC_context.t q i o -> a -> q -> i ->
-  Lwt.t (Error_monad.shell_tzresult o)) *
-    ((RPC_service.t RPC_context.t (RPC_context.t * a) q i o -> a -> a -> q ->
-    i -> Lwt.t (Error_monad.shell_tzresult o)) *
-      ((RPC_service.t RPC_context.t ((RPC_context.t * a) * b) q i o -> a -> a ->
-      b -> q -> i -> Lwt.t (Error_monad.shell_tzresult o)) *
-        ((RPC_service.t RPC_context.t (((RPC_context.t * a) * b) * c) q i o ->
-        a -> a -> b -> c -> q -> i -> Lwt.t (Error_monad.shell_tzresult o)) * G))))
-    * G * a -> a -> (|Signature.Public_key_hash|).(S.SPublic_key_hash.t) ->
+Parameter delegated_balance : forall {a : Set},
+  RPC_context.simple a -> a ->
+  (|Signature.Public_key_hash|).(S.SPublic_key_hash.t) ->
   Lwt.t (Error_monad.shell_tzresult Alpha_context.Tez.t).
 
-Parameter deactivated : forall {G a b c i o q : Set},
-  ((RPC_service.t RPC_context.t RPC_context.t q i o -> a -> q -> i ->
-  Lwt.t (Error_monad.shell_tzresult o)) *
-    ((RPC_service.t RPC_context.t (RPC_context.t * a) q i o -> a -> a -> q ->
-    i -> Lwt.t (Error_monad.shell_tzresult o)) *
-      ((RPC_service.t RPC_context.t ((RPC_context.t * a) * b) q i o -> a -> a ->
-      b -> q -> i -> Lwt.t (Error_monad.shell_tzresult o)) *
-        ((RPC_service.t RPC_context.t (((RPC_context.t * a) * b) * c) q i o ->
-        a -> a -> b -> c -> q -> i -> Lwt.t (Error_monad.shell_tzresult o)) * G))))
-    * G * a -> a -> (|Signature.Public_key_hash|).(S.SPublic_key_hash.t) ->
+Parameter deactivated : forall {a : Set},
+  RPC_context.simple a -> a ->
+  (|Signature.Public_key_hash|).(S.SPublic_key_hash.t) ->
   Lwt.t (Error_monad.shell_tzresult bool).
 
-Parameter grace_period : forall {G a b c i o q : Set},
-  ((RPC_service.t RPC_context.t RPC_context.t q i o -> a -> q -> i ->
-  Lwt.t (Error_monad.shell_tzresult o)) *
-    ((RPC_service.t RPC_context.t (RPC_context.t * a) q i o -> a -> a -> q ->
-    i -> Lwt.t (Error_monad.shell_tzresult o)) *
-      ((RPC_service.t RPC_context.t ((RPC_context.t * a) * b) q i o -> a -> a ->
-      b -> q -> i -> Lwt.t (Error_monad.shell_tzresult o)) *
-        ((RPC_service.t RPC_context.t (((RPC_context.t * a) * b) * c) q i o ->
-        a -> a -> b -> c -> q -> i -> Lwt.t (Error_monad.shell_tzresult o)) * G))))
-    * G * a -> a -> (|Signature.Public_key_hash|).(S.SPublic_key_hash.t) ->
+Parameter grace_period : forall {a : Set},
+  RPC_context.simple a -> a ->
+  (|Signature.Public_key_hash|).(S.SPublic_key_hash.t) ->
   Lwt.t (Error_monad.shell_tzresult Alpha_context.Cycle.t).
 
 Module Baking_rights.
@@ -207,16 +136,8 @@ Module Baking_rights.
   End t.
   Definition t := t.record.
   
-  Parameter get : forall {G a b c i o q : Set},
-    ((RPC_service.t RPC_context.t RPC_context.t q i o -> a -> q -> i ->
-    Lwt.t (Error_monad.shell_tzresult o)) *
-      ((RPC_service.t RPC_context.t (RPC_context.t * a) q i o -> a -> a -> q ->
-      i -> Lwt.t (Error_monad.shell_tzresult o)) *
-        ((RPC_service.t RPC_context.t ((RPC_context.t * a) * b) q i o -> a ->
-        a -> b -> q -> i -> Lwt.t (Error_monad.shell_tzresult o)) *
-          ((RPC_service.t RPC_context.t (((RPC_context.t * a) * b) * c) q i o ->
-          a -> a -> b -> c -> q -> i -> Lwt.t (Error_monad.shell_tzresult o)) *
-            G)))) * G * a -> option (list Alpha_context.Raw_level.t) ->
+  Parameter get : forall {a : Set},
+    RPC_context.simple a -> option (list Alpha_context.Raw_level.t) ->
     option (list Alpha_context.Cycle.t) ->
     option (list Signature.public_key_hash) -> option bool -> option int -> a ->
     Lwt.t (Error_monad.shell_tzresult (list t)).
@@ -240,60 +161,28 @@ Module Endorsing_rights.
   End t.
   Definition t := t.record.
   
-  Parameter get : forall {G a b c i o q : Set},
-    ((RPC_service.t RPC_context.t RPC_context.t q i o -> a -> q -> i ->
-    Lwt.t (Error_monad.shell_tzresult o)) *
-      ((RPC_service.t RPC_context.t (RPC_context.t * a) q i o -> a -> a -> q ->
-      i -> Lwt.t (Error_monad.shell_tzresult o)) *
-        ((RPC_service.t RPC_context.t ((RPC_context.t * a) * b) q i o -> a ->
-        a -> b -> q -> i -> Lwt.t (Error_monad.shell_tzresult o)) *
-          ((RPC_service.t RPC_context.t (((RPC_context.t * a) * b) * c) q i o ->
-          a -> a -> b -> c -> q -> i -> Lwt.t (Error_monad.shell_tzresult o)) *
-            G)))) * G * a -> option (list Alpha_context.Raw_level.t) ->
+  Parameter get : forall {a : Set},
+    RPC_context.simple a -> option (list Alpha_context.Raw_level.t) ->
     option (list Alpha_context.Cycle.t) ->
     option (list Signature.public_key_hash) -> a ->
     Lwt.t (Error_monad.shell_tzresult (list t)).
 End Endorsing_rights.
 
 Module Endorsing_power.
-  Parameter get : forall {G a b c i o q : Set},
-    ((RPC_service.t RPC_context.t RPC_context.t q i o -> a -> q -> i ->
-    Lwt.t (Error_monad.shell_tzresult o)) *
-      ((RPC_service.t RPC_context.t (RPC_context.t * a) q i o -> a -> a -> q ->
-      i -> Lwt.t (Error_monad.shell_tzresult o)) *
-        ((RPC_service.t RPC_context.t ((RPC_context.t * a) * b) q i o -> a ->
-        a -> b -> q -> i -> Lwt.t (Error_monad.shell_tzresult o)) *
-          ((RPC_service.t RPC_context.t (((RPC_context.t * a) * b) * c) q i o ->
-          a -> a -> b -> c -> q -> i -> Lwt.t (Error_monad.shell_tzresult o)) *
-            G)))) * G * a -> a -> Alpha_context.packed_operation ->
+  Parameter get : forall {a : Set},
+    RPC_context.simple a -> a -> Alpha_context.packed_operation ->
     (|Chain_id|).(S.HASH.t) -> Lwt.t (Error_monad.shell_tzresult int).
 End Endorsing_power.
 
 Module Required_endorsements.
-  Parameter get : forall {G a b c i o q : Set},
-    ((RPC_service.t RPC_context.t RPC_context.t q i o -> a -> q -> i ->
-    Lwt.t (Error_monad.shell_tzresult o)) *
-      ((RPC_service.t RPC_context.t (RPC_context.t * a) q i o -> a -> a -> q ->
-      i -> Lwt.t (Error_monad.shell_tzresult o)) *
-        ((RPC_service.t RPC_context.t ((RPC_context.t * a) * b) q i o -> a ->
-        a -> b -> q -> i -> Lwt.t (Error_monad.shell_tzresult o)) *
-          ((RPC_service.t RPC_context.t (((RPC_context.t * a) * b) * c) q i o ->
-          a -> a -> b -> c -> q -> i -> Lwt.t (Error_monad.shell_tzresult o)) *
-            G)))) * G * a -> a -> Alpha_context.Period.t ->
+  Parameter get : forall {a : Set},
+    RPC_context.simple a -> a -> Alpha_context.Period.t ->
     Lwt.t (Error_monad.shell_tzresult int).
 End Required_endorsements.
 
 Module Minimal_valid_time.
-  Parameter get : forall {G a b c i o q : Set},
-    ((RPC_service.t RPC_context.t RPC_context.t q i o -> a -> q -> i ->
-    Lwt.t (Error_monad.shell_tzresult o)) *
-      ((RPC_service.t RPC_context.t (RPC_context.t * a) q i o -> a -> a -> q ->
-      i -> Lwt.t (Error_monad.shell_tzresult o)) *
-        ((RPC_service.t RPC_context.t ((RPC_context.t * a) * b) q i o -> a ->
-        a -> b -> q -> i -> Lwt.t (Error_monad.shell_tzresult o)) *
-          ((RPC_service.t RPC_context.t (((RPC_context.t * a) * b) * c) q i o ->
-          a -> a -> b -> c -> q -> i -> Lwt.t (Error_monad.shell_tzresult o)) *
-            G)))) * G * a -> a -> int -> int ->
+  Parameter get : forall {a : Set},
+    RPC_context.simple a -> a -> int -> int ->
     Lwt.t (Error_monad.shell_tzresult Time.t).
 End Minimal_valid_time.
 

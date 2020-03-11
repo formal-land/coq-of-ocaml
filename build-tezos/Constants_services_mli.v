@@ -13,26 +13,12 @@ Require Tezos.Alpha_context.
 
 Import Alpha_context.
 
-Parameter errors : forall {G a b c i o q : Set},
-  ((RPC_service.t RPC_context.t RPC_context.t q i o -> a -> q -> i ->
-  Lwt.t (Error_monad.shell_tzresult o)) *
-    ((RPC_service.t RPC_context.t (RPC_context.t * a) q i o -> a -> a -> q ->
-    i -> Lwt.t (Error_monad.shell_tzresult o)) *
-      ((RPC_service.t RPC_context.t ((RPC_context.t * a) * b) q i o -> a -> a ->
-      b -> q -> i -> Lwt.t (Error_monad.shell_tzresult o)) *
-        ((RPC_service.t RPC_context.t (((RPC_context.t * a) * b) * c) q i o ->
-        a -> a -> b -> c -> q -> i -> Lwt.t (Error_monad.shell_tzresult o)) * G))))
-    * G * a -> a -> Lwt.t (Error_monad.shell_tzresult Data_encoding.json_schema).
+Parameter errors : forall {a : Set},
+  RPC_context.simple a -> a ->
+  Lwt.t (Error_monad.shell_tzresult Data_encoding.json_schema).
 
-Parameter all : forall {G a b c i o q : Set},
-  ((RPC_service.t RPC_context.t RPC_context.t q i o -> a -> q -> i ->
-  Lwt.t (Error_monad.shell_tzresult o)) *
-    ((RPC_service.t RPC_context.t (RPC_context.t * a) q i o -> a -> a -> q ->
-    i -> Lwt.t (Error_monad.shell_tzresult o)) *
-      ((RPC_service.t RPC_context.t ((RPC_context.t * a) * b) q i o -> a -> a ->
-      b -> q -> i -> Lwt.t (Error_monad.shell_tzresult o)) *
-        ((RPC_service.t RPC_context.t (((RPC_context.t * a) * b) * c) q i o ->
-        a -> a -> b -> c -> q -> i -> Lwt.t (Error_monad.shell_tzresult o)) * G))))
-    * G * a -> a -> Lwt.t (Error_monad.shell_tzresult Alpha_context.Constants.t).
+Parameter all : forall {a : Set},
+  RPC_context.simple a -> a ->
+  Lwt.t (Error_monad.shell_tzresult Alpha_context.Constants.t).
 
 Parameter register : unit -> unit.

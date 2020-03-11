@@ -39,17 +39,7 @@ Module Seed.
   (* ❌ Top-level evaluations are ignored *)
   (* top_level_evaluation *)
   
-  Definition get {D H a b c i o q : Set}
-    (ctxt :
-      ((RPC_service.t RPC_context.t RPC_context.t q i o -> D -> q -> i ->
-      Lwt.t (Error_monad.shell_tzresult o)) *
-        ((RPC_service.t RPC_context.t (RPC_context.t * a) q i o -> D -> a ->
-        q -> i -> Lwt.t (Error_monad.shell_tzresult o)) *
-          ((RPC_service.t RPC_context.t ((RPC_context.t * a) * b) q i o -> D ->
-          a -> b -> q -> i -> Lwt.t (Error_monad.shell_tzresult o)) *
-            ((RPC_service.t RPC_context.t (((RPC_context.t * a) * b) * c) q i o
-            -> D -> a -> b -> c -> q -> i ->
-            Lwt.t (Error_monad.shell_tzresult o)) * H)))) * H * D) (block : D)
+  Definition get {A : Set} (ctxt : RPC_context.simple A) (block : A)
     : Lwt.t (Error_monad.shell_tzresult Alpha_context.Seed.seed) :=
     RPC_context.make_call0 S.__seed_value ctxt block tt tt.
 End Seed.
@@ -125,17 +115,8 @@ Module Nonce.
               | Pervasives.Error _ => Error_monad.__return Forgotten
               end).
   
-  Definition get {D H a b c i o q : Set}
-    (ctxt :
-      ((RPC_service.t RPC_context.t RPC_context.t q i o -> D -> q -> i ->
-      Lwt.t (Error_monad.shell_tzresult o)) *
-        ((RPC_service.t RPC_context.t (RPC_context.t * a) q i o -> D -> a ->
-        q -> i -> Lwt.t (Error_monad.shell_tzresult o)) *
-          ((RPC_service.t RPC_context.t ((RPC_context.t * a) * b) q i o -> D ->
-          a -> b -> q -> i -> Lwt.t (Error_monad.shell_tzresult o)) *
-            ((RPC_service.t RPC_context.t (((RPC_context.t * a) * b) * c) q i o
-            -> D -> a -> b -> c -> q -> i ->
-            Lwt.t (Error_monad.shell_tzresult o)) * H)))) * H * D) (block : D)
+  Definition get {A : Set}
+    (ctxt : RPC_context.simple A) (block : A)
     (level : Alpha_context.Raw_level.raw_level)
     : Lwt.t (Error_monad.shell_tzresult info) :=
     RPC_context.make_call1 S.get ctxt block level tt tt.

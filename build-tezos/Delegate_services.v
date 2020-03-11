@@ -276,17 +276,8 @@ Definition register (function_parameter : unit) : unit :=
             let '_ := function_parameter in
             Alpha_context.Delegate.grace_period ctxt pkh).
 
-Definition __list_value {D H a b c i o q : Set}
-  (ctxt :
-    ((RPC_service.t RPC_context.t RPC_context.t q i o -> D -> q -> i ->
-    Lwt.t (Error_monad.shell_tzresult o)) *
-      ((RPC_service.t RPC_context.t (RPC_context.t * a) q i o -> D -> a -> q ->
-      i -> Lwt.t (Error_monad.shell_tzresult o)) *
-        ((RPC_service.t RPC_context.t ((RPC_context.t * a) * b) q i o -> D ->
-        a -> b -> q -> i -> Lwt.t (Error_monad.shell_tzresult o)) *
-          ((RPC_service.t RPC_context.t (((RPC_context.t * a) * b) * c) q i o ->
-          D -> a -> b -> c -> q -> i -> Lwt.t (Error_monad.shell_tzresult o)) *
-            H)))) * H * D) (block : D) (op_staroptstar : option bool)
+Definition __list_value {A : Set}
+  (ctxt : RPC_context.simple A) (block : A) (op_staroptstar : option bool)
   : option bool -> unit ->
   Lwt.t
     (Error_monad.shell_tzresult
@@ -308,62 +299,26 @@ Definition __list_value {D H a b c i o q : Set}
         {| S.list_query.active := active; S.list_query.inactive := inactive |}
         tt.
 
-Definition __info_value {D H a b c i o q : Set}
-  (ctxt :
-    ((RPC_service.t RPC_context.t RPC_context.t q i o -> D -> q -> i ->
-    Lwt.t (Error_monad.shell_tzresult o)) *
-      ((RPC_service.t RPC_context.t (RPC_context.t * a) q i o -> D -> a -> q ->
-      i -> Lwt.t (Error_monad.shell_tzresult o)) *
-        ((RPC_service.t RPC_context.t ((RPC_context.t * a) * b) q i o -> D ->
-        a -> b -> q -> i -> Lwt.t (Error_monad.shell_tzresult o)) *
-          ((RPC_service.t RPC_context.t (((RPC_context.t * a) * b) * c) q i o ->
-          D -> a -> b -> c -> q -> i -> Lwt.t (Error_monad.shell_tzresult o)) *
-            H)))) * H * D) (block : D)
+Definition __info_value {A : Set}
+  (ctxt : RPC_context.simple A) (block : A)
   (pkh : (|Signature.Public_key_hash|).(S.SPublic_key_hash.t))
   : Lwt.t (Error_monad.shell_tzresult info) :=
   RPC_context.make_call1 S.__info_value ctxt block pkh tt tt.
 
-Definition balance {D H a b c i o q : Set}
-  (ctxt :
-    ((RPC_service.t RPC_context.t RPC_context.t q i o -> D -> q -> i ->
-    Lwt.t (Error_monad.shell_tzresult o)) *
-      ((RPC_service.t RPC_context.t (RPC_context.t * a) q i o -> D -> a -> q ->
-      i -> Lwt.t (Error_monad.shell_tzresult o)) *
-        ((RPC_service.t RPC_context.t ((RPC_context.t * a) * b) q i o -> D ->
-        a -> b -> q -> i -> Lwt.t (Error_monad.shell_tzresult o)) *
-          ((RPC_service.t RPC_context.t (((RPC_context.t * a) * b) * c) q i o ->
-          D -> a -> b -> c -> q -> i -> Lwt.t (Error_monad.shell_tzresult o)) *
-            H)))) * H * D) (block : D)
+Definition balance {A : Set}
+  (ctxt : RPC_context.simple A) (block : A)
   (pkh : (|Signature.Public_key_hash|).(S.SPublic_key_hash.t))
   : Lwt.t (Error_monad.shell_tzresult Alpha_context.Tez.t) :=
   RPC_context.make_call1 S.balance ctxt block pkh tt tt.
 
-Definition __frozen_balance_value {D H a b c i o q : Set}
-  (ctxt :
-    ((RPC_service.t RPC_context.t RPC_context.t q i o -> D -> q -> i ->
-    Lwt.t (Error_monad.shell_tzresult o)) *
-      ((RPC_service.t RPC_context.t (RPC_context.t * a) q i o -> D -> a -> q ->
-      i -> Lwt.t (Error_monad.shell_tzresult o)) *
-        ((RPC_service.t RPC_context.t ((RPC_context.t * a) * b) q i o -> D ->
-        a -> b -> q -> i -> Lwt.t (Error_monad.shell_tzresult o)) *
-          ((RPC_service.t RPC_context.t (((RPC_context.t * a) * b) * c) q i o ->
-          D -> a -> b -> c -> q -> i -> Lwt.t (Error_monad.shell_tzresult o)) *
-            H)))) * H * D) (block : D)
+Definition __frozen_balance_value {A : Set}
+  (ctxt : RPC_context.simple A) (block : A)
   (pkh : (|Signature.Public_key_hash|).(S.SPublic_key_hash.t))
   : Lwt.t (Error_monad.shell_tzresult Alpha_context.Tez.t) :=
   RPC_context.make_call1 S.__frozen_balance_value ctxt block pkh tt tt.
 
-Definition frozen_balance_by_cycle {D H a b c i o q : Set}
-  (ctxt :
-    ((RPC_service.t RPC_context.t RPC_context.t q i o -> D -> q -> i ->
-    Lwt.t (Error_monad.shell_tzresult o)) *
-      ((RPC_service.t RPC_context.t (RPC_context.t * a) q i o -> D -> a -> q ->
-      i -> Lwt.t (Error_monad.shell_tzresult o)) *
-        ((RPC_service.t RPC_context.t ((RPC_context.t * a) * b) q i o -> D ->
-        a -> b -> q -> i -> Lwt.t (Error_monad.shell_tzresult o)) *
-          ((RPC_service.t RPC_context.t (((RPC_context.t * a) * b) * c) q i o ->
-          D -> a -> b -> c -> q -> i -> Lwt.t (Error_monad.shell_tzresult o)) *
-            H)))) * H * D) (block : D)
+Definition frozen_balance_by_cycle {A : Set}
+  (ctxt : RPC_context.simple A) (block : A)
   (pkh : (|Signature.Public_key_hash|).(S.SPublic_key_hash.t))
   : Lwt.t
     (Error_monad.shell_tzresult
@@ -371,77 +326,32 @@ Definition frozen_balance_by_cycle {D H a b c i o q : Set}
         Alpha_context.Delegate.frozen_balance)) :=
   RPC_context.make_call1 S.frozen_balance_by_cycle ctxt block pkh tt tt.
 
-Definition staking_balance {D H a b c i o q : Set}
-  (ctxt :
-    ((RPC_service.t RPC_context.t RPC_context.t q i o -> D -> q -> i ->
-    Lwt.t (Error_monad.shell_tzresult o)) *
-      ((RPC_service.t RPC_context.t (RPC_context.t * a) q i o -> D -> a -> q ->
-      i -> Lwt.t (Error_monad.shell_tzresult o)) *
-        ((RPC_service.t RPC_context.t ((RPC_context.t * a) * b) q i o -> D ->
-        a -> b -> q -> i -> Lwt.t (Error_monad.shell_tzresult o)) *
-          ((RPC_service.t RPC_context.t (((RPC_context.t * a) * b) * c) q i o ->
-          D -> a -> b -> c -> q -> i -> Lwt.t (Error_monad.shell_tzresult o)) *
-            H)))) * H * D) (block : D)
+Definition staking_balance {A : Set}
+  (ctxt : RPC_context.simple A) (block : A)
   (pkh : (|Signature.Public_key_hash|).(S.SPublic_key_hash.t))
   : Lwt.t (Error_monad.shell_tzresult Alpha_context.Tez.t) :=
   RPC_context.make_call1 S.staking_balance ctxt block pkh tt tt.
 
-Definition delegated_contracts {D H a b c i o q : Set}
-  (ctxt :
-    ((RPC_service.t RPC_context.t RPC_context.t q i o -> D -> q -> i ->
-    Lwt.t (Error_monad.shell_tzresult o)) *
-      ((RPC_service.t RPC_context.t (RPC_context.t * a) q i o -> D -> a -> q ->
-      i -> Lwt.t (Error_monad.shell_tzresult o)) *
-        ((RPC_service.t RPC_context.t ((RPC_context.t * a) * b) q i o -> D ->
-        a -> b -> q -> i -> Lwt.t (Error_monad.shell_tzresult o)) *
-          ((RPC_service.t RPC_context.t (((RPC_context.t * a) * b) * c) q i o ->
-          D -> a -> b -> c -> q -> i -> Lwt.t (Error_monad.shell_tzresult o)) *
-            H)))) * H * D) (block : D)
+Definition delegated_contracts {A : Set}
+  (ctxt : RPC_context.simple A) (block : A)
   (pkh : (|Signature.Public_key_hash|).(S.SPublic_key_hash.t))
   : Lwt.t (Error_monad.shell_tzresult (list Contract_repr.contract)) :=
   RPC_context.make_call1 S.delegated_contracts ctxt block pkh tt tt.
 
-Definition delegated_balance {D H a b c i o q : Set}
-  (ctxt :
-    ((RPC_service.t RPC_context.t RPC_context.t q i o -> D -> q -> i ->
-    Lwt.t (Error_monad.shell_tzresult o)) *
-      ((RPC_service.t RPC_context.t (RPC_context.t * a) q i o -> D -> a -> q ->
-      i -> Lwt.t (Error_monad.shell_tzresult o)) *
-        ((RPC_service.t RPC_context.t ((RPC_context.t * a) * b) q i o -> D ->
-        a -> b -> q -> i -> Lwt.t (Error_monad.shell_tzresult o)) *
-          ((RPC_service.t RPC_context.t (((RPC_context.t * a) * b) * c) q i o ->
-          D -> a -> b -> c -> q -> i -> Lwt.t (Error_monad.shell_tzresult o)) *
-            H)))) * H * D) (block : D)
+Definition delegated_balance {A : Set}
+  (ctxt : RPC_context.simple A) (block : A)
   (pkh : (|Signature.Public_key_hash|).(S.SPublic_key_hash.t))
   : Lwt.t (Error_monad.shell_tzresult Alpha_context.Tez.t) :=
   RPC_context.make_call1 S.delegated_balance ctxt block pkh tt tt.
 
-Definition deactivated {D H a b c i o q : Set}
-  (ctxt :
-    ((RPC_service.t RPC_context.t RPC_context.t q i o -> D -> q -> i ->
-    Lwt.t (Error_monad.shell_tzresult o)) *
-      ((RPC_service.t RPC_context.t (RPC_context.t * a) q i o -> D -> a -> q ->
-      i -> Lwt.t (Error_monad.shell_tzresult o)) *
-        ((RPC_service.t RPC_context.t ((RPC_context.t * a) * b) q i o -> D ->
-        a -> b -> q -> i -> Lwt.t (Error_monad.shell_tzresult o)) *
-          ((RPC_service.t RPC_context.t (((RPC_context.t * a) * b) * c) q i o ->
-          D -> a -> b -> c -> q -> i -> Lwt.t (Error_monad.shell_tzresult o)) *
-            H)))) * H * D) (block : D)
+Definition deactivated {A : Set}
+  (ctxt : RPC_context.simple A) (block : A)
   (pkh : (|Signature.Public_key_hash|).(S.SPublic_key_hash.t))
   : Lwt.t (Error_monad.shell_tzresult bool) :=
   RPC_context.make_call1 S.deactivated ctxt block pkh tt tt.
 
-Definition grace_period {D H a b c i o q : Set}
-  (ctxt :
-    ((RPC_service.t RPC_context.t RPC_context.t q i o -> D -> q -> i ->
-    Lwt.t (Error_monad.shell_tzresult o)) *
-      ((RPC_service.t RPC_context.t (RPC_context.t * a) q i o -> D -> a -> q ->
-      i -> Lwt.t (Error_monad.shell_tzresult o)) *
-        ((RPC_service.t RPC_context.t ((RPC_context.t * a) * b) q i o -> D ->
-        a -> b -> q -> i -> Lwt.t (Error_monad.shell_tzresult o)) *
-          ((RPC_service.t RPC_context.t (((RPC_context.t * a) * b) * c) q i o ->
-          D -> a -> b -> c -> q -> i -> Lwt.t (Error_monad.shell_tzresult o)) *
-            H)))) * H * D) (block : D)
+Definition grace_period {A : Set}
+  (ctxt : RPC_context.simple A) (block : A)
   (pkh : (|Signature.Public_key_hash|).(S.SPublic_key_hash.t))
   : Lwt.t (Error_monad.shell_tzresult Alpha_context.Cycle.t) :=
   RPC_context.make_call1 S.grace_period ctxt block pkh tt tt.
@@ -672,21 +582,12 @@ Module Baking_rights.
               Error_monad.__return (List.filter is_requested rights)
             end).
   
-  Definition get {D H a b c i o q : Set}
-    (ctxt :
-      ((RPC_service.t RPC_context.t RPC_context.t q i o -> D -> q -> i ->
-      Lwt.t (Error_monad.shell_tzresult o)) *
-        ((RPC_service.t RPC_context.t (RPC_context.t * a) q i o -> D -> a ->
-        q -> i -> Lwt.t (Error_monad.shell_tzresult o)) *
-          ((RPC_service.t RPC_context.t ((RPC_context.t * a) * b) q i o -> D ->
-          a -> b -> q -> i -> Lwt.t (Error_monad.shell_tzresult o)) *
-            ((RPC_service.t RPC_context.t (((RPC_context.t * a) * b) * c) q i o
-            -> D -> a -> b -> c -> q -> i ->
-            Lwt.t (Error_monad.shell_tzresult o)) * H)))) * H * D)
+  Definition get {A : Set}
+    (ctxt : RPC_context.simple A)
     (op_staroptstar : option (list Alpha_context.Raw_level.t))
     : option (list Alpha_context.Cycle.t) ->
     option (list (|Signature.Public_key_hash|).(S.SPublic_key_hash.t)) ->
-    option bool -> option int -> D ->
+    option bool -> option int -> A ->
     Lwt.t (Error_monad.shell_tzresult (list t)) :=
     let levels :=
       match op_staroptstar with
@@ -857,20 +758,11 @@ Module Endorsing_rights.
               Error_monad.__return (List.filter is_requested rights)
             end).
   
-  Definition get {D H a b c i o q : Set}
-    (ctxt :
-      ((RPC_service.t RPC_context.t RPC_context.t q i o -> D -> q -> i ->
-      Lwt.t (Error_monad.shell_tzresult o)) *
-        ((RPC_service.t RPC_context.t (RPC_context.t * a) q i o -> D -> a ->
-        q -> i -> Lwt.t (Error_monad.shell_tzresult o)) *
-          ((RPC_service.t RPC_context.t ((RPC_context.t * a) * b) q i o -> D ->
-          a -> b -> q -> i -> Lwt.t (Error_monad.shell_tzresult o)) *
-            ((RPC_service.t RPC_context.t (((RPC_context.t * a) * b) * c) q i o
-            -> D -> a -> b -> c -> q -> i ->
-            Lwt.t (Error_monad.shell_tzresult o)) * H)))) * H * D)
+  Definition get {A : Set}
+    (ctxt : RPC_context.simple A)
     (op_staroptstar : option (list Alpha_context.Raw_level.t))
     : option (list Alpha_context.Cycle.t) ->
-    option (list (|Signature.Public_key_hash|).(S.SPublic_key_hash.t)) -> D ->
+    option (list (|Signature.Public_key_hash|).(S.SPublic_key_hash.t)) -> A ->
     Lwt.t (Error_monad.shell_tzresult (list t)) :=
     let levels :=
       match op_staroptstar with
@@ -943,17 +835,8 @@ Module Endorsing_power.
             let '(op, chain_id) := function_parameter in
             endorsing_power ctxt (op, chain_id)).
   
-  Definition get {D H a b c i o q : Set}
-    (ctxt :
-      ((RPC_service.t RPC_context.t RPC_context.t q i o -> D -> q -> i ->
-      Lwt.t (Error_monad.shell_tzresult o)) *
-        ((RPC_service.t RPC_context.t (RPC_context.t * a) q i o -> D -> a ->
-        q -> i -> Lwt.t (Error_monad.shell_tzresult o)) *
-          ((RPC_service.t RPC_context.t ((RPC_context.t * a) * b) q i o -> D ->
-          a -> b -> q -> i -> Lwt.t (Error_monad.shell_tzresult o)) *
-            ((RPC_service.t RPC_context.t (((RPC_context.t * a) * b) * c) q i o
-            -> D -> a -> b -> c -> q -> i ->
-            Lwt.t (Error_monad.shell_tzresult o)) * H)))) * H * D) (block : D)
+  Definition get {A : Set}
+    (ctxt : RPC_context.simple A) (block : A)
     (op : Alpha_context.Operation.packed) (chain_id : (|Chain_id|).(S.HASH.t))
     : Lwt.t (Error_monad.shell_tzresult int) :=
     RPC_context.make_call0 S.endorsing_power ctxt block tt (op, chain_id).
@@ -1002,17 +885,8 @@ Module Required_endorsements.
             let '_ := function_parameter in
             required_endorsements ctxt block_delay).
   
-  Definition get {D H a b c i o q : Set}
-    (ctxt :
-      ((RPC_service.t RPC_context.t RPC_context.t q i o -> D -> q -> i ->
-      Lwt.t (Error_monad.shell_tzresult o)) *
-        ((RPC_service.t RPC_context.t (RPC_context.t * a) q i o -> D -> a ->
-        q -> i -> Lwt.t (Error_monad.shell_tzresult o)) *
-          ((RPC_service.t RPC_context.t ((RPC_context.t * a) * b) q i o -> D ->
-          a -> b -> q -> i -> Lwt.t (Error_monad.shell_tzresult o)) *
-            ((RPC_service.t RPC_context.t (((RPC_context.t * a) * b) * c) q i o
-            -> D -> a -> b -> c -> q -> i ->
-            Lwt.t (Error_monad.shell_tzresult o)) * H)))) * H * D) (block : D)
+  Definition get {A : Set}
+    (ctxt : RPC_context.simple A) (block : A)
     (block_delay : Alpha_context.Period.t)
     : Lwt.t (Error_monad.shell_tzresult int) :=
     RPC_context.make_call0 S.required_endorsements ctxt block
@@ -1074,19 +948,9 @@ Module Minimal_valid_time.
             let '_ := function_parameter in
             minimal_valid_time ctxt priority endorsing_power).
   
-  Definition get {D H a b c i o q : Set}
-    (ctxt :
-      ((RPC_service.t RPC_context.t RPC_context.t q i o -> D -> q -> i ->
-      Lwt.t (Error_monad.shell_tzresult o)) *
-        ((RPC_service.t RPC_context.t (RPC_context.t * a) q i o -> D -> a ->
-        q -> i -> Lwt.t (Error_monad.shell_tzresult o)) *
-          ((RPC_service.t RPC_context.t ((RPC_context.t * a) * b) q i o -> D ->
-          a -> b -> q -> i -> Lwt.t (Error_monad.shell_tzresult o)) *
-            ((RPC_service.t RPC_context.t (((RPC_context.t * a) * b) * c) q i o
-            -> D -> a -> b -> c -> q -> i ->
-            Lwt.t (Error_monad.shell_tzresult o)) * H)))) * H * D) (block : D)
-    (priority : int) (endorsing_power : int)
-    : Lwt.t (Error_monad.shell_tzresult Time.t) :=
+  Definition get {A : Set}
+    (ctxt : RPC_context.simple A) (block : A) (priority : int)
+    (endorsing_power : int) : Lwt.t (Error_monad.shell_tzresult Time.t) :=
     RPC_context.make_call0 S.minimal_valid_time ctxt block
       {| S.t.priority := priority; S.t.endorsing_power := endorsing_power |} tt.
 End Minimal_valid_time.

@@ -5,7 +5,7 @@
 
 Alpha_context_mli.v
 Alpha_context.v
-#Alpha_services_mli.v
+Alpha_services_mli.v
 #Alpha_services.v
 Amendment_mli.v
 Amendment.v
@@ -25,19 +25,19 @@ Commitment_repr.v
 Commitment_storage_mli.v
 Commitment_storage.v
 Constants_repr.v
-#Constants_services_mli.v
-#Constants_services.v
+Constants_services_mli.v
+Constants_services.v
 Constants_storage.v
 Contract_hash.v
 Contract_repr_mli.v
 Contract_repr.v
-#Contract_services_mli.v
+Contract_services_mli.v
 #Contract_services.v
 Contract_storage_mli.v
 Contract_storage.v
 Cycle_repr_mli.v
 Cycle_repr.v
-#Delegate_services_mli.v
+Delegate_services_mli.v
 #Delegate_services.v
 Delegate_storage_mli.v
 Delegate_storage.v
@@ -48,7 +48,7 @@ Fitness_repr.v
 Fitness_storage.v
 Gas_limit_repr_mli.v
 Gas_limit_repr.v
-#Helpers_services_mli.v
+Helpers_services_mli.v
 #Helpers_services.v
 Init_storage.v
 Legacy_script_support_repr_mli.v
@@ -105,7 +105,7 @@ Seed_repr_mli.v
 Seed_repr.v
 Seed_storage_mli.v
 Seed_storage.v
-#Services_registration.v
+Services_registration.v
 State_hash.v
 Storage_description_mli.v
 Storage_description.v
@@ -124,5 +124,5 @@ Vote_storage_mli.v
 Vote_storage.v
 Voting_period_repr_mli.v
 Voting_period_repr.v
-#Voting_services_mli.v
-#Voting_services.v
+Voting_services_mli.v
+Voting_services.v
