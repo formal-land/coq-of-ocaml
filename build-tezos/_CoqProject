@@ -6,7 +6,7 @@
 Alpha_context_mli.v
 Alpha_context.v
 Alpha_services_mli.v
-#Alpha_services.v
+Alpha_services.v
 Amendment_mli.v
 Amendment.v
 Apply_results_mli.v
@@ -32,13 +32,13 @@ Contract_hash.v
 Contract_repr_mli.v
 Contract_repr.v
 Contract_services_mli.v
-#Contract_services.v
+Contract_services.v
 Contract_storage_mli.v
 Contract_storage.v
 Cycle_repr_mli.v
 Cycle_repr.v
 Delegate_services_mli.v
-#Delegate_services.v
+Delegate_services.v
 Delegate_storage_mli.v
 Delegate_storage.v
 Environment.v
@@ -49,7 +49,7 @@ Fitness_storage.v
 Gas_limit_repr_mli.v
 Gas_limit_repr.v
 Helpers_services_mli.v
-#Helpers_services.v
+Helpers_services.v
 Init_storage.v
 Legacy_script_support_repr_mli.v
 Legacy_script_support_repr.v

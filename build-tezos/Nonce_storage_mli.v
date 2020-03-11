@@ -25,9 +25,7 @@ Parameter encoding : Data_encoding.t nonce.
 
 Definition unrevealed : Set := Storage.unrevealed_nonce.
 
-Inductive status : Set :=
-| Unrevealed : unrevealed -> status
-| Revealed : Seed_repr.nonce -> status.
+Definition status : Set := Storage.nonce_status.
 
 Parameter get :
   Raw_context.t -> Level_repr.t -> Lwt.t (Error_monad.tzresult status).

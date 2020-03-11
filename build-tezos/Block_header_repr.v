@@ -38,7 +38,7 @@ Module protocol_data.
 End protocol_data.
 Definition protocol_data := protocol_data.record.
 
-Module t.
+Module block_header.
   Record record : Set := Build {
     shell : Block_header.shell_header;
     protocol_data : protocol_data }.
@@ -46,10 +46,8 @@ Module t.
     Build shell r.(protocol_data).
   Definition with_protocol_data protocol_data (r : record) :=
     Build r.(shell) protocol_data.
-End t.
-Definition t := t.record.
-
-Definition block_header : Set := t.
+End block_header.
+Definition block_header := block_header.record.
 
 Definition raw : Set := Block_header.t.
 
@@ -103,9 +101,11 @@ Definition protocol_data_encoding : Data_encoding.encoding protocol_data :=
         (Data_encoding.obj1
           (Data_encoding.req None None "signature" Signature.encoding)))).
 
-Definition __raw_value (function_parameter : t) : Block_header.t :=
-  let '{| t.shell := shell; t.protocol_data := protocol_data |} :=
-    function_parameter in
+Definition __raw_value (function_parameter : block_header) : Block_header.t :=
+  let '{|
+    block_header.shell := shell;
+      block_header.protocol_data := protocol_data
+      |} := function_parameter in
   let protocol_data :=
     Data_encoding.Binary.to_bytes_exn protocol_data_encoding protocol_data in
   {| Block_header.t.shell := shell;
@@ -115,17 +115,20 @@ Definition unsigned_encoding
   : Data_encoding.encoding (Block_header.shell_header * contents) :=
   Data_encoding.merge_objs Block_header.shell_header_encoding contents_encoding.
 
-Definition encoding : Data_encoding.encoding t :=
+Definition encoding : Data_encoding.encoding block_header :=
   (let arg := Data_encoding.def "block_header.alpha.full_header" in
   fun eta => arg None None eta)
     (Data_encoding.conv
       (fun function_parameter =>
-        let '{| t.shell := shell; t.protocol_data := protocol_data |} :=
-          function_parameter in
+        let '{|
+          block_header.shell := shell;
+            block_header.protocol_data := protocol_data
+            |} := function_parameter in
         (shell, protocol_data))
       (fun function_parameter =>
         let '(shell, protocol_data) := function_parameter in
-        {| t.shell := shell; t.protocol_data := protocol_data |}) None
+        {| block_header.shell := shell;
+          block_header.protocol_data := protocol_data |}) None
       (Data_encoding.merge_objs Block_header.shell_header_encoding
         protocol_data_encoding)).
 
@@ -152,17 +155,20 @@ Definition max_header_length : int :=
       contents.proof_of_work_nonce :=
         MBytes.create Constants_repr.proof_of_work_nonce_size |} in
   Data_encoding.Binary.length encoding
-    {| t.shell := fake_shell;
-      t.protocol_data :=
+    {| block_header.shell := fake_shell;
+      block_header.protocol_data :=
         {| protocol_data.contents := fake_contents;
           protocol_data.signature := Signature.zero |} |}.
 
 Definition hash_raw : Block_header.t -> (|Block_hash|).(S.HASH.t) :=
   Block_header.__hash_value.
 
-Definition __hash_value (function_parameter : t) : (|Block_hash|).(S.HASH.t) :=
-  let '{| t.shell := shell; t.protocol_data := protocol_data |} :=
-    function_parameter in
+Definition __hash_value (function_parameter : block_header)
+  : (|Block_hash|).(S.HASH.t) :=
+  let '{|
+    block_header.shell := shell;
+      block_header.protocol_data := protocol_data
+      |} := function_parameter in
   Block_header.__hash_value
     {| Block_header.t.shell := shell;
       Block_header.t.protocol_data :=

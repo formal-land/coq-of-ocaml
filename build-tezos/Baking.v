@@ -300,36 +300,39 @@ Definition check_header_proof_of_work_stamp
   (stamp_threshold : (|Compare.Uint64|).(Compare.S.t)) : bool :=
   let __hash_value :=
     Alpha_context.Block_header.__hash_value
-      {| Alpha_context.Block_header.t.shell := shell;
-        Alpha_context.Block_header.t.protocol_data :=
+      {| Alpha_context.Block_header.block_header.shell := shell;
+        Alpha_context.Block_header.block_header.protocol_data :=
           {| Alpha_context.Block_header.protocol_data.contents := contents;
             Alpha_context.Block_header.protocol_data.signature := Signature.zero
             |} |} in
   check_hash __hash_value stamp_threshold.
 
 Definition check_proof_of_work_stamp
-  (ctxt : Alpha_context.context) (block : Alpha_context.Block_header.t)
+  (ctxt : Alpha_context.context)
+  (block : Alpha_context.Block_header.block_header)
   : Lwt.t (Error_monad.tzresult unit) :=
   let proof_of_work_threshold :=
     Alpha_context.Constants.proof_of_work_threshold ctxt in
   if
-    check_header_proof_of_work_stamp block.(Alpha_context.Block_header.t.shell)
-      block.(Alpha_context.Block_header.t.protocol_data).(Alpha_context.Block_header.protocol_data.contents)
+    check_header_proof_of_work_stamp
+      block.(Alpha_context.Block_header.block_header.shell)
+      block.(Alpha_context.Block_header.block_header.protocol_data).(Alpha_context.Block_header.protocol_data.contents)
       proof_of_work_threshold then
     Error_monad.return_unit
   else
     Error_monad.fail extensible_type_value.
 
 Definition check_signature
-  (block : Alpha_context.Block_header.t) (chain_id : (|Chain_id|).(S.HASH.t))
+  (block : Alpha_context.Block_header.block_header)
+  (chain_id : (|Chain_id|).(S.HASH.t))
   (__key_value : (|Signature.Public_key|).(S.SPublic_key.t))
   : Lwt.t (Error_monad.tzresult unit) :=
   let check_signature
     (__key_value : (|Signature.Public_key|).(S.SPublic_key.t))
-    (function_parameter : Alpha_context.Block_header.t) : bool :=
+    (function_parameter : Alpha_context.Block_header.block_header) : bool :=
     let '{|
-      Alpha_context.Block_header.t.shell := shell;
-        Alpha_context.Block_header.t.protocol_data := {|
+      Alpha_context.Block_header.block_header.shell := shell;
+        Alpha_context.Block_header.block_header.protocol_data := {|
           Alpha_context.Block_header.protocol_data.contents := contents;
             Alpha_context.Block_header.protocol_data.signature :=
               signature
@@ -350,13 +353,14 @@ Definition max_fitness_gap {A : Set} (_ctxt : A) : int64 :=
   1.
 
 Definition check_fitness_gap
-  (ctxt : Alpha_context.context) (block : Alpha_context.Block_header.t)
+  (ctxt : Alpha_context.context)
+  (block : Alpha_context.Block_header.block_header)
   : Lwt.t (Error_monad.tzresult unit) :=
   let current_fitness := Alpha_context.Fitness.current ctxt in
   let=? announced_fitness :=
     Lwt.__return
       (Alpha_context.Fitness.to_int64
-        block.(Alpha_context.Block_header.t.shell).(Block_header.shell_header.fitness))
+        block.(Alpha_context.Block_header.block_header.shell).(Block_header.shell_header.fitness))
     in
   let gap := Int64.sub announced_fitness current_fitness in
   if

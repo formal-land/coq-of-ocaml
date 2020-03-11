@@ -373,8 +373,8 @@ and "'contents.Seed_nonce_revelation" :=
 and "'contents.Double_endorsement_evidence" :=
   (contents.Double_endorsement_evidence_skeleton 'operation 'operation)
 and "'contents.Double_baking_evidence" :=
-  (contents.Double_baking_evidence_skeleton Block_header_repr.t
-    Block_header_repr.t)
+  (contents.Double_baking_evidence_skeleton Block_header_repr.block_header
+    Block_header_repr.block_header)
 and "'contents.Activate_account" :=
   (contents.Activate_account_skeleton
     (|Ed25519|).(S.SIGNATURE.Public_key_hash).(S.SPublic_key_hash.t)

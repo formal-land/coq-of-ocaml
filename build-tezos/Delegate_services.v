@@ -247,7 +247,7 @@ Module S.
       (RPC_path.op_div path "grace_period").
 End S.
 
-Definition register (function_parameter : unit) : unit :=
+Definition begin_register (function_parameter : unit) : unit :=
   let '_ := function_parameter in
   (* ❌ Sequences of instructions are ignored (operator ";") *)
   (* ❌ instruction_sequence ";" *)
@@ -425,8 +425,6 @@ Module Baking_rights.
           Alpha_context.Timestamp.encoding)).
   
   Module S.
-    Import Data_encoding.
-    
     Definition custom_root
       : RPC_path.path Updater.rpc_context Updater.rpc_context :=
       RPC_path.op_div (RPC_path.op_div RPC_path.open_root "helpers")
@@ -452,7 +450,7 @@ Module Baking_rights.
     End baking_rights_query.
     Definition baking_rights_query := baking_rights_query.record.
     
-    Definition baking_rights_query : RPC_query.t baking_rights_query :=
+    Definition __baking_rights_query_value : RPC_query.t baking_rights_query :=
       RPC_query.seal
         (RPC_query.op_pipeplus
           (RPC_query.op_pipeplus
@@ -489,7 +487,7 @@ Module Baking_rights.
       RPC_service.get_service
         (Some
           "Retrieves the list of delegates allowed to bake a block.\nBy default, it gives the best baking priorities for bakers that have at least one opportunity below the 64th priority for the next block.\nParameters `level` and `cycle` can be used to specify the (valid) level(s) in the past or future at which the baking rights have to be returned. Parameter `delegate` can be used to restrict the results to the given delegates. If parameter `all` is set, all the baking opportunities for each baker at each level are returned, instead of just the first one.\nReturns the list of baking slots. Also returns the minimal timestamps that correspond to these slots. The timestamps are omitted for levels in the past, and are only estimates for levels later that the next block, based on the hypothesis that all predecessor blocks were baked at the first priority.")
-        baking_rights_query (Data_encoding.__list_value None encoding)
+        __baking_rights_query_value (Data_encoding.__list_value None encoding)
         custom_root.
   End S.
   
@@ -664,8 +662,6 @@ Module Endorsing_rights.
           Alpha_context.Timestamp.encoding)).
   
   Module S.
-    Import Data_encoding.
-    
     Definition custom_root
       : RPC_path.path Updater.rpc_context Updater.rpc_context :=
       RPC_path.op_div (RPC_path.op_div RPC_path.open_root "helpers")
@@ -685,7 +681,8 @@ Module Endorsing_rights.
     End endorsing_rights_query.
     Definition endorsing_rights_query := endorsing_rights_query.record.
     
-    Definition endorsing_rights_query : RPC_query.t endorsing_rights_query :=
+    Definition __endorsing_rights_query_value
+      : RPC_query.t endorsing_rights_query :=
       RPC_query.seal
         (RPC_query.op_pipeplus
           (RPC_query.op_pipeplus
@@ -712,8 +709,8 @@ Module Endorsing_rights.
       RPC_service.get_service
         (Some
           "Retrieves the delegates allowed to endorse a block.\nBy default, it gives the endorsement slots for delegates that have at least one in the next block.\nParameters `level` and `cycle` can be used to specify the (valid) level(s) in the past or future at which the endorsement rights have to be returned. Parameter `delegate` can be used to restrict the results to the given delegates.\nReturns the list of endorsement slots. Also returns the minimal timestamps that correspond to these slots. The timestamps are omitted for levels in the past, and are only estimates for levels later that the next block, based on the hypothesis that all predecessor blocks were baked at the first priority.")
-        endorsing_rights_query (Data_encoding.__list_value None encoding)
-        custom_root.
+        __endorsing_rights_query_value
+        (Data_encoding.__list_value None encoding) custom_root.
   End S.
   
   Definition endorsement_slots

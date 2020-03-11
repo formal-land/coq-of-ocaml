@@ -36,7 +36,7 @@ Module protocol_data.
 End protocol_data.
 Definition protocol_data := protocol_data.record.
 
-Module t.
+Module block_header.
   Record record : Set := Build {
     shell : Block_header.shell_header;
     protocol_data : protocol_data }.
@@ -44,10 +44,8 @@ Module t.
     Build shell r.(protocol_data).
   Definition with_protocol_data protocol_data (r : record) :=
     Build r.(shell) protocol_data.
-End t.
-Definition t := t.record.
-
-Definition block_header : Set := t.
+End block_header.
+Definition block_header := block_header.record.
 
 Definition raw : Set := Block_header.t.
 

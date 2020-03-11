@@ -265,8 +265,8 @@ Definition register (function_parameter : unit) : unit :=
       | None => Pervasives.raise extensible_type_value
       | Some value =>
         let=? '(value, ctxt) :=
-          Script_ir_translator.parse_data None ctxt true value_type
-            (Micheline.root value) in
+          (Script_ir_translator.parse_data (a := unit)) None ctxt true
+            value_type (Micheline.root value) in
         let=? '(value, _ctxt) :=
           Script_ir_translator.unparse_data ctxt Script_ir_translator.Readable
             value_type value in

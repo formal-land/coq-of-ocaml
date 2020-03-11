@@ -15,6 +15,7 @@ Require Tezos.Contract_services_mli. Module Contract_services := Contract_servic
 Require Tezos.Delegate_services_mli. Module Delegate_services := Delegate_services_mli.
 Require Tezos.Helpers_services_mli. Module Helpers_services := Helpers_services_mli.
 Require Tezos.Nonce_hash.
+Require Tezos.Seed_repr.
 Require Tezos.Services_registration.
 Require Tezos.Storage_mli. Module Storage := Storage_mli.
 Require Tezos.Voting_services_mli. Module Voting_services := Voting_services_mli.
@@ -105,11 +106,11 @@ Module Nonce.
               let level := Alpha_context.Level.from_raw ctxt None raw_level in
               let= function_parameter := Alpha_context.Nonce.get ctxt level in
               match function_parameter with
-              | Pervasives.Ok (Alpha_context.Nonce.Revealed __nonce_value) =>
+              | Pervasives.Ok (Storage.Revealed __nonce_value) =>
                 Error_monad.__return (Revealed __nonce_value)
               |
                 Pervasives.Ok
-                  (Alpha_context.Nonce.Unrevealed {|
+                  (Storage.Unrevealed {|
                     Storage.unrevealed_nonce.nonce_hash := nonce_hash |}) =>
                 Error_monad.__return (Missing nonce_hash)
               | Pervasives.Error _ => Error_monad.__return Forgotten

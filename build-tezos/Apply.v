@@ -980,14 +980,14 @@ Definition apply_contents_list
       Error_monad.fail_unless
         (Pervasives.op_andand
           ((|Compare.Int32|).(Compare.S.op_eq)
-            bh1.(Alpha_context.Block_header.t.shell).(Block_header.shell_header.level)
-            bh2.(Alpha_context.Block_header.t.shell).(Block_header.shell_header.level))
+            bh1.(Alpha_context.Block_header.block_header.shell).(Block_header.shell_header.level)
+            bh2.(Alpha_context.Block_header.block_header.shell).(Block_header.shell_header.level))
           (Pervasives.not ((|Block_hash|).(S.HASH.equal) hash1 hash2)))
         extensible_type_value in
     let=? raw_level :=
       Lwt.__return
         (Alpha_context.Raw_level.of_int32
-          bh1.(Alpha_context.Block_header.t.shell).(Block_header.shell_header.level))
+          bh1.(Alpha_context.Block_header.block_header.shell).(Block_header.shell_header.level))
       in
     let oldest_level := Alpha_context.Level.last_allowed_fork_level ctxt in
     let=? '_ :=
@@ -1002,12 +1002,12 @@ Definition apply_contents_list
     let level := Alpha_context.Level.from_raw ctxt None raw_level in
     let=? delegate1 :=
       Alpha_context.Roll.baking_rights_owner ctxt level
-        bh1.(Alpha_context.Block_header.t.protocol_data).(Alpha_context.Block_header.protocol_data.contents).(Alpha_context.Block_header.contents.priority)
+        bh1.(Alpha_context.Block_header.block_header.protocol_data).(Alpha_context.Block_header.protocol_data.contents).(Alpha_context.Block_header.contents.priority)
       in
     let=? '_ := Baking.check_signature bh1 chain_id delegate1 in
     let=? delegate2 :=
       Alpha_context.Roll.baking_rights_owner ctxt level
-        bh2.(Alpha_context.Block_header.t.protocol_data).(Alpha_context.Block_header.protocol_data.contents).(Alpha_context.Block_header.contents.priority)
+        bh2.(Alpha_context.Block_header.block_header.protocol_data).(Alpha_context.Block_header.protocol_data.contents).(Alpha_context.Block_header.contents.priority)
       in
     let=? '_ := Baking.check_signature bh2 chain_id delegate2 in
     let=? '_ :=
@@ -1232,25 +1232,26 @@ Definition begin_partial_construction (ctxt : Alpha_context.context)
 
 Definition begin_application
   (ctxt : Alpha_context.context) (chain_id : (|Chain_id|).(S.HASH.t))
-  (block_header : Alpha_context.Block_header.t) (pred_timestamp : Time.t)
+  (block_header : Alpha_context.Block_header.block_header)
+  (pred_timestamp : Time.t)
   : Lwt.t
     (Error_monad.tzresult
       (Alpha_context.context * Alpha_context.public_key * Alpha_context.Period.t)) :=
   let=? ctxt :=
     Alpha_context.Global.set_block_priority ctxt
-      block_header.(Alpha_context.Block_header.t.protocol_data).(Alpha_context.Block_header.protocol_data.contents).(Alpha_context.Block_header.contents.priority)
+      block_header.(Alpha_context.Block_header.block_header.protocol_data).(Alpha_context.Block_header.protocol_data.contents).(Alpha_context.Block_header.contents.priority)
     in
   let current_level := Alpha_context.Level.current ctxt in
   let=? '_ := Baking.check_proof_of_work_stamp ctxt block_header in
   let=? '_ := Baking.check_fitness_gap ctxt block_header in
   let=? '(delegate_pk, block_delay) :=
     Baking.check_baking_rights ctxt
-      block_header.(Alpha_context.Block_header.t.protocol_data).(Alpha_context.Block_header.protocol_data.contents)
+      block_header.(Alpha_context.Block_header.block_header.protocol_data).(Alpha_context.Block_header.protocol_data.contents)
       pred_timestamp in
   let=? '_ := Baking.check_signature block_header chain_id delegate_pk in
   let has_commitment :=
     match
-      block_header.(Alpha_context.Block_header.t.protocol_data).(Alpha_context.Block_header.protocol_data.contents).(Alpha_context.Block_header.contents.seed_nonce_hash)
+      block_header.(Alpha_context.Block_header.block_header.protocol_data).(Alpha_context.Block_header.protocol_data.contents).(Alpha_context.Block_header.contents.seed_nonce_hash)
       with
     | None => false
     | Some _ => true

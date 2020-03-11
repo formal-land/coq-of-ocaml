@@ -458,7 +458,8 @@ Module Forge.
       let= function_parameter := Contract_services.manager_key ctxt block source
         in
       match function_parameter with
-      | (Pervasives.Error _) as e => Lwt.__return e
+      | Pervasives.Error __error_value =>
+        Lwt.__return (Pervasives.Error __error_value)
       | Pervasives.Ok revealed =>
         let ops :=
           List.map
@@ -652,8 +653,9 @@ Module Forge.
   
   Definition double_baking_evidence {A : Set}
     (ctxt : RPC_context.simple A) (block : A)
-    (branch : (|Block_hash|).(S.HASH.t)) (bh1 : Alpha_context.Block_header.t)
-    (bh2 : Alpha_context.Block_header.t) (function_parameter : unit)
+    (branch : (|Block_hash|).(S.HASH.t))
+    (bh1 : Alpha_context.Block_header.block_header)
+    (bh2 : Alpha_context.Block_header.block_header) (function_parameter : unit)
     : Lwt.t (Error_monad.shell_tzresult MBytes.t) :=
     let '_ := function_parameter in
     operation ctxt block branch
@@ -769,7 +771,7 @@ Module S.
   End level_query.
   Definition level_query := level_query.record.
   
-  Definition level_query : RPC_query.t level_query :=
+  Definition __level_query_value : RPC_query.t level_query :=
     RPC_query.seal
       (RPC_query.op_pipeplus
         (RPC_query.__query_value
@@ -784,13 +786,13 @@ Module S.
     RPC_service.get_service
       (Some
         "Returns the level of the interrogated block, or the one of a block located `offset` blocks after in the chain (or before when negative). For instance, the next block if `offset` is 1.")
-      level_query Alpha_context.Level.encoding
+      __level_query_value Alpha_context.Level.encoding
       (RPC_path.op_div path "current_level").
   
   Definition levels_in_current_cycle
     : RPC_service.service Updater.rpc_context Updater.rpc_context level_query
       unit (Alpha_context.Raw_level.t * Alpha_context.Raw_level.t) :=
-    RPC_service.get_service (Some "Levels of a cycle") level_query
+    RPC_service.get_service (Some "Levels of a cycle") __level_query_value
       (Data_encoding.obj2
         (Data_encoding.req None None "first" Alpha_context.Raw_level.encoding)
         (Data_encoding.req None None "last" Alpha_context.Raw_level.encoding))

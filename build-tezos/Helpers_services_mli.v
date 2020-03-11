@@ -153,7 +153,8 @@ Module Forge.
   
   Parameter double_baking_evidence : forall {a : Set},
     RPC_context.simple a -> a -> (|Block_hash|).(S.HASH.t) ->
-    Alpha_context.Block_header.t -> Alpha_context.Block_header.t -> unit ->
+    Alpha_context.Block_header.block_header ->
+    Alpha_context.Block_header.block_header -> unit ->
     Lwt.t (Error_monad.shell_tzresult MBytes.t).
   
   Parameter double_endorsement_evidence : forall {a : Set},

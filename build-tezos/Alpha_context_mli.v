@@ -13,6 +13,7 @@ Require Tezos.Blinded_public_key_hash.
 Require Tezos.Contract_repr.
 Require Tezos.Michelson_v1_primitives.
 Require Tezos.Nonce_hash.
+Require Tezos.Nonce_storage.
 Require Tezos.Script_expr_hash.
 Require Tezos.Script_int_repr.
 Require Tezos.Storage_mli. Module Storage := Storage_mli.
@@ -1247,7 +1248,7 @@ Module Fitness.
 End Fitness.
 
 Module Nonce.
-  Parameter t : Set.
+  Definition t : Set := Nonce_storage.t.
   
   Definition nonce : Set := t.
   
@@ -1261,9 +1262,7 @@ Module Nonce.
   Parameter reveal :
     context -> Level.t -> nonce -> Lwt.t (Error_monad.tzresult context).
   
-  Inductive status : Set :=
-  | Unrevealed : unrevealed -> status
-  | Revealed : nonce -> status.
+  Definition status : Set := Storage.nonce_status.
   
   Parameter get : context -> Level.t -> Lwt.t (Error_monad.tzresult status).
   
@@ -1753,7 +1752,7 @@ Module Block_header.
   End protocol_data.
   Definition protocol_data := protocol_data.record.
   
-  Module t.
+  Module block_header.
     Record record : Set := Build {
       shell : Block_header.shell_header;
       protocol_data : protocol_data }.
@@ -1761,10 +1760,8 @@ Module Block_header.
       Build shell r.(protocol_data).
     Definition with_protocol_data protocol_data (r : record) :=
       Build r.(shell) protocol_data.
-  End t.
-  Definition t := t.record.
-  
-  Definition block_header : Set := t.
+  End block_header.
+  Definition block_header := block_header.record.
   
   Definition raw : Set := Block_header.t.
   
@@ -2141,7 +2138,8 @@ and "'contents.Seed_nonce_revelation" :=
 and "'contents.Double_endorsement_evidence" :=
   (contents.Double_endorsement_evidence_skeleton 'operation 'operation)
 and "'contents.Double_baking_evidence" :=
-  (contents.Double_baking_evidence_skeleton Block_header.t Block_header.t)
+  (contents.Double_baking_evidence_skeleton Block_header.block_header
+    Block_header.block_header)
 and "'contents.Activate_account" :=
   (contents.Activate_account_skeleton
     (|Ed25519|).(S.SIGNATURE.Public_key_hash).(S.SPublic_key_hash.t)

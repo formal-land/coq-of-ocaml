@@ -65,7 +65,7 @@ Parameter first_baking_priorities :
   Alpha_context.Level.t -> Lwt.t (Error_monad.tzresult (list int)).
 
 Parameter check_signature :
-  Alpha_context.Block_header.t -> (|Chain_id|).(S.HASH.t) ->
+  Alpha_context.Block_header.block_header -> (|Chain_id|).(S.HASH.t) ->
   Alpha_context.public_key -> Lwt.t (Error_monad.tzresult unit).
 
 Parameter check_header_proof_of_work_stamp :
@@ -73,11 +73,11 @@ Parameter check_header_proof_of_work_stamp :
   Alpha_context.Block_header.contents -> int64 -> bool.
 
 Parameter check_proof_of_work_stamp :
-  Alpha_context.context -> Alpha_context.Block_header.t ->
+  Alpha_context.context -> Alpha_context.Block_header.block_header ->
   Lwt.t (Error_monad.tzresult unit).
 
 Parameter check_fitness_gap :
-  Alpha_context.context -> Alpha_context.Block_header.t ->
+  Alpha_context.context -> Alpha_context.Block_header.block_header ->
   Lwt.t (Error_monad.tzresult unit).
 
 Parameter dawn_of_a_new_cycle :

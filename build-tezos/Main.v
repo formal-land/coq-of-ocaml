@@ -18,7 +18,7 @@ Require Tezos.Services_registration.
 
 Definition block_header_data : Set := Alpha_context.Block_header.protocol_data.
 
-Definition block_header : Set := Alpha_context.Block_header.t.
+Definition block_header : Set := Alpha_context.Block_header.block_header.
 
 Definition block_header_data_encoding
   : Data_encoding.encoding Alpha_context.Block_header.protocol_data :=
@@ -179,11 +179,12 @@ Inductive validation_mode : Set :=
 | Full_construction : 'validation_mode.Full_construction -> validation_mode
 
 where "'validation_mode.Application" :=
-  (validation_mode.Application_skeleton Alpha_context.Block_header.t
+  (validation_mode.Application_skeleton Alpha_context.Block_header.block_header
     Alpha_context.public_key_hash Alpha_context.Period.t)
 and "'validation_mode.Partial_application" :=
-  (validation_mode.Partial_application_skeleton Alpha_context.Block_header.t
-    Alpha_context.public_key_hash Alpha_context.Period.t)
+  (validation_mode.Partial_application_skeleton
+    Alpha_context.Block_header.block_header Alpha_context.public_key_hash
+    Alpha_context.Period.t)
 and "'validation_mode.Partial_construction" :=
   (validation_mode.Partial_construction_skeleton (|Block_hash|).(S.HASH.t))
 and "'validation_mode.Full_construction" :=
@@ -226,7 +227,7 @@ Definition begin_partial_application
   (chain_id : (|Chain_id|).(S.HASH.t)) (ctxt : Context.t)
   (predecessor_timestamp : Time.t)
   (predecessor_fitness : Alpha_context.Fitness.t)
-  (block_header : Alpha_context.Block_header.t)
+  (block_header : Alpha_context.Block_header.block_header)
   : Lwt.t (Error_monad.tzresult validation_state) :=
   let level :=
     block_header.(block_header.shell).(Block_header.shell_header.level) in
@@ -251,7 +252,7 @@ Definition begin_application
   (chain_id : (|Chain_id|).(S.HASH.t)) (ctxt : Context.t)
   (predecessor_timestamp : Time.t)
   (predecessor_fitness : Alpha_context.Fitness.t)
-  (block_header : Alpha_context.Block_header.t)
+  (block_header : Alpha_context.Block_header.block_header)
   : Lwt.t (Error_monad.tzresult validation_state) :=
   let level :=
     block_header.(block_header.shell).(Block_header.shell_header.level) in

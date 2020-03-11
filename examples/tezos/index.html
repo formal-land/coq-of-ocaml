@@ -59,9 +59,9 @@
     <pre><code>opam repo add coq-released https://coq.inria.fr/opam/released
 opam pin add https://github.com/clarus/coq-of-ocaml.git#master</code></pre>
     <ul>
-      <li>OCaml size: 36293 lines</li>
-      <li>Coq size: 45556 lines (+25% compared to&nbsp;OCaml)</li>
-      <li>Warnings from coq-of-ocaml: 1020</li>
+      <li>OCaml size: 36295 lines</li>
+      <li>Coq size: 45564 lines (+25% compared to&nbsp;OCaml)</li>
+      <li>Warnings from coq-of-ocaml: 1019</li>
     </ul>
     
       <canvas id="chart" width="400" height="400"></canvas>
@@ -125,7 +125,7 @@ opam pin add https://github.com/clarus/coq-of-ocaml.git#master</code></pre>
           41570,
           41570,
           41570,
-          42496,
+          44966,
         ],
         generated: [
           47563,
@@ -185,7 +185,7 @@ opam pin add https://github.com/clarus/coq-of-ocaml.git#master</code></pre>
           46742,
           46742,
           46742,
-          45556,
+          45564,
         ],
         labels: [
           "01-14",
@@ -529,7 +529,7 @@ opam pin add https://github.com/clarus/coq-of-ocaml.git#master</code></pre>
       </li>
       
       <li>
-        <a href="#nonce_storage.ml">nonce_storage.ml</a>&nbsp;<span class="label label-warning">8</span>
+        <a href="#nonce_storage.ml">nonce_storage.ml</a>&nbsp;<span class="label label-warning">7</span>
       </li>
       
       <li>
@@ -1533,8 +1533,8 @@ Definition description : Storage_description.t Raw_context.context :=
   <div style="margin: 20px;">
     <h3>Alpha_context_mli</h3>
     <ul>
-      <li>OCaml size: 1389 lines</li>
-      <li>Coq size: 2589 lines (+86% compared to&nbsp;OCaml)</li>
+      <li>OCaml size: 1390 lines</li>
+      <li>Coq size: 2587 lines (+86% compared to&nbsp;OCaml)</li>
     </ul>
   </div>
   <div class="col-md-6">
@@ -2178,7 +2178,7 @@ module Fitness : sig
 end
 
 module Nonce : sig
-  type t
+  type t = Nonce_storage.t
 
   type nonce = t
 
@@ -2190,7 +2190,7 @@ module Nonce : sig
 
   val reveal : context -&gt; Level.t -&gt; nonce -&gt; context tzresult Lwt.t
 
-  type status = Unrevealed of unrevealed | Revealed of nonce
+  type status = Storage.nonce_status
 
   val get : context -&gt; Level.t -&gt; status tzresult Lwt.t
 
@@ -2507,9 +2507,10 @@ module Block_header : sig
 
   type protocol_data = {contents : contents; signature : Signature.t}
 
-  type t = {shell : Block_header.shell_header; protocol_data : protocol_data}
-
-  type block_header = t
+  type block_header = {
+    shell : Block_header.shell_header;
+    protocol_data : protocol_data;
+  }
 
   type raw = Block_header.t
 
@@ -2596,8 +2597,8 @@ and _ contents =
     }
       -&gt; Kind.double_endorsement_evidence contents
   | Double_baking_evidence : {
-      bh1 : Block_header.t;
-      bh2 : Block_header.t;
+      bh1 : Block_header.block_header;
+      bh2 : Block_header.block_header;
     }
       -&gt; Kind.double_baking_evidence contents
   | Activate_account : {
@@ -2948,6 +2949,7 @@ Require Tezos.Blinded_public_key_hash.
 Require Tezos.Contract_repr.
 Require Tezos.Michelson_v1_primitives.
 Require Tezos.Nonce_hash.
+Require Tezos.Nonce_storage.
 Require Tezos.Script_expr_hash.
 Require Tezos.Script_int_repr.
 Require Tezos.Storage_mli. Module Storage := Storage_mli.
@@ -4182,7 +4184,7 @@ Module Fitness.
 End Fitness.
 
 Module Nonce.
-  Parameter t : Set.
+  Definition t : Set := Nonce_storage.t.
   
   Definition nonce : Set := t.
   
@@ -4196,9 +4198,7 @@ Module Nonce.
   Parameter reveal :
     context -&gt; Level.t -&gt; nonce -&gt; Lwt.t (Error_monad.tzresult context).
   
-  Inductive status : Set :=
-  | Unrevealed : unrevealed -&gt; status
-  | Revealed : nonce -&gt; status.
+  Definition status : Set := Storage.nonce_status.
   
   Parameter get : context -&gt; Level.t -&gt; Lwt.t (Error_monad.tzresult status).
   
@@ -4688,7 +4688,7 @@ Module Block_header.
   End protocol_data.
   Definition protocol_data := protocol_data.record.
   
-  Module t.
+  Module block_header.
     Record record : Set := Build {
       shell : Block_header.shell_header;
       protocol_data : protocol_data }.
@@ -4696,10 +4696,8 @@ Module Block_header.
       Build shell r.(protocol_data).
     Definition with_protocol_data protocol_data (r : record) :=
       Build r.(shell) protocol_data.
-  End t.
-  Definition t := t.record.
-  
-  Definition block_header : Set := t.
+  End block_header.
+  Definition block_header := block_header.record.
   
   Definition raw : Set := Block_header.t.
   
@@ -5076,7 +5074,8 @@ and &quot;'contents.Seed_nonce_revelation&quot; :=
 and &quot;'contents.Double_endorsement_evidence&quot; :=
   (contents.Double_endorsement_evidence_skeleton 'operation 'operation)
 and &quot;'contents.Double_baking_evidence&quot; :=
-  (contents.Double_baking_evidence_skeleton Block_header.t Block_header.t)
+  (contents.Double_baking_evidence_skeleton Block_header.block_header
+    Block_header.block_header)
 and &quot;'contents.Activate_account&quot; :=
   (contents.Activate_account_skeleton
     (|Ed25519|).(S.SIGNATURE.Public_key_hash).(S.SPublic_key_hash.t)
@@ -5532,7 +5531,7 @@ Parameter description : Storage_description.t context.
     <h3>Alpha_services</h3>
     <ul>
       <li>OCaml size: 117 lines</li>
-      <li>Coq size: 151 lines (+29% compared to&nbsp;OCaml)</li>
+      <li>Coq size: 152 lines (+29% compared to&nbsp;OCaml)</li>
     </ul>
   </div>
   <div class="col-md-6">
@@ -5661,9 +5660,9 @@ Expected a list of named or unspecified '_' type variables">get</abbr> =
         let level = Level.from_raw ctxt raw_level in
         Nonce.get ctxt level
         &gt;&gt;= function
-        | Ok (Revealed nonce) -&gt;
+        | Ok (Storage.Revealed nonce) -&gt;
             return (Revealed nonce)
-        | Ok (Unrevealed {nonce_hash; _}) -&gt;
+        | Ok (Storage.Unrevealed {nonce_hash; _}) -&gt;
             return (Missing nonce_hash)
         | Error _ -&gt;
             return Forgotten)
@@ -5718,6 +5717,7 @@ Require Tezos.Contract_services_mli. Module Contract_services := Contract_servic
 Require Tezos.Delegate_services_mli. Module Delegate_services := Delegate_services_mli.
 Require Tezos.Helpers_services_mli. Module Helpers_services := Helpers_services_mli.
 Require Tezos.Nonce_hash.
+Require Tezos.Seed_repr.
 Require Tezos.Services_registration.
 Require Tezos.Storage_mli. Module Storage := Storage_mli.
 Require Tezos.Voting_services_mli. Module Voting_services := Voting_services_mli.
@@ -5808,11 +5808,11 @@ Module Nonce.
               let level := Alpha_context.Level.from_raw ctxt None raw_level in
               let= function_parameter := Alpha_context.Nonce.get ctxt level in
               match function_parameter with
-              | Pervasives.Ok (Alpha_context.Nonce.Revealed __nonce_value) =&gt;
+              | Pervasives.Ok (Storage.Revealed __nonce_value) =&gt;
                 Error_monad.__return (Revealed __nonce_value)
               |
                 Pervasives.Ok
-                  (Alpha_context.Nonce.Unrevealed {|
+                  (Storage.Unrevealed {|
                     Storage.unrevealed_nonce.nonce_hash := nonce_hash |}) =&gt;
                 Error_monad.__return (Missing nonce_hash)
               | Pervasives.Error _ =&gt; Error_monad.__return Forgotten
@@ -6729,7 +6729,7 @@ Parameter record_ballot :
     <h3>Apply</h3>
     <ul>
       <li>OCaml size: 1493 lines</li>
-      <li>Coq size: 1361 lines (-9% compared to&nbsp;OCaml)</li>
+      <li>Coq size: 1362 lines (-9% compared to&nbsp;OCaml)</li>
     </ul>
   </div>
   <div class="col-md-6">
@@ -9268,14 +9268,14 @@ Definition apply_contents_list
       Error_monad.fail_unless
         (Pervasives.op_andand
           ((|Compare.Int32|).(Compare.S.op_eq)
-            bh1.(Alpha_context.Block_header.t.shell).(Block_header.shell_header.level)
-            bh2.(Alpha_context.Block_header.t.shell).(Block_header.shell_header.level))
+            bh1.(Alpha_context.Block_header.block_header.shell).(Block_header.shell_header.level)
+            bh2.(Alpha_context.Block_header.block_header.shell).(Block_header.shell_header.level))
           (Pervasives.not ((|Block_hash|).(S.HASH.equal) hash1 hash2)))
         extensible_type_value in
     let=? raw_level :=
       Lwt.__return
         (Alpha_context.Raw_level.of_int32
-          bh1.(Alpha_context.Block_header.t.shell).(Block_header.shell_header.level))
+          bh1.(Alpha_context.Block_header.block_header.shell).(Block_header.shell_header.level))
       in
     let oldest_level := Alpha_context.Level.last_allowed_fork_level ctxt in
     let=? '_ :=
@@ -9290,12 +9290,12 @@ Definition apply_contents_list
     let level := Alpha_context.Level.from_raw ctxt None raw_level in
     let=? delegate1 :=
       Alpha_context.Roll.baking_rights_owner ctxt level
-        bh1.(Alpha_context.Block_header.t.protocol_data).(Alpha_context.Block_header.protocol_data.contents).(Alpha_context.Block_header.contents.priority)
+        bh1.(Alpha_context.Block_header.block_header.protocol_data).(Alpha_context.Block_header.protocol_data.contents).(Alpha_context.Block_header.contents.priority)
       in
     let=? '_ := Baking.check_signature bh1 chain_id delegate1 in
     let=? delegate2 :=
       Alpha_context.Roll.baking_rights_owner ctxt level
-        bh2.(Alpha_context.Block_header.t.protocol_data).(Alpha_context.Block_header.protocol_data.contents).(Alpha_context.Block_header.contents.priority)
+        bh2.(Alpha_context.Block_header.block_header.protocol_data).(Alpha_context.Block_header.protocol_data.contents).(Alpha_context.Block_header.contents.priority)
       in
     let=? '_ := Baking.check_signature bh2 chain_id delegate2 in
     let=? '_ :=
@@ -9520,25 +9520,26 @@ Definition begin_partial_construction (ctxt : Alpha_context.context)
 
 Definition begin_application
   (ctxt : Alpha_context.context) (chain_id : (|Chain_id|).(S.HASH.t))
-  (block_header : Alpha_context.Block_header.t) (pred_timestamp : Time.t)
+  (block_header : Alpha_context.Block_header.block_header)
+  (pred_timestamp : Time.t)
   : Lwt.t
     (Error_monad.tzresult
       (Alpha_context.context * Alpha_context.public_key * Alpha_context.Period.t)) :=
   let=? ctxt :=
     Alpha_context.Global.set_block_priority ctxt
-      block_header.(Alpha_context.Block_header.t.protocol_data).(Alpha_context.Block_header.protocol_data.contents).(Alpha_context.Block_header.contents.priority)
+      block_header.(Alpha_context.Block_header.block_header.protocol_data).(Alpha_context.Block_header.protocol_data.contents).(Alpha_context.Block_header.contents.priority)
     in
   let current_level := Alpha_context.Level.current ctxt in
   let=? '_ := Baking.check_proof_of_work_stamp ctxt block_header in
   let=? '_ := Baking.check_fitness_gap ctxt block_header in
   let=? '(delegate_pk, block_delay) :=
     Baking.check_baking_rights ctxt
-      block_header.(Alpha_context.Block_header.t.protocol_data).(Alpha_context.Block_header.protocol_data.contents)
+      block_header.(Alpha_context.Block_header.block_header.protocol_data).(Alpha_context.Block_header.protocol_data.contents)
       pred_timestamp in
   let=? '_ := Baking.check_signature block_header chain_id delegate_pk in
   let has_commitment :=
     match
-      block_header.(Alpha_context.Block_header.t.protocol_data).(Alpha_context.Block_header.protocol_data.contents).(Alpha_context.Block_header.contents.seed_nonce_hash)
+      block_header.(Alpha_context.Block_header.block_header.protocol_data).(Alpha_context.Block_header.protocol_data.contents).(Alpha_context.Block_header.contents.seed_nonce_hash)
       with
     | None =&gt; false
     | Some _ =&gt; true
@@ -13721,7 +13722,7 @@ Parameter block_metadata_encoding : Data_encoding.encoding block_metadata.
     <h3>Baking</h3>
     <ul>
       <li>OCaml size: 400 lines</li>
-      <li>Coq size: 422 lines (+5% compared to&nbsp;OCaml)</li>
+      <li>Coq size: 426 lines (+6% compared to&nbsp;OCaml)</li>
     </ul>
   </div>
   <div class="col-md-6">
@@ -14091,7 +14092,7 @@ They are sent to a unit type.">(Invalid_block_signature
 
 let max_fitness_gap _ctxt = 1L
 
-let check_fitness_gap ctxt (block : Block_header.t) =
+let check_fitness_gap ctxt (block : Block_header.block_header) =
   let current_fitness = Fitness.current ctxt in
   Lwt.return (Fitness.to_int64 block.shell.fitness)
   &gt;&gt;=? fun announced_fitness -&gt;
@@ -14449,36 +14450,39 @@ Definition check_header_proof_of_work_stamp
   (stamp_threshold : (|Compare.Uint64|).(Compare.S.t)) : bool :=
   let __hash_value :=
     Alpha_context.Block_header.__hash_value
-      {| Alpha_context.Block_header.t.shell := shell;
-        Alpha_context.Block_header.t.protocol_data :=
+      {| Alpha_context.Block_header.block_header.shell := shell;
+        Alpha_context.Block_header.block_header.protocol_data :=
           {| Alpha_context.Block_header.protocol_data.contents := contents;
             Alpha_context.Block_header.protocol_data.signature := Signature.zero
             |} |} in
   check_hash __hash_value stamp_threshold.
 
 Definition check_proof_of_work_stamp
-  (ctxt : Alpha_context.context) (block : Alpha_context.Block_header.t)
+  (ctxt : Alpha_context.context)
+  (block : Alpha_context.Block_header.block_header)
   : Lwt.t (Error_monad.tzresult unit) :=
   let proof_of_work_threshold :=
     Alpha_context.Constants.proof_of_work_threshold ctxt in
   if
-    check_header_proof_of_work_stamp block.(Alpha_context.Block_header.t.shell)
-      block.(Alpha_context.Block_header.t.protocol_data).(Alpha_context.Block_header.protocol_data.contents)
+    check_header_proof_of_work_stamp
+      block.(Alpha_context.Block_header.block_header.shell)
+      block.(Alpha_context.Block_header.block_header.protocol_data).(Alpha_context.Block_header.protocol_data.contents)
       proof_of_work_threshold then
     Error_monad.return_unit
   else
     Error_monad.fail extensible_type_value.
 
 Definition check_signature
-  (block : Alpha_context.Block_header.t) (chain_id : (|Chain_id|).(S.HASH.t))
+  (block : Alpha_context.Block_header.block_header)
+  (chain_id : (|Chain_id|).(S.HASH.t))
   (__key_value : (|Signature.Public_key|).(S.SPublic_key.t))
   : Lwt.t (Error_monad.tzresult unit) :=
   let check_signature
     (__key_value : (|Signature.Public_key|).(S.SPublic_key.t))
-    (function_parameter : Alpha_context.Block_header.t) : bool :=
+    (function_parameter : Alpha_context.Block_header.block_header) : bool :=
     let '{|
-      Alpha_context.Block_header.t.shell := shell;
-        Alpha_context.Block_header.t.protocol_data := {|
+      Alpha_context.Block_header.block_header.shell := shell;
+        Alpha_context.Block_header.block_header.protocol_data := {|
           Alpha_context.Block_header.protocol_data.contents := contents;
             Alpha_context.Block_header.protocol_data.signature :=
               signature
@@ -14499,13 +14503,14 @@ Definition max_fitness_gap {A : Set} (_ctxt : A) : int64 :=
   1.
 
 Definition check_fitness_gap
-  (ctxt : Alpha_context.context) (block : Alpha_context.Block_header.t)
+  (ctxt : Alpha_context.context)
+  (block : Alpha_context.Block_header.block_header)
   : Lwt.t (Error_monad.tzresult unit) :=
   let current_fitness := Alpha_context.Fitness.current ctxt in
   let=? announced_fitness :=
     Lwt.__return
       (Alpha_context.Fitness.to_int64
-        block.(Alpha_context.Block_header.t.shell).(Block_header.shell_header.fitness))
+        block.(Alpha_context.Block_header.block_header.shell).(Block_header.shell_header.fitness))
     in
   let gap := Int64.sub announced_fitness current_fitness in
   if
@@ -14578,7 +14583,7 @@ Definition minimal_valid_time
   <div style="margin: 20px;">
     <h3>Baking_mli</h3>
     <ul>
-      <li>OCaml size: 165 lines</li>
+      <li>OCaml size: 166 lines</li>
       <li>Coq size: 95 lines (-43% compared to&nbsp;OCaml)</li>
     </ul>
   </div>
@@ -14696,7 +14701,7 @@ val first_baking_priorities :
 (** [check_signature ctxt chain_id block id] check if the block is
     signed with the given key, and belongs to the given [chain_id] *)
 val check_signature :
-  Block_header.t -&gt; Chain_id.t -&gt; public_key -&gt; unit tzresult Lwt.t
+  Block_header.block_header -&gt; Chain_id.t -&gt; public_key -&gt; unit tzresult Lwt.t
 
 (** Checks if the header that would be built from the given components
     is valid for the given diffculty. The signature is not passed as it
@@ -14707,11 +14712,12 @@ val check_header_proof_of_work_stamp :
 
 (** verify if the proof of work stamp is valid *)
 val check_proof_of_work_stamp :
-  context -&gt; Block_header.t -&gt; unit tzresult Lwt.t
+  context -&gt; Block_header.block_header -&gt; unit tzresult Lwt.t
 
 (** check if the gap between the fitness of the current context
     and the given block is within the protocol parameters *)
-val check_fitness_gap : context -&gt; Block_header.t -&gt; unit tzresult Lwt.t
+val check_fitness_gap :
+  context -&gt; Block_header.block_header -&gt; unit tzresult Lwt.t
 
 val dawn_of_a_new_cycle : context -&gt; Cycle.t option tzresult Lwt.t
 
@@ -14821,7 +14827,7 @@ Parameter first_baking_priorities :
   Alpha_context.Level.t -&gt; Lwt.t (Error_monad.tzresult (list int)).
 
 Parameter check_signature :
-  Alpha_context.Block_header.t -&gt; (|Chain_id|).(S.HASH.t) -&gt;
+  Alpha_context.Block_header.block_header -&gt; (|Chain_id|).(S.HASH.t) -&gt;
   Alpha_context.public_key -&gt; Lwt.t (Error_monad.tzresult unit).
 
 Parameter check_header_proof_of_work_stamp :
@@ -14829,11 +14835,11 @@ Parameter check_header_proof_of_work_stamp :
   Alpha_context.Block_header.contents -&gt; int64 -&gt; bool.
 
 Parameter check_proof_of_work_stamp :
-  Alpha_context.context -&gt; Alpha_context.Block_header.t -&gt;
+  Alpha_context.context -&gt; Alpha_context.Block_header.block_header -&gt;
   Lwt.t (Error_monad.tzresult unit).
 
 Parameter check_fitness_gap :
-  Alpha_context.context -&gt; Alpha_context.Block_header.t -&gt;
+  Alpha_context.context -&gt; Alpha_context.Block_header.block_header -&gt;
   Lwt.t (Error_monad.tzresult unit).
 
 Parameter dawn_of_a_new_cycle :
@@ -15243,8 +15249,8 @@ Parameter Index : {_ : unit &amp; Storage_description.INDEX.signature (t := t)}.
   <div style="margin: 20px;">
     <h3>Block_header_repr</h3>
     <ul>
-      <li>OCaml size: 131 lines</li>
-      <li>Coq size: 170 lines (+29% compared to&nbsp;OCaml)</li>
+      <li>OCaml size: 132 lines</li>
+      <li>Coq size: 176 lines (+33% compared to&nbsp;OCaml)</li>
     </ul>
   </div>
   <div class="col-md-6">
@@ -15285,9 +15291,10 @@ type contents = {
 
 type protocol_data = {contents : contents; signature : Signature.t}
 
-type t = {shell : Block_header.shell_header; protocol_data : protocol_data}
-
-type block_header = t
+type block_header = {
+  shell : Block_header.shell_header;
+  protocol_data : protocol_data;
+}
 
 type raw = Block_header.t
 
@@ -15425,7 +15432,7 @@ Module protocol_data.
 End protocol_data.
 Definition protocol_data := protocol_data.record.
 
-Module t.
+Module block_header.
   Record record : Set := Build {
     shell : Block_header.shell_header;
     protocol_data : protocol_data }.
@@ -15433,10 +15440,8 @@ Module t.
     Build shell r.(protocol_data).
   Definition with_protocol_data protocol_data (r : record) :=
     Build r.(shell) protocol_data.
-End t.
-Definition t := t.record.
-
-Definition block_header : Set := t.
+End block_header.
+Definition block_header := block_header.record.
 
 Definition raw : Set := Block_header.t.
 
@@ -15490,9 +15495,11 @@ Definition protocol_data_encoding : Data_encoding.encoding protocol_data :=
         (Data_encoding.obj1
           (Data_encoding.req None None &quot;signature&quot; Signature.encoding)))).
 
-Definition __raw_value (function_parameter : t) : Block_header.t :=
-  let '{| t.shell := shell; t.protocol_data := protocol_data |} :=
-    function_parameter in
+Definition __raw_value (function_parameter : block_header) : Block_header.t :=
+  let '{|
+    block_header.shell := shell;
+      block_header.protocol_data := protocol_data
+      |} := function_parameter in
   let protocol_data :=
     Data_encoding.Binary.to_bytes_exn protocol_data_encoding protocol_data in
   {| Block_header.t.shell := shell;
@@ -15502,17 +15509,20 @@ Definition unsigned_encoding
   : Data_encoding.encoding (Block_header.shell_header * contents) :=
   Data_encoding.merge_objs Block_header.shell_header_encoding contents_encoding.
 
-Definition encoding : Data_encoding.encoding t :=
+Definition encoding : Data_encoding.encoding block_header :=
   (let arg := Data_encoding.def &quot;block_header.alpha.full_header&quot; in
   fun eta =&gt; arg None None eta)
     (Data_encoding.conv
       (fun function_parameter =&gt;
-        let '{| t.shell := shell; t.protocol_data := protocol_data |} :=
-          function_parameter in
+        let '{|
+          block_header.shell := shell;
+            block_header.protocol_data := protocol_data
+            |} := function_parameter in
         (shell, protocol_data))
       (fun function_parameter =&gt;
         let '(shell, protocol_data) := function_parameter in
-        {| t.shell := shell; t.protocol_data := protocol_data |}) None
+        {| block_header.shell := shell;
+          block_header.protocol_data := protocol_data |}) None
       (Data_encoding.merge_objs Block_header.shell_header_encoding
         protocol_data_encoding)).
 
@@ -15539,17 +15549,20 @@ Definition max_header_length : int :=
       contents.proof_of_work_nonce :=
         MBytes.create Constants_repr.proof_of_work_nonce_size |} in
   Data_encoding.Binary.length encoding
-    {| t.shell := fake_shell;
-      t.protocol_data :=
+    {| block_header.shell := fake_shell;
+      block_header.protocol_data :=
         {| protocol_data.contents := fake_contents;
           protocol_data.signature := Signature.zero |} |}.
 
 Definition hash_raw : Block_header.t -&gt; (|Block_hash|).(S.HASH.t) :=
   Block_header.__hash_value.
 
-Definition __hash_value (function_parameter : t) : (|Block_hash|).(S.HASH.t) :=
-  let '{| t.shell := shell; t.protocol_data := protocol_data |} :=
-    function_parameter in
+Definition __hash_value (function_parameter : block_header)
+  : (|Block_hash|).(S.HASH.t) :=
+  let '{|
+    block_header.shell := shell;
+      block_header.protocol_data := protocol_data
+      |} := function_parameter in
   Block_header.__hash_value
     {| Block_header.t.shell := shell;
       Block_header.t.protocol_data :=
@@ -15564,8 +15577,8 @@ Definition __hash_value (function_parameter : t) : (|Block_hash|).(S.HASH.t) :=
   <div style="margin: 20px;">
     <h3>Block_header_repr_mli</h3>
     <ul>
-      <li>OCaml size: 61 lines</li>
-      <li>Coq size: 75 lines (+22% compared to&nbsp;OCaml)</li>
+      <li>OCaml size: 62 lines</li>
+      <li>Coq size: 73 lines (+17% compared to&nbsp;OCaml)</li>
     </ul>
   </div>
   <div class="col-md-6">
@@ -15604,9 +15617,10 @@ type contents = {
 
 type protocol_data = {contents : contents; signature : Signature.t}
 
-type t = {shell : Block_header.shell_header; protocol_data : protocol_data}
-
-type block_header = t
+type block_header = {
+  shell : Block_header.shell_header;
+  protocol_data : protocol_data;
+}
 
 type raw = Block_header.t
 
@@ -15674,7 +15688,7 @@ Module protocol_data.
 End protocol_data.
 Definition protocol_data := protocol_data.record.
 
-Module t.
+Module block_header.
   Record record : Set := Build {
     shell : Block_header.shell_header;
     protocol_data : protocol_data }.
@@ -15682,10 +15696,8 @@ Module t.
     Build shell r.(protocol_data).
   Definition with_protocol_data protocol_data (r : record) :=
     Build r.(shell) protocol_data.
-End t.
-Definition t := t.record.
-
-Definition block_header : Set := t.
+End block_header.
+Definition block_header := block_header.record.
 
 Definition raw : Set := Block_header.t.
 
@@ -18834,8 +18846,8 @@ Parameter Index : {_ : unit &amp; Storage_description.INDEX.signature (t := t)}.
   <div style="margin: 20px;">
     <h3>Contract_services</h3>
     <ul>
-      <li>OCaml size: 425 lines</li>
-      <li>Coq size: 430 lines (+1% compared to&nbsp;OCaml)</li>
+      <li>OCaml size: 429 lines</li>
+      <li>Coq size: 430 lines (+0% compared to&nbsp;OCaml)</li>
     </ul>
   </div>
   <div class="col-md-6">
@@ -19265,7 +19277,11 @@ They are sent to a unit type.">Not_found</abbr>
 
 They are sent to a unit type.">Not_found</abbr>
         | Some value -&gt;
-            parse_data ctxt ~legacy:true value_type (Micheline.root value)
+            (parse_data [@coq_implicit &quot;(a := unit)&quot;])
+              ctxt
+              ~legacy:true
+              value_type
+              (Micheline.root value)
             &gt;&gt;=? fun (value, ctxt) -&gt;
             unparse_data ctxt Readable value_type value
             &gt;&gt;=? fun (value, _ctxt) -&gt; return (Micheline.strip_locations value)
@@ -19783,8 +19799,8 @@ Definition register (function_parameter : unit) : unit :=
       | None =&gt; Pervasives.raise extensible_type_value
       | Some value =&gt;
         let=? '(value, ctxt) :=
-          Script_ir_translator.parse_data None ctxt true value_type
-            (Micheline.root value) in
+          (Script_ir_translator.parse_data (a := unit)) None ctxt true
+            value_type (Micheline.root value) in
         let=? '(value, _ctxt) :=
           Script_ir_translator.unparse_data ctxt Script_ir_translator.Readable
             value_type value in
@@ -22556,8 +22572,8 @@ Parameter Index : {_ : unit &amp; Storage_description.INDEX.signature (t := cycl
   <div style="margin: 20px;">
     <h3>Delegate_services</h3>
     <ul>
-      <li>OCaml size: 697 lines</li>
-      <li>Coq size: 1025 lines (+47% compared to&nbsp;OCaml)</li>
+      <li>OCaml size: 693 lines</li>
+      <li>Coq size: 1022 lines (+47% compared to&nbsp;OCaml)</li>
     </ul>
   </div>
   <div class="col-md-6">
@@ -22917,7 +22933,7 @@ Expected a list of named or unspecified '_' type variables">grace_period</abbr> 
       RPC_path.(path / &quot;grace_period&quot;)
 end
 
-let register () =
+let begin_register () =
   let open Services_registration in
   <abbr class="mark-warning" title="Sequences of instructions are ignored (operator &quot;;&quot;)
 
@@ -23071,8 +23087,6 @@ module Baking_rights = struct
          (opt &quot;estimated_time&quot; Timestamp.encoding))
 
   module S = struct
-    open Data_encoding
-
     let custom_root = RPC_path.(open_root / &quot;helpers&quot; / &quot;baking_rights&quot;)
 
     type baking_rights_query = {
@@ -23130,7 +23144,7 @@ Expected a list of named or unspecified '_' type variables">baking_rights</abbr>
            later that the next block, based on the hypothesis that all \
            predecessor blocks were baked at the first priority.&quot;
         ~query:baking_rights_query
-        ~output:(list encoding)
+        ~output:(Data_encoding.list encoding)
         custom_root
   end
 
@@ -23230,8 +23244,6 @@ module Endorsing_rights = struct
          (opt &quot;estimated_time&quot; Timestamp.encoding))
 
   module S = struct
-    open Data_encoding
-
     let custom_root = RPC_path.(open_root / &quot;helpers&quot; / &quot;endorsing_rights&quot;)
 
     type endorsing_rights_query = {
@@ -23281,7 +23293,7 @@ Expected a list of named or unspecified '_' type variables">endorsing_rights</ab
            later that the next block, based on the hypothesis that all \
            predecessor blocks were baked at the first priority.&quot;
         ~query:endorsing_rights_query
-        ~output:(list encoding)
+        ~output:(Data_encoding.list encoding)
         custom_root
   end
 
@@ -23489,7 +23501,7 @@ end
 let register () =
   <abbr class="mark-warning" title="Sequences of instructions are ignored (operator &quot;;&quot;)
 
-Alternative: use a monad to sequence side-effects.">register ()</abbr> ;
+Alternative: use a monad to sequence side-effects.">begin_register ()</abbr> ;
   <abbr class="mark-warning" title="Sequences of instructions are ignored (operator &quot;;&quot;)
 
 Alternative: use a monad to sequence side-effects.">Baking_rights.register ()</abbr> ;
@@ -23781,7 +23793,7 @@ Module S.
       (RPC_path.op_div path &quot;grace_period&quot;).
 End S.
 
-Definition register (function_parameter : unit) : unit :=
+Definition begin_register (function_parameter : unit) : unit :=
   let '_ := function_parameter in
   (* ❌ Sequences of instructions are ignored (operator &quot;;&quot;) *)
   (* ❌ instruction_sequence &quot;;&quot; *)
@@ -23959,8 +23971,6 @@ Module Baking_rights.
           Alpha_context.Timestamp.encoding)).
   
   Module S.
-    Import Data_encoding.
-    
     Definition custom_root
       : RPC_path.path Updater.rpc_context Updater.rpc_context :=
       RPC_path.op_div (RPC_path.op_div RPC_path.open_root &quot;helpers&quot;)
@@ -23986,7 +23996,7 @@ Module Baking_rights.
     End baking_rights_query.
     Definition baking_rights_query := baking_rights_query.record.
     
-    Definition baking_rights_query : RPC_query.t baking_rights_query :=
+    Definition __baking_rights_query_value : RPC_query.t baking_rights_query :=
       RPC_query.seal
         (RPC_query.op_pipeplus
           (RPC_query.op_pipeplus
@@ -24023,7 +24033,7 @@ Module Baking_rights.
       RPC_service.get_service
         (Some
           &quot;Retrieves the list of delegates allowed to bake a block.\nBy default, it gives the best baking priorities for bakers that have at least one opportunity below the 64th priority for the next block.\nParameters `level` and `cycle` can be used to specify the (valid) level(s) in the past or future at which the baking rights have to be returned. Parameter `delegate` can be used to restrict the results to the given delegates. If parameter `all` is set, all the baking opportunities for each baker at each level are returned, instead of just the first one.\nReturns the list of baking slots. Also returns the minimal timestamps that correspond to these slots. The timestamps are omitted for levels in the past, and are only estimates for levels later that the next block, based on the hypothesis that all predecessor blocks were baked at the first priority.&quot;)
-        baking_rights_query (Data_encoding.__list_value None encoding)
+        __baking_rights_query_value (Data_encoding.__list_value None encoding)
         custom_root.
   End S.
   
@@ -24198,8 +24208,6 @@ Module Endorsing_rights.
           Alpha_context.Timestamp.encoding)).
   
   Module S.
-    Import Data_encoding.
-    
     Definition custom_root
       : RPC_path.path Updater.rpc_context Updater.rpc_context :=
       RPC_path.op_div (RPC_path.op_div RPC_path.open_root &quot;helpers&quot;)
@@ -24219,7 +24227,8 @@ Module Endorsing_rights.
     End endorsing_rights_query.
     Definition endorsing_rights_query := endorsing_rights_query.record.
     
-    Definition endorsing_rights_query : RPC_query.t endorsing_rights_query :=
+    Definition __endorsing_rights_query_value
+      : RPC_query.t endorsing_rights_query :=
       RPC_query.seal
         (RPC_query.op_pipeplus
           (RPC_query.op_pipeplus
@@ -24246,8 +24255,8 @@ Module Endorsing_rights.
       RPC_service.get_service
         (Some
           &quot;Retrieves the delegates allowed to endorse a block.\nBy default, it gives the endorsement slots for delegates that have at least one in the next block.\nParameters `level` and `cycle` can be used to specify the (valid) level(s) in the past or future at which the endorsement rights have to be returned. Parameter `delegate` can be used to restrict the results to the given delegates.\nReturns the list of endorsement slots. Also returns the minimal timestamps that correspond to these slots. The timestamps are omitted for levels in the past, and are only estimates for levels later that the next block, based on the hypothesis that all predecessor blocks were baked at the first priority.&quot;)
-        endorsing_rights_query (Data_encoding.__list_value None encoding)
-        custom_root.
+        __endorsing_rights_query_value
+        (Data_encoding.__list_value None encoding) custom_root.
   End S.
   
   Definition endorsement_slots
@@ -28362,7 +28371,7 @@ Parameter op_plusat : cost -&gt; cost -&gt; cost.
     <h3>Helpers_services</h3>
     <ul>
       <li>OCaml size: 890 lines</li>
-      <li>Coq size: 857 lines (-4% compared to&nbsp;OCaml)</li>
+      <li>Coq size: 859 lines (-4% compared to&nbsp;OCaml)</li>
     </ul>
   </div>
   <div class="col-md-6">
@@ -29162,8 +29171,8 @@ Alternative: use a monad to sequence side-effects.">register0_noctxt S.operation
         ~gas_limit ~storage_limit operations =
       Contract_services.manager_key ctxt block source
       &gt;&gt;= function
-      | Error _ as e -&gt;
-          Lwt.return e
+      | Error error -&gt;
+          Lwt.return (Error error)
       | Ok revealed -&gt;
           let ops =
             List.map
@@ -29402,8 +29411,8 @@ Alternative: use a monad to sequence side-effects.">register0 S.operations (fun 
                 return_unit )
             &gt;&gt;|? fun () -&gt; op)
           operations)</abbr> ;
-    register0_noctxt S.block (fun () raw_block -&gt;
-        parse_protocol_data raw_block.protocol_data)
+    register0_noctxt S.block (fun () (raw_block : Block_header.raw) -&gt;
+        parse_protocol_data (raw_block : Block_header.raw).protocol_data)
 
   let operations ctxt block ?check operations =
     RPC_context.make_call0 S.operations ctxt block () (operations, check)
@@ -29976,7 +29985,8 @@ Module Forge.
       let= function_parameter := Contract_services.manager_key ctxt block source
         in
       match function_parameter with
-      | (Pervasives.Error _) as e =&gt; Lwt.__return e
+      | Pervasives.Error __error_value =&gt;
+        Lwt.__return (Pervasives.Error __error_value)
       | Pervasives.Ok revealed =&gt;
         let ops :=
           List.map
@@ -30170,8 +30180,9 @@ Module Forge.
   
   Definition double_baking_evidence {A : Set}
     (ctxt : RPC_context.simple A) (block : A)
-    (branch : (|Block_hash|).(S.HASH.t)) (bh1 : Alpha_context.Block_header.t)
-    (bh2 : Alpha_context.Block_header.t) (function_parameter : unit)
+    (branch : (|Block_hash|).(S.HASH.t))
+    (bh1 : Alpha_context.Block_header.block_header)
+    (bh2 : Alpha_context.Block_header.block_header) (function_parameter : unit)
     : Lwt.t (Error_monad.shell_tzresult MBytes.t) :=
     let '_ := function_parameter in
     operation ctxt block branch
@@ -30287,7 +30298,7 @@ Module S.
   End level_query.
   Definition level_query := level_query.record.
   
-  Definition level_query : RPC_query.t level_query :=
+  Definition __level_query_value : RPC_query.t level_query :=
     RPC_query.seal
       (RPC_query.op_pipeplus
         (RPC_query.__query_value
@@ -30302,13 +30313,13 @@ Module S.
     RPC_service.get_service
       (Some
         &quot;Returns the level of the interrogated block, or the one of a block located `offset` blocks after in the chain (or before when negative). For instance, the next block if `offset` is 1.&quot;)
-      level_query Alpha_context.Level.encoding
+      __level_query_value Alpha_context.Level.encoding
       (RPC_path.op_div path &quot;current_level&quot;).
   
   Definition levels_in_current_cycle
     : RPC_service.service Updater.rpc_context Updater.rpc_context level_query
       unit (Alpha_context.Raw_level.t * Alpha_context.Raw_level.t) :=
-    RPC_service.get_service (Some &quot;Levels of a cycle&quot;) level_query
+    RPC_service.get_service (Some &quot;Levels of a cycle&quot;) __level_query_value
       (Data_encoding.obj2
         (Data_encoding.req None None &quot;first&quot; Alpha_context.Raw_level.encoding)
         (Data_encoding.req None None &quot;last&quot; Alpha_context.Raw_level.encoding))
@@ -30383,7 +30394,7 @@ Definition levels_in_current_cycle {A : Set}
     <h3>Helpers_services_mli</h3>
     <ul>
       <li>OCaml size: 271 lines</li>
-      <li>Coq size: 181 lines (-34% compared to&nbsp;OCaml)</li>
+      <li>Coq size: 182 lines (-33% compared to&nbsp;OCaml)</li>
     </ul>
   </div>
   <div class="col-md-6">
@@ -30619,8 +30630,8 @@ module Forge : sig
     'a #RPC_context.simple -&gt;
     'a -&gt;
     branch:Block_hash.t -&gt;
-    bh1:Block_header.t -&gt;
-    bh2:Block_header.t -&gt;
+    bh1:Block_header.block_header -&gt;
+    bh2:Block_header.block_header -&gt;
     unit -&gt;
     MBytes.t shell_tzresult Lwt.t
 
@@ -30819,7 +30830,8 @@ Module Forge.
   
   Parameter double_baking_evidence : forall {a : Set},
     RPC_context.simple a -&gt; a -&gt; (|Block_hash|).(S.HASH.t) -&gt;
-    Alpha_context.Block_header.t -&gt; Alpha_context.Block_header.t -&gt; unit -&gt;
+    Alpha_context.Block_header.block_header -&gt;
+    Alpha_context.Block_header.block_header -&gt; unit -&gt;
     Lwt.t (Error_monad.shell_tzresult MBytes.t).
   
   Parameter double_endorsement_evidence : forall {a : Set},
@@ -34291,7 +34303,7 @@ Parameter last_allowed_fork_level : Raw_context.t -&gt; Raw_level_repr.t.
     <h3>Main</h3>
     <ul>
       <li>OCaml size: 380 lines</li>
-      <li>Coq size: 597 lines (+57% compared to&nbsp;OCaml)</li>
+      <li>Coq size: 598 lines (+57% compared to&nbsp;OCaml)</li>
     </ul>
   </div>
   <div class="col-md-6">
@@ -34326,7 +34338,7 @@ Parameter last_allowed_fork_level : Raw_context.t -&gt; Raw_level_repr.t.
 
 type block_header_data = Alpha_context.Block_header.protocol_data
 
-<abbr class="mark-warning" title="We do not handle types with both a synonym and a type definition">type block_header = Alpha_context.Block_header.t = {
+<abbr class="mark-warning" title="We do not handle types with both a synonym and a type definition">type block_header = Alpha_context.Block_header.block_header = {
   shell : Block_header.shell_header;
   protocol_data : block_header_data;
 }</abbr>
@@ -34394,12 +34406,12 @@ Alternative: use a monad to sequence side-effects.">Alpha_services.register ()</
 
 type validation_mode =
   | Application of {
-      block_header : Alpha_context.Block_header.t;
+      block_header : Alpha_context.Block_header.block_header;
       baker : Alpha_context.public_key_hash;
       block_delay : Alpha_context.Period.t;
     }
   | Partial_application of {
-      block_header : Alpha_context.Block_header.t;
+      block_header : Alpha_context.Block_header.block_header;
       baker : Alpha_context.public_key_hash;
       block_delay : Alpha_context.Period.t;
     }
@@ -34422,7 +34434,7 @@ let current_context {ctxt; _} = return (Alpha_context.finalize ctxt).context
 
 let begin_partial_application ~chain_id ~ancestor_context:ctxt
     ~predecessor_timestamp ~predecessor_fitness
-    (block_header : Alpha_context.Block_header.t) =
+    (block_header : Alpha_context.Block_header.block_header) =
   let level = block_header.shell.level in
   let fitness = predecessor_fitness in
   let timestamp = block_header.shell.timestamp in
@@ -34438,7 +34450,7 @@ let begin_partial_application ~chain_id ~ancestor_context:ctxt
 
 let begin_application ~chain_id ~predecessor_context:ctxt
     ~predecessor_timestamp ~predecessor_fitness
-    (block_header : Alpha_context.Block_header.t) =
+    (block_header : Alpha_context.Block_header.block_header) =
   let level = block_header.shell.level in
   let fitness = predecessor_fitness in
   let timestamp = block_header.shell.timestamp in
@@ -34703,7 +34715,7 @@ Require Tezos.Services_registration.
 
 Definition block_header_data : Set := Alpha_context.Block_header.protocol_data.
 
-Definition block_header : Set := Alpha_context.Block_header.t.
+Definition block_header : Set := Alpha_context.Block_header.block_header.
 
 Definition block_header_data_encoding
   : Data_encoding.encoding Alpha_context.Block_header.protocol_data :=
@@ -34864,11 +34876,12 @@ Inductive validation_mode : Set :=
 | Full_construction : 'validation_mode.Full_construction -&gt; validation_mode
 
 where &quot;'validation_mode.Application&quot; :=
-  (validation_mode.Application_skeleton Alpha_context.Block_header.t
+  (validation_mode.Application_skeleton Alpha_context.Block_header.block_header
     Alpha_context.public_key_hash Alpha_context.Period.t)
 and &quot;'validation_mode.Partial_application&quot; :=
-  (validation_mode.Partial_application_skeleton Alpha_context.Block_header.t
-    Alpha_context.public_key_hash Alpha_context.Period.t)
+  (validation_mode.Partial_application_skeleton
+    Alpha_context.Block_header.block_header Alpha_context.public_key_hash
+    Alpha_context.Period.t)
 and &quot;'validation_mode.Partial_construction&quot; :=
   (validation_mode.Partial_construction_skeleton (|Block_hash|).(S.HASH.t))
 and &quot;'validation_mode.Full_construction&quot; :=
@@ -34911,7 +34924,7 @@ Definition begin_partial_application
   (chain_id : (|Chain_id|).(S.HASH.t)) (ctxt : Context.t)
   (predecessor_timestamp : Time.t)
   (predecessor_fitness : Alpha_context.Fitness.t)
-  (block_header : Alpha_context.Block_header.t)
+  (block_header : Alpha_context.Block_header.block_header)
   : Lwt.t (Error_monad.tzresult validation_state) :=
   let level :=
     block_header.(block_header.shell).(Block_header.shell_header.level) in
@@ -34936,7 +34949,7 @@ Definition begin_application
   (chain_id : (|Chain_id|).(S.HASH.t)) (ctxt : Context.t)
   (predecessor_timestamp : Time.t)
   (predecessor_fitness : Alpha_context.Fitness.t)
-  (block_header : Alpha_context.Block_header.t)
+  (block_header : Alpha_context.Block_header.block_header)
   : Lwt.t (Error_monad.tzresult validation_state) :=
   let level :=
     block_header.(block_header.shell).(Block_header.shell_header.level) in
@@ -35290,7 +35303,7 @@ Definition init (ctxt : Context.t) (block_header : Block_header.shell_header)
     <h3>Main_mli</h3>
     <ul>
       <li>OCaml size: 62 lines</li>
-      <li>Coq size: 249 lines (+301% compared to&nbsp;OCaml)</li>
+      <li>Coq size: 250 lines (+303% compared to&nbsp;OCaml)</li>
     </ul>
   </div>
   <div class="col-md-6">
@@ -35325,12 +35338,12 @@ Definition init (ctxt : Context.t) (block_header : Block_header.shell_header)
 
 type validation_mode =
   | Application of {
-      block_header : Alpha_context.Block_header.t;
+      block_header : Alpha_context.Block_header.block_header;
       baker : Alpha_context.public_key_hash;
       block_delay : Alpha_context.Period.t;
     }
   | Partial_application of {
-      block_header : Alpha_context.Block_header.t;
+      block_header : Alpha_context.Block_header.block_header;
       baker : Alpha_context.public_key_hash;
       block_delay : Alpha_context.Period.t;
     }
@@ -35357,7 +35370,7 @@ include
 Can only do `with` on types in module types using type expressions rather than type definitions">Updater.PROTOCOL
     with type block_header_data = Alpha_context.Block_header.protocol_data
      and type block_header_metadata = Apply_results.block_metadata
-     and type block_header = Alpha_context.Block_header.t
+     and type block_header = Alpha_context.Block_header.block_header
      and type operation_data = Alpha_context.packed_protocol_data
      and type operation_receipt = Apply_results.packed_operation_metadata
      and type operation = Alpha_context.packed_operation
@@ -35480,11 +35493,12 @@ Inductive validation_mode : Set :=
 | Full_construction : 'validation_mode.Full_construction -&gt; validation_mode
 
 where &quot;'validation_mode.Application&quot; :=
-  (validation_mode.Application_skeleton Alpha_context.Block_header.t
+  (validation_mode.Application_skeleton Alpha_context.Block_header.block_header
     Alpha_context.public_key_hash Alpha_context.Period.t)
 and &quot;'validation_mode.Partial_application&quot; :=
-  (validation_mode.Partial_application_skeleton Alpha_context.Block_header.t
-    Alpha_context.public_key_hash Alpha_context.Period.t)
+  (validation_mode.Partial_application_skeleton
+    Alpha_context.Block_header.block_header Alpha_context.public_key_hash
+    Alpha_context.Period.t)
 and &quot;'validation_mode.Partial_construction&quot; :=
   (validation_mode.Partial_construction_skeleton (|Block_hash|).(S.HASH.t))
 and &quot;'validation_mode.Full_construction&quot; :=
@@ -40623,12 +40637,12 @@ Definition path_length := (|Blake2BModule|).(S.HASH.path_length).
   <div style="margin: 20px;">
     <h3>Nonce_storage</h3>
     <ul>
-      <li>OCaml size: 129 lines</li>
-      <li>Coq size: 93 lines (-28% compared to&nbsp;OCaml)</li>
+      <li>OCaml size: 127 lines</li>
+      <li>Coq size: 93 lines (-27% compared to&nbsp;OCaml)</li>
     </ul>
   </div>
   <div class="col-md-6">
-    <a href="#nonce_storage.ml"><code>nonce_storage.ml</code></a>&nbsp;<span class="label label-warning">8 warnings</span>
+    <a href="#nonce_storage.ml"><code>nonce_storage.ml</code></a>&nbsp;<span class="label label-warning">7 warnings</span>
     
     <pre>(*****************************************************************************)
 (*                                                                           *)
@@ -40758,9 +40772,7 @@ They are sent to a unit type.">Unexpected_nonce</abbr>
 
 type unrevealed = Storage.unrevealed_nonce
 
-<abbr class="mark-warning" title="We do not handle types with both a synonym and a type definition">type status = Storage.nonce_status =
-  | Unrevealed of unrevealed
-  | Revealed of Seed_repr.nonce</abbr>
+type status = Storage.nonce_status
 
 let get = Storage.Seed.Nonce.get
 
@@ -40876,7 +40888,7 @@ Definition check_hash : Seed_repr.nonce -&gt; Nonce_hash.t -&gt; bool :=
     <h3>Nonce_storage_mli</h3>
     <ul>
       <li>OCaml size: 53 lines</li>
-      <li>Coq size: 46 lines (-14% compared to&nbsp;OCaml)</li>
+      <li>Coq size: 44 lines (-17% compared to&nbsp;OCaml)</li>
     </ul>
   </div>
   <div class="col-md-6">
@@ -40921,7 +40933,7 @@ val encoding : nonce Data_encoding.t
 
 type unrevealed = Storage.unrevealed_nonce
 
-type status = Unrevealed of unrevealed | Revealed of Seed_repr.nonce
+type status = Storage.nonce_status
 
 val get : Raw_context.t -&gt; Level_repr.t -&gt; status tzresult Lwt.t
 
@@ -40966,9 +40978,7 @@ Parameter encoding : Data_encoding.t nonce.
 
 Definition unrevealed : Set := Storage.unrevealed_nonce.
 
-Inductive status : Set :=
-| Unrevealed : unrevealed -&gt; status
-| Revealed : Seed_repr.nonce -&gt; status.
+Definition status : Set := Storage.nonce_status.
 
 Parameter get :
   Raw_context.t -&gt; Level_repr.t -&gt; Lwt.t (Error_monad.tzresult status).
@@ -41091,8 +41101,8 @@ and _ contents =
     }
       -&gt; Kind.double_endorsement_evidence contents
   | Double_baking_evidence : {
-      bh1 : Block_header_repr.t;
-      bh2 : Block_header_repr.t;
+      bh1 : Block_header_repr.block_header;
+      bh2 : Block_header_repr.block_header;
     }
       -&gt; Kind.double_baking_evidence contents
   | Activate_account : {
@@ -42267,8 +42277,8 @@ and &quot;'contents.Seed_nonce_revelation&quot; :=
 and &quot;'contents.Double_endorsement_evidence&quot; :=
   (contents.Double_endorsement_evidence_skeleton 'operation 'operation)
 and &quot;'contents.Double_baking_evidence&quot; :=
-  (contents.Double_baking_evidence_skeleton Block_header_repr.t
-    Block_header_repr.t)
+  (contents.Double_baking_evidence_skeleton Block_header_repr.block_header
+    Block_header_repr.block_header)
 and &quot;'contents.Activate_account&quot; :=
   (contents.Activate_account_skeleton
     (|Ed25519|).(S.SIGNATURE.Public_key_hash).(S.SPublic_key_hash.t)
@@ -43524,8 +43534,8 @@ and _ contents =
     }
       -&gt; Kind.double_endorsement_evidence contents
   | Double_baking_evidence : {
-      bh1 : Block_header_repr.t;
-      bh2 : Block_header_repr.t;
+      bh1 : Block_header_repr.block_header;
+      bh2 : Block_header_repr.block_header;
     }
       -&gt; Kind.double_baking_evidence contents
   | Activate_account : {
@@ -44084,8 +44094,8 @@ and &quot;'contents.Seed_nonce_revelation&quot; :=
 and &quot;'contents.Double_endorsement_evidence&quot; :=
   (contents.Double_endorsement_evidence_skeleton 'operation 'operation)
 and &quot;'contents.Double_baking_evidence&quot; :=
-  (contents.Double_baking_evidence_skeleton Block_header_repr.t
-    Block_header_repr.t)
+  (contents.Double_baking_evidence_skeleton Block_header_repr.block_header
+    Block_header_repr.block_header)
 and &quot;'contents.Activate_account&quot; :=
   (contents.Activate_account_skeleton
     (|Ed25519|).(S.SIGNATURE.Public_key_hash).(S.SPublic_key_hash.t)
