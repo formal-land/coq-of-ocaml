@@ -59,9 +59,9 @@
     <pre><code>opam repo add coq-released https://coq.inria.fr/opam/released
 opam pin add https://github.com/clarus/coq-of-ocaml.git#master</code></pre>
     <ul>
-      <li>OCaml size: 36295 lines</li>
-      <li>Coq size: 45564 lines (+25% compared to&nbsp;OCaml)</li>
-      <li>Warnings from coq-of-ocaml: 1019</li>
+      <li>OCaml size: 36292 lines</li>
+      <li>Coq size: 45533 lines (+25% compared to&nbsp;OCaml)</li>
+      <li>Warnings from coq-of-ocaml: 1020</li>
     </ul>
     
       <canvas id="chart" width="400" height="400"></canvas>
@@ -125,7 +125,7 @@ opam pin add https://github.com/clarus/coq-of-ocaml.git#master</code></pre>
           41570,
           41570,
           41570,
-          44966,
+          44931,
         ],
         generated: [
           47563,
@@ -185,7 +185,7 @@ opam pin add https://github.com/clarus/coq-of-ocaml.git#master</code></pre>
           46742,
           46742,
           46742,
-          45564,
+          45533,
         ],
         labels: [
           "01-14",
@@ -271,7 +271,7 @@ opam pin add https://github.com/clarus/coq-of-ocaml.git#master</code></pre>
       </li>
       
       <li>
-        <a href="#alpha_context.mli">alpha_context.mli</a>&nbsp;<span class="label label-warning">12</span>
+        <a href="#alpha_context.mli">alpha_context.mli</a>&nbsp;<span class="label label-warning">15</span>
       </li>
       
       <li>
@@ -485,7 +485,7 @@ opam pin add https://github.com/clarus/coq-of-ocaml.git#master</code></pre>
       </li>
       
       <li>
-        <a href="#main.ml">main.ml</a>&nbsp;<span class="label label-warning">5</span>
+        <a href="#main.ml">main.ml</a>&nbsp;<span class="label label-warning">3</span>
       </li>
       
       <li>
@@ -1533,12 +1533,12 @@ Definition description : Storage_description.t Raw_context.context :=
   <div style="margin: 20px;">
     <h3>Alpha_context_mli</h3>
     <ul>
-      <li>OCaml size: 1390 lines</li>
-      <li>Coq size: 2587 lines (+86% compared to&nbsp;OCaml)</li>
+      <li>OCaml size: 1393 lines</li>
+      <li>Coq size: 2558 lines (+83% compared to&nbsp;OCaml)</li>
     </ul>
   </div>
   <div class="col-md-6">
-    <a href="#alpha_context.mli"><code>alpha_context.mli</code></a>&nbsp;<span class="label label-warning">12 warnings</span>
+    <a href="#alpha_context.mli"><code>alpha_context.mli</code></a>&nbsp;<span class="label label-warning">15 warnings</span>
     
     <pre>(*****************************************************************************)
 (*                                                                           *)
@@ -2499,18 +2499,21 @@ module Vote : sig
 end
 
 module Block_header : sig
-  type contents = {
+  <abbr class="mark-warning" title="We do not handle types with both a synonym and a type definition">type contents = Block_header_repr.contents = {
     priority : int;
     seed_nonce_hash : Nonce_hash.t option;
     proof_of_work_nonce : MBytes.t;
-  }
+  }</abbr>
 
-  type protocol_data = {contents : contents; signature : Signature.t}
+  <abbr class="mark-warning" title="We do not handle types with both a synonym and a type definition">type protocol_data = Block_header_repr.protocol_data = {
+    contents : contents;
+    signature : Signature.t;
+  }</abbr>
 
-  type block_header = {
+  <abbr class="mark-warning" title="We do not handle types with both a synonym and a type definition">type block_header = Block_header_repr.block_header = {
     shell : Block_header.shell_header;
     protocol_data : protocol_data;
-  }
+  }</abbr>
 
   type raw = Block_header.t
 
@@ -2946,6 +2949,7 @@ Import ListNotations.
 Require Import Tezos.Environment.
 Import Environment.Notations.
 Require Tezos.Blinded_public_key_hash.
+Require Tezos.Block_header_repr.
 Require Tezos.Contract_repr.
 Require Tezos.Michelson_v1_primitives.
 Require Tezos.Nonce_hash.
@@ -4663,41 +4667,11 @@ Module Vote.
 End Vote.
 
 Module Block_header.
-  Module contents.
-    Record record : Set := Build {
-      priority : int;
-      seed_nonce_hash : option Nonce_hash.t;
-      proof_of_work_nonce : MBytes.t }.
-    Definition with_priority priority (r : record) :=
-      Build priority r.(seed_nonce_hash) r.(proof_of_work_nonce).
-    Definition with_seed_nonce_hash seed_nonce_hash (r : record) :=
-      Build r.(priority) seed_nonce_hash r.(proof_of_work_nonce).
-    Definition with_proof_of_work_nonce proof_of_work_nonce (r : record) :=
-      Build r.(priority) r.(seed_nonce_hash) proof_of_work_nonce.
-  End contents.
-  Definition contents := contents.record.
+  Definition contents : Set := Block_header_repr.contents.
   
-  Module protocol_data.
-    Record record : Set := Build {
-      contents : contents;
-      signature : Signature.t }.
-    Definition with_contents contents (r : record) :=
-      Build contents r.(signature).
-    Definition with_signature signature (r : record) :=
-      Build r.(contents) signature.
-  End protocol_data.
-  Definition protocol_data := protocol_data.record.
+  Definition protocol_data : Set := Block_header_repr.protocol_data.
   
-  Module block_header.
-    Record record : Set := Build {
-      shell : Block_header.shell_header;
-      protocol_data : protocol_data }.
-    Definition with_shell shell (r : record) :=
-      Build shell r.(protocol_data).
-    Definition with_protocol_data protocol_data (r : record) :=
-      Build r.(shell) protocol_data.
-  End block_header.
-  Definition block_header := block_header.record.
+  Definition block_header : Set := Block_header_repr.block_header.
   
   Definition raw : Set := Block_header.t.
   
@@ -6729,7 +6703,7 @@ Parameter record_ballot :
     <h3>Apply</h3>
     <ul>
       <li>OCaml size: 1493 lines</li>
-      <li>Coq size: 1362 lines (-9% compared to&nbsp;OCaml)</li>
+      <li>Coq size: 1359 lines (-9% compared to&nbsp;OCaml)</li>
     </ul>
   </div>
   <div class="col-md-6">
@@ -8128,7 +8102,7 @@ let may_start_new_cycle ctxt =
 let begin_full_construction ctxt pred_timestamp protocol_data =
   Alpha_context.Global.set_block_priority
     ctxt
-    protocol_data.Block_header.priority
+    protocol_data.Block_header_repr.priority
   &gt;&gt;=? fun ctxt -&gt;
   Baking.check_baking_rights ctxt protocol_data pred_timestamp
   &gt;&gt;=? fun (delegate_pk, block_delay) -&gt;
@@ -8156,7 +8130,7 @@ let begin_partial_construction ctxt =
 let begin_application ctxt chain_id block_header pred_timestamp =
   Alpha_context.Global.set_block_priority
     ctxt
-    block_header.Block_header.protocol_data.contents.priority
+    block_header.Block_header_repr.protocol_data.contents.priority
   &gt;&gt;=? fun ctxt -&gt;
   let current_level = Alpha_context.Level.current ctxt in
   Baking.check_proof_of_work_stamp ctxt block_header
@@ -8204,7 +8178,7 @@ let check_minimum_endorsements ctxt protocol_data block_delay
 They are sent to a unit type.">(Not_enough_endorsements_for_priority
        {
          required = minimum;
-         priority = protocol_data.Block_header.priority;
+         priority = protocol_data.Block_header_repr.priority;
          endorsements = included_endorsements;
          timestamp;
        })</abbr>
@@ -8240,7 +8214,7 @@ let finalize_application ctxt protocol_data delegate ~block_delay =
   let rewards = Alpha_context.get_rewards ctxt in
   Delegate.freeze_rewards ctxt delegate rewards
   &gt;&gt;=? fun ctxt -&gt;
-  ( match protocol_data.Block_header.seed_nonce_hash with
+  ( match protocol_data.Block_header_repr.seed_nonce_hash with
   | None -&gt;
       return ctxt
   | Some nonce_hash -&gt;
@@ -8303,6 +8277,7 @@ Require Tezos.Amendment.
 Require Tezos.Apply_results.
 Require Tezos.Baking.
 Require Tezos.Blinded_public_key_hash.
+Require Tezos.Block_header_repr.
 Require Tezos.Michelson_v1_gas.
 Require Tezos.Nonce_hash.
 Require Tezos.Script_interpreter.
@@ -9480,14 +9455,14 @@ Definition may_start_new_cycle (ctxt : Alpha_context.context)
 
 Definition begin_full_construction
   (ctxt : Alpha_context.context) (pred_timestamp : Time.t)
-  (protocol_data : Alpha_context.Block_header.contents)
+  (protocol_data : Block_header_repr.contents)
   : Lwt.t
     (Error_monad.tzresult
-      (Alpha_context.context * Alpha_context.Block_header.contents *
+      (Alpha_context.context * Block_header_repr.contents *
         Alpha_context.public_key * Alpha_context.Period.t)) :=
   let=? ctxt :=
     Alpha_context.Global.set_block_priority ctxt
-      protocol_data.(Alpha_context.Block_header.contents.priority) in
+      protocol_data.(Block_header_repr.contents.priority) in
   let=? '(delegate_pk, block_delay) :=
     Baking.check_baking_rights ctxt protocol_data pred_timestamp in
   let ctxt := Alpha_context.Fitness.increase None ctxt in
@@ -9497,7 +9472,7 @@ Definition begin_full_construction
     assert
       (Lwt.t
         (Error_monad.tzresult
-          (Alpha_context.context * Alpha_context.Block_header.contents *
+          (Alpha_context.context * Block_header_repr.contents *
             Alpha_context.public_key * Alpha_context.Period.t))) false
   | Some pred_level =&gt;
     let=? rights := Baking.endorsement_rights ctxt pred_level in
@@ -9520,26 +9495,25 @@ Definition begin_partial_construction (ctxt : Alpha_context.context)
 
 Definition begin_application
   (ctxt : Alpha_context.context) (chain_id : (|Chain_id|).(S.HASH.t))
-  (block_header : Alpha_context.Block_header.block_header)
-  (pred_timestamp : Time.t)
+  (block_header : Block_header_repr.block_header) (pred_timestamp : Time.t)
   : Lwt.t
     (Error_monad.tzresult
       (Alpha_context.context * Alpha_context.public_key * Alpha_context.Period.t)) :=
   let=? ctxt :=
     Alpha_context.Global.set_block_priority ctxt
-      block_header.(Alpha_context.Block_header.block_header.protocol_data).(Alpha_context.Block_header.protocol_data.contents).(Alpha_context.Block_header.contents.priority)
+      block_header.(Block_header_repr.block_header.protocol_data).(Block_header_repr.protocol_data.contents).(Block_header_repr.contents.priority)
     in
   let current_level := Alpha_context.Level.current ctxt in
   let=? '_ := Baking.check_proof_of_work_stamp ctxt block_header in
   let=? '_ := Baking.check_fitness_gap ctxt block_header in
   let=? '(delegate_pk, block_delay) :=
     Baking.check_baking_rights ctxt
-      block_header.(Alpha_context.Block_header.block_header.protocol_data).(Alpha_context.Block_header.protocol_data.contents)
+      block_header.(Block_header_repr.block_header.protocol_data).(Block_header_repr.protocol_data.contents)
       pred_timestamp in
   let=? '_ := Baking.check_signature block_header chain_id delegate_pk in
   let has_commitment :=
     match
-      block_header.(Alpha_context.Block_header.block_header.protocol_data).(Alpha_context.Block_header.protocol_data.contents).(Alpha_context.Block_header.contents.seed_nonce_hash)
+      block_header.(Block_header_repr.block_header.protocol_data).(Block_header_repr.protocol_data.contents).(Block_header_repr.contents.seed_nonce_hash)
       with
     | None =&gt; false
     | Some _ =&gt; true
@@ -9565,8 +9539,7 @@ Definition begin_application
   end.
 
 Definition check_minimum_endorsements
-  (ctxt : Alpha_context.context)
-  (protocol_data : Alpha_context.Block_header.contents)
+  (ctxt : Alpha_context.context) (protocol_data : Block_header_repr.contents)
   (block_delay : Alpha_context.Period.t)
   (included_endorsements : (|Compare.Int|).(Compare.S.t))
   : Lwt.t (Error_monad.tzresult unit) :=
@@ -9577,8 +9550,7 @@ Definition check_minimum_endorsements
     extensible_type_value.
 
 Definition finalize_application
-  (ctxt : Alpha_context.context)
-  (protocol_data : Alpha_context.Block_header.contents)
+  (ctxt : Alpha_context.context) (protocol_data : Block_header_repr.contents)
   (delegate : (|Signature.Public_key_hash|).(S.SPublic_key_hash.t))
   (block_delay : Alpha_context.Period.t)
   : Lwt.t
@@ -9591,8 +9563,8 @@ Definition finalize_application
   let=? ctxt := Alpha_context.add_deposit ctxt delegate deposit in
   let=? reward :=
     Baking.baking_reward ctxt
-      protocol_data.(Alpha_context.Block_header.contents.priority)
-      included_endorsements in
+      protocol_data.(Block_header_repr.contents.priority) included_endorsements
+    in
   let=? ctxt := Alpha_context.add_rewards ctxt reward in
   let=? ctxt :=
     (|Signature.Public_key_hash|).(S.SPublic_key_hash.Map).(S.INDEXES_Map.fold)
@@ -9607,8 +9579,7 @@ Definition finalize_application
   let rewards := Alpha_context.get_rewards ctxt in
   let=? ctxt := Alpha_context.Delegate.freeze_rewards ctxt delegate rewards in
   let=? ctxt :=
-    match protocol_data.(Alpha_context.Block_header.contents.seed_nonce_hash)
-      with
+    match protocol_data.(Block_header_repr.contents.seed_nonce_hash) with
     | None =&gt; Error_monad.__return ctxt
     | Some nonce_hash =&gt;
       Alpha_context.Nonce.record_hash ctxt
@@ -9643,7 +9614,7 @@ Definition finalize_application
       Apply_results.block_metadata.level := Alpha_context.Level.current ctxt;
       Apply_results.block_metadata.voting_period_kind := voting_period_kind;
       Apply_results.block_metadata.nonce_hash :=
-        protocol_data.(Alpha_context.Block_header.contents.seed_nonce_hash);
+        protocol_data.(Block_header_repr.contents.seed_nonce_hash);
       Apply_results.block_metadata.consumed_gas := consumed_gas;
       Apply_results.block_metadata.deactivated := deactivated;
       Apply_results.block_metadata.balance_updates := balance_updates |} in
@@ -13722,7 +13693,7 @@ Parameter block_metadata_encoding : Data_encoding.encoding block_metadata.
     <h3>Baking</h3>
     <ul>
       <li>OCaml size: 400 lines</li>
-      <li>Coq size: 426 lines (+6% compared to&nbsp;OCaml)</li>
+      <li>Coq size: 423 lines (+5% compared to&nbsp;OCaml)</li>
     </ul>
   </div>
   <div class="col-md-6">
@@ -13901,7 +13872,7 @@ let check_timestamp c priority pred_timestamp =
 They are sent to a unit type.">(Timestamp_too_early (minimal_time, timestamp))</abbr>
        Timestamp.(timestamp -? minimal_time))
 
-let check_baking_rights c {Block_header.priority; _} pred_timestamp =
+let check_baking_rights c {Block_header_repr.priority; _} pred_timestamp =
   let level = Level.current c in
   Roll.baking_rights_owner c level ~priority
   &gt;&gt;=? fun delegate -&gt;
@@ -14060,7 +14031,7 @@ let check_proof_of_work_stamp ctxt block =
   let proof_of_work_threshold = Constants.proof_of_work_threshold ctxt in
   if
     check_header_proof_of_work_stamp
-      block.Block_header.shell
+      block.Block_header_repr.shell
       block.protocol_data.contents
       proof_of_work_threshold
   then return_unit
@@ -14070,7 +14041,7 @@ They are sent to a unit type.">Invalid_stamp</abbr>
 
 let check_signature block chain_id key =
   let check_signature key
-      {Block_header.shell; protocol_data = {contents; signature}} =
+      {Block_header_repr.shell; protocol_data = {contents; signature}} =
     let unsigned_header =
       Data_encoding.Binary.to_bytes_exn
         Block_header.unsigned_encoding
@@ -14161,6 +14132,7 @@ Unset Guard Checking.
 Require Import Tezos.Environment.
 Import Environment.Notations.
 Require Tezos.Alpha_context.
+Require Tezos.Block_header_repr.
 Require Tezos.Misc.
 
 Import Alpha_context.
@@ -14251,12 +14223,11 @@ Definition check_timestamp
       (Alpha_context.Timestamp.op_minusquestion timestamp minimal_time)).
 
 Definition check_baking_rights
-  (c : Alpha_context.context)
-  (function_parameter : Alpha_context.Block_header.contents)
+  (c : Alpha_context.context) (function_parameter : Block_header_repr.contents)
   : Alpha_context.Timestamp.time -&gt;
   Lwt.t
     (Error_monad.tzresult (Alpha_context.public_key * Alpha_context.Period.t)) :=
-  let '{| Alpha_context.Block_header.contents.priority := priority |} :=
+  let '{| Block_header_repr.contents.priority := priority |} :=
     function_parameter in
   fun pred_timestamp =&gt;
     let level := Alpha_context.Level.current c in
@@ -14458,34 +14429,31 @@ Definition check_header_proof_of_work_stamp
   check_hash __hash_value stamp_threshold.
 
 Definition check_proof_of_work_stamp
-  (ctxt : Alpha_context.context)
-  (block : Alpha_context.Block_header.block_header)
+  (ctxt : Alpha_context.context) (block : Block_header_repr.block_header)
   : Lwt.t (Error_monad.tzresult unit) :=
   let proof_of_work_threshold :=
     Alpha_context.Constants.proof_of_work_threshold ctxt in
   if
     check_header_proof_of_work_stamp
-      block.(Alpha_context.Block_header.block_header.shell)
-      block.(Alpha_context.Block_header.block_header.protocol_data).(Alpha_context.Block_header.protocol_data.contents)
+      block.(Block_header_repr.block_header.shell)
+      block.(Block_header_repr.block_header.protocol_data).(Block_header_repr.protocol_data.contents)
       proof_of_work_threshold then
     Error_monad.return_unit
   else
     Error_monad.fail extensible_type_value.
 
 Definition check_signature
-  (block : Alpha_context.Block_header.block_header)
-  (chain_id : (|Chain_id|).(S.HASH.t))
+  (block : Block_header_repr.block_header) (chain_id : (|Chain_id|).(S.HASH.t))
   (__key_value : (|Signature.Public_key|).(S.SPublic_key.t))
   : Lwt.t (Error_monad.tzresult unit) :=
   let check_signature
     (__key_value : (|Signature.Public_key|).(S.SPublic_key.t))
-    (function_parameter : Alpha_context.Block_header.block_header) : bool :=
+    (function_parameter : Block_header_repr.block_header) : bool :=
     let '{|
-      Alpha_context.Block_header.block_header.shell := shell;
-        Alpha_context.Block_header.block_header.protocol_data := {|
-          Alpha_context.Block_header.protocol_data.contents := contents;
-            Alpha_context.Block_header.protocol_data.signature :=
-              signature
+      Block_header_repr.block_header.shell := shell;
+        Block_header_repr.block_header.protocol_data := {|
+          Block_header_repr.protocol_data.contents := contents;
+            Block_header_repr.protocol_data.signature := signature
             |}
         |} := function_parameter in
     let unsigned_header :=
@@ -34302,12 +34270,12 @@ Parameter last_allowed_fork_level : Raw_context.t -&gt; Raw_level_repr.t.
   <div style="margin: 20px;">
     <h3>Main</h3>
     <ul>
-      <li>OCaml size: 380 lines</li>
-      <li>Coq size: 598 lines (+57% compared to&nbsp;OCaml)</li>
+      <li>OCaml size: 374 lines</li>
+      <li>Coq size: 602 lines (+60% compared to&nbsp;OCaml)</li>
     </ul>
   </div>
   <div class="col-md-6">
-    <a href="#main.ml"><code>main.ml</code></a>&nbsp;<span class="label label-warning">5 warnings</span>
+    <a href="#main.ml"><code>main.ml</code></a>&nbsp;<span class="label label-warning">3 warnings</span>
     
     <pre>(*****************************************************************************)
 (*                                                                           *)
@@ -34350,18 +34318,11 @@ type block_header_metadata = Apply_results.block_metadata
 
 let block_header_metadata_encoding = Apply_results.block_metadata_encoding
 
-<abbr class="mark-warning" title="We do not handle types with both a synonym and a type definition">type operation_data = Alpha_context.packed_protocol_data =
-  | Operation_data :
-      'kind Alpha_context.Operation.protocol_data
-      -&gt; operation_data</abbr>
+type operation_data = Alpha_context.packed_protocol_data
 
 let operation_data_encoding = Alpha_context.Operation.protocol_data_encoding
 
-<abbr class="mark-warning" title="We do not handle types with both a synonym and a type definition">type operation_receipt = Apply_results.packed_operation_metadata =
-  | Operation_metadata :
-      'kind Apply_results.operation_metadata
-      -&gt; operation_receipt
-  | No_operation_metadata : operation_receipt</abbr>
+type operation_receipt = Apply_results.packed_operation_metadata
 
 let operation_receipt_encoding = Apply_results.operation_metadata_encoding
 
@@ -34501,7 +34462,7 @@ let apply_operation ({mode; chain_id; ctxt; op_count; _} as data)
               (Alpha_context.Operation.acceptable_passes operation)) -&gt;
       (* Multipass validation only considers operations in pass 0. *)
       let op_count = op_count + 1 in
-      return ({data with ctxt; op_count}, No_operation_metadata)
+      return ({data with ctxt; op_count}, Apply_results.No_operation_metadata)
   | _ -&gt;
       let {shell; protocol_data = Operation_data protocol_data} = operation in
       let operation : _ Alpha_context.operation = {shell; protocol_data} in
@@ -34525,7 +34486,8 @@ let apply_operation ({mode; chain_id; ctxt; op_count; _} as data)
         operation
       &gt;&gt;=? fun (ctxt, result) -&gt;
       let op_count = op_count + 1 in
-      return ({data with ctxt; op_count}, Operation_metadata result)
+      return
+        ({data with ctxt; op_count}, Apply_results.Operation_metadata result)
 
 let finalize_block {mode; ctxt; op_count} =
   match mode with
@@ -34709,6 +34671,7 @@ Import Environment.Notations.
 Require Tezos.Alpha_context.
 Require Tezos.Apply.
 Require Tezos.Apply_results.
+Require Tezos.Block_header_repr.
 Require Tezos.Script_ir_translator.
 Require Tezos.Script_typed_ir.
 Require Tezos.Services_registration.
@@ -35011,7 +34974,9 @@ Definition begin_construction
 
 Definition apply_operation (function_parameter : validation_state)
   : Alpha_context.packed_operation -&gt;
-  Lwt.t (Error_monad.tzresult (validation_state * operation_receipt)) :=
+  Lwt.t
+    (Error_monad.tzresult
+      (validation_state * Apply_results.packed_operation_metadata)) :=
   let
     '{|
       validation_state.mode := mode;
@@ -35033,11 +34998,12 @@ Definition apply_operation (function_parameter : validation_state)
       let op_count := Pervasives.op_plus op_count 1 in
       Error_monad.__return
         ((validation_state.with_op_count op_count
-          (validation_state.with_ctxt ctxt data)), No_operation_metadata)
+          (validation_state.with_ctxt ctxt data)),
+          Apply_results.No_operation_metadata)
     | (_, _) =&gt;
       let '{|
         operation.shell := shell;
-          operation.protocol_data := Operation_data protocol_data
+          operation.protocol_data := Alpha_context.Operation_data protocol_data
           |} := operation in
       let operation :=
         {| Alpha_context.operation.shell := shell;
@@ -35079,7 +35045,7 @@ Definition apply_operation (function_parameter : validation_state)
       Error_monad.__return
         ((validation_state.with_op_count op_count
           (validation_state.with_ctxt ctxt data)),
-          (Operation_metadata __result_value))
+          (Apply_results.Operation_metadata __result_value))
     end.
 
 Definition finalize_block (function_parameter : validation_state)

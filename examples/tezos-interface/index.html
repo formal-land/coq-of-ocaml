@@ -61,7 +61,7 @@ opam pin add https://github.com/clarus/coq-of-ocaml.git#master</code></pre>
     <ul>
       <li>OCaml size: 6154 lines</li>
       <li>Coq size: 3444 lines (-45% compared to&nbsp;OCaml)</li>
-      <li>Warnings from coq-of-ocaml: 99</li>
+      <li>Warnings from coq-of-ocaml: 102</li>
     </ul>
     
       <canvas id="chart" width="400" height="400"></canvas>
@@ -108,7 +108,7 @@ opam pin add https://github.com/clarus/coq-of-ocaml.git#master</code></pre>
     </ul>
   </div>
   <div class="col-md-6">
-    <a href="#environment.mli"><code>environment.mli</code></a>&nbsp;<span class="label label-warning">99 warnings</span>
+    <a href="#environment.mli"><code>environment.mli</code></a>&nbsp;<span class="label label-warning">102 warnings</span>
     
     <pre>module Pervasives : sig
 # 1 &quot;../lib_protocol_environment/sigs/v1/pervasives.mli&quot;
@@ -5067,7 +5067,7 @@ Extensible type 'Base58.data' not handled">include HASH</abbr>
 
   val empty : t
 
-  type path = Left of path * t | Right of t * path | Op
+  <abbr class="mark-warning" title="We do not handle the definition of new types in signatures">type path = Left of path * t | Right of t * path | Op</abbr>
 
   val compute_path : elt list -&gt; int -&gt; path
 
@@ -6063,10 +6063,10 @@ module type PROTOCOL = sig
   val block_header_data_encoding : block_header_data Data_encoding.t
 
   (** A fully parsed block header. *)
-  type block_header = {
+  <abbr class="mark-warning" title="We do not handle the definition of new types in signatures">type block_header = {
     shell : Block_header.shell_header;
     protocol_data : block_header_data;
-  }
+  }</abbr>
 
   (** Version-specific side information computed by the protocol
       during the validation of a block. Should not include information
@@ -6087,10 +6087,10 @@ module type PROTOCOL = sig
   type operation_receipt
 
   (** A fully parsed operation. *)
-  type operation = {
+  <abbr class="mark-warning" title="We do not handle the definition of new types in signatures">type operation = {
     shell : Operation.shell_header;
     protocol_data : operation_data;
-  }
+  }</abbr>
 
   (** Encoding for version-specific operation data. *)
   val operation_data_encoding : operation_data Data_encoding.t

@@ -11,6 +11,7 @@ Unset Guard Checking.
 Require Import Tezos.Environment.
 Import Environment.Notations.
 Require Tezos.Alpha_context.
+Require Tezos.Block_header_repr.
 Require Tezos.Misc.
 
 Import Alpha_context.
@@ -101,12 +102,11 @@ Definition check_timestamp
       (Alpha_context.Timestamp.op_minusquestion timestamp minimal_time)).
 
 Definition check_baking_rights
-  (c : Alpha_context.context)
-  (function_parameter : Alpha_context.Block_header.contents)
+  (c : Alpha_context.context) (function_parameter : Block_header_repr.contents)
   : Alpha_context.Timestamp.time ->
   Lwt.t
     (Error_monad.tzresult (Alpha_context.public_key * Alpha_context.Period.t)) :=
-  let '{| Alpha_context.Block_header.contents.priority := priority |} :=
+  let '{| Block_header_repr.contents.priority := priority |} :=
     function_parameter in
   fun pred_timestamp =>
     let level := Alpha_context.Level.current c in
@@ -308,34 +308,31 @@ Definition check_header_proof_of_work_stamp
   check_hash __hash_value stamp_threshold.
 
 Definition check_proof_of_work_stamp
-  (ctxt : Alpha_context.context)
-  (block : Alpha_context.Block_header.block_header)
+  (ctxt : Alpha_context.context) (block : Block_header_repr.block_header)
   : Lwt.t (Error_monad.tzresult unit) :=
   let proof_of_work_threshold :=
     Alpha_context.Constants.proof_of_work_threshold ctxt in
   if
     check_header_proof_of_work_stamp
-      block.(Alpha_context.Block_header.block_header.shell)
-      block.(Alpha_context.Block_header.block_header.protocol_data).(Alpha_context.Block_header.protocol_data.contents)
+      block.(Block_header_repr.block_header.shell)
+      block.(Block_header_repr.block_header.protocol_data).(Block_header_repr.protocol_data.contents)
       proof_of_work_threshold then
     Error_monad.return_unit
   else
     Error_monad.fail extensible_type_value.
 
 Definition check_signature
-  (block : Alpha_context.Block_header.block_header)
-  (chain_id : (|Chain_id|).(S.HASH.t))
+  (block : Block_header_repr.block_header) (chain_id : (|Chain_id|).(S.HASH.t))
   (__key_value : (|Signature.Public_key|).(S.SPublic_key.t))
   : Lwt.t (Error_monad.tzresult unit) :=
   let check_signature
     (__key_value : (|Signature.Public_key|).(S.SPublic_key.t))
-    (function_parameter : Alpha_context.Block_header.block_header) : bool :=
+    (function_parameter : Block_header_repr.block_header) : bool :=
     let '{|
-      Alpha_context.Block_header.block_header.shell := shell;
-        Alpha_context.Block_header.block_header.protocol_data := {|
-          Alpha_context.Block_header.protocol_data.contents := contents;
-            Alpha_context.Block_header.protocol_data.signature :=
-              signature
+      Block_header_repr.block_header.shell := shell;
+        Block_header_repr.block_header.protocol_data := {|
+          Block_header_repr.protocol_data.contents := contents;
+            Block_header_repr.protocol_data.signature := signature
             |}
         |} := function_parameter in
     let unsigned_header :=

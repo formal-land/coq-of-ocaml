@@ -10,6 +10,7 @@ Import ListNotations.
 Require Import Tezos.Environment.
 Import Environment.Notations.
 Require Tezos.Blinded_public_key_hash.
+Require Tezos.Block_header_repr.
 Require Tezos.Contract_repr.
 Require Tezos.Michelson_v1_primitives.
 Require Tezos.Nonce_hash.
@@ -1727,41 +1728,11 @@ Module Vote.
 End Vote.
 
 Module Block_header.
-  Module contents.
-    Record record : Set := Build {
-      priority : int;
-      seed_nonce_hash : option Nonce_hash.t;
-      proof_of_work_nonce : MBytes.t }.
-    Definition with_priority priority (r : record) :=
-      Build priority r.(seed_nonce_hash) r.(proof_of_work_nonce).
-    Definition with_seed_nonce_hash seed_nonce_hash (r : record) :=
-      Build r.(priority) seed_nonce_hash r.(proof_of_work_nonce).
-    Definition with_proof_of_work_nonce proof_of_work_nonce (r : record) :=
-      Build r.(priority) r.(seed_nonce_hash) proof_of_work_nonce.
-  End contents.
-  Definition contents := contents.record.
+  Definition contents : Set := Block_header_repr.contents.
   
-  Module protocol_data.
-    Record record : Set := Build {
-      contents : contents;
-      signature : Signature.t }.
-    Definition with_contents contents (r : record) :=
-      Build contents r.(signature).
-    Definition with_signature signature (r : record) :=
-      Build r.(contents) signature.
-  End protocol_data.
-  Definition protocol_data := protocol_data.record.
+  Definition protocol_data : Set := Block_header_repr.protocol_data.
   
-  Module block_header.
-    Record record : Set := Build {
-      shell : Block_header.shell_header;
-      protocol_data : protocol_data }.
-    Definition with_shell shell (r : record) :=
-      Build shell r.(protocol_data).
-    Definition with_protocol_data protocol_data (r : record) :=
-      Build r.(shell) protocol_data.
-  End block_header.
-  Definition block_header := block_header.record.
+  Definition block_header : Set := Block_header_repr.block_header.
   
   Definition raw : Set := Block_header.t.
   

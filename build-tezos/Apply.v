@@ -15,6 +15,7 @@ Require Tezos.Amendment.
 Require Tezos.Apply_results.
 Require Tezos.Baking.
 Require Tezos.Blinded_public_key_hash.
+Require Tezos.Block_header_repr.
 Require Tezos.Michelson_v1_gas.
 Require Tezos.Nonce_hash.
 Require Tezos.Script_interpreter.
@@ -1192,14 +1193,14 @@ Definition may_start_new_cycle (ctxt : Alpha_context.context)
 
 Definition begin_full_construction
   (ctxt : Alpha_context.context) (pred_timestamp : Time.t)
-  (protocol_data : Alpha_context.Block_header.contents)
+  (protocol_data : Block_header_repr.contents)
   : Lwt.t
     (Error_monad.tzresult
-      (Alpha_context.context * Alpha_context.Block_header.contents *
+      (Alpha_context.context * Block_header_repr.contents *
         Alpha_context.public_key * Alpha_context.Period.t)) :=
   let=? ctxt :=
     Alpha_context.Global.set_block_priority ctxt
-      protocol_data.(Alpha_context.Block_header.contents.priority) in
+      protocol_data.(Block_header_repr.contents.priority) in
   let=? '(delegate_pk, block_delay) :=
     Baking.check_baking_rights ctxt protocol_data pred_timestamp in
   let ctxt := Alpha_context.Fitness.increase None ctxt in
@@ -1209,7 +1210,7 @@ Definition begin_full_construction
     assert
       (Lwt.t
         (Error_monad.tzresult
-          (Alpha_context.context * Alpha_context.Block_header.contents *
+          (Alpha_context.context * Block_header_repr.contents *
             Alpha_context.public_key * Alpha_context.Period.t))) false
   | Some pred_level =>
     let=? rights := Baking.endorsement_rights ctxt pred_level in
@@ -1232,26 +1233,25 @@ Definition begin_partial_construction (ctxt : Alpha_context.context)
 
 Definition begin_application
   (ctxt : Alpha_context.context) (chain_id : (|Chain_id|).(S.HASH.t))
-  (block_header : Alpha_context.Block_header.block_header)
-  (pred_timestamp : Time.t)
+  (block_header : Block_header_repr.block_header) (pred_timestamp : Time.t)
   : Lwt.t
     (Error_monad.tzresult
       (Alpha_context.context * Alpha_context.public_key * Alpha_context.Period.t)) :=
   let=? ctxt :=
     Alpha_context.Global.set_block_priority ctxt
-      block_header.(Alpha_context.Block_header.block_header.protocol_data).(Alpha_context.Block_header.protocol_data.contents).(Alpha_context.Block_header.contents.priority)
+      block_header.(Block_header_repr.block_header.protocol_data).(Block_header_repr.protocol_data.contents).(Block_header_repr.contents.priority)
     in
   let current_level := Alpha_context.Level.current ctxt in
   let=? '_ := Baking.check_proof_of_work_stamp ctxt block_header in
   let=? '_ := Baking.check_fitness_gap ctxt block_header in
   let=? '(delegate_pk, block_delay) :=
     Baking.check_baking_rights ctxt
-      block_header.(Alpha_context.Block_header.block_header.protocol_data).(Alpha_context.Block_header.protocol_data.contents)
+      block_header.(Block_header_repr.block_header.protocol_data).(Block_header_repr.protocol_data.contents)
       pred_timestamp in
   let=? '_ := Baking.check_signature block_header chain_id delegate_pk in
   let has_commitment :=
     match
-      block_header.(Alpha_context.Block_header.block_header.protocol_data).(Alpha_context.Block_header.protocol_data.contents).(Alpha_context.Block_header.contents.seed_nonce_hash)
+      block_header.(Block_header_repr.block_header.protocol_data).(Block_header_repr.protocol_data.contents).(Block_header_repr.contents.seed_nonce_hash)
       with
     | None => false
     | Some _ => true
@@ -1277,8 +1277,7 @@ Definition begin_application
   end.
 
 Definition check_minimum_endorsements
-  (ctxt : Alpha_context.context)
-  (protocol_data : Alpha_context.Block_header.contents)
+  (ctxt : Alpha_context.context) (protocol_data : Block_header_repr.contents)
   (block_delay : Alpha_context.Period.t)
   (included_endorsements : (|Compare.Int|).(Compare.S.t))
   : Lwt.t (Error_monad.tzresult unit) :=
@@ -1289,8 +1288,7 @@ Definition check_minimum_endorsements
     extensible_type_value.
 
 Definition finalize_application
-  (ctxt : Alpha_context.context)
-  (protocol_data : Alpha_context.Block_header.contents)
+  (ctxt : Alpha_context.context) (protocol_data : Block_header_repr.contents)
   (delegate : (|Signature.Public_key_hash|).(S.SPublic_key_hash.t))
   (block_delay : Alpha_context.Period.t)
   : Lwt.t
@@ -1303,8 +1301,8 @@ Definition finalize_application
   let=? ctxt := Alpha_context.add_deposit ctxt delegate deposit in
   let=? reward :=
     Baking.baking_reward ctxt
-      protocol_data.(Alpha_context.Block_header.contents.priority)
-      included_endorsements in
+      protocol_data.(Block_header_repr.contents.priority) included_endorsements
+    in
   let=? ctxt := Alpha_context.add_rewards ctxt reward in
   let=? ctxt :=
     (|Signature.Public_key_hash|).(S.SPublic_key_hash.Map).(S.INDEXES_Map.fold)
@@ -1319,8 +1317,7 @@ Definition finalize_application
   let rewards := Alpha_context.get_rewards ctxt in
   let=? ctxt := Alpha_context.Delegate.freeze_rewards ctxt delegate rewards in
   let=? ctxt :=
-    match protocol_data.(Alpha_context.Block_header.contents.seed_nonce_hash)
-      with
+    match protocol_data.(Block_header_repr.contents.seed_nonce_hash) with
     | None => Error_monad.__return ctxt
     | Some nonce_hash =>
       Alpha_context.Nonce.record_hash ctxt
@@ -1355,7 +1352,7 @@ Definition finalize_application
       Apply_results.block_metadata.level := Alpha_context.Level.current ctxt;
       Apply_results.block_metadata.voting_period_kind := voting_period_kind;
       Apply_results.block_metadata.nonce_hash :=
-        protocol_data.(Alpha_context.Block_header.contents.seed_nonce_hash);
+        protocol_data.(Block_header_repr.contents.seed_nonce_hash);
       Apply_results.block_metadata.consumed_gas := consumed_gas;
       Apply_results.block_metadata.deactivated := deactivated;
       Apply_results.block_metadata.balance_updates := balance_updates |} in

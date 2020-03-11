@@ -12,6 +12,7 @@ Import Environment.Notations.
 Require Tezos.Alpha_context.
 Require Tezos.Apply.
 Require Tezos.Apply_results.
+Require Tezos.Block_header_repr.
 Require Tezos.Script_ir_translator.
 Require Tezos.Script_typed_ir.
 Require Tezos.Services_registration.
@@ -314,7 +315,9 @@ Definition begin_construction
 
 Definition apply_operation (function_parameter : validation_state)
   : Alpha_context.packed_operation ->
-  Lwt.t (Error_monad.tzresult (validation_state * operation_receipt)) :=
+  Lwt.t
+    (Error_monad.tzresult
+      (validation_state * Apply_results.packed_operation_metadata)) :=
   let
     '{|
       validation_state.mode := mode;
@@ -336,11 +339,12 @@ Definition apply_operation (function_parameter : validation_state)
       let op_count := Pervasives.op_plus op_count 1 in
       Error_monad.__return
         ((validation_state.with_op_count op_count
-          (validation_state.with_ctxt ctxt data)), No_operation_metadata)
+          (validation_state.with_ctxt ctxt data)),
+          Apply_results.No_operation_metadata)
     | (_, _) =>
       let '{|
         operation.shell := shell;
-          operation.protocol_data := Operation_data protocol_data
+          operation.protocol_data := Alpha_context.Operation_data protocol_data
           |} := operation in
       let operation :=
         {| Alpha_context.operation.shell := shell;
@@ -382,7 +386,7 @@ Definition apply_operation (function_parameter : validation_state)
       Error_monad.__return
         ((validation_state.with_op_count op_count
           (validation_state.with_ctxt ctxt data)),
-          (Operation_metadata __result_value))
+          (Apply_results.Operation_metadata __result_value))
     end.
 
 Definition finalize_block (function_parameter : validation_state)
