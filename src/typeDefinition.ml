@@ -391,11 +391,24 @@ module Inductive = struct
       )
     )
 
+  let typ_depends_on_name (typ : Type.t) (name : Name.t) : bool =
+    Name.Set.mem name (Type.local_typ_constructors_of_typ typ)
+
   let to_coq_notations_wheres
     (subst : Type.Subst.t)
     (inductive : t)
     : SmartPrint.t list =
-    (inductive.notations |> List.map (fun (name, typ_args, typ) ->
+    let sorted_notations =
+      (* inductive.notations in *)
+      inductive.notations |> List.stable_sort (fun (name1, _, typ1) (name2, _, typ2) ->
+        if typ_depends_on_name typ2 name1 then
+          -1
+        else if typ_depends_on_name typ1 name2 then
+          +1
+        else
+          0
+      ) in
+    (sorted_notations |> List.map (fun (name, typ_args, typ) ->
       to_coq_notations_where subst (to_coq_notation_name name) typ_args typ
     )) @
     (inductive.constructor_records |> List.map

@@ -12,8 +12,8 @@ Unset Guard Checking.
 
 Definition foo : Set := string.
 
-Reserved Notation "'simple".
 Reserved Notation "'double".
+Reserved Notation "'simple".
 
 Inductive tree (a : Set) : Set :=
 | Tree : list (node a) -> tree a
@@ -28,8 +28,8 @@ with unrelated (a : Set) : Set :=
 where "'simple" := (fun (t_b : Set) => t_b)
 and "'double" := (fun (t_b : Set) => t_b * 'simple t_b).
 
-Definition simple := 'simple.
 Definition double := 'double.
+Definition simple := 'simple.
 
 Arguments Tree {_}.
 Arguments Leaf {_}.

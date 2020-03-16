@@ -1,4 +1,5 @@
 ## [Unreleased]
+* Add automatic re-ordering of type synonyms in mutual types to generate valid definitions.
 * Add minimal handling of class types as records.
 * Ignore type parameters with constraints (like being a sub-type of some variants).
 * Add a `@coq_struct "param"` attribute to specify the decreasing parameter name of fixpoints.
