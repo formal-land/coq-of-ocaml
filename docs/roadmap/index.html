@@ -1,0 +1,119 @@
+<!DOCTYPE html><html lang="en"><head><meta charSet="utf-8"/><meta http-equiv="X-UA-Compatible" content="IE=edge"/><title>Future · coq-of-ocaml</title><meta name="viewport" content="width=device-width"/><meta name="generator" content="Docusaurus"/><meta name="description" content="We present some of the things we have done, and what we could do in the future."/><meta name="docsearch:language" content="en"/><meta property="og:title" content="Future · coq-of-ocaml"/><meta property="og:type" content="website"/><meta property="og:url" content="https://clarus.github.io/coq-of-ocaml/"/><meta property="og:description" content="We present some of the things we have done, and what we could do in the future."/><meta property="og:image" content="https://clarus.github.io/coq-of-ocaml/img/undraw_online.svg"/><meta name="twitter:card" content="summary"/><meta name="twitter:image" content="https://clarus.github.io/coq-of-ocaml/img/undraw_tweetstorm.svg"/><link rel="shortcut icon" href="/coq-of-ocaml/img/favicon.ico"/><link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/default.min.css"/><script type="text/javascript" src="https://buttons.github.io/buttons.js"></script><script type="text/javascript" src="/coq-of-ocaml/js/language-name.js"></script><script src="/coq-of-ocaml/js/scrollSpy.js"></script><link rel="stylesheet" href="/coq-of-ocaml/css/main.css"/><script src="/coq-of-ocaml/js/codetabs.js"></script></head><body class="sideNavVisible separateOnPageNav"><div class="fixedHeaderContainer"><div class="headerWrapper wrapper"><header><a href="/coq-of-ocaml/"><img class="logo" src="/coq-of-ocaml/img/favicon.ico" alt="coq-of-ocaml"/><h2 class="headerTitleWithLogo">coq-of-ocaml</h2></a><div class="navigationWrapper navigationSlider"><nav class="slidingNav"><ul class="nav-site nav-site-internal"><li class="siteNavGroupActive"><a href="/coq-of-ocaml/docs/introduction" target="_self">Docs</a></li><li class=""><a href="https://clarus.github.io/coq-of-ocaml/examples/" target="_self">Examples</a></li><li class=""><a href="https://github.com/clarus/coq-of-ocaml" target="_self">GitHub</a></li></ul></nav></div></header></div></div><div class="navPusher"><div class="docMainWrapper wrapper"><div class="docsNavContainer" id="docsNav"><nav class="toc"><div class="toggleNav"><section class="navWrapper wrapper"><div class="navBreadcrumb wrapper"><div class="navToggle" id="navToggler"><div class="hamburger-menu"><div class="line1"></div><div class="line2"></div><div class="line3"></div></div></div><h2><i>›</i><span>Roadmap</span></h2><div class="tocToggler" id="tocToggler"><i class="icon-toc"></i></div></div><div class="navGroups"><div class="navGroup"><h3 class="navGroupCategoryTitle">Introduction</h3><ul class=""><li class="navListItem"><a class="navItem" href="/coq-of-ocaml/docs/introduction">What is coq-of-ocaml</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">Getting started</h3><ul class=""><li class="navListItem"><a class="navItem" href="/coq-of-ocaml/docs/install">Install</a></li><li class="navListItem"><a class="navItem" href="/coq-of-ocaml/docs/run">Run</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">Concepts</h3><ul class=""><li class="navListItem"><a class="navItem" href="/coq-of-ocaml/docs/ocaml-core">OCaml core</a></li><li class="navListItem"><a class="navItem" href="/coq-of-ocaml/docs/type-definitions">Type definitions</a></li><li class="navListItem"><a class="navItem" href="/coq-of-ocaml/docs/module-system">Module system</a></li><li class="navListItem"><a class="navItem" href="/coq-of-ocaml/docs/gadts">GADTs</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">Roadmap</h3><ul class=""><li class="navListItem navListItemActive"><a class="navItem" href="/coq-of-ocaml/docs/roadmap">Future</a></li></ul></div></div></section></div><script>
+            var coll = document.getElementsByClassName('collapsible');
+            var checkActiveCategory = true;
+            for (var i = 0; i < coll.length; i++) {
+              var links = coll[i].nextElementSibling.getElementsByTagName('*');
+              if (checkActiveCategory){
+                for (var j = 0; j < links.length; j++) {
+                  if (links[j].classList.contains('navListItemActive')){
+                    coll[i].nextElementSibling.classList.toggle('hide');
+                    coll[i].childNodes[1].classList.toggle('rotate');
+                    checkActiveCategory = false;
+                    break;
+                  }
+                }
+              }
+
+              coll[i].addEventListener('click', function() {
+                var arrow = this.childNodes[1];
+                arrow.classList.toggle('rotate');
+                var content = this.nextElementSibling;
+                content.classList.toggle('hide');
+              });
+            }
+
+            document.addEventListener('DOMContentLoaded', function() {
+              createToggler('#navToggler', '#docsNav', 'docsSliderActive');
+              createToggler('#tocToggler', 'body', 'tocActive');
+
+              var headings = document.querySelector('.toc-headings');
+              headings && headings.addEventListener('click', function(event) {
+                var el = event.target;
+                while(el !== headings){
+                  if (el.tagName === 'A') {
+                    document.body.classList.remove('tocActive');
+                    break;
+                  } else{
+                    el = el.parentNode;
+                  }
+                }
+              }, false);
+
+              function createToggler(togglerSelector, targetSelector, className) {
+                var toggler = document.querySelector(togglerSelector);
+                var target = document.querySelector(targetSelector);
+
+                if (!toggler) {
+                  return;
+                }
+
+                toggler.onclick = function(event) {
+                  event.preventDefault();
+
+                  target.classList.toggle(className);
+                };
+              }
+            });
+        </script></nav></div><div class="container mainContainer docsContainer"><div class="wrapper"><div class="post"><header class="postHeader"><h1 id="__docusaurus" class="postHeaderTitle">Future</h1></header><article><div><span><p>We present some of the things we have done, and what we could do in the future.</p>
+<h2><a class="anchor" aria-hidden="true" id="done"></a><a href="#done" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Done</h2>
+<p>Our main achievement is the translation of the economic protocol (kernel) of the <a href="https://tezos.com/">Tezos crypto-currency</a> to a valid <a href="https://coq.inria.fr/">Coq</a> program. We present the results on our <a href="https://clarus.github.io/coq-of-ocaml/examples/tezos/">example page</a>. This amounts to the translation of around 40.000 lines of <a href="https://ocaml.org/">OCaml</a>, including the definition of interfaces.</p>
+<h2><a class="anchor" aria-hidden="true" id="coq-of-ocaml-as-a-kit"></a><a href="#coq-of-ocaml-as-a-kit" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>coq-of-ocaml as a kit</h2>
+<p>Here are some of the tasks that we could do, with an estimated cost in days:</p>
+<ul>
+<li><p>support extensible types with casts (1 day):</p>
+<ul>
+<li>define values of extensible types as <code>string * {A : Set @ A}</code>, maybe with a single constructor to differentiate the different extensible types;</li>
+<li>in a <code>match</code>, do an unsafe cast to get the correct value for the existential type <code>A</code>;</li>
+</ul>
+<p>We use the extensible types for the error messages in Tezos. We could also replace these extensible types by standard algebraic types. Indeed, we statically know all the possible cases. However, this may require splitting and relocating the code of some of the files.</p></li>
+<li><p>have full test-coverage (2 days):</p>
+<ul>
+<li>we only have unit tests for the main cases;</li>
+<li>we use the Tezos code-base as a huge non-regression test;</li>
+<li>we could track the lines covered by our unit tests and make sure we get to 100%;</li>
+</ul></li>
+<li><p>have a configuration file (1 day + 1 day of stabilization and documentation):</p>
+<ul>
+<li>we currently use a fork of coq-of-ocaml to have special features like renaming some variables with collisions;</li>
+<li>we would like to have a configuration file instead;</li>
+</ul></li>
+<li><p>upgrade to OCaml 4.09 (1 day + maybe a few days if this creates nasty bugs):</p>
+<ul>
+<li>necessary since we <a href="https://gitlab.com/tezos/tezos/-/merge_requests/1632">upgraded to OCaml 4.09</a>;</li>
+<li>requires to upgrade our <a href="https://github.com/ocaml/merlin">Merlin</a> version too, as the one we used is not compatible;</li>
+</ul></li>
+<li><p>have a protocol which we can compile back to OCaml (1 week + potentially many preliminary tasks):</p>
+<ul>
+<li>there are some parts of the protocol which we do not import yet, like <code>let () = ...</code> at top-level;</li>
+<li>having a Coq protocol which we can test in OCaml with the test-suite would increase confidence in our work;</li>
+<li>require to import all the small bits which we ignored till then;</li>
+<li>require to connect the axioms generated by the protocol environment to their actual implementation;</li>
+</ul></li>
+<li><p>verify the gas (one week):</p>
+<ul>
+<li>check that the gas count does not impact the output of standard operations (apart from the fact that such operations may fail if there is not enough gas);</li>
+<li>check basic properties on the gas operations (the gas count commutes with the addition for example);</li>
+</ul></li>
+<li><p>compile everything with the storage (1 day, maybe more, investigation):</p>
+<ul>
+<li>we currently compile files depending on <code>storage.ml</code> using the Coq file generated from the interface <code>storage.mli</code>;</li>
+<li>this is due to the performance impact of using the full definitions of the storage in place of its axioms;</li>
+<li>there are no reasons why this should be the case;</li>
+<li>investigate why and fix it;</li>
+</ul></li>
+<li><p>upgrade the import to Carthage (2 days):</p>
+<ul>
+<li>we currently import the Babylon protocol of Tezos;</li>
+<li>do the same for the Cartharge version;</li>
+</ul></li>
+<li><p>integrate into the CI of the development of the next Tezos protocol (3 days, but many preliminary tasks):</p>
+<ul>
+<li>being into the CI of Tezos would help to maintain the proofs for the evolving protocol;</li>
+<li>the cheapest way to integrate into the CI seems to be to verify that there no regressions on the warnings from coq-of-ocaml;</li>
+<li>requires to be compatible with the current protocol;</li>
+<li>requires to have a more precise way to sort-out the warnings, as some can not be removed for now;</li>
+<li>requires to be up-to-date with the current environment.</li>
+</ul></li>
+</ul>
+<p>As a more long term project, we would also like to support the GADTs in a proper way.</p>
+</span></div></article></div><div class="docs-prevnext"><a class="docs-prev button" href="/coq-of-ocaml/docs/gadts"><span class="arrow-prev">← </span><span>GADTs</span></a></div></div></div><nav class="onPageNav"><ul class="toc-headings"><li><a href="#done">Done</a></li><li><a href="#coq-of-ocaml-as-a-kit">coq-of-ocaml as a kit</a></li></ul></nav></div><footer class="nav-footer" id="footer"><section class="sitemap"><a href="/coq-of-ocaml/" class="nav-home"><img src="/coq-of-ocaml/img/favicon.ico" alt="coq-of-ocaml" width="66" height="58"/></a><div><h5>Docs</h5><a href="/coq-of-ocaml/docs/introduction.html">Introduction</a><a href="/coq-of-ocaml/docs/install.html">Getting Started</a><a href="/coq-of-ocaml/docs/ocaml-core.html">Concepts</a></div><div><h5>Community</h5><a href="https://github.com/clarus/coq-of-ocaml/issues?q=is%3Aissue+is%3Aopen+sort%3Aupdated-desc+label%3A%22Enhancement+%3Anew%3A%22" target="_blank" rel="noreferrer noopener">Feature requests and proposals</a><a href="https://github.com/clarus/coq-of-ocaml/issues?q=is%3Aissue+is%3Aopen+sort%3Aupdated-desc+label%3A%22Bug+%3Abug%3A%22" target="_blank" rel="noreferrer noopener">Issues</a><a href="https://gitter.im/clarus/coq-of-ocaml" target="_blank" rel="noreferrer noopener">Chat room</a><a href="https://www.nomadic-labs.com/" target="_blank" rel="noreferrer noopener">Nomadic Labs</a></div><div><h5>More</h5><a href="https://github.com/clarus/coq-of-ocaml">GitHub</a><a class="github-button" href="https://github.com/clarus/coq-of-ocaml" data-icon="octicon-star" data-count-href="/clarus/coq-of-ocaml/stargazers" data-show-count="true" data-count-aria-label="# stargazers on GitHub" aria-label="Star this project on GitHub">Star</a></div></section><section class="copyright">Copyright © 2020 Guillaume Claret</section></footer></div></body></html>
