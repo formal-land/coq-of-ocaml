@@ -65,6 +65,7 @@ let escape_reserved_word (is_value : bool) (s : string) : string =
   | "mod" -> "__mod"
   | "nativeint" -> escape_if_value s
   | "option" -> escape_if_value s
+  | "pack" -> "__pack"
   | "ref" -> escape_if_value s
   | "result" -> escape_if_value s
   | "return" -> "__return"
@@ -112,10 +113,6 @@ let prefix_by_t (name : t) : t =
 let prefix_by_with (name : t) : t =
   let Make name = name in
   Make ("with_" ^ name)
-
-let suffix_by_gadt (name : t) : t =
-  let Make name = name in
-  Make (name ^ "_gadt")
 
 let suffix_by_skeleton (name : t) : t =
   let Make name = name in

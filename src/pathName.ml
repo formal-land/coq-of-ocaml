@@ -98,9 +98,6 @@ let try_convert (path_name : t) : t option =
     | "op_and" -> make [] "andb"
     | "op_pipepipe" -> make [] "orb"
     | "or" -> make [] "orb"
-    (* Composition operators *)
-    | "op_pipegt" -> make ["OCaml"; "Stdlib"] "reverse_apply"
-    | "op_atat" -> make [] "apply"
     (* Integer arithmetic *)
     | "op_tildeminus" -> make ["Z"] "opp"
     | "op_tildeplus" -> make []  ""
@@ -262,10 +259,14 @@ let of_constructor_description
   (constructor_description : Types.constructor_description)
   : t =
   match constructor_description with
-  | { cstr_name; cstr_res = { desc = Tconstr (path, _, _); _ } ; _ } ->
+  | {
+      cstr_name;
+      cstr_res = { desc = Tconstr (path, _, _); _ };
+      _
+    } ->
     let { path; _ } = of_path_without_convert false path in
-    let path_name = { path; base = Name.of_string false cstr_name } in
-    convert path_name
+    let base = Name.of_string false cstr_name in
+    convert { path; base }
   | _ -> failwith "Unexpected constructor description without a type constructor"
 
 let of_label_description (label_description : Types.label_description) : t =

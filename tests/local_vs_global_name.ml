@@ -1,6 +1,4 @@
-module M : sig
-  val n : int
-end = struct
+module M = struct
   let b = false
   let n = 12
 end

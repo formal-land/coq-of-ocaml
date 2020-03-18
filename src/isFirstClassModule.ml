@@ -15,6 +15,7 @@ let get_modtype_declarations_of_module_declaration
       | _ -> None
     )
   | _ -> []
+  | exception _ -> []
 
 let is_modtype_declaration_similar_to_shape
   (modtype_declaration : Types.modtype_declaration)

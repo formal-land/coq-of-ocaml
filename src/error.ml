@@ -5,7 +5,6 @@ module Category = struct
   type t =
     | FirstClassModule
     | Merlin
-    | NotFound
     | NotSupported
     | SideEffect
     | Unexpected
@@ -14,7 +13,6 @@ module Category = struct
     match category with
     | FirstClassModule -> "First class module"
     | Merlin -> "Merlin"
-    | NotFound -> "Not found"
     | NotSupported -> "Not supported"
     | SideEffect -> "Side effect"
     | Unexpected -> "Unexpected"

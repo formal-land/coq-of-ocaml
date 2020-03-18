@@ -18,14 +18,18 @@ let rec map_at (tree : 'a t) (path_name : PathName.t) (f : 'a -> 'a) : 'a t =
   tree |> List.map (fun item ->
     match item with
     | Item (name, x) ->
-      if name = head then
+      if name = head && tail = None then
         Item (name, f x)
       else
         item
     | Module (name, tree) ->
-      match tail with
-      | None -> item
-      | Some path_name -> Module (name, map_at tree path_name f)
+      if name = head then
+        begin match tail with
+        | None -> item
+        | Some tail -> Module (name, map_at tree tail f)
+        end
+      else
+        item
   )
 
 let rec flatten_aux (prefix : Name.t list) (tree : 'a t) : (PathName.t * 'a) list =

@@ -24,7 +24,7 @@ module Value = struct
           else
             !^ "with"
           end ^^
-          let { Exp.Header.name; typ_vars; args; typ } = header in
+          let { Exp.Header.name; typ_vars; args; typ; _ } = header in
           Name.to_coq name ^^
           begin match typ_vars with
           | [] -> empty
@@ -35,13 +35,7 @@ module Value = struct
           group (separate space (args |> List.map (fun (x, t) ->
             parens @@ nest (Name.to_coq x ^^ !^ ":" ^^ Type.to_coq None None t)
           ))) ^^
-          (if Recursivity.to_bool value.Exp.Definition.is_rec then
-            match args with
-            | [] -> empty
-            | (x, _) :: _ -> braces (nest (!^ "struct" ^^ Name.to_coq x))
-          else
-            empty
-          ) ^^
+          Exp.Header.to_coq_structs value.Exp.Definition.is_rec header ^^
           begin match typ with
           | None -> empty
           | Some typ -> !^ ": " ^-^ Type.to_coq None None typ
@@ -62,6 +56,7 @@ type t =
   | TypeDefinition of TypeDefinition.t
   | Open of Open.t
   | Module of Name.t * t list
+  | ModuleExp of Name.t * Exp.t
   | ModuleInclude of PathName.t
   | ModuleSynonym of Name.t * PathName.t
   | Signature of Name.t * Signature.t
@@ -75,22 +70,6 @@ let error_message
   : t list Monad.t =
   raise [ErrorMessage (message, structure)] category message
 
-let simple_value (name : Name.t) (e : Exp.t) : t =
-  Value {
-    is_rec = Recursivity.New false;
-    cases = [
-      (
-        {
-          name;
-          typ_vars = [];
-          args = [];
-          typ = None
-        },
-        Some e
-      )
-    ]
-  }
-
 let top_level_evaluation_error : t list Monad.t =
   error_message
     (Error "top_level_evaluation")
@@ -99,7 +78,8 @@ let top_level_evaluation_error : t list Monad.t =
 
 (** Import an OCaml structure. *)
 let rec of_structure (structure : structure) : t list Monad.t =
-  let of_structure_item (item : structure_item) : t list Monad.t =
+  let of_structure_item (item : structure_item) (final_env : Env.t)
+    : t list Monad.t =
     set_env item.str_env (
     set_loc (Loc.of_location item.str_loc) (
     match item.str_desc with
@@ -119,11 +99,17 @@ let rec of_structure (structure : structure) : t list Monad.t =
       top_level_evaluation_error
     | Tstr_eval _ -> top_level_evaluation_error
     | Tstr_value (is_rec, cases) ->
-      Exp.import_let_fun Name.Map.empty true is_rec cases >>= fun def ->
+      set_scoping_env false (
+        Exp.import_let_fun Name.Map.empty true is_rec cases
+      ) >>= fun def ->
       return [Value def]
     | Tstr_type (_, typs) ->
+      (* Because types may be recursive, so we need the types to already be in
+         the environment. This is useful for example for the detection of
+         phantom types. *)
+      set_env final_env (
       TypeDefinition.of_ocaml typs >>= fun def ->
-      return [TypeDefinition def]
+      return [TypeDefinition def])
     | Tstr_exception { ext_id; _ } ->
       error_message (Error ("exception " ^ Ident.name ext_id)) SideEffect (
         "The definition of exceptions is not handled.\n\n" ^
@@ -133,74 +119,36 @@ let rec of_structure (structure : structure) : t list Monad.t =
     | Tstr_open open_description ->
       let o = Open.of_ocaml open_description in
       return [Open o]
-    | Tstr_module {
-        mb_id = name;
-        mb_expr = {
-          mod_desc = Tmod_structure structure;
-          mod_type;
-          _
-        };
-        _
-      }
-    | Tstr_module {
-        mb_id = name;
-        mb_expr = {
-          mod_desc = Tmod_constraint ({ mod_desc = Tmod_structure structure; _ }, _, _, _);
-          mod_type;
-          _
-        };
-        _
-      } ->
-      let name = Name.of_ident false name in
-      IsFirstClassModule.is_module_typ_first_class mod_type >>= fun is_first_class ->
-      begin match is_first_class with
-      | Found md_type_path ->
-        Exp.of_structure
-          Name.Map.empty
-          md_type_path
-          mod_type
-          structure.str_items
-          structure.str_final_env >>= fun module_exp ->
-        return [simple_value name module_exp]
-      | Not_found _ ->
-        of_structure structure >>= fun structures ->
-        return [Module (name, structures)]
-      end
-    | Tstr_module {
-        mb_id = name;
-        mb_expr = {
-          mod_desc = Tmod_ident (path, _);
-          mod_type;
-          _
-        };
-        _
-      } ->
-      let name = Name.of_ident false name in
-      let reference = PathName.of_path_with_convert false path in
-      IsFirstClassModule.is_module_typ_first_class mod_type >>= fun is_first_class ->
+    | Tstr_module { mb_id; mb_expr; _ } ->
+      let name = Name.of_ident false mb_id in
+      IsFirstClassModule.is_module_typ_first_class mb_expr.mod_type
+        >>= fun is_first_class ->
       begin match is_first_class with
       | Found _ ->
-        return [
-          simple_value name (Exp.Variable (MixedPath.PathName reference, []))
-        ]
-      | Not_found _ -> return [ModuleSynonym (name, reference)]
+        Exp.of_module_expr
+          Name.Map.empty mb_expr (Some mb_expr.mod_type) >>= fun module_exp ->
+        return [ModuleExp (name, module_exp)]
+      | Not_found reason ->
+        begin match mb_expr.mod_desc with
+        | Tmod_structure structure ->
+          of_structure structure >>= fun structures ->
+          return [Module (name, structures)]
+        | Tmod_ident (path, _) ->
+          let reference = PathName.of_path_with_convert false path in
+          return [ModuleSynonym (name, reference)]
+        | Tmod_apply _ | Tmod_functor _ ->
+          Exp.of_module_expr Name.Map.empty mb_expr None >>= fun module_exp ->
+          return [ModuleExp (name, module_exp)]
+        | _ ->
+          raise
+            []
+            FirstClassModule
+            (
+              "We expected to find a signature name for this module.\n\n" ^
+              "Reason:\n" ^ reason
+            )
+        end
       end
-    | Tstr_module {
-        mb_id;
-        mb_expr = { mod_desc = (Tmod_apply _ | Tmod_functor _); _ } as mb_expr;
-        _
-      } ->
-      let name = Name.of_ident false mb_id in
-      Exp.of_module_expr
-        Name.Map.empty
-        mb_expr
-        None >>= fun module_exp ->
-      return [simple_value name module_exp]
-    | Tstr_module _ ->
-      error_message
-        (Error "unhandled_module")
-        NotSupported
-        "This kind of module is not handled."
     | Tstr_modtype { mtd_type = None; _ } ->
       error_message
         (Error "abstract_module_type")
@@ -282,16 +230,17 @@ let rec of_structure (structure : structure) : t list Monad.t =
                 let field =
                   PathName.of_path_and_name_with_convert mod_type_path name in
                 Some (
-                  simple_value
-                    name
-                    (Exp.Variable (
+                  ModuleExp (
+                    name,
+                    Exp.Variable (
                       MixedPath.Access (
                         reference,
                         [field],
                         false
                       ),
                       []
-                    ))
+                    )
+                  )
                 )
               | _ -> None
             )
@@ -315,7 +264,15 @@ let rec of_structure (structure : structure) : t list Monad.t =
         )
     (* We ignore attribute fields. *)
     | Tstr_attribute _ -> return [])) in
-  structure.str_items |> Monad.List.flatten_map of_structure_item
+  Monad.List.fold_right
+    (fun structure_item (structure, final_env) ->
+      let env = structure_item.str_env in
+      of_structure_item structure_item final_env >>= fun structure_item ->
+      return (structure_item @ structure, env)
+    )
+    structure.str_items
+    ([], structure.str_final_env) >>= fun (structure, _) ->
+  return structure
 
 (** Pretty-print a structure to Coq. *)
 let rec to_coq (defs : t list) : SmartPrint.t =
@@ -338,6 +295,20 @@ let rec to_coq (defs : t list) : SmartPrint.t =
         !^ "Module" ^^ Name.to_coq name ^-^ !^ "." ^^ newline ^^
         indent (to_coq defs) ^^ newline ^^
         !^ "End" ^^ Name.to_coq name ^-^ !^ "."
+      )
+    | ModuleExp (name, e) ->
+      let (e, typ) =
+        match e with
+        | TypeAnnotation (e, typ) -> (e, Some typ)
+        | _ -> (e, None) in
+      nest (
+        !^ "Definition" ^^ Name.to_coq name ^^
+        begin match typ with
+        | None -> empty
+        | Some typ -> !^ ":" ^^ Type.to_coq None None typ
+        end ^^
+        !^ ":=" ^^
+        Exp.to_coq false e ^-^ !^ "."
       )
     | ModuleInclude reference ->
       nest (!^ "Include" ^^ PathName.to_coq reference ^-^ !^ ".")

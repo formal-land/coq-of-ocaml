@@ -1,4 +1,22 @@
 ## [Unreleased]
+* Add automatic re-ordering of type synonyms in mutual types to generate valid definitions.
+* Add minimal handling of class types as records.
+* Ignore type parameters with constraints (like being a sub-type of some variants).
+* Add a `@coq_struct "param"` attribute to specify the decreasing parameter name of fixpoints.
+* Add a tactic `rewrite_cast_exists_eval_eq` to simplify the use of the `cast_exists` axiom in proofs.
+* Name the arguments of the signatures.
+* Rename `obj_magic` as `cast`.
+* Set the primitive projection flag.
+* Add support for the `with` operator on constructor records.
+* Add an attribute `@coq_match_gadt_with_result` for GADT matches with casts for the results.
+* Do not generate casts for the return values of the match branches with `@coq_match_gadt`.
+* Remove the rarely used `match exception when false` construct for default return value in matches.
+* Add arity annotations for the existentials.
+* Eliminate phantom types and propagate this erasing.
+* Inline the application operators `@@` and `|>`.
+* Put first-class modules in `Set`, using existentials in impredicative sets.
+* Add a `@coq_match_with_default` to generate a default branch for incomplete matches.
+* Add a `@coq_force_gadt` attribute to force a type to be defined as a GADT (without type parameters).
 * Add basic handling of module alias and typeof in `.mli` files.
 * Add more type annotations on values to better support polymorphic values.
 * Add better support for include of signatures in `.mli` files.
@@ -16,7 +34,7 @@
 * Add basic support for includes of module types with sub-modules.
 * Add `with` notation for records.
 * Ignore patterns with extensible types.
-* Replace the generation of `Export` by `Included` (fix).
+* Replace the generation of `Export` by `Include` (fix).
 * Add support of `include` in first-class module values.
 * Add support of functor definitions.
 * Add an annotation mechanism `[@axiom]` to ignore the content of some definitions.

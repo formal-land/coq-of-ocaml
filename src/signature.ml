@@ -21,7 +21,7 @@ let items_of_types_signature (signature : Types.signature) : item list Monad.t =
     | Sig_value (ident, { val_type; _ }) ->
       let name = Name.of_ident true ident in
       Type.of_type_expr_without_free_vars val_type >>= fun typ ->
-      let typ_args = Name.Set.elements (Type.typ_args typ) in
+      let typ_args = Name.Set.elements (Type.typ_args_of_typ typ) in
       return (Value (name, typ_args, typ))
     | Sig_type (ident, { type_manifest = None; type_params; _ }, _) ->
       let name = Name.of_ident false ident in
@@ -35,7 +35,7 @@ let items_of_types_signature (signature : Types.signature) : item list Monad.t =
     | Sig_typext (_, { ext_type_path; _ }, _) ->
       let name = Path.name ext_type_path in
       raise
-        (Error ("extensible_type " ^ name))
+        (Error ("extensible_type_definition `" ^ name ^ "`"))
         NotSupported
         ("Extensible type '" ^ name ^ "' not handled")
     | Sig_module (ident, { md_type; _ }, _) ->
@@ -48,13 +48,15 @@ let items_of_types_signature (signature : Types.signature) : item list Monad.t =
           PathName.of_path_with_convert false signature_path in
         let mapper ident { Types.type_manifest; type_params; _ } =
           let name = Name.of_ident false ident in
-          match type_manifest with
-          | None -> return (Some (Tree.Item (name, None)))
+          begin match type_manifest with
+          | None -> return (Type.Arity (List.length type_params))
           | Some type_manifest ->
             (type_params |> Monad.List.map Type.of_type_expr_variable) >>= fun typ_args ->
             Type.of_type_expr_without_free_vars type_manifest >>= fun typ ->
             let typ = Type.FunTyps (typ_args, typ) in
-            return (Some (Tree.Item (name, Some typ))) in
+            return (Type.Typ typ)
+          end >>= fun arity_or_typ ->
+          return (Some (Tree.Item (name, arity_or_typ))) in
         ModuleTypParams.get_module_typ_typ_params
           mapper md_type >>= fun typ_params ->
         raise
@@ -138,7 +140,15 @@ let items_of_signature (signature : signature) : item list Monad.t =
       raise [Error "open"] NotSupported "Signature item `open` not handled."
     | Tsig_recmodule _ ->
       raise [Error "recursive_module"] NotSupported "Recursive module signatures are not handled."
-    | Tsig_type (_, [ { typ_id; typ_type = { type_manifest = None; type_params; _ }; _ } ]) ->
+    | Tsig_type (_, [ { typ_id; typ_type = { type_manifest = None; type_kind; type_params; _ }; _ } ]) ->
+      begin match type_kind with
+      | Type_abstract -> return ()
+      | _ ->
+        raise
+          ()
+          FirstClassModule
+          "We do not handle the definition of new types in signatures"
+      end >>= fun () ->
       let name = Name.of_ident false typ_id in
       (type_params |> Monad.List.map Type.of_type_expr_variable) >>= fun typ_args ->
       return [TypExistential (name, typ_args)]
@@ -157,7 +167,7 @@ let items_of_signature (signature : signature) : item list Monad.t =
     | Tsig_value { val_id; val_desc = { ctyp_type; _ }; _ } ->
       let name = Name.of_ident true val_id in
       Type.of_type_expr_without_free_vars ctyp_type >>= fun typ ->
-      let typ_args = Name.Set.elements (Type.typ_args typ) in
+      let typ_args = Name.Set.elements (Type.typ_args_of_typ typ) in
       return [Value (name, typ_args, typ)])) in
   signature.sig_items |> Monad.List.flatten_map of_signature_item
 
@@ -233,14 +243,10 @@ let to_coq_definition (name : Name.t) (signature : t) : SmartPrint.t =
           to_coq_type_kind arity
         )
       )) ^^
+      nest (!^ ":" ^^ Pp.set) ^^
       !^ ":=" ^^ !^ "{" ^^ newline ^^
       indent (separate newline (List.map to_coq_item signature.items)) ^^ newline ^^
       !^ "}" ^-^ !^ "."
-    ) ^^
-    (match typ_params with
-    | [] -> empty
-    | _ ->
-      newline ^^ !^ "Arguments" ^^ !^ "signature" ^^ !^ ":" ^^ !^ "clear" ^^ !^ "implicits" ^-^ !^ "."
     )
   ) ^^ newline ^^
   !^ "End" ^^ Name.to_coq name ^-^ !^ "."

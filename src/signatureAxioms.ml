@@ -46,7 +46,7 @@ let of_types_signature (signature : Types.signature) : t Monad.t =
     | Types.Sig_value (ident, { val_type; _ }) ->
       let name = Name.of_ident true ident in
       Type.of_typ_expr true Name.Map.empty val_type >>= fun (typ, _, _) ->
-      let typ_vars = Name.Set.elements (Type.typ_args typ) in
+      let typ_vars = Name.Set.elements (Type.typ_args_of_typ typ) in
       return (Value (name, typ_vars, typ))
     | Sig_type (ident, { type_params; _ }, _) ->
       (* We ignore the type manifest so that we do not unroll unwanted type
@@ -125,11 +125,56 @@ let rec of_signature (signature : Typedtree.signature) : t Monad.t =
         [Error "class"]
         NotSupported
         "Signature item `class` not handled"
-    | Tsig_class_type _ ->
-      raise
-        [Error "class_type"]
-        NotSupported
-        "Signature item `class_type` not handled"
+    | Tsig_class_type class_typ_declarations ->
+      begin match class_typ_declarations with
+      | [{ ci_params; ci_id_class_type; ci_expr; _ }] ->
+        (ci_params |>
+          List.map (fun ({ Typedtree.ctyp_type; _ }, _) -> ctyp_type) |>
+          TypeIsGadt.named_typ_params_expecting_variables
+        ) >>= fun typ_params ->
+        let name = Name.of_ident false ci_id_class_type in
+        begin match ci_expr with
+        | {
+            cltyp_desc = Tcty_signature class_signature;
+            cltyp_env;
+            cltyp_loc;
+            _
+          } ->
+          set_env cltyp_env (
+          set_loc (Loc.of_location cltyp_loc) (
+          (class_signature.csig_fields |> Monad.List.filter_map (fun class_typ_field ->
+            set_loc (Loc.of_location class_typ_field.Typedtree.ctf_loc) (
+            match class_typ_field.ctf_desc with
+            | Tctf_method (field_name, _, _, { ctyp_type; _ }) ->
+              let field_name = Name.of_string false field_name in
+              Type.of_typ_expr false Name.Map.empty ctyp_type
+                >>= fun (field_typ, _, _) ->
+              return (Some (field_name, field_typ))
+            | _ ->
+              raise
+                None
+                NotSupported
+                "We do not handle this form of field of class type"
+            )) >>= fun fields ->
+            return [TypDefinition (TypeDefinition.Record (
+              name,
+              TypeIsGadt.named_typ_params_with_unknowns typ_params,
+              fields,
+              false
+            ))]
+          )))
+        | _ ->
+          raise
+            [Error "unhandled_class_type"]
+            NotSupported
+            "We do not handle this form of class type"
+        end
+      | _ ->
+        raise
+          [Error "mutual_class_types"]
+          NotSupported
+          "We do not handle mutually recursive declaration of class types"
+      end
     | Tsig_exception { ext_id; _ } ->
       raise
         [Error ("exception " ^ Ident.name ext_id)]
@@ -200,17 +245,21 @@ let rec of_signature (signature : Typedtree.signature) : t Monad.t =
         NotSupported
         "Recursive module signatures are not handled"
     | Tsig_type (_, typs) ->
+      (* Because types may be recursive, so we need the types to already be in
+         the environment. This is useful for example for the detection of
+         phantom types. *)
+      set_env final_env (
       TypeDefinition.of_ocaml typs >>= fun typ_definition ->
-      return [TypDefinition typ_definition]
+      return [TypDefinition typ_definition])
     | Tsig_typext { tyext_path; _ } ->
       raise
-        [Error ("extensible_type " ^ Path.last tyext_path)]
+        [Error ("extensible_type_definition `" ^ Path.last tyext_path ^ "`")]
         NotSupported
         "Extensible types are not handled."
     | Tsig_value { val_id; val_desc = { ctyp_type; _ }; _ } ->
       let name = Name.of_ident true val_id in
       Type.of_typ_expr true Name.Map.empty ctyp_type >>= fun (typ, _, _) ->
-      let typ_vars = Name.Set.elements (Type.typ_args typ) in
+      let typ_vars = Name.Set.elements (Type.typ_args_of_typ typ) in
       return [Value (name, typ_vars, typ)])) in
   Monad.List.fold_right
     (fun signature_item (signature, final_env) ->

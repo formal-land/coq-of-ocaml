@@ -19,6 +19,7 @@ a.out
 *.glob
 *.v.d
 .coqdeps.d
+.Makefile.d
 Makefile.conf
 _build/
 \#*\#
