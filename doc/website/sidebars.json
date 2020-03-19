@@ -12,6 +12,9 @@
       "type-definitions",
       "module-system",
       "gadts"
+    ],
+    "Roadmap": [
+      "roadmap"
     ]
   }
 }
