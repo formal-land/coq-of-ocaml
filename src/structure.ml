@@ -99,10 +99,9 @@ let rec of_structure (structure : structure) : t list Monad.t =
       top_level_evaluation_error
     | Tstr_eval _ -> top_level_evaluation_error
     | Tstr_value (is_rec, cases) ->
-      set_scoping_env false (
-        Exp.import_let_fun Name.Map.empty true is_rec cases
-      ) >>= fun def ->
-      return [Value def]
+      push_env (
+      Exp.import_let_fun Name.Map.empty true is_rec cases >>= fun def ->
+      return [Value def])
     | Tstr_type (_, typs) ->
       (* Because types may be recursive, so we need the types to already be in
          the environment. This is useful for example for the detection of

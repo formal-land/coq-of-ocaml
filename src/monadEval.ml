@@ -5,35 +5,25 @@ module Result = struct
   }
 end
 
-module LocalEnv = struct
-  type t = {
-    inner : Env.t option;
-    outer : Env.t option;
-  }
+module EnvStack = struct
+  type t = Env.t list
 
-  let init : t = {
-    inner = None;
-    outer = None;
-  }
+  let init : t = []
 end
 
 module Interpret = struct
-  type 'a t = Env.t -> Loc.t -> LocalEnv.t -> 'a Result.t
+  type 'a t = Env.t -> EnvStack.t -> Loc.t -> 'a Result.t
 end
 
 module Command = struct
   open Monad.Command
 
   let eval (type a) (file_name : string) (command : a t) : a Interpret.t =
-    fun env loc scoping_env ->
+    fun env env_stack loc ->
       match command with
       | GetEnv -> { Result.errors = []; value = env }
+      | GetEnvStack -> { errors = []; value = env_stack }
       | GetLoc -> { errors = []; value = loc }
-      | GetScopingEnv is_inner ->
-        {
-          errors = [];
-          value = if is_inner then scoping_env.inner else scoping_env.outer;
-        }
       | Raise (value, category, message) ->
         { errors = [{ category; loc; message }]; value }
       | Warn message ->
@@ -45,17 +35,11 @@ module Wrapper = struct
     (wrapper : Monad.Wrapper.t)
     (interpret : 'a Interpret.t)
     : 'a Interpret.t =
-    fun env loc scoping_env ->
+    fun env env_stack loc ->
       match wrapper with
-      | Env env -> interpret env loc scoping_env
-      | Loc loc -> interpret env loc scoping_env
-      | ScopingEnv is_inner ->
-        let scoping_env =
-          if is_inner then
-            { scoping_env with inner = Some env }
-          else
-            { scoping_env with outer = Some env } in
-        interpret env loc scoping_env
+      | EnvSet env -> interpret env env_stack loc
+      | EnvStackPush -> interpret env (env :: env_stack) loc
+      | LocSet loc -> interpret env env_stack loc
 end
 
 let rec eval : type a. string -> a Monad.t -> a Interpret.t =

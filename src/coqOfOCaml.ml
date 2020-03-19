@@ -36,8 +36,8 @@ let exp
       source_file_name
       (Ast.of_typedtree typedtree typedtree_errors)
       env
-      loc
-      MonadEval.LocalEnv.init in
+      MonadEval.EnvStack.init
+      loc in
   let error_message =
     Error.display_errors json_mode source_file_name source_file_content errors in
   let has_errors =

@@ -176,6 +176,39 @@ Definition set_fold {acc elt : Set} (f : elt -> acc -> acc) (Box : set elt)
   let 'existS _ _ Box := Box in
   Box.(Boxed_set.OPS).(S.SET.fold) f Box.(Boxed_set.boxed).
 
+Definition set_nested {elt : Set} (Box : set elt) : set elt :=
+  let 'existS _ _ Box := Box in
+  (pack
+    (let __result_value :=
+      (pack
+        (let elt : Set := elt in
+        let elt_ty := Box.(Boxed_set.elt_ty) in
+        let OPS := existT (A := unit) (fun _ => _) tt Box.(Boxed_set.OPS) in
+        let boxed := Box.(Boxed_set.boxed) in
+        let size := Box.(Boxed_set.size) in
+        existT (A := Set) _ _
+          {|
+            Boxed_set.elt_ty := elt_ty;
+            Boxed_set.OPS := (|OPS|);
+            Boxed_set.boxed := boxed;
+            Boxed_set.size := size
+          |})) in
+    let elt : Set := elt in
+    let elt_ty := Box.(Boxed_set.elt_ty) in
+    let OPS := existT (A := unit) (fun _ => _) tt Box.(Boxed_set.OPS) in
+    let boxed := Box.(Boxed_set.boxed) in
+    let size :=
+      let Result := __result_value in
+      let 'existS _ _ Result := Result in
+      Result.(Boxed_set.size) in
+    existT (A := Set) _ _
+      {|
+        Boxed_set.elt_ty := elt_ty;
+        Boxed_set.OPS := (|OPS|);
+        Boxed_set.boxed := boxed;
+        Boxed_set.size := size
+      |})).
+
 Module MAP.
   Record signature {key : Set} {t : Set -> Set} : Set := {
     key := key;

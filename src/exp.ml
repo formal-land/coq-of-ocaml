@@ -360,11 +360,11 @@ let rec of_expression (typ_vars : Name.t Name.Map.t) (e : expression)
     of_expression typ_vars e >>= fun e ->
     return (LetModuleUnpack (x, path_name, e))
   | Texp_letmodule (x, _, module_expr, e) ->
-    set_scoping_env true (
     let x = Name.of_ident true x in
-    of_module_expr typ_vars module_expr None >>= fun value ->
-    of_expression typ_vars e >>= fun e ->
-    return (LetVar (x, [], value, e)))
+    push_env (of_module_expr typ_vars module_expr None >>= fun value ->
+    set_env e.exp_env (
+    push_env (of_expression typ_vars e >>= fun e ->
+    return (LetVar (x, [], value, e)))))
   | Texp_letexception _ ->
     error_message
       (Error "let_exception")
@@ -389,7 +389,7 @@ let rec of_expression (typ_vars : Name.t Name.Map.t) (e : expression)
       NotSupported
       "Creation of objects is not handled"
   | Texp_pack module_expr ->
-    of_module_expr typ_vars module_expr None >>= fun e ->
+    push_env (of_module_expr typ_vars module_expr None) >>= fun e ->
     return (ModulePack e)
   | Texp_unreachable ->
     error_message
@@ -849,7 +849,8 @@ and of_structure
           (ErrorMessage (e_next, "top_level_evaluation"))
           SideEffect
           "Top-level evaluations are ignored"
-      | Tstr_value (rec_flag, cases) -> of_let typ_vars rec_flag cases e_next
+      | Tstr_value (rec_flag, cases) ->
+        push_env (of_let typ_vars rec_flag cases e_next)
       | Tstr_primitive _ ->
         raise
           (ErrorMessage (e_next, "primitive"))
