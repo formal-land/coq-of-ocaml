@@ -47,17 +47,10 @@ let rec of_path_aux (path : Path.t)
 (** If the module was declared in the current unbundled signature definition. *)
 let is_module_path_local (path : Path.t) : bool Monad.t =
   get_env_stack >>= fun env_stack ->
-  (* print_endline (Path.name path);
-  print_int (List.length env_stack);
-  print_newline (); *)
   let envs_without_path = env_stack |> List.filter (fun env ->
     match Env.find_module path env with
-    | _ ->
-      (* print_endline "false"; *)
-      false
-    | exception _ ->
-      (* print_endline "true"; *)
-      true
+    | _ -> false
+    | exception _ -> true
   ) in
   return (List.length envs_without_path mod 2 = 1)
 
