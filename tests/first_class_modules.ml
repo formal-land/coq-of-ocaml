@@ -126,6 +126,27 @@ let set_fold
   = fun f (module Box) ->
     Box.OPS.fold f Box.boxed
 
+let set_nested
+  : type elt. elt set -> elt set
+  = fun (module Box) ->
+  (module struct
+    let result : elt set =
+      (module struct
+        type nonrec elt = elt
+        let elt_ty = Box.elt_ty
+        module OPS = Box.OPS
+        let boxed = Box.boxed
+        let size = Box.size
+      end)
+    type nonrec elt = elt
+    let elt_ty = Box.elt_ty
+    module OPS = Box.OPS
+    let boxed = Box.boxed
+    let size =
+      let (module Result) = result in
+      Result.size
+  end)
+
 module type MAP = sig
   type key
   type +'a t
