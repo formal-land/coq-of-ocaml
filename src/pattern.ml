@@ -99,7 +99,9 @@ let rec of_pattern (p : pattern) : t option Monad.t =
     )
   | Tpat_lazy p ->
     of_pattern p >>= fun pattern ->
-    raise pattern NotSupported "Lazy patterns are not supported")
+    raise pattern NotSupported "Lazy patterns are not supported"
+  | Tpat_exception _ ->
+    raise None NotSupported "We do not support exception patterns")
 
 let rec has_or_patterns (p : t) : bool =
   match p with

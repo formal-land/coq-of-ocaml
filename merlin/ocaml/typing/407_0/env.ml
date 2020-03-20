@@ -24,9 +24,7 @@ open Path
 open Types
 open Btype
 
-let state = Local_store.new_bindings ()
-let sref f = Local_store.ref state f
-let srefk k = Local_store.ref state (fun () -> k)
+open Local_store.Compiler
 
 let add_delayed_check_forward = ref (fun _ -> assert false)
 
@@ -95,41 +93,6 @@ exception Error of error
 
 let error err = raise (Error err)
 
-module EnvLazy : sig
-  type ('a,'b) t
-
-  val force : ('a -> 'b) -> ('a,'b) t -> 'b
-  val create : 'a -> ('a,'b) t
-  val get_arg : ('a,'b) t -> 'a option
-end  = struct
-
-  type ('a,'b) t = ('a,'b) eval ref
-
-  and ('a,'b) eval =
-    | Done of 'b
-    | Raise of exn
-    | Thunk of 'a
-
-  let force f x =
-    match !x with
-    | Done x -> x
-    | Raise e -> raise e
-    | Thunk e ->
-        match f e with
-        | y ->
-          x := Done y;
-          y
-        | exception e ->
-          x := Raise e;
-          raise e
-
-  let get_arg x =
-    match !x with Thunk a -> Some a | _ -> None
-
-  let create x =
-    ref (Thunk x)
-end
-
 module PathMap = Path.Map
 
 type summary =
@@ -141,7 +104,7 @@ type summary =
   | Env_modtype of summary * Ident.t * modtype_declaration
   | Env_class of summary * Ident.t * class_declaration
   | Env_cltype of summary * Ident.t * class_type_declaration
-  | Env_open of summary * StringSet.t * Path.t
+  | Env_open of summary * String.Set.t * Path.t
   | Env_functor_arg of summary * Ident.t
   | Env_constraints of summary * type_declaration PathMap.t
   | Env_copy_types of summary * string list
@@ -623,20 +586,20 @@ let persistent_structures : (string, pers_struct option) Hashtbl.t ref =
 
 let crc_units = sref Consistbl.create
 
-let imported_units = srefk StringSet.empty
+let imported_units = srefk String.Set.empty
 
 let add_import s =
-  imported_units := StringSet.add s !imported_units
+  imported_units := String.Set.add s !imported_units
 
-let imported_opaque_units = srefk StringSet.empty
+let imported_opaque_units = srefk String.Set.empty
 
 let add_imported_opaque s =
-  imported_opaque_units := StringSet.add s !imported_opaque_units
+  imported_opaque_units := String.Set.add s !imported_opaque_units
 
 let clear_imports () =
   Consistbl.clear !crc_units;
-  imported_units := StringSet.empty;
-  imported_opaque_units := StringSet.empty
+  imported_units := String.Set.empty;
+  imported_opaque_units := String.Set.empty
 
 let check_consistency ps =
   try
@@ -2050,7 +2013,7 @@ let add_components ?filter_modules slot root env0 comps =
     TycompTbl.add_open slot w comps env0
   in
 
-  let skipped_modules = ref StringSet.empty in
+  let skipped_modules = ref String.Set.empty in
   let filter tbl env0_tbl =
     match filter_modules with
     | None -> tbl
@@ -2063,7 +2026,7 @@ let add_components ?filter_modules slot root env0 comps =
             (match IdTbl.find_name m env0_tbl~mark:false with
              | (_ : _ * _) -> false
              | exception _ -> true);
-          skipped_modules := StringSet.add m !skipped_modules;
+          skipped_modules := String.Set.add m !skipped_modules;
           acc
         end)
         tbl Tbl.empty
@@ -2168,10 +2131,10 @@ let open_signature_of_initially_opened_module root env =
 
 let open_signature_from_env_summary root env ~hidden_submodules =
   let filter_modules =
-    if StringSet.is_empty hidden_submodules then
+    if String.Set.is_empty hidden_submodules then
       None
     else
-      Some (fun m -> not (StringSet.mem m hidden_submodules))
+      Some (fun m -> not (String.Set.mem m hidden_submodules))
   in
   open_signature None root env ?filter_modules
 
@@ -2236,11 +2199,11 @@ let crc_of_unit name =
 (* Return the list of imported interfaces with their CRCs *)
 
 let imports () =
-  Consistbl.extract (StringSet.elements !imported_units) !crc_units
+  Consistbl.extract (String.Set.elements !imported_units) !crc_units
 
 (* Returns true if [s] is an opaque imported module  *)
 let is_imported_opaque s =
-  StringSet.mem s !imported_opaque_units
+  String.Set.mem s !imported_opaque_units
 
 (* Save a signature to a file *)
 
@@ -2745,7 +2708,7 @@ let check_state_consistency () =
       | exception Not_found -> true
     end
   | Some cell ->
-    begin match !(Cmi_cache.(read cell.ps_filename).Cmi_cache.cmi_cache) with
+    begin match !(Cmi_cache.(get_cached_entry cell.ps_filename).Cmi_cache.cmi_cache) with
       | Cmi_cache_store ps_sig -> Std.lazy_eq ps_sig cell.ps_sig
       | _ -> false
       | exception Not_found -> false

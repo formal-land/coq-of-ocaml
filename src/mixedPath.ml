@@ -28,7 +28,7 @@ let rec of_path_aux (path : Path.t)
   get_signature_path path >>= fun signature_path ->
   begin match path with
   | Papply _ -> failwith "Unexpected path application"
-  | Pdot (path', field_string, _) ->
+  | Pdot (path', field_string) ->
     of_path_aux path' >>= fun (namespace_path, fields, signature_path) ->
     begin match signature_path with
     | Some signature_path ->

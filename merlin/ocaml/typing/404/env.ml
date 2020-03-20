@@ -24,9 +24,7 @@ open Path
 open Types
 open Btype
 
-let state = Local_store.new_bindings ()
-let sref f = Local_store.ref state f
-let srefk k = Local_store.ref state (fun () -> k)
+open Local_store.Compiler
 
 let add_delayed_check_forward = ref (fun _ -> assert false)
 
@@ -94,41 +92,6 @@ type error =
 exception Error of error
 
 let error err = raise (Error err)
-
-module EnvLazy : sig
-  type ('a,'b) t
-
-  val force : ('a -> 'b) -> ('a,'b) t -> 'b
-  val create : 'a -> ('a,'b) t
-  val get_arg : ('a,'b) t -> 'a option
-end  = struct
-
-  type ('a,'b) t = ('a,'b) eval ref
-
-  and ('a,'b) eval =
-      Done of 'b
-    | Raise of exn
-    | Thunk of 'a
-
-  let force f x =
-    match !x with
-        Done x -> x
-      | Raise e -> raise e
-      | Thunk e ->
-          try
-            let y = f e in
-            x := Done y;
-            y
-          with e ->
-            x := Raise e;
-            raise e
-
-  let get_arg x =
-    match !x with Thunk a -> Some a | _ -> None
-
-  let create x =
-    ref (Thunk x)
-end
 
 module PathMap = Path.Map
 
@@ -402,20 +365,20 @@ let persistent_structures : (string, pers_struct option) Hashtbl.t ref =
 
 let crc_units = sref Consistbl.create
 
-let imported_units = srefk StringSet.empty
+let imported_units = srefk String.Set.empty
 
 let add_import s =
-  imported_units := StringSet.add s !imported_units
+  imported_units := String.Set.add s !imported_units
 
-let imported_opaque_units = srefk StringSet.empty
+let imported_opaque_units = srefk String.Set.empty
 
 let add_imported_opaque s =
-  imported_opaque_units := StringSet.add s !imported_opaque_units
+  imported_opaque_units := String.Set.add s !imported_opaque_units
 
 let clear_imports () =
   Consistbl.clear !crc_units;
-  imported_units := StringSet.empty;
-  imported_opaque_units := StringSet.empty
+  imported_units := String.Set.empty;
+  imported_opaque_units := String.Set.empty
 
 let check_consistency ps =
   try
@@ -2078,11 +2041,11 @@ let crc_of_unit name =
 (* Return the list of imported interfaces with their CRCs *)
 
 let imports () =
-  Consistbl.extract (StringSet.elements !imported_units) !crc_units
+  Consistbl.extract (String.Set.elements !imported_units) !crc_units
 
 (* Returns true if [s] is an opaque imported module  *)
 let is_imported_opaque s =
-  StringSet.mem s !imported_opaque_units
+  String.Set.mem s !imported_opaque_units
 
 (* Save a signature to a file *)
 
@@ -2567,7 +2530,7 @@ let check_state_consistency () =
       | exception Not_found -> true
     end
   | Some cell ->
-    begin match !(Cmi_cache.(read cell.ps_filename).Cmi_cache.cmi_cache) with
+    begin match !(Cmi_cache.(get_cached_entry cell.ps_filename).Cmi_cache.cmi_cache) with
       | Cmi_cache_store ps_sig -> Std.lazy_eq ps_sig cell.ps_sig
       | _ -> false
       | exception Not_found -> false

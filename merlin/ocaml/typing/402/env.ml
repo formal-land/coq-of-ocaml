@@ -23,9 +23,7 @@ open Path
 open Types
 open Btype
 
-let state = Local_store.new_bindings ()
-let sref f = Local_store.ref state f
-let srefk k = Local_store.ref state (fun () -> k)
+open Local_store.Compiler
 
 let add_delayed_check_forward = ref (fun _ -> assert false)
 
@@ -94,56 +92,6 @@ type error =
 exception Error of error
 
 let error err = raise (Error err)
-
-module EnvLazy : sig
-  type ('a,'b) t
-
-  val force : ('a -> 'b) -> ('a,'b) t -> 'b
-  val create : 'a -> ('a,'b) t
-  val is_val : ('a,'b) t -> bool
-  val get_arg : ('a,'b) t -> 'a option
-
-  type ('a,'b) eval =
-      Done of 'b
-    | Raise of exn
-    | Thunk of 'a
-
-
-  val view : ('a,'b) t ->  ('a,'b) eval
-end  = struct
-
-  type ('a,'b) t = ('a,'b) eval ref
-
-  and ('a,'b) eval =
-      Done of 'b
-    | Raise of exn
-    | Thunk of 'a
-
-  let force f x =
-    match !x with
-        Done x -> x
-      | Raise e -> raise e
-      | Thunk e ->
-          try
-            let y = f e in
-            x := Done y;
-            y
-          with e ->
-            x := Raise e;
-            raise e
-
-  let is_val x =
-    match !x with Done _ -> true | _ -> false
-
-  let get_arg x =
-    match !x with Thunk a -> Some a | _ -> None
-
-  let create x =
-    let x = ref (Thunk x) in
-    x
-
-  let view x = !x
-end
 
 type aliasmap = {
   am_typ: Path.t list Path.Map.t;
@@ -371,16 +319,14 @@ let persistent_structures : (string, pers_struct option) Hashtbl.t ref =
 
 let crc_units = sref Consistbl.create
 
-module StringSet = Std.String.Set
-
-let imported_units = ref StringSet.empty
+let imported_units = ref String.Set.empty
 
 let add_import s =
-  imported_units := StringSet.add s !imported_units
+  imported_units := String.Set.add s !imported_units
 
 let clear_imports () =
   Consistbl.clear !crc_units;
-  imported_units := StringSet.empty
+  imported_units := String.Set.empty
 
 let check_consistency ps =
   if not ps.ps_crcs_checked then
@@ -501,7 +447,7 @@ let check_state_consistency () =
       | exception Not_found -> true
     end
   | Some cell ->
-    begin match !(Cmi_cache.(read cell.ps_filename).Cmi_cache.cmi_cache) with
+    begin match !(Cmi_cache.(get_cached_entry cell.ps_filename).Cmi_cache.cmi_cache) with
       | Cmi_cache_store (_, ps_sig) -> Std.lazy_eq ps_sig cell.ps_sig
       | _ -> false
       | exception Not_found -> false
@@ -1788,7 +1734,7 @@ let crc_of_unit name =
 (* Return the list of imported interfaces with their CRCs *)
 
 let imports () =
-  Consistbl.extract (StringSet.elements !imported_units) !crc_units
+  Consistbl.extract (String.Set.elements !imported_units) !crc_units
 
 (* Save a signature to a file *)
 

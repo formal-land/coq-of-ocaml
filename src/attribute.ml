@@ -29,20 +29,21 @@ let of_payload_string (id : string) (payload : Parsetree.payload)
     raise message Unexpected "Expected a single string parameter this attribute"
 
 let of_attributes (attributes : Typedtree.attributes) : t list Monad.t =
-  attributes |> Monad.List.filter_map (fun (loc, payload) ->
-    set_loc (Loc.of_location loc.Asttypes.loc) (
-    let id = loc.Asttypes.txt in
+  attributes |> Monad.List.filter_map (
+    fun {Parsetree.attr_name; attr_payload; _} ->
+    set_loc (Loc.of_location attr_name.Asttypes.loc) (
+    let id = attr_name.Asttypes.txt in
     match id with
     | "coq_axiom" -> return (Some Axiom)
     | "coq_force_gadt" -> return (Some ForceGadt)
     | "coq_implicit" ->
-      of_payload_string id payload >>= fun payload ->
+      of_payload_string id attr_payload >>= fun payload ->
       return (Some (Implicit payload))
     | "coq_match_gadt" -> return (Some MatchGadt)
     | "coq_match_gadt_with_result" -> return (Some MatchGadtWithResult)
     | "coq_match_with_default" -> return (Some MatchWithDefault)
     | "coq_struct" ->
-      of_payload_string id payload >>= fun payload ->
+      of_payload_string id attr_payload >>= fun payload ->
       return (Some (Struct payload))
     | _ -> return None)
   )

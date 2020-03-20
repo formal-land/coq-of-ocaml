@@ -234,7 +234,7 @@ let of_path_without_convert (is_value : bool) (path : Path.t) : t =
         (path, base)
       | [] -> assert false
       end
-    | Path.Pdot (path, field, _) ->
+    | Path.Pdot (path, field) ->
       let (path, base) = aux path in
       (base :: path, Name.of_string is_value field)
     | Path.Papply _ -> failwith "Unexpected path application" in
@@ -248,7 +248,7 @@ let of_path_and_name_with_convert (path : Path.t) (name : Name.t) : t =
   let rec aux p : Name.t list * Name.t =
     match p with
     | Path.Pident x -> ([Name.of_ident false x], name)
-    | Path.Pdot (p, s, _) ->
+    | Path.Pdot (p, s) ->
       let (path, base) = aux p in
       (Name.of_string false s :: path, base)
     | Path.Papply _ -> failwith "Unexpected path application" in

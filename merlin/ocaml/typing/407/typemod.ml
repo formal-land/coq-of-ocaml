@@ -52,13 +52,6 @@ type error =
 exception Error of Location.t * Env.t * error
 exception Error_forward of Location.error
 
-module ImplementationHooks = Misc.MakeHooks(struct
-    type t = Typedtree.structure * Typedtree.module_coercion
-  end)
-module InterfaceHooks = Misc.MakeHooks(struct
-    type t = Typedtree.signature
-  end)
-
 open Typedtree
 
 let fst3 (x,_,_) = x
@@ -119,12 +112,18 @@ let initial_env ~loc ~safe_string ~initially_opened_module
     match initially_opened_module with
     | None -> env
     | Some name ->
-      snd (type_initially_opened_module env name)
+      try snd (type_initially_opened_module env name)
+      with exn ->
+        Msupport.raise_error exn;
+        env
   in
   let open_implicit_module env m =
     let open Asttypes in
     let lid = {loc; txt = Longident.parse m } in
-    snd (type_open_ Override env lid.loc lid)
+    try snd (type_open_ Override env lid.loc lid)
+    with exn ->
+      Msupport.raise_error exn;
+      env
   in
   List.fold_left open_implicit_module env open_implicit_modules
 
@@ -650,24 +649,24 @@ let check_recmod_typedecls env sdecls decls =
 (* Auxiliaries for checking uniqueness of names in signatures and structures *)
 
 let check cl loc set_ref name =
-  if StringSet.mem name !set_ref
+  if String.Set.mem name !set_ref
   then raise(Error(loc, Env.empty, Repeated_name(cl, name)))
-  else set_ref := StringSet.add name !set_ref
+  else set_ref := String.Set.add name !set_ref
 
 type names =
   {
-    types: StringSet.t ref;
-    modules: StringSet.t ref;
-    modtypes: StringSet.t ref;
-    typexts: StringSet.t ref;
+    types: String.Set.t ref;
+    modules: String.Set.t ref;
+    modtypes: String.Set.t ref;
+    typexts: String.Set.t ref;
   }
 
 let new_names () =
   {
-    types = ref StringSet.empty;
-    modules = ref StringSet.empty;
-    modtypes = ref StringSet.empty;
-    typexts = ref StringSet.empty;
+    types = ref String.Set.empty;
+    modules = ref String.Set.empty;
+    modtypes = ref String.Set.empty;
+    typexts = ref String.Set.empty;
   }
 
 
@@ -692,12 +691,12 @@ let check_sig_item names loc = function
 
 let simplify_signature sg =
   let rec aux = function
-    | [] -> [], StringSet.empty
+    | [] -> [], String.Set.empty
     | (Sig_value(id, _descr) as component) :: sg ->
         let (sg, val_names) as k = aux sg in
         let name = Ident.name id in
-        if StringSet.mem name val_names then k
-        else (component :: sg, StringSet.add name val_names)
+        if String.Set.mem name val_names then k
+        else (component :: sg, String.Set.add name val_names)
     | component :: sg ->
         let (sg, val_names) = aux sg in
         (component :: sg, val_names)
@@ -1824,9 +1823,6 @@ let type_toplevel_phrase env s =
   Env.reset_required_globals ();
   let (str, sg, env) =
     type_structure ~toplevel:true false None env s Location.none in
-  let (str, _coerce) = ImplementationHooks.apply_hooks
-      { Misc.sourcefile = "//toplevel//" } (str, Tcoerce_none)
-  in
   (str, sg, env)
 
 let type_module_alias = type_module ~alias:true true false None
@@ -2011,16 +2007,12 @@ let type_implementation sourcefile outputprefix modulename initial_env ast =
       (Some sourcefile) initial_env None;
     raise e
 
-let type_implementation sourcefile outputprefix modulename initial_env ast =
-  ImplementationHooks.apply_hooks { Misc.sourcefile }
-    (type_implementation sourcefile outputprefix modulename initial_env ast)
-
 let save_signature modname tsg outputprefix source_file initial_env cmi =
   Cmt_format.save_cmt  (outputprefix ^ ".cmti") modname
     (Cmt_format.Interface tsg) (Some source_file) initial_env (Some cmi)
 
-let type_interface sourcefile env ast =
-  InterfaceHooks.apply_hooks { Misc.sourcefile } (transl_signature env ast)
+let type_interface _sourcefile env ast =
+  transl_signature env ast
 
 (* "Packaging" of several compilation units into one unit
    having them as sub-modules.  *)
@@ -2101,7 +2093,7 @@ let report_error ppf = function
   | Cannot_eliminate_dependency mty ->
       fprintf ppf
         "@[This functor has type@ %a@ \
-           The parameter cannot be eliminated in the result type.@  \
+           The parameter cannot be eliminated in the result type.@ \
            Please bind the argument to a module identifier.@]" modtype mty
   | Signature_expected -> fprintf ppf "This module type is not a signature"
   | Structure_expected mty ->
