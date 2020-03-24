@@ -119,7 +119,10 @@ module Constructors = struct
       : (t * (RecordSkeleton.t * Name.t list * Type.t) option) Monad.t =
       let { Types.cd_args; cd_id; cd_loc; cd_res; _ } = case in
       set_loc (Loc.of_location cd_loc) (
-      let constructor_name = Name.of_ident false cd_id in
+      let constructor_name =
+        PathName.map_constructor_name
+          (Ident.name cd_id) (Name.to_string typ_name) in
+      let constructor_name = Name.of_string false constructor_name in
       let typ_vars = Name.Map.empty in
       begin match cd_args with
       | Cstr_tuple param_typs ->

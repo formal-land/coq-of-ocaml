@@ -255,6 +255,10 @@ let of_path_and_name_with_convert (path : Path.t) (name : Name.t) : t =
   let (path, base) = aux path in
   convert (of_name (List.rev path) base)
 
+let map_constructor_name (cstr_name : string) (typ_ident : string) : string =
+  match (cstr_name, typ_ident) with
+  | _ -> cstr_name
+
 let of_constructor_description
   (constructor_description : Types.constructor_description)
   : t =
@@ -264,7 +268,9 @@ let of_constructor_description
       cstr_res = { desc = Tconstr (path, _, _); _ };
       _
     } ->
+    let typ_ident = Path.head path in
     let { path; _ } = of_path_without_convert false path in
+    let cstr_name = map_constructor_name cstr_name (Ident.name typ_ident) in
     let base = Name.of_string false cstr_name in
     convert { path; base }
   | _ -> failwith "Unexpected constructor description without a type constructor"
