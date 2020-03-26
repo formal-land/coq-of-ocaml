@@ -136,17 +136,10 @@ let rec of_structure (structure : structure) : t list Monad.t =
           Name.Map.empty mb_expr (Some mb_expr.mod_type) >>= fun module_exp ->
         return [ModuleExp (name, module_exp)]
       | Not_found reason ->
-        begin match mb_expr.mod_desc with
-        | Tmod_structure structure ->
-          of_structure structure >>= fun structures ->
-          return [Module (name, structures)]
-        | Tmod_ident (path, _) ->
-          let reference = PathName.of_path_with_convert false path in
-          return [ModuleSynonym (name, reference)]
-        | Tmod_apply _ | Tmod_functor _ ->
-          Exp.of_module_expr Name.Map.empty mb_expr None >>= fun module_exp ->
-          return [ModuleExp (name, module_exp)]
-        | _ ->
+        of_module_expr name mb_expr >>= fun module_expr ->
+        begin match module_expr with
+        | Some module_expr -> return [module_expr]
+        | None ->
           raise
             []
             FirstClassModule
@@ -280,6 +273,21 @@ let rec of_structure (structure : structure) : t list Monad.t =
     structure.str_items
     ([], structure.str_final_env) >>= fun (structure, _) ->
   return structure
+
+and of_module_expr (name : Name.t) (module_expr : module_expr)
+  : t option Monad.t =
+  match module_expr.mod_desc with
+  | Tmod_structure structure ->
+    of_structure structure >>= fun structures ->
+    return (Some (Module (name, structures)))
+  | Tmod_ident (path, _) ->
+    let reference = PathName.of_path_with_convert false path in
+    return (Some (ModuleSynonym (name, reference)))
+  | Tmod_apply _ | Tmod_functor _ ->
+    Exp.of_module_expr Name.Map.empty module_expr None >>= fun module_exp ->
+    return (Some (ModuleExp (name, module_exp)))
+  | Tmod_constraint (module_expr, _, _, _) -> of_module_expr name module_expr
+  | Tmod_unpack _ -> return None
 
 (** Pretty-print a structure to Coq. *)
 let rec to_coq (defs : t list) : SmartPrint.t =
