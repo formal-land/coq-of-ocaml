@@ -245,12 +245,12 @@ let rec of_expression (typ_vars : Name.t Name.Map.t) (e : expression)
   | Texp_record { fields; extended_expression; _ } ->
       Array.to_list fields |> Monad.List.filter_map (
         fun (label_description, definition) ->
-          let x_e =
-            match definition with
-            | Kept _ -> None
-            | Overridden (_, e) ->
-              let x = PathName.of_label_description label_description in
-              Some (x, e) in
+          begin match definition with
+          | Kept _ -> return None
+          | Overridden (_, e) ->
+            PathName.of_label_description label_description >>= fun x ->
+            return (Some (x, e))
+          end >>= fun x_e ->
           match x_e with
           | None -> return None
           | Some (x, e) ->
@@ -274,7 +274,7 @@ let rec of_expression (typ_vars : Name.t Name.Map.t) (e : expression)
         )
     end
   | Texp_field (e, _, label_description) ->
-    let x = PathName.of_label_description label_description in
+    PathName.of_label_description label_description >>= fun x ->
     of_expression typ_vars e >>= fun e ->
     return (Field (e, x))
   | Texp_ifthenelse (e1, e2, e3) ->

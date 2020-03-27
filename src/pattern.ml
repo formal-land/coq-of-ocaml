@@ -70,7 +70,7 @@ let rec of_pattern (p : pattern) : t option Monad.t =
       Constructor (path_name, patterns)))
   | Tpat_record (fields, _) ->
     (fields |> Monad.List.map (fun (_, label_description, p) ->
-      let x = PathName.of_label_description label_description in
+      PathName.of_label_description label_description >>= fun x ->
       of_pattern p >>= fun pattern ->
       return (
         Util.Option.map pattern (fun pattern -> (x, pattern))

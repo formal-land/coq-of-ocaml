@@ -275,14 +275,30 @@ let of_constructor_description
     convert { path; base }
   | _ -> failwith "Unexpected constructor description without a type constructor"
 
-let of_label_description (label_description : Types.label_description) : t =
+let rec iterate_in_aliases (path : Path.t) : Path.t Monad.t =
+  let barrier_modules = [
+  ] in
+  let is_in_barrier_module (path : Path.t) : bool =
+    List.mem (Ident.name (Path.head path)) barrier_modules in
+  get_env >>= fun env ->
+  match Env.find_type path env with
+  | { type_manifest = Some { desc = Tconstr (path', _, _); _ }; _ } ->
+    if is_in_barrier_module path && not (is_in_barrier_module path') then
+      return path
+    else
+      iterate_in_aliases path'
+  | _ -> return path
+
+let of_label_description (label_description : Types.label_description)
+  : t Monad.t =
   match label_description with
   | { lbl_name; lbl_res = { desc = Tconstr (path, _, _); _ } ; _ } ->
+    iterate_in_aliases path >>= fun path ->
     let { path; base } = of_path_without_convert false path in
     let path_name = {
       path = path @ [base];
       base = Name.of_string false lbl_name } in
-    convert path_name
+    return (convert path_name)
   | _ -> failwith "Unexpected label description without a type constructor"
 
 let constructor_of_variant (label : string) : t Monad.t =
