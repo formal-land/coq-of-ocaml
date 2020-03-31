@@ -13,9 +13,9 @@ let rec get_signature_typ_params
     : 'a Tree.item option Monad.t =
     match signature_item with
     | Sig_value _ -> return None
-    | Sig_type (ident, type_declaration, _) -> mapper ident type_declaration
+    | Sig_type (ident, type_declaration, _, _) -> mapper ident type_declaration
     | Sig_typext _ -> return None
-    | Sig_module (ident, module_declaration, _) ->
+    | Sig_module (ident, _, module_declaration, _, _) ->
       let name = Name.of_ident false ident in
       get_module_typ_typ_params
         mapper module_declaration.md_type >>= fun typ_params ->
@@ -28,7 +28,7 @@ and get_module_typ_typ_params
   match module_typ with
   | Mty_signature signature ->
     get_signature_typ_params mapper signature
-  | Mty_alias (_, path) | Mty_ident path ->
+  | Mty_alias path | Mty_ident path ->
     get_env >>= fun env ->
     begin match Env.find_modtype path env with
     | module_typ -> get_module_typ_declaration_typ_params mapper module_typ

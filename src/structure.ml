@@ -109,15 +109,23 @@ let rec of_structure (structure : structure) : t list Monad.t =
       set_env final_env (
       TypeDefinition.of_ocaml typs >>= fun def ->
       return [TypeDefinition def])
-    | Tstr_exception { ext_id; _ } ->
+    | Tstr_exception { tyexn_constructor = { ext_id; _ }; _ } ->
       error_message (Error ("exception " ^ Ident.name ext_id)) SideEffect (
         "The definition of exceptions is not handled.\n\n" ^
         "Alternative: using sum types (\"option\", \"result\", ...) to " ^
         "represent error cases."
       )
-    | Tstr_open open_description ->
-      let o = Open.of_ocaml open_description in
-      return [Open o]
+    | Tstr_open { open_expr; _ } ->
+      begin match open_expr with
+      | { mod_desc = Tmod_ident (path, _); _ } ->
+        let o = Open.of_ocaml path in
+        return [Open o]
+      | _ ->
+        raise
+          [Error "open_module_expression"]
+          NotSupported
+          "We do not support open on complex module expressions"
+      end
     | Tstr_module { mb_id; mb_expr; _ } ->
       let name = Name.of_ident false mb_id in
       IsFirstClassModule.is_module_typ_first_class mb_expr.mod_type
@@ -128,17 +136,10 @@ let rec of_structure (structure : structure) : t list Monad.t =
           Name.Map.empty mb_expr (Some mb_expr.mod_type) >>= fun module_exp ->
         return [ModuleExp (name, module_exp)]
       | Not_found reason ->
-        begin match mb_expr.mod_desc with
-        | Tmod_structure structure ->
-          of_structure structure >>= fun structures ->
-          return [Module (name, structures)]
-        | Tmod_ident (path, _) ->
-          let reference = PathName.of_path_with_convert false path in
-          return [ModuleSynonym (name, reference)]
-        | Tmod_apply _ | Tmod_functor _ ->
-          Exp.of_module_expr Name.Map.empty mb_expr None >>= fun module_exp ->
-          return [ModuleExp (name, module_exp)]
-        | _ ->
+        of_module_expr name mb_expr >>= fun module_expr ->
+        begin match module_expr with
+        | Some module_expr -> return [module_expr]
+        | None ->
           raise
             []
             FirstClassModule
@@ -208,7 +209,7 @@ let rec of_structure (structure : structure) : t list Monad.t =
       | IsFirstClassModule.Found mod_type_path ->
         get_env >>= fun env ->
         begin match Mtype.scrape env mod_type with
-        | Mty_ident path | Mty_alias (_, path) ->
+        | Mty_ident path | Mty_alias path ->
           error_message
             (Error "include_module_with_abstract_module_type")
             NotSupported
@@ -220,7 +221,7 @@ let rec of_structure (structure : structure) : t list Monad.t =
           return (
             signature |> Util.List.filter_map (fun signature_item ->
               match signature_item with
-              | Types.Sig_value (ident, _) | Sig_type (ident, _, _) ->
+              | Types.Sig_value (ident, _, _) | Sig_type (ident, _, _, _) ->
                 let is_value =
                   match signature_item with
                   | Types.Sig_value _ -> true
@@ -272,6 +273,21 @@ let rec of_structure (structure : structure) : t list Monad.t =
     structure.str_items
     ([], structure.str_final_env) >>= fun (structure, _) ->
   return structure
+
+and of_module_expr (name : Name.t) (module_expr : module_expr)
+  : t option Monad.t =
+  match module_expr.mod_desc with
+  | Tmod_structure structure ->
+    of_structure structure >>= fun structures ->
+    return (Some (Module (name, structures)))
+  | Tmod_ident (path, _) ->
+    let reference = PathName.of_path_with_convert false path in
+    return (Some (ModuleSynonym (name, reference)))
+  | Tmod_apply _ | Tmod_functor _ ->
+    Exp.of_module_expr Name.Map.empty module_expr None >>= fun module_exp ->
+    return (Some (ModuleExp (name, module_exp)))
+  | Tmod_constraint (module_expr, _, _, _) -> of_module_expr name module_expr
+  | Tmod_unpack _ -> return None
 
 (** Pretty-print a structure to Coq. *)
 let rec to_coq (defs : t list) : SmartPrint.t =

@@ -119,7 +119,10 @@ module Constructors = struct
       : (t * (RecordSkeleton.t * Name.t list * Type.t) option) Monad.t =
       let { Types.cd_args; cd_id; cd_loc; cd_res; _ } = case in
       set_loc (Loc.of_location cd_loc) (
-      let constructor_name = Name.of_ident false cd_id in
+      let constructor_name =
+        PathName.map_constructor_name
+          (Ident.name cd_id) (Name.to_string typ_name) in
+      let constructor_name = Name.of_string false constructor_name in
       let typ_vars = Name.Map.empty in
       begin match cd_args with
       | Cstr_tuple param_typs ->
@@ -250,10 +253,12 @@ module Constructors = struct
 end
 
 module Inductive = struct
+  type notation = Name.t * Name.t list * Type.t
+
   type t = {
     constructor_records
       : (Name.t * (RecordSkeleton.t * Name.t list * Type.t) list) list;
-    notations : (Name.t * Name.t list * Type.t) list;
+    notations : notation list;
     records : RecordSkeleton.t list;
     typs : (Name.t * Name.t option list * Constructors.t) list;
   }
@@ -391,23 +396,28 @@ module Inductive = struct
       )
     )
 
-  let typ_depends_on_name (typ : Type.t) (name : Name.t) : bool =
-    Name.Set.mem name (Type.local_typ_constructors_of_typ typ)
+  let rec sort_notations (sorted : notation list) (to_sort : notation list)
+    : notation list =
+    let to_sort_names = List.map (fun (name, _, _) -> name) to_sort in
+    let (selected, to_sort) =
+      to_sort |> List.partition (fun (_, typ_args, typ) ->
+        let dependencies =
+          Name.Set.diff
+            (Type.local_typ_constructors_of_typ typ)
+            (Name.Set.of_list typ_args) in
+        not (dependencies |> Name.Set.exists (fun dependency ->
+          List.mem dependency to_sort_names
+        ))
+      ) in
+    match selected with
+    | [] -> sorted @ to_sort
+    | _ :: _ -> sort_notations (sorted @ selected) to_sort
 
   let to_coq_notations_wheres
     (subst : Type.Subst.t)
     (inductive : t)
     : SmartPrint.t list =
-    let sorted_notations =
-      (* inductive.notations in *)
-      inductive.notations |> List.stable_sort (fun (name1, _, typ1) (name2, _, typ2) ->
-        if typ_depends_on_name typ2 name1 then
-          -1
-        else if typ_depends_on_name typ1 name2 then
-          +1
-        else
-          0
-      ) in
+    let sorted_notations = sort_notations [] inductive.notations in
     (sorted_notations |> List.map (fun (name, typ_args, typ) ->
       to_coq_notations_where subst (to_coq_notation_name name) typ_args typ
     )) @

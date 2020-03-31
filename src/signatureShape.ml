@@ -22,8 +22,8 @@ let of_signature (signature : Types.signature) : t =
     let shape_list =
       signature |> Util.List.filter_map (fun item ->
         match item with
-        | Types.Sig_value (ident, _) -> Some (Name.of_ident true ident)
-        | Sig_module (ident, _, _) -> Some (Name.of_ident false ident)
+        | Types.Sig_value (ident, _, _) -> Some (Name.of_ident true ident)
+        | Sig_module (ident, _, _, _, _) -> Some (Name.of_ident false ident)
         | _ -> None
       ) in
     let shape = Name.Set.of_list shape_list in

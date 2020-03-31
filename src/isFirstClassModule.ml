@@ -10,7 +10,7 @@ let get_modtype_declarations_of_module_declaration
   match Env.scrape_alias env module_declaration.md_type with
   | Mty_signature signature ->
     signature |> Util.List.filter_map (function
-      | Types.Sig_modtype (module_type_ident, module_type) ->
+      | Types.Sig_modtype (module_type_ident, module_type, _) ->
         Some ([module_type_ident], module_type)
       | _ -> None
     )
@@ -29,7 +29,7 @@ let is_modtype_declaration_similar_to_shape
 
 let apply_idents_on_path (path : Path.t) (idents : Ident.t list) : Path.t =
   List.fold_left (fun path ident ->
-    Path.Pdot (path, Ident.name ident, 0)
+    Path.Pdot (path, Ident.name ident)
   ) path idents
 
 let is_black_list (path : Path.t) : bool =
@@ -95,7 +95,7 @@ let rec is_module_typ_first_class
   : maybe_found Monad.t =
   get_env >>= fun env ->
   match Mtype.scrape env module_typ with
-  | Mty_alias (_, path) | Mty_ident path ->
+  | Mty_alias path | Mty_ident path ->
     begin match Env.find_module path env with
     | { Types.md_type; _ } -> is_module_typ_first_class md_type
     | exception Not_found ->

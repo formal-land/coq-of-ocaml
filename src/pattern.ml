@@ -70,7 +70,7 @@ let rec of_pattern (p : pattern) : t option Monad.t =
       Constructor (path_name, patterns)))
   | Tpat_record (fields, _) ->
     (fields |> Monad.List.map (fun (_, label_description, p) ->
-      let x = PathName.of_label_description label_description in
+      PathName.of_label_description label_description >>= fun x ->
       of_pattern p >>= fun pattern ->
       return (
         Util.Option.map pattern (fun pattern -> (x, pattern))
@@ -99,7 +99,9 @@ let rec of_pattern (p : pattern) : t option Monad.t =
     )
   | Tpat_lazy p ->
     of_pattern p >>= fun pattern ->
-    raise pattern NotSupported "Lazy patterns are not supported")
+    raise pattern NotSupported "Lazy patterns are not supported"
+  | Tpat_exception _ ->
+    raise None NotSupported "We do not support exception patterns")
 
 let rec has_or_patterns (p : t) : bool =
   match p with

@@ -43,12 +43,12 @@ let name_of_included_module_typ (module_typ : Typedtree.module_type)
 
 let of_types_signature (signature : Types.signature) : t Monad.t =
   signature |> Monad.List.map (function
-    | Types.Sig_value (ident, { val_type; _ }) ->
+    | Types.Sig_value (ident, { val_type; _ }, _) ->
       let name = Name.of_ident true ident in
       Type.of_typ_expr true Name.Map.empty val_type >>= fun (typ, _, _) ->
       let typ_vars = Name.Set.elements (Type.typ_args_of_typ typ) in
       return (Value (name, typ_vars, typ))
-    | Sig_type (ident, { type_params; _ }, _) ->
+    | Sig_type (ident, { type_params; _ }, _, _) ->
       (* We ignore the type manifest so that we do not unroll unwanted type
          definitions. *)
       let name = Name.of_ident false ident in
@@ -76,7 +76,7 @@ let of_first_class_types_signature
     PathName.of_path_and_name_with_convert signature_path name in
   set_env final_env (
   signature |> Monad.List.filter_map (function
-    | Types.Sig_value (ident, { val_type; _ }) ->
+    | Types.Sig_value (ident, { val_type; _ }, _) ->
       let name = Name.of_ident true ident in
       Type.of_typ_expr true Name.Map.empty val_type >>= fun (typ, _, new_typ_vars) ->
       return (Some (
@@ -88,14 +88,14 @@ let of_first_class_types_signature
           field_path_name name
         )
       ))
-    | Sig_type (ident, _, _) ->
+    | Sig_type (ident, _, _, _) ->
       let name = Name.of_ident false ident in
       return (Some (
         IncludedFieldType (name, module_name, field_path_name name)
       ))
     | Sig_typext _ ->
       raise None NotSupported "Type extension not handled"
-    | Sig_module (ident, _, _) ->
+    | Sig_module (ident, _, _, _, _) ->
       let name = Name.of_ident false ident in
       return (Some (
         IncludedFieldModule (name, module_name, field_path_name name)
@@ -175,7 +175,7 @@ let rec of_signature (signature : Typedtree.signature) : t Monad.t =
           NotSupported
           "We do not handle mutually recursive declaration of class types"
       end
-    | Tsig_exception { ext_id; _ } ->
+    | Tsig_exception { tyexn_constructor = { ext_id; _ }; _ } ->
       raise
         [Error ("exception " ^ Ident.name ext_id)]
         SideEffect
@@ -192,6 +192,11 @@ let rec of_signature (signature : Typedtree.signature) : t Monad.t =
           module_name signature_path incl_type final_env >>= fun fields ->
         return (Value (module_name, [], typ) :: fields)
       end
+    | Tsig_modsubst _ ->
+      raise
+        [Error "unhandled_module_substitution"]
+        NotSupported
+        "We do not handle module substitution"
     | Tsig_modtype { mtd_type = None; _ } ->
       raise
         [Error "abstract_module_type"]
@@ -236,15 +241,15 @@ let rec of_signature (signature : Typedtree.signature) : t Monad.t =
         let typ = ModuleTyp.to_typ module_typ in
         return [Value (name, [], typ)]
       end
-    | Tsig_open open_description ->
-      let o = Open.of_ocaml open_description in
+    | Tsig_open { open_expr = (path, _); _} ->
+      let o = Open.of_ocaml path in
       return [Open o]
     | Tsig_recmodule _ ->
       raise
         [Error "recursive_module"]
         NotSupported
         "Recursive module signatures are not handled"
-    | Tsig_type (_, typs) ->
+    | Tsig_type (_, typs) | Tsig_typesubst typs ->
       (* Because types may be recursive, so we need the types to already be in
          the environment. This is useful for example for the detection of
          phantom types. *)

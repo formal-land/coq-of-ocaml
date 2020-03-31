@@ -118,16 +118,16 @@ module ModuleTypValues = struct
     | Mty_signature signature ->
       signature |> Monad.List.filter_map (fun item ->
         match item with
-        | Types.Sig_value (ident, { val_type; _ }) ->
+        | Types.Sig_value (ident, { val_type; _ }, _) ->
           Type.of_typ_expr true typ_vars val_type >>= fun (_, _, new_typ_vars) ->
           return (Some (Value (
             Name.of_ident true ident,
             Name.Set.cardinal new_typ_vars
           )))
-        | Sig_module (ident, { Types.md_type = Mty_functor _; _ }, _) ->
+        | Sig_module (ident, _, { Types.md_type = Mty_functor _; _ }, _, _) ->
           let name = Name.of_ident false ident in
           return (Some (ModuleFunctor name))
-        | Sig_module (ident, _, _) ->
+        | Sig_module (ident, _, _, _, _) ->
           let name = Name.of_ident false ident in
           return (Some (Module name))
         | _ -> return None
@@ -201,14 +201,14 @@ let rec of_expression (typ_vars : Name.t Name.Map.t) (e : expression)
       | None -> return None
     )) >>= fun e_xs ->
     return (Apply (e_f, e_xs))
-  | Texp_match (e, cases, exception_cases, _) ->
+  | Texp_match (e, cases, _) ->
     let is_gadt_match =
       Attribute.has_match_gadt attributes ||
       Attribute.has_match_gadt_with_result attributes in
     let do_cast_results = Attribute.has_match_gadt_with_result attributes in
     let is_with_default_case = Attribute.has_match_with_default attributes in
     of_expression typ_vars e >>= fun e ->
-    of_match typ_vars e cases exception_cases is_gadt_match do_cast_results is_with_default_case
+    of_match typ_vars e cases is_gadt_match do_cast_results is_with_default_case
   | Texp_tuple es ->
     Monad.List.map (of_expression typ_vars) es >>= fun es ->
     return (Tuple es)
@@ -245,12 +245,12 @@ let rec of_expression (typ_vars : Name.t Name.Map.t) (e : expression)
   | Texp_record { fields; extended_expression; _ } ->
       Array.to_list fields |> Monad.List.filter_map (
         fun (label_description, definition) ->
-          let x_e =
-            match definition with
-            | Kept _ -> None
-            | Overridden (_, e) ->
-              let x = PathName.of_label_description label_description in
-              Some (x, e) in
+          begin match definition with
+          | Kept _ -> return None
+          | Overridden (_, e) ->
+            PathName.of_label_description label_description >>= fun x ->
+            return (Some (x, e))
+          end >>= fun x_e ->
           match x_e with
           | None -> return None
           | Some (x, e) ->
@@ -274,7 +274,7 @@ let rec of_expression (typ_vars : Name.t Name.Map.t) (e : expression)
         )
     end
   | Texp_field (e, _, label_description) ->
-    let x = PathName.of_label_description label_description in
+    PathName.of_label_description label_description >>= fun x ->
     of_expression typ_vars e >>= fun e ->
     return (Field (e, x))
   | Texp_ifthenelse (e1, e2, e3) ->
@@ -346,6 +346,7 @@ let rec of_expression (typ_vars : Name.t Name.Map.t) (e : expression)
   | Texp_letmodule (
       x,
       _,
+      _,
       {
         mod_desc = Tmod_unpack (
           { exp_desc = Texp_ident (path, _, _); _ },
@@ -359,7 +360,7 @@ let rec of_expression (typ_vars : Name.t Name.Map.t) (e : expression)
     let path_name = PathName.of_path_with_convert false path in
     of_expression typ_vars e >>= fun e ->
     return (LetModuleUnpack (x, path_name, e))
-  | Texp_letmodule (x, _, module_expr, e) ->
+  | Texp_letmodule (x, _, _, module_expr, e) ->
     let x = Name.of_ident true x in
     push_env (of_module_expr typ_vars module_expr None >>= fun value ->
     set_env e.exp_env (
@@ -391,6 +392,11 @@ let rec of_expression (typ_vars : Name.t Name.Map.t) (e : expression)
   | Texp_pack module_expr ->
     push_env (of_module_expr typ_vars module_expr None) >>= fun e ->
     return (ModulePack e)
+  | Texp_letop _ ->
+    error_message
+      (Error "let_op")
+      NotSupported
+      "We do not support let operators"
   | Texp_unreachable ->
     error_message
       (Error "unreachable")
@@ -400,13 +406,15 @@ let rec of_expression (typ_vars : Name.t Name.Map.t) (e : expression)
     error_message
       (Error "extension")
       NotSupported
-      "Construction of extensions is not handled"))
+      "Construction of extensions is not handled"
+  | Texp_open (_, e) ->
+    of_expression typ_vars e >>= fun e ->
+    error_message e NotSupported "We do not support local open"))
 
 and of_match
   (typ_vars : Name.t Name.Map.t)
   (e : t)
   (cases : case list)
-  (exception_cases : case list)
   (is_gadt_match : bool)
   (do_cast_results : bool)
   (is_with_default_case : bool)
@@ -493,10 +501,6 @@ and of_match
           ) in
       (p, existential_cast, rhs)
     ) in
-  (exception_cases |> Monad.List.iter (fun { c_lhs; _ } ->
-    set_loc (Loc.of_location c_lhs.pat_loc) (
-    raise () NotSupported "We do not support pattern-matching on exceptions")
-  )) >>= fun () ->
   return (Match (e, cases, is_with_default_case))
 
 (** Generate a variable and a "match" on this variable from a list of
@@ -510,7 +514,7 @@ and open_cases
   : (Name.t * t) Monad.t =
   let name = Name.of_string false "function_parameter" in
   let e = Variable (MixedPath.of_name name, []) in
-  of_match typ_vars e cases [] is_gadt_match do_cast_results is_with_default_case >>= fun e ->
+  of_match typ_vars e cases is_gadt_match do_cast_results is_with_default_case >>= fun e ->
   return (name, e)
 
 and import_let_fun
@@ -969,11 +973,11 @@ and of_include
   | signature_item :: signature ->
     of_include typ_vars module_path_name signature_path signature e_next >>= fun e_next ->
     begin match signature_item with
-    | Sig_value (ident, _) | Sig_type (ident, _, _) ->
+    | Sig_value (ident, _, _) | Sig_type (ident, _, _, _) ->
       let is_value =
         match signature_item with Sig_value _ -> true | _ -> false in
       begin match signature_item with
-      | Sig_value (_, { Types.val_type; _ }) ->
+      | Sig_value (_, { Types.val_type; _ }, _) ->
         Type.of_typ_expr true typ_vars val_type >>= fun (_, _, new_typ_vars) ->
         return (Name.Set.elements new_typ_vars)
       | _ -> return []

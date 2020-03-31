@@ -23,9 +23,7 @@ open Path
 open Types
 open Btype
 
-let state = Local_store.new_bindings ()
-let sref f = Local_store.ref state f
-let srefk k = Local_store.ref state (fun () -> k)
+open Local_store.Compiler
 
 let add_delayed_check_forward = ref (fun _ -> assert false)
 
@@ -92,53 +90,8 @@ exception Error of error
 
 let error err = raise (Error err)
 
-module EnvLazy : sig
-  type ('a,'b) t
-
-  val force : ('a -> 'b) -> ('a,'b) t -> 'b
-  val create : 'a -> ('a,'b) t
-  val get_arg : ('a,'b) t -> 'a option
-  val create_forced : 'b -> ('a, 'b) t
-  val create_failed : exn -> ('a, 'b) t
-
-end  = struct
-
-  type ('a,'b) t = ('a,'b) eval ref
-
-  and ('a,'b) eval =
-    | Done of 'b
-    | Raise of exn
-    | Thunk of 'a
-
-  let force f x =
-    match !x with
-    | Done x -> x
-    | Raise e -> raise e
-    | Thunk e ->
-        match f e with
-        | y ->
-          x := Done y;
-          y
-        | exception e ->
-          x := Raise e;
-          raise e
-
-  let get_arg x =
-    match !x with Thunk a -> Some a | _ -> None
-
-  let create x =
-    ref (Thunk x)
-
-  let create_forced y =
-    ref (Done y)
-
-  let create_failed e =
-    ref (Raise e)
-
-end
-
 (** Map indexed by the name of module components. *)
-module NameMap = StringMap
+module NameMap = String.Map
 
 type summary =
     Env_empty
@@ -468,7 +421,7 @@ and module_declaration_lazy =
 
 and module_components =
   {
-    alerts: string StringMap.t;
+    alerts: Misc.alerts;
     loc: Location.t;
     comps: (components_maker, module_components_repr option) EnvLazy.t;
   }
@@ -596,11 +549,27 @@ let diff env1 env2 =
   IdTbl.diff_keys env1.modules env2.modules @
   IdTbl.diff_keys env1.classes env2.classes
 
+type can_load_cmis =
+  | Can_load_cmis
+  | Cannot_load_cmis of EnvLazy.log
+
+let can_load_cmis = srefk Can_load_cmis
+
+let without_cmis f x =
+  let log = EnvLazy.log () in
+  let res =
+    Misc.(protect_refs
+            [ R (can_load_cmis, Cannot_load_cmis log)]
+            (fun () -> f x))
+  in
+  EnvLazy.backtrack log;
+  res
+
 (* Forward declarations *)
 
 let components_of_module' =
   ref ((fun ~alerts:_ ~loc:_ _env _sub _path _addr _mty -> assert false) :
-         alerts:string StringMap.t -> loc:Location.t -> t ->
+         alerts:string String.Map.t -> loc:Location.t -> t ->
        Subst.t option -> Subst.t -> Path.t -> address_lazy -> module_type ->
        module_components)
 let components_of_module_maker' =
@@ -627,7 +596,11 @@ let md md_type =
   {md_type; md_attributes=[]; md_loc=Location.none}
 
 let get_components_opt c =
-  EnvLazy.force !components_of_module_maker' c.comps
+  match !can_load_cmis with
+  | Can_load_cmis ->
+    EnvLazy.force !components_of_module_maker' c.comps
+  | Cannot_load_cmis log ->
+    EnvLazy.force_logged log !components_of_module_maker' c.comps
 
 let empty_structure =
   Structure_comps {
@@ -685,20 +658,20 @@ let persistent_structures : (string, pers_struct option) Hashtbl.t ref =
 
 let crc_units = sref Consistbl.create
 
-let imported_units = srefk StringSet.empty
+let imported_units = srefk String.Set.empty
 
 let add_import s =
-  imported_units := StringSet.add s !imported_units
+  imported_units := String.Set.add s !imported_units
 
-let imported_opaque_units = srefk StringSet.empty
+let imported_opaque_units = srefk String.Set.empty
 
 let add_imported_opaque s =
-  imported_opaque_units := StringSet.add s !imported_opaque_units
+  imported_opaque_units := String.Set.add s !imported_opaque_units
 
 let clear_imports () =
   Consistbl.clear !crc_units;
-  imported_units := StringSet.empty;
-  imported_opaque_units := StringSet.empty
+  imported_units := String.Set.empty;
+  imported_opaque_units := String.Set.empty
 
 let check_consistency ps =
   try
@@ -740,8 +713,8 @@ let register_pers_for_short_paths ps =
     List.exists
       (function
         | Alerts alerts ->
-          StringMap.mem "deprecated" alerts ||
-          StringMap.mem "ocaml.deprecated" alerts
+          String.Map.mem "deprecated" alerts ||
+          String.Map.mem "ocaml.deprecated" alerts
         | _ -> false)
       ps.ps_flags
   in
@@ -775,7 +748,7 @@ module Persistent_signature = struct
       cmi_cache : exn ref }
 
   let load = ref (fun ~unit_name ->
-      match find_in_path_uncap !Config.load_path (unit_name ^ ".cmi") with
+      match Load_path.find_uncap (unit_name ^ ".cmi") with
       | filename ->
         let {Cmi_cache. cmi; cmi_cache} = Cmi_cache.read filename in
         Some { filename; cmi; cmi_cache }
@@ -803,7 +776,7 @@ let acknowledge_pers_struct check modname
   let flags = cmi.cmi_flags in
   let alerts =
     List.fold_left (fun acc -> function Alerts s -> s | _ -> acc)
-      StringMap.empty
+      String.Map.empty
       flags
   in
   let id = Ident.create_persistent name in
@@ -861,6 +834,9 @@ let find_pers_struct check name =
   | Some ps -> ps
   | None -> raise Not_found
   | exception Not_found ->
+    match !can_load_cmis with
+    | Cannot_load_cmis _ -> raise Not_found
+    | Can_load_cmis ->
         let ps =
           match !Persistent_signature.load ~unit_name:name with
           | Some ps -> ps
@@ -1285,7 +1261,7 @@ exception Recmodule
 let report_alerts ?loc p alerts =
   match loc with
   | Some loc ->
-      StringMap.iter
+      String.Map.iter
         (fun kind message ->
            let message = if message = "" then "" else "\n" ^ message in
            Location.alert ~kind loc
@@ -2260,7 +2236,7 @@ let components_of_functor_appl f env p1 p2 =
     !check_well_formed_module env Location.(in_file !input_name)
       ("the signature of " ^ Path.name p) mty;
     let comps =
-      components_of_module ~alerts:StringMap.empty
+      components_of_module ~alerts:String.Map.empty
         ~loc:Location.none
         (*???*)
         env None Subst.identity p addr mty
@@ -2532,7 +2508,6 @@ let read_signature modname filename =
   let ps = read_pers_struct modname filename in
   Lazy.force ps.ps_sig
 
-(*
 let is_identchar_latin1 = function
   | 'A'..'Z' | 'a'..'z' | '_' | '\192'..'\214' | '\216'..'\246'
   | '\248'..'\255' | '\'' | '0'..'9' -> true
@@ -2555,8 +2530,7 @@ let persistent_structures_of_dir dir =
   Load_path.Dir.files dir
   |> List.to_seq
   |> Seq.filter_map unit_name_of_filename
-  |> StringSet.of_seq
-*)
+  |> String.Set.of_seq
 
 (* Return the CRC of the interface of the given compilation unit *)
 
@@ -2575,11 +2549,11 @@ let crc_of_unit name =
 (* Return the list of imported interfaces with their CRCs *)
 
 let imports () =
-  Consistbl.extract (StringSet.elements !imported_units) !crc_units
+  Consistbl.extract (String.Set.elements !imported_units) !crc_units
 
 (* Returns true if [s] is an opaque imported module  *)
 let is_imported_opaque s =
-  StringSet.mem s !imported_opaque_units
+  String.Set.mem s !imported_opaque_units
 
 (* Save a signature to a file *)
 
@@ -2733,18 +2707,18 @@ let filter_non_loaded_persistent f env =
                  if f (Ident.create_persistent name) then
                    acc
                  else
-                   StringSet.add name acc)
+                   String.Set.add name acc)
       env.modules
-      StringSet.empty
+      String.Set.empty
   in
   let remove_ids tbl ids =
-    StringSet.fold
+    String.Set.fold
       (fun name tbl -> IdTbl.remove (Ident.create_persistent name) tbl)
       ids
       tbl
   in
   let rec filter_summary summary ids =
-    if StringSet.is_empty ids then
+    if String.Set.is_empty ids then
       summary
     else
       match summary with
@@ -2772,8 +2746,8 @@ let filter_non_loaded_persistent f env =
       | Env_copy_types (s, types) ->
           Env_copy_types (filter_summary s ids, types)
       | Env_persistent (s, id) ->
-          if StringSet.mem (Ident.name id) ids then
-            filter_summary s (StringSet.remove (Ident.name id) ids)
+          if String.Set.mem (Ident.name id) ids then
+            filter_summary s (String.Set.remove (Ident.name id) ids)
           else
             Env_persistent (filter_summary s ids, id)
   in
@@ -2855,7 +2829,7 @@ let short_paths_module_type_desc mty =
 
 let deprecated_of_alerts alerts =
   if
-    StringMap.exists (fun key _ ->
+    String.Map.exists (fun key _ ->
       match key with
       | "deprecated" | "ocaml.deprecated" -> true
       | _ -> false
@@ -2893,7 +2867,7 @@ and short_paths_module_components_desc env mpath comp =
   | Functor_comps _ -> assert false
   | Structure_comps c ->
       let comps =
-        StringMap.fold (fun name (decl, _) acc ->
+        String.Map.fold (fun name (decl, _) acc ->
           let desc = short_paths_type_desc decl in
           let depr = deprecated_of_attributes decl.type_attributes in
           let item = Short_paths.Desc.Module.Type(name, desc, depr) in
@@ -2901,7 +2875,7 @@ and short_paths_module_components_desc env mpath comp =
         ) c.comp_types []
       in
       let comps =
-        StringMap.fold (fun name clty  acc ->
+        String.Map.fold (fun name clty  acc ->
           let desc = short_paths_class_type_desc clty in
           let depr = deprecated_of_attributes clty.clty_attributes in
           let item = Short_paths.Desc.Module.Class_type(name, desc, depr) in
@@ -2909,7 +2883,7 @@ and short_paths_module_components_desc env mpath comp =
         ) c.comp_cltypes comps
       in
       let comps =
-        StringMap.fold (fun name mtd acc ->
+        String.Map.fold (fun name mtd acc ->
           let desc = short_paths_module_type_desc mtd.mtd_type in
           let depr = deprecated_of_attributes mtd.mtd_attributes in
           let item = Short_paths.Desc.Module.Module_type(name, desc, depr) in
@@ -2917,9 +2891,9 @@ and short_paths_module_components_desc env mpath comp =
         ) c.comp_modtypes comps
       in
       let comps =
-        StringMap.fold (fun name (data, _) acc ->
+        String.Map.fold (fun name (data, _) acc ->
           let comps =
-            match StringMap.find name c.comp_components with
+            match String.Map.find name c.comp_components with
             | exception Not_found -> assert false
             | comps, _ -> comps
           in
@@ -2980,7 +2954,7 @@ let short_paths_additions_desc env additions =
            let depr = deprecated_of_alerts comps.alerts in
            Short_paths.Desc.Module(id, desc, source, depr) :: acc
        | Type_open(root, decls) ->
-           StringMap.fold
+           String.Map.fold
              (fun name (decl, _) acc ->
                 let id = Ident.create_local name in
                 let path = Pdot(root, name) in
@@ -2990,7 +2964,7 @@ let short_paths_additions_desc env additions =
                 Short_paths.Desc.Type(id, desc, source, depr) :: acc)
              decls acc
        | Class_type_open(root, decls) ->
-           StringMap.fold
+           String.Map.fold
              (fun name clty acc ->
                 let id = Ident.create_local name in
                 let path = Pdot(root, name) in
@@ -3000,7 +2974,7 @@ let short_paths_additions_desc env additions =
                 Short_paths.Desc.Class_type(id, desc, source, depr) :: acc)
              decls acc
        | Module_type_open(root, decls) ->
-           StringMap.fold
+           String.Map.fold
              (fun name mtd acc ->
                 let id = Ident.create_local name in
                 let path = Pdot(root, name) in
@@ -3010,7 +2984,7 @@ let short_paths_additions_desc env additions =
                 Short_paths.Desc.Module_type(id, desc, source, depr) :: acc)
              decls acc
        | Module_open(root, decls) ->
-           StringMap.fold
+           String.Map.fold
              (fun name comps acc ->
                match comps with
                | Persistent -> acc
@@ -3059,7 +3033,7 @@ let (initial_safe_string, initial_unsafe_string) =
     empty
 
 let add_type ~check id info env =
-add_type ~check ~predef:false id info env
+  add_type ~check ~predef:false id info env
 
 (* Return the environment summary *)
 
@@ -3147,18 +3121,19 @@ let check_state_consistency () =
   Std.Hashtbl.forall !persistent_structures @@ fun name ps ->
   match ps with
   | None ->
-    begin match find_in_path_uncap !Config.load_path (name ^ ".cmi") with
+    begin match Load_path.find_uncap (name ^ ".cmi") with
       | _ -> false
       | exception Not_found -> true
     end
   | Some cell ->
-    begin match !(Cmi_cache.(read cell.ps_filename).Cmi_cache.cmi_cache) with
+    begin match !(Cmi_cache.(get_cached_entry cell.ps_filename).Cmi_cache.cmi_cache) with
       | Cmi_cache_store ps_sig -> Std.lazy_eq ps_sig cell.ps_sig
       | _ -> false
       | exception Not_found -> false
     end
 
-let with_cmis f = f ()
+let with_cmis f =
+  Misc.(protect_refs [ R (can_load_cmis, Can_load_cmis)] f)
 
 (* helper for merlin *)
 

@@ -18,27 +18,27 @@ let items_of_types_signature (signature : Types.signature) : item list Monad.t =
   let of_types_signature_item (signature_item : Types.signature_item)
     : item Monad.t =
     match signature_item with
-    | Sig_value (ident, { val_type; _ }) ->
+    | Sig_value (ident, { val_type; _ }, _) ->
       let name = Name.of_ident true ident in
       Type.of_type_expr_without_free_vars val_type >>= fun typ ->
       let typ_args = Name.Set.elements (Type.typ_args_of_typ typ) in
       return (Value (name, typ_args, typ))
-    | Sig_type (ident, { type_manifest = None; type_params; _ }, _) ->
+    | Sig_type (ident, { type_manifest = None; type_params; _ }, _, _) ->
       let name = Name.of_ident false ident in
       Monad.List.map Type.of_type_expr_variable type_params >>= fun typ_args ->
       return (TypExistential (name, typ_args))
-    | Sig_type (ident, { type_manifest = Some typ; type_params; _ }, _) ->
+    | Sig_type (ident, { type_manifest = Some typ; type_params; _ }, _, _) ->
       let name = Name.of_ident false ident in
       Monad.List.map Type.of_type_expr_variable type_params >>= fun typ_args ->
       Type.of_type_expr_without_free_vars typ >>= fun typ ->
       return (TypSynonym (name, typ_args, typ))
-    | Sig_typext (_, { ext_type_path; _ }, _) ->
+    | Sig_typext (_, { ext_type_path; _ }, _, _) ->
       let name = Path.name ext_type_path in
       raise
         (Error ("extensible_type_definition `" ^ name ^ "`"))
         NotSupported
         ("Extensible type '" ^ name ^ "' not handled")
-    | Sig_module (ident, { md_type; _ }, _) ->
+    | Sig_module (ident, _, { md_type; _ }, _, _) ->
       let name = Name.of_ident false ident in
       IsFirstClassModule.is_module_typ_first_class
         md_type >>= fun is_first_class ->
@@ -82,19 +82,19 @@ let items_of_types_signature (signature : Types.signature) : item list Monad.t =
             reason
           )
       end
-    | Sig_modtype (ident, _) ->
+    | Sig_modtype (ident, _, _) ->
       let name = Ident.name ident in
       raise
         (Error ("module_type" ^ name))
         NotSupported
         ("Signatures '" ^ name ^ "' inside signature is not handled")
-    | Sig_class (ident, _, _) ->
+    | Sig_class (ident, _, _, _) ->
       let name = Ident.name ident in
       raise
         (Error ("class" ^ name))
         NotSupported
         ("Class '" ^ name ^ "' not handled.")
-    | Sig_class_type (ident, _, _) ->
+    | Sig_class_type (ident, _, _, _) ->
       let name = Ident.name ident in
       raise
         (Error ("class_type" ^ name))
@@ -126,6 +126,11 @@ let items_of_signature (signature : signature) : item list Monad.t =
         SideEffect
         "Signature item `exception` not handled."
     | Tsig_include { incl_type; _ } -> items_of_types_signature incl_type
+    | Tsig_modsubst _ ->
+      raise
+        [Error "module_substitution"]
+        NotSupported
+        "We do not handle module substitutions"
     | Tsig_modtype _ ->
       raise
         [Error "module_type"]
@@ -152,13 +157,23 @@ let items_of_signature (signature : signature) : item list Monad.t =
       let name = Name.of_ident false typ_id in
       (type_params |> Monad.List.map Type.of_type_expr_variable) >>= fun typ_args ->
       return [TypExistential (name, typ_args)]
-    | Tsig_type (_, [ { typ_id; typ_type = { type_manifest = Some typ; type_params; _ }; _ } ]) ->
-      let name = Name.of_ident false typ_id in
-      (type_params |> Monad.List.map Type.of_type_expr_variable) >>= fun typ_args ->
-      Type.of_type_expr_without_free_vars typ >>= fun typ ->
-      return [TypSynonym (name, typ_args, typ)]
-    | Tsig_type (_, _) ->
-      raise [Error "mutual_type"] NotSupported "Mutual type definitions in signatures not handled."
+    | Tsig_type (_, typs) | Tsig_typesubst typs ->
+      begin match typs with
+      | [ {
+          typ_id;
+          typ_type = { type_manifest = Some typ; type_params; _ };
+          _
+        } ] ->
+        let name = Name.of_ident false typ_id in
+        (type_params |> Monad.List.map Type.of_type_expr_variable) >>= fun typ_args ->
+        Type.of_type_expr_without_free_vars typ >>= fun typ ->
+        return [TypSynonym (name, typ_args, typ)]
+      | _ ->
+        raise
+          [Error "mutual_type"]
+          NotSupported
+          "Mutual type definitions in signatures not handled."
+      end
     | Tsig_typext { tyext_path; _ } ->
       raise
       [Error ("extensible_type " ^ Path.last tyext_path)]
