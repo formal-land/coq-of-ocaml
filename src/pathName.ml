@@ -261,7 +261,7 @@ let map_constructor_name (cstr_name : string) (typ_ident : string) : string =
 
 let of_constructor_description
   (constructor_description : Types.constructor_description)
-  : t =
+  : t Monad.t =
   match constructor_description with
   | {
       cstr_name;
@@ -272,8 +272,13 @@ let of_constructor_description
     let { path; _ } = of_path_without_convert false path in
     let cstr_name = map_constructor_name cstr_name (Ident.name typ_ident) in
     let base = Name.of_string false cstr_name in
-    convert { path; base }
-  | _ -> failwith "Unexpected constructor description without a type constructor"
+    return (convert { path; base })
+  | { cstr_name; _ } ->
+    let path = of_name [] (Name.of_string false cstr_name) in
+    raise
+      path
+      Unexpected
+      "Unexpected constructor description without a type constructor"
 
 let rec iterate_in_aliases (path : Path.t) : Path.t Monad.t =
   let barrier_modules = [
@@ -299,7 +304,12 @@ let of_label_description (label_description : Types.label_description)
       path = path @ [base];
       base = Name.of_string false lbl_name } in
     return (convert path_name)
-  | _ -> failwith "Unexpected label description without a type constructor"
+  | { lbl_name; _ } ->
+    let path = of_name [] (Name.of_string false lbl_name) in
+    raise
+      path
+      Unexpected
+      "Unexpected label description without a type constructor"
 
 let constructor_of_variant (label : string) : t Monad.t =
   match label with
