@@ -227,8 +227,7 @@ let rec of_expression (typ_vars : Name.t Name.Map.t) (e : expression)
           "They are sent to a unit type."
         )
     | _ ->
-      let x =
-        PathName.of_constructor_description constructor_description in
+      PathName.of_constructor_description constructor_description >>= fun x ->
       (es |> Monad.List.map (of_expression typ_vars)) >>= fun es ->
       return (Constructor (x, implicits, es))
     end
