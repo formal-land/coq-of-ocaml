@@ -617,11 +617,15 @@ let of_ocaml (typs : type_declaration list) : t Monad.t =
       let typ_args = filter_in_free_vars typ_args free_vars in
       return (Synonym (name, typ_args, typ))
     end
-  | [ { typ_id; typ_type = { type_kind = Type_abstract; type_manifest = None; type_params; _ }; _ } ] ->
+  | [ { typ_id; typ_type = { type_kind = Type_abstract; type_manifest = None; type_params; _ }; typ_attributes; _ } ] ->
+    Attribute.of_attributes typ_attributes >>= fun typ_attributes ->
     let name = Name.of_ident false typ_id in
     TypeIsGadt.named_typ_params_expecting_variables type_params >>= fun typ_args ->
     let typ_args_with_unknowns =
-      TypeIsGadt.named_typ_params_without_unknowns typ_args in
+      if not (Attribute.has_phantom typ_attributes) then
+        TypeIsGadt.named_typ_params_without_unknowns typ_args
+      else
+        [] in
     return (Abstract (name, typ_args_with_unknowns))
   | [ { typ_id; typ_type = { type_kind = Type_record (fields, _); type_params; _ }; _ } ] ->
     let name = Name.of_ident false typ_id in
