@@ -1,4 +1,6 @@
 ## [Unreleased]
+* Add configuration to disable guard or positivity checking.
+* Add handling of a configuration file.
 * Add the `@coq_phantom` attribute to force an abstract type declaration to be phantom.
 
 ## 2.1.0 (March 20, 2020)

@@ -7,9 +7,6 @@ Local Open Scope Z_scope.
 Local Open Scope type_scope.
 Import ListNotations.
 
-Unset Positivity Checking.
-Unset Guard Checking.
-
 Definition n : Z := 12.
 
 Definition c1 : ascii := "a" % char.

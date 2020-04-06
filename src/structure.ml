@@ -35,7 +35,7 @@ module Value = struct
           group (separate space (args |> List.map (fun (x, t) ->
             parens @@ nest (Name.to_coq x ^^ !^ ":" ^^ Type.to_coq None None t)
           ))) ^^
-          Exp.Header.to_coq_structs value.Exp.Definition.is_rec header ^^
+          Exp.Header.to_coq_structs header ^^
           begin match typ with
           | None -> empty
           | Some typ -> !^ ": " ^-^ Type.to_coq None None typ

@@ -7,9 +7,6 @@ Local Open Scope Z_scope.
 Local Open Scope type_scope.
 Import ListNotations.
 
-Unset Positivity Checking.
-Unset Guard Checking.
-
 Definition n1 : Z :=
   let m := 12 in
   let n1 := m in

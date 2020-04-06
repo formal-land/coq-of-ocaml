@@ -11,19 +11,12 @@ module Header = struct
     structs : string list;
     typ : Type.t option }
 
-  let to_coq_structs (is_rec : Recursivity.t) (header : t) : SmartPrint.t =
-    if Recursivity.to_bool is_rec then
-    match header.args with
+  let to_coq_structs (header : t) : SmartPrint.t =
+    match header.structs with
     | [] -> empty
-    | (x, _) :: _ ->
-      let structs =
-        match header.structs with
-        | [] -> Name.to_coq x
-        | _ :: _ ->
-          separate space (List.map (fun s -> !^ s) header.structs) in
+    | _ :: _ ->
+      let structs = separate space (List.map (fun s -> !^ s) header.structs) in
       braces (nest (!^ "struct" ^^ structs))
-  else
-    empty
 end
 
 module Definition = struct
@@ -526,7 +519,7 @@ and import_let_fun
   (cases |> Monad.List.filter_map (fun { vb_pat = p; vb_expr; vb_attributes; _ } ->
     Attribute.of_attributes vb_attributes >>= fun attributes ->
     let is_axiom = Attribute.has_axiom attributes in
-    let structs = Attribute.get_structs attributes in
+    let struct_attributes = Attribute.get_structs attributes in
     set_env vb_expr.exp_env (
     set_loc (Loc.of_location p.pat_loc) (
     Pattern.of_pattern p >>= fun p ->
@@ -543,6 +536,17 @@ and import_let_fun
       of_expression typ_vars vb_expr >>= fun e ->
       let (args_names, e_body) = open_function e in
       let (args_typs, e_body_typ) = Type.open_type e_typ (List.length args_names) in
+      get_configuration >>= fun configuration ->
+      let structs =
+        match struct_attributes with
+        | [] ->
+          if Configuration.is_without_guard_checking configuration then
+            match (Recursivity.to_bool is_rec, args_names) with
+            | (true, x :: _) -> [Name.to_string x]
+            | _ -> []
+          else
+            []
+        | _ :: _ -> struct_attributes in
       let header = {
         Header.name = x;
         typ_vars = Name.Set.elements new_typ_vars;
@@ -1125,7 +1129,7 @@ let rec to_coq (paren : bool) (e : t) : SmartPrint.t =
             Name.to_coq x ^^ !^ ":" ^^ Type.to_coq None None x_typ
           )))
         )) ^^
-        Header.to_coq_structs def.Definition.is_rec header ^^
+        Header.to_coq_structs header ^^
         (match header.Header.typ with
         | None -> empty
         | Some typ -> !^ ": " ^-^ Type.to_coq None None typ) ^-^

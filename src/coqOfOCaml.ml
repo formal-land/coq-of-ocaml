@@ -23,8 +23,7 @@ module Output = struct
 end
 
 let exp
-  (env : Env.t)
-  (loc : Loc.t)
+  (context : MonadEval.Context.t)
   (typedtree : Mtyper.typedtree)
   (typedtree_errors : exn list)
   (source_file_name : string)
@@ -35,9 +34,7 @@ let exp
     MonadEval.eval
       source_file_name
       (Ast.of_typedtree typedtree typedtree_errors)
-      env
-      MonadEval.EnvStack.init
-      loc in
+      context in
   let error_message =
     Error.display_errors json_mode source_file_name source_file_content errors in
   let has_errors =
@@ -48,8 +45,7 @@ let exp
 
 (** Display on stdout the conversion in Coq of an OCaml structure. *)
 let of_ocaml
-  (env : Env.t)
-  (loc : Loc.t)
+  (context : MonadEval.Context.t)
   (typedtree : Mtyper.typedtree)
   (typedtree_errors : exn list)
   (source_file_name : string)
@@ -58,7 +54,13 @@ let of_ocaml
   (json_mode : bool)
   : Output.t =
   let (ast, error_message, has_errors) =
-    exp env loc typedtree typedtree_errors source_file_name source_file_content json_mode in
+    exp
+      context
+      typedtree
+      typedtree_errors
+      source_file_name
+      source_file_content
+      json_mode in
   let document = Ast.to_coq ast in
   let generated_file_name =
     match output_file_name with
@@ -101,9 +103,15 @@ let main () =
   Printexc.record_backtrace true;
   let file_name = ref None in
   let json_mode = ref false in
+  let configuration_file_name = ref None in
   let merlin_file_name = ref None in
   let output_file_name = ref None in
   let options = [
+    (
+      "-config",
+      Arg.String (fun value -> configuration_file_name := Some value),
+      "file   the configuration file of coq-of-ocaml"
+    );
     (
       "-merlin",
       Arg.String (fun value -> merlin_file_name := Some value),
@@ -120,13 +128,17 @@ let main () =
       "    produce the list of error messages in a JSON file"
     )
   ] in
-  let usage_msg = "Usage:\n  coq-of-ocaml [options] file.ml\nOptions are:" in
+  let usage_msg = "Usage:\n  coq-of-ocaml [options] file.ml(i)\nOptions are:" in
   Arg.parse options (fun arg -> file_name := Some arg) usage_msg;
   match !file_name with
   | None -> Arg.usage options usage_msg
   | Some file_name ->
     let base_name = Filename.basename file_name in
     let directory_name = Filename.dirname file_name in
+
+    let configuration =
+      Configuration.of_optional_file_name file_name !configuration_file_name in
+
     let merlin_file_name =
       match !merlin_file_name with
       | None -> Filename.concat directory_name ".merlin"
@@ -153,8 +165,19 @@ let main () =
     let typedtree_errors = Mtyper.get_errors typing in
     let initial_loc = Ast.get_initial_loc typedtree in
     let initial_env = Mtyper.get_env typing in
+
+    let context =
+      MonadEval.Context.init configuration initial_env initial_loc in
+
     let output =
-      of_ocaml initial_env initial_loc typedtree typedtree_errors file_name file_content !output_file_name !json_mode in
+      of_ocaml
+        context
+        typedtree
+        typedtree_errors
+        file_name
+        file_content
+        !output_file_name
+        !json_mode in
     Output.write !json_mode output
 
 ;;main ()

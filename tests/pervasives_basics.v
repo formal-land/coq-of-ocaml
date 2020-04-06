@@ -7,9 +7,6 @@ Local Open Scope Z_scope.
 Local Open Scope type_scope.
 Import ListNotations.
 
-Unset Positivity Checking.
-Unset Guard Checking.
-
 Definition b : bool :=
   orb (equiv_decb false true) (andb (nequiv_decb tt tt) (negb true)).
 

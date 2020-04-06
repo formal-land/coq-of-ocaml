@@ -2,9 +2,15 @@
 open SmartPrint
 open Monad.Notations
 
-type t =
+type content =
   | SignatureAxioms of SignatureAxioms.t
   | Structure of Structure.t list
+
+type t = {
+  content : content;
+  without_guard_checking : bool;
+  without_positivity_checking : bool;
+}
 
 let get_initial_loc (typedtree : Mtyper.typedtree) : Loc.t =
   match typedtree with
@@ -31,15 +37,25 @@ let report_errors (typedtree_errors : exn list) : unit Monad.t =
     | _ -> return ()
   )
 
-let of_typedtree (typedtree : Mtyper.typedtree) (typedtree_errors : exn list) : t Monad.t =
+let of_typedtree (typedtree : Mtyper.typedtree) (typedtree_errors : exn list)
+  : t Monad.t =
   report_errors typedtree_errors >>
-  match typedtree with
+  begin match typedtree with
   | `Implementation structure ->
     Structure.of_structure structure >>= fun structure ->
     return (Structure structure)
   | `Interface signature ->
     SignatureAxioms.of_signature signature >>= fun signature ->
     return (SignatureAxioms signature)
+  end >>= fun content ->
+  get_configuration >>= fun configuration ->
+  return {
+    content;
+    without_guard_checking =
+      Configuration.is_without_guard_checking configuration;
+    without_positivity_checking =
+      Configuration.is_without_positivity_checking configuration;
+  }
 
 let to_coq (ast : t) : SmartPrint.t =
   concat (List.map (fun d -> d ^^ newline) [
@@ -49,11 +65,20 @@ let to_coq (ast : t) : SmartPrint.t =
     !^ "Local Open Scope string_scope.";
     !^ "Local Open Scope Z_scope.";
     !^ "Local Open Scope type_scope.";
-    !^ "Import ListNotations." ^^ newline;
-    !^ "Unset Positivity Checking.";
+    !^ "Import ListNotations.";
+  ]) ^^
+  begin if ast.without_guard_checking then
     !^ "Unset Guard Checking."
-  ]) ^^ newline ^^
-  (match ast with
+  else
+    empty
+  end ^^
+  begin if ast.without_positivity_checking then
+    !^ "Unset Positivity Checking."
+  else
+    empty
+  end ^^ newline ^^
+  begin match ast.content with
   | SignatureAxioms signature -> SignatureAxioms.to_coq signature
-  | Structure structure -> Structure.to_coq structure) ^^
+  | Structure structure -> Structure.to_coq structure
+  end ^^
   newline

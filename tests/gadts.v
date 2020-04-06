@@ -7,9 +7,6 @@ Local Open Scope Z_scope.
 Local Open Scope type_scope.
 Import ListNotations.
 
-Unset Positivity Checking.
-Unset Guard Checking.
-
 Inductive gre (a : Set) : Set :=
 | Arg : a -> gre a.
 
@@ -25,7 +22,7 @@ Inductive expr : Set :=
 | Sum : expr -> expr -> expr
 | Pair : expr -> expr -> expr.
 
-Fixpoint proj_int (e : expr) {struct e} : Z :=
+Fixpoint proj_int (e : expr) : Z :=
   match e with
   | Int n => n
   | Sum e1 e2 => Z.add (proj_int e1) (proj_int e2)

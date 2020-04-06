@@ -7,9 +7,6 @@ Local Open Scope Z_scope.
 Local Open Scope type_scope.
 Import ListNotations.
 
-Unset Positivity Checking.
-Unset Guard Checking.
-
 Definition t1 : Set := string.
 
 Definition t2 (a b : Set) : Set := a * b.

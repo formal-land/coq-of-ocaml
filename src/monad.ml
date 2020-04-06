@@ -8,6 +8,7 @@
 
 module Command = struct
   type 'a t =
+    | GetConfiguration : Configuration.t t
     | GetEnv : Env.t t
     | GetEnvStack : Env.t list t
     | GetLoc : Loc.t t
@@ -37,6 +38,9 @@ module Notations = struct
 
   let (>>) (x : 'a t) (y : 'b t) : 'b t =
     Bind (x, fun () -> y)
+
+  let get_configuration : Configuration.t t =
+    Command Command.GetConfiguration
 
   let get_env : Env.t t =
     Command Command.GetEnv

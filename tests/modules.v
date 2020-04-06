@@ -7,9 +7,6 @@ Local Open Scope Z_scope.
 Local Open Scope type_scope.
 Import ListNotations.
 
-Unset Positivity Checking.
-Unset Guard Checking.
-
 Module List2.
   Inductive t (a : Set) : Set :=
   | Nil : t a
@@ -18,14 +15,13 @@ Module List2.
   Arguments Nil {_}.
   Arguments Cons {_}.
   
-  Fixpoint sum (l : t Z) {struct l} : Z :=
+  Fixpoint sum (l : t Z) : Z :=
     match l with
     | Nil => 0
     | Cons x xs => Z.add x (sum xs)
     end.
   
-  Fixpoint of_list {A : Set} (function_parameter : list A)
-    {struct function_parameter} : t A :=
+  Fixpoint of_list {A : Set} (function_parameter : list A) : t A :=
     match function_parameter with
     | [] => Nil
     | cons x xs => Cons x (of_list xs)
