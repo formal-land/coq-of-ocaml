@@ -1,3 +1,6 @@
+## [Unreleased]
+* Add the `@coq_phantom` attribute to force an abstract type declaration to be phantom.
+
 ## 2.1.0 (March 20, 2020)
 * Add automatic re-ordering of type synonyms in mutual types to generate valid definitions.
 * Add minimal handling of class types as records.

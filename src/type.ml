@@ -43,51 +43,55 @@ let rec non_phantom_typs (path : Path.t) (typs : Types.type_expr list)
       TypeIsGadt.named_typ_params_expecting_variables_or_ignored
         typ_declaration.type_params in
     Attribute.of_attributes typ_declaration.type_attributes >>= fun typ_attributes ->
-    begin match typ_declaration.type_kind with
-    | Type_abstract ->
-      begin match typ_declaration.type_manifest with
-      | None ->
-        return (Some (typ_params |> List.map (function
-          | None ->
-            if Path.name path = "array" then
-              true
-            else
-              false
-          | Some _ -> true
-        )))
-      (* Specific case for inductives defined with polymorphic variants. *)
-      | Some { desc = Tvariant _; _ } ->
-        return (Some (typ_params |> List.map (function
-          | None -> false
-          | Some _ -> true
-        )))
-      | Some typ ->
-        non_phantom_vars_of_typ typ >>= fun non_phantom_typ_vars ->
+    let is_phantom = Attribute.has_phantom typ_attributes in
+    if is_phantom then
+      return (Some (typ_params |> List.map (fun _ -> false)))
+    else
+      begin match typ_declaration.type_kind with
+      | Type_abstract ->
+        begin match typ_declaration.type_manifest with
+        | None ->
+          return (Some (typ_params |> List.map (function
+            | None ->
+              if Path.name path = "array" then
+                true
+              else
+                false
+            | Some _ -> true
+          )))
+        (* Specific case for inductives defined with polymorphic variants. *)
+        | Some { desc = Tvariant _; _ } ->
+          return (Some (typ_params |> List.map (function
+            | None -> false
+            | Some _ -> true
+          )))
+        | Some typ ->
+          non_phantom_vars_of_typ typ >>= fun non_phantom_typ_vars ->
+          return (Some (
+            filter_typ_params_in_valid_set typ_params non_phantom_typ_vars
+          ))
+        end
+      | Type_record (labels, _) ->
+        let typs = List.map (fun label -> label.ld_type) labels in
+        non_phantom_vars_of_typs typs >>= fun non_phantom_typ_vars ->
         return (Some (
           filter_typ_params_in_valid_set typ_params non_phantom_typ_vars
         ))
+      | Type_variant constructors ->
+        let is_not_gadt =
+          let constructors_return_typ_params =
+            constructors |> List.map (fun constructor ->
+              TypeIsGadt.get_return_typ_params typ_params constructor.cd_res
+            ) in
+          not (Attribute.has_force_gadt typ_attributes) &&
+          match TypeIsGadt.check_if_not_gadt typ_params constructors_return_typ_params with
+          | None -> false
+          | Some _ -> true in
+        return (Some (typ_params |> List.map (fun _ -> is_not_gadt)))
+      | Type_open -> return None
       end
-    | Type_record (labels, _) ->
-      let typs = List.map (fun label -> label.ld_type) labels in
-      non_phantom_vars_of_typs typs >>= fun non_phantom_typ_vars ->
-      return (Some (
-        filter_typ_params_in_valid_set typ_params non_phantom_typ_vars
-      ))
-    | Type_variant constructors ->
-      let is_not_gadt =
-        let constructors_return_typ_params =
-          constructors |> List.map (fun constructor ->
-            TypeIsGadt.get_return_typ_params typ_params constructor.cd_res
-          ) in
-        not (Attribute.has_force_gadt typ_attributes) && 
-        match TypeIsGadt.check_if_not_gadt typ_params constructors_return_typ_params with
-        | None -> false
-        | Some _ -> true in
-      return (Some (typ_params |> List.map (fun _ -> is_not_gadt)))
-    | Type_open -> return None
-    end
-  | exception Not_found -> return None
-  end >>= fun non_phantom_typs_shape ->
+    | exception Not_found -> return None
+    end >>= fun non_phantom_typs_shape ->
   let typs =
     match non_phantom_typs_shape with
     | None -> typs
