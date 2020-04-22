@@ -11,7 +11,8 @@
       "ocaml-core",
       "type-definitions",
       "module-system",
-      "gadts"
+      "gadts",
+      "attributes"
     ],
     "Roadmap": [
       "roadmap"
