@@ -349,7 +349,7 @@ let rec of_expression (typ_vars : Name.t Name.Map.t) (e : expression)
       e
     ) ->
     let x = Name.of_ident true x in
-    let path_name = PathName.of_path_with_convert false path in
+    PathName.of_path_with_convert false path >>= fun path_name ->
     of_expression typ_vars e >>= fun e ->
     return (LetModuleUnpack (x, path_name, e))
   | Texp_letmodule (x, _, _, module_expr, e) ->
@@ -655,34 +655,33 @@ and of_module_expr
           )
         else
           ModuleTypValues.get typ_vars module_type >>= fun values ->
-          let fields =
-            values |> List.map (function
+          begin
+            values |> Monad.List.map (function
               | ModuleTypValues.Value (value, nb_free_vars) ->
-                (
-                  PathName.of_path_and_name_with_convert module_type_path value,
+                PathName.of_path_and_name_with_convert module_type_path value
+                  >>= fun field_name ->
+                begin match local_module_type_path with
+                | Some local_module_type_path ->
+                  PathName.of_path_with_convert false path >>= fun base ->
+                  PathName.of_path_and_name_with_convert
+                    local_module_type_path
+                    value >>= fun field ->
+                  return (MixedPath.Access ( base, [field], false))
+                | None ->
+                  PathName.of_path_and_name_with_convert path value
+                    >>= fun path_name ->
+                  return (MixedPath.PathName path_name)
+                end >>= fun mixed_path ->
+                return (
+                  field_name,
                   nb_free_vars,
-                  Variable (
-                    begin match local_module_type_path with
-                    | Some local_module_type_path ->
-                      MixedPath.Access (
-                        PathName.of_path_with_convert false path,
-                        [PathName.of_path_and_name_with_convert
-                          local_module_type_path
-                          value
-                        ],
-                        false
-                      )
-                    | None ->
-                      MixedPath.PathName (
-                        PathName.of_path_and_name_with_convert path value
-                      )
-                    end,
-                    []
-                  )
+                  Variable (mixed_path, [])
                 )
               | Module modul ->
-                (
-                  PathName.of_path_and_name_with_convert module_type_path modul,
+                PathName.of_path_and_name_with_convert module_type_path modul
+                  >>= fun field_name ->
+                return (
+                  field_name,
                   0,
                   Variable (
                     MixedPath.Access (PathName.of_name [] modul, [], false),
@@ -690,15 +689,18 @@ and of_module_expr
                   )
                 )
               | ModuleFunctor functo ->
-                (
-                  PathName.of_path_and_name_with_convert module_type_path functo,
+                PathName.of_path_and_name_with_convert module_type_path functo
+                  >>= fun field_name ->
+                return (
+                  field_name,
                   0,
                   Variable (
                     MixedPath.PathName (PathName.of_name [] functo),
                     []
                   )
                 )
-            ) in
+            )
+          end >>= fun fields ->
           return (Module (module_typ_params_arity, fields))
       | Not_found _ -> default_result
       end
@@ -817,17 +819,21 @@ and of_structure
     ModuleTypParams.get_module_typ_typ_params_arity module_type >>=
       fun module_typ_params_arity ->
     ModuleTypValues.get typ_vars module_type >>= fun values ->
-    let fields =
-      values |> List.map (function
+    begin
+      values |> Monad.List.map (function
         | ModuleTypValues.Value (value, nb_free_vars) ->
-          (
-            PathName.of_path_and_name_with_convert signature_path value,
+          PathName.of_path_and_name_with_convert signature_path value
+            >>= fun field_name ->
+          return (
+            field_name,
             nb_free_vars,
             Variable (MixedPath.of_name value, [])
           )
         | Module modul ->
-          (
-            PathName.of_path_and_name_with_convert signature_path modul,
+          PathName.of_path_and_name_with_convert signature_path modul
+            >>= fun field_name ->
+          return (
+            field_name,
             0,
             Variable (
               MixedPath.Access (PathName.of_name [] modul, [], false),
@@ -835,15 +841,18 @@ and of_structure
             )
           )
         | ModuleFunctor functo ->
-          (
-            PathName.of_path_and_name_with_convert signature_path functo,
+          PathName.of_path_and_name_with_convert signature_path functo
+            >>= fun field_name ->
+          return (
+            field_name,
             0,
             Variable (
               MixedPath.PathName (PathName.of_name [] functo),
               []
             )
           )
-      ) in
+      )
+    end >>= fun fields ->
     return (Module (module_typ_params_arity, fields)))
   | item :: items ->
       set_env item.str_env (
@@ -942,7 +951,7 @@ and of_structure
             incl_module_type >>= fun is_first_class ->
           begin match is_first_class with
           | Found incl_signature_path ->
-            let path_name = PathName.of_path_with_convert false path in
+            PathName.of_path_with_convert false path >>= fun path_name ->
             of_include typ_vars path_name incl_signature_path incl_type e_next
           | Not_found reason ->
             raise
@@ -986,19 +995,14 @@ and of_include
       | _ -> return []
       end >>= fun typ_vars ->
       let name = Name.of_ident is_value ident in
+      PathName.of_path_and_name_with_convert signature_path name
+        >>= fun signature_path_name ->
       return (
         LetVar (
           name,
           typ_vars,
           Variable (
-            MixedPath.Access (
-              module_path_name,
-              [PathName.of_path_and_name_with_convert
-                signature_path
-                name
-              ],
-              false
-            ),
+            MixedPath.Access (module_path_name, [signature_path_name], false),
             []
           ),
           e_next
@@ -1065,24 +1069,24 @@ let rec to_coq (paren : bool) (e : t) : SmartPrint.t =
     | (
         Variable (
           MixedPath.PathName {
-            PathName.path = [Name.Make lib_name];
+            PathName.path = [Name.Make "Stdlib"];
             base = Name.Make "op_atat"
           },
           []
         ),
         [f; x]
-      ) when lib_name = PathName.stdlib_name ->
+      ) ->
       to_coq paren (Apply (f, [x]))
     | (
         Variable (
           MixedPath.PathName {
-            PathName.path = [Name.Make lib_name];
+            PathName.path = [Name.Make "Stdlib"];
             base = Name.Make "op_pipegt"
           },
           []
         ),
         [x; f]
-      ) when lib_name = PathName.stdlib_name ->
+      ) ->
       to_coq paren (Apply (f, [x]))
     | _ ->
       Pp.parens paren @@ nest @@ (separate space (List.map (to_coq true) (e_f :: e_xs)))

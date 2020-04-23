@@ -65,7 +65,8 @@ let of_path
   match (fields, signature_path) with
   | ([], None) ->
     let path_name = PathName.of_path_without_convert is_value base_path in
-    begin match PathName.try_convert path_name with
+    PathName.try_convert path_name >>= fun conversion ->
+    begin match conversion with
     | None ->
       begin match long_ident with
       | None -> return (PathName path_name)
@@ -75,15 +76,12 @@ let of_path
     end
   | _ ->
     is_module_path_local base_path >>= fun is_local ->
-    let base_path_name = PathName.of_path_with_convert is_value base_path in
-    return (Access (
-      base_path_name,
-      fields |> List.map (fun (signature_path, field_string) ->
-        let field_name = Name.of_string is_value field_string in
-        PathName.of_path_and_name_with_convert signature_path field_name
-      ) |> List.rev,
-      is_local
-    ))
+    PathName.of_path_with_convert is_value base_path >>= fun base_path_name ->
+    (fields |> Monad.List.map (fun (signature_path, field_string) ->
+      let field_name = Name.of_string is_value field_string in
+      PathName.of_path_and_name_with_convert signature_path field_name
+    )) >>= fun fields ->
+    return (Access (base_path_name, List.rev fields, is_local))
 
 let to_coq (path : t) : SmartPrint.t =
   match path with

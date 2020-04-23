@@ -44,8 +44,8 @@ let items_of_types_signature (signature : Types.signature) : item list Monad.t =
         md_type >>= fun is_first_class ->
       begin match is_first_class with
       | Found signature_path ->
-        let signature_path_name =
-          PathName.of_path_with_convert false signature_path in
+        PathName.of_path_with_convert false signature_path
+          >>= fun signature_path_name ->
         let mapper ident { Types.type_manifest; type_params; _ } =
           let name = Name.of_ident false ident in
           begin match type_manifest with

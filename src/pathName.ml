@@ -6,12 +6,6 @@ type t = {
   path : Name.t list;
   base : Name.t }
 
-let stdlib_name =
-  if Sys.ocaml_version >= "4.07" then
-    "Stdlib"
-  else
-    "Pervasives"
-
 (** Internal helper for this module. *)
 let __make (path : string list) (base : string) : t =
   {
@@ -23,8 +17,8 @@ let __make (path : string list) (base : string) : t =
    conversion is needed. We consider all the paths in the standard library
    to be converted, as conversion also means keeping the name as it (without
    taking into accounts that the stdlib was open). *)
-let try_convert (path_name : t) : t option =
-  let make path base = Some (__make path base) in
+let try_convert (path_name : t) : t option Monad.t =
+  let make path base = return (Some (__make path base)) in
   let { path; base } = path_name in
   match path |> List.map Name.to_string with
   (* The core library *)
@@ -64,7 +58,7 @@ let try_convert (path_name : t) : t option =
     | "Division_by_zero" -> make ["OCaml"] "Division_by_zero"
     | "Sys_blocked_io" -> make ["OCaml"] "Sys_blocked_io"
     | "Undefined_recursive_module" -> make ["OCaml"] "Undefined_recursive_module"
-    | _ -> None
+    | _ -> return None
     end
 
   (* Optional parameters *)
@@ -72,11 +66,11 @@ let try_convert (path_name : t) : t option =
     begin match Name.to_string base with
     | "None" -> make [] "None"
     | "Some" -> make [] "Some"
-    | _ -> None
+    | _ -> return None
     end
 
   (* Stdlib *)
-  | [lib_name] when lib_name = stdlib_name ->
+  | ["Stdlib"] ->
     begin match Name.to_string base with
     (* Exceptions *)
     | "invalid_arg" -> make ["OCaml"; "Stdlib"] "invalid_arg"
@@ -157,50 +151,51 @@ let try_convert (path_name : t) : t option =
     | "result" -> make [] "sum"
     (* Operations on format strings *)
     (* Program termination *)
-    | _ -> Some path_name
+    | _ -> return (Some path_name)
     end
 
   (* Bytes *)
-  | [lib_name; "Bytes"] when lib_name = stdlib_name ->
+  | ["Stdlib"; "Bytes"] ->
     begin match Name.to_string base with
     | "cat" -> make ["String"] "append"
     | "concat" -> make ["String"] "concat"
     | "length" -> make ["String"] "length"
     | "sub" -> make ["String"] "sub"
-    | _ -> Some path_name
+    | _ -> return (Some path_name)
     end
 
   (* List *)
-  | [lib_name; "List"] when lib_name = stdlib_name ->
+  | ["Stdlib"; "List"] ->
     begin match Name.to_string base with
     | "exists" -> make ["OCaml"; "List"] "_exists"
     | "exists2" -> make ["OCaml"; "List"] "_exists2"
     | "length" -> make ["OCaml"; "List"] "length"
     | "map" -> make ["List"] "map"
     | "rev" -> make ["List"] "rev"
-    | _ -> Some path_name
+    | _ -> return (Some path_name)
     end
 
   (* Seq *)
-  | [lib_name; "Seq"] when lib_name = stdlib_name ->
+  | ["Stdlib"; "Seq"] ->
     begin match Name.to_string base with
     | "t" -> make ["OCaml"; "Seq"] "t"
-    | _ -> Some path_name
+    | _ -> return (Some path_name)
     end
 
   (* String *)
-  | [lib_name; "String"] when lib_name = stdlib_name ->
+  | ["Stdlib"; "String"] ->
     begin match Name.to_string base with
     | "length" -> make ["OCaml"; "String"] "length"
-    | _ -> Some path_name
+    | _ -> return (Some path_name)
     end
 
-  | _ -> None
+  | _ -> return None
 
-let convert (path_name : t) : t =
-  match try_convert path_name with
-  | None -> path_name
-  | Some path_name -> path_name
+let convert (path_name : t) : t Monad.t =
+  try_convert path_name >>= fun conversion ->
+  match conversion with
+  | None -> return path_name
+  | Some path_name -> return path_name
 
 (** Lift a local name to a global name. *)
 let of_name (path : Name.t list) (base : Name.t) : t =
@@ -241,10 +236,10 @@ let of_path_without_convert (is_value : bool) (path : Path.t) : t =
   let (path, base) = aux path in
   of_name (List.rev path) base
 
-let of_path_with_convert (is_value : bool) (path : Path.t) : t =
+let of_path_with_convert (is_value : bool) (path : Path.t) : t Monad.t =
   convert (of_path_without_convert is_value path)
 
-let of_path_and_name_with_convert (path : Path.t) (name : Name.t) : t =
+let of_path_and_name_with_convert (path : Path.t) (name : Name.t) : t Monad.t =
   let rec aux p : Name.t list * Name.t =
     match p with
     | Path.Pident x -> ([Name.of_ident false x], name)
@@ -272,7 +267,7 @@ let of_constructor_description
     let { path; _ } = of_path_without_convert false path in
     let cstr_name = map_constructor_name cstr_name (Ident.name typ_ident) in
     let base = Name.of_string false cstr_name in
-    return (convert { path; base })
+    convert { path; base }
   | { cstr_name; _ } ->
     let path = of_name [] (Name.of_string false cstr_name) in
     raise
@@ -303,7 +298,7 @@ let of_label_description (label_description : Types.label_description)
     let path_name = {
       path = path @ [base];
       base = Name.of_string false lbl_name } in
-    return (convert path_name)
+    convert path_name
   | { lbl_name; _ } ->
     let path = of_name [] (Name.of_string false lbl_name) in
     raise

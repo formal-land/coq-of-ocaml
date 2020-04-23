@@ -72,12 +72,13 @@ let of_first_class_types_signature
   (signature : Types.signature)
   (final_env : Env.t)
   : t Monad.t =
-  let field_path_name name =
+  let get_field_path_name name =
     PathName.of_path_and_name_with_convert signature_path name in
   set_env final_env (
   signature |> Monad.List.filter_map (function
     | Types.Sig_value (ident, { val_type; _ }, _) ->
       let name = Name.of_ident true ident in
+      get_field_path_name name >>= fun field_path_name ->
       Type.of_typ_expr true Name.Map.empty val_type >>= fun (typ, _, new_typ_vars) ->
       return (Some (
         IncludedFieldValue (
@@ -85,20 +86,22 @@ let of_first_class_types_signature
           Name.Set.elements new_typ_vars,
           typ,
           module_name,
-          field_path_name name
+          field_path_name
         )
       ))
     | Sig_type (ident, _, _, _) ->
       let name = Name.of_ident false ident in
+      get_field_path_name name >>= fun field_path_name ->
       return (Some (
-        IncludedFieldType (name, module_name, field_path_name name)
+        IncludedFieldType (name, module_name, field_path_name)
       ))
     | Sig_typext _ ->
       raise None NotSupported "Type extension not handled"
     | Sig_module (ident, _, _, _, _) ->
       let name = Name.of_ident false ident in
+      get_field_path_name name >>= fun field_path_name ->
       return (Some (
-        IncludedFieldModule (name, module_name, field_path_name name)
+        IncludedFieldModule (name, module_name, field_path_name)
       ))
     | Sig_modtype _ ->
       raise None NotSupported "Module type not handled in included signature"
@@ -219,7 +222,7 @@ let rec of_signature (signature : Typedtree.signature) : t Monad.t =
       let mty_desc = flatten_single_include mty_desc in
       begin match mty_desc with
       | Tmty_alias (path, _) ->
-        let path_name = PathName.of_path_with_convert false path in
+        PathName.of_path_with_convert false path >>= fun path_name ->
         return [ModuleAlias (name, path_name)]
       | Tmty_signature signature ->
         of_signature signature >>= fun signature ->
@@ -242,7 +245,7 @@ let rec of_signature (signature : Typedtree.signature) : t Monad.t =
         return [Value (name, [], typ)]
       end
     | Tsig_open { open_expr = (path, _); _} ->
-      let o = Open.of_ocaml path in
+      Open.of_ocaml path >>= fun o ->
       return [Open o]
     | Tsig_recmodule _ ->
       raise

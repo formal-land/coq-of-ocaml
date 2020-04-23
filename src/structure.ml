@@ -118,7 +118,7 @@ let rec of_structure (structure : structure) : t list Monad.t =
     | Tstr_open { open_expr; _ } ->
       begin match open_expr with
       | { mod_desc = Tmod_ident (path, _); _ } ->
-        let o = Open.of_ocaml path in
+        Open.of_ocaml path >>= fun o ->
         return [Open o]
       | _ ->
         raise
@@ -203,8 +203,9 @@ let rec of_structure (structure : structure) : t list Monad.t =
         };
         _
       } ->
-      let reference = PathName.of_path_with_convert false path in
-      IsFirstClassModule.is_module_typ_first_class mod_type >>= fun is_first_class ->
+      PathName.of_path_with_convert false path >>= fun reference ->
+      IsFirstClassModule.is_module_typ_first_class mod_type
+        >>= fun is_first_class ->
       begin match is_first_class with
       | IsFirstClassModule.Found mod_type_path ->
         get_env >>= fun env ->
@@ -218,32 +219,30 @@ let rec of_structure (structure : structure) : t list Monad.t =
               Path.name path ^ "` to handle the include."
             )
         | Mty_signature signature ->
-          return (
-            signature |> Util.List.filter_map (fun signature_item ->
-              match signature_item with
-              | Types.Sig_value (ident, _, _) | Sig_type (ident, _, _, _) ->
-                let is_value =
-                  match signature_item with
-                  | Types.Sig_value _ -> true
-                  | _ -> false in
-                let name = Name.of_ident is_value ident in
-                let field =
-                  PathName.of_path_and_name_with_convert mod_type_path name in
-                Some (
-                  ModuleExp (
-                    name,
-                    Exp.Variable (
-                      MixedPath.Access (
-                        reference,
-                        [field],
-                        false
-                      ),
-                      []
-                    )
+          signature |> Monad.List.filter_map (fun signature_item ->
+            match signature_item with
+            | Types.Sig_value (ident, _, _) | Sig_type (ident, _, _, _) ->
+              let is_value =
+                match signature_item with
+                | Types.Sig_value _ -> true
+                | _ -> false in
+              let name = Name.of_ident is_value ident in
+              PathName.of_path_and_name_with_convert mod_type_path name
+                >>= fun field ->
+              return (Some (
+                ModuleExp (
+                  name,
+                  Exp.Variable (
+                    MixedPath.Access (
+                      reference,
+                      [field],
+                      false
+                    ),
+                    []
                   )
                 )
-              | _ -> None
-            )
+              ))
+            | _ -> return None
           )
         | Mty_functor _ ->
           error_message
@@ -281,7 +280,7 @@ and of_module_expr (name : Name.t) (module_expr : module_expr)
     of_structure structure >>= fun structures ->
     return (Some (Module (name, structures)))
   | Tmod_ident (path, _) ->
-    let reference = PathName.of_path_with_convert false path in
+    PathName.of_path_with_convert false path >>= fun reference ->
     return (Some (ModuleSynonym (name, reference)))
   | Tmod_apply _ | Tmod_functor _ ->
     Exp.of_module_expr Name.Map.empty module_expr None >>= fun module_exp ->
