@@ -370,6 +370,9 @@ let compare_paths (path1 : Path.t) (path2 : Path.t) : int =
   let import_path (path : Path.t) : t = of_path_without_convert false path in
   compare (import_path path1) (import_path path2)
 
+let to_string (x : t) : string =
+  String.concat "." (List.map Name.to_string (x.path @ [x.base]))
+
 let to_coq (x : t) : SmartPrint.t =
   separate (!^ ".") (List.map Name.to_coq (x.path @ [x.base]))
 

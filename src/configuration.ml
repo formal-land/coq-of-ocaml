@@ -5,8 +5,16 @@ module Import = struct
   }
 end
 
+module MonadicOperator = struct
+  type t = {
+    name : string;
+    notation : string;
+  }
+end
+
 type t = {
   file_name : string;
+  monadic_operators : MonadicOperator.t list;
   require : Import.t list;
   require_import : Import.t list;
   require_mli : string list;
@@ -16,12 +24,22 @@ type t = {
 
 let default (file_name : string) : t = {
   file_name;
+  monadic_operators = [];
   require = [];
   require_import = [];
   require_mli = [];
   without_guard_checking = [];
   without_positivity_checking = [];
 }
+
+let is_monadic_operator (configuration : t) (name : string) : string option =
+  let monadic_operator =
+    List.find_opt
+      (fun { MonadicOperator.name = name'; _ } -> name' = name)
+      configuration.monadic_operators in
+  match monadic_operator with
+  | None -> None
+  | Some { MonadicOperator.notation; _ } -> Some notation
 
 let should_require (configuration : t) (base : string)
   : (string * bool) option =
@@ -74,6 +92,14 @@ let of_json (file_name : string) (json : Yojson.Basic.t) : t =
     List.fold_left
       (fun configuration (id, entry) ->
         match id with
+        | "monadic_operators" ->
+          let entry =
+            entry |>
+            get_string_couple_list "monadic_operators" |>
+            List.map (fun (name, notation) ->
+              { MonadicOperator.name; notation }
+            ) in
+          {configuration with monadic_operators = entry}
         | "require" ->
           let entry =
             entry |>

@@ -193,7 +193,20 @@ let rec of_expression (typ_vars : Name.t Name.Map.t) (e : expression)
         return (Some e_x)
       | None -> return None
     )) >>= fun e_xs ->
-    return (Apply (e_f, e_xs))
+    let normal_apply = Apply (e_f, e_xs) in
+    begin match (e_f, e_xs) with
+    | (
+        Variable (MixedPath.PathName path_name, []),
+        [e1; Function (x, e2)]
+      ) ->
+      get_configuration >>= fun configuration ->
+      let name = PathName.to_string path_name in
+      begin match Configuration.is_monadic_operator configuration name with
+      | None -> return normal_apply
+      | Some _ -> return (LetVar (x, [], e1, e2))
+      end
+    | _ -> return normal_apply
+    end
   | Texp_match (e, cases, _) ->
     let is_gadt_match =
       Attribute.has_match_gadt attributes ||
