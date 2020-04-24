@@ -14,6 +14,7 @@ end
 
 type t = {
   file_name : string;
+  head_suffix : string;
   monadic_operators : MonadicOperator.t list;
   require : Import.t list;
   require_import : Import.t list;
@@ -24,6 +25,7 @@ type t = {
 
 let default (file_name : string) : t = {
   file_name;
+  head_suffix = "";
   monadic_operators = [];
   require = [];
   require_import = [];
@@ -65,6 +67,12 @@ let is_without_guard_checking (configuration : t) : bool =
 let is_without_positivity_checking (configuration : t) : bool =
   List.mem configuration.file_name configuration.without_positivity_checking
 
+let get_string (id : string) (json : Yojson.Basic.t) : string =
+  let error_message = "Expected a string list in " ^ id in
+  match json with
+  | `String value -> value
+  | _ -> failwith error_message
+
 let get_string_list (id : string) (json : Yojson.Basic.t) : string list =
   let error_message = "Expected a string list in " ^ id in
   match json with
@@ -92,6 +100,9 @@ let of_json (file_name : string) (json : Yojson.Basic.t) : t =
     List.fold_left
       (fun configuration (id, entry) ->
         match id with
+        | "head_suffix" ->
+          let entry = get_string "head_suffix" entry in
+          {configuration with head_suffix = entry}
         | "monadic_operators" ->
           let entry =
             entry |>

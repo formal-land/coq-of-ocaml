@@ -8,6 +8,7 @@ type content =
 
 type t = {
   content : content;
+  head_suffix : string;
   without_guard_checking : bool;
   without_positivity_checking : bool;
 }
@@ -51,6 +52,7 @@ let of_typedtree (typedtree : Mtyper.typedtree) (typedtree_errors : exn list)
   get_configuration >>= fun configuration ->
   return {
     content;
+    head_suffix = configuration.head_suffix;
     without_guard_checking =
       Configuration.is_without_guard_checking configuration;
     without_positivity_checking =
@@ -100,6 +102,10 @@ let to_coq (imports : MonadEval.Import.t list) (ast : t) : SmartPrint.t =
           empty
         end
     )) ^^ newline
+  end ^^
+  begin match ast.head_suffix with
+  | "" -> empty
+  | _ -> !^ (ast.head_suffix) ^^ newline
   end ^^
   begin match ast.content with
   | SignatureAxioms signature -> SignatureAxioms.to_coq signature

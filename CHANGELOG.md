@@ -1,4 +1,5 @@
 ## [Unreleased]
+* Add configuration to add head suffix in the generated file.
 * Add configuration to add monadic operators.
 * Add configuration to specify dependencies required as mli files.
 * Add configuration to list the required files in a file, together with an import or not.
