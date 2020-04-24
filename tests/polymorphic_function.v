@@ -9,4 +9,4 @@ Import ListNotations.
 
 Definition f {A B : Set} (x : A) (y : B) : A := x.
 
-Definition n : Z := f 12 3.
+Definition n : int := f 12 3.

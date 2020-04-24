@@ -27,10 +27,10 @@ let try_convert (path_name : t) : t option Monad.t =
   | [] ->
     begin match base with
     (* Built-in types *)
-    | "int" -> make [] "Z"
-    | "float" -> make [] "Z"
+    | "int" -> make [] "int"
+    | "float" -> make [] "float"
     | "char" -> make [] "ascii"
-    | "bytes" -> make [] "string"
+    | "bytes" -> make [] "bytes"
     | "string" -> make [] "string"
     | "bool" -> make [] "bool"
     | "false" -> make [] "false"

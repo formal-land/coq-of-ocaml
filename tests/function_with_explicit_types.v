@@ -7,7 +7,7 @@ Local Open Scope Z_scope.
 Local Open Scope type_scope.
 Import ListNotations.
 
-Definition f (n : Z) (b : bool) : Z :=
+Definition f (n : int) (b : bool) : int :=
   if b then
     Z.add n 1
   else

@@ -10,7 +10,7 @@ Import ListNotations.
 Module M.
   Definition b : bool := false.
   
-  Definition n : Z := 12.
+  Definition n : int := 12.
 End M.
 
-Definition n : Z := Z.add M.n 2.
+Definition n : int := Z.add M.n 2.

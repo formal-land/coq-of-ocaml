@@ -21,7 +21,7 @@ Module S.
       union : t -> t -> t;
       inter : t -> t -> t;
       diff : t -> t -> t;
-      compare : t -> t -> Z;
+      compare : t -> t -> int;
       equal : t -> t -> bool;
       subset : t -> t -> bool;
       iter : (elt -> unit) -> t -> unit;
@@ -31,7 +31,7 @@ Module S.
       __exists : (elt -> bool) -> t -> bool;
       filter : (elt -> bool) -> t -> t;
       partition : (elt -> bool) -> t -> t * t;
-      cardinal : t -> Z;
+      cardinal : t -> int;
       elements : t -> list elt;
       min_elt_opt : t -> option elt;
       max_elt_opt : t -> option elt;
@@ -76,7 +76,7 @@ Module Boxed_set.
     elt_ty : comparable_ty;
     OPS : S.SET.signature (elt := elt) (t := OPS_t);
     boxed : OPS.(S.SET.t);
-    size : Z;
+    size : int;
   }.
 End Boxed_set.
 
@@ -107,13 +107,13 @@ Definition tripe
   : {'[a, b, c, bar] : [Set ** Set ** Set ** Set] @
     Triple.signature (a := a) (b := b) (c := c) (bar := bar)} :=
   (pack
-    (let a : Set := Z in
+    (let a : Set := int in
     let b : Set := bool in
     let c : Set := string in
     let va := 0 in
     let vb := false in
     let vc := "" in
-    let bar : Set := Z in
+    let bar : Set := int in
     let foo := 12 in
     existT (A := [Set ** Set ** Set ** Set]) _ [_, _, _, _]
       {|

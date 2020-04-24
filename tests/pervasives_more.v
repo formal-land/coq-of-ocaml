@@ -21,11 +21,11 @@ Definition b_le : bool := OCaml.Stdlib.le true false.
 
 Definition b_ge : bool := OCaml.Stdlib.ge tt tt.
 
-Definition comp : Z := OCaml.Stdlib.compare 1 2.
+Definition comp : int := OCaml.Stdlib.compare 1 2.
 
-Definition n_min : Z := OCaml.Stdlib.min 1 2.
+Definition n_min : int := OCaml.Stdlib.min 1 2.
 
-Definition n_max : Z := OCaml.Stdlib.max 1 2.
+Definition n_max : int := OCaml.Stdlib.max 1 2.
 
 Definition b_not : bool := negb false.
 
@@ -37,47 +37,47 @@ Definition b_or : bool := orb true false.
 
 Definition b_or_old : bool := orb true false.
 
-Definition app1 : Z := (fun x => x) 12.
+Definition app1 : int := (fun x => x) 12.
 
-Definition app2 : Z := (fun x => x) 12.
+Definition app2 : int := (fun x => x) 12.
 
-Definition n_neg1 : Z := Z.opp 12.
+Definition n_neg1 : int := Z.opp 12.
 
-Definition n_neg2 : Z := (-12).
+Definition n_neg2 : int := (-12).
 
-Definition n_pos1 : Z := 12.
+Definition n_pos1 : int := 12.
 
-Definition n_pos2 : Z := 12.
+Definition n_pos2 : int := 12.
 
-Definition n_succ : Z := Z.succ 1.
+Definition n_succ : int := Z.succ 1.
 
-Definition n_pred : Z := Z.pred 1.
+Definition n_pred : int := Z.pred 1.
 
-Definition n_plus : Z := Z.add 1 2.
+Definition n_plus : int := Z.add 1 2.
 
-Definition n_minus : Z := Z.sub 1 2.
+Definition n_minus : int := Z.sub 1 2.
 
-Definition n_times : Z := Z.mul 1 2.
+Definition n_times : int := Z.mul 1 2.
 
-Definition n_div : Z := Z.div 1 2.
+Definition n_div : int := Z.div 1 2.
 
-Definition n_mod : Z := Z.modulo 1 2.
+Definition n_mod : int := Z.modulo 1 2.
 
-Definition n_abs : Z := Z.abs 1.
+Definition n_abs : int := Z.abs 1.
 
-Definition n_land : Z := Z.land 12 13.
+Definition n_land : int := Z.land 12 13.
 
-Definition n_lor : Z := Z.lor 12 13.
+Definition n_lor : int := Z.lor 12 13.
 
-Definition n_lxor : Z := Z.lxor 12 13.
+Definition n_lxor : int := Z.lxor 12 13.
 
-Definition n_lsl : Z := Z.shiftl 12 13.
+Definition n_lsl : int := Z.shiftl 12 13.
 
-Definition n_lsr : Z := Z.shiftr 12 13.
+Definition n_lsr : int := Z.shiftr 12 13.
 
 Definition ss : string := String.append "begin" "end".
 
-Definition n_char : Z := OCaml.Stdlib.int_of_char "c" % char.
+Definition n_char : int := OCaml.Stdlib.int_of_char "c" % char.
 
 Definition i : unit := OCaml.Stdlib.ignore 12.
 
@@ -87,10 +87,10 @@ Definition bool_s : bool := OCaml.Stdlib.bool_of_string "false".
 
 Definition s_n : string := OCaml.Stdlib.string_of_int 12.
 
-Definition n_s : Z := OCaml.Stdlib.int_of_string "12".
+Definition n_s : int := OCaml.Stdlib.int_of_string "12".
 
-Definition n1 : Z := fst (12, 13).
+Definition n1 : int := fst (12, 13).
 
-Definition n2 : Z := snd (12, 13).
+Definition n2 : int := snd (12, 13).
 
-Definition ll : list Z := OCaml.Stdlib.app [ 1; 2 ] [ 3; 4 ].
+Definition ll : list int := OCaml.Stdlib.app [ 1; 2 ] [ 3; 4 ].

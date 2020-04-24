@@ -9,11 +9,11 @@ Import ListNotations.
 
 Inductive set : Set :=
 | Empty : set
-| Node : set -> Z -> set -> set.
+| Node : set -> int -> set -> set.
 
 Definition empty : set := Empty.
 
-Fixpoint member (x : Z) (s : set) : bool :=
+Fixpoint member (x : int) (s : set) : bool :=
   match s with
   | Empty => false
   | Node s1 y s2 =>
@@ -26,7 +26,7 @@ Fixpoint member (x : Z) (s : set) : bool :=
         true
   end.
 
-Fixpoint insert (x : Z) (s : set) : set :=
+Fixpoint insert (x : int) (s : set) : set :=
   match s with
   | Empty => Node Empty x Empty
   | Node s1 y s2 =>

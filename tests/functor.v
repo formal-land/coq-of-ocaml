@@ -10,7 +10,7 @@ Import ListNotations.
 Module COMPARABLE.
   Record signature {t : Set} : Set := {
     t := t;
-    compare : t -> t -> Z;
+    compare : t -> t -> int;
   }.
 End COMPARABLE.
 
@@ -23,7 +23,7 @@ Module S.
     op_lteq : t -> t -> bool;
     op_gteq : t -> t -> bool;
     op_gt : t -> t -> bool;
-    compare : t -> t -> Z;
+    compare : t -> t -> int;
     equal : t -> t -> bool;
     max : t -> t -> t;
     min : t -> t -> t;

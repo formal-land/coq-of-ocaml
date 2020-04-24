@@ -13,8 +13,8 @@ Fixpoint f_map {A B : Set} (f : A -> B) (l : list A) : list B :=
   | cons x l => cons (f x) (f_map f l)
   end.
 
-Definition n : Z :=
-  let fix sum (l : list Z) : Z :=
+Definition n : int :=
+  let fix sum (l : list int) : int :=
     match l with
     | [] => 0
     | cons x l => Z.add x (sum l)

@@ -60,7 +60,7 @@ Reserved Notation "'re".
 Reserved Notation "'re_bis".
 
 Inductive ind : Set :=
-| Ind : 're Z -> ind
+| Ind : 're int -> ind
 
 where "'re" := (fun (t_a : Set) => re_skeleton t_a string)
 and "'re_bis" := (re_bis_skeleton unit).

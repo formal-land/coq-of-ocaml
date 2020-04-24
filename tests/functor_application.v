@@ -22,7 +22,7 @@ Module Target.
 End Target.
 
 Definition M : {t : Set & Source.signature (t := t)} :=
-  let t : Set := Z in
+  let t : Set := int in
   let x := 12 in
   existT (A := Set) _ _
     {|
@@ -47,9 +47,9 @@ Definition FSubst :=
       |}) : {_ : unit & Target.signature (t := (|X|).(Source.t))}).
 
 Definition Sum :=
-  fun (X : {_ : unit & Source.signature (t := Z)}) =>
-    fun (Y : {_ : unit & Source.signature (t := Z)}) =>
-      ((let t : Set := Z in
+  fun (X : {_ : unit & Source.signature (t := int)}) =>
+    fun (Y : {_ : unit & Source.signature (t := int)}) =>
+      ((let t : Set := int in
       let y := Z.add (|X|).(Source.x) (|Y|).(Source.x) in
       existT (A := Set) _ _
         {|

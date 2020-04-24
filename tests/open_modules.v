@@ -8,7 +8,7 @@ Local Open Scope type_scope.
 Import ListNotations.
 
 Module M.
-  Definition n : Z := 12.
+  Definition n : int := 12.
 End M.
 
 Module N.
@@ -18,7 +18,7 @@ Module N.
   
   Import M.
   
-  Definition y : Z := n.
+  Definition y : int := n.
 End N.
 
 Definition b : bool := N.n.

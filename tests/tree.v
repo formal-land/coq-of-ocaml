@@ -9,9 +9,9 @@ Import ListNotations.
 
 Inductive tree : Set :=
 | Leaf : tree
-| Node : tree -> Z -> tree -> tree.
+| Node : tree -> int -> tree -> tree.
 
-Fixpoint find (x : Z) (t : tree) : bool :=
+Fixpoint find (x : int) (t : tree) : bool :=
   match t with
   | Leaf => false
   | Node t1 x' t2 =>
