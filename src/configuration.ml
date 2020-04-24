@@ -9,6 +9,7 @@ type t = {
   file_name : string;
   require : Import.t list;
   require_import : Import.t list;
+  require_mli : string list;
   without_guard_checking : string list;
   without_positivity_checking : string list;
 }
@@ -17,6 +18,7 @@ let default (file_name : string) : t = {
   file_name;
   require = [];
   require_import = [];
+  require_mli = [];
   without_guard_checking = [];
   without_positivity_checking = [];
 }
@@ -35,6 +37,9 @@ let should_require (configuration : t) (base : string)
   | (Some { Import.target; _ }, _) -> Some (target, false)
   | (_, Some { Import.target; _ }) -> Some (target, true)
   | (None, None) -> None
+
+let is_require_mli (configuration : t) (name : string) : bool =
+  List.mem name configuration.require_mli
 
 let is_without_guard_checking (configuration : t) : bool =
   List.mem configuration.file_name configuration.without_guard_checking
@@ -81,6 +86,9 @@ let of_json (file_name : string) (json : Yojson.Basic.t) : t =
             get_string_couple_list "require_import" |>
             List.map (fun (source, target) -> { Import.source; target }) in
           {configuration with require_import = entry}
+        | "require_mli" ->
+          let entry = get_string_list "require_mli" entry in
+          {configuration with require_mli = entry}
         | "without_guard_checking" ->
           let entry = get_string_list "without_guard_checking" entry in
           {configuration with without_guard_checking = entry}

@@ -2,15 +2,18 @@ module Import = struct
   type t = {
     base : string;
     import : bool;
+    mli : bool;
     name : string;
   }
 
   let merge (imports1 : t list) (imports2 : t list) : t list =
     List.sort_uniq
       (fun
-        { base = base1; import = import1; name = name1 }
-        { base = base2; import = import2; name = name2 } ->
-        compare (not import1, base1, name1) (not import2, base2, name2)
+        { base = base1; import = import1; mli = mli1; name = name1 }
+        { base = base2; import = import2; mli = mli2; name = name2 } ->
+        compare
+          (not import1, base1, name1, mli1)
+          (not import2, base2, name2, mli2)
       )
       (imports1 @ imports2)
 end
@@ -81,7 +84,8 @@ module Command = struct
         | None -> Result.success None
         | Some (target, import) ->
           let result = Result.success (Some import) in
-          { result with imports = [{ Import.base = target; import; name }] }
+          let mli = Configuration.is_require_mli context.configuration name in
+          { result with imports = [{ Import.base = target; import; mli; name }] }
         end
       | Warn message ->
         Result.success (Error.warn file_name context.loc message)

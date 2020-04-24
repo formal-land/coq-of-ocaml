@@ -1,4 +1,5 @@
 ## [Unreleased]
+* Add configuration to specify dependencies required as mli files.
 * Add configuration to list the required files in a file, together with an import or not.
 * Add configuration to disable guard or positivity checking.
 * Add handling of a configuration file.
