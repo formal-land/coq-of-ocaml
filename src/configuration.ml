@@ -7,26 +7,34 @@ end
 
 type t = {
   file_name : string;
-  import_as : Import.t list;
+  require : Import.t list;
+  require_import : Import.t list;
   without_guard_checking : string list;
   without_positivity_checking : string list;
 }
 
 let default (file_name : string) : t = {
   file_name;
-  import_as = [];
+  require = [];
+  require_import = [];
   without_guard_checking = [];
   without_positivity_checking = [];
 }
 
-let should_import_as (configuration : t) (base : string) : string option =
-  let import_as_rule =
-    configuration.import_as |> List.find_opt (fun { Import.source; _ } ->
+let should_require (configuration : t) (base : string)
+  : (string * bool) option =
+  let require =
+    configuration.require |> List.find_opt (fun { Import.source; _ } ->
       source = base
     ) in
-  match import_as_rule with
-  | None -> None
-  | Some { Import.target; _ } -> Some target
+  let require_import =
+    configuration.require_import |> List.find_opt (fun { Import.source; _ } ->
+      source = base
+    ) in
+  match (require, require_import) with
+  | (Some { Import.target; _ }, _) -> Some (target, false)
+  | (_, Some { Import.target; _ }) -> Some (target, true)
+  | (None, None) -> None
 
 let is_without_guard_checking (configuration : t) : bool =
   List.mem configuration.file_name configuration.without_guard_checking
@@ -61,12 +69,18 @@ let of_json (file_name : string) (json : Yojson.Basic.t) : t =
     List.fold_left
       (fun configuration (id, entry) ->
         match id with
-        | "import_as" ->
+        | "require" ->
           let entry =
             entry |>
-            get_string_couple_list "import_as" |>
+            get_string_couple_list "require" |>
             List.map (fun (source, target) -> { Import.source; target }) in
-          {configuration with import_as = entry}
+          {configuration with require = entry}
+        | "require_import" ->
+          let entry =
+            entry |>
+            get_string_couple_list "require_import" |>
+            List.map (fun (source, target) -> { Import.source; target }) in
+          {configuration with require_import = entry}
         | "without_guard_checking" ->
           let entry = get_string_list "without_guard_checking" entry in
           {configuration with without_guard_checking = entry}

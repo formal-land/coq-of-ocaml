@@ -195,16 +195,20 @@ let try_convert (path_name : t) : t option Monad.t =
     begin match (path, base) with
     | (source :: name :: rest, _) ->
       use source name >>= fun is_import ->
-      if is_import then
-        make (name :: rest) base
-      else
-        return None
+      begin match is_import with
+      | None -> return None
+      | Some import ->
+        if import then
+          make rest base
+        else
+          make (name :: rest) base
+      end
     | ([source], name) ->
       use source name >>= fun is_import ->
-      if is_import then
-        make [] base
-      else
-        return None
+      begin match is_import with
+      | None -> return None
+      | Some _ -> make [] base
+      end
     | _ -> return None
     end
 

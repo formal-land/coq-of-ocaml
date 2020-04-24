@@ -81,9 +81,10 @@ let to_coq (imports : MonadEval.Import.t list) (ast : t) : SmartPrint.t =
   | [] -> empty
   | _ :: _ ->
     separate empty (imports |> List.map (
-      fun { MonadEval.Import.base; name } ->
+      fun { MonadEval.Import.base; import; name } ->
         nest (
-          !^ "Require" ^^ !^ base ^-^ !^ "." ^-^ !^ name ^-^ !^ "."
+          !^ "Require" ^^ (if import then !^ "Import" else empty) ^^
+          !^ base ^-^ !^ "." ^-^ !^ name ^-^ !^ "."
         ) ^^ newline
     )) ^^ newline
   end ^^

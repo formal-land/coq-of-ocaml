@@ -1,5 +1,5 @@
 ## [Unreleased]
-* Add `import_as` configuration to list imported files in file.
+* Add configuration to list the required files in a file, together with an import or not.
 * Add configuration to disable guard or positivity checking.
 * Add handling of a configuration file.
 * Add the `@coq_phantom` attribute to force an abstract type declaration to be phantom.

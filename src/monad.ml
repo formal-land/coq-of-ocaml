@@ -13,7 +13,7 @@ module Command = struct
     | GetEnvStack : Env.t list t
     | GetLoc : Loc.t t
     | Raise : 'a * Error.Category.t * string -> 'a t
-    | Use : string * string -> bool t
+    | Use : string * string -> bool option t
     | Warn : string -> unit t
 end
 
@@ -64,7 +64,7 @@ module Notations = struct
   let raise (value : 'a) (category : Error.Category.t) (message : string) : 'a t =
     Command (Command.Raise (value, category, message))
 
-  let use (base : string) (name : string) : bool t =
+  let use (base : string) (name : string) : bool option t =
     Command (Command.Use (base, name))
 
   let warn (message : string) : 'a t =
