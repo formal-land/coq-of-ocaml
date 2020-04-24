@@ -1,7 +1,28 @@
+module Import = struct
+  type t = {
+    base : string;
+    name : string;
+  }
+
+  let merge (imports1 : t list) (imports2 : t list) : t list =
+    List.sort_uniq
+      (fun { base = base1; name = name1 } { base = base2; name = name2 } ->
+        compare (base1, name1) (base2, name2)
+      )
+      (imports1 @ imports2)
+end
+
 module Result = struct
   type 'a t = {
-    errors: Error.t list;
-    value: 'a;
+    errors : Error.t list;
+    imports : Import.t list;
+    value : 'a;
+  }
+
+  let success (value : 'a) : 'a t = {
+    errors = [];
+    imports = [];
+    value;
   }
 end
 
@@ -27,7 +48,7 @@ module Context = struct
     configuration;
     env = initial_env;
     env_stack = [];
-    loc = initial_loc
+    loc = initial_loc;
   }
 end
 
@@ -41,14 +62,26 @@ module Command = struct
   let eval (type a) (file_name : string) (command : a t) : a Interpret.t =
     fun context ->
       match command with
-      | GetConfiguration -> { errors = []; value = context.configuration }
-      | GetEnv -> { errors = []; value = context.env }
-      | GetEnvStack -> { errors = []; value = context.env_stack }
-      | GetLoc -> { errors = []; value = context.loc }
+      | GetConfiguration -> Result.success context.configuration
+      | GetEnv -> Result.success context.env
+      | GetEnvStack -> Result.success context.env_stack
+      | GetLoc -> Result.success context.loc
       | Raise (value, category, message) ->
-        { errors = [{ category; loc = context.loc; message }]; value }
+        let result = Result.success value in
+        { result with
+          errors = [{ category; loc = context.loc; message }]
+        }
+      | Use (base, name) ->
+        let target =
+          Configuration.should_import_as context.configuration base in
+        begin match target with
+        | None -> Result.success false
+        | Some target ->
+          let result = Result.success true in
+          { result with imports = [{ Import.base = target; name }] }
+        end
       | Warn message ->
-        { errors = []; value = Error.warn file_name context.loc message }
+        Result.success (Error.warn file_name context.loc message)
 end
 
 module Wrapper = struct
@@ -68,13 +101,17 @@ let rec eval : type a. string -> a Monad.t -> a Interpret.t =
   fun file_name x context ->
     match x with
     | Monad.Bind (x, f) ->
-      let { Result.errors = errors_x; value = value_x } =
+      let { Result.errors = errors_x; imports = imports_x; value = value_x } =
         eval file_name x context in
-      let { Result.errors = errors_y; value = value_y } =
+      let { Result.errors = errors_y; imports = imports_y; value = value_y } =
         eval file_name (f value_x) context in
-      { errors = errors_y @ errors_x; value = value_y }
+      {
+        errors = errors_y @ errors_x;
+        imports = Import.merge imports_x imports_y;
+        value = value_y
+      }
     | Monad.Command command ->
       Command.eval file_name command context
-    | Monad.Return value -> { errors = []; value }
+    | Monad.Return value -> Result.success value
     | Monad.Wrapper (wrapper, x) ->
       Wrapper.eval wrapper (eval file_name x) context

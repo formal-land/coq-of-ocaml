@@ -29,8 +29,8 @@ let exp
   (source_file_name : string)
   (source_file_content : string)
   (json_mode : bool)
-  : Ast.t * string * bool =
-  let { MonadEval.Result.errors; value} =
+  : Ast.t * MonadEval.Import.t list * string * bool =
+  let { MonadEval.Result.errors; imports; value} =
     MonadEval.eval
       source_file_name
       (Ast.of_typedtree typedtree typedtree_errors)
@@ -41,7 +41,7 @@ let exp
     match errors with
     | [] -> false
     | _ :: _ -> true in
-  (value, error_message, has_errors)
+  (value, imports, error_message, has_errors)
 
 (** Display on stdout the conversion in Coq of an OCaml structure. *)
 let of_ocaml
@@ -53,7 +53,7 @@ let of_ocaml
   (output_file_name : string option)
   (json_mode : bool)
   : Output.t =
-  let (ast, error_message, has_errors) =
+  let (ast, imports, error_message, has_errors) =
     exp
       context
       typedtree
@@ -61,7 +61,7 @@ let of_ocaml
       source_file_name
       source_file_content
       json_mode in
-  let document = Ast.to_coq ast in
+  let document = Ast.to_coq imports ast in
   let generated_file_name =
     match output_file_name with
     | None ->

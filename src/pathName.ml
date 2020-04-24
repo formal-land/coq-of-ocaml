@@ -20,10 +20,12 @@ let __make (path : string list) (base : string) : t =
 let try_convert (path_name : t) : t option Monad.t =
   let make path base = return (Some (__make path base)) in
   let { path; base } = path_name in
-  match path |> List.map Name.to_string with
+  let path = path |> List.map Name.to_string in
+  let base = Name.to_string base in
   (* The core library *)
+  match path with
   | [] ->
-    begin match Name.to_string base with
+    begin match base with
     (* Built-in types *)
     | "int" -> make [] "Z"
     | "float" -> make [] "Z"
@@ -63,7 +65,7 @@ let try_convert (path_name : t) : t option Monad.t =
 
   (* Optional parameters *)
   | ["*predef*"] ->
-    begin match Name.to_string base with
+    begin match base with
     | "None" -> make [] "None"
     | "Some" -> make [] "Some"
     | _ -> return None
@@ -71,7 +73,7 @@ let try_convert (path_name : t) : t option Monad.t =
 
   (* Stdlib *)
   | ["Stdlib"] ->
-    begin match Name.to_string base with
+    begin match base with
     (* Exceptions *)
     | "invalid_arg" -> make ["OCaml"; "Stdlib"] "invalid_arg"
     | "failwith" -> make ["OCaml"; "Stdlib"] "failwith"
@@ -156,7 +158,7 @@ let try_convert (path_name : t) : t option Monad.t =
 
   (* Bytes *)
   | ["Stdlib"; "Bytes"] ->
-    begin match Name.to_string base with
+    begin match base with
     | "cat" -> make ["String"] "append"
     | "concat" -> make ["String"] "concat"
     | "length" -> make ["String"] "length"
@@ -166,7 +168,7 @@ let try_convert (path_name : t) : t option Monad.t =
 
   (* List *)
   | ["Stdlib"; "List"] ->
-    begin match Name.to_string base with
+    begin match base with
     | "exists" -> make ["OCaml"; "List"] "_exists"
     | "exists2" -> make ["OCaml"; "List"] "_exists2"
     | "length" -> make ["OCaml"; "List"] "length"
@@ -177,19 +179,34 @@ let try_convert (path_name : t) : t option Monad.t =
 
   (* Seq *)
   | ["Stdlib"; "Seq"] ->
-    begin match Name.to_string base with
+    begin match base with
     | "t" -> make ["OCaml"; "Seq"] "t"
     | _ -> return (Some path_name)
     end
 
   (* String *)
   | ["Stdlib"; "String"] ->
-    begin match Name.to_string base with
+    begin match base with
     | "length" -> make ["OCaml"; "String"] "length"
     | _ -> return (Some path_name)
     end
 
-  | _ -> return None
+  | _ ->
+    begin match (path, base) with
+    | (source :: name :: rest, _) ->
+      use source name >>= fun is_import ->
+      if is_import then
+        make (name :: rest) base
+      else
+        return None
+    | ([source], name) ->
+      use source name >>= fun is_import ->
+      if is_import then
+        make [] base
+      else
+        return None
+    | _ -> return None
+    end
 
 let convert (path_name : t) : t Monad.t =
   try_convert path_name >>= fun conversion ->
