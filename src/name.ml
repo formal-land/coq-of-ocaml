@@ -1,5 +1,6 @@
 (** Local identifiers, used for variable names in patterns for example. *)
 open SmartPrint
+open Monad.Notations
 
 (** Just a [string]. *)
 type t = Make of string
@@ -47,10 +48,10 @@ let escape_operator (s : string) : string =
   );
   Buffer.contents b
 
-let escape_reserved_word (is_value : bool) (s : string) : string =
+let escape_reserved_word (is_value : bool) (s : string) : string Monad.t =
   let escape_if_value s =
     if is_value then "__" ^ s ^ "_value" else s in
-  match s with
+  return (match s with
   | "bool" -> escape_if_value s
   | "bytes" -> escape_if_value s
   | "error" -> "__error"
@@ -74,7 +75,7 @@ let escape_reserved_word (is_value : bool) (s : string) : string =
   | "string" -> escape_if_value s
   | "unit" -> escape_if_value s
   | "Variable" -> "__Variable"
-  | _ -> s
+  | _ -> s)
 
 let substitute_first_dollar (s : string) : string =
   if String.length s <> 0 && String.get s 0 = '$' then
@@ -82,21 +83,30 @@ let substitute_first_dollar (s : string) : string =
   else
     s
 
-let convert (is_value : bool) (s : string) : string =
+let convert (is_value : bool) (s : string) : string Monad.t =
   let s = substitute_first_dollar s in
   let s_escaped_operator = escape_operator s in
   if s_escaped_operator <> s then
-    "op_" ^ s_escaped_operator
+    return ("op_" ^ s_escaped_operator)
   else
     escape_reserved_word is_value s
 
 (** Lift a [string] to an identifier. *)
-let of_string (is_value : bool) (s : string) : t =
-  Make (convert is_value s)
+let of_string (is_value : bool) (s : string) : t Monad.t =
+  convert is_value s >>= fun name ->
+  return (Make name)
+
+(** Lift a [string] to an identifier without doing conversion. *)
+let of_string_raw (s : string) : t =
+  Make s
 
 (** Import an OCaml identifier. *)
-let of_ident (is_value : bool) (i : Ident.t) : t =
+let of_ident (is_value : bool) (i : Ident.t) : t Monad.t =
   of_string is_value (Ident.name i)
+
+(** Import an OCaml identifier without doing conversion. *)
+let of_ident_raw (i : Ident.t) : t =
+  of_string_raw (Ident.name i)
 
 let to_string (name : t) : string =
   let Make name = name in

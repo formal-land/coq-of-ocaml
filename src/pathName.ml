@@ -223,17 +223,17 @@ let of_name (path : Name.t list) (base : Name.t) : t =
   { path; base }
 
 (** Import an OCaml [Longident.t]. *)
-let of_long_ident (is_value : bool) (long_ident : Longident.t) : t =
+let of_long_ident (is_value : bool) (long_ident : Longident.t) : t Monad.t =
   match List.rev (Longident.flatten long_ident) with
   | [] -> failwith "Unexpected Longident.t with an empty list"
   | x :: xs ->
-    of_name
-      (xs |> List.rev |> List.map (Name.of_string is_value))
-      (Name.of_string is_value x)
+    (xs |> List.rev |> Monad.List.map (Name.of_string is_value)) >>= fun path ->
+    (Name.of_string is_value x) >>= fun name ->
+    return (of_name path name)
 
 (** Import an OCaml [Path.t]. *)
-let of_path_without_convert (is_value : bool) (path : Path.t) : t =
-  let rec aux path : (Name.t list * Name.t) =
+let of_path_without_convert (is_value : bool) (path : Path.t) : t Monad.t =
+  let rec aux path : (Name.t list * Name.t) Monad.t =
     match path with
     | Path.Pident ident ->
       let ident_elements =
@@ -245,30 +245,35 @@ let of_path_without_convert (is_value : bool) (path : Path.t) : t =
           match path with
           | [] -> base
           | _ :: _ -> String.capitalize_ascii base in
-        let path = List.map (Name.of_string is_value) path in
-        let base = Name.of_string is_value base in
-        (path, base)
+        Monad.List.map (Name.of_string is_value) path >>= fun path ->
+        Name.of_string is_value base >>= fun base ->
+        return (path, base)
       | [] -> assert false
       end
     | Path.Pdot (path, field) ->
-      let (path, base) = aux path in
-      (base :: path, Name.of_string is_value field)
+      aux path >>= fun (path, base) ->
+      Name.of_string is_value field >>= fun field ->
+      return (base :: path, field)
     | Path.Papply _ -> failwith "Unexpected path application" in
-  let (path, base) = aux path in
-  of_name (List.rev path) base
+  aux path >>= fun (path, base) ->
+  return (of_name (List.rev path) base)
 
 let of_path_with_convert (is_value : bool) (path : Path.t) : t Monad.t =
-  convert (of_path_without_convert is_value path)
+  of_path_without_convert is_value path >>= fun path ->
+  convert path
 
 let of_path_and_name_with_convert (path : Path.t) (name : Name.t) : t Monad.t =
-  let rec aux p : Name.t list * Name.t =
+  let rec aux p : (Name.t list * Name.t) Monad.t =
     match p with
-    | Path.Pident x -> ([Name.of_ident false x], name)
+    | Path.Pident x ->
+      Name.of_ident false x >>= fun x ->
+      return ([x], name)
     | Path.Pdot (p, s) ->
-      let (path, base) = aux p in
-      (Name.of_string false s :: path, base)
+      aux p >>= fun (path, base) ->
+      Name.of_string false s >>= fun s ->
+      return (s :: path, base)
     | Path.Papply _ -> failwith "Unexpected path application" in
-  let (path, base) = aux path in
+  aux path >>= fun (path, base) ->
   convert (of_name (List.rev path) base)
 
 let map_constructor_name (cstr_name : string) (typ_ident : string) : string =
@@ -285,12 +290,13 @@ let of_constructor_description
       _
     } ->
     let typ_ident = Path.head path in
-    let { path; _ } = of_path_without_convert false path in
+    of_path_without_convert false path >>= fun { path; _ } ->
     let cstr_name = map_constructor_name cstr_name (Ident.name typ_ident) in
-    let base = Name.of_string false cstr_name in
+    Name.of_string false cstr_name >>= fun base ->
     convert { path; base }
   | { cstr_name; _ } ->
-    let path = of_name [] (Name.of_string false cstr_name) in
+    Name.of_string false cstr_name >>= fun cstr_name ->
+    let path = of_name [] cstr_name in
     raise
       path
       Unexpected
@@ -315,13 +321,15 @@ let of_label_description (label_description : Types.label_description)
   match label_description with
   | { lbl_name; lbl_res = { desc = Tconstr (path, _, _); _ } ; _ } ->
     iterate_in_aliases path >>= fun path ->
-    let { path; base } = of_path_without_convert false path in
+    of_path_without_convert false path >>= fun { path; base } ->
+    Name.of_string false lbl_name >>= fun lbl_name ->
     let path_name = {
       path = path @ [base];
-      base = Name.of_string false lbl_name } in
+      base = lbl_name } in
     convert path_name
   | { lbl_name; _ } ->
-    let path = of_name [] (Name.of_string false lbl_name) in
+    Name.of_string false lbl_name >>= fun lbl_name ->
+    let path = of_name [] lbl_name in
     raise
       path
       Unexpected
@@ -331,8 +339,9 @@ let constructor_of_variant (label : string) : t Monad.t =
   match label with
   (* Custom variants to add here. *)
   | _ ->
+    Name.of_string false label >>= fun base ->
     raise
-      { path = []; base = Name.of_string false label }
+      { path = []; base }
       NotSupported
       ("Constructor of the variant `" ^ label ^ " unknown")
 
@@ -351,10 +360,8 @@ let is_tt (path_name : t) : bool =
   | ([], "tt") -> true
   | _ -> false
 
-let is_unit (path_name : t) : bool =
-  match (path_name.path, Name.to_string path_name.base) with
-  | ([], "unit") -> true
-  | _ -> false
+let is_unit (path : Path.t) : bool =
+  Path.name path = "unit"
 
 let false_value : t =
   { path = []; base = Name.Make "false" }
@@ -366,9 +373,12 @@ let prefix_by_with (path_name : t) : t =
   let { path; base } = path_name in
   { path; base = Name.prefix_by_with base }
 
-let compare_paths (path1 : Path.t) (path2 : Path.t) : int =
-  let import_path (path : Path.t) : t = of_path_without_convert false path in
-  compare (import_path path1) (import_path path2)
+let compare_paths (path1 : Path.t) (path2 : Path.t) : int Monad.t =
+  let import_path (path : Path.t) : t Monad.t =
+    of_path_without_convert false path in
+  import_path path1 >>= fun path1 ->
+  import_path path2 >>= fun path2 ->
+  return (compare path1 path2)
 
 let to_string (x : t) : string =
   String.concat "." (List.map Name.to_string (x.path @ [x.base]))

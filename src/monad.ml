@@ -34,6 +34,9 @@ module Notations = struct
   let return (x : 'a) : 'a t =
     Return x
 
+  let (let*) (x : 'a t) (f : 'a -> 'b t) : 'b t =
+    Bind (x, f)
+
   let (>>=) (x : 'a t) (f : 'a -> 'b t) : 'b t =
     Bind (x, f)
 
@@ -73,6 +76,17 @@ end
 
 module List = struct
   open Notations
+
+  let rec filter (f : 'a -> bool t) (l : 'a list) : 'a list t =
+    match l with
+    | [] -> return []
+    | x :: l ->
+      f x >>= fun is_valid ->
+      filter f l >>= fun l ->
+      if is_valid then
+        return (x :: l)
+      else
+        return l
 
   let rec filter_map (f : 'a -> 'b option t) (l : 'a list) : 'b list t =
     match l with
@@ -121,4 +135,28 @@ module List = struct
       f x >>= fun x ->
       map f l >>= fun l ->
       return (x :: l)
+
+  let rec lesser_and_greater
+    (compare : 'a -> 'a -> int t) (x : 'a) (l : 'a list)
+    : ('a list * 'a list) t =
+    match l with
+    | [] -> return ([], [])
+    | y :: l ->
+      compare y x >>= fun comparison ->
+      lesser_and_greater compare x l >>= fun (lesser, greater) ->
+      if comparison < 0 then
+        return (y :: lesser, greater)
+      else if comparison > 0 then
+        return (lesser, y :: greater)
+      else
+        return (lesser, greater)
+
+  let rec sort_uniq (compare : 'a -> 'a -> int t) (l : 'a list) : 'a list t =
+    match l with
+    | [] -> return []
+    | head :: tail ->
+      lesser_and_greater compare head tail >>= fun (lesser, greater) ->
+      sort_uniq compare lesser >>= fun lesser ->
+      sort_uniq compare greater >>= fun greater ->
+      return (lesser @ [head] @ greater)
 end

@@ -11,32 +11,35 @@ module TypParams = struct
   type t = Name.t option list
 end
 
-let rec named_typ_param (typ : Types.type_expr) : TypeVariable.t =
+let rec named_typ_param (typ : Types.type_expr) : TypeVariable.t Monad.t =
   match typ.Types.desc with
   | Tvar x | Tunivar x ->
     begin match x with
-    | None | Some "_" -> TypeVariable.Unknown
-    | Some x -> TypeVariable.Known (Name.of_string false x)
+    | None | Some "_" -> return TypeVariable.Unknown
+    | Some x ->
+      Name.of_string false x >>= fun x ->
+      return (TypeVariable.Known x)
     end
   | Tlink typ | Tsubst typ -> named_typ_param typ
-  | _ -> TypeVariable.Error
+  | _ -> return TypeVariable.Error
 
 let named_typ_params_expecting_anything (typs : Types.type_expr list)
-  : TypParams.t option =
-  typs |>
-  List.map named_typ_param |>
-  List.map (function
-    | TypeVariable.Error -> None
-    | Known name -> Some (Some name)
-    | Unknown -> Some None
-  ) |>
-  Util.Option.all
+  : TypParams.t option Monad.t =
+  Monad.List.map named_typ_param typs >>= fun typs ->
+  return (
+    typs |>
+    List.map (function
+      | TypeVariable.Error -> None
+      | Known name -> Some (Some name)
+      | Unknown -> Some None
+    ) |>
+    Util.Option.all
+  )
 
 let named_typ_params_expecting_variables (typs : Types.type_expr list)
   : TypParams.t Monad.t =
-  typs |>
-  List.map named_typ_param |>
-  Monad.List.map (function
+  Monad.List.map named_typ_param typs >>= fun typs ->
+  typs |> Monad.List.map (function
     | TypeVariable.Error ->
       raise
         None
@@ -47,18 +50,18 @@ let named_typ_params_expecting_variables (typs : Types.type_expr list)
   )
 
 let named_typ_params_expecting_variables_or_ignored
-  (typs : Types.type_expr list) : TypParams.t =
-  typs |>
-  List.map named_typ_param |>
-  List.map (function
+  (typs : Types.type_expr list) : TypParams.t Monad.t =
+  Monad.List.map named_typ_param typs >>= fun typs ->
+  return (typs |> List.map (function
     | TypeVariable.Error -> None
     | Known name -> Some name
     | Unknown -> None
-  )
+  ))
 
-let named_typ_params_with_unknowns (typ_params : TypParams.t) : Name.t list =
-  typ_params |> List.map (function
-    | Some typ_param -> typ_param
+let named_typ_params_with_unknowns (typ_params : TypParams.t)
+  : Name.t list Monad.t =
+  typ_params |> Monad.List.map (function
+    | Some typ_param -> return typ_param
     | None -> Name.of_string false "_"
   )
 
@@ -89,11 +92,11 @@ let rec merge_typ_params (params1 : TypParams.t) (params2 : TypParams.t)
     case of a non-GADT type. *)
 let get_return_typ_params
   (defined_typ_params : TypParams.t) (return_typ : Types.type_expr option)
-  : TypParams.t option =
+  : TypParams.t option Monad.t =
   match return_typ with
   | Some { Types.desc = Tconstr (_, typs, _); _ } ->
     named_typ_params_expecting_anything typs
-  | _ -> Some (defined_typ_params)
+  | _ -> return (Some (defined_typ_params))
 
 (** Check if the type is not a GADT. If this is not a GADT, also return a
   prefered list of parameter names for the type variables. It merges the

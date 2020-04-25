@@ -25,7 +25,7 @@ let of_ocaml_module_with_substitutions
   (substitutions :
     (Path.t * Longident.t Asttypes.loc * Typedtree.with_constraint) list)
   : t Monad.t =
-  let signature_path_name = PathName.of_long_ident false long_ident_loc.txt in
+  let* signature_path_name = PathName.of_long_ident false long_ident_loc.txt in
   get_env >>= fun env ->
   let (_, module_typ) = Env.lookup_modtype long_ident_loc.txt env in
   ModuleTypParams.get_module_typ_declaration_typ_params_arity
@@ -39,7 +39,8 @@ let of_ocaml_module_with_substitutions
         set_loc (Loc.of_location typ_loc) (
         Type.of_type_expr_without_free_vars typ >>= fun typ ->
         Monad.List.map Type.of_type_expr_variable type_params >>= fun typ_params ->
-        return (Some (PathName.of_path_without_convert false path, typ_params, typ)))
+        let* path_name = PathName.of_path_without_convert false path in
+        return (Some (path_name, typ_params, typ)))
       | _ ->
         raise None NotSupported (
           "Can only do `with` on types in module types using type expressions " ^
@@ -64,7 +65,7 @@ let rec of_ocaml_desc (module_typ_desc : Typedtree.module_type_desc) : t Monad.t
   | Tmty_alias _ ->
     raise (Error "alias") NotSupported "Aliases in module types are not handled"
   | Tmty_functor (ident, _, Some param, result) ->
-    let name = Name.of_ident false ident in
+    let* name = Name.of_ident false ident in
     of_ocaml param >>= fun param ->
     of_ocaml result >>= fun result ->
     return (Functor (name, param, result))
@@ -111,16 +112,14 @@ let to_coq (typ_variables_prefix : Name.t) (module_typ : t) : SmartPrint.t =
     nest (
       nest (PathName.to_coq path_name ^-^ !^ "." ^-^ !^ "signature") ^^
       separate space (Tree.flatten typ_values |> List.map (fun (path_name, arity_or_typ) ->
-        let name = ModuleTypParams.get_typ_param_name path_name in
+        let name = ModuleTypParams.to_coq_typ_param_name path_name in
         nest (parens (
-          Name.to_coq name ^^ !^ ":=" ^^
+          name ^^ !^ ":=" ^^
           match arity_or_typ with
           | Type.Typ typ -> Type.to_coq None (Some Type.Context.Apply) typ
           | Arity _ ->
-            Name.to_coq (
-              ModuleTypParams.get_typ_param_name
-                (PathName.add_prefix typ_variables_prefix path_name)
-            )
+            ModuleTypParams.to_coq_typ_param_name
+              (PathName.add_prefix typ_variables_prefix path_name)
         ))
       ))
     )

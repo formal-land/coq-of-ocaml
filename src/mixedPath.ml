@@ -64,13 +64,15 @@ let of_path
   of_path_aux path >>= fun (base_path, fields, signature_path) ->
   match (fields, signature_path) with
   | ([], None) ->
-    let path_name = PathName.of_path_without_convert is_value base_path in
+    PathName.of_path_without_convert is_value base_path >>= fun path_name ->
     PathName.try_convert path_name >>= fun conversion ->
     begin match conversion with
     | None ->
       begin match long_ident with
       | None -> return (PathName path_name)
-      | Some long_ident -> return (PathName (PathName.of_long_ident is_value long_ident))
+      | Some long_ident ->
+        PathName.of_long_ident is_value long_ident >>= fun path_name ->
+        return (PathName path_name)
       end
     | Some path_name -> return (PathName path_name)
     end
@@ -78,7 +80,7 @@ let of_path
     is_module_path_local base_path >>= fun is_local ->
     PathName.of_path_with_convert is_value base_path >>= fun base_path_name ->
     (fields |> Monad.List.map (fun (signature_path, field_string) ->
-      let field_name = Name.of_string is_value field_string in
+      Name.of_string is_value field_string >>= fun field_name ->
       PathName.of_path_and_name_with_convert signature_path field_name
     )) >>= fun fields ->
     return (Access (base_path_name, List.rev fields, is_local))

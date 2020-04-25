@@ -21,7 +21,9 @@ let rec of_pattern (p : pattern) : t option Monad.t =
   set_loc (Loc.of_location p.pat_loc) (
   match p.pat_desc with
   | Tpat_any -> return (Some Any)
-  | Tpat_var (x, _) -> return (Some (Variable (Name.of_ident true x)))
+  | Tpat_var (x, _) ->
+    Name.of_ident true x >>= fun x ->
+    return (Some (Variable x))
   | Tpat_tuple ps ->
     Monad.List.map of_pattern ps >>= fun patterns ->
     return (
@@ -47,9 +49,10 @@ let rec of_pattern (p : pattern) : t option Monad.t =
     end
   | Tpat_alias (p, x, _) ->
     of_pattern p >>= fun pattern ->
+    Name.of_ident true x >>= fun x ->
     return (
       Util.Option.map pattern (fun pattern ->
-      Alias (pattern, Name.of_ident true x))
+      Alias (pattern, x))
     )
   | Tpat_constant c ->
     Constant.of_constant c >>= fun constant ->

@@ -19,16 +19,16 @@ let items_of_types_signature (signature : Types.signature) : item list Monad.t =
     : item Monad.t =
     match signature_item with
     | Sig_value (ident, { val_type; _ }, _) ->
-      let name = Name.of_ident true ident in
+      let* name = Name.of_ident true ident in
       Type.of_type_expr_without_free_vars val_type >>= fun typ ->
       let typ_args = Name.Set.elements (Type.typ_args_of_typ typ) in
       return (Value (name, typ_args, typ))
     | Sig_type (ident, { type_manifest = None; type_params; _ }, _, _) ->
-      let name = Name.of_ident false ident in
+      let* name = Name.of_ident false ident in
       Monad.List.map Type.of_type_expr_variable type_params >>= fun typ_args ->
       return (TypExistential (name, typ_args))
     | Sig_type (ident, { type_manifest = Some typ; type_params; _ }, _, _) ->
-      let name = Name.of_ident false ident in
+      let* name = Name.of_ident false ident in
       Monad.List.map Type.of_type_expr_variable type_params >>= fun typ_args ->
       Type.of_type_expr_without_free_vars typ >>= fun typ ->
       return (TypSynonym (name, typ_args, typ))
@@ -39,7 +39,7 @@ let items_of_types_signature (signature : Types.signature) : item list Monad.t =
         NotSupported
         ("Extensible type '" ^ name ^ "' not handled")
     | Sig_module (ident, _, { md_type; _ }, _, _) ->
-      let name = Name.of_ident false ident in
+      let* name = Name.of_ident false ident in
       IsFirstClassModule.is_module_typ_first_class
         md_type >>= fun is_first_class ->
       begin match is_first_class with
@@ -47,7 +47,7 @@ let items_of_types_signature (signature : Types.signature) : item list Monad.t =
         PathName.of_path_with_convert false signature_path
           >>= fun signature_path_name ->
         let mapper ident { Types.type_manifest; type_params; _ } =
-          let name = Name.of_ident false ident in
+          let* name = Name.of_ident false ident in
           begin match type_manifest with
           | None -> return (Type.Arity (List.length type_params))
           | Some type_manifest ->
@@ -138,7 +138,7 @@ let items_of_signature (signature : signature) : item list Monad.t =
         "Signatures inside signatures are not handled."
     | Tsig_module { md_id; md_type; _ } ->
       push_env (
-      let name = Name.of_ident false md_id in
+      let* name = Name.of_ident false md_id in
       ModuleTyp.of_ocaml md_type >>= fun module_typ ->
       return [Module (name, module_typ)])
     | Tsig_open _ ->
@@ -154,7 +154,7 @@ let items_of_signature (signature : signature) : item list Monad.t =
           FirstClassModule
           "We do not handle the definition of new types in signatures"
       end >>= fun () ->
-      let name = Name.of_ident false typ_id in
+      let* name = Name.of_ident false typ_id in
       (type_params |> Monad.List.map Type.of_type_expr_variable) >>= fun typ_args ->
       return [TypExistential (name, typ_args)]
     | Tsig_type (_, typs) | Tsig_typesubst typs ->
@@ -164,7 +164,7 @@ let items_of_signature (signature : signature) : item list Monad.t =
           typ_type = { type_manifest = Some typ; type_params; _ };
           _
         } ] ->
-        let name = Name.of_ident false typ_id in
+        let* name = Name.of_ident false typ_id in
         (type_params |> Monad.List.map Type.of_type_expr_variable) >>= fun typ_args ->
         Type.of_type_expr_without_free_vars typ >>= fun typ ->
         return [TypSynonym (name, typ_args, typ)]
@@ -180,7 +180,7 @@ let items_of_signature (signature : signature) : item list Monad.t =
         NotSupported
         "Extensible types are not handled."
     | Tsig_value { val_id; val_desc = { ctyp_type; _ }; _ } ->
-      let name = Name.of_ident true val_id in
+      let* name = Name.of_ident true val_id in
       Type.of_type_expr_without_free_vars ctyp_type >>= fun typ ->
       let typ_args = Name.Set.elements (Type.typ_args_of_typ typ) in
       return [Value (name, typ_args, typ)])) in
@@ -227,11 +227,11 @@ let rec to_coq_type_kind (arity : int) : SmartPrint.t =
     Pp.set ^^ !^ "->" ^^ to_coq_type_kind (arity - 1)
 
 let to_coq_definition (name : Name.t) (signature : t) : SmartPrint.t =
-  let typ_params : (Name.t * int) list =
+  let typ_params : (SmartPrint.t * int) list =
     Tree.flatten signature.typ_params |> List.map (fun (path_name, arity) ->
-      (ModuleTypParams.get_typ_param_name path_name, arity)
+      (ModuleTypParams.to_coq_typ_param_name path_name, arity)
     ) in
-  let reversed_grouped_typ_params : (Name.t list * int) list =
+  let reversed_grouped_typ_params : (SmartPrint.t list * int) list =
     List.fold_left
       (fun grouped (typ_param, arity) ->
         match grouped with
@@ -254,8 +254,7 @@ let to_coq_definition (name : Name.t) (signature : t) : SmartPrint.t =
       !^ "Record" ^^ !^ "signature" ^^
       separate space (grouped_typ_params |> List.map (fun (typ_params, arity) ->
         braces (
-          separate space (typ_params |> List.map Name.to_coq) ^^ !^ ":" ^^
-          to_coq_type_kind arity
+          separate space typ_params ^^ !^ ":" ^^ to_coq_type_kind arity
         )
       )) ^^
       nest (!^ ":" ^^ Pp.set) ^^

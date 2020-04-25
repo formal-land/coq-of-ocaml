@@ -112,16 +112,17 @@ module ModuleTypValues = struct
       signature |> Monad.List.filter_map (fun item ->
         match item with
         | Types.Sig_value (ident, { val_type; _ }, _) ->
+          let* ident = Name.of_ident true ident in
           Type.of_typ_expr true typ_vars val_type >>= fun (_, _, new_typ_vars) ->
           return (Some (Value (
-            Name.of_ident true ident,
+            ident,
             Name.Set.cardinal new_typ_vars
           )))
         | Sig_module (ident, _, { Types.md_type = Mty_functor _; _ }, _, _) ->
-          let name = Name.of_ident false ident in
+          let* name = Name.of_ident false ident in
           return (Some (ModuleFunctor name))
         | Sig_module (ident, _, _, _, _) ->
-          let name = Name.of_ident false ident in
+          let* name = Name.of_ident false ident in
           return (Some (Module name))
         | _ -> return None
       )
@@ -173,7 +174,7 @@ let rec of_expression (typ_vars : Name.t Name.Map.t) (e : expression)
       }];
       _
     } ->
-    let x = Name.of_ident true x in
+    let* x = Name.of_ident true x in
     of_expression typ_vars e >>= fun e ->
     return (Function (x, e))
   | Texp_function { cases; _ } ->
@@ -224,7 +225,7 @@ let rec of_expression (typ_vars : Name.t Name.Map.t) (e : expression)
     | Cstr_extension _ ->
       raise
         (Variable (
-          MixedPath.of_name (Name.of_string true "extensible_type_value"),
+          MixedPath.of_name (Name.of_string_raw "extensible_type_value"),
           []
         ))
         NotSupported
@@ -361,12 +362,12 @@ let rec of_expression (typ_vars : Name.t Name.Map.t) (e : expression)
       },
       e
     ) ->
-    let x = Name.of_ident true x in
+    let* x = Name.of_ident true x in
     PathName.of_path_with_convert false path >>= fun path_name ->
     of_expression typ_vars e >>= fun e ->
     return (LetModuleUnpack (x, path_name, e))
   | Texp_letmodule (x, _, _, module_expr, e) ->
-    let x = Name.of_ident true x in
+    let* x = Name.of_ident true x in
     push_env (of_module_expr typ_vars module_expr None >>= fun value ->
     set_env e.exp_env (
     push_env (of_expression typ_vars e >>= fun e ->
@@ -426,13 +427,13 @@ and of_match
   : t Monad.t =
   (cases |> Monad.List.filter_map (fun {c_lhs; c_guard; c_rhs} ->
     set_loc (Loc.of_location c_lhs.pat_loc) (
-    let bound_vars =
-      Typedtree.pat_bound_idents c_lhs |> List.rev |> List.map
+    let* bound_vars =
+      Typedtree.pat_bound_idents c_lhs |> List.rev |> Monad.List.map
         (fun ident ->
           let { Types.val_type; _ } =
             Env.find_value (Path.Pident ident) c_rhs.exp_env in
-          let name = Name.of_ident true ident in
-          (name, val_type)
+          let* name = Name.of_ident true ident in
+          return (name, val_type)
         ) in
     Type.existential_typs_of_typs (List.map snd bound_vars) >>= fun existentials ->
     Monad.List.map
@@ -517,7 +518,7 @@ and open_cases
   (do_cast_results : bool)
   (is_with_default_case : bool)
   : (Name.t * t) Monad.t =
-  let name = Name.of_string false "function_parameter" in
+  let name = Name.of_string_raw "function_parameter" in
   let e = Variable (MixedPath.of_name name, []) in
   of_match typ_vars e cases is_gadt_match do_cast_results is_with_default_case >>= fun e ->
   return (name, e)
@@ -598,7 +599,7 @@ and of_let
         _
       };
       _
-     }] when PathName.is_unit (PathName.of_path_without_convert false path) ->
+     }] when PathName.is_unit path ->
      raise
       (ErrorMessage (e2, "top_level_evaluation"))
       SideEffect
@@ -654,11 +655,13 @@ and of_module_expr
       | Found module_type_path ->
         ModuleTypParams.get_module_typ_typ_params_arity module_type
           >>= fun module_typ_params_arity ->
-        let are_module_paths_similar =
+        let* are_module_paths_similar =
           match local_module_type_path with
-          | None -> false
+          | None -> return false
           | Some local_module_type_path ->
-            PathName.compare_paths local_module_type_path module_type_path = 0 in
+            let* comparison =
+              PathName.compare_paths local_module_type_path module_type_path in
+              return (comparison = 0) in
         if are_module_paths_similar then
           return (
             ModuleCast (
@@ -750,7 +753,7 @@ and of_module_expr
         NotSupported
         "Expected an annotation to get the module type of the parameter of this functor"
     | Some module_type_arg ->
-      let x = Name.of_ident false ident in
+      let* x = Name.of_ident false ident in
       ModuleTyp.of_ocaml module_type_arg >>= fun module_type_arg ->
       of_module_expr typ_vars e None >>= fun e ->
       return (Functor (x, ModuleTyp.to_typ module_type_arg, e))
@@ -777,7 +780,7 @@ and of_module_expr
       if module_typ_params_arity = module_typ_params_arity_for_application then
         return application
       else
-        let functor_result_name = Name.of_string false "functor_result" in
+        let functor_result_name = Name.of_string_raw "functor_result" in
         return (
           LetVar (
             functor_result_name,
@@ -899,7 +902,7 @@ and of_structure
               };
               _
             } ->
-            let name = Name.of_ident false typ_id in
+            let* name = Name.of_ident false typ_id in
             (type_params |> Monad.List.map Type.of_type_expr_variable) >>= fun typ_args ->
             Type.of_type_expr_without_free_vars typ >>= fun typ ->
             return (LetTyp (name, typ_args, typ, e_next))
@@ -926,7 +929,7 @@ and of_structure
           SideEffect
           "Exception not handled"
       | Tstr_module { mb_id; mb_expr; _ } ->
-        let name = Name.of_ident false mb_id in
+        let* name = Name.of_ident false mb_id in
         of_module_expr
           typ_vars mb_expr (Some mb_expr.mod_type) >>= fun value ->
         return (LetVar (name, [], value, e_next))
@@ -1007,7 +1010,7 @@ and of_include
         return (Name.Set.elements new_typ_vars)
       | _ -> return []
       end >>= fun typ_vars ->
-      let name = Name.of_ident is_value ident in
+      let* name = Name.of_ident is_value ident in
       PathName.of_path_and_name_with_convert signature_path name
         >>= fun signature_path_name ->
       return (

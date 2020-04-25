@@ -95,7 +95,7 @@ let rec of_structure (structure : structure) : t list Monad.t =
         };
         _
       } ])
-      when PathName.is_unit (PathName.of_path_without_convert false path) ->
+      when PathName.is_unit path ->
       top_level_evaluation_error
     | Tstr_eval _ -> top_level_evaluation_error
     | Tstr_value (is_rec, cases) ->
@@ -127,7 +127,7 @@ let rec of_structure (structure : structure) : t list Monad.t =
           "We do not support open on complex module expressions"
       end
     | Tstr_module { mb_id; mb_expr; _ } ->
-      let name = Name.of_ident false mb_id in
+      let* name = Name.of_ident false mb_id in
       IsFirstClassModule.is_module_typ_first_class mb_expr.mod_type
         >>= fun is_first_class ->
       begin match is_first_class with
@@ -155,7 +155,7 @@ let rec of_structure (structure : structure) : t list Monad.t =
         NotSupported
         "Abstract module types not handled."
     | Tstr_modtype { mtd_id; mtd_type = Some { mty_desc; _ }; _ } ->
-      let name = Name.of_ident false mtd_id in
+      let* name = Name.of_ident false mtd_id in
       begin
         match mty_desc with
         | Tmty_signature signature ->
@@ -168,7 +168,7 @@ let rec of_structure (structure : structure) : t list Monad.t =
             "This kind of signature is not handled."
       end
     | Tstr_primitive { val_id; val_val = { val_type; _ }; _ } ->
-      let name = Name.of_ident true val_id in
+      let* name = Name.of_ident true val_id in
       Type.of_typ_expr true Name.Map.empty val_type >>= fun (typ, _, free_typ_vars) ->
       return [AbstractValue (name, Name.Set.elements free_typ_vars, typ)]
     | Tstr_typext _ ->
@@ -226,7 +226,7 @@ let rec of_structure (structure : structure) : t list Monad.t =
                 match signature_item with
                 | Types.Sig_value _ -> true
                 | _ -> false in
-              let name = Name.of_ident is_value ident in
+              let* name = Name.of_ident is_value ident in
               PathName.of_path_and_name_with_convert mod_type_path name
                 >>= fun field ->
               return (Some (
