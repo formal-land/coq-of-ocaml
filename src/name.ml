@@ -48,34 +48,53 @@ let escape_operator (s : string) : string =
   );
   Buffer.contents b
 
+let reserved_names : string list = [
+  "error";
+  "exists";
+  "exists2";
+  "left";
+  "mod";
+  "pack";
+  "return";
+  "right";
+  "Set";
+  "Variable";
+]
+
+(** We only escape these names if they are used as values, as they may collide
+    with the corresponding type names. *)
+let value_names_to_escape : string list = [
+  "bool";
+  "bytes";
+  "float";
+  "int";
+  "int32";
+  "int64";
+  "list";
+  "nativeint";
+  "option";
+  "ref";
+  "result";
+  "string";
+  "unit";
+]
+
 let escape_reserved_word (is_value : bool) (s : string) : string Monad.t =
-  let escape_if_value s =
-    if is_value then "__" ^ s ^ "_value" else s in
-  return (match s with
-  | "bool" -> escape_if_value s
-  | "bytes" -> escape_if_value s
-  | "error" -> "__error"
-  | "exists" -> "__exists"
-  | "exists2" -> "__exists2"
-  | "float" -> escape_if_value s
-  | "int" -> escape_if_value s
-  | "int32" -> escape_if_value s
-  | "int64" -> escape_if_value s
-  | "left" -> "__left"
-  | "list" -> escape_if_value s
-  | "mod" -> "__mod"
-  | "nativeint" -> escape_if_value s
-  | "option" -> escape_if_value s
-  | "pack" -> "__pack"
-  | "ref" -> escape_if_value s
-  | "result" -> escape_if_value s
-  | "return" -> "__return"
-  | "right" -> "__right"
-  | "Set" -> "__Set"
-  | "string" -> escape_if_value s
-  | "unit" -> escape_if_value s
-  | "Variable" -> "__Variable"
-  | _ -> s)
+  let* configuration = get_configuration in
+  let is_value_to_escape =
+    is_value &&
+    (
+      List.mem s value_names_to_escape ||
+      Configuration.is_value_to_escape configuration s
+    ) in
+  if is_value_to_escape then
+    return ("__" ^ s ^ "_value")
+  else
+    let is_reserved_name = List.mem s reserved_names in
+    if is_reserved_name then
+      return ("__" ^ s)
+    else
+      return s
 
 let substitute_first_dollar (s : string) : string =
   if String.length s <> 0 && String.get s 0 = '$' then

@@ -13,6 +13,7 @@ module MonadicOperator = struct
 end
 
 type t = {
+  escape_value : string list;
   file_name : string;
   head_suffix : string;
   monadic_operators : MonadicOperator.t list;
@@ -24,6 +25,7 @@ type t = {
 }
 
 let default (file_name : string) : t = {
+  escape_value = [];
   file_name;
   head_suffix = "";
   monadic_operators = [];
@@ -33,6 +35,9 @@ let default (file_name : string) : t = {
   without_guard_checking = [];
   without_positivity_checking = [];
 }
+
+let is_value_to_escape (configuration : t) (name : string) : bool =
+  List.mem name configuration.escape_value
 
 let is_monadic_operator (configuration : t) (name : string) : string option =
   let monadic_operator =
@@ -100,6 +105,9 @@ let of_json (file_name : string) (json : Yojson.Basic.t) : t =
     List.fold_left
       (fun configuration (id, entry) ->
         match id with
+        | "escape_value" ->
+          let entry = get_string_list "escape_value" entry in
+          {configuration with escape_value = entry}
         | "head_suffix" ->
           let entry = get_string "head_suffix" entry in
           {configuration with head_suffix = entry}
