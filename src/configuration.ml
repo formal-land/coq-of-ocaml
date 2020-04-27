@@ -1,3 +1,11 @@
+module ConstructorMapping = struct
+  type t = {
+    source : string;
+    target : string;
+    typ : string;
+  }
+end
+
 module Import = struct
   type t = {
     source : string;
@@ -14,6 +22,7 @@ end
 
 type t = {
   alias_barrier_modules : string list;
+  constructor_map : ConstructorMapping.t list;
   escape_value : string list;
   file_name : string;
   head_suffix : string;
@@ -27,6 +36,7 @@ type t = {
 
 let default (file_name : string) : t = {
   alias_barrier_modules = [];
+  constructor_map = [];
   escape_value = [];
   file_name;
   head_suffix = "";
@@ -40,6 +50,14 @@ let default (file_name : string) : t = {
 
 let is_alias_in_barrier_module (configuration : t) (name : string) : bool =
   List.mem name configuration.alias_barrier_modules
+
+let is_constructor_renamed (configuration : t) (typ : string) (name : string)
+  : string option =
+  configuration.constructor_map |>
+  List.find_opt (fun { ConstructorMapping.source; typ = typ'; _ } ->
+    source = name && typ' = typ
+  ) |>
+  Option.map (fun { ConstructorMapping.target; _ } -> target)
 
 let is_value_to_escape (configuration : t) (name : string) : bool =
   List.mem name configuration.escape_value
@@ -104,6 +122,18 @@ let get_string_couple_list (id : string) (json : Yojson.Basic.t)
     )
   | _ -> failwith error_message
 
+let get_string_triple_list (id : string) (json : Yojson.Basic.t)
+  : (string * string * string) list =
+  let error_message = "Expected a list of triples of strings in " ^ id in
+  match json with
+  | `List jsons ->
+    jsons |> List.map (function
+      | `List [`String value1; `String value2; `String value3] ->
+        (value1, value2, value3)
+      | _ -> failwith error_message
+    )
+  | _ -> failwith error_message
+
 let of_json (file_name : string) (json : Yojson.Basic.t) : t =
   match json with
   | `Assoc entries ->
@@ -113,6 +143,14 @@ let of_json (file_name : string) (json : Yojson.Basic.t) : t =
         | "alias_barrier_modules" ->
           let entry = get_string_list "alias_barrier_modules" entry in
           {configuration with alias_barrier_modules = entry}
+        | "constructor_map" ->
+          let entry =
+            entry |>
+            get_string_triple_list "constructor_map" |>
+            List.map (fun (typ, source, target) ->
+              { ConstructorMapping.source; target; typ }
+            ) in
+          {configuration with constructor_map = entry}
         | "escape_value" ->
           let entry = get_string_list "escape_value" entry in
           {configuration with escape_value = entry}

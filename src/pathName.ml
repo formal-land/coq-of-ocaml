@@ -279,9 +279,14 @@ let of_path_and_name_with_convert (path : Path.t) (name : Name.t) : t Monad.t =
   aux path >>= fun (path, base) ->
   convert (of_name path base)
 
-let map_constructor_name (cstr_name : string) (typ_ident : string) : string =
-  match (cstr_name, typ_ident) with
-  | _ -> cstr_name
+let map_constructor_name (cstr_name : string) (typ_ident : string)
+  : string Monad.t =
+  let* configuration = get_configuration in
+  let renaming =
+    Configuration.is_constructor_renamed configuration typ_ident cstr_name in
+  match renaming with
+  | Some renaming -> return renaming
+  | None -> return cstr_name
 
 let of_constructor_description
   (constructor_description : Types.constructor_description)
@@ -294,7 +299,7 @@ let of_constructor_description
     } ->
     let typ_ident = Path.head path in
     of_path_without_convert false path >>= fun { path; _ } ->
-    let cstr_name = map_constructor_name cstr_name (Ident.name typ_ident) in
+    let* cstr_name = map_constructor_name cstr_name (Ident.name typ_ident) in
     Name.of_string false cstr_name >>= fun base ->
     convert { path; base }
   | { cstr_name; _ } ->
