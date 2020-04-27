@@ -42,8 +42,10 @@ type t =
     (** A constructor name, some implicits, and a list of arguments. *)
   | Apply of t * t list (** An application. *)
   | Function of Name.t * t (** An argument name and a body. *)
-  | LetVar of Name.t * Name.t list * t * t
-    (** The let of a variable, with optionally a list of polymorphic variables. *)
+  | LetVar of string option * Name.t * Name.t list * t * t
+    (** The let of a variable, with optionally a list of polymorphic variables.
+        We optionally specify the symbol of the let operator as it may be
+        non-standard for monadic binds. *)
   | LetFun of t option Definition.t * t
   | LetTyp of Name.t * Name.t list * Type.t * t
     (** The definition of a type. It is used to represent module values. *)
@@ -200,11 +202,11 @@ let rec of_expression (typ_vars : Name.t Name.Map.t) (e : expression)
         Variable (MixedPath.PathName path_name, []),
         [e1; Function (x, e2)]
       ) ->
-      get_configuration >>= fun configuration ->
+      let* configuration = get_configuration in
       let name = PathName.to_string path_name in
       begin match Configuration.is_monadic_operator configuration name with
       | None -> return normal_apply
-      | Some _ -> return (LetVar (x, [], e1, e2))
+      | Some let_symbol -> return (LetVar (Some let_symbol, x, [], e1, e2))
       end
     | _ -> return normal_apply
     end
@@ -371,7 +373,7 @@ let rec of_expression (typ_vars : Name.t Name.Map.t) (e : expression)
     push_env (of_module_expr typ_vars module_expr None >>= fun value ->
     set_env e.exp_env (
     push_env (of_expression typ_vars e >>= fun e ->
-    return (LetVar (x, [], value, e)))))
+    return (LetVar (None, x, [], value, e)))))
   | Texp_letexception _ ->
     error_message
       (Error "let_exception")
@@ -518,9 +520,11 @@ and open_cases
   (do_cast_results : bool)
   (is_with_default_case : bool)
   : (Name.t * t) Monad.t =
-  let name = Name.of_string_raw "function_parameter" in
+  let name = Name.FunctionParameter in
   let e = Variable (MixedPath.of_name name, []) in
-  of_match typ_vars e cases is_gadt_match do_cast_results is_with_default_case >>= fun e ->
+  let* e =
+    of_match
+      typ_vars e cases is_gadt_match do_cast_results is_with_default_case in
   return (name, e)
 
 and import_let_fun
@@ -620,7 +624,7 @@ and of_let
       Pattern.of_pattern p >>= fun p ->
       of_expression typ_vars e1 >>= fun e1 ->
       begin match p with
-      | Some (Pattern.Variable x) -> return (LetVar (x, [], e1, e2))
+      | Some (Pattern.Variable x) -> return (LetVar (None, x, [], e1, e2))
       | Some p -> return (Match (e1, [p, None, e2], false))
       | None -> return (Match (e1, [], false))
       end
@@ -783,6 +787,7 @@ and of_module_expr
         let functor_result_name = Name.of_string_raw "functor_result" in
         return (
           LetVar (
+            None,
             functor_result_name,
             [],
             application,
@@ -932,7 +937,7 @@ and of_structure
         let* name = Name.of_ident false mb_id in
         of_module_expr
           typ_vars mb_expr (Some mb_expr.mod_type) >>= fun value ->
-        return (LetVar (name, [], value, e_next))
+        return (LetVar (None, name, [], value, e_next))
       | Tstr_recmodule _ ->
         raise
           (ErrorMessage (e_next, "recursive_module"))
@@ -1015,6 +1020,7 @@ and of_include
         >>= fun signature_path_name ->
       return (
         LetVar (
+          None,
           name,
           typ_vars,
           Variable (
@@ -1041,6 +1047,11 @@ let rec flatten_list (e : t) : t list option =
     | _ -> None
     end
   | _ -> None
+
+let to_coq_let_symbol (let_symbol : string option) : SmartPrint.t =
+  match let_symbol with
+  | None -> !^ "let"
+  | Some let_symbol -> !^ let_symbol
 
 (** Pretty-print an expression to Coq (inside parenthesis if the [paren] flag is
     set). *)
@@ -1109,13 +1120,10 @@ let rec to_coq (paren : bool) (e : t) : SmartPrint.t =
     end
   | Function (x, e) ->
     Pp.parens paren @@ nest (!^ "fun" ^^ Name.to_coq x ^^ !^ "=>" ^^ to_coq false e)
-  | LetVar (x, typ_params, e1, e2) ->
-    begin match e1 with
-    | Variable (PathName { path = []; base }, []) when Name.equal base x ->
-      to_coq paren e2
-    | _ ->
+  | LetVar (let_symbol, x, typ_params, e1, e2) ->
+    let get_default () =
       Pp.parens paren @@ nest (
-        !^ "let" ^^ Name.to_coq x ^^
+        to_coq_let_symbol let_symbol ^^ Name.to_coq x ^^
         begin match typ_params with
         | [] -> empty
         | _ :: _ ->
@@ -1126,7 +1134,38 @@ let rec to_coq (paren : bool) (e : t) : SmartPrint.t =
         end ^^
         !^ ":=" ^^ to_coq false e1 ^^ !^ "in" ^^
         newline ^^ to_coq false e2
-      )
+      ) in
+    begin match (x, e1, e2) with
+    | (
+        _,
+        Variable (PathName { path = []; base }, []),
+        _
+     ) when Name.equal base x ->
+      to_coq paren e2
+    | (
+        Name.FunctionParameter,
+        _,
+        Match (
+          Variable (
+            MixedPath.PathName {
+              PathName.path = [];
+              base = Name.FunctionParameter
+            },
+            []
+          ),
+          cases,
+          is_with_default_case
+        )
+      ) ->
+      let single_let =
+        to_coq_try_single_let_pattern
+          paren let_symbol
+          e1 cases is_with_default_case in
+      begin match single_let with
+      | Some single_let -> single_let
+      | None -> get_default ()
+      end
+    | _ -> get_default ()
     end
   | LetFun (def, e) ->
     (* There should be only on case for recursive definitionss. *)
@@ -1180,7 +1219,7 @@ let rec to_coq (paren : bool) (e : t) : SmartPrint.t =
   | Match (e, cases, is_with_default_case) ->
     let single_let =
       to_coq_try_single_let_pattern
-        paren "let"
+        paren None
         e cases is_with_default_case in
     begin match single_let with
     | Some single_let -> single_let
@@ -1284,7 +1323,7 @@ let rec to_coq (paren : bool) (e : t) : SmartPrint.t =
 
 and to_coq_try_single_let_pattern
   (paren : bool)
-  (let_symbol : string)
+  (let_symbol : string option)
   (e : t)
   (cases : (Pattern.t * match_existential_cast option * t) list)
   (is_with_default_case : bool)
@@ -1293,7 +1332,8 @@ and to_coq_try_single_let_pattern
   | ([(pattern, existential_cast, e2)], false)
     when not (Pattern.has_or_patterns pattern) ->
     Some (Pp.parens paren @@ nest (
-      !^ let_symbol ^^ !^ "'" ^-^ Pattern.to_coq false pattern ^-^ !^ " :=" ^^
+      to_coq_let_symbol let_symbol ^^ !^ "'" ^-^
+      Pattern.to_coq false pattern ^-^ !^ " :=" ^^
       to_coq false e ^^ !^ "in" ^^ newline ^^
       to_coq_cast_existentials existential_cast e2
     ))

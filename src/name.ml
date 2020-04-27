@@ -3,7 +3,9 @@ open SmartPrint
 open Monad.Notations
 
 (** Just a [string]. *)
-type t = Make of string
+type t =
+  | FunctionParameter
+  | Make of string
 
 module Set = Set.Make (struct
   type nonrec t = t
@@ -17,7 +19,9 @@ end)
 
 let equal (name1 : t) (name2 : t) : bool =
   match (name1, name2) with
+  | (FunctionParameter, FunctionParameter) -> true
   | (Make name1, Make name2) -> String.equal name1 name2
+  | _ -> false
 
 let escape_operator_character (c : char) : string =
   match c with
@@ -128,24 +132,21 @@ let of_ident_raw (i : Ident.t) : t =
   of_string_raw (Ident.name i)
 
 let to_string (name : t) : string =
-  let Make name = name in
-  name
+  match name with
+  | FunctionParameter -> "function_parameter"
+  | Make name -> name
 
 let prefix_by_single_quote (name : t) : t =
-  let Make name = name in
-  Make ("'" ^ name)
+  Make ("'" ^ to_string name)
 
 let prefix_by_t (name : t) : t =
-  let Make name = name in
-  Make ("t_" ^ name)
+  Make ("t_" ^ to_string name)
 
 let prefix_by_with (name : t) : t =
-  let Make name = name in
-  Make ("with_" ^ name)
+  Make ("with_" ^ to_string name)
 
 let suffix_by_skeleton (name : t) : t =
-  let Make name = name in
-  Make (name ^ "_skeleton")
+  Make (to_string name ^ "_skeleton")
 
 (** Pretty-print a name to Coq. *)
 let to_coq (name : t) : SmartPrint.t =
