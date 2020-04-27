@@ -231,25 +231,28 @@ let of_long_ident (is_value : bool) (long_ident : Longident.t) : t Monad.t =
     (Name.of_string is_value x) >>= fun name ->
     return (of_name path name)
 
+(** Split an [Ident.t] in case of flattened module names. *)
+let split_ident (is_value : bool) (ident : Ident.t)
+  : (Name.t list * Name.t) Monad.t =
+  let ident_elements =
+    Str.split (Str.regexp_string "__") (Ident.name ident) |>
+    List.rev in
+  match ident_elements with
+  | base :: path ->
+    let base =
+      match path with
+      | [] -> base
+      | _ :: _ -> String.capitalize_ascii base in
+    let* path = Monad.List.map (Name.of_string false) path in
+    let* base = Name.of_string is_value base in
+    return (List.rev path, base)
+  | [] -> assert false
+
 (** Import an OCaml [Path.t]. *)
 let of_path_without_convert (is_value : bool) (path : Path.t) : t Monad.t =
   let rec aux path : (Name.t list * Name.t) Monad.t =
     match path with
-    | Path.Pident ident ->
-      let ident_elements =
-        Str.split (Str.regexp_string "__") (Ident.name ident) |>
-        List.rev in
-      begin match ident_elements with
-      | base :: path ->
-        let base =
-          match path with
-          | [] -> base
-          | _ :: _ -> String.capitalize_ascii base in
-        Monad.List.map (Name.of_string is_value) path >>= fun path ->
-        Name.of_string is_value base >>= fun base ->
-        return (path, base)
-      | [] -> assert false
-      end
+    | Path.Pident ident -> split_ident is_value ident
     | Path.Pdot (path, field) ->
       aux path >>= fun (path, base) ->
       Name.of_string is_value field >>= fun field ->
@@ -266,15 +269,15 @@ let of_path_and_name_with_convert (path : Path.t) (name : Name.t) : t Monad.t =
   let rec aux p : (Name.t list * Name.t) Monad.t =
     match p with
     | Path.Pident x ->
-      Name.of_ident false x >>= fun x ->
-      return ([x], name)
+      let* (path, base) = split_ident false x in
+      return (path @ [base], name)
     | Path.Pdot (p, s) ->
       aux p >>= fun (path, base) ->
       Name.of_string false s >>= fun s ->
-      return (s :: path, base)
+      return (path @ [s], base)
     | Path.Papply _ -> failwith "Unexpected path application" in
   aux path >>= fun (path, base) ->
-  convert (of_name (List.rev path) base)
+  convert (of_name path base)
 
 let map_constructor_name (cstr_name : string) (typ_ident : string) : string =
   match (cstr_name, typ_ident) with
