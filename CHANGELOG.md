@@ -1,4 +1,5 @@
 ## [Unreleased]
+* Add configuration to rename some variants.
 * Add configuration to rename some constructors.
 * Add configuration for module barriers in record aliases.
 * Add configuration to escape some value names.

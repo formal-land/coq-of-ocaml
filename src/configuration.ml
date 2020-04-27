@@ -20,6 +20,13 @@ module MonadicOperator = struct
   }
 end
 
+module VariantMapping = struct
+  type t = {
+    source : string;
+    target : string;
+  }
+end
+
 type t = {
   alias_barrier_modules : string list;
   constructor_map : ConstructorMapping.t list;
@@ -30,6 +37,7 @@ type t = {
   require : Import.t list;
   require_import : Import.t list;
   require_mli : string list;
+  variant_map : VariantMapping.t list;
   without_guard_checking : string list;
   without_positivity_checking : string list;
 }
@@ -44,6 +52,7 @@ let default (file_name : string) : t = {
   require = [];
   require_import = [];
   require_mli = [];
+  variant_map = [];
   without_guard_checking = [];
   without_positivity_checking = [];
 }
@@ -88,6 +97,13 @@ let should_require (configuration : t) (base : string)
 
 let is_require_mli (configuration : t) (name : string) : bool =
   List.mem name configuration.require_mli
+
+let get_variant_renaming (configuration : t) (name : string) : string option =
+  configuration.variant_map |>
+  List.find_opt (fun { VariantMapping.source; _ } ->
+    source = name
+  ) |>
+  Option.map (fun { VariantMapping.target; _ } -> target)
 
 let is_without_guard_checking (configuration : t) : bool =
   List.mem configuration.file_name configuration.without_guard_checking
@@ -180,6 +196,14 @@ let of_json (file_name : string) (json : Yojson.Basic.t) : t =
         | "require_mli" ->
           let entry = get_string_list "require_mli" entry in
           {configuration with require_mli = entry}
+        | "variant_map" ->
+          let entry =
+            entry |>
+            get_string_couple_list "variant_map" |>
+            List.map (fun (source, target) ->
+              { VariantMapping.source; target }
+            ) in
+          {configuration with variant_map = entry}
         | "without_guard_checking" ->
           let entry = get_string_list "without_guard_checking" entry in
           {configuration with without_guard_checking = entry}

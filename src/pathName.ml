@@ -345,9 +345,12 @@ let of_label_description (label_description : Types.label_description)
       "Unexpected label description without a type constructor"
 
 let constructor_of_variant (label : string) : t Monad.t =
-  match label with
-  (* Custom variants to add here. *)
-  | _ ->
+  let* configuration = get_configuration in
+  let renaming =
+    Configuration.get_variant_renaming configuration label in
+  match renaming with
+  | Some renaming -> return { path = []; base = Name.of_string_raw renaming }
+  | None ->
     Name.of_string false label >>= fun base ->
     raise
       { path = []; base }
