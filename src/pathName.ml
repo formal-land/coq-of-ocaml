@@ -306,10 +306,11 @@ let of_constructor_description
       "Unexpected constructor description without a type constructor"
 
 let rec iterate_in_aliases (path : Path.t) : Path.t Monad.t =
-  let barrier_modules = [
-  ] in
+  let* configuration = get_configuration in
   let is_in_barrier_module (path : Path.t) : bool =
-    List.mem (Ident.name (Path.head path)) barrier_modules in
+    Configuration.is_alias_in_barrier_module
+      configuration
+      (Ident.name (Path.head path)) in
   get_env >>= fun env ->
   match Env.find_type path env with
   | { type_manifest = Some { desc = Tconstr (path', _, _); _ }; _ } ->

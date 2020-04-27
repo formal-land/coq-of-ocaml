@@ -13,6 +13,7 @@ module MonadicOperator = struct
 end
 
 type t = {
+  alias_barrier_modules : string list;
   escape_value : string list;
   file_name : string;
   head_suffix : string;
@@ -25,6 +26,7 @@ type t = {
 }
 
 let default (file_name : string) : t = {
+  alias_barrier_modules = [];
   escape_value = [];
   file_name;
   head_suffix = "";
@@ -35,6 +37,9 @@ let default (file_name : string) : t = {
   without_guard_checking = [];
   without_positivity_checking = [];
 }
+
+let is_alias_in_barrier_module (configuration : t) (name : string) : bool =
+  List.mem name configuration.alias_barrier_modules
 
 let is_value_to_escape (configuration : t) (name : string) : bool =
   List.mem name configuration.escape_value
@@ -105,6 +110,9 @@ let of_json (file_name : string) (json : Yojson.Basic.t) : t =
     List.fold_left
       (fun configuration (id, entry) ->
         match id with
+        | "alias_barrier_modules" ->
+          let entry = get_string_list "alias_barrier_modules" entry in
+          {configuration with alias_barrier_modules = entry}
         | "escape_value" ->
           let entry = get_string_list "escape_value" entry in
           {configuration with escape_value = entry}

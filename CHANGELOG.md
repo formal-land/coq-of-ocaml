@@ -1,4 +1,5 @@
 ## [Unreleased]
+* Add configuration for module barriers in record aliases.
 * Add configuration to escape some value names.
 * Add configuration to add head suffix in the generated file.
 * Add configuration to add monadic operators.

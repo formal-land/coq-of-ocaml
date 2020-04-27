@@ -1132,8 +1132,7 @@ let rec to_coq (paren : bool) (e : t) : SmartPrint.t =
             !^ ":" ^^ !^ "Set"
           ))
         end ^^
-        !^ ":=" ^^ to_coq false e1 ^^ !^ "in" ^^
-        newline ^^ to_coq false e2
+        !^ ":=" ^^ to_coq false e1 ^^ !^ "in" ^^ newline ^^ to_coq false e2
       ) in
     begin match (x, e1, e2) with
     | (
