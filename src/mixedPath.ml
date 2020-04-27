@@ -25,7 +25,15 @@ let get_signature_path (path : Path.t) : Path.t option Monad.t =
 
 let rec of_path_aux (path : Path.t)
   : (Path.t * (Path.t * string) list * Path.t option) Monad.t =
-  get_signature_path path >>= fun signature_path ->
+  let* signature_path = get_signature_path path in
+  let* configuration = get_configuration in
+  let is_in_black_list =
+    Configuration.is_in_first_class_module_backlist configuration path in
+  let signature_path =
+    if is_in_black_list then
+      None
+    else
+      signature_path in
   begin match path with
   | Papply _ -> failwith "Unexpected path application"
   | Pdot (path', field_string) ->

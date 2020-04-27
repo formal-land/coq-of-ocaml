@@ -70,12 +70,12 @@ let to_coq (imports : MonadEval.Import.t list) (ast : t) : SmartPrint.t =
     !^ "Import ListNotations.";
   ]) ^^
   begin if ast.without_guard_checking then
-    !^ "Unset Guard Checking."
+    !^ "Unset Guard Checking." ^^ newline
   else
     empty
   end ^^
   begin if ast.without_positivity_checking then
-    !^ "Unset Positivity Checking."
+    !^ "Unset Positivity Checking." ^^ newline
   else
     empty
   end ^^ newline ^^

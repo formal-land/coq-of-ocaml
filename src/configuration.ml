@@ -32,6 +32,7 @@ type t = {
   constructor_map : ConstructorMapping.t list;
   escape_value : string list;
   file_name : string;
+  first_class_module_path_blacklist : string list;
   head_suffix : string;
   monadic_operators : MonadicOperator.t list;
   require : Import.t list;
@@ -47,6 +48,7 @@ let default (file_name : string) : t = {
   constructor_map = [];
   escape_value = [];
   file_name;
+  first_class_module_path_blacklist = [];
   head_suffix = "";
   monadic_operators = [];
   require = [];
@@ -70,6 +72,14 @@ let is_constructor_renamed (configuration : t) (typ : string) (name : string)
 
 let is_value_to_escape (configuration : t) (name : string) : bool =
   List.mem name configuration.escape_value
+
+let is_in_first_class_module_backlist (configuration : t) (path : Path.t)
+  : bool =
+  match Path.to_string_list path with
+  | head :: _ :: []
+    when List.mem head configuration.first_class_module_path_blacklist ->
+    true
+  | _ -> false
 
 let is_monadic_operator (configuration : t) (name : string) : string option =
   let monadic_operator =
@@ -170,6 +180,9 @@ let of_json (file_name : string) (json : Yojson.Basic.t) : t =
         | "escape_value" ->
           let entry = get_string_list "escape_value" entry in
           {configuration with escape_value = entry}
+        | "first_class_module_path_blacklist" ->
+          let entry = get_string_list "first_class_module_path_blacklist" entry in
+          {configuration with first_class_module_path_blacklist = entry}
         | "head_suffix" ->
           let entry = get_string "head_suffix" entry in
           {configuration with head_suffix = entry}
