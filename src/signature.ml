@@ -176,9 +176,9 @@ let items_of_signature (signature : signature) : item list Monad.t =
       end
     | Tsig_typext { tyext_path; _ } ->
       raise
-      [Error ("extensible_type " ^ Path.last tyext_path)]
-        NotSupported
-        "Extensible types are not handled."
+        [Error ("extensible_type " ^ Path.last tyext_path)]
+        ExtensibleType
+        "We do not handle extensible types"
     | Tsig_value { val_id; val_desc = { ctyp_type; _ }; _ } ->
       let* name = Name.of_ident true val_id in
       Type.of_type_expr_without_free_vars ctyp_type >>= fun typ ->

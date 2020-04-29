@@ -36,7 +36,7 @@ let rec of_pattern (p : pattern) : t option Monad.t =
     | Cstr_extension _ ->
       raise
         None
-        NotSupported
+        ExtensibleType
         "Patterns of extensible types are not handled"
     | _ ->
       PathName.of_constructor_description constructor_description >>= fun x ->
@@ -104,7 +104,7 @@ let rec of_pattern (p : pattern) : t option Monad.t =
     of_pattern p >>= fun pattern ->
     raise pattern NotSupported "Lazy patterns are not supported"
   | Tpat_exception _ ->
-    raise None NotSupported "We do not support exception patterns")
+    raise None SideEffect "We do not support exception patterns")
 
 let rec has_or_patterns (p : t) : bool =
   match p with

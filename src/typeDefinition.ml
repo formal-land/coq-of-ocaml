@@ -634,7 +634,10 @@ let of_ocaml (typs : type_declaration list) : t Monad.t =
   | [ { typ_id; typ_type = { type_kind = Type_open; _ }; _ } ] ->
     let* name = Name.of_ident false typ_id in
     let typ = Type.Apply (MixedPath.of_name (Name.of_string_raw "extensible_type"), []) in
-    raise (Synonym (name, [], typ)) NotSupported "Extensible types are not handled"
+    raise
+      (Synonym (name, [], typ))
+      ExtensibleType
+      "We do not handle extensible types"
   | _ ->
     (typs |> Monad.List.fold_left (fun (constructor_records, notations, records, typs) typ ->
       set_loc (Loc.of_location typ.typ_loc) (
@@ -728,8 +731,8 @@ let of_ocaml (typs : type_declaration list) : t Monad.t =
       | { typ_type = { type_kind = Type_open; _ }; _ } ->
         raise
           (constructor_records, notations, records, typs)
-          NotSupported
-          "Extensible types are not handled"
+          ExtensibleType
+          "We do not handle extensible types"
       )
     ) ([], [], [], [])) >>= fun (constructor_records, notations, records, typs) ->
     return (

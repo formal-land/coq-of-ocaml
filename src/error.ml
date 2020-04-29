@@ -3,19 +3,21 @@ open SmartPrint
 
 module Category = struct
   type t =
+    | ExtensibleType
     | FirstClassModule
     | Merlin
     | NotSupported
     | SideEffect
     | Unexpected
 
-  let to_string (category : t) : string =
+  let to_id (category : t) : string =
     match category with
-    | FirstClassModule -> "First class module"
-    | Merlin -> "Merlin"
-    | NotSupported -> "Not supported"
-    | SideEffect -> "Side effect"
-    | Unexpected -> "Unexpected"
+    | ExtensibleType -> "extensible_type"
+    | FirstClassModule -> "first_class_module"
+    | Merlin -> "merlin"
+    | NotSupported -> "not_supported"
+    | SideEffect -> "side_effect"
+    | Unexpected -> "unexpected"
 end
 
 type t = {
@@ -76,7 +78,7 @@ let display_error
   colorize "34;1" (
     pad 100 '-'
       ("--- " ^ file_name ^ ":" ^ string_of_int loc.start.line ^ " ")
-      (" " ^ Category.to_string category ^ " ---")
+      (" " ^ Category.to_id category ^ " ---")
   ) ^ "\n" ^
   "\n" ^
   get_code_frame source_lines loc.start.line ^ "\n" ^
@@ -109,7 +111,7 @@ let display_errors_json (errors : t list) : string =
   Yojson.pretty_to_string ~std:true (
     `List (errors |> List.map (fun { category; loc; message } ->
       `Assoc [
-        ("category", `String (Category.to_string category));
+        ("category", `String (Category.to_id category));
         ("location", `Assoc [
           ("end", `Int loc.end_.character);
           ("start", `Int loc.start.character);
@@ -120,13 +122,19 @@ let display_errors_json (errors : t list) : string =
   ) ^ "\n"
 
 let display_errors
+  (configuration : Configuration.t)
   (json_mode : bool)
   (source_file_name : string)
   (source_file_content : string)
   (errors : t list)
   : string =
   let errors =
-    errors |> List.sort (fun error1 error2 ->
+    errors |>
+    List.filter (fun { category; _ } ->
+      let error_id = Category.to_id category in
+      not (Configuration.is_error_in_blacklist configuration error_id)
+    ) |>
+    List.sort (fun error1 error2 ->
       compare error1.loc.start.line error2.loc.start.line
     ) in
   if not json_mode then

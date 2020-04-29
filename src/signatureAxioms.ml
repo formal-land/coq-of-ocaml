@@ -55,7 +55,10 @@ let of_types_signature (signature : Types.signature) : t Monad.t =
       Monad.List.map Type.of_type_expr_variable type_params >>= fun typ_params ->
       return (TypDefinition (TypeDefinition.Abstract (name, typ_params)))
     | Sig_typext _ ->
-      raise (Error "type_extension") NotSupported "Type extension not handled"
+      raise
+        (Error "type_extension")
+        ExtensibleType
+        "We do not handle extensible types"
     | Sig_module _ ->
       raise (Error "module") NotSupported "Module not handled in included signature"
     | Sig_modtype _ ->
@@ -96,7 +99,7 @@ let of_first_class_types_signature
         IncludedFieldType (name, module_name, field_path_name)
       ))
     | Sig_typext _ ->
-      raise None NotSupported "Type extension not handled"
+      raise None ExtensibleType "We do not handle extensible types"
     | Sig_module (ident, _, _, _, _) ->
       let* name = Name.of_ident false ident in
       get_field_path_name name >>= fun field_path_name ->
@@ -264,8 +267,8 @@ let rec of_signature (signature : Typedtree.signature) : t Monad.t =
     | Tsig_typext { tyext_path; _ } ->
       raise
         [Error ("extensible_type_definition `" ^ Path.last tyext_path ^ "`")]
-        NotSupported
-        "Extensible types are not handled."
+        ExtensibleType
+        "We do not handle extensible types"
     | Tsig_value { val_id; val_desc = { ctyp_type; _ }; _ } ->
       let* name = Name.of_ident true val_id in
       Type.of_typ_expr true Name.Map.empty ctyp_type >>= fun (typ, _, _) ->

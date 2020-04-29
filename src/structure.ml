@@ -174,7 +174,7 @@ let rec of_structure (structure : structure) : t list Monad.t =
     | Tstr_typext _ ->
       error_message
         (Error "type_extension")
-        NotSupported
+        ExtensibleType
         "We do not handle type extensions"
     | Tstr_recmodule _ ->
       error_message

@@ -230,7 +230,7 @@ let rec of_expression (typ_vars : Name.t Name.Map.t) (e : expression)
           MixedPath.of_name (Name.of_string_raw "extensible_type_value"),
           []
         ))
-        NotSupported
+        ExtensibleType
         (
           "Values of extensible types are ignored.\n\n" ^
           "They are sent to a unit type."
@@ -924,8 +924,8 @@ and of_structure
       | Tstr_typext _ ->
         raise
           (ErrorMessage (e_next, "type_extension"))
-          NotSupported
-          "Type extension not handled"
+          ExtensibleType
+          "We do not handle extensible types"
       | Tstr_exception _ ->
         raise
           (ErrorMessage (e_next, "exception"))

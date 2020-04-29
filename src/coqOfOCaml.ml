@@ -36,7 +36,12 @@ let exp
       (Ast.of_typedtree typedtree typedtree_errors)
       context in
   let error_message =
-    Error.display_errors json_mode source_file_name source_file_content errors in
+    Error.display_errors
+      context.configuration
+      json_mode
+      source_file_name
+      source_file_content
+      errors in
   let has_errors =
     match errors with
     | [] -> false
