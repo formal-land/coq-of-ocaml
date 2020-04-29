@@ -415,9 +415,7 @@ let rec of_expression (typ_vars : Name.t Name.Map.t) (e : expression)
       (Error "extension")
       NotSupported
       "Construction of extensions is not handled"
-  | Texp_open (_, e) ->
-    of_expression typ_vars e >>= fun e ->
-    error_message e NotSupported "We do not support local open"))
+  | Texp_open (_, e) -> of_expression typ_vars e))
 
 and of_match
   (typ_vars : Name.t Name.Map.t)

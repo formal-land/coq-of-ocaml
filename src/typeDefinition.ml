@@ -584,20 +584,9 @@ let filter_in_free_vars
         None
   )
 
-let raise_if_synonym_and_definition
-  (type_kind : Types.type_kind) : unit Monad.t =
-  match type_kind with
-  | Type_abstract -> return ()
-  | _ ->
-    raise
-      ()
-      NotSupported
-      "We do not handle types with both a synonym and a type definition"
-
 let of_ocaml (typs : type_declaration list) : t Monad.t =
   match typs with
-  | [ { typ_id; typ_type = { type_kind; type_manifest = Some typ; type_params; _ }; _ } ] ->
-    raise_if_synonym_and_definition type_kind >>= fun () ->
+  | [ { typ_id; typ_type = { type_manifest = Some typ; type_params; _ }; _ } ] ->
     let* name = Name.of_ident false typ_id in
     TypeIsGadt.named_typ_params_expecting_variables type_params >>= fun typ_args ->
     begin match typ.Types.desc with
@@ -652,8 +641,7 @@ let of_ocaml (typs : type_declaration list) : t Monad.t =
       let* name = Name.of_ident false typ.typ_id in
       TypeIsGadt.named_typ_params_expecting_variables typ.typ_type.type_params >>= fun typ_args ->
       match typ with
-      | { typ_type = { type_kind; type_manifest = Some typ; _ }; _ } ->
-        raise_if_synonym_and_definition type_kind >>= fun () ->
+      | { typ_type = { type_manifest = Some typ; _ }; _ } ->
         begin match typ.Types.desc with
         | Tvariant { row_fields; _ } ->
           Monad.List.map (Constructors.Single.of_ocaml_row typ_args) row_fields >>= fun single_constructors ->

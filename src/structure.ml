@@ -175,7 +175,7 @@ let rec of_structure (structure : structure) : t list Monad.t =
       error_message
         (Error "type_extension")
         NotSupported
-        "Structure item `typext` not handled."
+        "We do not handle type extensions"
     | Tstr_recmodule _ ->
       error_message
         (Error "recursive_module")
