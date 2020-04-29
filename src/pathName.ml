@@ -346,10 +346,11 @@ let of_label_description (label_description : Types.label_description)
 
 let constructor_of_variant (label : string) : t Monad.t =
   let* configuration = get_configuration in
-  let renaming =
-    Configuration.get_variant_renaming configuration label in
-  match renaming with
-  | Some renaming -> return { path = []; base = Name.of_string_raw renaming }
+  let constructor =
+    Configuration.get_variant_constructor configuration label in
+  match constructor with
+  | Some constructor ->
+    return { path = []; base = Name.of_string_raw constructor }
   | None ->
     Name.of_string false label >>= fun base ->
     raise
@@ -398,13 +399,15 @@ let to_string (x : t) : string =
 let to_coq (x : t) : SmartPrint.t =
   separate (!^ ".") (List.map Name.to_coq (x.path @ [x.base]))
 
-let typ_of_variant (label : string) : t option =
-  match label with
-  (* Custom variants to add here. *)
-  | _ -> None
+let typ_of_variant (label : string) : t option Monad.t =
+  let* configuration = get_configuration in
+  let typ = Configuration.get_variant_typ configuration label in
+  match typ with
+  | Some typ -> return (Some { path = []; base = Name.of_string_raw typ })
+  | None -> return None
 
 let typ_of_variants (labels : string list) : t option Monad.t =
-  let typs = labels |> Util.List.filter_map typ_of_variant in
+  let* typs = labels |> Monad.List.filter_map typ_of_variant in
   let typs = typs |> List.sort_uniq compare in
   let variants_message =
     String.concat ", " (labels |> List.map (fun label -> "`" ^ label)) in

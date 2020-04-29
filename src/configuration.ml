@@ -39,7 +39,8 @@ type t = {
   require : Import.t list;
   require_import : Import.t list;
   require_mli : string list;
-  variant_map : VariantMapping.t list;
+  variant_constructors : VariantMapping.t list;
+  variant_types : VariantMapping.t list;
   without_guard_checking : string list;
   without_positivity_checking : string list;
 }
@@ -56,7 +57,8 @@ let default (file_name : string) : t = {
   require = [];
   require_import = [];
   require_mli = [];
-  variant_map = [];
+  variant_constructors = [];
+  variant_types = [];
   without_guard_checking = [];
   without_positivity_checking = [];
 }
@@ -113,8 +115,15 @@ let should_require (configuration : t) (base : string)
 let is_require_mli (configuration : t) (name : string) : bool =
   List.mem name configuration.require_mli
 
-let get_variant_renaming (configuration : t) (name : string) : string option =
-  configuration.variant_map |>
+let get_variant_constructor (configuration : t) (name : string) : string option =
+  configuration.variant_constructors |>
+  List.find_opt (fun { VariantMapping.source; _ } ->
+    source = name
+  ) |>
+  Option.map (fun { VariantMapping.target; _ } -> target)
+
+let get_variant_typ (configuration : t) (name : string) : string option =
+  configuration.variant_types |>
   List.find_opt (fun { VariantMapping.source; _ } ->
     source = name
   ) |>
@@ -217,14 +226,22 @@ let of_json (file_name : string) (json : Yojson.Basic.t) : t =
         | "require_mli" ->
           let entry = get_string_list "require_mli" entry in
           {configuration with require_mli = entry}
-        | "variant_map" ->
+        | "variant_constructors" ->
           let entry =
             entry |>
-            get_string_couple_list "variant_map" |>
+            get_string_couple_list "variant_constructors" |>
             List.map (fun (source, target) ->
               { VariantMapping.source; target }
             ) in
-          {configuration with variant_map = entry}
+          {configuration with variant_constructors = entry}
+        | "variant_types" ->
+          let entry =
+            entry |>
+            get_string_couple_list "variant_types" |>
+            List.map (fun (source, target) ->
+              { VariantMapping.source; target }
+            ) in
+          {configuration with variant_types = entry}
         | "without_guard_checking" ->
           let entry = get_string_list "without_guard_checking" entry in
           {configuration with without_guard_checking = entry}
