@@ -13,6 +13,20 @@ let __make (path : string list) (base : string) : t =
     base = Name.Make base
   }
 
+let try_to_use (head : string) (name : string) : bool option Monad.t =
+  let* configuration = get_configuration in
+  let require = Configuration.should_require configuration head in
+  let require_import = Configuration.should_require_import configuration head in
+  match (require, require_import) with
+  | (_, Some require_import) ->
+    let* () = use true require_import name in
+    return (Some true)
+  | (Some require, _) ->
+    let* () = use false require name in
+    return (Some false)
+  | (None, None) -> return None
+
+
 (* Convert an identifier from OCaml to its Coq's equivalent, or [None] if no
    conversion is needed. We consider all the paths in the standard library
    to be converted, as conversion also means keeping the name as it (without
@@ -194,7 +208,7 @@ let try_convert (path_name : t) : t option Monad.t =
   | _ ->
     begin match (path, base) with
     | (source :: name :: rest, _) ->
-      use source name >>= fun is_import ->
+      let* is_import = try_to_use source name in
       begin match is_import with
       | None -> return None
       | Some import ->
@@ -204,7 +218,7 @@ let try_convert (path_name : t) : t option Monad.t =
           make (name :: rest) base
       end
     | ([source], name) ->
-      use source name >>= fun is_import ->
+      let* is_import = try_to_use source name in
       begin match is_import with
       | None -> return None
       | Some _ -> make [] base
@@ -224,11 +238,22 @@ let of_name (path : Name.t list) (base : Name.t) : t =
 
 (** Import an OCaml [Longident.t]. *)
 let of_long_ident (is_value : bool) (long_ident : Longident.t) : t Monad.t =
+  let* configuration = get_configuration in
+  let* () =
+    match Longident.flatten long_ident with
+    | head :: _ ->
+      let require =
+        Configuration.should_require_long_ident configuration head in
+      begin match require with
+      | None -> return ()
+      | Some require -> use false require head
+      end
+    | [] -> return () in
   match List.rev (Longident.flatten long_ident) with
   | [] -> failwith "Unexpected Longident.t with an empty list"
   | x :: xs ->
     (xs |> List.rev |> Monad.List.map (Name.of_string is_value)) >>= fun path ->
-    (Name.of_string is_value x) >>= fun name ->
+    let* name = Name.of_string is_value x in
     return (of_name path name)
 
 (** Split an [Ident.t] in case of flattened module names. *)

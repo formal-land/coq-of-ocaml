@@ -38,6 +38,7 @@ type t = {
   monadic_operators : MonadicOperator.t list;
   require : Import.t list;
   require_import : Import.t list;
+  require_long_ident : Import.t list;
   require_mli : string list;
   variant_constructors : VariantMapping.t list;
   variant_types : VariantMapping.t list;
@@ -56,6 +57,7 @@ let default (file_name : string) : t = {
   monadic_operators = [];
   require = [];
   require_import = [];
+  require_long_ident = [];
   require_mli = [];
   variant_constructors = [];
   variant_types = [];
@@ -98,19 +100,22 @@ let is_monadic_operator (configuration : t) (name : string) : string option =
   | Some { MonadicOperator.notation; _ } -> Some notation
 
 let should_require (configuration : t) (base : string)
-  : (string * bool) option =
-  let require =
-    configuration.require |> List.find_opt (fun { Import.source; _ } ->
-      source = base
-    ) in
-  let require_import =
-    configuration.require_import |> List.find_opt (fun { Import.source; _ } ->
-      source = base
-    ) in
-  match (require, require_import) with
-  | (Some { Import.target; _ }, _) -> Some (target, false)
-  | (_, Some { Import.target; _ }) -> Some (target, true)
-  | (None, None) -> None
+  : string option =
+  configuration.require |>
+  List.find_opt (fun { Import.source; _ } -> source = base) |>
+  Option.map (fun { Import.target; _ } -> target)
+
+let should_require_import (configuration : t) (base : string)
+  : string option =
+  configuration.require_import |>
+  List.find_opt (fun { Import.source; _ } -> source = base) |>
+  Option.map (fun { Import.target; _ } -> target)
+
+let should_require_long_ident (configuration : t) (base : string)
+  : string option =
+  configuration.require_long_ident |>
+  List.find_opt (fun { Import.source; _ } -> source = base) |>
+  Option.map (fun { Import.target; _ } -> target)
 
 let is_require_mli (configuration : t) (name : string) : bool =
   List.mem name configuration.require_mli
@@ -223,6 +228,12 @@ let of_json (file_name : string) (json : Yojson.Basic.t) : t =
             get_string_couple_list "require_import" |>
             List.map (fun (source, target) -> { Import.source; target }) in
           {configuration with require_import = entry}
+        | "require_long_ident" ->
+          let entry =
+            entry |>
+            get_string_couple_list "require_long_ident" |>
+            List.map (fun (source, target) -> { Import.source; target }) in
+          {configuration with require_long_ident = entry}
         | "require_mli" ->
           let entry = get_string_list "require_mli" entry in
           {configuration with require_mli = entry}

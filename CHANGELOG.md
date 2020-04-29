@@ -1,4 +1,5 @@
 ## [Unreleased]
+* Add configuration for the requires from long ident.
 * Add configuration to find the type of a polymorphic variant.
 * Add configuration to blacklist some errors.
 * Add configuration to blacklist some first-class module paths.

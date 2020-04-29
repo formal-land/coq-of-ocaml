@@ -77,16 +77,10 @@ module Command = struct
         { result with
           errors = [{ category; loc = context.loc; message }]
         }
-      | Use (base, name) ->
-        let target =
-          Configuration.should_require context.configuration base in
-        begin match target with
-        | None -> Result.success None
-        | Some (target, import) ->
-          let result = Result.success (Some import) in
-          let mli = Configuration.is_require_mli context.configuration name in
-          { result with imports = [{ Import.base = target; import; mli; name }] }
-        end
+      | Use (import, base, name) ->
+        let result = Result.success () in
+        let mli = Configuration.is_require_mli context.configuration name in
+        { result with imports = [{ Import.base; import; mli; name }] }
       | Warn message ->
         Result.success (Error.warn file_name context.loc message)
 end
