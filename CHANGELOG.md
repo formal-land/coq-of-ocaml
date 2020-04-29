@@ -1,4 +1,6 @@
 ## [Unreleased]
+* Add configuration to disable exit with error code on some files.
+* Exit with a non-null code in case of error.
 * Add configuration for the requires from long ident.
 * Add configuration to find the type of a polymorphic variant.
 * Add configuration to blacklist some errors.

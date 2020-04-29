@@ -103,6 +103,14 @@ let of_ocaml
     success_message;
   }
 
+let exit (context : MonadEval.Context.t) (output : Output.t) : unit =
+  let is_blacklist =
+    Configuration.is_filename_in_error_blacklist context.configuration in
+  if output.has_errors && not is_blacklist then
+    exit 1
+  else
+    exit 0
+
 (** The main function. *)
 let main () =
   Printexc.record_backtrace true;
@@ -183,6 +191,7 @@ let main () =
         file_content
         !output_file_name
         !json_mode in
-    Output.write !json_mode output
+    Output.write !json_mode output;
+    exit context output
 
 ;;main ()
