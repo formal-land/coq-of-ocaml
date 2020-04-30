@@ -1132,14 +1132,16 @@ let rec to_coq (paren : bool) (e : t) : SmartPrint.t =
         end ^^
         !^ ":=" ^^ to_coq false e1 ^^ !^ "in" ^^ newline ^^ to_coq false e2
       ) in
-    begin match (x, e1, e2) with
+    begin match (let_symbol, x, e1, e2) with
     | (
+        None,
         _,
         Variable (PathName { path = []; base }, []),
         _
      ) when Name.equal base x ->
       to_coq paren e2
     | (
+        _,
         Name.FunctionParameter,
         _,
         Match (
