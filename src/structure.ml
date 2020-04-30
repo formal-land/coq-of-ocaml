@@ -203,11 +203,14 @@ let rec of_structure (structure : structure) : t list Monad.t =
         };
         _
       } ->
+      let* configuration = get_configuration in
+      let is_in_blacklist =
+        Configuration.is_in_first_class_module_backlist configuration path in
       PathName.of_path_with_convert false path >>= fun reference ->
       IsFirstClassModule.is_module_typ_first_class mod_type
         >>= fun is_first_class ->
-      begin match is_first_class with
-      | IsFirstClassModule.Found mod_type_path ->
+      begin match (is_in_blacklist, is_first_class) with
+      | (false, IsFirstClassModule.Found mod_type_path) ->
         get_env >>= fun env ->
         begin match Mtype.scrape env mod_type with
         | Mty_ident path | Mty_alias path ->
@@ -250,8 +253,7 @@ let rec of_structure (structure : structure) : t list Monad.t =
             Unexpected
             "Unexpected include of functor."
         end
-      | IsFirstClassModule.Not_found _ ->
-        return [ModuleInclude reference]
+      | _ -> return [ModuleInclude reference]
       end
     | Tstr_include _ ->
       error_message
