@@ -61,7 +61,7 @@ let items_of_types_signature (signature : Types.signature) : item list Monad.t =
           mapper md_type >>= fun typ_params ->
         raise
           (Module (name, ModuleTyp.With (signature_path_name, typ_params)))
-          FirstClassModule
+          Module
           (
             "Sub-module '" ^ Ident.name ident ^ "' in included " ^
             "signature.\n\n" ^
@@ -75,7 +75,7 @@ let items_of_types_signature (signature : Types.signature) : item list Monad.t =
       | Not_found reason ->
         raise
           (Error ("module " ^ Ident.name ident))
-          FirstClassModule
+          Module
           (
             "Signature name for the module '" ^ Ident.name ident ^
             "' in included signature not found.\n\n" ^
@@ -151,7 +151,7 @@ let items_of_signature (signature : signature) : item list Monad.t =
       | _ ->
         raise
           ()
-          FirstClassModule
+          Module
           "We do not handle the definition of new types in signatures"
       end >>= fun () ->
       let* name = Name.of_ident false typ_id in

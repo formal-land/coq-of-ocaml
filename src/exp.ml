@@ -741,7 +741,7 @@ and of_module_expr
     | IsFirstClassModule.Not_found reason ->
       error_message
         (Error "first_class_module_value_of_unknown_signature")
-        FirstClassModule
+        Module
         (
           "The signature name of this module could not be found\n\n" ^
           reason
@@ -816,7 +816,7 @@ and of_module_expr
     of_expression typ_vars e >>= fun e ->
     raise
       e
-      FirstClassModule
+      Module
       (
         "We do not support unpacking of first-class module outside of " ^
         "expressions.\n\n" ^

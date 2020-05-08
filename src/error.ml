@@ -4,8 +4,8 @@ open SmartPrint
 module Category = struct
   type t =
     | ExtensibleType
-    | FirstClassModule
     | Merlin
+    | Module
     | NotSupported
     | SideEffect
     | Unexpected
@@ -13,8 +13,8 @@ module Category = struct
   let to_id (category : t) : string =
     match category with
     | ExtensibleType -> "extensible_type"
-    | FirstClassModule -> "first_class_module"
     | Merlin -> "merlin"
+    | Module -> "module"
     | NotSupported -> "not_supported"
     | SideEffect -> "side_effect"
     | Unexpected -> "unexpected"

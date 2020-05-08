@@ -115,10 +115,13 @@ let rec is_module_typ_first_class
       )
     | [signature_path] -> return (Found signature_path)
     | signature_path :: (_ :: _) ->
-      raise (Found signature_path) FirstClassModule (
-        "It is unclear which name has this signature. At least two similar\n" ^
-        "signatures found, namely:\n" ^
-        String.concat ", " (signature_paths |> List.map Path.name) ^ "\n\n" ^
+      raise (Found signature_path) Module (
+        "It is unclear which name this signature has. At least two similar\n" ^
+        "signatures found, namely:\n\n" ^
+        String.concat "\n" (
+          signature_paths |>
+          List.map (fun path -> "* " ^ Path.name path)
+        ) ^ "\n\n" ^
         "We were looking for a module signature name for the following shape:\n" ^
         Pp.to_string (SignatureShape.pretty_print shape) ^ "\n" ^
         "(a shape is a list of names of values and sub-modules)\n\n" ^

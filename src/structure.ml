@@ -142,7 +142,7 @@ let rec of_structure (structure : structure) : t list Monad.t =
         | None ->
           raise
             []
-            FirstClassModule
+            Module
             (
               "We expected to find a signature name for this module.\n\n" ^
               "Reason:\n" ^ reason
