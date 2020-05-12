@@ -5,7 +5,7 @@ module Position = struct
   }
 
   let of_position (position : Lexing.position) : t = {
-    character = position.Lexing.pos_cnum;
+    character = position.Lexing.pos_cnum - position.Lexing.pos_bol + 1;
     line = position.Lexing.pos_lnum;
   }
 end
