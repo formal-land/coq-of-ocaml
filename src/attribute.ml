@@ -8,6 +8,7 @@ type t =
   | MatchGadt
   | MatchGadtWithResult
   | MatchWithDefault
+  | Phantom
   | Struct of string
 
 let of_payload_string (id : string) (payload : Parsetree.payload)
@@ -42,6 +43,7 @@ let of_attributes (attributes : Typedtree.attributes) : t list Monad.t =
     | "coq_match_gadt" -> return (Some MatchGadt)
     | "coq_match_gadt_with_result" -> return (Some MatchGadtWithResult)
     | "coq_match_with_default" -> return (Some MatchWithDefault)
+    | "coq_phantom" -> return (Some Phantom)
     | "coq_struct" ->
       of_payload_string id attr_payload >>= fun payload ->
       return (Some (Struct payload))
@@ -81,6 +83,12 @@ let has_match_gadt_with_result (attributes : t list) : bool =
 let has_match_with_default (attributes : t list) : bool =
   attributes |> List.exists (function
     | MatchWithDefault -> true
+    | _ -> false
+  )
+
+let has_phantom (attributes : t list) : bool =
+  attributes |> List.exists (function
+    | Phantom -> true
     | _ -> false
   )
 

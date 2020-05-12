@@ -7,10 +7,7 @@ Local Open Scope Z_scope.
 Local Open Scope type_scope.
 Import ListNotations.
 
-Unset Positivity Checking.
-Unset Guard Checking.
-
-Definition n : Z :=
+Definition n : int :=
   match ([ 1; 2 ], false) with
   | (cons x (cons _ []), true) => x
   | (cons _ (cons y []), false) => y
@@ -18,10 +15,10 @@ Definition n : Z :=
   end.
 
 Inductive t : Set :=
-| Bar : Z -> t
+| Bar : int -> t
 | Foo : bool -> string -> t.
 
-Definition m (x : t) : Z :=
+Definition m (x : t) : int :=
   match
     (x,
       match x with

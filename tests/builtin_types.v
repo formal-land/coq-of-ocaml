@@ -7,10 +7,7 @@ Local Open Scope Z_scope.
 Local Open Scope type_scope.
 Import ListNotations.
 
-Unset Positivity Checking.
-Unset Guard Checking.
-
-Definition n : Z := 12.
+Definition n : int := 12.
 
 Definition c1 : ascii := "a" % char.
 
@@ -30,9 +27,9 @@ Definition u : unit := tt.
 
 Definition l1 {A : Set} : list A := nil.
 
-Definition l2 : list Z := [ 0; 1; 2; 3 ].
+Definition l2 : list int := [ 0; 1; 2; 3 ].
 
-Definition o : option Z :=
+Definition o : option int :=
   if b1 then
     None
   else

@@ -119,10 +119,10 @@ module Constructors = struct
       : (t * (RecordSkeleton.t * Name.t list * Type.t) option) Monad.t =
       let { Types.cd_args; cd_id; cd_loc; cd_res; _ } = case in
       set_loc (Loc.of_location cd_loc) (
-      let constructor_name =
+      let* constructor_name =
         PathName.map_constructor_name
           (Ident.name cd_id) (Name.to_string typ_name) in
-      let constructor_name = Name.of_string false constructor_name in
+      let* constructor_name = Name.of_string false constructor_name in
       let typ_vars = Name.Map.empty in
       begin match cd_args with
       | Cstr_tuple param_typs ->
@@ -135,9 +135,10 @@ module Constructors = struct
           List.map (fun { Types.ld_type; _ } -> ld_type) |>
           Type.of_typs_exprs true typ_vars
         ) >>= fun (record_params, _, _) ->
-        let record_fields = labeled_typs |> List.map ( fun { Types.ld_id; _ } ->
-          Name.of_ident false ld_id
-        ) in
+        let* record_fields =
+          labeled_typs |> Monad.List.map ( fun { Types.ld_id; _ } ->
+            Name.of_ident false ld_id
+          ) in
         (* We get the order of the type arguments from their order of
           introduction in the record fields. *)
         let typ_args =
@@ -180,7 +181,7 @@ module Constructors = struct
           )
         ))
       end >>= fun (param_typs, records) ->
-      let return_typ_params =
+      let* return_typ_params =
         TypeIsGadt.get_return_typ_params defined_typ_params cd_res in
       return (
         {
@@ -196,10 +197,11 @@ module Constructors = struct
       (row : Asttypes.label * Types.row_field)
       : t Monad.t =
       let (label, field) = row in
+      let* constructor_name = Name.of_string false label in
       let typs = Type.type_exprs_of_row_field field in
       Type.of_typs_exprs true Name.Map.empty typs >>= fun (param_typs, _, _) ->
       return {
-        constructor_name = Name.of_string false label;
+        constructor_name;
         param_typs;
         return_typ_params = Some defined_typ_params;
       }
@@ -221,23 +223,25 @@ module Constructors = struct
         TypeIsGadt.check_if_not_gadt
           defined_typ_params
           constructors_return_typ_params in
-    let constructors = single_constructors |> List.map (
+    let* constructors = single_constructors |> Monad.List.map (
       fun { Single.constructor_name; param_typs; _ } ->
         match merged_typ_params with
         | None ->
-          {
+          return {
             constructor_name;
             param_typs;
             res_typ_params = [];
             typ_vars = Name.Set.elements (Type.typ_args_of_typs param_typs)
           }
         | Some merged_typ_params ->
-          {
+          let* res_typ_params =
+            TypeIsGadt.named_typ_params_with_unknowns merged_typ_params in
+          let res_typ_params =
+            List.map (fun name -> Type.Variable name) res_typ_params in
+          return {
             constructor_name;
             param_typs;
-            res_typ_params =
-              List.map (fun name -> Type.Variable name)
-                (TypeIsGadt.named_typ_params_with_unknowns merged_typ_params);
+            res_typ_params;
             typ_vars =
               Name.Set.elements (
                 Name.Set.diff
@@ -580,21 +584,10 @@ let filter_in_free_vars
         None
   )
 
-let raise_if_synonym_and_definition
-  (type_kind : Types.type_kind) : unit Monad.t =
-  match type_kind with
-  | Type_abstract -> return ()
-  | _ ->
-    raise
-      ()
-      NotSupported
-      "We do not handle types with both a synonym and a type definition"
-
 let of_ocaml (typs : type_declaration list) : t Monad.t =
   match typs with
-  | [ { typ_id; typ_type = { type_kind; type_manifest = Some typ; type_params; _ }; _ } ] ->
-    raise_if_synonym_and_definition type_kind >>= fun () ->
-    let name = Name.of_ident false typ_id in
+  | [ { typ_id; typ_type = { type_manifest = Some typ; type_params; _ }; _ } ] ->
+    let* name = Name.of_ident false typ_id in
     TypeIsGadt.named_typ_params_expecting_variables type_params >>= fun typ_args ->
     begin match typ.Types.desc with
     | Tvariant { row_fields; _ } ->
@@ -617,34 +610,41 @@ let of_ocaml (typs : type_declaration list) : t Monad.t =
       let typ_args = filter_in_free_vars typ_args free_vars in
       return (Synonym (name, typ_args, typ))
     end
-  | [ { typ_id; typ_type = { type_kind = Type_abstract; type_manifest = None; type_params; _ }; _ } ] ->
-    let name = Name.of_ident false typ_id in
+  | [ { typ_id; typ_type = { type_kind = Type_abstract; type_manifest = None; type_params; _ }; typ_attributes; _ } ] ->
+    Attribute.of_attributes typ_attributes >>= fun typ_attributes ->
+    let* name = Name.of_ident false typ_id in
     TypeIsGadt.named_typ_params_expecting_variables type_params >>= fun typ_args ->
     let typ_args_with_unknowns =
-      TypeIsGadt.named_typ_params_without_unknowns typ_args in
+      if not (Attribute.has_phantom typ_attributes) then
+        TypeIsGadt.named_typ_params_without_unknowns typ_args
+      else
+        [] in
     return (Abstract (name, typ_args_with_unknowns))
   | [ { typ_id; typ_type = { type_kind = Type_record (fields, _); type_params; _ }; _ } ] ->
-    let name = Name.of_ident false typ_id in
+    let* name = Name.of_ident false typ_id in
     TypeIsGadt.named_typ_params_expecting_variables type_params >>= fun typ_args ->
     (fields |> Monad.List.map (fun { Types.ld_id = x; ld_type = typ; _ } ->
+      let* x = Name.of_ident false x in
       Type.of_type_expr_without_free_vars typ >>= fun typ ->
-      return (Name.of_ident false x, typ)
+      return (x, typ)
     )) >>= fun fields ->
     let free_vars = Type.typ_args_of_typs (List.map snd fields) in
     let typ_args = filter_in_free_vars typ_args free_vars in
     return (Record (name, typ_args, fields, true))
   | [ { typ_id; typ_type = { type_kind = Type_open; _ }; _ } ] ->
-    let name = Name.of_ident false typ_id in
-    let typ = Type.Apply (MixedPath.of_name (Name.of_string false "extensible_type"), []) in
-    raise (Synonym (name, [], typ)) NotSupported "Extensible types are not handled"
+    let* name = Name.of_ident false typ_id in
+    let typ = Type.Apply (MixedPath.of_name (Name.of_string_raw "extensible_type"), []) in
+    raise
+      (Synonym (name, [], typ))
+      ExtensibleType
+      "We do not handle extensible types"
   | _ ->
     (typs |> Monad.List.fold_left (fun (constructor_records, notations, records, typs) typ ->
       set_loc (Loc.of_location typ.typ_loc) (
-      let name = Name.of_ident false typ.typ_id in
+      let* name = Name.of_ident false typ.typ_id in
       TypeIsGadt.named_typ_params_expecting_variables typ.typ_type.type_params >>= fun typ_args ->
       match typ with
-      | { typ_type = { type_kind; type_manifest = Some typ; _ }; _ } ->
-        raise_if_synonym_and_definition type_kind >>= fun () ->
+      | { typ_type = { type_manifest = Some typ; _ }; _ } ->
         begin match typ.Types.desc with
         | Tvariant { row_fields; _ } ->
           Monad.List.map (Constructors.Single.of_ocaml_row typ_args) row_fields >>= fun single_constructors ->
@@ -680,8 +680,9 @@ let of_ocaml (typs : type_declaration list) : t Monad.t =
           "Abstract types not supported in mutually recursive definitions"
       | { typ_type = { type_kind = Type_record (fields, _); _ }; _ } ->
         (fields |> Monad.List.map (fun { Types.ld_id = x; ld_type = typ; _ } ->
+          let* x = Name.of_ident false x in
           Type.of_type_expr_without_free_vars typ >>= fun typ ->
-          return (Name.of_ident false x, typ)
+          return (x, typ)
         )) >>= fun fields ->
         let free_vars = Type.typ_args_of_typs (List.map snd fields) in
         let typ_args = filter_in_free_vars typ_args free_vars in
@@ -730,8 +731,8 @@ let of_ocaml (typs : type_declaration list) : t Monad.t =
       | { typ_type = { type_kind = Type_open; _ }; _ } ->
         raise
           (constructor_records, notations, records, typs)
-          NotSupported
-          "Extensible types are not handled"
+          ExtensibleType
+          "We do not handle extensible types"
       )
     ) ([], [], [], [])) >>= fun (constructor_records, notations, records, typs) ->
     return (

@@ -7,12 +7,9 @@ Local Open Scope Z_scope.
 Local Open Scope type_scope.
 Import ListNotations.
 
-Unset Positivity Checking.
-Unset Guard Checking.
-
 Inductive t1 : Set :=
-| C1 : Z -> t1
-| C2 : bool -> Z -> t1
+| C1 : int -> t1
+| C2 : bool -> int -> t1
 | C3 : t1.
 
 Definition n : t1 := C2 false 3.
@@ -30,19 +27,19 @@ Inductive t2 (a : Set) : Set :=
 Arguments D1 {_}.
 Arguments D2 {_}.
 
-Fixpoint of_list {A : Set} (l : list A) {struct l} : t2 A :=
+Fixpoint of_list {A : Set} (l : list A) : t2 A :=
   match l with
   | [] => D1
   | cons x xs => D2 x (of_list xs)
   end.
 
-Fixpoint sum (l : t2 Z) {struct l} : Z :=
+Fixpoint sum (l : t2 int) : int :=
   match l with
   | D1 => 0
   | D2 x xs => Z.add x (sum xs)
   end.
 
-Definition s {A : Set} (function_parameter : A) : Z :=
+Definition s {A : Set} (function_parameter : A) : int :=
   let '_ := function_parameter in
   sum (of_list [ 5; 7; 3 ]).
 

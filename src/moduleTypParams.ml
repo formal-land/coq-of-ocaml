@@ -1,3 +1,4 @@
+open SmartPrint
 open Monad.Notations
 
 type 'a t = 'a Tree.t
@@ -16,7 +17,7 @@ let rec get_signature_typ_params
     | Sig_type (ident, type_declaration, _, _) -> mapper ident type_declaration
     | Sig_typext _ -> return None
     | Sig_module (ident, _, module_declaration, _, _) ->
-      let name = Name.of_ident false ident in
+      Name.of_ident false ident >>= fun name ->
       get_module_typ_typ_params
         mapper module_declaration.md_type >>= fun typ_params ->
       return (Some (Tree.Module (name, typ_params)))
@@ -50,7 +51,7 @@ let mapper_get_arity
   : int Tree.item option Monad.t =
   match type_declaration.type_manifest with
   | None ->
-    let name = Name.of_ident false ident in
+    Name.of_ident false ident >>= fun name ->
     let arity = List.length type_declaration.type_params in
     return (Some (Tree.Item (name, arity)))
   | Some _ -> return None
@@ -64,7 +65,5 @@ let get_module_typ_typ_params_arity =
 let get_module_typ_declaration_typ_params_arity =
   get_module_typ_declaration_typ_params mapper_get_arity
 
-let get_typ_param_name (path_name : PathName.t) : Name.t =
-  Name.of_string
-    false
-    (String.concat "_" ((path_name.path @ [path_name.base]) |> List.map Name.to_string))
+let to_coq_typ_param_name (path_name : PathName.t) : SmartPrint.t =
+  separate (!^ "_") (List.map Name.to_coq (path_name.path @ [path_name.base]))

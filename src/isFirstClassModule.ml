@@ -36,8 +36,8 @@ let is_black_list (path : Path.t) : bool =
   match PathName.of_path_without_convert false path with
   | _ -> false
 
-let merge_similar_paths (paths : Path.t list) : Path.t list =
-  paths |> List.sort_uniq PathName.compare_paths
+let merge_similar_paths (paths : Path.t list) : Path.t list Monad.t =
+  paths |> Monad.List.sort_uniq PathName.compare_paths
 
 (** Find the [Path.t] of all the signature definitions which are found to be similar
     to [signature]. If the signature is the one of a module used as a namespace there
@@ -46,7 +46,7 @@ let merge_similar_paths (paths : Path.t list) : Path.t list =
     or similar definitions. In this case we will fail later with an explicit
     error message. *)
 let find_similar_signatures (env : Env.t) (signature : Types.signature)
-  : Path.t list * SignatureShape.t =
+  : (Path.t list * SignatureShape.t) Monad.t =
   let shape = SignatureShape.of_signature signature in
   (* We explore signatures in the current namespace. *)
   let similar_signature_paths =
@@ -78,11 +78,10 @@ let find_similar_signatures (env : Env.t) (signature : Types.signature)
           similar_modtype_declarations @ signature_paths
         )
         None env [] in
-  let paths =
-    (similar_signature_paths @ similar_signature_paths_in_modules) |>
-    merge_similar_paths |>
-    List.filter (fun path -> not (is_black_list path)) in
-  (paths, shape)
+  merge_similar_paths
+    (similar_signature_paths @ similar_signature_paths_in_modules)
+    >>= fun paths ->
+  return (List.filter (fun path -> not (is_black_list path)) paths, shape)
 
 type maybe_found =
   | Found of Path.t
@@ -103,7 +102,7 @@ let rec is_module_typ_first_class
       return (Not_found reason)
     end
   | Mty_signature signature ->
-    let (signature_paths, shape) = find_similar_signatures env signature in
+    find_similar_signatures env signature >>= fun (signature_paths, shape) ->
     begin match signature_paths with
     | [] ->
       return (
@@ -116,10 +115,13 @@ let rec is_module_typ_first_class
       )
     | [signature_path] -> return (Found signature_path)
     | signature_path :: (_ :: _) ->
-      raise (Found signature_path) FirstClassModule (
-        "It is unclear which name has this signature. At least two similar\n" ^
-        "signatures found, namely:\n" ^
-        String.concat ", " (signature_paths |> List.map Path.name) ^ "\n\n" ^
+      raise (Found signature_path) Module (
+        "It is unclear which name this signature has. At least two similar\n" ^
+        "signatures found, namely:\n\n" ^
+        String.concat "\n" (
+          signature_paths |>
+          List.map (fun path -> "* " ^ Path.name path)
+        ) ^ "\n\n" ^
         "We were looking for a module signature name for the following shape:\n" ^
         Pp.to_string (SignatureShape.pretty_print shape) ^ "\n" ^
         "(a shape is a list of names of values and sub-modules)\n\n" ^

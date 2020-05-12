@@ -7,17 +7,14 @@ Local Open Scope Z_scope.
 Local Open Scope type_scope.
 Import ListNotations.
 
-Unset Positivity Checking.
-Unset Guard Checking.
-
-Fixpoint f_map {A B : Set} (f : A -> B) (l : list A) {struct f} : list B :=
+Fixpoint f_map {A B : Set} (f : A -> B) (l : list A) : list B :=
   match l with
   | [] => nil
   | cons x l => cons (f x) (f_map f l)
   end.
 
-Definition n : Z :=
-  let fix sum (l : list Z) {struct l} : Z :=
+Definition n : int :=
+  let fix sum (l : list int) : int :=
     match l with
     | [] => 0
     | cons x l => Z.add x (sum l)

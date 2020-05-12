@@ -35,7 +35,7 @@ module Value = struct
           group (separate space (args |> List.map (fun (x, t) ->
             parens @@ nest (Name.to_coq x ^^ !^ ":" ^^ Type.to_coq None None t)
           ))) ^^
-          Exp.Header.to_coq_structs value.Exp.Definition.is_rec header ^^
+          Exp.Header.to_coq_structs header ^^
           begin match typ with
           | None -> empty
           | Some typ -> !^ ": " ^-^ Type.to_coq None None typ
@@ -95,7 +95,7 @@ let rec of_structure (structure : structure) : t list Monad.t =
         };
         _
       } ])
-      when PathName.is_unit (PathName.of_path_without_convert false path) ->
+      when PathName.is_unit path ->
       top_level_evaluation_error
     | Tstr_eval _ -> top_level_evaluation_error
     | Tstr_value (is_rec, cases) ->
@@ -118,7 +118,7 @@ let rec of_structure (structure : structure) : t list Monad.t =
     | Tstr_open { open_expr; _ } ->
       begin match open_expr with
       | { mod_desc = Tmod_ident (path, _); _ } ->
-        let o = Open.of_ocaml path in
+        Open.of_ocaml path >>= fun o ->
         return [Open o]
       | _ ->
         raise
@@ -127,7 +127,7 @@ let rec of_structure (structure : structure) : t list Monad.t =
           "We do not support open on complex module expressions"
       end
     | Tstr_module { mb_id; mb_expr; _ } ->
-      let name = Name.of_ident false mb_id in
+      let* name = Name.of_ident false mb_id in
       IsFirstClassModule.is_module_typ_first_class mb_expr.mod_type
         >>= fun is_first_class ->
       begin match is_first_class with
@@ -142,7 +142,7 @@ let rec of_structure (structure : structure) : t list Monad.t =
         | None ->
           raise
             []
-            FirstClassModule
+            Module
             (
               "We expected to find a signature name for this module.\n\n" ^
               "Reason:\n" ^ reason
@@ -155,7 +155,7 @@ let rec of_structure (structure : structure) : t list Monad.t =
         NotSupported
         "Abstract module types not handled."
     | Tstr_modtype { mtd_id; mtd_type = Some { mty_desc; _ }; _ } ->
-      let name = Name.of_ident false mtd_id in
+      let* name = Name.of_ident false mtd_id in
       begin
         match mty_desc with
         | Tmty_signature signature ->
@@ -168,14 +168,14 @@ let rec of_structure (structure : structure) : t list Monad.t =
             "This kind of signature is not handled."
       end
     | Tstr_primitive { val_id; val_val = { val_type; _ }; _ } ->
-      let name = Name.of_ident true val_id in
+      let* name = Name.of_ident true val_id in
       Type.of_typ_expr true Name.Map.empty val_type >>= fun (typ, _, free_typ_vars) ->
       return [AbstractValue (name, Name.Set.elements free_typ_vars, typ)]
     | Tstr_typext _ ->
       error_message
         (Error "type_extension")
-        NotSupported
-        "Structure item `typext` not handled."
+        ExtensibleType
+        "We do not handle type extensions"
     | Tstr_recmodule _ ->
       error_message
         (Error "recursive_module")
@@ -203,10 +203,14 @@ let rec of_structure (structure : structure) : t list Monad.t =
         };
         _
       } ->
-      let reference = PathName.of_path_with_convert false path in
-      IsFirstClassModule.is_module_typ_first_class mod_type >>= fun is_first_class ->
-      begin match is_first_class with
-      | IsFirstClassModule.Found mod_type_path ->
+      let* configuration = get_configuration in
+      let is_in_blacklist =
+        Configuration.is_in_first_class_module_backlist configuration path in
+      PathName.of_path_with_convert false path >>= fun reference ->
+      IsFirstClassModule.is_module_typ_first_class mod_type
+        >>= fun is_first_class ->
+      begin match (is_in_blacklist, is_first_class) with
+      | (false, IsFirstClassModule.Found mod_type_path) ->
         get_env >>= fun env ->
         begin match Mtype.scrape env mod_type with
         | Mty_ident path | Mty_alias path ->
@@ -218,32 +222,30 @@ let rec of_structure (structure : structure) : t list Monad.t =
               Path.name path ^ "` to handle the include."
             )
         | Mty_signature signature ->
-          return (
-            signature |> Util.List.filter_map (fun signature_item ->
-              match signature_item with
-              | Types.Sig_value (ident, _, _) | Sig_type (ident, _, _, _) ->
-                let is_value =
-                  match signature_item with
-                  | Types.Sig_value _ -> true
-                  | _ -> false in
-                let name = Name.of_ident is_value ident in
-                let field =
-                  PathName.of_path_and_name_with_convert mod_type_path name in
-                Some (
-                  ModuleExp (
-                    name,
-                    Exp.Variable (
-                      MixedPath.Access (
-                        reference,
-                        [field],
-                        false
-                      ),
-                      []
-                    )
+          signature |> Monad.List.filter_map (fun signature_item ->
+            match signature_item with
+            | Types.Sig_value (ident, _, _) | Sig_type (ident, _, _, _) ->
+              let is_value =
+                match signature_item with
+                | Types.Sig_value _ -> true
+                | _ -> false in
+              let* name = Name.of_ident is_value ident in
+              PathName.of_path_and_name_with_convert mod_type_path name
+                >>= fun field ->
+              return (Some (
+                ModuleExp (
+                  name,
+                  Exp.Variable (
+                    MixedPath.Access (
+                      reference,
+                      [field],
+                      false
+                    ),
+                    []
                   )
                 )
-              | _ -> None
-            )
+              ))
+            | _ -> return None
           )
         | Mty_functor _ ->
           error_message
@@ -251,8 +253,7 @@ let rec of_structure (structure : structure) : t list Monad.t =
             Unexpected
             "Unexpected include of functor."
         end
-      | IsFirstClassModule.Not_found _ ->
-        return [ModuleInclude reference]
+      | _ -> return [ModuleInclude reference]
       end
     | Tstr_include _ ->
       error_message
@@ -281,7 +282,7 @@ and of_module_expr (name : Name.t) (module_expr : module_expr)
     of_structure structure >>= fun structures ->
     return (Some (Module (name, structures)))
   | Tmod_ident (path, _) ->
-    let reference = PathName.of_path_with_convert false path in
+    PathName.of_path_with_convert false path >>= fun reference ->
     return (Some (ModuleSynonym (name, reference)))
   | Tmod_apply _ | Tmod_functor _ ->
     Exp.of_module_expr Name.Map.empty module_expr None >>= fun module_exp ->

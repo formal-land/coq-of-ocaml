@@ -7,9 +7,6 @@ Local Open Scope Z_scope.
 Local Open Scope type_scope.
 Import ListNotations.
 
-Unset Positivity Checking.
-Unset Guard Checking.
-
 Definition f {A B : Set} (x : A) (y : B) : A := x.
 
-Definition n : Z := f 12 3.
+Definition n : int := f 12 3.

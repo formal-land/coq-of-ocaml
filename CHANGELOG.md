@@ -1,3 +1,22 @@
+## [Unreleased]
+* Add configuration to disable exit with error code on some files.
+* Exit with a non-null code in case of error.
+* Add configuration for the requires from long ident.
+* Add configuration to find the type of a polymorphic variant.
+* Add configuration to blacklist some errors.
+* Add configuration to blacklist some first-class module paths.
+* Add configuration to rename some variants.
+* Add configuration to rename some constructors.
+* Add configuration for module barriers in record aliases.
+* Add configuration to escape some value names.
+* Add configuration to add head suffix in the generated file.
+* Add configuration to add monadic operators.
+* Add configuration to specify dependencies required as mli files.
+* Add configuration to list the required files in a file, together with an import or not.
+* Add configuration to disable guard or positivity checking.
+* Add handling of a configuration file.
+* Add the `@coq_phantom` attribute to force an abstract type declaration to be phantom.
+
 ## 2.1.0 (March 20, 2020)
 * Add automatic re-ordering of type synonyms in mutual types to generate valid definitions.
 * Add minimal handling of class types as records.

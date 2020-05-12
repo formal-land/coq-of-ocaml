@@ -25,7 +25,15 @@ let get_signature_path (path : Path.t) : Path.t option Monad.t =
 
 let rec of_path_aux (path : Path.t)
   : (Path.t * (Path.t * string) list * Path.t option) Monad.t =
-  get_signature_path path >>= fun signature_path ->
+  let* signature_path = get_signature_path path in
+  let* configuration = get_configuration in
+  let is_in_black_list =
+    Configuration.is_in_first_class_module_backlist configuration path in
+  let signature_path =
+    if is_in_black_list then
+      None
+    else
+      signature_path in
   begin match path with
   | Papply _ -> failwith "Unexpected path application"
   | Pdot (path', field_string) ->
@@ -64,26 +72,26 @@ let of_path
   of_path_aux path >>= fun (base_path, fields, signature_path) ->
   match (fields, signature_path) with
   | ([], None) ->
-    let path_name = PathName.of_path_without_convert is_value base_path in
-    begin match PathName.try_convert path_name with
+    PathName.of_path_without_convert is_value base_path >>= fun path_name ->
+    PathName.try_convert path_name >>= fun conversion ->
+    begin match conversion with
     | None ->
       begin match long_ident with
       | None -> return (PathName path_name)
-      | Some long_ident -> return (PathName (PathName.of_long_ident is_value long_ident))
+      | Some long_ident ->
+        PathName.of_long_ident is_value long_ident >>= fun path_name ->
+        return (PathName path_name)
       end
     | Some path_name -> return (PathName path_name)
     end
   | _ ->
     is_module_path_local base_path >>= fun is_local ->
-    let base_path_name = PathName.of_path_with_convert is_value base_path in
-    return (Access (
-      base_path_name,
-      fields |> List.map (fun (signature_path, field_string) ->
-        let field_name = Name.of_string is_value field_string in
-        PathName.of_path_and_name_with_convert signature_path field_name
-      ) |> List.rev,
-      is_local
-    ))
+    PathName.of_path_with_convert is_value base_path >>= fun base_path_name ->
+    (fields |> Monad.List.map (fun (signature_path, field_string) ->
+      Name.of_string is_value field_string >>= fun field_name ->
+      PathName.of_path_and_name_with_convert signature_path field_name
+    )) >>= fun fields ->
+    return (Access (base_path_name, List.rev fields, is_local))
 
 let to_coq (path : t) : SmartPrint.t =
   match path with
