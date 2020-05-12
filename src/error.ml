@@ -96,6 +96,8 @@ let display_error
   (loc : Loc.t)
   (category : Category.t)
   (message : string)
+  (error_number : int)
+  (number_of_errors : int)
   : string =
   colorize "34;1" (
     pad 100 '-'
@@ -104,7 +106,10 @@ let display_error
         ":" ^ string_of_int loc.start.character ^
         " "
       )
-      (" " ^ Category.to_id category ^ " ---")
+      (" " ^ Category.to_id category ^
+        " (" ^ string_of_int error_number ^ "/" ^ string_of_int number_of_errors ^ ")" ^
+        " ---"
+      )
   ) ^ "\n" ^
   "\n" ^
   get_code_frame source_lines loc ^ "\n" ^
@@ -120,8 +125,10 @@ let display_errors_human
   let source_lines = String.split_on_char '\n' source_file_content in
   let error_messages =
     errors |>
-    List.map (fun { category; loc; message } ->
-      display_error source_file_name source_lines loc category message) |>
+    List.mapi (fun index { category; loc; message } ->
+      display_error source_file_name source_lines loc category message
+        (index + 1) (List.length errors)
+    ) |>
     String.concat "" in
   let nb_errors = List.length errors in
   error_messages ^
