@@ -122,7 +122,6 @@ let display_errors_json (errors : t list) : string =
   ) ^ "\n"
 
 let display_errors
-  (configuration : Configuration.t)
   (json_mode : bool)
   (source_file_name : string)
   (source_file_content : string)
@@ -130,10 +129,6 @@ let display_errors
   : string =
   let errors =
     errors |>
-    List.filter (fun { category; _ } ->
-      let error_id = Category.to_id category in
-      not (Configuration.is_error_in_blacklist configuration error_id)
-    ) |>
     List.sort (fun error1 error2 ->
       compare error1.loc.start.line error2.loc.start.line
     ) in

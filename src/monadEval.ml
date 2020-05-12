@@ -74,9 +74,17 @@ module Command = struct
       | GetLoc -> Result.success context.loc
       | Raise (value, category, message) ->
         let result = Result.success value in
-        { result with
-          errors = [{ category; loc = context.loc; message }]
-        }
+        let errors =
+          let error_id = Error.Category.to_id category in
+          let is_valid_error =
+            not (
+              Configuration.is_error_in_blacklist context.configuration error_id
+            ) in
+          if is_valid_error then
+            [{ Error.category; loc = context.loc; message }]
+          else
+            [] in
+        { result with errors }
       | Use (import, base, name) ->
         let result = Result.success () in
         let mli = Configuration.is_require_mli context.configuration name in

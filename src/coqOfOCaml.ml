@@ -37,7 +37,6 @@ let exp
       context in
   let error_message =
     Error.display_errors
-      context.configuration
       json_mode
       source_file_name
       source_file_content
