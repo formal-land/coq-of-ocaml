@@ -29,11 +29,6 @@ type t = {
 let to_comment (error_message : string) : SmartPrint.t =
   !^ ("(* ❌ " ^ List.hd (String.split_on_char '\n' error_message) ^ " *)")
 
-(** Display a warning. *)
-let warn (file_name : string) (loc : Loc.t) (message : string) : unit =
-  let message = "Warning: " ^ message in
-  print_endline (Loc.to_string file_name loc ^ ": " ^ message)
-
 let pad
   (width : int)
   (character : char)

@@ -14,7 +14,6 @@ module Command = struct
     | GetLoc : Loc.t t
     | Raise : 'a * Error.Category.t * string -> 'a t
     | Use : bool * string * string -> unit t
-    | Warn : string -> unit t
 end
 
 module Wrapper = struct
@@ -69,9 +68,6 @@ module Notations = struct
 
   let use (import : bool) (base : string) (name : string) : unit t =
     Command (Command.Use (import, base, name))
-
-  let warn (message : string) : 'a t =
-    Command (Command.Warn message)
 end
 
 module List = struct

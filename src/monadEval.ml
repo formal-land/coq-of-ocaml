@@ -65,7 +65,7 @@ end
 module Command = struct
   open Monad.Command
 
-  let eval (type a) (file_name : string) (command : a t) : a Interpret.t =
+  let eval (type a) (command : a t) : a Interpret.t =
     fun context ->
       match command with
       | GetConfiguration -> Result.success context.configuration
@@ -89,8 +89,6 @@ module Command = struct
         let result = Result.success () in
         let mli = Configuration.is_require_mli context.configuration name in
         { result with imports = [{ Import.base; import; mli; name }] }
-      | Warn message ->
-        Result.success (Error.warn file_name context.loc message)
 end
 
 module Wrapper = struct
@@ -106,21 +104,20 @@ module Wrapper = struct
       | LocSet loc -> interpret {context with loc}
 end
 
-let rec eval : type a. string -> a Monad.t -> a Interpret.t =
-  fun file_name x context ->
+let rec eval : type a. a Monad.t -> a Interpret.t =
+  fun x context ->
     match x with
     | Monad.Bind (x, f) ->
       let { Result.errors = errors_x; imports = imports_x; value = value_x } =
-        eval file_name x context in
+        eval x context in
       let { Result.errors = errors_y; imports = imports_y; value = value_y } =
-        eval file_name (f value_x) context in
+        eval (f value_x) context in
       {
         errors = errors_y @ errors_x;
         imports = Import.merge imports_x imports_y;
         value = value_y
       }
-    | Monad.Command command ->
-      Command.eval file_name command context
+    | Monad.Command command -> Command.eval command context
     | Monad.Return value -> Result.success value
     | Monad.Wrapper (wrapper, x) ->
-      Wrapper.eval wrapper (eval file_name x) context
+      Wrapper.eval wrapper (eval x) context

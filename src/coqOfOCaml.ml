@@ -32,7 +32,6 @@ let exp
   : Ast.t * MonadEval.Import.t list * string * bool =
   let { MonadEval.Result.errors; imports; value} =
     MonadEval.eval
-      source_file_name
       (Ast.of_typedtree typedtree typedtree_errors)
       context in
   let error_message =
