@@ -12,7 +12,7 @@ module Output = struct
       let error_file_name = output.source_file_name ^ ".errors" in
       Util.File.write error_file_name output.error_message
     else if output.has_errors then
-      prerr_endline output.error_message
+      print_endline output.error_message
     end;
     print_endline output.success_message;
     begin match output.generated_file with
