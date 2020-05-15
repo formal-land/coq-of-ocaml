@@ -409,7 +409,7 @@ let rec of_expression (typ_vars : Name.t Name.Map.t) (e : expression)
     error_message
       (Error "unreachable")
       NotSupported
-      "Unreachable expressions are not supported"
+      "We do not support unreachable expressions"
   | Texp_extension_constructor _ ->
     error_message
       (Error "extension")
@@ -425,7 +425,13 @@ and of_match
   (do_cast_results : bool)
   (is_with_default_case : bool)
   : t Monad.t =
-  (cases |> Monad.List.filter_map (fun {c_lhs; c_guard; c_rhs} ->
+  (cases |>
+  List.filter (fun { c_rhs; _ } ->
+    match c_rhs.exp_desc with
+    | Texp_unreachable -> false
+    | _ -> true
+  ) |>
+  Monad.List.filter_map (fun {c_lhs; c_guard; c_rhs} ->
     set_loc (Loc.of_location c_lhs.pat_loc) (
     let* bound_vars =
       Typedtree.pat_bound_idents c_lhs |> List.rev |> Monad.List.map
