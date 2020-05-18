@@ -1,3 +1,13 @@
+lib: [
+  "_build/install/default/lib/coq-of-ocaml/META"
+  "_build/install/default/lib/coq-of-ocaml/dune-package"
+  "_build/install/default/lib/coq-of-ocaml/opam"
+]
 bin: [
-  "_build/default/src/coqOfOCaml.exe" {"coq-of-ocaml"}
+  "_build/install/default/bin/coq-of-ocaml"
+]
+doc: [
+  "_build/install/default/doc/coq-of-ocaml/CHANGELOG.md"
+  "_build/install/default/doc/coq-of-ocaml/LICENSE"
+  "_build/install/default/doc/coq-of-ocaml/README.md"
 ]

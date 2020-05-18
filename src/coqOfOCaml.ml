@@ -192,4 +192,7 @@ let main () =
     Output.write !json_mode output;
     exit context output
 
-;;main ()
+;;match main () with
+| () -> ()
+| exception Typetexp.Error (_, env, error) ->
+  Typetexp.report_error env Format.std_formatter error

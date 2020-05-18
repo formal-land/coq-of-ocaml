@@ -10,7 +10,8 @@ license: "MIT"
 build: [
   ["sh" "-c" "cd OCaml && ./configure.sh"]
   [make "-C" "OCaml" "-j%{jobs}%"]
-  [make "-j%{jobs}%"]
+  ["dune" "subst"] {pinned}
+  ["dune" "build" "-p" name "-j" jobs]
   [make "test"] {with-test}
 ]
 install: [
