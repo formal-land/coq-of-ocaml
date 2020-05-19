@@ -26,7 +26,5 @@ _build/
 OCaml/Makefile
 tests/extraction
 .merlin
-src/merlin/ocaml/preprocess/*/parser_raw.ml
-src/merlin/ocaml/preprocess/*/parser_raw.mli
 src/merlin/utils/menhirLib.ml
 src/merlin/utils/menhirLib.mli
