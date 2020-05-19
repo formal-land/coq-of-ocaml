@@ -26,5 +26,3 @@ _build/
 OCaml/Makefile
 tests/extraction
 .merlin
-src/merlin/utils/menhirLib.ml
-src/merlin/utils/menhirLib.mli
