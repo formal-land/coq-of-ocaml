@@ -234,12 +234,11 @@ let make_candidate ~get_doc ~attrs ~exact ~prefix_path name ?loc ?path ty =
         end
       | _, _ -> `None
   in
-  {name; kind; desc; info}
+  let deprecated = Type_utils.is_deprecated attrs in
+  {name; kind; desc; info; deprecated}
 
-let item_for_global_module name = {name; kind = `Module; desc = `None; info = `None}
-
-let fold_types f id env acc =
-  Env.fold_types (fun s p (decl,_) acc -> f s p decl acc) id env acc
+let item_for_global_module name =
+  {name; kind = `Module; desc = `None; info = `None; deprecated = false}
 
 let fold_constructors f id env acc =
   Env.fold_constructors
@@ -395,7 +394,7 @@ let get_candidates ?get_doc ?target_type ?prefix_path ~prefix kind ~validate env
         ) prefix_path env []
 
       | `Types ->
-        fold_types (fun name path decl candidates ->
+        Env.fold_type_decls (fun name path decl candidates ->
           if not @@ validate `Lident `Typ name then candidates else
           make_weighted_candidate ~exact:(name = prefix) name ~path (`Typ decl)
             ~loc:decl.Types.type_loc ~attrs:(type_attributes decl)
@@ -467,7 +466,7 @@ let complete_methods ~env ~prefix obj =
   let methods = List.filter ~f:has_prefix (methods_of_type env t) in
   List.map methods ~f:(fun (name,ty) ->
     let info = `None (* TODO: get documentation. *) in
-    { name; kind = `MethodCall; desc = `Type_scheme ty; info }
+    { name; kind = `MethodCall; desc = `Type_scheme ty; info; deprecated = false }
   )
 
 type is_label =
@@ -549,7 +548,8 @@ let complete_prefix ?get_doc ?target_type ?(kinds=[]) ~prefix ~is_label
       List.fold_left (Mconfig.global_modules config) ~init:compl ~f:(
         fun candidates name ->
           if not (String.no_double_underscore name) then candidates else
-          let default = { name; kind = `Module; desc = `None; info = `None } in
+          let default =
+            { name; kind = `Module; desc = `None; info = `None; deprecated = false } in
           if name = prefix && uniq (`Mod, name) then
             try
               let path, md, attrs = Type_utils.lookup_module (Longident.Lident name) env in

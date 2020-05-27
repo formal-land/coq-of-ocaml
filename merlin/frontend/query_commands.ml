@@ -247,7 +247,6 @@ let dispatch pipeline (type a) : a Query_protocol.t -> a =
     to_string ()
 
   | Type_enclosing (expro, pos, index) ->
-    let open Typedtree in
     let typer = Mpipeline.typer_result pipeline in
     let verbosity = verbosity pipeline in
     let structures = Mbrowse.of_typedtree (Mtyper.get_typedtree typer) in
@@ -256,66 +255,34 @@ let dispatch pipeline (type a) : a Query_protocol.t -> a =
       | [] -> []
       | browse -> Browse_misc.annotate_tail_calls browse
     in
-    let aux (env, node, tail) =
-      let open Browse_raw in
-      let ret x = Some (Mbrowse.node_loc node, x, tail) in
-      match[@ocaml.warning "-9"] node with
-      | Expression {exp_type = t}
-      | Pattern {pat_type = t}
-      | Core_type {ctyp_type = t}
-      | Value_description { val_desc = { ctyp_type = t } } ->
-        ret (`Type (env, t))
-      | Type_declaration { typ_id = id; typ_type = t} ->
-        ret (`Type_decl (env, id, t))
-      | Module_expr {mod_type = m}
-      | Module_type {mty_type = m}
-      | Module_binding {mb_expr = {mod_type = m}}
-      | Module_declaration {md_type = {mty_type = m}}
-      | Module_type_declaration {mtd_type = Some {mty_type = m}}
-      | Module_binding_name {mb_expr = {mod_type = m}}
-      | Module_declaration_name {md_type = {mty_type = m}}
-      | Module_type_declaration_name {mtd_type = Some {mty_type = m}} ->
-        ret (`Modtype (env, m))
-      | _ -> None
-    in
-    let result = List.filter_map ~f:aux path in
+    let result = Type_enclosing.from_nodes path in
+
     (* enclosings of cursor in given expression *)
-    let small_enclosings =
-      let exprs = reconstruct_identifier pipeline pos expro in
-      let env, node = Mbrowse.leaf_node (Mtyper.node_at typer pos) in
-      let open Browse_raw in
-      let include_lident = match node with
-        | Pattern _ -> false
-        | _ -> true
-      in
-      let include_uident = match node with
-        | Module_binding _
-        | Module_binding_name _
-        | Module_declaration _
-        | Module_declaration_name _
-        | Module_type_declaration _
-        | Module_type_declaration_name _
-          -> false
-        | _ -> true
-      in
-      List.filter_map exprs ~f:(fun {Location. txt = source; loc} ->
-          match source with
-          | "" -> None
-          | source when not include_lident && Char.is_lowercase source.[0] ->
-            None
-          | source when not include_uident && Char.is_uppercase source.[0] ->
-            None
-          | source ->
-            try
-              let ppf, to_string = Format.to_string () in
-              if Type_utils.type_in_env ~verbosity env ppf source then
-                Some (loc, `String (to_string ()), `No)
-              else
-                None
-            with _ ->
-              None
+    let exprs = reconstruct_identifier pipeline pos expro in
+    let () =
+      Logger.log ~section:Type_enclosing.log_section
+        ~title:"reconstruct identifier" "%a"
+        Logger.json (fun () ->
+          let lst =
+            List.map exprs ~f:(fun { Location.loc; txt } ->
+              `Assoc [ "start", Lexing.json_of_position loc.Location.loc_start
+                     ; "end",   Lexing.json_of_position loc.Location.loc_end
+                     ; "identifier", `String txt]
+            )
+          in
+          `List lst
         )
     in
+    let env, node = Mbrowse.leaf_node (Mtyper.node_at typer pos) in
+    let small_enclosings = Type_enclosing.from_reconstructed verbosity exprs env node in
+    Logger.log ~section:Type_enclosing.log_section ~title:"small enclosing" "%a"
+      Logger.fmt (fun fmt ->
+        Format.fprintf fmt "result = [ %a ]"
+          (Format.pp_print_list ~pp_sep:Format.pp_print_space
+             (fun fmt (loc, _, _) -> Location.print_loc fmt loc))
+          small_enclosings
+      );
+
     let normalize ({Location. loc_start; loc_end; _}, text, _tail) =
         Lexing.split_pos loc_start, Lexing.split_pos loc_end, text in
     let all_items =
@@ -359,7 +326,7 @@ let dispatch pipeline (type a) : a Query_protocol.t -> a =
     in
     List.map ~f:Mbrowse.node_loc path
 
-  | Complete_prefix (prefix, pos, _, with_doc, with_types) ->
+  | Complete_prefix (prefix, pos, kinds, with_doc, with_types) ->
     let pipeline, typer = for_completion pipeline pos in
     let config = Mpipeline.final_config pipeline in
     let verbosity = Mconfig.(config.query.verbosity) in
@@ -373,13 +340,12 @@ let dispatch pipeline (type a) : a Query_protocol.t -> a =
     let get_doc =
       if not with_doc then None else
         let local_defs = Mtyper.get_typedtree typer in
-        let config = Mpipeline.final_config pipeline in
         Some (Locate.get_doc ~config ~env ~local_defs
                 ~comments:(Mpipeline.reader_comments pipeline) ~pos)
     in
     let entries =
       Printtyp.wrap_printing_env env ~verbosity @@ fun () ->
-      Completion.branch_complete config ?get_doc ?target_type prefix branch |>
+      Completion.branch_complete config ~kinds ?get_doc ?target_type prefix branch |>
       print_completion_entries ~with_types config source
     and context = match context with
       | `Application context when no_labels ->
@@ -431,7 +397,7 @@ let dispatch pipeline (type a) : a Query_protocol.t -> a =
           let name = Format.flush_str_formatter () in
           Printtyp.type_scheme env Format.str_formatter v.Types.val_type;
           let desc = Format.flush_str_formatter () in
-          {Compl. name; kind = `Value; desc; info = "" }
+          {Compl. name; kind = `Value; desc; info = ""; deprecated = false }
         )
     in
     { Compl. entries ; context = `Unknown }
