@@ -239,10 +239,26 @@ let option_fold f' o env (f : _ f0) acc = match o with
   | None -> acc
   | Some x -> f' x env f acc
 
-let of_expression e = app (Expression e)
-let of_case c = app (Case c)
-let of_pattern p = app (Pattern p)
 let of_core_type ct = app (Core_type ct)
+
+let of_exp_extra (exp,_,_) = match exp with
+  | Texp_constraint ct ->
+    of_core_type ct
+  | Texp_coerce (cto,ct) ->
+    of_core_type ct ** option_fold of_core_type cto
+  | Texp_poly cto ->
+    option_fold of_core_type cto
+  | Texp_open _ | Texp_newtype _ ->
+    id_fold
+let of_expression e = app (Expression e) **
+    list_fold of_exp_extra e.exp_extra
+
+let of_pat_extra (pat,_,_) = match pat with
+  | Tpat_constraint ct -> of_core_type ct
+  | Tpat_type _ | Tpat_unpack | Tpat_open _ -> id_fold
+let of_pattern p = app (Pattern p) ** list_fold of_pat_extra p.pat_extra
+
+let of_case c = app (Case c)
 let of_label_declaration ct = app (Label_declaration ct)
 let of_value_binding vb = app (Value_binding vb)
 let of_module_type mt = app (Module_type mt)
@@ -251,10 +267,6 @@ let of_typ_param (ct,_) = of_core_type ct
 let of_constructor_arguments = function
   | Cstr_tuple cts -> list_fold of_core_type cts
   | Cstr_record lbls -> list_fold of_label_declaration lbls
-
-let of_pat_extra (pat,_,_) = match pat with
-  | Tpat_constraint ct -> of_core_type ct
-  | Tpat_type _ | Tpat_unpack | Tpat_open _ -> id_fold
 
 let of_record_field obj loc lbl =
   fun env (f : _ f0) acc ->
@@ -345,16 +357,6 @@ let of_expression_desc loc = function
   | Texp_pack me ->
     of_module_expr me
   | Texp_unreachable | Texp_extension_constructor _ ->
-    id_fold
-
-and of_exp_extra (exp,_,_) = match exp with
-  | Texp_constraint ct ->
-    of_core_type ct
-  | Texp_coerce (cto,ct) ->
-    of_core_type ct ** option_fold of_core_type cto
-  | Texp_poly cto ->
-    option_fold of_core_type cto
-  | Texp_open _ | Texp_newtype _ ->
     id_fold
 
 and of_class_expr_desc = function
@@ -516,12 +518,10 @@ and of_class_type_field_desc = function
 
 let of_node = function
   | Dummy -> id_fold
-  | Pattern { pat_desc; pat_extra } ->
-    of_pattern_desc pat_desc **
-    list_fold of_pat_extra pat_extra
-  | Expression { exp_desc; exp_extra; exp_loc } ->
-    of_expression_desc exp_loc exp_desc **
-    list_fold of_exp_extra exp_extra
+  | Pattern { pat_desc; pat_extra=_ } ->
+    of_pattern_desc pat_desc
+  | Expression { exp_desc; exp_extra=_; exp_loc } ->
+    of_expression_desc exp_loc exp_desc
   | Case { c_lhs; c_guard; c_rhs } ->
     of_pattern c_lhs ** of_expression c_rhs **
     option_fold of_expression c_guard

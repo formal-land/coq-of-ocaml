@@ -1,4 +1,6 @@
 (executable
   (name coqOfOCaml)
+  (package coq-of-ocaml)
+  (public_name coq-of-ocaml)
   (libraries merlin_analysis merlin_kernel smart_print)
 )

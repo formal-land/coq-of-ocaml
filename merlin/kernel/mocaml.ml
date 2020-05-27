@@ -26,6 +26,7 @@ let is_current_state state = match !current_state with
 (* Build settings *)
 
 let setup_config config = (
+  (* assert Local_store.(is_bound compiler_state); *)
   let open Mconfig in
   let open Clflags in
   let ocaml = config.ocaml in
