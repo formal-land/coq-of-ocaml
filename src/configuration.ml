@@ -30,8 +30,9 @@ end
 type t = {
   alias_barrier_modules : string list;
   constructor_map : ConstructorMapping.t list;
-  error_blacklist : string list;
+  error_category_blacklist : string list;
   error_filename_blacklist : string list;
+  error_message_blacklist : string list;
   escape_value : string list;
   file_name : string;
   first_class_module_path_blacklist : string list;
@@ -50,8 +51,9 @@ type t = {
 let default (file_name : string) : t = {
   alias_barrier_modules = [];
   constructor_map = [];
-  error_blacklist = [];
+  error_category_blacklist = [];
   error_filename_blacklist = [];
+  error_message_blacklist = [];
   escape_value = [];
   file_name;
   first_class_module_path_blacklist = [];
@@ -78,11 +80,17 @@ let is_constructor_renamed (configuration : t) (typ : string) (name : string)
   ) |>
   Option.map (fun { ConstructorMapping.target; _ } -> target)
 
-let is_error_in_blacklist (configuration : t) (error_id : string) : bool =
-  List.mem error_id configuration.error_blacklist
+let is_category_in_error_blacklist (configuration : t) (error_id : string) : bool =
+  List.mem error_id configuration.error_category_blacklist
 
 let is_filename_in_error_blacklist (configuration : t) : bool =
   List.mem configuration.file_name configuration.error_filename_blacklist
+
+let is_message_in_error_blacklist (configuration : t) (message : string)
+  : bool =
+  configuration.error_message_blacklist |> List.exists (fun content ->
+    Str.string_match (Str.regexp_string content) message 0
+  )
 
 let is_value_to_escape (configuration : t) (name : string) : bool =
   List.mem name configuration.escape_value
@@ -201,12 +209,15 @@ let of_json (file_name : string) (json : Yojson.Basic.t) : t =
               { ConstructorMapping.source; target; typ }
             ) in
           {configuration with constructor_map = entry}
-        | "error_blacklist" ->
-          let entry = get_string_list "error_blacklist" entry in
-          {configuration with error_blacklist = entry}
+        | "error_category_blacklist" ->
+          let entry = get_string_list "error_category_blacklist" entry in
+          {configuration with error_category_blacklist = entry}
         | "error_filename_blacklist" ->
           let entry = get_string_list "error_filename_blacklist" entry in
           {configuration with error_filename_blacklist = entry}
+        | "error_message_blacklist" ->
+          let entry = get_string_list "error_message_blacklist" entry in
+          {configuration with error_message_blacklist = entry}
         | "escape_value" ->
           let entry = get_string_list "escape_value" entry in
           {configuration with escape_value = entry}

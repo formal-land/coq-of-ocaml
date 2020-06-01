@@ -78,7 +78,12 @@ module Command = struct
           let error_id = Error.Category.to_id category in
           let is_valid_error =
             not (
-              Configuration.is_error_in_blacklist context.configuration error_id
+              Configuration.is_category_in_error_blacklist
+                context.configuration error_id
+            ) &&
+            not (
+              Configuration.is_message_in_error_blacklist
+                context.configuration message
             ) in
           if is_valid_error then
             [{ Error.category; loc = context.loc; message }]

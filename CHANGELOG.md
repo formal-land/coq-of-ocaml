@@ -1,4 +1,5 @@
 ## [Unreleased]
+* Add configuration to black list errors containing a certain message.
 * Add configuration to disable exit with error code on some files.
 * Exit with a non-null code in case of error.
 * Add configuration for the requires from long ident.
