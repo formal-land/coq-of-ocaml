@@ -89,7 +89,9 @@ let is_filename_in_error_blacklist (configuration : t) : bool =
 let is_message_in_error_blacklist (configuration : t) (message : string)
   : bool =
   configuration.error_message_blacklist |> List.exists (fun content ->
-    Str.string_match (Str.regexp_string content) message 0
+    (* That is the simplest way I found to test string inclusion from the
+       standard library. *)
+    Str.replace_first (Str.regexp_string content) "" message <> message
   )
 
 let is_value_to_escape (configuration : t) (name : string) : bool =
