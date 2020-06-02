@@ -108,7 +108,7 @@ module Constructors = struct
       constructor_name : Name.t;
       param_typs : Type.t list; (** The parameters of the constructor. *)
       return_typ_params : Name.t option list option;
-        (** The return type, in case of GADT contructor, with some inference to
+        (** The return type, in case of GADT constructor, with some inference to
             rule-out GADTs with only existential variables. *)
     }
 
