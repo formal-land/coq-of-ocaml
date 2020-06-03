@@ -583,22 +583,6 @@ let filter_in_free_vars
         None
   )
 
-let gadt_prename
-    (name : Name.t)
-    (defined_typ_params : Name.t option list)
-    (constructors_return_typ_params : Constructors.Single.t list)
-    : Name.t =
-    match name with
-      | FunctionParameter -> name
-      | Make s ->
-        let constructors_return_typ_params =
-          constructors_return_typ_params |> List.map (fun constructor_return_typ_params ->
-              constructor_return_typ_params.Constructors.Single.return_typ_params
-            ) in
-        match TypeIsGadt.check_if_not_gadt defined_typ_params constructors_return_typ_params with
-        | Some _ -> name
-        | None -> Make ("pre_" ^ s)
-
 let of_ocaml (typs : type_declaration list) : t Monad.t =
   match typs with
   | [ { typ_id; typ_type = { type_manifest = Some typ; type_params; _ }; _ } ] ->
@@ -724,7 +708,6 @@ let of_ocaml (typs : type_declaration list) : t Monad.t =
         let (single_constructors, new_constructor_records) = List.split cases in
         let new_constructor_records =
           new_constructor_records |> Util.List.filter_map (fun x -> x) in
-        let name = gadt_prename name typ_args single_constructors in
         let constructor_records =
           match new_constructor_records with
           | [] -> constructor_records
