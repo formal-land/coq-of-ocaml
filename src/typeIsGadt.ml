@@ -58,41 +58,17 @@ let typ_params_ghost_marked
     | Unknown -> None
   ))
 
-(* let named_typ_params_expecting_variables_or_ignored
- *   (typs : Types.type_expr list) : TypParams.t Monad.t =
- *   Monad.List.map named_typ_param typs >>= fun typs ->
- *   return (typs |> List.filter_map (function
- *     | TypeVariable.Error -> None
- *     | Known name -> Some name
- *     | Unknown -> None
- *   )) *)
-
-(* let named_typ_params_with_unknowns (typ_params : TypParams.t) *)
-  (* : TypeParams.t Monad.t = *)
-  (* typ_params |> Monad.List.map (function *)
-    (* | Some typ_param -> return typ_param *)
-    (* | None -> Name.of_string false "_" *)
-  (* ) |> return *)
-
-(* let named_typ_params_without_unknowns (typ_params : TypParams.t) : Name.t list = *)
-  (* typ_params |> Util.List.filter_map (function *)
-    (* | Some typ_param -> Some typ_param *)
-    (* | None -> None *)
-  (* ) *)
-
-
-
 let rec merge_typ_params (params1 : TypParams.t) (params2 : TypParams.t)
-  : TypParams.t option =
+  : TypParams.t =
   match (params1, params2) with
-  | ([], []) -> Some []
-  | (_ :: _, []) | ([], _ :: _) -> None
+  | ([], []) -> []
+  | (_ :: _ as xs, []) | ([], (_ :: _ as xs)) -> xs
   | (param1 :: params1, param2 :: params2) ->
-    Util.Option.bind (merge_typ_params params1 params2) (fun params ->
-      if Name.equal param1 param2 then
-        Some (param1 :: params)
-      else
-        None)
+    let params = merge_typ_params params1 params2 in
+    if Name.equal param1 param2 then
+      param1 :: params
+    else
+      params
 
 (** Get the parameters of the return type of a constructor if the parameters are
     only variables. Defaults to the parameters of the defined type itself, in
@@ -120,7 +96,5 @@ let rec check_if_not_gadt
   match constructors_return_typ_params with
   | [] -> Some defined_typ_params
   | return_typ_params :: constructors_return_typ_params ->
-    Util.Option.bind
-      (merge_typ_params defined_typ_params return_typ_params)
-      (fun defined_typ_params ->
-         check_if_not_gadt defined_typ_params constructors_return_typ_params)
+    let typ_params = merge_typ_params defined_typ_params return_typ_params in
+    check_if_not_gadt typ_params constructors_return_typ_params
