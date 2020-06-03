@@ -23,18 +23,18 @@ let rec named_typ_param (typ : Types.type_expr) : TypeVariable.t Monad.t =
   | Tlink typ | Tsubst typ -> named_typ_param typ
   | _ -> return TypeVariable.Error
 
-let named_typ_params_expecting_anything (typs : Types.type_expr list)
+let filter_error_params (typs : Types.type_expr list)
   : TypParams.t option Monad.t =
   Monad.List.map named_typ_param typs >>= fun typs ->
-  return (
-    typs |>
-    List.map (function
-      | TypeVariable.Error -> None
-      | Known name -> Some (Some name)
-      | Unknown -> Some None
-    ) |>
-    Util.Option.all
-  )
+  let x : TypParams.t = typs |>
+          List.map (function
+              | TypeVariable.Error ->
+                None
+              | Known name ->
+                Some name
+              | Unknown ->
+                None) in
+  return (Some x)
 
 let named_typ_params_expecting_variables (typs : Types.type_expr list)
   : TypParams.t Monad.t =
@@ -83,8 +83,8 @@ let rec merge_typ_params (params1 : TypParams.t) (params2 : TypParams.t)
       if Name.equal param1 param2 then
         Some (Some param1 :: params)
       else
-        None
-    | (Some param, None) | (None, Some param) -> Some (Some param :: params)
+        Some (params)
+    | (Some _, None) | (None, Some _) -> Some (None :: params)
     | (None, None) -> Some (None :: params))
 
 (** Get the parameters of the return type of a constructor if the parameters are
@@ -95,7 +95,7 @@ let get_return_typ_params
   : TypParams.t option Monad.t =
   match return_typ with
   | Some { Types.desc = Tconstr (_, typs, _); _ } ->
-    named_typ_params_expecting_anything typs
+    filter_error_params typs
   | _ -> return (Some (defined_typ_params))
 
 (** Check if the type is not a GADT. If this is not a GADT, also return a
@@ -111,17 +111,21 @@ let rec check_if_not_gadt
     begin match return_typ_params with
     | None -> None
     | Some return_typ_params ->
-      let are_variables_different =
+      let are_variables_num_different =
         let non_null_variables =
           Util.List.filter_map (fun x -> x) return_typ_params in
         List.length non_null_variables <>
           Name.Set.cardinal (Name.Set.of_list non_null_variables) in
-      if are_variables_different then
+      if are_variables_num_different then
         None
       else
-        Util.Option.bind
+        let ret = Util.Option.bind
           (merge_typ_params defined_typ_params return_typ_params)
           (fun defined_typ_params ->
-            check_if_not_gadt defined_typ_params constructors_return_typ_params
-          )
+            check_if_not_gadt defined_typ_params constructors_return_typ_params 
+          ) in
+        begin match ret with
+          | None -> None
+          | Some tys -> Some (tys |> List.filter (function | None -> false | Some _ -> true))
+        end
     end
