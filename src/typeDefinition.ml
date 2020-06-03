@@ -107,14 +107,14 @@ module Constructors = struct
     type t = {
       constructor_name : Name.t;
       param_typs : Type.t list; (** The parameters of the constructor. *)
-      return_typ_params : Name.t option list option;
+      return_typ_params : Name.t list;
         (** The return type, in case of GADT constructor, with some inference to
             rule-out GADTs with only existential variables. *)
     }
 
     let of_ocaml_case
       (typ_name : Name.t)
-      (defined_typ_params : Name.t option list)
+      (defined_typ_params : Name.t list)
       (case : Types.constructor_declaration)
       : (t * (RecordSkeleton.t * Name.t list * Type.t) option) Monad.t =
       let { Types.cd_args; cd_id; cd_loc; cd_res; _ } = case in
@@ -192,7 +192,7 @@ module Constructors = struct
       ))
 
     let of_ocaml_row
-      (defined_typ_params : Name.t option list)
+      (defined_typ_params : Name.t list)
       (row : Asttypes.label * Types.row_field)
       : t Monad.t =
       let (label, field) = row in
@@ -202,26 +202,27 @@ module Constructors = struct
       return {
         constructor_name;
         param_typs;
-        return_typ_params = Some defined_typ_params;
+        return_typ_params = defined_typ_params;
       }
   end
 
   let of_ocaml
-    (defined_typ_params : Name.t option list)
+    (defined_typ_params : Name.t list)
     (force_gadt : bool)
     (single_constructors : Single.t list)
-    : (t * Name.t option list option) Monad.t =
+    : (t * Name.t list option) Monad.t =
     let merged_typ_params =
       if force_gadt then
         None
       else
         let constructors_return_typ_params =
           single_constructors |> List.map (fun single_constructor ->
-            single_constructor.Single.return_typ_params
-          ) in
+              single_constructor.Single.return_typ_params
+            ) in
         TypeIsGadt.check_if_not_gadt
           defined_typ_params
           constructors_return_typ_params in
+
     let* constructors = single_constructors |> Monad.List.map (
       fun { Single.constructor_name; param_typs; _ } ->
         match merged_typ_params with
@@ -233,10 +234,11 @@ module Constructors = struct
             typ_vars = Name.Set.elements (Type.typ_args_of_typs param_typs)
           }
         | Some merged_typ_params ->
-          let* res_typ_params =
-            TypeIsGadt.named_typ_params_with_unknowns merged_typ_params in
+          (* let* res_typ_params = *)
+            (* TypeIsGadt.named_typ_params_with_unknowns merged_typ_params in *)
           let res_typ_params =
-            List.map (fun name -> Type.Variable name) res_typ_params in
+            (* List.map (fun name -> Type.Variable name) res_typ_params in *)
+            List.map (fun name -> Type.Variable name) merged_typ_params in
           return {
             constructor_name;
             param_typs;
@@ -246,7 +248,6 @@ module Constructors = struct
                 Name.Set.diff
                   (Type.typ_args_of_typs param_typs)
                   (merged_typ_params |>
-                    Util.List.filter_map (fun x -> x) |>
                     Name.Set.of_list
                   )
               )
@@ -263,7 +264,7 @@ module Inductive = struct
       : (Name.t * (RecordSkeleton.t * Name.t list * Type.t) list) list;
     notations : notation list;
     records : RecordSkeleton.t list;
-    typs : (Name.t * Name.t option list * Constructors.t) list;
+    typs : (Name.t * Name.t list * Constructors.t) list;
   }
 
   let get_notation_module_name (inductive : t) : SmartPrint.t =
@@ -324,7 +325,7 @@ module Inductive = struct
     (subst : Type.Subst.t)
     (is_first : bool)
     (name : Name.t)
-    (left_typ_args : Name.t option list)
+    (left_typ_args : Name.t list)
     (constructors : Constructors.t)
     : SmartPrint.t =
     let keyword = if is_first then !^ "Inductive" else !^ "with" in
@@ -335,9 +336,10 @@ module Inductive = struct
       else
         parens (
           nest (
-            separate space (left_typ_args |> List.map (function
-              None -> !^ "_"
-              | Some name -> Name.to_coq name
+            separate space (left_typ_args |> List.map ( Name.to_coq
+                (* function *)
+                  (* None -> !^ "_" *)
+                (* | Some name -> Name.to_coq name *)
             )) ^^
             !^ ":" ^^ Pp.set
           )
@@ -474,7 +476,7 @@ module Inductive = struct
     )
 
   let to_coq_typs_implicits
-    (left_typ_args : Name.t option list)
+    (left_typ_args : Name.t list)
     (constructors : Constructors.t)
     : SmartPrint.t list =
     match left_typ_args with
@@ -574,9 +576,7 @@ type t =
 
 let filter_in_free_vars
   (typ_args : TypeIsGadt.TypParams.t) (free_vars : Name.Set.t) : Name.t list =
-  typ_args |> Util.List.filter_map (function
-    | None -> None
-    | Some typ_arg ->
+  typ_args |> Util.List.filter_map (function typ_arg ->
       if Name.Set.mem typ_arg free_vars then
         Some typ_arg
       else
@@ -615,7 +615,7 @@ let of_ocaml (typs : type_declaration list) : t Monad.t =
     TypeIsGadt.named_typ_params_expecting_variables type_params >>= fun typ_args ->
     let typ_args_with_unknowns =
       if not (Attribute.has_phantom typ_attributes) then
-        TypeIsGadt.named_typ_params_without_unknowns typ_args
+        typ_args
       else
         [] in
     return (Abstract (name, typ_args_with_unknowns))
