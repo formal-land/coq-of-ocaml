@@ -28,18 +28,16 @@ let type_exprs_of_row_field (row_field : Types.row_field)
   | Rabsent -> []
 
 let filter_typ_params_in_valid_set
-  (typ_params : TypeIsGadt.TypParams.t) (valid_set : Name.Set.t) : bool list =
-  typ_params |> List.map (function
-    | None -> false
-    | Some typ_param -> Name.Set.mem typ_param valid_set
-  )
+  (typ_params : Name.t list) (valid_set : Name.Set.t) : bool list =
+  typ_params |> List.map (function ty -> Name.Set.mem ty valid_set)
+
 
 let rec non_phantom_typs (path : Path.t) (typs : Types.type_expr list)
   : Types.type_expr list Monad.t =
   get_env >>= fun env ->
   begin match Env.find_type path env with
   | typ_declaration ->
-    TypeIsGadt.named_typ_params_expecting_variables_or_ignored
+    TypeIsGadt.inductive_variables
       typ_declaration.type_params >>= fun typ_params ->
     Attribute.of_attributes typ_declaration.type_attributes >>= fun typ_attributes ->
     let is_phantom = Attribute.has_phantom typ_attributes in
@@ -51,21 +49,22 @@ let rec non_phantom_typs (path : Path.t) (typs : Types.type_expr list)
         begin match typ_declaration.type_manifest with
         | None ->
           return (Some (typ_params |> List.map (function
-            | None ->
+            | TypeIsGadt.InductiveVariable.Parameter _ -> true
+            | _ ->
               if Path.name path = "array" then
                 true
               else
                 false
-            | Some _ -> true
           )))
         (* Specific case for inductives defined with polymorphic variants. *)
         | Some { desc = Tvariant _; _ } ->
           return (Some (typ_params |> List.map (function
-            | None -> false
-            | Some _ -> true
+            | TypeIsGadt.InductiveVariable.Parameter _ -> true
+            | _ -> false
           )))
         | Some typ ->
           non_phantom_vars_of_typ typ >>= fun non_phantom_typ_vars ->
+          let typ_params = TypeIsGadt.get_parameters typ_params in
           return (Some (
             filter_typ_params_in_valid_set typ_params non_phantom_typ_vars
           ))
@@ -73,22 +72,22 @@ let rec non_phantom_typs (path : Path.t) (typs : Types.type_expr list)
       | Type_record (labels, _) ->
         let typs = List.map (fun label -> label.ld_type) labels in
         non_phantom_vars_of_typs typs >>= fun non_phantom_typ_vars ->
+        let typ_params = TypeIsGadt.get_parameters typ_params in
         return (Some (
           filter_typ_params_in_valid_set typ_params non_phantom_typ_vars
         ))
       | Type_variant constructors ->
-        let* is_not_gadt =
-          let* constructors_return_typ_params =
-            constructors |> Monad.List.map (fun constructor ->
+        let* constructors_return_typ_params =
+          constructors |> Monad.List.map (fun constructor ->
               TypeIsGadt.get_return_typ_params typ_params constructor.cd_res
             ) in
-          return (
-            not (Attribute.has_force_gadt typ_attributes) &&
-            match TypeIsGadt.check_if_not_gadt typ_params constructors_return_typ_params with
-            | None -> false
+        let gadt_shape = TypeIsGadt.gadt_shape typ_params constructors_return_typ_params in
+
+        return (Some (gadt_shape |> List.map (fun shape ->
+            match shape with
+            | None -> Attribute.has_force_gadt typ_attributes
             | Some _ -> true
-          ) in
-        return (Some (typ_params |> List.map (fun _ -> is_not_gadt)))
+          )))
       | Type_open -> return None
       end
     | exception Not_found -> return None
@@ -139,10 +138,10 @@ and non_phantom_vars_of_typ (typ : Types.type_expr) : Name.Set.t Monad.t =
     return Name.Set.empty
   | Tpoly (typ, typ_args) ->
     let* typ_args =
-      TypeIsGadt.named_typ_params_expecting_variables_or_ignored typ_args in
+      TypeIsGadt.typ_params_ghost_marked typ_args in
     let typ_args =
       typ_args |>
-      Util.List.filter_map (fun x -> x) |>
+      TypeIsGadt.get_parameters |>
       Name.Set.of_list in
     non_phantom_vars_of_typ typ >>= fun non_phantom_vars ->
     return (Name.Set.diff non_phantom_vars typ_args)
@@ -251,8 +250,8 @@ let rec of_typ_expr
     end
   | Tpoly (typ, typ_args) ->
     let* typ_args =
-      TypeIsGadt.named_typ_params_expecting_variables_or_ignored typ_args in
-    let typ_args = typ_args |> Util.List.filter_map (fun x -> x) in
+      TypeIsGadt.typ_params_ghost_marked typ_args in
+    let typ_args = typ_args |> TypeIsGadt.get_parameters in
     non_phantom_vars_of_typ typ >>= fun non_phantom_vars ->
     let typ_args = typ_args |> List.filter (fun typ_arg ->
       Name.Set.mem typ_arg non_phantom_vars

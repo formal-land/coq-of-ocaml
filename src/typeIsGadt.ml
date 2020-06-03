@@ -1,131 +1,132 @@
 open Monad.Notations
 
-module TypeVariable = struct
+module InductiveVariable = struct
   type t =
     | Error
-    | Known of Name.t
+    | Parameter of Name.t
+    | Index of Name.t
     | Unknown
 end
 
-module TypParams = struct
-  type t = Name.t option list
+module IndParams = struct
+  type t = InductiveVariable.t list
 end
 
-let rec named_typ_param (typ : Types.type_expr) : TypeVariable.t Monad.t =
+let get_parameters (typs : IndParams.t) : Name.t list =
+  typs |> List.filter_map (function
+      | InductiveVariable.Parameter name -> Some name
+      | _ -> None)
+
+let rec inductive_variable (typ : Types.type_expr) : InductiveVariable.t Monad.t =
   match typ.Types.desc with
   | Tvar x | Tunivar x ->
     begin match x with
-    | None | Some "_" -> return TypeVariable.Unknown
+    | None | Some "_" -> return InductiveVariable.Unknown
     | Some x ->
       Name.of_string false x >>= fun x ->
-      return (TypeVariable.Known x)
+      return (InductiveVariable.Parameter x)
     end
-  | Tlink typ | Tsubst typ -> named_typ_param typ
-  | _ -> return TypeVariable.Error
+  | Tlink typ | Tsubst typ -> inductive_variable typ
+  | Tconstr (typ, _, _) ->
+    Path.last typ |> Name.of_string false >>= fun typ ->  return (InductiveVariable.Index typ)
+  | _ -> return InductiveVariable.Error
 
-let filter_error_params (typs : Types.type_expr list)
-  : TypParams.t option Monad.t =
-  Monad.List.map named_typ_param typs >>= fun typs ->
-  let x : TypParams.t = typs |>
-          List.map (function
-              | TypeVariable.Error ->
-                None
-              | Known name ->
-                Some name
-              | Unknown ->
-                None) in
-  return (Some x)
+let inductive_variables (typs : Types.type_expr list) : InductiveVariable.t list Monad.t =
+  Monad.List.map inductive_variable typs
 
-let named_typ_params_expecting_variables (typs : Types.type_expr list)
-  : TypParams.t Monad.t =
-  Monad.List.map named_typ_param typs >>= fun typs ->
-  typs |> Monad.List.map (function
-    | TypeVariable.Error ->
-      raise
-        None
-        Unexpected
-        "Expected a list of named or unspecified '_' type variables"
-    | Known name -> return (Some name)
-    | Unknown -> return None
-  )
+let filter_params (typs : Types.type_expr list)
+  : IndParams.t Monad.t =
+  Monad.List.map inductive_variable typs >>= fun typs ->
+  typs |> List.filter (function
+      | InductiveVariable.Parameter _ -> true
+      | _ -> false)
+  |> return
 
-let named_typ_params_expecting_variables_or_ignored
-  (typs : Types.type_expr list) : TypParams.t Monad.t =
-  Monad.List.map named_typ_param typs >>= fun typs ->
-  return (typs |> List.map (function
-    | TypeVariable.Error -> None
-    | Known name -> Some name
-    | Unknown -> None
-  ))
+  let typ_params_ghost_marked
+  (typs : Types.type_expr list) : IndParams.t Monad.t =
+  typs |> filter_params
 
-let named_typ_params_with_unknowns (typ_params : TypParams.t)
-  : Name.t list Monad.t =
-  typ_params |> Monad.List.map (function
-    | Some typ_param -> return typ_param
-    | None -> Name.of_string false "_"
-  )
+let equal (param1 : InductiveVariable.t) (param2 : InductiveVariable.t) =
+  match param1, param2 with
+  | Error, Error | Unknown, Unknown -> true
+  | Parameter name1, Parameter name2 | Index name1, Index name2 -> Name.equal name1 name2
+  | _, _ -> false
 
-let named_typ_params_without_unknowns (typ_params : TypParams.t) : Name.t list =
-  typ_params |> Util.List.filter_map (function
-    | Some typ_param -> Some typ_param
-    | None -> None
-  )
-
-let rec merge_typ_params (params1 : TypParams.t) (params2 : TypParams.t)
-  : TypParams.t option =
+let rec merge_typ_params
+    (params1 : InductiveVariable.t option list)
+    (params2 : InductiveVariable.t option list)
+  : InductiveVariable.t option list =
   match (params1, params2) with
-  | ([], []) -> Some []
-  | (_ :: _, []) | ([], _ :: _) -> None
+  | ([], []) -> []
+  | (_ :: _, []) | ([], _ :: _) -> []
   | (param1 :: params1, param2 :: params2) ->
-    Util.Option.bind (merge_typ_params params1 params2) (fun params ->
-    match (param1, param2) with
-    | (Some param1, Some param2) ->
-      if Name.equal param1 param2 then
-        Some (Some param1 :: params)
-      else
-        Some (params)
-    | (Some _, None) | (None, Some _) -> Some (None :: params)
-    | (None, None) -> Some (None :: params))
+    let params = merge_typ_params params1 params2 in
+    begin match (param1, param2) with
+      | (Some param1, Some param2) ->
+        if equal param1 param2 then
+          Some param1 :: params
+        else
+          None :: params
+      | (Some _, None) | (None, Some _) -> None :: params
+      | (None, None) -> None :: params
+    end
 
 (** Get the parameters of the return type of a constructor if the parameters are
     only variables. Defaults to the parameters of the defined type itself, in
     case of a non-GADT type. *)
 let get_return_typ_params
-  (defined_typ_params : TypParams.t) (return_typ : Types.type_expr option)
-  : TypParams.t option Monad.t =
+  (defined_typ_params : IndParams.t) (return_typ : Types.type_expr option)
+  : IndParams.t Monad.t =
   match return_typ with
   | Some { Types.desc = Tconstr (_, typs, _); _ } ->
-    filter_error_params typs
-  | _ -> return (Some (defined_typ_params))
+    Monad.List.map inductive_variable typs
+  | _ -> return (defined_typ_params)
+
+let rec adt_parameters
+    (defined_typ_params : InductiveVariable.t option list)
+    (constructors_return_typ_params : InductiveVariable.t option list list)
+  : IndParams.t =
+  match constructors_return_typ_params with
+  | [] -> List.filter_map (fun x -> x) defined_typ_params
+  | return_typ_params :: constructors_return_typ_params ->
+    let typ_params = merge_typ_params defined_typ_params return_typ_params in
+    adt_parameters typ_params constructors_return_typ_params
+
+
+let rec gadt_shape'
+    (defined_typ_params : InductiveVariable.t option list)
+    (constructors_return_typ_params : InductiveVariable.t option list list)
+  : InductiveVariable.t option list =
+  match constructors_return_typ_params with
+  | [] -> defined_typ_params
+  | return_typ_params :: constructors_return_typ_params ->
+    let typ_params = merge_typ_params defined_typ_params return_typ_params in
+    gadt_shape' typ_params constructors_return_typ_params
+
+let gadt_shape
+    (defined_typ_params : InductiveVariable.t list)
+    (constructors_return_typ_params : InductiveVariable.t list list)
+  : InductiveVariable.t option list =
+  let defined_typ_params = List.map (function x -> Some x) defined_typ_params in
+  let constructors_return_typ_params =
+    List.map (function xs ->
+        List.map (function x -> Some x) xs)
+      constructors_return_typ_params in
+  gadt_shape' defined_typ_params constructors_return_typ_params
 
 (** Check if the type is not a GADT. If this is not a GADT, also return a
   prefered list of parameter names for the type variables. It merges the
   names found in the definition of the type name and in the constructors. *)
-let rec check_if_not_gadt
-  (defined_typ_params : TypParams.t)
-  (constructors_return_typ_params : TypParams.t option list)
-  : TypParams.t option =
-  match constructors_return_typ_params with
-  | [] -> Some defined_typ_params
-  | return_typ_params :: constructors_return_typ_params ->
-    begin match return_typ_params with
-    | None -> None
-    | Some return_typ_params ->
-      let are_variables_num_different =
-        let non_null_variables =
-          Util.List.filter_map (fun x -> x) return_typ_params in
-        List.length non_null_variables <>
-          Name.Set.cardinal (Name.Set.of_list non_null_variables) in
-      if are_variables_num_different then
-        None
-      else
-        let ret = Util.Option.bind
-          (merge_typ_params defined_typ_params return_typ_params)
-          (fun defined_typ_params ->
-            check_if_not_gadt defined_typ_params constructors_return_typ_params 
-          ) in
-        begin match ret with
-          | None -> None
-          | Some tys -> Some (tys |> List.filter (function | None -> false | Some _ -> true))
-        end
-    end
+let check_if_not_gadt
+    (defined_typ_params : IndParams.t)
+    (constructors_return_typ_params : IndParams.t list)
+  : IndParams.t option =
+  let defined_typ_params' = List.map (function x -> Some x) defined_typ_params in
+  let constructors_return_typ_params =
+    List.map (function xs ->
+        List.map (function x -> Some x) xs)
+      constructors_return_typ_params in
+  let typ_params = adt_parameters defined_typ_params' constructors_return_typ_params in
+      if typ_params <> defined_typ_params
+      then Some typ_params
+      else None
