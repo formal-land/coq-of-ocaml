@@ -86,15 +86,24 @@ let print_typParams (tys : TypParams.t) : unit =
            |> String.concat ", " in
   print_string ("Ty Params : " ^ ts ^ "\n")
 
+let rec adt_parameters
+  (defined_typ_params : TypParams.t)
+  (constructors_return_typ_params : TypParams.t list)
+  : TypParams.t =
+  match constructors_return_typ_params with
+  | [] -> defined_typ_params
+  | return_typ_params :: constructors_return_typ_params ->
+    let typ_params = merge_typ_params defined_typ_params return_typ_params in
+    adt_parameters typ_params constructors_return_typ_params
+
 (** Check if the type is not a GADT. If this is not a GADT, also return a
   prefered list of parameter names for the type variables. It merges the
   names found in the definition of the type name and in the constructors. *)
-let rec check_if_not_gadt
-  (defined_typ_params : TypParams.t)
-  (constructors_return_typ_params : TypParams.t list)
+let check_if_not_gadt
+    (defined_typ_params : TypParams.t)
+    (constructors_return_typ_params : TypParams.t list)
   : TypParams.t option =
-  match constructors_return_typ_params with
-  | [] -> Some defined_typ_params
-  | return_typ_params :: constructors_return_typ_params ->
-    let typ_params = merge_typ_params defined_typ_params return_typ_params in
-    check_if_not_gadt typ_params constructors_return_typ_params
+  let typ_params = adt_parameters defined_typ_params constructors_return_typ_params in
+      if typ_params <> defined_typ_params
+      then Some typ_params
+      else None
