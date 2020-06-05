@@ -136,8 +136,9 @@ let rec of_signature (signature : Typedtree.signature) : t Monad.t =
       | [{ ci_params; ci_id_class_type; ci_expr; _ }] ->
         (ci_params |>
           List.map (fun ({ Typedtree.ctyp_type; _ }, _) -> ctyp_type) |>
-          TypeIsGadt.named_typ_params_expecting_variables
+          TypeIsGadt.inductive_variables
         ) >>= fun typ_params ->
+        let typ_params = TypeIsGadt.get_parameters typ_params in
         let* name = Name.of_ident false ci_id_class_type in
         begin match ci_expr with
         | {
