@@ -237,7 +237,6 @@ module Constructors = struct
           let merged_typ_params =
             TypeIsGadt.get_parameters merged_typ_params in
           let res_typ_params =
-            (* List.map (fun name -> Type.Variable name) res_typ_params in *)
             List.map (fun name -> Type.Variable name) merged_typ_params in
           return {
             constructor_name;
@@ -336,11 +335,7 @@ module Inductive = struct
       else
         parens (
           nest (
-            separate space (left_typ_args |> List.map ( Name.to_coq
-                (* function *)
-                  (* None -> !^ "_" *)
-                (* | Some name -> Name.to_coq name *)
-            )) ^^
+            separate space (left_typ_args |> List.map Name.to_coq) ^^
             !^ ":" ^^ Pp.set
           )
         )

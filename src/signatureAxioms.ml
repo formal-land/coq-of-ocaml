@@ -163,8 +163,6 @@ let rec of_signature (signature : Typedtree.signature) : t Monad.t =
                 NotSupported
                 "We do not handle this form of field of class type"
             )) >>= fun fields ->
-            (* let* typ_params = *)
-              (* TypeIsGadt.named_typ_params_with_unknowns typ_params in *)
             return [TypDefinition (TypeDefinition.Record (
               name,
               typ_params,

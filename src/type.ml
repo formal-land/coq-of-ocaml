@@ -83,11 +83,11 @@ let rec non_phantom_typs (path : Path.t) (typs : Types.type_expr list)
             ) in
         let gadt_shape = TypeIsGadt.gadt_shape typ_params constructors_return_typ_params in
 
-        return (List.map (fun shape ->
+        return (Some (gadt_shape |> List.map (fun shape ->
             match shape with
             | None -> Attribute.has_force_gadt typ_attributes
             | Some _ -> true
-          ) gadt_shape)
+          )))
       | Type_open -> return None
       end
     | exception Not_found -> return None
