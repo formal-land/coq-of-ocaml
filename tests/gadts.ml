@@ -14,6 +14,7 @@ let rec proj_int (e : int expr) : int =
   match[@coq_match_with_default] e with
   | Int n -> n
   | Sum (e1, e2) -> proj_int e1 + proj_int e2
+  | _ -> .
 
 type 'a one_case =
   | SingleCase : int one_case

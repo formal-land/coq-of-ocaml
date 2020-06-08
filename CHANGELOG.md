@@ -1,4 +1,5 @@
 ## [Unreleased]
+* Ignore unreachable expressions in match cases
 * Add configuration to black list errors containing a certain message.
 * Add configuration to disable exit with error code on some files.
 * Exit with a non-null code in case of error.
