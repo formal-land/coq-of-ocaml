@@ -12,6 +12,10 @@ module IndParams = struct
   type t = InductiveVariable.t list
 end
 
+let get_name : InductiveVariable.t -> Name.t option = function
+  | InductiveVariable.Parameter name | Index name -> Some name
+  | _ -> None
+
 let get_parameters (typs : IndParams.t) : Name.t list =
   typs |> List.filter_map (function
       | InductiveVariable.Parameter name -> Some name
