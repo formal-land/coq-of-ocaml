@@ -221,15 +221,15 @@ module Constructors = struct
                 defined_typ_params
                 constructors_return_typ_params) with
       | None -> defined_typ_params
-      | Some typs -> typs
+      | Some typs -> typs in
 
     let* constructors = single_constructors |> Monad.List.map (
       fun { Single.constructor_name; param_typs; _ } ->
-          let typ_params =
-            TypeIsGadt.get_parameters typ_params in
           let res_typ_params =
-            List.map (fun name -> Type.Variable name) typ_params in
-          return {
+            typ_params |> TypeIsGadt.get_parameters |> List.map (fun name -> Type.Variable name) in
+          let typ_param_names = (typ_params |> List.map TypeIsGadt.get_name |>
+                                 List.filter_map (function x -> x) |> Name.Set.of_list)
+          in return {
             constructor_name;
             param_typs;
             res_typ_params;
@@ -237,13 +237,15 @@ module Constructors = struct
               Name.Set.elements (
                 Name.Set.diff
                   (Type.typ_args_of_typs param_typs)
-                  (typ_params |> Name.Set.of_list)
+                  typ_param_names
               )
 
           }
     ) in
-    return (constructors, merged_typ_params)
+    return (constructors, typ_params)
+
 end
+
 
 module Inductive = struct
   type notation = Name.t * Name.t list * Type.t
