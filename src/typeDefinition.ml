@@ -215,21 +215,21 @@ module Constructors = struct
       single_constructors |> List.map (fun single_constructor ->
           single_constructor.Single.return_typ_params
         ) in
-
-    let typ_params =
-        match (TypeIsGadt.check_if_not_gadt
+    let merged_typ_params = TypeIsGadt.check_if_not_gadt
                 defined_typ_params
-                constructors_return_typ_params) with
+                constructors_return_typ_params in
+    let typ_params =
+        match merged_typ_params with
       | None -> defined_typ_params
-      | Some typs -> typs in
+      | Some merged_typ_params -> merged_typ_params in
 
     let* constructors = single_constructors |> Monad.List.map (
       fun { Single.constructor_name; param_typs; _ } ->
           let res_typ_params =
             typ_params |> TypeIsGadt.get_parameters |> List.map (fun name -> Type.Variable name) in
           let typ_param_names = (typ_params |> List.map TypeIsGadt.get_name |>
-                                 List.filter_map (function x -> x) |> Name.Set.of_list)
-          in return {
+                                 List.filter_map (function x -> x) |> Name.Set.of_list) in
+          return {
             constructor_name;
             param_typs;
             res_typ_params;

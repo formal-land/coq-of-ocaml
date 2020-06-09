@@ -29,7 +29,7 @@ let type_exprs_of_row_field (row_field : Types.row_field)
 
 let filter_typ_params_in_valid_set
   (typ_params : Name.t list) (valid_set : Name.Set.t) : bool list =
-  typ_params |> List.map (function ty -> Name.Set.mem ty valid_set)
+  typ_params |> List.map (fun ty -> Name.Set.mem ty valid_set)
 
 
 let rec non_phantom_typs (path : Path.t) (typs : Types.type_expr list)

@@ -96,17 +96,6 @@ let rec adt_parameters
     let typ_params = merge_typ_params defined_typ_params return_typ_params in
     adt_parameters typ_params constructors_return_typ_params
 
-
-let rec gadt_shape'
-    (defined_typ_params : InductiveVariable.t option list)
-    (constructors_return_typ_params : InductiveVariable.t option list list)
-  : InductiveVariable.t option list =
-  match constructors_return_typ_params with
-  | [] -> defined_typ_params
-  | return_typ_params :: constructors_return_typ_params ->
-    let typ_params = merge_typ_params defined_typ_params return_typ_params in
-    gadt_shape' typ_params constructors_return_typ_params
-
 let gadt_shape
     (defined_typ_params : InductiveVariable.t list)
     (constructors_return_typ_params : InductiveVariable.t list list)
@@ -116,7 +105,7 @@ let gadt_shape
     List.map (function xs ->
         List.map (function x -> Some x) xs)
       constructors_return_typ_params in
-  gadt_shape' defined_typ_params constructors_return_typ_params
+  List.fold_left merge_typ_params defined_typ_params constructors_return_typ_params
 
 (** Check if the type is not a GADT. If this is not a GADT, also return a
   prefered list of parameter names for the type variables. It merges the
