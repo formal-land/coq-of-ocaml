@@ -37,8 +37,7 @@ let rec non_phantom_typs (path : Path.t) (typs : Types.type_expr list)
   get_env >>= fun env ->
   begin match Env.find_type path env with
   | typ_declaration ->
-    AdtParameters.inductive_variables
-      typ_declaration.type_params >>= fun typ_params ->
+    AdtParameters.of_ocaml typ_declaration.type_params >>= fun typ_params ->
     Attribute.of_attributes typ_declaration.type_attributes >>= fun typ_attributes ->
     let is_phantom = Attribute.has_phantom typ_attributes in
     if is_phantom then

@@ -6,6 +6,21 @@ module AdtVariable = struct
     | Parameter of Name.t
     | Index of Name.t
     | Unknown
+
+  let rec of_ocaml (typ : Types.type_expr) : t Monad.t =
+    match typ.Types.desc with
+    | Tvar x | Tunivar x ->
+      begin match x with
+        | None | Some "_" -> return Unknown
+        | Some x ->
+          Name.of_string false x >>= fun x ->
+          return (Parameter x)
+      end
+    | Tlink typ | Tsubst typ -> of_ocaml typ
+    | Tconstr (typ, _, _) ->
+      Path.last typ |> Name.of_string false >>= fun typ ->  return (Index typ)
+    | _ -> return Error
+
 end
 
 type t = AdtVariable.t list
@@ -19,39 +34,29 @@ let get_parameters (typs : t) : Name.t list =
       | AdtVariable.Parameter name -> Some name
       | _ -> None)
 
-let rec inductive_variable (typ : Types.type_expr) : AdtVariable.t Monad.t =
-  match typ.Types.desc with
-  | Tvar x | Tunivar x ->
-    begin match x with
-    | None | Some "_" -> return AdtVariable.Unknown
-    | Some x ->
-      Name.of_string false x >>= fun x ->
-      return (AdtVariable.Parameter x)
-    end
-  | Tlink typ | Tsubst typ -> inductive_variable typ
-  | Tconstr (typ, _, _) ->
-    Path.last typ |> Name.of_string false >>= fun typ ->  return (AdtVariable.Index typ)
-  | _ -> return AdtVariable.Error
-
-let inductive_variables (typs : Types.type_expr list) : AdtVariable.t list Monad.t =
-  Monad.List.map inductive_variable typs
+let of_ocaml : Types.type_expr list -> t Monad.t =
+  Monad.List.map AdtVariable.of_ocaml
 
 let filter_params (typs : Types.type_expr list)
   : t Monad.t =
-  Monad.List.map inductive_variable typs >>= fun typs ->
-  typs |> List.filter (function
-      | AdtVariable.Parameter _ -> true
-      | _ -> false)
-  |> return
+  of_ocaml typs >>= fun typs ->
+  typs |> Monad.List.filter (function
+      | AdtVariable.Parameter _ -> return true
+      | _ -> return false)
 
-  let typ_params_ghost_marked
-  (typs : Types.type_expr list) : t Monad.t =
+let typ_params_ghost_marked
+    (typs : Types.type_expr list)
+  : t Monad.t =
   typs |> filter_params
 
-let equal (param1 : AdtVariable.t) (param2 : AdtVariable.t) =
+let equal
+    (param1 : AdtVariable.t)
+    (param2 : AdtVariable.t)
+  : bool =
   match param1, param2 with
   | Error, Error | Unknown, Unknown -> true
-  | Parameter name1, Parameter name2 | Index name1, Index name2 -> Name.equal name1 name2
+  | Parameter name1, Parameter name2 | Index name1, Index name2 ->
+    Name.equal name1 name2
   | _, _ -> false
 
 let rec merge_typ_params
@@ -77,11 +82,12 @@ let rec merge_typ_params
     only variables. Defaults to the parameters of the defined type itself, in
     case of a non-GADT type. *)
 let get_return_typ_params
-  (defined_typ_params : t) (return_typ : Types.type_expr option)
+    (defined_typ_params : t)
+    (return_typ : Types.type_expr option)
   : t Monad.t =
   match return_typ with
   | Some { Types.desc = Tconstr (_, typs, _); _ } ->
-    Monad.List.map inductive_variable typs
+    of_ocaml typs
   | _ -> return (defined_typ_params)
 
 let rec adt_parameters

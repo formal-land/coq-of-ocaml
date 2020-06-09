@@ -574,7 +574,7 @@ let of_ocaml (typs : type_declaration list) : t Monad.t =
   match typs with
   | [ { typ_id; typ_type = { type_manifest = Some typ; type_params; _ }; _ } ] ->
     let* name = Name.of_ident false typ_id in
-    AdtParameters.inductive_variables type_params >>= fun ind_vars ->
+    AdtParameters.of_ocaml type_params >>= fun ind_vars ->
     let typ_args = AdtParameters.get_parameters ind_vars in
     begin match typ.Types.desc with
     | Tvariant { row_fields; _ } ->
@@ -600,7 +600,7 @@ let of_ocaml (typs : type_declaration list) : t Monad.t =
   | [ { typ_id; typ_type = { type_kind = Type_abstract; type_manifest = None; type_params; _ }; typ_attributes; _ } ] ->
     Attribute.of_attributes typ_attributes >>= fun typ_attributes ->
     let* name = Name.of_ident false typ_id in
-    AdtParameters.inductive_variables type_params >>= fun typ_args ->
+    AdtParameters.of_ocaml type_params >>= fun typ_args ->
     let typ_args_with_unknowns =
       if not (Attribute.has_phantom typ_attributes) then
         AdtParameters.get_parameters typ_args
@@ -609,7 +609,7 @@ let of_ocaml (typs : type_declaration list) : t Monad.t =
     return (Abstract (name, typ_args_with_unknowns))
   | [ { typ_id; typ_type = { type_kind = Type_record (fields, _); type_params; _ }; _ } ] ->
     let* name = Name.of_ident false typ_id in
-    AdtParameters.inductive_variables type_params >>= fun typ_args ->
+    AdtParameters.of_ocaml type_params >>= fun typ_args ->
     (fields |> Monad.List.map (fun { Types.ld_id = x; ld_type = typ; _ } ->
       let* x = Name.of_ident false x in
       Type.of_type_expr_without_free_vars typ >>= fun typ ->
@@ -630,7 +630,7 @@ let of_ocaml (typs : type_declaration list) : t Monad.t =
     (typs |> Monad.List.fold_left (fun (constructor_records, notations, records, typs) typ ->
       set_loc (Loc.of_location typ.typ_loc) (
       let* name = Name.of_ident false typ.typ_id in
-      AdtParameters.inductive_variables typ.typ_type.type_params >>= fun typ_args ->
+      AdtParameters.of_ocaml typ.typ_type.type_params >>= fun typ_args ->
       match typ with
       | { typ_type = { type_manifest = Some typ; _ }; _ } ->
         begin match typ.Types.desc with
