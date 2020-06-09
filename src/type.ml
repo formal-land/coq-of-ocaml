@@ -49,7 +49,7 @@ let rec non_phantom_typs (path : Path.t) (typs : Types.type_expr list)
         begin match typ_declaration.type_manifest with
         | None ->
           return (Some (typ_params |> List.map (function
-            | AdtParameters.InductiveVariable.Parameter _ -> true
+            | AdtParameters.AdtVariable.Parameter _ -> true
             | _ ->
               if Path.name path = "array" then
                 true
@@ -59,7 +59,7 @@ let rec non_phantom_typs (path : Path.t) (typs : Types.type_expr list)
         (* Specific case for inductives defined with polymorphic variants. *)
         | Some { desc = Tvariant _; _ } ->
           return (Some (typ_params |> List.map (function
-            | AdtParameters.InductiveVariable.Parameter _ -> true
+            | AdtParameters.AdtVariable.Parameter _ -> true
             | _ -> false
           )))
         | Some typ ->

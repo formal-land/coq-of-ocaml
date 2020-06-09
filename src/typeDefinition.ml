@@ -107,14 +107,14 @@ module Constructors = struct
     type t = {
       constructor_name : Name.t;
       param_typs : Type.t list; (** The parameters of the constructor. *)
-      return_typ_params : AdtParameters.IndParams.t;
+      return_typ_params : AdtParameters.t;
         (** The return type, in case of GADT constructor, with some inference to
             rule-out GADTs with only existential variables. *)
     }
 
     let of_ocaml_case
       (typ_name : Name.t)
-      (defined_typ_params : AdtParameters.IndParams.t)
+      (defined_typ_params : AdtParameters.t)
       (case : Types.constructor_declaration)
       : (t * (RecordSkeleton.t * Name.t list * Type.t) option) Monad.t =
       let { Types.cd_args; cd_id; cd_loc; cd_res; _ } = case in
@@ -192,7 +192,7 @@ module Constructors = struct
       ))
 
     let of_ocaml_row
-      (defined_typ_params : AdtParameters.IndParams.t)
+      (defined_typ_params : AdtParameters.t)
       (row : Asttypes.label * Types.row_field)
       : t Monad.t =
       let (label, field) = row in
@@ -207,9 +207,9 @@ module Constructors = struct
   end
 
   let of_ocaml
-    (defined_typ_params : AdtParameters.IndParams.t)
+    (defined_typ_params : AdtParameters.t)
     (single_constructors : Single.t list)
-    : (t * AdtParameters.IndParams.t) Monad.t =
+    : (t * AdtParameters.t) Monad.t =
 
     let constructors_return_typ_params =
       single_constructors |> List.map (fun single_constructor ->
