@@ -37,7 +37,7 @@ let rec non_phantom_typs (path : Path.t) (typs : Types.type_expr list)
   get_env >>= fun env ->
   begin match Env.find_type path env with
   | typ_declaration ->
-    TypeIsGadt.inductive_variables
+    AdtParameters.inductive_variables
       typ_declaration.type_params >>= fun typ_params ->
     Attribute.of_attributes typ_declaration.type_attributes >>= fun typ_attributes ->
     let is_phantom = Attribute.has_phantom typ_attributes in
@@ -49,7 +49,7 @@ let rec non_phantom_typs (path : Path.t) (typs : Types.type_expr list)
         begin match typ_declaration.type_manifest with
         | None ->
           return (Some (typ_params |> List.map (function
-            | TypeIsGadt.InductiveVariable.Parameter _ -> true
+            | AdtParameters.InductiveVariable.Parameter _ -> true
             | _ ->
               if Path.name path = "array" then
                 true
@@ -59,12 +59,12 @@ let rec non_phantom_typs (path : Path.t) (typs : Types.type_expr list)
         (* Specific case for inductives defined with polymorphic variants. *)
         | Some { desc = Tvariant _; _ } ->
           return (Some (typ_params |> List.map (function
-            | TypeIsGadt.InductiveVariable.Parameter _ -> true
+            | AdtParameters.InductiveVariable.Parameter _ -> true
             | _ -> false
           )))
         | Some typ ->
           non_phantom_vars_of_typ typ >>= fun non_phantom_typ_vars ->
-          let typ_params = TypeIsGadt.get_parameters typ_params in
+          let typ_params = AdtParameters.get_parameters typ_params in
           return (Some (
             filter_typ_params_in_valid_set typ_params non_phantom_typ_vars
           ))
@@ -72,16 +72,16 @@ let rec non_phantom_typs (path : Path.t) (typs : Types.type_expr list)
       | Type_record (labels, _) ->
         let typs = List.map (fun label -> label.ld_type) labels in
         non_phantom_vars_of_typs typs >>= fun non_phantom_typ_vars ->
-        let typ_params = TypeIsGadt.get_parameters typ_params in
+        let typ_params = AdtParameters.get_parameters typ_params in
         return (Some (
           filter_typ_params_in_valid_set typ_params non_phantom_typ_vars
         ))
       | Type_variant constructors ->
         let* constructors_return_typ_params =
           constructors |> Monad.List.map (fun constructor ->
-              TypeIsGadt.get_return_typ_params typ_params constructor.cd_res
+              AdtParameters.get_return_typ_params typ_params constructor.cd_res
             ) in
-        let gadt_shape = TypeIsGadt.gadt_shape typ_params constructors_return_typ_params in
+        let gadt_shape = AdtParameters.gadt_shape typ_params constructors_return_typ_params in
 
         return (Some (gadt_shape |> List.map (fun shape ->
             match shape with
@@ -138,10 +138,10 @@ and non_phantom_vars_of_typ (typ : Types.type_expr) : Name.Set.t Monad.t =
     return Name.Set.empty
   | Tpoly (typ, typ_args) ->
     let* typ_args =
-      TypeIsGadt.typ_params_ghost_marked typ_args in
+      AdtParameters.typ_params_ghost_marked typ_args in
     let typ_args =
       typ_args |>
-      TypeIsGadt.get_parameters |>
+      AdtParameters.get_parameters |>
       Name.Set.of_list in
     non_phantom_vars_of_typ typ >>= fun non_phantom_vars ->
     return (Name.Set.diff non_phantom_vars typ_args)
@@ -250,8 +250,8 @@ let rec of_typ_expr
     end
   | Tpoly (typ, typ_args) ->
     let* typ_args =
-      TypeIsGadt.typ_params_ghost_marked typ_args in
-    let typ_args = typ_args |> TypeIsGadt.get_parameters in
+      AdtParameters.typ_params_ghost_marked typ_args in
+    let typ_args = typ_args |> AdtParameters.get_parameters in
     non_phantom_vars_of_typ typ >>= fun non_phantom_vars ->
     let typ_args = typ_args |> List.filter (fun typ_arg ->
       Name.Set.mem typ_arg non_phantom_vars
