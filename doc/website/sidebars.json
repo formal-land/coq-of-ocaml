@@ -12,7 +12,8 @@
       "type-definitions",
       "module-system",
       "gadts",
-      "attributes"
+      "attributes",
+      "configuration"
     ],
     "Roadmap": [
       "roadmap"

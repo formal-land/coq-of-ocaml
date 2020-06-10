@@ -1,4 +1,7 @@
 {
+  "engines": {
+    "node": "12.13.0"
+  },
   "scripts": {
     "examples": "docusaurus-examples",
     "start": "docusaurus-start",
