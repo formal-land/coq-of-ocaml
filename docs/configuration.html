@@ -1,0 +1,456 @@
+<!DOCTYPE html><html lang="en"><head><meta charSet="utf-8"/><meta http-equiv="X-UA-Compatible" content="IE=edge"/><title>Configuration · coq-of-ocaml</title><meta name="viewport" content="width=device-width"/><meta name="generator" content="Docusaurus"/><meta name="description" content="We present the configuration mechanism of coq-of-ocaml to define some global settings. We write the configuration in a file in the [JSON format](https://www.json.org/json-en.html). To run coq-of-ocaml with a configuration file, use the `-config` option:"/><meta name="docsearch:language" content="en"/><meta property="og:title" content="Configuration · coq-of-ocaml"/><meta property="og:type" content="website"/><meta property="og:url" content="https://clarus.github.io/coq-of-ocaml/"/><meta property="og:description" content="We present the configuration mechanism of coq-of-ocaml to define some global settings. We write the configuration in a file in the [JSON format](https://www.json.org/json-en.html). To run coq-of-ocaml with a configuration file, use the `-config` option:"/><meta property="og:image" content="https://clarus.github.io/coq-of-ocaml/img/undraw_online.svg"/><meta name="twitter:card" content="summary"/><meta name="twitter:image" content="https://clarus.github.io/coq-of-ocaml/img/undraw_tweetstorm.svg"/><link rel="shortcut icon" href="/coq-of-ocaml/img/favicon.ico"/><link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/default.min.css"/><script type="text/javascript" src="https://buttons.github.io/buttons.js"></script><script type="text/javascript" src="/coq-of-ocaml/js/language-name.js"></script><script src="/coq-of-ocaml/js/scrollSpy.js"></script><link rel="stylesheet" href="/coq-of-ocaml/css/main.css"/><script src="/coq-of-ocaml/js/codetabs.js"></script></head><body class="sideNavVisible separateOnPageNav"><div class="fixedHeaderContainer"><div class="headerWrapper wrapper"><header><a href="/coq-of-ocaml/"><img class="logo" src="/coq-of-ocaml/img/favicon.ico" alt="coq-of-ocaml"/><h2 class="headerTitleWithLogo">coq-of-ocaml</h2></a><div class="navigationWrapper navigationSlider"><nav class="slidingNav"><ul class="nav-site nav-site-internal"><li class="siteNavGroupActive"><a href="/coq-of-ocaml/docs/introduction" target="_self">Docs</a></li><li class=""><a href="https://clarus.github.io/coq-of-ocaml/examples/" target="_self">Examples</a></li><li class=""><a href="https://github.com/clarus/coq-of-ocaml" target="_self">GitHub</a></li></ul></nav></div></header></div></div><div class="navPusher"><div class="docMainWrapper wrapper"><div class="docsNavContainer" id="docsNav"><nav class="toc"><div class="toggleNav"><section class="navWrapper wrapper"><div class="navBreadcrumb wrapper"><div class="navToggle" id="navToggler"><div class="hamburger-menu"><div class="line1"></div><div class="line2"></div><div class="line3"></div></div></div><h2><i>›</i><span>Concepts</span></h2><div class="tocToggler" id="tocToggler"><i class="icon-toc"></i></div></div><div class="navGroups"><div class="navGroup"><h3 class="navGroupCategoryTitle">Introduction</h3><ul class=""><li class="navListItem"><a class="navItem" href="/coq-of-ocaml/docs/introduction">What is coq-of-ocaml</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">Getting started</h3><ul class=""><li class="navListItem"><a class="navItem" href="/coq-of-ocaml/docs/install">Install</a></li><li class="navListItem"><a class="navItem" href="/coq-of-ocaml/docs/run">Run</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">Concepts</h3><ul class=""><li class="navListItem"><a class="navItem" href="/coq-of-ocaml/docs/ocaml-core">OCaml core</a></li><li class="navListItem"><a class="navItem" href="/coq-of-ocaml/docs/type-definitions">Type definitions</a></li><li class="navListItem"><a class="navItem" href="/coq-of-ocaml/docs/module-system">Module system</a></li><li class="navListItem"><a class="navItem" href="/coq-of-ocaml/docs/gadts">GADTs</a></li><li class="navListItem"><a class="navItem" href="/coq-of-ocaml/docs/attributes">Attributes</a></li><li class="navListItem navListItemActive"><a class="navItem" href="/coq-of-ocaml/docs/configuration">Configuration</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">Roadmap</h3><ul class=""><li class="navListItem"><a class="navItem" href="/coq-of-ocaml/docs/roadmap">Future</a></li></ul></div></div></section></div><script>
+            var coll = document.getElementsByClassName('collapsible');
+            var checkActiveCategory = true;
+            for (var i = 0; i < coll.length; i++) {
+              var links = coll[i].nextElementSibling.getElementsByTagName('*');
+              if (checkActiveCategory){
+                for (var j = 0; j < links.length; j++) {
+                  if (links[j].classList.contains('navListItemActive')){
+                    coll[i].nextElementSibling.classList.toggle('hide');
+                    coll[i].childNodes[1].classList.toggle('rotate');
+                    checkActiveCategory = false;
+                    break;
+                  }
+                }
+              }
+
+              coll[i].addEventListener('click', function() {
+                var arrow = this.childNodes[1];
+                arrow.classList.toggle('rotate');
+                var content = this.nextElementSibling;
+                content.classList.toggle('hide');
+              });
+            }
+
+            document.addEventListener('DOMContentLoaded', function() {
+              createToggler('#navToggler', '#docsNav', 'docsSliderActive');
+              createToggler('#tocToggler', 'body', 'tocActive');
+
+              var headings = document.querySelector('.toc-headings');
+              headings && headings.addEventListener('click', function(event) {
+                var el = event.target;
+                while(el !== headings){
+                  if (el.tagName === 'A') {
+                    document.body.classList.remove('tocActive');
+                    break;
+                  } else{
+                    el = el.parentNode;
+                  }
+                }
+              }, false);
+
+              function createToggler(togglerSelector, targetSelector, className) {
+                var toggler = document.querySelector(togglerSelector);
+                var target = document.querySelector(targetSelector);
+
+                if (!toggler) {
+                  return;
+                }
+
+                toggler.onclick = function(event) {
+                  event.preventDefault();
+
+                  target.classList.toggle(className);
+                };
+              }
+            });
+        </script></nav></div><div class="container mainContainer docsContainer"><div class="wrapper"><div class="post"><header class="postHeader"><h1 id="__docusaurus" class="postHeaderTitle">Configuration</h1></header><article><div><span><p>We present the configuration mechanism of coq-of-ocaml to define some global settings. We write the configuration in a file in the <a href="https://www.json.org/json-en.html">JSON format</a>. To run coq-of-ocaml with a configuration file, use the <code>-config</code> option:</p>
+<pre><code class="hljs css language-sh">coq-of-ocaml -config configuration.json ...
+</code></pre>
+<p>The general structure of a configuration file is an object of entry keys and values:</p>
+<pre><code class="hljs css language-sh">{
+  <span class="hljs-string">"entry_1"</span>: value_1,
+  ...,
+  <span class="hljs-string">"entry_n"</span>: value_n
+}
+</code></pre>
+<p>An example is:</p>
+<pre><code class="hljs css language-json">{
+  <span class="hljs-attr">"error_message_blacklist"</span>: [
+    <span class="hljs-string">"Unbound module Tezos_protocol_alpha_functor"</span>
+  ],
+  <span class="hljs-attr">"monadic_operators"</span>: [
+    [<span class="hljs-string">"Error_monad.op_gtgteq"</span>, <span class="hljs-string">"let="</span>],
+    [<span class="hljs-string">"Error_monad.op_gtgteqquestion"</span>, <span class="hljs-string">"let=?"</span>],
+    [<span class="hljs-string">"Error_monad.op_gtgtquestion"</span>, <span class="hljs-string">"let?"</span>]
+  ],
+  <span class="hljs-attr">"require"</span>: [
+    [<span class="hljs-string">"Tezos_raw_protocol_alpha"</span>, <span class="hljs-string">"Tezos"</span>]
+  ],
+  <span class="hljs-attr">"variant_constructors"</span>: [
+    [<span class="hljs-string">"Dir"</span>, <span class="hljs-string">"Context.Dir"</span>],
+    [<span class="hljs-string">"Key"</span>, <span class="hljs-string">"Context.Key"</span>],
+    [<span class="hljs-string">"Hex"</span>, <span class="hljs-string">"MBytes.Hex"</span>]
+  ],
+  <span class="hljs-attr">"without_positivity_checking"</span>: [
+    <span class="hljs-string">"src/proto_alpha/lib_protocol/storage_description.ml"</span>
+  ]
+}
+</code></pre>
+<p>The configuration entries are described as follows.</p>
+<h2><a class="anchor" aria-hidden="true" id="alias_barrier_modules"></a><a href="#alias_barrier_modules" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>alias_barrier_modules</h2>
+<h4><a class="anchor" aria-hidden="true" id="example"></a><a href="#example" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Example</h4>
+<pre><code class="hljs"><span class="hljs-string">"alias_barrier_modules"</span>: [
+  <span class="hljs-string">"Tezos_protocol_environment_alpha__Environment"</span>
+]
+</code></pre>
+<h4><a class="anchor" aria-hidden="true" id="value"></a><a href="#value" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Value</h4>
+<p>A list of module names at which to stop when iterating through record aliases to find the initial record definition.</p>
+<h4><a class="anchor" aria-hidden="true" id="explanation"></a><a href="#explanation" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Explanation</h4>
+<p>An example of OCaml code with a record alias is:</p>
+<pre><code class="hljs css language-ocaml"><span class="hljs-keyword">module</span> <span class="hljs-type">A</span> = <span class="hljs-keyword">struct</span>
+  <span class="hljs-keyword">type</span> t = {a : <span class="hljs-built_in">string</span>; b : <span class="hljs-built_in">bool</span>}
+<span class="hljs-keyword">end</span>
+
+<span class="hljs-keyword">module</span> <span class="hljs-type">B</span> = <span class="hljs-keyword">struct</span>
+  <span class="hljs-keyword">type</span> t = <span class="hljs-type">A</span>.t = {a : <span class="hljs-built_in">string</span>; b : <span class="hljs-built_in">bool</span>}
+<span class="hljs-keyword">end</span>
+
+<span class="hljs-keyword">let</span> x = {<span class="hljs-type">B</span>.a = <span class="hljs-string">"hi"</span>; b = <span class="hljs-literal">true</span>}
+</code></pre>
+<p>which generates:</p>
+<pre><code class="hljs css language-coq"><span class="hljs-keyword">Module</span> A.
+  <span class="hljs-keyword">Module</span> t.
+    <span class="hljs-keyword">Record</span> <span class="hljs-built_in">record</span> : <span class="hljs-keyword">Set</span> := Build {
+      a : string;
+      b : bool }.
+    <span class="hljs-keyword">Definition</span> with_a a (r : <span class="hljs-built_in">record</span>) :=
+      Build a r.(b).
+    <span class="hljs-keyword">Definition</span> with_b b (r : <span class="hljs-built_in">record</span>) :=
+      Build r.(a) b.
+  <span class="hljs-keyword">End</span> t.
+  <span class="hljs-keyword">Definition</span> t := t.<span class="hljs-built_in">record</span>.
+<span class="hljs-keyword">End</span> A.
+
+<span class="hljs-keyword">Module</span> B.
+  <span class="hljs-keyword">Definition</span> t : <span class="hljs-keyword">Set</span> := A.t.
+<span class="hljs-keyword">End</span> B.
+
+<span class="hljs-keyword">Definition</span> x : B.t := {| <span class="hljs-type">A</span>.t.a := <span class="hljs-string">"hi"</span>; A.t.b := true |<span class="hljs-type">}.
+</span></code></pre>
+<p>Even if in OCaml we can talk about the field <code>B.a</code>, in Coq we transform it to <code>A.t.a</code> so that there is a single record definition. To do this transformation, we go through the record aliases up to the alias barriers, if any.</p>
+<h2><a class="anchor" aria-hidden="true" id="constructor_map"></a><a href="#constructor_map" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>constructor_map</h2>
+<h4><a class="anchor" aria-hidden="true" id="example-1"></a><a href="#example-1" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Example</h4>
+<pre><code class="hljs"><span class="hljs-string">"constructor_map"</span>: [
+  [<span class="hljs-string">"public_key_hash"</span>, <span class="hljs-string">"Ed25519"</span>, <span class="hljs-string">"Ed25519Hash"</span>],
+  [<span class="hljs-string">"public_key_hash"</span>, <span class="hljs-string">"P256"</span>, <span class="hljs-string">"P256Hash"</span>],
+  [<span class="hljs-string">"public_key_hash"</span>, <span class="hljs-string">"Secp256k1"</span>, <span class="hljs-string">"Secp256k1Hash"</span>]
+]
+</code></pre>
+<h4><a class="anchor" aria-hidden="true" id="value-1"></a><a href="#value-1" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Value</h4>
+<p>A list of triples with a type name, a constructor name and a new constructor name to rename to. The type name must be the type name associated to the constructor, and is not prefixed by a module name. This type name is mostly there to help to disambiguate.</p>
+<h4><a class="anchor" aria-hidden="true" id="explanation-1"></a><a href="#explanation-1" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Explanation</h4>
+<p>In OCaml we can have different types with the same constructor names, as long as the OCaml compiler can differentiate them based on type information. In Coq this is not the case. The definition of two constructors with the same name generates a name collision. For this reason, we can selectively rename some constructors in coq-of-ocaml in order to avoid name collisions in Coq.</p>
+<h2><a class="anchor" aria-hidden="true" id="error_category_blacklist"></a><a href="#error_category_blacklist" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>error_category_blacklist</h2>
+<h4><a class="anchor" aria-hidden="true" id="example-2"></a><a href="#example-2" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Example</h4>
+<pre><code class="hljs"><span class="hljs-string">"error_category_blacklist"</span>: [
+  <span class="hljs-string">"extensible_type"</span>,
+  <span class="hljs-string">"module"</span>,
+  <span class="hljs-string">"side_effect"</span>
+]
+</code></pre>
+<h4><a class="anchor" aria-hidden="true" id="value-2"></a><a href="#value-2" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Value</h4>
+<p>A list of error categories to black-list. The category of an error message is given in its header. For example:</p>
+<pre><code class="hljs">--- foo.ml:<span class="hljs-number">1</span>:<span class="hljs-number">1</span> ------------------------------------------- side_effect (<span class="hljs-number">1</span>/<span class="hljs-number">1</span>) ---
+
+&gt; <span class="hljs-number">1</span> | let () =
+&gt; <span class="hljs-number">2</span> |   print_endline <span class="hljs-string">"hello world"</span>
+  <span class="hljs-number">3</span> | 
+
+
+Top-level evaluations are ignored
+</code></pre>
+<p>is an error of category <code>side_effect</code>.</p>
+<h4><a class="anchor" aria-hidden="true" id="explanation-2"></a><a href="#explanation-2" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Explanation</h4>
+<p>We may want to ignore some categories of errors in order to focus on other errors in a CI system for example.</p>
+<h2><a class="anchor" aria-hidden="true" id="error_filename_blacklist"></a><a href="#error_filename_blacklist" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>error_filename_blacklist</h2>
+<h4><a class="anchor" aria-hidden="true" id="example-3"></a><a href="#example-3" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Example</h4>
+<pre><code class="hljs"><span class="hljs-string">"error_filename_blacklist"</span>: [
+  <span class="hljs-string">"src/proto_alpha/lib_protocol/alpha_context.ml"</span>,
+  <span class="hljs-string">"src/proto_alpha/lib_protocol/alpha_context.mli"</span>
+]
+</code></pre>
+<h4><a class="anchor" aria-hidden="true" id="value-3"></a><a href="#value-3" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Value</h4>
+<p>A list of file names on which not to fail, even in case of errors. The return code of coq-of-ocaml is then 0 (success). We still display the error messages.</p>
+<h4><a class="anchor" aria-hidden="true" id="explanation-3"></a><a href="#explanation-3" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Explanation</h4>
+<p>We may still want to see the error logs of some complicated files while not returning a fatal error.</p>
+<h2><a class="anchor" aria-hidden="true" id="error_message_blacklist"></a><a href="#error_message_blacklist" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>error_message_blacklist</h2>
+<h4><a class="anchor" aria-hidden="true" id="example-4"></a><a href="#example-4" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Example</h4>
+<pre><code class="hljs"><span class="hljs-string">"error_message_blacklist"</span>: [
+  <span class="hljs-string">"Unbound module Tezos_protocol_alpha_functor"</span>
+]
+</code></pre>
+<h4><a class="anchor" aria-hidden="true" id="value-4"></a><a href="#value-4" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Value</h4>
+<p>A list of strings used to filtered out the error messages. An error message containing such a string is ignored.</p>
+<h4><a class="anchor" aria-hidden="true" id="explanation-4"></a><a href="#explanation-4" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Explanation</h4>
+<p>We may want to ignore an error after manual inspection. This option allows to ignore an arbitrary error based on its error message.</p>
+<h2><a class="anchor" aria-hidden="true" id="escape_value"></a><a href="#escape_value" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>escape_value</h2>
+<h4><a class="anchor" aria-hidden="true" id="example-5"></a><a href="#example-5" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Example</h4>
+<pre><code class="hljs"><span class="hljs-string">"escape_value"</span>: [
+  <span class="hljs-string">"a"</span>,
+  <span class="hljs-string">"baking_rights_query"</span>,
+  <span class="hljs-string">"json"</span>
+]
+</code></pre>
+<h4><a class="anchor" aria-hidden="true" id="value-5"></a><a href="#value-5" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Value</h4>
+<p>A list of variable names to escape. We escape by replacing a name <code>foo</code> by <code>__foo_value</code>. We do not escape type names or modules names.</p>
+<h4><a class="anchor" aria-hidden="true" id="explanation-5"></a><a href="#explanation-5" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Explanation</h4>
+<p>In OCaml, the value and type namespaces are different. For example, we can have a string named <code>string</code> of type <code>string</code>. In Coq, we need to find an alternate name in order to avoid a name collision. If you have a name collision due to a value having the same name as a type, you can use this option to escape the value name (and only the value name).</p>
+<h2><a class="anchor" aria-hidden="true" id="first_class_module_path_blacklist"></a><a href="#first_class_module_path_blacklist" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>first_class_module_path_blacklist</h2>
+<h4><a class="anchor" aria-hidden="true" id="example-6"></a><a href="#example-6" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Example</h4>
+<pre><code class="hljs"><span class="hljs-string">"first_class_module_path_blacklist"</span>: [
+  <span class="hljs-string">"Tezos_raw_protocol_alpha"</span>
+]
+</code></pre>
+<h4><a class="anchor" aria-hidden="true" id="value-6"></a><a href="#value-6" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Value</h4>
+<p>A list of module names, typically corresponding to the module of a folder. All the modules which are direct children of such modules are considered as plain modules. They are encoded by Coq modules, even if there is a signature to make a corresponding record.</p>
+<h4><a class="anchor" aria-hidden="true" id="explanation-6"></a><a href="#explanation-6" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Explanation</h4>
+<p>The module system of coq-of-ocaml encodes the modules having a signature name as dependent records. We use the signature name as the record type name. Sometimes, for modules corresponding to files, we want to avoid using records even if there is a named signature. This option prevents the record encoding for modules of the form <code>A.B</code> where <code>A</code> is in the black-list. For example, when a reference to a value <code>A.B.c</code> appears, we generate <code>A.B.c</code> rather than <code>A.B.(signature_name_of_B.c)</code>. Indeed, <code>A.B</code> is a Coq module rather than a record.</p>
+<h2><a class="anchor" aria-hidden="true" id="head_suffix"></a><a href="#head_suffix" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>head_suffix</h2>
+<h4><a class="anchor" aria-hidden="true" id="example-7"></a><a href="#example-7" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Example</h4>
+<pre><code class="hljs"><span class="hljs-string">"head_suffix"</span>: <span class="hljs-string">"Import Environment.Notations.\n"</span>
+</code></pre>
+<h4><a class="anchor" aria-hidden="true" id="value-7"></a><a href="#value-7" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Value</h4>
+<p>A string to add in the header of each file.</p>
+<h4><a class="anchor" aria-hidden="true" id="explanation-7"></a><a href="#explanation-7" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Explanation</h4>
+<p>We can use this option to add some default imports, or turn on some notations or flags.</p>
+<h2><a class="anchor" aria-hidden="true" id="monadic_operators"></a><a href="#monadic_operators" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>monadic_operators</h2>
+<h4><a class="anchor" aria-hidden="true" id="example-8"></a><a href="#example-8" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Example</h4>
+<pre><code class="hljs"><span class="hljs-string">"monadic_operators"</span>: [
+  [<span class="hljs-string">"Error_monad.op_gtgteq"</span>, <span class="hljs-string">"let="</span>],
+  [<span class="hljs-string">"Error_monad.op_gtgteqquestion"</span>, <span class="hljs-string">"let=?"</span>],
+  [<span class="hljs-string">"Error_monad.op_gtgtquestion"</span>, <span class="hljs-string">"let?"</span>]
+]
+</code></pre>
+<h4><a class="anchor" aria-hidden="true" id="value-8"></a><a href="#value-8" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Value</h4>
+<p>A list of couples of a monadic operator name and a monadic notation to use by coq-of-ocaml. You still have to define the notations somewhere, such as:</p>
+<pre><code class="hljs css language-coq"><span class="hljs-keyword">Notation</span> <span class="hljs-string">"'let?' x ':=' X 'in' Y"</span> :=
+  (Error_monad.op_gtgtquestion X (<span class="hljs-keyword">fun</span> x =&gt; Y))
+  (<span class="hljs-built_in">at</span> level <span class="hljs-number">200</span>, x <span class="hljs-keyword">ident</span>, X <span class="hljs-built_in">at</span> level <span class="hljs-number">100</span>, Y <span class="hljs-built_in">at</span> level <span class="hljs-number">200</span>).
+
+<span class="hljs-keyword">Notation</span> <span class="hljs-string">"'let?' ' x ':=' X 'in' Y"</span> :=
+  (Error_monad.op_gtgtquestion X (<span class="hljs-keyword">fun</span> x =&gt; Y))
+  (<span class="hljs-built_in">at</span> level <span class="hljs-number">200</span>, x <span class="hljs-built_in">pattern</span>, X <span class="hljs-built_in">at</span> level <span class="hljs-number">100</span>, Y <span class="hljs-built_in">at</span> level <span class="hljs-number">200</span>).
+</code></pre>
+<p>The binder <code>x</code> can be a variable name or a pattern prefixed by <code>'</code>.</p>
+<h4><a class="anchor" aria-hidden="true" id="explanation-8"></a><a href="#explanation-8" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Explanation</h4>
+<p>This helps to improve readability of code with effects written in a monadic style. For example:</p>
+<pre><code class="hljs css language-ocaml">(* let (&gt;&gt;=) x f = ... *)
+
+let operate x =
+  operation1 x &gt;&gt;= fun (y, z) -&gt;
+  operation2 y z
+</code></pre>
+<p>will generate, thanks to the notation mechanism:</p>
+<pre><code class="hljs css language-coq"><span class="hljs-keyword">Definition</span> operate (x : string) : int :=
+  <span class="hljs-keyword">let</span>! '(y, z) := operation1 x <span class="hljs-built_in">in</span>
+  operation2 y z.
+</code></pre>
+<p>Note that you can also use the monadic notation in OCaml with the <a href="https://caml.inria.fr/pub/docs/manual-ocaml/bindingops.html">binding operators</a>.</p>
+<h2><a class="anchor" aria-hidden="true" id="require"></a><a href="#require" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>require</h2>
+<h4><a class="anchor" aria-hidden="true" id="example-9"></a><a href="#example-9" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Example</h4>
+<pre><code class="hljs"><span class="hljs-string">"require"</span>: [
+  [<span class="hljs-string">"Tezos_raw_protocol_alpha"</span>, <span class="hljs-string">"Tezos"</span>]
+]
+</code></pre>
+<h4><a class="anchor" aria-hidden="true" id="value-9"></a><a href="#value-9" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Value</h4>
+<p>A list of couples of a module name and a module to require from in Coq.</p>
+<h4><a class="anchor" aria-hidden="true" id="explanation-9"></a><a href="#explanation-9" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Explanation</h4>
+<p>When we import a project with many files in Coq, we need to add the relevant <code>Require</code> directives for external references. For a require rule <code>[&quot;A&quot;, &quot;B&quot;]</code>, when we see in OCaml a reference to the module <code>A.M</code>, we generate in Coq the reference <code>M</code>. We also add a <code>Require B.M.</code> at the top of the file.</p>
+<h2><a class="anchor" aria-hidden="true" id="require_import"></a><a href="#require_import" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>require_import</h2>
+<h4><a class="anchor" aria-hidden="true" id="example-10"></a><a href="#example-10" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Example</h4>
+<pre><code class="hljs"><span class="hljs-string">"require_import"</span>: [
+  [<span class="hljs-string">"Tezos_protocol_environment_alpha"</span>, <span class="hljs-string">"Tezos"</span>]
+]
+</code></pre>
+<h4><a class="anchor" aria-hidden="true" id="value-10"></a><a href="#value-10" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Value</h4>
+<p>A list of couples of a module name and a module to require import from in Coq.</p>
+<h4><a class="anchor" aria-hidden="true" id="explanation-10"></a><a href="#explanation-10" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Explanation</h4>
+<p>Similar to the <code>require</code> command, with an additional <code>Import</code> in order to shorten the paths for commonly used modules.</p>
+<h2><a class="anchor" aria-hidden="true" id="require_long_ident"></a><a href="#require_long_ident" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>require_long_ident</h2>
+<h4><a class="anchor" aria-hidden="true" id="example-11"></a><a href="#example-11" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Example</h4>
+<pre><code class="hljs"><span class="hljs-string">"require_long_ident"</span>: [
+  [<span class="hljs-string">"Storage_description"</span>, <span class="hljs-string">"Tezos"</span>]
+]
+</code></pre>
+<h4><a class="anchor" aria-hidden="true" id="value-11"></a><a href="#value-11" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Value</h4>
+<p>A list of module names and module namespaces to require from.</p>
+<h4><a class="anchor" aria-hidden="true" id="explanation-11"></a><a href="#explanation-11" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Explanation</h4>
+<p>In some cases, it is not possible to get the right <code>Require</code> directive for an external reference. In particular when there is a long identifier rather than a path in the OCaml AST. With a rule <code>[&quot;A&quot;, &quot;B&quot;]</code>, a reference to the module <code>A</code> also generates the same reference <code>A</code> but adds a <code>Require B.A.</code> at the top of the output.</p>
+<h2><a class="anchor" aria-hidden="true" id="require_mli"></a><a href="#require_mli" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>require_mli</h2>
+<h4><a class="anchor" aria-hidden="true" id="example-12"></a><a href="#example-12" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Example</h4>
+<pre><code class="hljs"><span class="hljs-string">"require_mli"</span>: [
+  <span class="hljs-string">"Storage"</span>,
+  <span class="hljs-string">"Storage_functors"</span>
+]
+</code></pre>
+<h4><a class="anchor" aria-hidden="true" id="value-12"></a><a href="#value-12" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Value</h4>
+<p>A list of files to require as <code>.mli</code> rather than as <code>.ml</code>. The files are described by their corresponding module name.</p>
+<h4><a class="anchor" aria-hidden="true" id="explanation-12"></a><a href="#explanation-12" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Explanation</h4>
+<p>In OCaml, there are two kinds of files, namely <code>.ml</code> and <code>.mli</code> files. We import both with coq-of-ocaml, but only the <code>.ml</code> file is complete and sufficient. The <code>.mli</code> import corresponds to axioms without the definitions. However, sometimes the import of the <code>.ml</code> version fails but the <code>.mli</code> works. Then, we may want to use the imported <code>.mli</code> as a dependency in the <code>Require</code> directive rather than the imported <code>.ml</code> version.</p>
+<h2><a class="anchor" aria-hidden="true" id="variant_constructors"></a><a href="#variant_constructors" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>variant_constructors</h2>
+<h4><a class="anchor" aria-hidden="true" id="example-13"></a><a href="#example-13" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Example</h4>
+<pre><code class="hljs"><span class="hljs-string">"variant_constructors"</span>: [
+  [<span class="hljs-string">"Dir"</span>, <span class="hljs-string">"Context.Dir"</span>],
+  [<span class="hljs-string">"Key"</span>, <span class="hljs-string">"Context.Key"</span>],
+  [<span class="hljs-string">"Uint16"</span>, <span class="hljs-string">"Data_encoding.Uint16"</span>],
+  [<span class="hljs-string">"Uint8"</span>, <span class="hljs-string">"Data_encoding.Uint8"</span>],
+  [<span class="hljs-string">"Hex"</span>, <span class="hljs-string">"MBytes.Hex"</span>]
+]
+</code></pre>
+<h4><a class="anchor" aria-hidden="true" id="value-13"></a><a href="#value-13" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Value</h4>
+<p>A list of polymorphic variant constructor names in OCaml and constructor names in Coq.</p>
+<h4><a class="anchor" aria-hidden="true" id="explanation-13"></a><a href="#explanation-13" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Explanation</h4>
+<p>Coq supports algebraic types through the <code>Inductive</code> keyword, but there are no direct equivalents for <a href="https://caml.inria.fr/pub/docs/manual-ocaml/lablexamples.html#s:polymorphic-variants">polymorphic variants</a>. We can replace many occurrences of polymorphic variants by standard algebraic types, updating the input code to help coq-of-ocaml. Sometimes, a direct modification of the source is not possible. We can then explain to coq-of-ocaml how to deal with polymorphic variants as if they were inductive types.</p>
+<p>When there is a type definition with a polymorphic variant, coq-of-ocaml transforms it to the closest inductive:</p>
+<pre><code class="hljs css language-ocaml"><span class="hljs-keyword">module</span> <span class="hljs-type">Context</span> = <span class="hljs-keyword">struct</span>
+  <span class="hljs-keyword">type</span> t = [<span class="hljs-type">`Dir</span> | <span class="hljs-type">`Key</span>]
+<span class="hljs-keyword">end</span>
+</code></pre>
+<p>generates:</p>
+<pre><code class="hljs css language-coq"><span class="hljs-keyword">Module</span> <span class="hljs-keyword">Context</span>.
+  <span class="hljs-keyword">Inductive</span> t : <span class="hljs-keyword">Set</span> :=
+  | <span class="hljs-type">Dir</span> : t
+  | <span class="hljs-type">Key</span> : t.
+<span class="hljs-keyword">End</span> <span class="hljs-keyword">Context</span>.
+</code></pre>
+<p>When a constructor appears, this option helps to tell Coq from which module it is. For example:</p>
+<pre><code class="hljs css language-ocaml"><span class="hljs-keyword">let</span> x : <span class="hljs-type">Context</span>.t = <span class="hljs-type">`Dir</span>
+</code></pre>
+<p>would be transformed to:</p>
+<pre><code class="hljs css language-coq"><span class="hljs-keyword">Definition</span> x : <span class="hljs-keyword">Context</span>.t := Dir.
+</code></pre>
+<p>which is incorrect. By giving the relation <code>[&quot;Dir&quot;, &quot;Context.Dir&quot;]</code>, we can tell coq-of-ocaml to generate the correct constructor with the correct module prefix:</p>
+<pre><code class="hljs css language-coq"><span class="hljs-keyword">Definition</span> x : <span class="hljs-keyword">Context</span>.t := <span class="hljs-keyword">Context</span>.Dir.
+</code></pre>
+<h2><a class="anchor" aria-hidden="true" id="variant_types"></a><a href="#variant_types" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>variant_types</h2>
+<h4><a class="anchor" aria-hidden="true" id="example-14"></a><a href="#example-14" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Example</h4>
+<pre><code class="hljs"><span class="hljs-string">"variant_types"</span>: [
+  [<span class="hljs-string">"Dir"</span>, <span class="hljs-string">"Context.key_or_dir"</span>],
+  [<span class="hljs-string">"Key"</span>, <span class="hljs-string">"Context.key_or_dir"</span>]
+]
+</code></pre>
+<h4><a class="anchor" aria-hidden="true" id="value-14"></a><a href="#value-14" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Value</h4>
+<p>A list of couples of a polymorphic variant constructor and a type name to use when the constructor appears.</p>
+<h4><a class="anchor" aria-hidden="true" id="explanation-14"></a><a href="#explanation-14" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Explanation</h4>
+<p>When we name a polymorphic variant with a type synonym:</p>
+<pre><code class="hljs css language-ocaml"><span class="hljs-keyword">type</span> t = [<span class="hljs-type">`Dir</span> | <span class="hljs-type">`Key</span>]
+</code></pre>
+<p>an expression could still have a type without mentioning <code>t</code>:</p>
+<pre><code class="hljs css language-ocaml"><span class="hljs-keyword">let</span> x : [<span class="hljs-type">`Dir</span>] = <span class="hljs-type">`Dir</span>
+</code></pre>
+<p>Since the polymorphic variants do not have a direct equivalent in OCaml, we could instead use a standard algebraic type:</p>
+<pre><code class="hljs css language-ocaml"><span class="hljs-keyword">type</span> t = <span class="hljs-type">Dir</span> | <span class="hljs-type">Key</span>
+
+<span class="hljs-keyword">let</span> x : t = <span class="hljs-type">Dir</span>
+</code></pre>
+<p>which translates to:</p>
+<pre><code class="hljs css language-coq"><span class="hljs-keyword">Inductive</span> t : <span class="hljs-keyword">Set</span> :=
+| <span class="hljs-type">Dir</span> : t
+| <span class="hljs-type">Key</span> : t.
+
+<span class="hljs-keyword">Definition</span> x : t := Dir.
+</code></pre>
+<p>When removing polymorphic variants is not possible, coq-of-ocaml transforms the type definition to the closest inductive type:</p>
+<pre><code class="hljs css language-coq"><span class="hljs-keyword">Inductive</span> t : <span class="hljs-keyword">Set</span> :=
+| <span class="hljs-type">Dir</span> : t
+| <span class="hljs-type">Key</span> : t.
+</code></pre>
+<p>and with the setting <code>[&quot;Dir&quot;, &quot;t&quot;]</code> it also correctly transforms the type of <code>x</code>:</p>
+<pre><code class="hljs css language-coq"><span class="hljs-keyword">Definition</span> x : t := Dir.
+</code></pre>
+<h2><a class="anchor" aria-hidden="true" id="without_guard_checking"></a><a href="#without_guard_checking" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>without_guard_checking</h2>
+<h4><a class="anchor" aria-hidden="true" id="example-15"></a><a href="#example-15" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Example</h4>
+<pre><code class="hljs"><span class="hljs-string">"without_guard_checking"</span>: [
+  <span class="hljs-string">"src/proto_alpha/lib_protocol/apply.ml"</span>,
+  <span class="hljs-string">"src/proto_alpha/lib_protocol/misc.ml"</span>,
+  <span class="hljs-string">"src/proto_alpha/lib_protocol/raw_context.ml"</span>,
+  <span class="hljs-string">"src/proto_alpha/lib_protocol/script_interpreter.ml"</span>,
+  <span class="hljs-string">"src/proto_alpha/lib_protocol/storage_description.ml"</span>
+]
+</code></pre>
+<h4><a class="anchor" aria-hidden="true" id="value-15"></a><a href="#value-15" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Value</h4>
+<p>A list of filenames on which to disable termination checks by Coq.</p>
+<h4><a class="anchor" aria-hidden="true" id="explanation-15"></a><a href="#explanation-15" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Explanation</h4>
+<p>This option turns off the flag <code>Guard Checking</code>:</p>
+<pre><code class="hljs css language-coq"><span class="hljs-keyword">Unset</span> Guard Checking.
+</code></pre>
+<p>Thus it is possible to write fixpoints which are not syntactically terminating. To help the evaluation tactics to terminate in the proofs, we can combine this setting with the <a href="http://localhost:3000/coq-of-ocaml/docs/attributes#coq_struct">coq_struct</a> attribute.</p>
+<p>For example, the following OCaml code:</p>
+<pre><code class="hljs css language-ocaml"><span class="hljs-comment">(* let split_at (c : char) (s : string) : (string * string) option = ... *)</span>
+
+<span class="hljs-keyword">let</span> <span class="hljs-keyword">rec</span> split_all (c : <span class="hljs-built_in">char</span>) (s : <span class="hljs-built_in">string</span>) : <span class="hljs-built_in">string</span> <span class="hljs-built_in">list</span> =
+  <span class="hljs-keyword">match</span> split_at c s <span class="hljs-keyword">with</span>
+  | <span class="hljs-type">None</span> -&gt; [s]
+  | <span class="hljs-type">Some</span> (s1, s2) -&gt; s1 :: split_all c s2
+</code></pre>
+<p>generates:</p>
+<pre><code class="hljs css language-coq"><span class="hljs-keyword">Fixpoint</span> split_all (c : ascii) (s : string) : list string :=
+  <span class="hljs-keyword">match</span> split_at c s <span class="hljs-built_in">with</span>
+  | <span class="hljs-type">None</span> =&gt; [ s ]
+  | <span class="hljs-type">Some</span> (s1, s2) =&gt; cons s1 (split_all c s2)
+  <span class="hljs-keyword">end</span>.
+</code></pre>
+<p>which is not accepted by Coq with the error:</p>
+<pre><code class="hljs"><span class="hljs-keyword">Error: </span>Cannot guess decreasing argument of fix.
+</code></pre>
+<p>despite the fact that we know that <code>split_at</code> should always return a smaller string. By disabling the guard checking, we can force Coq to accept this example of code. We automatically add a <code>struct</code> annotation on the first fixpoint argument so that Coq accepts the definition:</p>
+<pre><code class="hljs css language-coq"><span class="hljs-keyword">Fixpoint</span> split_all (c : ascii) (s : string) {struct c} : list string :=
+  <span class="hljs-keyword">match</span> split_at c s <span class="hljs-built_in">with</span>
+  | <span class="hljs-type">None</span> =&gt; [ s ]
+  | <span class="hljs-type">Some</span> (s1, s2) =&gt; cons s1 (split_all c s2)
+  <span class="hljs-keyword">end</span>.
+</code></pre>
+<p>However, we must be cautious as a <code>struct</code> annotation may break the symbolic evaluation of <code>split_all</code> since <code>c</code> never changes in recursive calls. For example:</p>
+<pre><code class="hljs css language-coq"><span class="hljs-keyword">Parameter</span> P : ascii -&gt; string -&gt; list string -&gt; <span class="hljs-keyword">Prop</span>.
+
+<span class="hljs-keyword">Lemma</span> split_all_property (c : ascii) (s : string) : P c s (split_all c s).
+  <span class="hljs-built_in">destruct</span> c; <span class="hljs-built_in">simpl</span>.
+</code></pre>
+<p>produces:</p>
+<pre><code class="hljs"><span class="hljs-keyword">Error: </span>Stack overflow.
+</code></pre>
+<p>because <code>split_all</code> is infinitely unfolded. With the <code>coq_struct</code> attribute we can force the <code>struct</code> annotation to be on the argument <code>s</code>:</p>
+<pre><code class="hljs css language-ocaml"><span class="hljs-keyword">let</span> <span class="hljs-keyword">rec</span> split_all (c : <span class="hljs-built_in">char</span>) (s : <span class="hljs-built_in">string</span>) : <span class="hljs-built_in">string</span> <span class="hljs-built_in">list</span> =
+  <span class="hljs-keyword">match</span> split_at c s <span class="hljs-keyword">with</span>
+  | <span class="hljs-type">None</span> -&gt; [s]
+  | <span class="hljs-type">Some</span> (s1, s2) -&gt; s1 :: split_all c s2
+[@@coq_struct <span class="hljs-string">"s"</span>]
+</code></pre>
+<p>produces:</p>
+<pre><code class="hljs css language-coq"><span class="hljs-keyword">Fixpoint</span> split_all (c : ascii) (s : string) {struct s} : list string :=
+  <span class="hljs-keyword">match</span> split_at c s <span class="hljs-built_in">with</span>
+  | <span class="hljs-type">None</span> =&gt; [ s ]
+  | <span class="hljs-type">Some</span> (s1, s2) =&gt; cons s1 (split_all c s2)
+  <span class="hljs-keyword">end</span>.
+</code></pre>
+<p>Then, neither:</p>
+<pre><code class="hljs css language-coq"><span class="hljs-built_in">destruct</span> c; <span class="hljs-built_in">simpl</span>.
+</code></pre>
+<p>nor:</p>
+<pre><code class="hljs css language-coq"><span class="hljs-built_in">destruct</span> s; <span class="hljs-built_in">simpl</span>.
+</code></pre>
+<p>breaks. For more information about the reduction strategies in Coq proofs, you can start with the documentation of the <a href="https://coq.inria.fr/refman/proof-engine/tactics.html#coq:tacn.simpl">simpl tactic</a>.</p>
+<h2><a class="anchor" aria-hidden="true" id="without_positivity_checking"></a><a href="#without_positivity_checking" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>without_positivity_checking</h2>
+<h4><a class="anchor" aria-hidden="true" id="example-16"></a><a href="#example-16" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Example</h4>
+<pre><code class="hljs"><span class="hljs-string">"without_positivity_checking"</span>: [
+  <span class="hljs-string">"src/proto_alpha/lib_protocol/storage_description.ml"</span>
+]
+</code></pre>
+<h4><a class="anchor" aria-hidden="true" id="value-16"></a><a href="#value-16" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Value</h4>
+<p>A list of filenames on which to disable the positivity checking.</p>
+<h4><a class="anchor" aria-hidden="true" id="explanation-16"></a><a href="#explanation-16" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Explanation</h4>
+<p>This option turns off the flag <code>Positivity Checking</code>:</p>
+<pre><code class="hljs css language-coq"><span class="hljs-keyword">Unset</span> Positivity Checking.
+</code></pre>
+<p>This allows to define types which would not respect the strict positivity condition:</p>
+<pre><code class="hljs css language-ocaml"><span class="hljs-keyword">type</span> t = <span class="hljs-type">L</span> <span class="hljs-keyword">of</span> (t -&gt; t)
+</code></pre>
+<p>generates:</p>
+<pre><code class="hljs css language-coq"><span class="hljs-keyword">Inductive</span> t : <span class="hljs-keyword">Set</span> :=
+| <span class="hljs-type">L</span> : (t -&gt; t) -&gt; t.
+</code></pre>
+<p>which without this setting gives this error in Coq:</p>
+<pre><code class="hljs"><span class="hljs-keyword">Error: </span>Non strictly positive occurrence of "t" in "(t -&gt; t) -&gt; t".
+</code></pre>
+</span></div></article></div><div class="docs-prevnext"><a class="docs-prev button" href="/coq-of-ocaml/docs/attributes"><span class="arrow-prev">← </span><span>Attributes</span></a><a class="docs-next button" href="/coq-of-ocaml/docs/roadmap"><span>Future</span><span class="arrow-next"> →</span></a></div></div></div><nav class="onPageNav"><ul class="toc-headings"><li><a href="#alias_barrier_modules">alias_barrier_modules</a></li><li><a href="#constructor_map">constructor_map</a></li><li><a href="#error_category_blacklist">error_category_blacklist</a></li><li><a href="#error_filename_blacklist">error_filename_blacklist</a></li><li><a href="#error_message_blacklist">error_message_blacklist</a></li><li><a href="#escape_value">escape_value</a></li><li><a href="#first_class_module_path_blacklist">first_class_module_path_blacklist</a></li><li><a href="#head_suffix">head_suffix</a></li><li><a href="#monadic_operators">monadic_operators</a></li><li><a href="#require">require</a></li><li><a href="#require_import">require_import</a></li><li><a href="#require_long_ident">require_long_ident</a></li><li><a href="#require_mli">require_mli</a></li><li><a href="#variant_constructors">variant_constructors</a></li><li><a href="#variant_types">variant_types</a></li><li><a href="#without_guard_checking">without_guard_checking</a></li><li><a href="#without_positivity_checking">without_positivity_checking</a></li></ul></nav></div><footer class="nav-footer" id="footer"><section class="sitemap"><a href="/coq-of-ocaml/" class="nav-home"><img src="/coq-of-ocaml/img/favicon.ico" alt="coq-of-ocaml" width="66" height="58"/></a><div><h5>Docs</h5><a href="/coq-of-ocaml/docs/introduction.html">Introduction</a><a href="/coq-of-ocaml/docs/install.html">Getting Started</a><a href="/coq-of-ocaml/docs/ocaml-core.html">Concepts</a></div><div><h5>Community</h5><a href="https://github.com/clarus/coq-of-ocaml/issues?q=is%3Aissue+is%3Aopen+sort%3Aupdated-desc+label%3A%22Enhancement+%3Anew%3A%22" target="_blank" rel="noreferrer noopener">Feature requests and proposals</a><a href="https://github.com/clarus/coq-of-ocaml/issues?q=is%3Aissue+is%3Aopen+sort%3Aupdated-desc+label%3A%22Bug+%3Abug%3A%22" target="_blank" rel="noreferrer noopener">Issues</a><a href="https://gitter.im/clarus/coq-of-ocaml" target="_blank" rel="noreferrer noopener">Chat room</a><a href="https://www.nomadic-labs.com/" target="_blank" rel="noreferrer noopener">Nomadic Labs</a></div><div><h5>More</h5><a href="https://github.com/clarus/coq-of-ocaml">GitHub</a><a class="github-button" href="https://github.com/clarus/coq-of-ocaml" data-icon="octicon-star" data-count-href="/clarus/coq-of-ocaml/stargazers" data-show-count="true" data-count-aria-label="# stargazers on GitHub" aria-label="Star this project on GitHub">Star</a></div></section><section class="copyright">Copyright © 2020 Guillaume Claret</section></footer></div></body></html>
