@@ -28,8 +28,10 @@ let type_exprs_of_row_field (row_field : Types.row_field)
   | Rabsent -> []
 
 let filter_typ_params_in_valid_set
-  (typ_params : Name.t list) (valid_set : Name.Set.t) : bool list =
-  typ_params |> List.map (fun ty -> Name.Set.mem ty valid_set)
+  (typ_params : AdtParameters.AdtVariable.t list) (valid_set : Name.Set.t) : bool list =
+  typ_params |> List.map (function
+      | AdtParameters.AdtVariable.Parameter name -> Name.Set.mem name valid_set
+      | _ -> false )
 
 
 let rec non_phantom_typs (path : Path.t) (typs : Types.type_expr list)
@@ -63,7 +65,6 @@ let rec non_phantom_typs (path : Path.t) (typs : Types.type_expr list)
           )))
         | Some typ ->
           non_phantom_vars_of_typ typ >>= fun non_phantom_typ_vars ->
-          let typ_params = AdtParameters.get_parameters typ_params in
           return (Some (
             filter_typ_params_in_valid_set typ_params non_phantom_typ_vars
           ))
@@ -71,7 +72,6 @@ let rec non_phantom_typs (path : Path.t) (typs : Types.type_expr list)
       | Type_record (labels, _) ->
         let typs = List.map (fun label -> label.ld_type) labels in
         non_phantom_vars_of_typs typs >>= fun non_phantom_typ_vars ->
-        let typ_params = AdtParameters.get_parameters typ_params in
         return (Some (
           filter_typ_params_in_valid_set typ_params non_phantom_typ_vars
         ))
@@ -81,7 +81,6 @@ let rec non_phantom_typs (path : Path.t) (typs : Types.type_expr list)
               AdtParameters.get_return_typ_params typ_params constructor.cd_res
             ) in
         let gadt_shape = AdtParameters.gadt_shape typ_params constructors_return_typ_params in
-
         return (Some (gadt_shape |> List.map (fun shape ->
             match shape with
             | None -> Attribute.has_force_gadt typ_attributes
