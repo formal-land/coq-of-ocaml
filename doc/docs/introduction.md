@@ -56,7 +56,12 @@ In a typical project, we may want to translate some of the `.ml` and keep the re
 
 When something is not properly handled, coq-of-ocaml generates an error message. These errors do not necessarily need to be fixed. However, there are good warnings to help having a more extensive and reliable Coq formalization by updating the OCaml source code.
 
-Generally, the generated Coq for a project does not compile as it. This can be due to unsupported features, or various small errors such as name collisions. We recommend to modify the OCaml source as needed, and use post-processing scripts to fix small errors. If the conversion to Coq has to be done only once, you can even fix the errors by hand. For a large project, maintaining a fork of coq-of-ocaml with custom edits can be the reasonable way to go.
+Generally, the generated Coq for a project does not compile as it is. This can be due to unsupported OCaml features, or various small errors such as name collisions. In this case, you can:
+* modify the OCaml input code, so that it fits what coq-of-ocaml handles or avoids Coq errors (follow the error messages);
+* use the [attributes](attributes) or [configuration](configuration) mechanism to customize the translation of coq-of-ocaml;
+* fork coq-of-ocaml to modify the code translation;
+* post-process the output with a script;
+* post-process the output by hand.
 
 ## Related
 In the OCaml community:
