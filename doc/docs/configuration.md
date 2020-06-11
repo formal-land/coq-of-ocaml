@@ -414,6 +414,72 @@ Unset Guard Checking.
 ```
 Thus it is possible to write fixpoints which are not syntactically terminating. To help the evaluation tactics to terminate in the proofs, we can combine this setting with the [coq_struct](http://localhost:3000/coq-of-ocaml/docs/attributes#coq_struct) attribute.
 
+For example, the following OCaml code:
+```ocaml
+(* let split_at (c : char) (s : string) : (string * string) option = ... *)
+
+let rec split_all (c : char) (s : string) : string list =
+  match split_at c s with
+  | None -> [s]
+  | Some (s1, s2) -> s1 :: split_all c s2
+```
+generates:
+```coq
+Fixpoint split_all (c : ascii) (s : string) : list string :=
+  match split_at c s with
+  | None => [ s ]
+  | Some (s1, s2) => cons s1 (split_all c s2)
+  end.
+```
+which is not accepted by Coq with the error:
+```
+Error: Cannot guess decreasing argument of fix.
+```
+despite the fact that we know that `split_at` should always return a smaller string. By disabling the guard checking, we can force Coq to accept this example of code. We automatically add a `struct` annotation on the first fixpoint argument so that Coq accepts the definition:
+```coq
+Fixpoint split_all (c : ascii) (s : string) {struct c} : list string :=
+  match split_at c s with
+  | None => [ s ]
+  | Some (s1, s2) => cons s1 (split_all c s2)
+  end.
+```
+However, we must be cautious as a `struct` annotation may break the symbolic evaluation of `split_all` since `c` never changes in recursive calls. For example:
+```coq
+Parameter P : ascii -> string -> list string -> Prop.
+
+Lemma split_all_property (c : ascii) (s : string) : P c s (split_all c s).
+  destruct c; simpl.
+```
+produces:
+```
+Error: Stack overflow.
+```
+because `split_all` is infinitely unfolded. With the `coq_struct` attribute we can force the `struct` annotation to be on the argument `s`:
+```ocaml
+let rec split_all (c : char) (s : string) : string list =
+  match split_at c s with
+  | None -> [s]
+  | Some (s1, s2) -> s1 :: split_all c s2
+[@@coq_struct "s"]
+```
+produces:
+```coq
+Fixpoint split_all (c : ascii) (s : string) {struct s} : list string :=
+  match split_at c s with
+  | None => [ s ]
+  | Some (s1, s2) => cons s1 (split_all c s2)
+  end.
+```
+Then, neither:
+```coq
+destruct c; simpl.
+```
+nor:
+```coq
+destruct s; simpl.
+```
+breaks. For more information about the reduction strategies in Coq proofs, you can start with the documentation of the [simpl tactic](https://coq.inria.fr/refman/proof-engine/tactics.html#coq:tacn.simpl).
+
 ## without_positivity_checking
 #### Example
 ```
