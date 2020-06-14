@@ -8,22 +8,27 @@ bug-reports: "https://github.com/clarus/coq-of-ocaml/issues"
 authors: ["Guillaume Claret"]
 license: "MIT"
 build: [
-  ["sh" "-c" "cd OCaml && ./configure.sh"]
-  [make "-C" "OCaml" "-j%{jobs}%"]
+  ["sh" "-c" "cd OCaml && ./configure.sh"] {coq:installed}
+  [make "-C" "OCaml" "-j%{jobs}%"] {coq:installed}
   [make "-j%{jobs}%"]
   [make "test"] {with-test}
 ]
 install: [
-  [make "-C" "OCaml" "install"]
+  [make "-C" "OCaml" "install"] {coq:installed}
 ]
 depends: [
   "conf-ruby" {with-test}
-  "coq" {>= "8.11"}
   "dune" {build}
   "menhir" {build}
   "ocaml" {>= "4.09" & < "4.10"}
   "smart-print"
   "yojson" {>= "1.6.0"}
+]
+depopts: [
+  "coq"
+]
+conflicts: [
+  "coq" {< "8.11"}
 ]
 tags: [
   "keyword:compilation"

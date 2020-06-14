@@ -46,10 +46,11 @@ script:
     sudo chown -R opam:opam /home/project
     export OPAMWITHTEST=true
     # Check if the package is compatible with the current environment
-    if [ "${SHOULD_SUPPORT}" = "true" ] || opam install ${PACKAGE_NAME} --show-action; then
+    if [ "${SHOULD_SUPPORT}" = "true" ] || opam install coq ${PACKAGE_NAME} --show-action; then
       # First, install the dependencies
       sudo apt-get update
       opam depext ${PACKAGE_NAME} -y
+      opam install coq -y
       opam install ${PACKAGE_NAME} --deps-only -y
       opam list
       # Then, install the package itself in verbose mode
