@@ -316,18 +316,18 @@ module Inductive = struct
     (subst : Type.Subst.t)
     (is_first : bool)
     (name : Name.t)
-    (left_typ_args : Name.t list)
+    (params : Name.t list)
     (constructors : Constructors.t)
     : SmartPrint.t =
     let keyword = if is_first then !^ "Inductive" else !^ "with" in
     nest (
       keyword ^^ Name.to_coq name ^^
-      (if left_typ_args = [] then
+      (if params = [] then
         empty
       else
         parens (
           nest (
-            separate space (left_typ_args |> List.map Name.to_coq) ^^
+            separate space (params |> List.map Name.to_coq) ^^
             !^ ":" ^^ Pp.set
           )
         )
@@ -463,10 +463,10 @@ module Inductive = struct
     )
 
   let to_coq_typs_implicits
-    (left_typ_args : Name.t list)
+    (params : Name.t list)
     (constructors : Constructors.t)
     : SmartPrint.t list =
-    match left_typ_args with
+    match params with
     | [] -> []
     | _ :: _ ->
       constructors |> List.map (fun {
@@ -475,7 +475,7 @@ module Inductive = struct
         !^ "Arguments" ^^ Name.to_coq constructor_name ^^ braces (
           nest (
             separate space (
-              (left_typ_args |> List.map (fun _ -> !^ "_")) @
+              (params |> List.map (fun _ -> !^ "_")) @
               (typ_vars |> List.map (fun _ -> !^ "_"))
             )
           )
@@ -518,8 +518,8 @@ module Inductive = struct
     let notations_record_definitions = to_coq_notations_record_definitions inductive in
     let notations_definitions = to_coq_notations_definitions inductive in
     let implicit_arguments =
-      List.concat (inductive.typs |> List.map (fun (_, left_typ_args, constructors) ->
-        to_coq_typs_implicits left_typ_args constructors
+      List.concat (inductive.typs |> List.map (fun (_, params, constructors) ->
+        to_coq_typs_implicits params constructors
       )) in
     nest (
       (match constructor_records with
@@ -532,9 +532,9 @@ module Inductive = struct
       | [] -> empty
       | _ :: _ -> separate newline reserved_notations ^^ newline ^^ newline) ^^
       separate (newline ^^ newline) (inductive.typs |>
-        List.mapi (fun index (name, left_typ_args, constructors) ->
+        List.mapi (fun index (name, params, constructors) ->
           let is_first = index = 0 in
-          to_coq_typs subst is_first name left_typ_args constructors
+          to_coq_typs subst is_first name params constructors
         )
       ) ^-^
       (match notations_wheres with
