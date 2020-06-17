@@ -255,6 +255,12 @@ module Inductive = struct
       : (Name.t * (RecordSkeleton.t * Name.t list * Type.t) list) list;
     notations : notation list;
     records : RecordSkeleton.t list;
+    (* typs is a list of mutually defined Inductives
+     * of the form
+     * Inductive `Name.t` (`Name.t list` : Set) : Set :=
+     * | `Constructor.t` ...
+     * with `Name.t` (`Name.t list` : set) : Set := ...
+     *)
     typs : (Name.t * Name.t list * Constructors.t) list;
   }
 
