@@ -33,127 +33,6 @@ let filter_typ_params_in_valid_set
       | AdtParameters.AdtVariable.Parameter name -> Name.Set.mem name valid_set
       | _ -> false )
 
-
-let rec non_phantom_typs (path : Path.t) (typs : Types.type_expr list)
-  : Types.type_expr list Monad.t =
-  get_env >>= fun env ->
-  begin match Env.find_type path env with
-  | typ_declaration ->
-    AdtParameters.of_ocaml typ_declaration.type_params >>= fun typ_params ->
-    Attribute.of_attributes typ_declaration.type_attributes >>= fun typ_attributes ->
-    let is_phantom = Attribute.has_phantom typ_attributes in
-    if is_phantom then
-      return (Some (typ_params |> List.map (fun _ -> false)))
-    else
-      begin match typ_declaration.type_kind with
-      | Type_abstract ->
-        begin match typ_declaration.type_manifest with
-        | None ->
-          return (Some (typ_params |> List.map (function
-            | AdtParameters.AdtVariable.Parameter _ -> true
-            | _ ->
-              if Path.name path = "array" then
-                true
-              else
-                false
-          )))
-        (* Specific case for inductives defined with polymorphic variants. *)
-        | Some { desc = Tvariant _; _ } ->
-          return (Some (typ_params |> List.map (function
-            | AdtParameters.AdtVariable.Parameter _ -> true
-            | _ -> false
-          )))
-        | Some typ ->
-          non_phantom_vars_of_typ typ >>= fun non_phantom_typ_vars ->
-          return (Some (
-            filter_typ_params_in_valid_set typ_params non_phantom_typ_vars
-          ))
-        end
-      | Type_record (labels, _) ->
-        let typs = List.map (fun label -> label.ld_type) labels in
-        non_phantom_vars_of_typs typs >>= fun non_phantom_typ_vars ->
-        return (Some (
-          filter_typ_params_in_valid_set typ_params non_phantom_typ_vars
-        ))
-      | Type_variant constructors ->
-        let* constructors_return_typ_params =
-          constructors |> Monad.List.map (fun constructor ->
-              AdtParameters.get_return_typ_params typ_params constructor.cd_res
-            ) in
-        let gadt_shape = AdtParameters.gadt_shape typ_params constructors_return_typ_params in
-        return (Some (gadt_shape |> List.map (fun shape ->
-            match shape with
-            | None -> Attribute.has_force_gadt typ_attributes
-            | Some _ -> true
-          )))
-      | Type_open -> return None
-      end
-    | exception Not_found -> return None
-    end >>= fun non_phantom_typs_shape ->
-  let typs =
-    match non_phantom_typs_shape with
-    | None -> typs
-    | Some non_phantom_typs_shape ->
-      List.rev @@ List.fold_left2
-        (fun typs is_non_phantom typ ->
-          if is_non_phantom then
-            typ :: typs
-          else
-            typs
-        )
-        [] non_phantom_typs_shape typs in
-  return typs
-
-and non_phantom_vars_of_typ (typ : Types.type_expr) : Name.Set.t Monad.t =
-  match typ.desc with
-  | Tvar x | Tunivar x ->
-    begin match x with
-    | None -> return Name.Set.empty
-    | Some x ->
-      let* x = Name.of_string false x in
-      return (Name.Set.singleton x)
-    end
-  | Tconstr (path, typs, _) ->
-    non_phantom_typs path typs >>= fun typs ->
-    non_phantom_vars_of_typs typs
-  | Tarrow (_, typ1, typ2, _) -> non_phantom_vars_of_typs [typ1; typ2]
-  | Ttuple typs | Tpackage (_, _, typs) ->
-    non_phantom_vars_of_typs typs
-  | Tlink typ | Tsubst typ -> non_phantom_vars_of_typ typ
-  | Tobject (_, object_descr) ->
-    let param_typs =
-      match !object_descr with
-      | Some (_, _ :: param_typs) -> List.tl param_typs
-      | _ -> [] in
-    non_phantom_vars_of_typs param_typs
-  | Tfield (_, _, typ1, typ2) -> non_phantom_vars_of_typs [typ1; typ2]
-  | Tnil -> return Name.Set.empty
-  | Tvariant _ ->
-    (* We return an empty set to prevent a potential stack-overflow. Moreover,
-       one should note that for the case of type synonyms which are polymorphic
-       variants we directly consider this definition like an inductive
-       definition in the phantom types analysis. *)
-    return Name.Set.empty
-  | Tpoly (typ, typ_args) ->
-    let* typ_args =
-      AdtParameters.typ_params_ghost_marked typ_args in
-    let typ_args =
-      typ_args |>
-      AdtParameters.get_parameters |>
-      Name.Set.of_list in
-    non_phantom_vars_of_typ typ >>= fun non_phantom_vars ->
-    return (Name.Set.diff non_phantom_vars typ_args)
-
-and non_phantom_vars_of_typs (typs : Types.type_expr list) 
-  : Name.Set.t Monad.t =
-  Monad.List.fold_left
-    (fun typ_vars typ ->
-      non_phantom_vars_of_typ typ >>= fun new_typ_vars ->
-      return (Name.Set.union typ_vars new_typ_vars)
-    )
-    Name.Set.empty
-    typs
-
 (** Import an OCaml type. Add to the environment all the new free type variables. *)
 let rec of_typ_expr
   (with_free_vars: bool)
@@ -190,7 +69,6 @@ let rec of_typ_expr
     of_typs_exprs with_free_vars typ_vars typs >>= fun (typs, typ_vars, new_typ_vars) ->
     return (Tuple typs, typ_vars, new_typ_vars)
   | Tconstr (path, typs, _) ->
-    non_phantom_typs path typs >>= fun typs ->
     of_typs_exprs with_free_vars typ_vars typs >>= fun (typs, typ_vars, new_typ_vars) ->
     MixedPath.of_path false path None >>= fun mixed_path ->
     return (Apply (mixed_path, typs), typ_vars, new_typ_vars)
@@ -250,12 +128,7 @@ let rec of_typ_expr
     let* typ_args =
       AdtParameters.typ_params_ghost_marked typ_args in
     let typ_args = typ_args |> AdtParameters.get_parameters in
-    non_phantom_vars_of_typ typ >>= fun non_phantom_vars ->
-    let typ_args = typ_args |> List.filter (fun typ_arg ->
-      Name.Set.mem typ_arg non_phantom_vars
-    ) in
     of_typ_expr with_free_vars typ_vars typ >>= fun (typ, typ_vars, new_typ_vars_typ) ->
-    let new_typ_vars_typ = Name.Set.diff non_phantom_vars new_typ_vars_typ in
     return (ForallTyps (typ_args, typ), typ_vars, new_typ_vars_typ)
   | Tpackage (path, idents, typs) ->
       let* path_name = PathName.of_path_without_convert false path in
