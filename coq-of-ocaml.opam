@@ -10,7 +10,7 @@ license: "MIT"
 build: [
   ["sh" "-c" "cd OCaml && ./configure.sh"] {coq:installed}
   [make "-C" "OCaml" "-j%{jobs}%"] {coq:installed}
-  [make "-j%{jobs}%"]
+  ["dune" "build" "--profile=release" "-j" jobs "src/coqOfOCaml.exe"]
   [make "test"] {with-test}
 ]
 install: [
@@ -18,7 +18,7 @@ install: [
 ]
 depends: [
   "conf-ruby" {with-test}
-  "dune" {build}
+  "dune"
   "menhir" {build}
   "ocaml" {>= "4.09" & < "4.10"}
   "smart-print"
