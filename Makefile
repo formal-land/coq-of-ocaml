@@ -1,5 +1,5 @@
 default:
-	dune build src/coqOfOCaml.exe
+	dune build -p coq-of-ocaml
 
 watch:
 	while inotifywait src/*.ml; do clear; make; done

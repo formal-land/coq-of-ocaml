@@ -31,11 +31,7 @@ Definition b_not : bool := negb false.
 
 Definition b_and : bool := andb true false.
 
-Definition b_and_old : bool := andb true false.
-
 Definition b_or : bool := orb true false.
-
-Definition b_or_old : bool := orb true false.
 
 Definition app1 : int := (fun x => x) 12.
 

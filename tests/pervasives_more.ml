@@ -15,9 +15,9 @@ let n_max = max 1 2
 (* Boolean operations *)
 let b_not = not false
 let b_and = true && false
-let b_and_old = true & false
+(* let b_and_old = true & false *)
 let b_or = true || false
-let b_or_old = true or false
+(* let b_or_old = true or false *)
 
 (* Composition operators *)
 let app1 = 12 |> fun x -> x

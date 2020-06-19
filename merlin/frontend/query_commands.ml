@@ -190,6 +190,12 @@ let reconstruct_identifier pipeline pos = function
         pos
     in
     let path = Mreader_lexer.identifier_suffix path in
+    Logger.log
+      ~section:Type_enclosing.log_section
+      ~title:"reconstruct-identifier"
+      "paths: [%s]"
+      (String.concat ~sep:";" (List.map path
+        ~f:(fun l -> l.Location.txt)));
     let reify dot =
       if dot = "" ||
          (dot.[0] >= 'a' && dot.[0] <= 'z') ||
@@ -243,19 +249,38 @@ let dispatch pipeline (type a) : a Query_protocol.t -> a =
     let env, _ = Mbrowse.leaf_node (Mtyper.node_at typer pos) in
     let ppf, to_string = Format.to_string () in
     let verbosity = verbosity pipeline in
-    ignore (Type_utils.type_in_env ~verbosity env ppf source : bool);
+    let context = Context.Expr in
+    ignore (Type_utils.type_in_env ~verbosity ~context env ppf source : bool);
     to_string ()
 
   | Type_enclosing (expro, pos, index) ->
     let typer = Mpipeline.typer_result pipeline in
     let verbosity = verbosity pipeline in
-    let structures = Mbrowse.of_typedtree (Mtyper.get_typedtree typer) in
     let pos = Mpipeline.get_lexing_pos pipeline pos in
-    let path = match Mbrowse.enclosing pos [structures] with
+    let structures = Mbrowse.enclosing pos
+      [Mbrowse.of_typedtree (Mtyper.get_typedtree typer)] in
+    let path = match structures with
       | [] -> []
       | browse -> Browse_misc.annotate_tail_calls browse
     in
-    let result = Type_enclosing.from_nodes path in
+    let exprs = reconstruct_identifier pipeline pos expro in
+
+    let () =
+      Logger.log ~section:Type_enclosing.log_section
+        ~title:"reconstruct identifier" "%a"
+        Logger.json (fun () ->
+          let lst =
+            List.map exprs ~f:(fun { Location.loc; txt } ->
+              `Assoc [ "start", Lexing.json_of_position loc.Location.loc_start
+                     ; "end",   Lexing.json_of_position loc.Location.loc_end
+                     ; "identifier", `String txt]
+            )
+          in
+          `List lst
+        )
+    in
+
+    let result = Type_enclosing.from_nodes ~path in
 
     (* enclosings of cursor in given expression *)
     let exprs = reconstruct_identifier pipeline pos expro in
@@ -273,8 +298,11 @@ let dispatch pipeline (type a) : a Query_protocol.t -> a =
           `List lst
         )
     in
-    let env, node = Mbrowse.leaf_node (Mtyper.node_at typer pos) in
-    let small_enclosings = Type_enclosing.from_reconstructed verbosity exprs env node in
+    let nodes = Mtyper.node_at typer pos in
+    let small_enclosings =
+      Type_enclosing.from_reconstructed exprs
+       ~nodes ~cursor:pos ~verbosity
+    in
     Logger.log ~section:Type_enclosing.log_section ~title:"small enclosing" "%a"
       Logger.fmt (fun fmt ->
         Format.fprintf fmt "result = [ %a ]"
@@ -283,15 +311,16 @@ let dispatch pipeline (type a) : a Query_protocol.t -> a =
           small_enclosings
       );
 
-    let normalize ({Location. loc_start; loc_end; _}, text, _tail) =
-        Lexing.split_pos loc_start, Lexing.split_pos loc_end, text in
     let all_items =
+      let normalize ({Location. loc_start; loc_end; _}, text, _tail) =
+        Lexing.split_pos loc_start, Lexing.split_pos loc_end, text in
       List.merge_cons
         ~f:(fun a b ->
             (* Tail position is computed only on result, and result comes last
                As an approximation, when two items are similar, we returns the
                rightmost one *)
             if compare (normalize a) (normalize b) = 0 then Some b else None)
+
         (small_enclosings @ result)
     in
     let ppf = Format.str_formatter in
@@ -300,16 +329,16 @@ let dispatch pipeline (type a) : a Query_protocol.t -> a =
           let print = match index with None -> true | Some index -> index = i in
           let ret x = (loc, x, tail) in
           match text with
-          | `String str -> ret (`String str)
-          | `Type (env, t) when print ->
+          | Type_enclosing.String str -> ret (`String str)
+          | Type_enclosing.Type (env, t) when print ->
             Printtyp.wrap_printing_env env ~verbosity
               (fun () -> Type_utils.print_type_with_decl ~verbosity env ppf t);
             ret (`String (Format.flush_str_formatter ()))
-          | `Type_decl (env, id, t) when print ->
+          | Type_enclosing.Type_decl (env, id, t) when print ->
             Printtyp.wrap_printing_env env ~verbosity
               (fun () -> Printtyp.type_declaration env id ppf t);
             ret (`String (Format.flush_str_formatter ()))
-          | `Modtype (env, m) when print ->
+          | Type_enclosing.Modtype (env, m) when print ->
             Printtyp.wrap_printing_env env ~verbosity
               (fun () -> Printtyp.modtype env ppf m);
             ret (`String (Format.flush_str_formatter ()))
@@ -325,6 +354,47 @@ let dispatch pipeline (type a) : a Query_protocol.t -> a =
       | path -> List.map ~f:snd path
     in
     List.map ~f:Mbrowse.node_loc path
+
+  | Locate_type pos ->
+    let typer = Mpipeline.typer_result pipeline in
+    let structures = Mbrowse.of_typedtree (Mtyper.get_typedtree typer) in
+    let pos = Mpipeline.get_lexing_pos pipeline pos in
+    let node =
+      match Mbrowse.enclosing pos [structures] with
+      | path :: _ -> Some path
+      | [] -> None
+    in
+    let path =
+      Option.bind node ~f:(fun (env, node) ->
+          Locate.log ~title:"query_commands Locate_type"
+            "inspecting node: %s" (Browse_raw.string_of_node node);
+          match node with
+          | Browse_raw.Expression {exp_type = ty; _}
+          | Pattern {pat_type = ty; _}
+          | Core_type {ctyp_type = ty; _}
+          | Value_description { val_desc = { ctyp_type = ty; _ }; _ } ->
+            begin match (Ctype.repr ty).desc with
+              | Tconstr (path, _, _) -> Some (env, path)
+              | _ -> None
+            end
+          | _ -> None)
+    in
+    begin match path with
+      | None -> `Invalid_context
+      | Some (env, path) ->
+        Locate.log ~title:"debug" "found type: %s" (Path.name path);
+        let local_defs = Mtyper.get_typedtree typer in
+        match Locate.from_path
+                ~env
+                ~config:(Mpipeline.final_config pipeline)
+                ~local_defs ~pos ~namespace:`Type `MLI
+                path with
+        | `Builtin -> `Builtin (Path.name path)
+        | `Not_in_env _ as s -> s
+        | `Not_found _ as s -> s
+        | `Found _ as s -> s
+        | `File_not_found _ as s -> s
+    end
 
   | Complete_prefix (prefix, pos, kinds, with_doc, with_types) ->
     let pipeline, typer = for_completion pipeline pos in
@@ -521,6 +591,10 @@ let dispatch pipeline (type a) : a Query_protocol.t -> a =
     Destruct.log ~title:"nodes before" "%a"
       Logger.json (fun () -> `List (List.map nodes ~f:dump_node));
     let nodes =
+      (* Drop nodes that:
+         - start inside the user's selection
+         - finish inside the user's selection
+      *)
       List.drop_while nodes
         ~f:(fun (_,t) ->
           let {Location. loc_start; loc_end; _} = Mbrowse.node_loc t in
