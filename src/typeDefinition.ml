@@ -214,22 +214,42 @@ module Constructors = struct
       }
   end
 
+  let rec list_eq (l : 'a list) : bool =
+    match l with
+    | [] -> true
+    | _ :: [] -> true
+    | x :: y :: xs -> x = y && list_eq (y :: xs)
+
   let of_ocaml
     (single_constructors : Single.t list)
     : (t * AdtParameters.t) Monad.t =
 
-    let* constructors = single_constructors |> Monad.List.map (
+    let* constructors_and_arities  = single_constructors |> Monad.List.map (
       fun { Single.constructor_name; param_typs; return_typ_params } ->
         let typ_vars = param_typs |> Type.typ_args_of_typs in
         let typ_vars = return_typ_params |> Type.typ_args_of_typs |> Name.Set.union typ_vars |> Name.Set.elements in
-          return {
+          return ({
             constructor_name;
             param_typs;
             res_typ_params = return_typ_params;
             typ_vars
-          }
+          }, List.length return_typ_params)
     ) in
-    return (constructors, [])
+
+    let (constructors, constructors_arity) = List.split constructors_and_arities in
+
+    (* let _ = constructors_and_arities |> List.map (function (constructor, arity) -> *)
+        (* print_string ((Name.to_string constructor.constructor_name) ^ ": "); *)
+        (* print_int arity; *)
+        (* print_string "\n") *)
+         (* in *)
+
+    (* let* arity_correct = constructors_arity |> Monad.List.fold_left () _ in *)
+    if not (list_eq constructors_arity)
+    then
+      raise (constructors, []) Error.Category.Unexpected "Unexpected error made the constructors have different return sizes"
+    else
+      return (constructors, [])
 
 end
 
@@ -324,7 +344,12 @@ module Inductive = struct
             !^ ":" ^^ Pp.set
           )
         )
-      ) ^^ !^ ":" ^^ Pp.set ^^ !^ ":=" ^-^
+     ) ^^ !^ ":" ^^
+      let arity = match constructors with
+        | {res_typ_params ; _} :: _ ->  List.length res_typ_params
+        | _ -> 0 in
+      Pp.typ_arity arity
+      ^^ !^ ":=" ^-^
       separate empty (
         constructors |> List.map (fun {
             Constructors.constructor_name;
