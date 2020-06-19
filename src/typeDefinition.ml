@@ -114,6 +114,7 @@ module Constructors = struct
 
     let of_ocaml_case
       (typ_name : Name.t)
+      (defined_typ_params : Name.t list)
       (case : Types.constructor_declaration)
       : (t * (RecordSkeleton.t * Name.t list * Type.t) option) Monad.t =
       let { Types.cd_args; cd_id; cd_loc; cd_res; _ } = case in
@@ -186,7 +187,7 @@ module Constructors = struct
           | Type.Apply (_, typs) -> return typs
           | _ -> raise [ty] Error.Category.Unexpected "Unexpected Type of record"
           end
-        | None -> return (param_typs)
+        | None -> return (List.map (fun v -> Type.Variable v) defined_typ_params)
       in
 
       return (
@@ -685,7 +686,8 @@ let of_ocaml (typs : type_declaration list) : t Monad.t =
           typs
         )
       | { typ_type = { type_kind = Type_variant cases; _ }; _ } ->
-        Monad.List.map (Constructors.Single.of_ocaml_case name) cases >>= fun cases ->
+        let typ_args = AdtParameters.get_parameters typ_args in
+        Monad.List.map (Constructors.Single.of_ocaml_case name typ_args) cases >>= fun cases ->
         let (single_constructors, new_constructor_records) = List.split cases in
         let new_constructor_records =
           new_constructor_records |> Util.List.filter_map (fun x -> x) in
