@@ -11,7 +11,7 @@ module AdtVariable = struct
     match typ.Types.desc with
     | Tvar x | Tunivar x ->
       begin match x with
-        | None | Some "_" -> return Unknown
+        | None -> return Unknown
         | Some x ->
           Name.of_string false x >>= fun x ->
           return (Parameter x)
