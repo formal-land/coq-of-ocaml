@@ -219,11 +219,12 @@ module Constructors = struct
 
     let* constructors = single_constructors |> Monad.List.map (
       fun { Single.constructor_name; param_typs; return_typ_params } ->
+        let typ_vars = param_typs |> Type.typ_args_of_typs |> Name.Set.elements in
           return {
             constructor_name;
             param_typs;
             res_typ_params = return_typ_params;
-            typ_vars = []
+            typ_vars
           }
     ) in
     return (constructors, [])
