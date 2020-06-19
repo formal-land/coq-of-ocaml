@@ -238,13 +238,6 @@ module Constructors = struct
 
     let (constructors, constructors_arity) = List.split constructors_and_arities in
 
-    (* let _ = constructors_and_arities |> List.map (function (constructor, arity) -> *)
-        (* print_string ((Name.to_string constructor.constructor_name) ^ ": "); *)
-        (* print_int arity; *)
-        (* print_string "\n") *)
-         (* in *)
-
-    (* let* arity_correct = constructors_arity |> Monad.List.fold_left () _ in *)
     if not (list_eq constructors_arity)
     then
       raise (constructors, []) Error.Category.Unexpected "Unexpected error made the constructors have different return sizes"
