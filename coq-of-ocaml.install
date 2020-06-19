@@ -1,3 +1,0 @@
-bin: [
-  "_build/default/src/coqOfOCaml.exe" {"coq-of-ocaml"}
-]
