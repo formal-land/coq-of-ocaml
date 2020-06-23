@@ -183,8 +183,8 @@ Module ConstructorWithPolymorphicRecord.
   
   Reserved Notation "'t.Foo".
   
-  Inductive t (loc a : Set) : Set :=
-  | Foo : 't.Foo loc a -> t loc a
+  Inductive t : Set -> Set -> Set :=
+  | Foo : forall {a loc : Set}, 't.Foo loc a -> t loc a
   
   where "'t.Foo" := (fun (t_loc t_a : Set) => t.Foo_skeleton t_loc t_a int).
   
@@ -192,8 +192,6 @@ Module ConstructorWithPolymorphicRecord.
     Include ConstructorRecords_t.t.
     Definition Foo := 't.Foo.
   End t.
-  
-  Arguments Foo {_ _}.
   
   Definition foo : t int string :=
     Foo {| t.Foo.location := 12; t.Foo.payload := "hi"; t.Foo.size := 23 |}.

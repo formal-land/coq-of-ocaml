@@ -59,21 +59,24 @@ Inductive comb : Set :=
 Inductive leaf : Set :=
 | Leaf : leaf.
 
-Inductive comparable_struct : Set :=
-| Int_key : option type_annot -> comparable_struct
-| String_key : option type_annot -> comparable_struct
-| Bool_key : option type_annot -> comparable_struct
-| Pair_key :
-  comparable_struct * option field_annot ->
-  comparable_struct * option field_annot -> option type_annot ->
-  comparable_struct.
+Inductive comparable_struct : Set -> Set -> Set :=
+| Int_key : forall {position : Set},
+  option type_annot -> comparable_struct int position
+| String_key : forall {position : Set},
+  option type_annot -> comparable_struct string position
+| Bool_key : forall {position : Set},
+  option type_annot -> comparable_struct bool position
+| Pair_key : forall {a b position : Set},
+  comparable_struct a leaf * option field_annot ->
+  comparable_struct b position * option field_annot -> option type_annot ->
+  comparable_struct (pair a b) comb.
 
-Definition comparable_ty : Set := comparable_struct.
+Definition comparable_ty (a : Set) : Set := comparable_struct a comb.
 
 Module Boxed_set.
   Record signature {elt OPS_t : Set} : Set := {
     elt := elt;
-    elt_ty : comparable_ty;
+    elt_ty : comparable_ty elt;
     OPS : S.SET.signature (elt := elt) (t := OPS_t);
     boxed : OPS.(S.SET.t);
     size : int;

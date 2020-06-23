@@ -7,31 +7,33 @@ Local Open Scope Z_scope.
 Local Open Scope type_scope.
 Import ListNotations.
 
-Inductive gre (a : Set) : Set :=
-| Arg : a -> gre a.
+Inductive gre : Set -> Set :=
+| Arg : forall {a : Set}, a -> gre a.
 
-Arguments Arg {_}.
+Inductive foo : Set -> Set -> Set :=
+| Bar : forall {a b c : Set}, a -> int -> b -> c -> foo b string
+| Other : forall {a b : Set}, int -> foo a b.
 
-Inductive foo : Set :=
-| Bar : forall {a b c : Set}, a -> int -> b -> c -> foo
-| Other : int -> foo.
+Inductive lex : Set -> Set :=
+| Clex : int -> lex int
+| Clex2 : int -> lex unit.
 
-Inductive expr : Set :=
-| Int : int -> expr
-| String : string -> expr
-| Sum : expr -> expr -> expr
-| Pair : expr -> expr -> expr.
+Inductive expr : Set -> Set :=
+| Int : int -> expr int
+| String : string -> expr string
+| Sum : expr int -> expr int -> expr int
+| Pair : forall {a b : Set}, expr a -> expr b -> expr (a * b).
 
-Fixpoint proj_int (e : expr) : int :=
+Fixpoint proj_int (e : expr int) : int :=
   match e with
   | Int n => n
   | Sum e1 e2 => Z.add (proj_int e1) (proj_int e2)
   | _ => unreachable_gadt_branch
   end.
 
-Inductive one_case : Set :=
-| SingleCase : one_case
-| Impossible : one_case.
+Inductive one_case : Set -> Set :=
+| SingleCase : one_case int
+| Impossible : one_case bool.
 
 Definition x : int :=
   match SingleCase with

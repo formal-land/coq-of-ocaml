@@ -20,12 +20,9 @@ Definition m : bool :=
   | _ => true
   end.
 
-Inductive t2 (a : Set) : Set :=
-| D1 : t2 a
-| D2 : a -> t2 a -> t2 a.
-
-Arguments D1 {_}.
-Arguments D2 {_}.
+Inductive t2 : Set -> Set :=
+| D1 : forall {a : Set}, t2 a
+| D2 : forall {a : Set}, a -> t2 a -> t2 a.
 
 Fixpoint of_list {A : Set} (l : list A) : t2 A :=
   match l with

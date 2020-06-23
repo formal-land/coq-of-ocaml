@@ -12,26 +12,21 @@ Definition foo : Set := string.
 Reserved Notation "'double".
 Reserved Notation "'simple".
 
-Inductive tree (a : Set) : Set :=
-| Tree : list (node a) -> tree a
+Inductive tree : Set -> Set :=
+| Tree : forall {a : Set}, list (node a) -> tree a
 
-with node (a : Set) : Set :=
-| Leaf : string -> node a
-| Node : tree a -> node a
+with node : Set -> Set :=
+| Leaf : forall {a : Set}, string -> node a
+| Node : forall {a : Set}, tree a -> node a
 
-with unrelated (a : Set) : Set :=
-| Unrelated : 'double ('simple a) -> unrelated a
+with unrelated : Set -> Set :=
+| Unrelated : forall {a : Set}, 'double ('simple a) -> unrelated a
 
 where "'simple" := (fun (t_b : Set) => t_b)
 and "'double" := (fun (t_b : Set) => t_b * 'simple t_b).
 
 Definition double := 'double.
 Definition simple := 'simple.
-
-Arguments Tree {_}.
-Arguments Leaf {_}.
-Arguments Node {_}.
-Arguments Unrelated {_}.
 
 Module re_bis.
   Record record {bis : Set} : Set := Build {

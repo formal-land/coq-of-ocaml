@@ -11,7 +11,10 @@ module AdtVariable = struct
     match typ.Types.desc with
     | Tvar x | Tunivar x ->
       begin match x with
-        | None -> return Unknown
+        | None | Some "_" -> return Unknown
+        (* | Some "_" -> *)
+          (* Name.of_string false "unit" >>= fun x -> *)
+          (* return (Parameter x) *)
         | Some x ->
           Name.of_string false x >>= fun x ->
           return (Parameter x)
@@ -32,6 +35,7 @@ let get_name : AdtVariable.t -> Name.t option = function
 let get_parameters (typs : t) : Name.t list =
   typs |> List.filter_map (function
       | AdtVariable.Parameter name -> Some name
+      | Unknown -> Some (Make "unit")
       | _ -> None)
 
 let of_ocaml : Types.type_expr list -> t Monad.t =

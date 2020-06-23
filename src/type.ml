@@ -238,7 +238,13 @@ and existential_typs_of_typs (typs : Types.type_expr list)
 (** The free variables of a type. *)
 let rec typ_args_of_typ (typ : t) : Name.Set.t =
   match typ with
-  | Variable x -> Name.Set.singleton x
+  | Variable x ->
+    begin match x with
+      | Make x when x = "unit" ->
+        Name.Set.empty
+    | _ ->
+      Name.Set.singleton x
+    end
   | Arrow (typ1, typ2) -> typ_args_of_typs [typ1; typ2]
   | Sum typs -> typ_args_of_typs (List.map snd typs)
   | Tuple typs | Apply (_, typs) -> typ_args_of_typs typs

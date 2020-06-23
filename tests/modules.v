@@ -8,12 +8,9 @@ Local Open Scope type_scope.
 Import ListNotations.
 
 Module List2.
-  Inductive t (a : Set) : Set :=
-  | Nil : t a
-  | Cons : a -> t a -> t a.
-  
-  Arguments Nil {_}.
-  Arguments Cons {_}.
+  Inductive t : Set -> Set :=
+  | Nil : forall {a : Set}, t a
+  | Cons : forall {a : Set}, a -> t a -> t a.
   
   Fixpoint sum (l : t int) : int :=
     match l with

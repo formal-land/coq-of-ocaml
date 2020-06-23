@@ -1,0 +1,4 @@
+-R . Tests -R ../OCaml OCaml 
+-arg -impredicative-set
+
+gadts.v
