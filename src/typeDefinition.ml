@@ -250,6 +250,26 @@ end
 module Inductive = struct
   type notation = Name.t * Name.t list * Type.t
 
+  module Tag = struct
+    type t = Name.t * Constructors.t
+
+    let of_typs
+      (name : Name.t)
+      (typs : Type.t list) : t =
+      let name = Name.to_string name in
+      let constructors = typs |> List.fold_left (fun constructors typ ->
+          let constructor_name = Name.Make (name ^ "_" ^ (Type.to_string typ)) in
+          let constructor : Constructors.item = {
+            constructor_name;
+            param_typs = [];
+            res_typ_params = [];
+            typ_vars = []
+          } in (constructor :: constructors)) [] in
+      let name = Name.Make (name ^ ("_tag")) in
+        (name, constructors)
+
+  end
+
   type t = {
     constructor_records
       : (Name.t * (RecordSkeleton.t * Name.t list * Type.t) list) list;
@@ -261,6 +281,7 @@ module Inductive = struct
      * | `Constructor.t` ...
      * with `Name.t` (`Name.t list` : set) : Set := ...
      *)
+    tags : Tag.t option;
     typs : (Name.t * Name.t list * Constructors.t) list;
   }
 
@@ -493,6 +514,14 @@ module Inductive = struct
         ) ^-^ !^ "."
       )
 
+  let to_coq_tags
+      (subst : Type.Subst.t)
+      (tags : Tag.t option)
+    : SmartPrint.t option =
+    match tags with
+    | None -> None
+    | Some (name, constructors) ->
+      Some (to_coq_typs subst true name [] constructors)
 
   let to_coq (inductive : t) : SmartPrint.t =
     let subst = {
@@ -522,6 +551,7 @@ module Inductive = struct
             path_name
         | _ -> path_name
     } in
+    let tags = to_coq_tags subst inductive.tags in
     let constructor_records = to_coq_constructor_records inductive in
     let record_skeletons = to_coq_record_skeletons inductive in
     let reserved_notations = to_coq_notations_reserved inductive in
@@ -533,6 +563,10 @@ module Inductive = struct
         to_coq_typs_implicits params constructors
       )) in
     nest (
+      (match tags with
+       | None -> empty
+       | Some tags -> tags ^^ newline ^^ newline
+      ) ^^
       (match constructor_records with
       | None -> empty
       | Some constructor_records -> constructor_records ^^ newline ^^ newline) ^^
@@ -598,6 +632,7 @@ let of_ocaml (typs : type_declaration list) : t Monad.t =
           constructor_records = [];
           notations = [];
           records = [];
+          tags = None;
           typs = [(name, typ_args, constructors)];
         })
         NotSupported
@@ -730,12 +765,22 @@ let of_ocaml (typs : type_declaration list) : t Monad.t =
           "We do not handle extensible types"
       )
     ) ([], [], [], [])) >>= fun (constructor_records, notations, records, typs) ->
-    let typs = typs |> List.map (function (x, y, z) -> (x, AdtParameters.get_parameters y, z)) in
+    let typs = typs |> List.map (function (name, typ_args, constructors) ->
+        (name, AdtParameters.get_parameters typ_args, constructors)) in
+
+    let ret_typs = typs |> List.map (function (_, _, constructors) ->
+        constructors |> List.map (function constructor -> constructor.Constructors.res_typ_params)
+        |> List.flatten) |> List.flatten |> List.sort_uniq compare in
+
+    let (name, _, _) = typs |> List.hd in
+    let tags = Inductive.Tag.of_typs name ret_typs in
+
     return (
       Inductive {
         constructor_records = List.rev constructor_records;
         notations = List.rev notations;
         records;
+        tags = Some tags;
         typs = List.rev typs
       }
     )
