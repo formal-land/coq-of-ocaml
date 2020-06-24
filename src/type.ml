@@ -19,6 +19,18 @@ and arity_or_typ =
   | Arity of int
   | Typ of t
 
+let to_string : t -> string = function
+  | Variable name -> Name.to_string name
+  | Arrow _ -> "Arrow"
+  | Sum _ -> "Sum"
+  | Tuple _ -> "Tuple"
+  | Apply _ -> "Apply"
+  | Package _ -> "Package"
+  | ForallModule _ -> "ForallModule"
+  | ForallTyps _ -> "ForallTyps"
+  | FunTyps _ -> "FunTyps"
+  | Error s -> "Error" ^ s
+
 let type_exprs_of_row_field (row_field : Types.row_field)
   : Types.type_expr list =
   match row_field with
