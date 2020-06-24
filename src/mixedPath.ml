@@ -11,6 +11,10 @@ type t =
 let of_name (name : Name.t) : t =
   PathName (PathName.of_name [] name)
 
+let to_string : t -> string = function
+  | Access (path, _, _) -> PathName.to_string path
+  | PathName path -> PathName.to_string path
+
 let get_signature_path (path : Path.t) : Path.t option Monad.t =
   get_env >>= fun env ->
   match Env.find_module path env with
