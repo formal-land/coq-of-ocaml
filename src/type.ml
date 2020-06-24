@@ -24,7 +24,7 @@ let to_string : t -> string = function
   | Arrow _ -> "Arrow"
   | Sum _ -> "Sum"
   | Tuple _ -> "Tuple"
-  | Apply _ -> "Apply"
+  | Apply (mpath, _) -> MixedPath.to_string mpath
   | Package _ -> "Package"
   | ForallModule _ -> "ForallModule"
   | ForallTyps _ -> "ForallTyps"
