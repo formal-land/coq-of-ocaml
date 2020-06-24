@@ -251,22 +251,31 @@ module Inductive = struct
   type notation = Name.t * Name.t list * Type.t
 
   module Tag = struct
-    type t = Name.t * Constructors.t
+    (* We keep the actual types around for the decode function later on *)
+    type t = Name.t * Type.t list * Constructors.t
+
+    let get_tag (name : Name.t) =
+      Name.Make ((Name.to_string name) ^ ("_tag"))
+
+    let get_tag_constructor
+      (name : Name.t)
+      (typ : Type.t)
+      : Name.t =
+      let name = Name.to_string name in
+      Name.Make (name ^ "_" ^ (Type.to_string typ) ^ "_tag")
 
     let of_typs
       (name : Name.t)
       (typs : Type.t list) : t =
-      let name = Name.to_string name in
-      let constructors = typs |> List.fold_left (fun constructors typ ->
-          let constructor_name = Name.Make (name ^ "_" ^ (Type.to_string typ)) in
+      let constructors = typs |> List.sort_uniq compare |> List.fold_left (fun constructors typ ->
+          let constructor_name = get_tag_constructor name typ in
           let constructor : Constructors.item = {
             constructor_name;
             param_typs = [];
             res_typ_params = [];
             typ_vars = []
           } in (constructor :: constructors)) [] in
-      let name = Name.Make (name ^ ("_tag")) in
-        (name, constructors)
+        (get_tag name, typs, constructors)
 
   end
 
@@ -359,10 +368,18 @@ module Inductive = struct
           )
         )
      ) ^^ !^ ":" ^^
-      let arity = match constructors with
-        | {res_typ_params ; _} :: _ ->  List.length res_typ_params
-        | _ -> 0 in
-      Pp.typ_arity arity
+      (* let arity = match constructors with *)
+        (* | {res_typ_params ; _} :: _ ->  List.length res_typ_params + 1 *)
+        (* | _ -> 1 in *)
+      let constructor = List.hd constructors in
+      let arity = List.length constructor.res_typ_params + 1 in
+      let l : SmartPrint.t list = List.init arity (fun i ->
+          if i = arity - 1
+          then Pp.set
+          else !^ (Name.to_string (Tag.get_tag name))) in
+
+      separate (!^ " -> ") l
+
       ^^ !^ ":=" ^-^
       separate empty (
         constructors |> List.map (fun {
@@ -520,7 +537,7 @@ module Inductive = struct
     : SmartPrint.t option =
     match tags with
     | None -> None
-    | Some (name, constructors) ->
+    | Some (name, _, constructors) ->
       Some (to_coq_typs subst true name [] constructors)
 
   let to_coq (inductive : t) : SmartPrint.t =
@@ -565,7 +582,7 @@ module Inductive = struct
     nest (
       (match tags with
        | None -> empty
-       | Some tags -> tags ^^ newline ^^ newline
+       | Some tags -> tags ^-^ !^ "." ^^ newline ^^ newline
       ) ^^
       (match constructor_records with
       | None -> empty
@@ -614,6 +631,20 @@ let filter_in_free_vars
       else
         None
   )
+
+let tag_constructor
+    (name : Name.t)
+    (constructor : Constructors.item)
+    : Constructors.item =
+  let res_typ_params = constructor.res_typ_params in
+  let res_typ_params = res_typ_params |> List.map
+                         (fun res_typ_param -> Inductive.Tag.get_tag_constructor name res_typ_param)
+                       |> List.map (fun x -> Type.Variable x) in
+  { constructor with res_typ_params }
+
+let tag_constructors (name : Name.t)
+  : Constructors.t -> Constructors.t =
+  List.map (fun item -> tag_constructor name item)
 
 let of_ocaml (typs : type_declaration list) : t Monad.t =
   match typs with
@@ -765,14 +796,15 @@ let of_ocaml (typs : type_declaration list) : t Monad.t =
           "We do not handle extensible types"
       )
     ) ([], [], [], [])) >>= fun (constructor_records, notations, records, typs) ->
-    let typs = typs |> List.map (function (name, typ_args, constructors) ->
-        (name, AdtParameters.get_parameters typ_args, constructors)) in
 
     let ret_typs = typs |> List.map (function (_, _, constructors) ->
         constructors |> List.map (function constructor -> constructor.Constructors.res_typ_params)
-        |> List.flatten) |> List.flatten |> List.sort_uniq compare in
+        |> List.flatten) |> List.flatten in
 
-    let (name, _, _) = typs |> List.hd in
+    let typs = typs |> List.map (function (name, typ_args, constructors) ->
+        (name, AdtParameters.get_parameters typ_args, tag_constructors name constructors)) in
+
+    let (name, _, _) = List.hd typs in
     let tags = Inductive.Tag.of_typs name ret_typs in
 
     return (
