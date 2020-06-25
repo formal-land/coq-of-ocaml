@@ -3,55 +3,9 @@ open Typedtree
 open SmartPrint
 open Monad.Notations
 
-(** A value is a toplevel definition made with a "let". *)
-module Value = struct
-  type t = Exp.t option Exp.Definition.t
-
-  (** Pretty-print a value definition to Coq. *)
-  let to_coq (value : t) : SmartPrint.t =
-    match value.Exp.Definition.cases with
-    | [] -> empty
-    | _ :: _ ->
-      separate (newline ^^ newline) (value.Exp.Definition.cases |> List.mapi (fun index (header, e) ->
-        let firt_case = index = 0 in
-        nest (
-          begin if firt_case then
-            begin if Recursivity.to_bool value.Exp.Definition.is_rec then
-              !^ "Fixpoint"
-            else
-              !^ "Definition"
-            end
-          else
-            !^ "with"
-          end ^^
-          let { Exp.Header.name; typ_vars; args; typ; _ } = header in
-          Name.to_coq name ^^
-          begin match typ_vars with
-          | [] -> empty
-          | _ :: _ ->
-            braces @@ group (separate space (List.map Name.to_coq typ_vars) ^^
-            !^ ":" ^^ Pp.set)
-          end ^^
-          group (separate space (args |> List.map (fun (x, t) ->
-            parens @@ nest (Name.to_coq x ^^ !^ ":" ^^ Type.to_coq None None t)
-          ))) ^^
-          Exp.Header.to_coq_structs header ^^
-          begin match typ with
-          | None -> empty
-          | Some typ -> !^ ": " ^-^ Type.to_coq None None typ
-          end ^-^
-          !^ (match typ with None -> ":=" | _ -> " :=") ^^
-          begin match e with
-          | None -> !^ "axiom"
-          | Some e -> Exp.to_coq false e
-          end
-        )
-      )) ^-^ !^ "."
-end
-
 (** A structure. *)
 type t =
-  | Value of Value.t
+  | Value of Exp.definition
   | AbstractValue of Name.t * Name.t list * Type.t
   | TypeDefinition of TypeDefinition.t
   | Open of Open.t
@@ -294,7 +248,7 @@ and of_module_expr (name : Name.t) (module_expr : module_expr)
 let rec to_coq (defs : t list) : SmartPrint.t =
   let rec to_coq_one (def : t) : SmartPrint.t =
     match def with
-    | Value value -> Value.to_coq value
+    | Value value -> Exp.to_coq_definition value
     | AbstractValue (name, typ_vars, typ) ->
       !^ "Parameter" ^^ Name.to_coq name ^^ !^ ":" ^^
       (match typ_vars with

@@ -19,12 +19,6 @@ module Header = struct
       braces (nest (!^ "struct" ^^ structs))
 end
 
-module Definition = struct
-  type 'a t = {
-    is_rec : Recursivity.t;
-    cases : (Header.t * 'a) list }
-end
-
 type match_existential_cast = {
   new_typ_vars : Name.t list;
   bound_vars : (Name.t * Type.t) list;
@@ -46,7 +40,7 @@ type t =
     (** The let of a variable, with optionally a list of polymorphic variables.
         We optionally specify the symbol of the let operator as it may be
         non-standard for monadic binds. *)
-  | LetFun of t option Definition.t * t
+  | LetFun of definition * t
   | LetTyp of Name.t * Name.t list * Type.t * t
     (** The definition of a type. It is used to represent module values. *)
   | LetModuleUnpack of Name.t * PathName.t * t
@@ -77,6 +71,12 @@ type t =
   | ErrorTyp of Type.t (** An error composed of a type. *)
   | ErrorMessage of t * string
     (** An expression together with an error message. *)
+
+and definition = {
+  is_rec : Recursivity.t;
+  cases : (Header.t * t option ) list
+}
+
 
 (** Take a function expression and make explicit the list of arguments and
     the body. *)
@@ -534,7 +534,7 @@ and import_let_fun
   (at_top_level : bool)
   (is_rec : Asttypes.rec_flag)
   (cases : value_binding list)
-  : t option Definition.t Monad.t =
+  : definition Monad.t =
   let is_rec = Recursivity.of_rec_flag is_rec in
   (cases |> Monad.List.filter_map (fun { vb_pat = p; vb_expr; vb_attributes; _ } ->
     Attribute.of_attributes vb_attributes >>= fun attributes ->
@@ -578,7 +578,7 @@ and import_let_fun
       return (Some (header, e_body))
     )
   ))) >>= fun cases ->
-  let result = { Definition.is_rec = is_rec; cases } in
+  let result = { is_rec = is_rec; cases } in
   match (at_top_level, result) with
   | (false, { is_rec = Recursivity.New true; cases = _ :: _ :: _ }) ->
     raise
@@ -1173,11 +1173,11 @@ let rec to_coq (paren : bool) (e : t) : SmartPrint.t =
   | LetFun (def, e) ->
     (* There should be only on case for recursive definitionss. *)
     Pp.parens paren @@ nest (separate newline
-      (def.Definition.cases |> List.mapi (fun index (header, e) ->
+      (def.cases |> List.mapi (fun index (header, e) ->
         let first_case = index = 0 in
         (if first_case then (
           !^ "let" ^^
-          (if Recursivity.to_bool def.Definition.is_rec then !^ "fix" else empty)
+          (if Recursivity.to_bool def.is_rec then !^ "fix" else empty)
         ) else
           !^ "with") ^^
         Name.to_coq header.Header.name ^^
@@ -1442,3 +1442,45 @@ and to_coq_exist_t
     Pp.primitive_tuple_infer nb_of_existential_variables ^^
     e
   )
+
+
+(** Pretty-print a definition to Coq. *)
+  let to_coq_definition (value : definition) : SmartPrint.t =
+    match value.cases with
+    | [] -> empty
+    | _ :: _ ->
+      separate (newline ^^ newline) (value.cases |> List.mapi (fun index (header, e) ->
+        let firt_case = index = 0 in
+        nest (
+          begin if firt_case then
+            begin if Recursivity.to_bool value.is_rec then
+              !^ "Fixpoint"
+            else
+              !^ "Definition"
+            end
+          else
+            !^ "with"
+          end ^^
+          let { Header.name; typ_vars; args; typ; _ } = header in
+          Name.to_coq name ^^
+          begin match typ_vars with
+          | [] -> empty
+          | _ :: _ ->
+            braces @@ group (separate space (List.map Name.to_coq typ_vars) ^^
+            !^ ":" ^^ Pp.set)
+          end ^^
+          group (separate space (args |> List.map (fun (x, t) ->
+            parens @@ nest (Name.to_coq x ^^ !^ ":" ^^ Type.to_coq None None t)
+          ))) ^^
+          Header.to_coq_structs header ^^
+          begin match typ with
+          | None -> empty
+          | Some typ -> !^ ": " ^-^ Type.to_coq None None typ
+          end ^-^
+          !^ (match typ with None -> ":=" | _ -> " :=") ^^
+          begin match e with
+          | None -> !^ "axiom"
+          | Some e -> to_coq false e
+          end
+        )
+      )) ^-^ !^ "."
