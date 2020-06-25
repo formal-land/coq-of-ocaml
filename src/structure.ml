@@ -107,8 +107,11 @@ let rec of_structure (structure : structure) : t list Monad.t =
          the environment. This is useful for example for the detection of
          phantom types. *)
       set_env final_env (
-      TypeDefinition.of_ocaml typs >>= fun def ->
-      return [TypeDefinition def])
+      TypeDefinition.of_ocaml typs >>= fun (tags, def) ->
+      let decoder = match tags with
+      | None -> []
+      | Some tags -> [] in
+      return ([TypeDefinition def] @ decoder))
     | Tstr_exception { tyexn_constructor = { ext_id; _ }; _ } ->
       error_message (Error ("exception " ^ Ident.name ext_id)) SideEffect (
         "The definition of exceptions is not handled.\n\n" ^
