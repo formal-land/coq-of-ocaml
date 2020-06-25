@@ -347,64 +347,6 @@ module Inductive = struct
   let to_coq_record_skeletons (inductive : t) : SmartPrint.t list =
     inductive.records |> List.map RecordSkeleton.to_coq
 
-  let to_coq_typs
-    (subst : Type.Subst.t)
-    (is_first : bool)
-    (name : Name.t)
-    (params : Name.t list)
-    (constructors : Constructors.t)
-    : SmartPrint.t =
-    let keyword = if is_first then !^ "Inductive" else !^ "with" in
-    nest (
-      keyword ^^ Name.to_coq name ^^
-      (if params = [] then
-        empty
-      else
-        parens (
-          nest (
-            separate space (params |> List.map Name.to_coq) ^^
-            !^ ":" ^^ Pp.set
-          )
-        )
-     ) ^^ !^ ":" ^^
-      (* let arity = match constructors with *)
-        (* | {res_typ_params ; _} :: _ ->  List.length res_typ_params + 1 *)
-        (* | _ -> 1 in *)
-      let constructor = List.hd constructors in
-      let arity = List.length constructor.res_typ_params + 1 in
-      let l : SmartPrint.t list = List.init arity (fun i ->
-          if i = arity - 1
-          then Pp.set
-          else !^ (Name.to_string (Tags.get_tag name))) in
-
-      separate (!^ " -> ") l
-
-      ^^ !^ ":=" ^-^
-      separate empty (
-        constructors |> List.map (fun {
-            Constructors.constructor_name;
-            param_typs;
-            res_typ_params;
-            typ_vars;
-          } ->
-          newline ^^ nest (
-            !^ "|" ^^ Name.to_coq constructor_name ^^ !^ ":" ^^
-            (match typ_vars with
-            | [] -> empty
-            | _ ->
-              !^ "forall" ^^ braces (
-                separate space (typ_vars |> List.map Name.to_coq) ^^ !^ ":" ^^ Pp.set
-              ) ^-^ !^ ","
-            ) ^^
-            group @@ separate space (param_typs |> List.map (fun param_typ ->
-              group (Type.to_coq (Some subst) (Some Type.Context.Arrow) param_typ ^^ !^ "->")
-            )) ^^
-            Type.to_coq (Some subst) None (Type.Apply (MixedPath.of_name name, res_typ_params))
-          )
-        )
-      )
-    )
-
   let to_coq_notations_where
     (subst : Type.Subst.t)
     (notation : SmartPrint.t)
@@ -530,90 +472,6 @@ module Inductive = struct
         ) ^-^ !^ "."
       )
 
-  let to_coq_tags
-      (subst : Type.Subst.t)
-      (tags : Tags.t option)
-    : SmartPrint.t option =
-    match tags with
-    | None -> None
-    | Some (name, _, constructors) ->
-      Some (to_coq_typs subst true name [] constructors)
-
-  let to_coq (inductive : t) : SmartPrint.t =
-    let subst = {
-      Type.Subst.name = (fun name -> name);
-      path_name = fun path_name ->
-        match path_name with
-        | { PathName.path = []; base } ->
-          let use_notation =
-            inductive.notations |> List.exists (fun (name, _, _) ->
-              name = base
-            ) in
-          if use_notation then
-            { path = []; base = Name.prefix_by_single_quote base }
-          else
-            path_name
-        | { path = [prefix]; base } ->
-          let use_notation =
-            inductive.constructor_records |> List.exists (fun (name, records) ->
-              records |> List.exists
-                (fun ({ RecordSkeleton.module_name; _ }, _, _) ->
-                  name = prefix && module_name = base
-                )
-            ) in
-          if use_notation then
-            { path = [Name.prefix_by_single_quote prefix]; base }
-          else
-            path_name
-        | _ -> path_name
-    } in
-    (* let tags = to_coq_tags subst inductive.tags in *)
-    let constructor_records = to_coq_constructor_records inductive in
-    let record_skeletons = to_coq_record_skeletons inductive in
-    let reserved_notations = to_coq_notations_reserved inductive in
-    let notations_wheres = to_coq_notations_wheres subst inductive in
-    let notations_record_definitions = to_coq_notations_record_definitions inductive in
-    let notations_definitions = to_coq_notations_definitions inductive in
-    let implicit_arguments =
-      List.concat (inductive.typs |> List.map (fun (_, params, constructors) ->
-        to_coq_typs_implicits params constructors
-      )) in
-    nest (
-      (* (match tags with *)
-       (* | None -> empty *)
-       (* | Some tags -> tags ^-^ !^ "." ^^ newline ^^ newline *)
-      (* ) ^^ *)
-      (match constructor_records with
-      | None -> empty
-      | Some constructor_records -> constructor_records ^^ newline ^^ newline) ^^
-      (match record_skeletons with
-      | [] -> empty
-      | _ :: _ -> separate (newline ^^ newline) record_skeletons ^^ newline ^^ newline) ^^
-      (match reserved_notations with
-      | [] -> empty
-      | _ :: _ -> separate newline reserved_notations ^^ newline ^^ newline) ^^
-      separate (newline ^^ newline) (inductive.typs |>
-        List.mapi (fun index (name, params, constructors) ->
-          let is_first = index = 0 in
-          to_coq_typs subst is_first name params constructors
-        )
-      ) ^-^
-      (match notations_wheres with
-      | [] -> empty
-      | _ :: _ ->
-        newline ^^ newline ^^
-        !^ "where " ^-^ separate (newline ^^ !^ "and ") notations_wheres
-      ) ^-^ !^ "." ^^
-      (match notations_record_definitions with
-      | None -> empty
-      | Some notations -> newline ^^ newline ^^ notations) ^^
-      (match notations_definitions with
-      | [] -> empty
-      | _ :: _ -> newline ^^ newline ^^ separate newline notations_definitions) ^^
-      (match implicit_arguments with
-      | [] -> empty
-      | _ :: _ -> newline ^^ newline ^^ separate newline implicit_arguments)
-    )
 end
 
 type t =
@@ -814,9 +672,155 @@ let of_ocaml (typs : type_declaration list) : t Monad.t =
         }
       ))
 
+
+let to_coq_typs
+    (subst : Type.Subst.t)
+    (is_first : bool)
+    (name : Name.t)
+    (params : Name.t list)
+    (constructors : Constructors.t)
+  : SmartPrint.t =
+  let keyword = if is_first then !^ "Inductive" else !^ "with" in
+  nest (
+    keyword ^^ Name.to_coq name ^^
+    (if params = [] then
+       empty
+     else
+       parens (
+         nest (
+           separate space (params |> List.map Name.to_coq) ^^
+           !^ ":" ^^ Pp.set
+         )
+       )
+    ) ^^ !^ ":" ^^
+    let constructor = List.hd constructors in
+    let arity = List.length constructor.res_typ_params + 1 in
+    let l : SmartPrint.t list = List.init arity (fun i ->
+        if i = arity - 1
+        then Pp.set
+        else !^ (Name.to_string (Tags.get_tag name))) in
+
+    separate (!^ " -> ") l
+
+    ^^ !^ ":=" ^-^
+    separate empty (
+      constructors |> List.map (fun {
+          Constructors.constructor_name;
+          param_typs;
+          res_typ_params;
+          typ_vars;
+        } ->
+          newline ^^ nest (
+            !^ "|" ^^ Name.to_coq constructor_name ^^ !^ ":" ^^
+            (match typ_vars with
+             | [] -> empty
+             | _ ->
+               !^ "forall" ^^ braces (
+                 separate space (typ_vars |> List.map Name.to_coq) ^^ !^ ":" ^^ Pp.set
+               ) ^-^ !^ ","
+            ) ^^
+            group @@ separate space (param_typs |> List.map (fun param_typ ->
+                group (Type.to_coq (Some subst) (Some Type.Context.Arrow) param_typ ^^ !^ "->")
+              )) ^^
+                     Type.to_coq (Some subst) None (Type.Apply (MixedPath.of_name name, res_typ_params))
+          )
+        )
+    )
+  )
+
+
+let to_coq_tags
+    (subst : Type.Subst.t)
+    (tags : Tags.t option)
+  : SmartPrint.t option =
+  match tags with
+  | None -> None
+  | Some (name, _, constructors) ->
+    Some (to_coq_typs subst true name [] constructors)
+
+let to_coq_inductive
+    (subst : Type.Subst.t)
+    (inductive : Inductive.t)
+  : SmartPrint.t =
+  let constructor_records = Inductive.to_coq_constructor_records inductive in
+  let record_skeletons = Inductive.to_coq_record_skeletons inductive in
+  let reserved_notations = Inductive.to_coq_notations_reserved inductive in
+  let notations_wheres = Inductive.to_coq_notations_wheres subst inductive in
+  let notations_record_definitions = Inductive.to_coq_notations_record_definitions inductive in
+  let notations_definitions = Inductive.to_coq_notations_definitions inductive in
+  let implicit_arguments =
+    List.concat (inductive.typs |> List.map (fun (_, params, constructors) ->
+        Inductive.to_coq_typs_implicits params constructors
+      )) in
+  nest (
+    (match constructor_records with
+     | None -> empty
+     | Some constructor_records -> constructor_records ^^ newline ^^ newline) ^^
+    (match record_skeletons with
+     | [] -> empty
+     | _ :: _ -> separate (newline ^^ newline) record_skeletons ^^ newline ^^ newline) ^^
+    (match reserved_notations with
+     | [] -> empty
+     | _ :: _ -> separate newline reserved_notations ^^ newline ^^ newline) ^^
+    separate (newline ^^ newline) (inductive.typs |>
+                                   List.mapi (fun index (name, params, constructors) ->
+                                       let is_first = index = 0 in
+                                       to_coq_typs subst is_first name params constructors
+                                     )
+                                  ) ^-^
+    (match notations_wheres with
+     | [] -> empty
+     | _ :: _ ->
+       newline ^^ newline ^^
+       !^ "where " ^-^ separate (newline ^^ !^ "and ") notations_wheres
+    ) ^-^ !^ "." ^^
+    (match notations_record_definitions with
+     | None -> empty
+     | Some notations -> newline ^^ newline ^^ notations) ^^
+    (match notations_definitions with
+     | [] -> empty
+     | _ :: _ -> newline ^^ newline ^^ separate newline notations_definitions) ^^
+    (match implicit_arguments with
+     | [] -> empty
+     | _ :: _ -> newline ^^ newline ^^ separate newline implicit_arguments)
+  )
+
+
 let to_coq (def : t) : SmartPrint.t =
   match def with
-  | Inductive (_, inductive) -> Inductive.to_coq inductive
+  | Inductive (tags, inductive) ->
+    let subst = {
+      Type.Subst.name = (fun name -> name);
+      path_name = fun path_name ->
+        match path_name with
+        | { PathName.path = []; base } ->
+          let use_notation =
+            inductive.notations |> List.exists (fun (name, _, _) ->
+              name = base
+            ) in
+          if use_notation then
+            { path = []; base = Name.prefix_by_single_quote base }
+          else
+            path_name
+        | { path = [prefix]; base } ->
+          let use_notation =
+            inductive.constructor_records |> List.exists (fun (name, records) ->
+              records |> List.exists
+                (fun ({ RecordSkeleton.module_name; _ }, _, _) ->
+                  name = prefix && module_name = base
+                )
+            ) in
+          if use_notation then
+            { path = [Name.prefix_by_single_quote prefix]; base }
+          else
+            path_name
+        | _ -> path_name
+    } in
+      (match to_coq_tags subst tags with
+       | None -> empty
+       | Some tags -> tags ^-^ !^ "." ^^ newline ^^ newline
+      ) ^^
+    to_coq_inductive subst inductive
   | Record (name, typ_args, fields, with_with) ->
     to_coq_record name name typ_args fields with_with
   | Synonym (name, typ_args, value) ->
