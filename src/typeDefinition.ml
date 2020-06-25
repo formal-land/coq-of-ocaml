@@ -246,38 +246,38 @@ module Constructors = struct
 
 end
 
+module Tags = struct
+  (* We keep the actual types around for the decode function later on *)
+  type t = Name.t * Type.t list * Constructors.t
+
+  let get_tag (name : Name.t) =
+    Name.Make ((Name.to_string name) ^ ("_tag"))
+
+  let get_tag_constructor
+      (name : Name.t)
+      (typ : Type.t)
+    : Name.t =
+    let name = Name.to_string name in
+    Name.Make (name ^ "_" ^ (Type.to_string typ) ^ "_tag")
+
+  let of_typs
+      (name : Name.t)
+      (typs : Type.t list) : t =
+    let constructors = typs |> List.sort_uniq compare |> List.fold_left (fun constructors typ ->
+        let constructor_name = get_tag_constructor name typ in
+        let constructor : Constructors.item = {
+          constructor_name;
+          param_typs = [];
+          res_typ_params = [];
+          typ_vars = []
+        } in (constructor :: constructors)) [] in
+    (get_tag name, typs, constructors)
+
+end
 
 module Inductive = struct
   type notation = Name.t * Name.t list * Type.t
 
-  module Tag = struct
-    (* We keep the actual types around for the decode function later on *)
-    type t = Name.t * Type.t list * Constructors.t
-
-    let get_tag (name : Name.t) =
-      Name.Make ((Name.to_string name) ^ ("_tag"))
-
-    let get_tag_constructor
-      (name : Name.t)
-      (typ : Type.t)
-      : Name.t =
-      let name = Name.to_string name in
-      Name.Make (name ^ "_" ^ (Type.to_string typ) ^ "_tag")
-
-    let of_typs
-      (name : Name.t)
-      (typs : Type.t list) : t =
-      let constructors = typs |> List.sort_uniq compare |> List.fold_left (fun constructors typ ->
-          let constructor_name = get_tag_constructor name typ in
-          let constructor : Constructors.item = {
-            constructor_name;
-            param_typs = [];
-            res_typ_params = [];
-            typ_vars = []
-          } in (constructor :: constructors)) [] in
-        (get_tag name, typs, constructors)
-
-  end
 
   type t = {
     constructor_records
@@ -290,7 +290,6 @@ module Inductive = struct
      * | `Constructor.t` ...
      * with `Name.t` (`Name.t list` : set) : Set := ...
      *)
-    tags : Tag.t option;
     typs : (Name.t * Name.t list * Constructors.t) list;
   }
 
@@ -376,7 +375,7 @@ module Inductive = struct
       let l : SmartPrint.t list = List.init arity (fun i ->
           if i = arity - 1
           then Pp.set
-          else !^ (Name.to_string (Tag.get_tag name))) in
+          else !^ (Name.to_string (Tags.get_tag name))) in
 
       separate (!^ " -> ") l
 
@@ -533,7 +532,7 @@ module Inductive = struct
 
   let to_coq_tags
       (subst : Type.Subst.t)
-      (tags : Tag.t option)
+      (tags : Tags.t option)
     : SmartPrint.t option =
     match tags with
     | None -> None
@@ -568,7 +567,7 @@ module Inductive = struct
             path_name
         | _ -> path_name
     } in
-    let tags = to_coq_tags subst inductive.tags in
+    (* let tags = to_coq_tags subst inductive.tags in *)
     let constructor_records = to_coq_constructor_records inductive in
     let record_skeletons = to_coq_record_skeletons inductive in
     let reserved_notations = to_coq_notations_reserved inductive in
@@ -580,10 +579,10 @@ module Inductive = struct
         to_coq_typs_implicits params constructors
       )) in
     nest (
-      (match tags with
-       | None -> empty
-       | Some tags -> tags ^-^ !^ "." ^^ newline ^^ newline
-      ) ^^
+      (* (match tags with *)
+       (* | None -> empty *)
+       (* | Some tags -> tags ^-^ !^ "." ^^ newline ^^ newline *)
+      (* ) ^^ *)
       (match constructor_records with
       | None -> empty
       | Some constructor_records -> constructor_records ^^ newline ^^ newline) ^^
@@ -618,7 +617,7 @@ module Inductive = struct
 end
 
 type t =
-  | Inductive of Inductive.t
+  | Inductive of (Tags.t option * Inductive.t)
   | Record of Name.t * Name.t list * (Name.t * Type.t) list * bool
   | Synonym of Name.t * Name.t list * Type.t
   | Abstract of Name.t * Name.t list
@@ -638,7 +637,7 @@ let tag_constructor
     : Constructors.item =
   let res_typ_params = constructor.res_typ_params in
   let res_typ_params = res_typ_params |> List.map
-                         (fun res_typ_param -> Inductive.Tag.get_tag_constructor name res_typ_param)
+                         (fun res_typ_param -> Tags.get_tag_constructor name res_typ_param)
                        |> List.map (fun x -> Type.Variable x) in
   { constructor with res_typ_params }
 
@@ -659,13 +658,12 @@ let of_ocaml (typs : type_declaration list) : t Monad.t =
         row_fields >>= fun single_constructors ->
       Constructors.of_ocaml single_constructors >>= fun (constructors, _) ->
       raise
-        (Inductive {
+        (Inductive (None ,{
           constructor_records = [];
           notations = [];
           records = [];
-          tags = None;
           typs = [(name, typ_args, constructors)];
-        })
+        }))
         NotSupported
         "Polymorphic variant types are defined as standard algebraic types"
     | _ ->
@@ -805,21 +803,20 @@ let of_ocaml (typs : type_declaration list) : t Monad.t =
         (name, AdtParameters.get_parameters typ_args, tag_constructors name constructors)) in
 
     let (name, _, _) = List.hd typs in
-    let tags = Inductive.Tag.of_typs name ret_typs in
+    let tags = Tags.of_typs name ret_typs in
 
-    return (
-      Inductive {
-        constructor_records = List.rev constructor_records;
-        notations = List.rev notations;
-        records;
-        tags = Some tags;
-        typs = List.rev typs
-      }
-    )
+    return (Inductive (
+        Some tags,
+        { constructor_records = List.rev constructor_records;
+          notations = List.rev notations;
+          records;
+          typs = List.rev typs
+        }
+      ))
 
 let to_coq (def : t) : SmartPrint.t =
   match def with
-  | Inductive inductive -> Inductive.to_coq inductive
+  | Inductive (_, inductive) -> Inductive.to_coq inductive
   | Record (name, typ_args, fields, with_with) ->
     to_coq_record name name typ_args fields with_with
   | Synonym (name, typ_args, value) ->
