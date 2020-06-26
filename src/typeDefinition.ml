@@ -231,11 +231,7 @@ module Constructors = struct
     ) in
 
     let (constructors, constructors_arity) = List.split constructors_and_arities in
-    let same_arities =
-      begin match List.hd constructors_arity with
-        | x -> List.for_all (fun y -> x = y) constructors_arity
-        | exception _ -> false
-      end in
+    let same_arities = List.for_all (fun y -> List.hd constructors_arity = y) constructors_arity in
 
     if not same_arities
     then
