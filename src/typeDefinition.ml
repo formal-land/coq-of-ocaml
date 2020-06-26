@@ -260,7 +260,8 @@ module Tags = struct
   let of_typs
       (name : Name.t)
       (typs : Type.t list) : t =
-    let constructors = typs |> List.sort_uniq compare |> List.fold_left (fun constructors typ ->
+    let typs = typs |> List.sort_uniq compare in
+    let constructors = typs |> List.fold_left (fun constructors typ ->
         let constructor_name = get_tag_constructor name typ in
         let constructor : Constructors.item = {
           constructor_name;
