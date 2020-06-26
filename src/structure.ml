@@ -82,8 +82,12 @@ let build_decoder :
   | TypeDefinition.Inductive (Some (tags_name, types, constructors), _) ->
     let name = Name.Make ("dec_" ^ (Name.to_string tags_name)) in
     let tag_var = Name.Make "tag" in
-    let patterns = List.map2 (fun typ constr ->
-        (Pattern.Variable constr.TypeDefinition.Constructors.constructor_name, None, Exp.Type typ)
+    let patterns = List.map2 (fun typ {TypeDefinition.Constructors.constructor_name; typ_vars; _} ->
+        let pat = if List.length typ_vars = 0
+          then Pattern.Variable constructor_name
+          else Pattern.Constructor ((PathName.of_name [] constructor_name),
+                                    typ_vars |> List.map (fun typ -> Pattern.Variable typ)) in
+        (pat, None, Exp.Type typ)
       ) types constructors in
     let header : Exp.Header.t = {
       name;

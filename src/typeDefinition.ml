@@ -262,12 +262,13 @@ module Tags = struct
       (typs : Type.t list) : t =
     let typs = typs |> List.sort_uniq compare in
     let constructors = typs |> List.fold_left (fun constructors typ ->
+        let typ_vars = Type.typ_args_of_typ typ |> Name.Set.elements in
         let constructor_name = get_tag_constructor name typ in
         let constructor : Constructors.item = {
           constructor_name;
           param_typs = [];
           res_typ_params = [];
-          typ_vars = []
+          typ_vars
         } in (constructor :: constructors)) [] in
     (get_tag name, typs, List.rev constructors)
 
@@ -491,10 +492,11 @@ let tag_constructor
     (name : Name.t)
     (constructor : Constructors.item)
     : Constructors.item =
-  let res_typ_params = constructor.res_typ_params in
+  let { Constructors.res_typ_params; typ_vars; _ } = constructor in
+  let typ_vars = typ_vars |> List.map (fun typ -> Type.Variable typ) in
   let res_typ_params = res_typ_params |> List.map
                          (fun res_typ_param -> Tags.get_tag_constructor name res_typ_param)
-                       |> List.map (fun x -> Type.Variable x) in
+                       |> List.map (fun x -> Type.Apply ((MixedPath.of_name x), typ_vars)) in
   { constructor with res_typ_params }
 
 let tag_constructors (name : Name.t)
