@@ -76,6 +76,26 @@ let top_level_evaluation_error : t list Monad.t =
     SideEffect
     "Top-level evaluations are ignored"
 
+let build_decoder :
+    TypeDefinition.t
+    -> Value.t option = function
+  | TypeDefinition.Inductive (Some (tags_name, _, _), _) ->
+    let name = Name.Make ("dec" ^ (Name.to_string tags_name)) in
+    let header : Exp.Header.t = {
+      name;
+      typ_vars = [];
+      args = [(Name.Make "tag", Type.Variable tags_name)];
+      structs = [];
+      typ = Some (Type.Variable (Name.Make "Set"));
+    } in
+    let def : Exp.t option Exp.Definition.t = {
+      is_rec = Recursivity.New false;
+      cases = [(header, None)]
+    } in
+    Some def
+  | _ -> None
+
+
 (** Import an OCaml structure. *)
 let rec of_structure (structure : structure) : t list Monad.t =
   let of_structure_item (item : structure_item) (final_env : Env.t)
@@ -108,7 +128,11 @@ let rec of_structure (structure : structure) : t list Monad.t =
          phantom types. *)
       set_env final_env (
       TypeDefinition.of_ocaml typs >>= fun def ->
-      return ([TypeDefinition def]))
+      let decoder = match build_decoder def with
+        | None -> []
+        | Some decoder -> [Value decoder] in
+
+      return ([TypeDefinition def] @ decoder))
     | Tstr_exception { tyexn_constructor = { ext_id; _ }; _ } ->
       error_message (Error ("exception " ^ Ident.name ext_id)) SideEffect (
         "The definition of exceptions is not handled.\n\n" ^
