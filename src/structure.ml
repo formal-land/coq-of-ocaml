@@ -79,18 +79,28 @@ let top_level_evaluation_error : t list Monad.t =
 let build_decoder :
     TypeDefinition.t
     -> Value.t option = function
-  | TypeDefinition.Inductive (Some (tags_name, _, _), _) ->
-    let name = Name.Make ("dec" ^ (Name.to_string tags_name)) in
+  | TypeDefinition.Inductive (Some (tags_name, types, constructors), _) ->
+    let name = Name.Make ("dec_" ^ (Name.to_string tags_name)) in
+    let tag_var = Name.Make "tag" in
+    let patterns = List.map2 (fun typ constr ->
+        let e = match typ with
+        | Type.Variable tyname -> Exp.Variable (MixedPath.of_name tyname, [])
+        | _ -> Exp.Constant (Constant.String "blah") in
+        (Pattern.Variable constr.TypeDefinition.Constructors.constructor_name, None, e)
+      ) types constructors in
     let header : Exp.Header.t = {
       name;
       typ_vars = [];
-      args = [(Name.Make "tag", Type.Variable tags_name)];
+      args = [(tag_var, Type.Variable tags_name)];
       structs = [];
       typ = Some (Type.Variable (Name.Make "Set"));
     } in
+    let matc : Exp.t =
+      Exp.Match ((Exp.Constant (Constant.String "tag1")), patterns, false)
+      in
     let def : Exp.t option Exp.Definition.t = {
       is_rec = Recursivity.New false;
-      cases = [(header, None)]
+      cases = [(header, Some matc)]
     } in
     Some def
   | _ -> None
