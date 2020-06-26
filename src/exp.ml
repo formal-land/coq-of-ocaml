@@ -38,6 +38,7 @@ type t =
   | Constant of Constant.t
   | Variable of MixedPath.t * string list
   | Tuple of t list (** A tuple of expressions. *)
+  | Type of Type.t
   | Constructor of PathName.t * string list * t list
     (** A constructor name, some implicits, and a list of arguments. *)
   | Apply of t * t list (** An application. *)
@@ -1093,6 +1094,7 @@ let rec to_coq (paren : bool) (e : t) : SmartPrint.t =
           separate space (PathName.to_coq x :: arguments)
       end
     end
+  | Type typ -> Type.to_coq None None typ
   | Apply (e_f, e_xs) ->
     begin match (e_f, e_xs) with
     | (

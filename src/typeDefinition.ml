@@ -269,7 +269,7 @@ module Tags = struct
           res_typ_params = [];
           typ_vars = []
         } in (constructor :: constructors)) [] in
-    (get_tag name, typs, constructors)
+    (get_tag name, typs, List.rev constructors)
 
 end
 
