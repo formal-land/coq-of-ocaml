@@ -214,12 +214,6 @@ module Constructors = struct
       }
   end
 
-  let rec list_eq (l : 'a list) : bool =
-    match l with
-    | [] -> true
-    | _ :: [] -> true
-    | x :: y :: xs -> x = y && list_eq (y :: xs)
-
   let of_ocaml
     (single_constructors : Single.t list)
     : (t * AdtParameters.t) Monad.t =
@@ -237,10 +231,17 @@ module Constructors = struct
     ) in
 
     let (constructors, constructors_arity) = List.split constructors_and_arities in
+    let same_arities =
+      begin match List.hd constructors_arity with
+        | x -> List.for_all (fun y -> x = y) constructors_arity
+        | exception _ -> false
+      end in
 
-    if not (list_eq constructors_arity)
+    if not same_arities
     then
-      raise (constructors, []) Error.Category.Unexpected "Unexpected error made the constructors have different return sizes"
+      raise (constructors, [])
+        Error.Category.Unexpected
+        "Unexpected error made the constructors have different return sizes"
     else
       return (constructors, [])
 
