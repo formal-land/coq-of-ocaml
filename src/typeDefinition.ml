@@ -661,10 +661,12 @@ let of_ocaml (typs : type_declaration list) : t Monad.t =
         (name, AdtParameters.get_parameters typ_args, tag_constructors name constructors)) in
 
     let (name, _, _) = List.hd typs in
-    let tags = Tags.of_typs name ret_typs in
+    let tags = if List.length ret_typs = 0
+      then None
+      else Some (Tags.of_typs name ret_typs) in
 
     return (Inductive (
-        Some tags,
+        tags,
         { constructor_records = List.rev constructor_records;
           notations = List.rev notations;
           records;
@@ -674,6 +676,7 @@ let of_ocaml (typs : type_declaration list) : t Monad.t =
 
 
 let to_coq_typs
+    ?tag:(is_tag=false)
     (subst : Type.Subst.t)
     (is_first : bool)
     (name : Name.t)
@@ -693,11 +696,12 @@ let to_coq_typs
          )
        )
     ) ^^ !^ ":" ^^
+    let _ = print_string (Name.to_string name) in
     let constructor = List.hd constructors in
     let arity = List.length constructor.res_typ_params + 1 in
     let l : SmartPrint.t list = List.init arity (fun i ->
         if i = arity - 1
-        then Pp.set
+        then !^ "Type"
         else !^ (Name.to_string (Tags.get_tag name))) in
 
     separate (!^ " -> ") l
@@ -715,7 +719,8 @@ let to_coq_typs
             (match typ_vars with
              | [] -> empty
              | _ ->
-               !^ "forall" ^^ braces (
+               let braces_or_parens = if is_tag then parens else braces in
+               !^ "forall" ^^ braces_or_parens (
                  separate space (typ_vars |> List.map Name.to_coq) ^^ !^ ":" ^^ Pp.set
                ) ^-^ !^ ","
             ) ^^
@@ -736,7 +741,7 @@ let to_coq_tags
   match tags with
   | None -> None
   | Some (name, _, constructors) ->
-    Some (to_coq_typs subst true name [] constructors)
+    Some (to_coq_typs ~tag:(true) subst true name [] constructors )
 
 let to_coq_inductive
     (subst : Type.Subst.t)
