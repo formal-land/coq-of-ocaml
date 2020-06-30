@@ -2,37 +2,8 @@ open Typedtree
 open SmartPrint
 open Monad.Notations
 
-module Tags = struct
-  (* We keep the actual types around for the decode function later on *)
-  type t = Name.t * Type.t list * AdtConstructors.t
-
-  let get_tag_constructor
-      (name : Name.t)
-      (typ : Type.t)
-    : Name.t =
-    let name = Name.to_string name in
-    Name.Make (name ^ "_" ^ (Type.to_string typ) ^ "_tag")
-
-  let of_typs
-      (name : Name.t)
-      (typs : Type.t list) : t =
-    let typs = typs |> List.sort_uniq compare in
-    let constructors = typs |> List.fold_left (fun constructors typ ->
-        let typ_vars = Type.typ_args_of_typ typ |> Name.Set.elements in
-        let constructor_name = get_tag_constructor name typ in
-        let constructor : AdtConstructors.item = {
-          constructor_name;
-          param_typs = [];
-          res_typ_params = [];
-          typ_vars
-        } in (constructor :: constructors)) [] in
-    (Name.suffix_by_tag name, typs, List.rev constructors)
-
-end
-
 module Inductive = struct
   type notation = Name.t * Name.t list * Type.t
-
 
   type t = {
     constructor_records
@@ -230,7 +201,7 @@ module Inductive = struct
 end
 
 type t =
-  | Inductive of (Tags.t option * Inductive.t)
+  | Inductive of (AdtTags.t option * Inductive.t)
   | Record of Name.t * Name.t list * (Name.t * Type.t) list * bool
   | Synonym of Name.t * Name.t list * Type.t
   | Abstract of Name.t * Name.t list
@@ -243,21 +214,6 @@ let filter_in_free_vars
       else
         None
   )
-
-let tag_constructor
-    (name : Name.t)
-    (constructor : AdtConstructors.item)
-    : AdtConstructors.item =
-  let { AdtConstructors.res_typ_params; typ_vars; _ } = constructor in
-  let typ_vars = typ_vars |> List.map (fun typ -> Type.Variable typ) in
-  let res_typ_params = res_typ_params |> List.map
-                         (fun res_typ_param -> Tags.get_tag_constructor name res_typ_param)
-                       |> List.map (fun x -> Type.Apply ((MixedPath.of_name x), typ_vars)) in
-  { constructor with res_typ_params }
-
-let tag_constructors (name : Name.t)
-  : AdtConstructors.t -> AdtConstructors.t =
-  List.map (fun item -> tag_constructor name item)
 
 let of_ocaml (typs : type_declaration list) : t Monad.t =
   match typs with
@@ -414,12 +370,12 @@ let of_ocaml (typs : type_declaration list) : t Monad.t =
         |> List.flatten) |> List.flatten in
 
     let typs = typs |> List.map (function (name, typ_args, constructors) ->
-        (name, AdtParameters.get_parameters typ_args, tag_constructors name constructors)) in
+        (name, AdtParameters.get_parameters typ_args, AdtTags.tag_constructors name constructors)) in
 
     let (name, _, _) = List.hd typs in
     let tags = if List.length ret_typs = 0
       then None
-      else Some (Tags.of_typs name ret_typs) in
+      else Some (AdtTags.of_typs name ret_typs) in
 
     return (Inductive (
         tags,
@@ -429,7 +385,6 @@ let of_ocaml (typs : type_declaration list) : t Monad.t =
           typs = List.rev typs
         }
       ))
-
 
 let to_coq_typs
     ?tag:(is_tag=false)
@@ -458,9 +413,7 @@ let to_coq_typs
         if i = arity - 1
         then !^ "Type"
         else !^ (Name.to_string (Name.suffix_by_tag name))) in
-
     separate (!^ " -> ") l
-
     ^^ !^ ":=" ^-^
     separate empty (
       constructors |> List.map (fun {
@@ -491,7 +444,7 @@ let to_coq_typs
 
 let to_coq_tags
     (subst : Type.Subst.t)
-    (tags : Tags.t option)
+    (tags : AdtTags.t option)
   : SmartPrint.t option =
   match tags with
   | None -> None
