@@ -696,7 +696,6 @@ let to_coq_typs
          )
        )
     ) ^^ !^ ":" ^^
-    let _ = print_string (Name.to_string name) in
     let constructor = List.hd constructors in
     let arity = List.length constructor.res_typ_params + 1 in
     let l : SmartPrint.t list = List.init arity (fun i ->
