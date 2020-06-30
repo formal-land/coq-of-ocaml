@@ -247,9 +247,6 @@ module Tags = struct
   (* We keep the actual types around for the decode function later on *)
   type t = Name.t * Type.t list * Constructors.t
 
-  let get_tag (name : Name.t) =
-    Name.Make ((Name.to_string name) ^ ("_tag"))
-
   let get_tag_constructor
       (name : Name.t)
       (typ : Type.t)
@@ -270,7 +267,7 @@ module Tags = struct
           res_typ_params = [];
           typ_vars
         } in (constructor :: constructors)) [] in
-    (get_tag name, typs, List.rev constructors)
+    (Name.suffix_by_tag name, typs, List.rev constructors)
 
 end
 
@@ -701,7 +698,7 @@ let to_coq_typs
     let l : SmartPrint.t list = List.init arity (fun i ->
         if i = arity - 1
         then !^ "Type"
-        else !^ (Name.to_string (Tags.get_tag name))) in
+        else !^ (Name.to_string (Name.suffix_by_tag name))) in
 
     separate (!^ " -> ") l
 
