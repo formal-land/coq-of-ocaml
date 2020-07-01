@@ -14,13 +14,31 @@ type t =
   | ForallTyps of Name.t list * t
   | FunTyps of Name.t list * t
   | Error of string
-
 and arity_or_typ =
   | Arity of int
   | Typ of t
 
+
+let rec rename (f : Name.t -> Name.t) : t -> t = function
+  | Variable a -> Variable (f a)
+  | Arrow (t1, t2) -> Arrow (rename f t1, rename f t2)
+  | Sum ls ->
+    let (s, ts) = List.split ls in
+    let ts = List.map (rename f) ts in
+    Sum (List.combine s ts)
+  | Tuple ts -> Tuple (List.map (rename f) ts)
+  | Apply (s, ts) ->
+    let ts = List.map (rename f) ts in
+    Apply (s, ts)
+  (* Do I need to rename n? *)
+  | ForallModule (n, t1,t2) -> ForallModule (n, rename f t1, rename f t2)
+  | ForallTyps (n, t) -> ForallTyps (n, rename f t)
+  | FunTyps (n, t) -> FunTyps (n, rename f t)
+  | _ as t -> t
+
+
 let to_string : t -> string = function
-  | Variable name -> Name.to_string name
+  | Variable _ -> "Var"
   | Arrow _ -> "Arrow"
   | Sum _ -> "Sum"
   | Tuple _ -> "Tuple"
@@ -30,6 +48,25 @@ let to_string : t -> string = function
   | ForallTyps _ -> "ForallTyps"
   | FunTyps _ -> "FunTyps"
   | Error s -> "Error" ^ s
+
+let equal (t1 : t) (t2 : t) =
+  match t1, t2 with
+  | Variable _ , Variable _ -> true
+  | Arrow _, Arrow _ -> true
+  | Sum _, Sum _ -> true
+  | Tuple _, Tuple _ -> true
+  | Apply (s1, _), Apply (s2, _) -> s1 = s2
+  | Package _, Package _ -> true
+  | ForallModule _, ForallModule _ -> true
+  | ForallTyps _, ForallTyps _ -> true
+  | FunTyps _, FunTyps _ -> true
+  | Error _, Error _ -> true
+  | _ -> false
+
+let compare t1 t2 =
+  if equal t1 t2
+  then 0
+  else 1
 
 let type_exprs_of_row_field (row_field : Types.row_field)
   : Types.type_expr list =
