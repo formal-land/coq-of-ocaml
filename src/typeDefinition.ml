@@ -365,17 +365,17 @@ let of_ocaml (typs : type_declaration list) : t Monad.t =
       )
     ) ([], [], [], [])) >>= fun (constructor_records, notations, records, typs) ->
 
-    let ret_typs = typs |> List.map (function (_, _, constructors) ->
-        constructors |> List.map (function constructor -> constructor.AdtConstructors.res_typ_params)
-        |> List.flatten) |> List.flatten in
+    let (name, _, _) = List.hd typs in
+    let index_typs = typs
+                     |> List.map (fun (_, _, constructors) -> constructors)
+                     |> AdtTags.get_index_typs name in
 
-    let typs = typs |> List.map (function (name, typ_args, constructors) ->
+    let typs = typs |> List.map (fun (name, typ_args, constructors) ->
         (name, AdtParameters.get_parameters typ_args, AdtTags.tag_constructors name constructors)) in
 
-    let (name, _, _) = List.hd typs in
-    let tags = if List.length ret_typs = 0
+    let tags = if List.length index_typs = 0
       then None
-      else Some (AdtTags.of_typs name ret_typs) in
+      else Some (AdtTags.of_typs name index_typs) in
 
     return (Inductive (
         tags,

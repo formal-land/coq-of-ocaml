@@ -49,7 +49,7 @@ let to_string : t -> string = function
   | FunTyps _ -> "FunTyps"
   | Error s -> "Error" ^ s
 
-let equal (t1 : t) (t2 : t) =
+let equal (t1 : t) (t2 : t): bool =
   match t1, t2 with
   | Variable _ , Variable _ -> true
   | Arrow _, Arrow _ -> true
@@ -63,7 +63,7 @@ let equal (t1 : t) (t2 : t) =
   | Error _, Error _ -> true
   | _ -> false
 
-let compare t1 t2 =
+let compare t1 t2 : int =
   if equal t1 t2
   then 0
   else 1
