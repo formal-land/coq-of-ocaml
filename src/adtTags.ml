@@ -42,8 +42,8 @@ let rec tag_args_of
   | Apply (s, ts) ->
     let ts =
       if s = MixedPath.of_name name
-      then ts |> List.map (function typ -> tag_typ name typ)
-      else ts in
+      then ts |> List.map @@ tag_typ name
+      else ts |> List.map @@ tag_args_of name in
     Apply (s, ts)
   | Arrow (t1, t2) -> Arrow (tag_args_of name t1, tag_args_of name t2)
   | Sum ls ->
@@ -71,7 +71,7 @@ let tag_constructors (name : Name.t)
   : AdtConstructors.t -> AdtConstructors.t =
   List.map (fun item -> tag_constructor name item)
 
-let get_application_of
+let rec get_application_of
     (name : Name.t)
   : Type.t -> Type.t list = function
   | Type.Apply (s, ts) ->
