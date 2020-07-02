@@ -38,7 +38,7 @@ let tag_typ
   let tag_constructor = get_tag_constructor name type_name in
   Type.Apply (MixedPath.of_name tag_constructor, free_vars)
 
-let rec rename_app
+let rec tag_args_of
     (name : Name.t)
   : Type.t -> Type.t = function
   | Apply (s, ts) ->
@@ -47,16 +47,16 @@ let rec rename_app
       then ts |> List.map (function typ -> tag_typ name typ)
       else ts in
     Apply (s, ts)
-  | Arrow (t1, t2) -> Arrow (rename_app name t1, rename_app name t2)
+  | Arrow (t1, t2) -> Arrow (tag_args_of name t1, tag_args_of name t2)
   | Sum ls ->
     let (s, ts) = List.split ls in
-    let ts = List.map (rename_app name) ts in
+    let ts = List.map (tag_args_of name) ts in
     Sum (List.combine s ts)
-  | Tuple ts -> Tuple (List.map (rename_app name) ts)
+  | Tuple ts -> Tuple (List.map (tag_args_of name) ts)
   (* Do I need to rename n? *)
-  | ForallModule (n, t1,t2) -> ForallModule (n, rename_app name t1, rename_app name t2)
-  | ForallTyps (n, t) -> ForallTyps (n, rename_app name t)
-  | FunTyps (n, t) -> FunTyps (n, rename_app name t)
+  | ForallModule (n, t1,t2) -> ForallModule (n, tag_args_of name t1, tag_args_of name t2)
+  | ForallTyps (n, t) -> ForallTyps (n, tag_args_of name t)
+  | FunTyps (n, t) -> FunTyps (n, tag_args_of name t)
   | _ as t -> t
 
 
@@ -65,7 +65,7 @@ let tag_constructor
     (constructor : AdtConstructors.item)
     : AdtConstructors.item =
   let { AdtConstructors.res_typ_params; param_typs; _ } = constructor in
-  let param_typs = param_typs |> List.map (rename_app name) in
+  let param_typs = param_typs |> List.map (tag_args_of name) in
   let res_typ_params = res_typ_params |> List.map (fun typ -> tag_typ name typ) in
   { constructor with res_typ_params; param_typs }
 
