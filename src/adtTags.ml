@@ -73,7 +73,7 @@ let tag_constructors (name : Name.t)
   : AdtConstructors.t -> AdtConstructors.t =
   List.map (fun item -> tag_constructor name item)
 
-let get_application
+let get_application_of
     (name : Name.t)
   : Type.t -> Type.t list = function
   | Type.Apply (s, ts) ->
@@ -91,7 +91,7 @@ let get_index_typs
                        |> List.flatten in
   let param_typs = constructors |> List.flatten
                    |> List.map (fun { AdtConstructors.param_typs; _ } ->
-                       List.map (get_application name) param_typs)
+                       List.map (get_application_of name) param_typs)
                    |> List.flatten
                    |> List.flatten in
   res_typ_params @ param_typs
