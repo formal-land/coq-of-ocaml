@@ -436,19 +436,20 @@ and of_match
           let* name = Name.of_ident true ident in
           return (name, val_type)
         ) in
-    Type.existential_typs_of_typs (List.map snd bound_vars) >>= fun existentials ->
+    (* Type.existential_typs_of_typs (List.map snd bound_vars) >>= fun existentials -> *)
     Monad.List.map
       (fun (name, typ) ->
         Type.of_typ_expr true typ_vars typ >>= fun (typ, _, _) ->
         return (name, typ)
       )
       bound_vars >>= fun bound_vars ->
-    let free_vars = Type.local_typ_constructors_of_typs (List.map snd bound_vars) in
-    let existentials = Name.Set.inter existentials free_vars in
+    (* let free_vars = Type.local_typ_constructors_of_typs (List.map snd bound_vars) in *)
+    (* let existentials = Name.Set.inter existentials free_vars in *)
     Type.of_typ_expr true typ_vars c_rhs.exp_type >>= fun (typ, _, _) ->
     let existential_cast =
       Some {
-        new_typ_vars = Name.Set.elements existentials;
+        (* new_typ_vars = Name.Set.elements existentials; *)
+        new_typ_vars = [];
         bound_vars;
         return_typ = typ;
         use_axioms = is_gadt_match;
