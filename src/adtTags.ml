@@ -8,14 +8,12 @@ let get_tag_constructor
   : Name.t =
   let name = Name.to_string name in
   let typ_name = Name.to_string typ_name in
-  (* Name.Make (name ^ "_" ^ (Type.to_string typ) ^ "_tag") *)
   Name.Make (name ^ "_" ^ typ_name ^ "_tag")
 
 let of_typs
     (name : Name.t)
     (typs : Type.t list) : t =
   let typs = typs |> List.sort_uniq compare |> List.sort_uniq Type.compare in
-  (* let typs = typs |> List.sort_uniq Type.compare in *)
   let constructors = typs |> List.fold_left (fun constructors typ ->
       let typ_vars = Type.typ_args_of_typ typ |> Name.Set.elements in
       let typ_name = Name.Make (Type.to_string typ) in
