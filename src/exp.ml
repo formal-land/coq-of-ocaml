@@ -549,11 +549,11 @@ and import_let_fun
     | Some (Pattern.Variable x) -> return (Some x)
     | _ ->
       raise None Unexpected "A variable name instead of a pattern was expected."
-    ) >>= fun x ->
+    ) >>= fun name ->
     Type.of_typ_expr true typ_vars vb_expr.exp_type >>= fun (e_typ, typ_vars, new_typ_vars) ->
-    match x with
+    match name with
     | None -> return None
-    | Some x ->
+    | Some name ->
       of_expression typ_vars vb_expr >>= fun e ->
       let (args_names, e_body) = open_function e in
       let (args_typs, e_body_typ) = Type.open_type e_typ (List.length args_names) in
@@ -569,7 +569,7 @@ and import_let_fun
             []
         | _ :: _ -> struct_attributes in
       let header = {
-        Header.name = x;
+        Header.name;
         typ_vars = Name.Set.elements new_typ_vars;
         args = List.combine args_names args_typs;
         structs;
