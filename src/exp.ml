@@ -558,6 +558,7 @@ and import_let_fun
       of_expression typ_vars vb_expr >>= fun e ->
       let (args_names, e_body) = open_function e in
       let (args_typs, e_body_typ) = Type.open_type e_typ (List.length args_names) in
+      (* let args_typs = List.map (Tags.tag_type) args_typs in *)
       get_configuration >>= fun configuration ->
       let structs =
         match struct_attributes with
@@ -571,7 +572,7 @@ and import_let_fun
         | _ :: _ -> struct_attributes in
       let header = {
         Header.name;
-        typ_vars = new_typ_vars |> Name.Set.elements |> List.map (fun typ -> (typ, Type.Set));
+        typ_vars = new_typ_vars |> Name.Set.elements |> List.map (fun typ -> (typ, Type.SetTyp));
         args = List.combine args_names args_typs;
         structs;
         typ = Some e_body_typ

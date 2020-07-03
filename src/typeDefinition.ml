@@ -375,7 +375,7 @@ let of_ocaml (typs : type_declaration list) : t Monad.t =
 
     let tags = if List.length index_typs = 0
       then None
-      else Some (AdtTags.of_typs name index_typs) in
+      else Some (fst @@ AdtTags.of_typs name index_typs) in
 
     return (Inductive (
         tags,

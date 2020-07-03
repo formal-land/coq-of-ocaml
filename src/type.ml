@@ -52,6 +52,11 @@ let compare t1 t2 : int =
   then 0
   else 1
 
+module Map = Map.Make (struct
+  type nonrec t = t
+  let compare = compare
+end)
+
 let rec subst_with
     (f : Name.t -> Name.t)
     (typ : t)
@@ -72,6 +77,19 @@ let rec subst_with
   | ForallTyps (names, typ) -> ForallTyps (names, subst_with f typ)
   | FunTyps (names, typ) -> FunTyps (names, subst_with f typ)
   | _ as typ -> typ
+
+(* let tag_constructor *)
+  (* (name: string) *)
+
+let get_tags_name
+    (path : Path.t)
+  : Path.t =
+  let name = Path.last path in
+  let name = name ^ "_" ^ "tag" in
+  let hds = Path.heads path in
+  List.fold_right (fun prefix suffix ->
+      Path.Pdot (Pident prefix, Path.name suffix)) hds (Path.Pident (Ident.create_local name))
+
 
 let type_exprs_of_row_field (row_field : Types.row_field)
   : Types.type_expr list =
@@ -225,6 +243,7 @@ and of_typs_exprs
     typs
   ) >>= fun (typs, typ_vars, new_typ_vars) ->
   return (List.rev typs, typ_vars, new_typ_vars)
+
 
 let rec of_type_expr_variable (typ : Types.type_expr) : Name.t Monad.t =
   match typ.desc with
