@@ -5,6 +5,7 @@ open Monad.Notations
 
 type t =
   | Variable of Name.t
+  | Set
   | Arrow of t * t
   | Sum of (string * t) list
   | Tuple of t list
@@ -24,6 +25,7 @@ let to_string : t -> string = function
   | Arrow _ -> "Arrow"
   | Sum _ -> "Sum"
   | Tuple _ -> "Tuple"
+  | Set -> "Set"
   | Apply (mpath, _) -> MixedPath.to_string mpath
   | Package _ -> "Package"
   | ForallModule _ -> "ForallModule"
@@ -270,6 +272,7 @@ and existential_typs_of_typs (typs : Types.type_expr list)
 let rec typ_args_of_typ (typ : t) : Name.Set.t =
   match typ with
   | Variable x -> Name.Set.singleton x
+  | Set -> Name.Set.empty
   | Arrow (typ1, typ2) -> typ_args_of_typs [typ1; typ2]
   | Sum typs -> typ_args_of_typs (List.map snd typs)
   | Tuple typs | Apply (_, typs) -> typ_args_of_typs typs
@@ -298,6 +301,7 @@ let rec local_typ_constructors_of_typ (typ : t) : Name.Set.t =
   match typ with
   | Variable x -> Name.Set.singleton x
   | Arrow (typ1, typ2) -> local_typ_constructors_of_typs [typ1; typ2]
+  | Set -> Name.Set.empty
   | Sum typs -> local_typ_constructors_of_typs (List.map snd typs)
   | Tuple typs -> local_typ_constructors_of_typs typs
   | Apply (mixed_path, typs) ->
@@ -392,6 +396,7 @@ let rec to_coq (subst : Subst.t option) (context : Context.t option) (typ : t)
       | None -> x
       | Some subst -> subst.name x in
     Name.to_coq x
+  | Set -> Pp.set
   | Arrow _ ->
     let (typ_xs, typ_y) = accumulate_nested_arrows typ in
     Context.parens context Context.Arrow @@ group (
