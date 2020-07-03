@@ -28,7 +28,8 @@ let of_typs
 
 let tag_typ
     (name : Name.t)
-    (typ : Type.t) =
+    (typ : Type.t)
+  : Type.t =
   let free_vars = Type.typ_args_of_typ typ
                   |> Name.Set.elements
                   |> List.map (function name -> Type.Variable name) in
@@ -92,4 +93,4 @@ let get_index_typs
                        List.map (get_application_of name) param_typs)
                    |> List.flatten
                    |> List.flatten in
-  res_typ_params @ param_typs
+  Type.Variable (Name.of_string_raw "a") :: res_typ_params @ param_typs
