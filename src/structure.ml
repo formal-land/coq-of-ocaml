@@ -29,7 +29,7 @@ module Value = struct
           begin match typ_vars with
           | [] -> empty
           | _ :: _ ->
-            braces @@ group (separate space (List.map Name.to_coq typ_vars) ^^
+            braces @@ group (separate space (List.map (fun typ -> Name.to_coq @@ fst typ) typ_vars) ^^
             !^ ":" ^^ Pp.set)
           end ^^
           group (separate space (args |> List.map (fun (x, t) ->
