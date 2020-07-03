@@ -52,6 +52,27 @@ let compare t1 t2 : int =
   then 0
   else 1
 
+let rec subst_with
+    (f : Name.t -> Name.t)
+    (typ : t)
+  : t =
+  match typ with
+  | Variable x -> Variable (f x)
+  | Arrow (typ1,typ2) ->
+    let typ1 = subst_with f typ1 in
+    let typ2 = subst_with f typ2 in
+    Arrow (typ1, typ2)
+  | Sum typs -> Sum (typs |> List.map (function (s, typ) -> (s, subst_with f typ)))
+  | Tuple typs -> Tuple (typs |> List.map (function typ -> subst_with f typ))
+  | Apply (p, typs) -> Apply (p, typs |> List.map (function typ -> subst_with f typ))
+  | ForallModule (name, typ1, typ2) ->
+    let typ1 = subst_with f typ1 in
+    let typ2 = subst_with f typ2 in
+    ForallModule(name, typ1, typ2)
+  | ForallTyps (names, typ) -> ForallTyps (names, subst_with f typ)
+  | FunTyps (names, typ) -> FunTyps (names, subst_with f typ)
+  | _ as typ -> typ
+
 let type_exprs_of_row_field (row_field : Types.row_field)
   : Types.type_expr list =
   match row_field with
