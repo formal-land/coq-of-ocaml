@@ -238,3 +238,15 @@ let of_ocaml
       "Unexpected error made the constructors have different return sizes"
   else
     return (constructors, [])
+
+let from_tags (tags : Type.tags) : Name.t * Type.t list * t =
+  let { Type.name; constructors } = tags in
+  let constructors : (Type.t * Name.t) list = Type.Map.bindings constructors in
+  let (typs, items) = constructors |> List.map (fun (typ, name) ->
+      (typ,
+       { constructor_name = name;
+        param_typs = [];
+        res_typ_params = [];
+        typ_vars = Type.typ_args_of_typ typ |> Name.Set.elements
+       })) |> List.split in
+    (name, typs, items)

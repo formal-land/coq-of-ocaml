@@ -154,6 +154,12 @@ let suffix_by_skeleton (name : t) : t =
 let suffix_by_tag (name : t) : t =
   Make ((to_string name) ^ "_tag")
 
+let suffix_by_tags (name : t) : t =
+  Make ((to_string name) ^ "_tags")
+
+let concat (name1 : t) (name2 : t) : t =
+  Make ((to_string name1) ^ (to_string name2))
+
 (** Pretty-print a name to Coq. *)
 let to_coq (name : t) : SmartPrint.t =
   !^ (to_string name)

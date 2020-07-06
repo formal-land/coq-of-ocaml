@@ -201,7 +201,7 @@ module Inductive = struct
 end
 
 type t =
-  | Inductive of (AdtTags.t option * Inductive.t)
+  | Inductive of (Type.tags option * Inductive.t)
   | Record of Name.t * Name.t list * (Name.t * Type.t) list * bool
   | Synonym of Name.t * Name.t list * Type.t
   | Abstract of Name.t * Name.t list
@@ -365,17 +365,19 @@ let of_ocaml (typs : type_declaration list) : t Monad.t =
       )
     ) ([], [], [], [])) >>= fun (constructor_records, notations, records, typs) ->
 
-    let (name, _, _) = List.hd typs in
-    let index_typs = typs
-                     |> List.map (fun (_, _, constructors) -> constructors)
-                     |> AdtTags.get_index_typs name in
+    (* let (name, _, _) = List.hd typs in *)
+    (* let index_typs = typs *)
+                     (* |> List.map (fun (_, _, constructors) -> constructors) *)
+                     (* |> AdtTags.get_index_typs name in *)
+    (* let typs = typs |> List.map (fun (name, typ_args, constructors) -> *)
+        (* (name, AdtParameters.get_parameters typ_args, AdtTags.tag_constructors name constructors)) in *)
+    (* let tags = if List.length index_typs = 0 *)
+      (* then None *)
+      (* else Some (fst @@ AdtTags.of_typs name index_typs) in *)
 
     let typs = typs |> List.map (fun (name, typ_args, constructors) ->
-        (name, AdtParameters.get_parameters typ_args, AdtTags.tag_constructors name constructors)) in
-
-    let tags = if List.length index_typs = 0
-      then None
-      else Some (fst @@ AdtTags.of_typs name index_typs) in
+        (name, AdtParameters.get_parameters typ_args, constructors)) in
+    let tags = None in
 
     return (Inductive (
         tags,
@@ -444,11 +446,12 @@ let to_coq_typs
 
 let to_coq_tags
     (subst : Type.Subst.t)
-    (tags : AdtTags.t option)
+    (tags : Type.tags option)
   : SmartPrint.t option =
   match tags with
   | None -> None
-  | Some (name, _, constructors) ->
+  | Some tags ->
+    let (name, _, constructors) = AdtConstructors.from_tags tags in
     Some (to_coq_typs ~tag:(true) subst true name [] constructors )
 
 let to_coq_inductive

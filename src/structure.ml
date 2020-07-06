@@ -79,8 +79,10 @@ let top_level_evaluation_error : t list Monad.t =
 let build_decoder :
     TypeDefinition.t
     -> Value.t option = function
-  | TypeDefinition.Inductive (Some (tags_name, types, constructors), _) ->
-    let name = Name.prefix_by_dec tags_name in
+  (* | TypeDefinition.Inductive (Some (tags_name, types, constructors), _) -> *)
+  | TypeDefinition.Inductive (Some tags, _) ->
+    let (name, types, constructors) = AdtConstructors.from_tags tags in
+    let name = Name.prefix_by_dec name in
     let tag_var = Name.Make "tag" in
     let patterns = List.map2 (fun typ { AdtConstructors.constructor_name; typ_vars; _ } ->
         let pat = if List.length typ_vars = 0
@@ -92,7 +94,7 @@ let build_decoder :
     let header : Exp.Header.t = {
       name;
       typ_vars = [];
-      args = [(tag_var, Type.Variable tags_name)];
+      args = [(tag_var, Type.Variable name)];
       structs = [];
       typ = Some (Type.Variable (Name.Make "Set"));
     } in
