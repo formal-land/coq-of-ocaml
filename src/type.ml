@@ -550,7 +550,7 @@ let rec to_coq (subst : Subst.t option) (context : Context.t option) (typ : t)
   | Error message -> !^ message
 
 (** tags represents the encoding of a type as datatype constructors
- ** Each GADT will generate its own tags for the types associacited on its indexes *)
+ ** Each GADT will generate its own tags for the types associated on its indexes *)
 type tags = {
   name : Name.t;
   constructors : Name.t Map.t }
@@ -570,26 +570,18 @@ let rec get_args_of
   | _ -> []
 
 
-(* let of_typs
- *     (name : Name.t)
- *     (typs : Type.t list) : t * Name.t Type.Map.t =
- *   let typs = typs |> List.sort_uniq compare |> List.sort_uniq Type.compare in
- *   let constructors = typs |> List.fold_left (fun constructors typ ->
- *       let typ_vars = Type.typ_args_of_typ typ |> Name.Set.elements in
- *       let typ_name = Name.Make (Type.to_string typ) in
- *       let constructor_name = Name.suffix_by_tag @@ Name.concat name typ_name in
- *       let constructor : AdtConstructors.item = {
- *         constructor_name;
- *         param_typs = [];
- *         res_typ_params = [];
- *         typ_vars
- *       } in (constructor :: constructors)) [] in
- *   let constructors = List.rev constructors in
- *   let tags = (Name.suffix_by_tag name, typs, List.rev constructors) in
- *   let mapping = List.map2 (fun typ { AdtConstructors.constructor_name; _ } -> (typ, constructor_name)) typs constructors
- *               |> List.to_seq in
- *   let mapping = Type.Map.add_seq mapping Type.Map.empty in
- *   (tags, mapping) *)
+let tags_of_typs
+    (name : Name.t)
+    (typs : t list)
+  : tags =
+  let typs = typs |> List.sort_uniq compare |> List.sort_uniq compare in
+  let constructors = typs |> List.fold_left (fun mapping typ ->
+      let typ_name = Name.of_string_raw @@ to_string typ in
+      let constructor_name = Name.suffix_by_tag @@ Name.concat name typ_name in
+      Map.add typ constructor_name mapping
+    ) Map.empty in
+  { name = tags_name name;
+    constructors }
 
 let rec get_tags_of
     (path : Path.t)
@@ -609,13 +601,7 @@ let rec get_tags_of
                  |> List.map (get_args_of path)
                  |> List.flatten in
       let* (typs, _, _) = of_typs_exprs true Name.Map.empty (typs @ args) in
-      (* let (_, constructors) = of_typs name typs in *)
-      let constructors = Map.empty in
-      return ({
-          name = tags_name name;
-          constructors
-        })
-
+      return @@ tags_of_typs name typs
     | _ -> raise { name = tags_name name; constructors = Map.empty }
                      Error.Category.Unexpected "Could not find type declaration"
   end
