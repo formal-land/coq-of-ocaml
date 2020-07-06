@@ -239,6 +239,12 @@ let of_ocaml
   else
     return (constructors, [])
 
+let type_arguments
+  (constructors : t)
+  : Type.t list =
+  constructors |> List.map (fun { res_typ_params; _ } ->
+            res_typ_params) |> List.flatten
+
 let from_tags (tags : Type.tags) : Name.t * Type.t list * t =
   let { Type.name; constructors } = tags in
   let constructors : (Type.t * Name.t) list = Type.Map.bindings constructors in

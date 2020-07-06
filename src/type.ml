@@ -569,12 +569,13 @@ let rec get_args_of
     else []
   | _ -> []
 
-
 let tags_of_typs
     (name : Name.t)
     (typs : t list)
   : tags =
-  let typs = typs |> List.sort_uniq compare |> List.sort_uniq compare in
+  (* We always add a variable to avoid the need of induction-recursion *)
+  let typs = Variable (Name.of_string_raw "a") :: typs
+             |> List.sort_uniq compare |> List.sort_uniq compare in
   let constructors = typs |> List.fold_left (fun mapping typ ->
       let typ_name = Name.of_string_raw @@ to_string typ in
       let constructor_name = Name.suffix_by_tag @@ Name.concat name typ_name in
