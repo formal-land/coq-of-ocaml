@@ -7,4 +7,4 @@ Local Open Scope Z_scope.
 Local Open Scope type_scope.
 Import ListNotations.
 
-Definition show {a : Set} (x : a) : string := axiom.
+Definition show {a : Set} : a -> string := axiom.

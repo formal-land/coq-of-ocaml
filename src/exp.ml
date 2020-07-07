@@ -553,8 +553,13 @@ and import_let_fun
     match x with
     | None -> return None
     | Some x ->
-      of_expression typ_vars vb_expr >>= fun e ->
-      let (args_names, e_body) = open_function e in
+      let* (args_names, e_body) =
+        if not is_axiom then
+          let* e = of_expression typ_vars vb_expr in
+          let (args_names, e_body) = open_function e in
+          return (args_names, Some e_body)
+        else
+          return ([], None) in
       let (args_typs, e_body_typ) = Type.open_type e_typ (List.length args_names) in
       get_configuration >>= fun configuration ->
       let structs =
@@ -574,7 +579,6 @@ and import_let_fun
         structs;
         typ = Some e_body_typ
       } in
-      let e_body = if is_axiom then None else Some e_body in
       return (Some (header, e_body))
     )
   ))) >>= fun cases ->
