@@ -76,8 +76,72 @@ let top_level_evaluation_error : t list Monad.t =
     SideEffect
     "Top-level evaluations are ignored"
 
+let rec get_include_name (module_expr : module_expr) : Name.t option Monad.t =
+  match module_expr.mod_desc with
+  | Tmod_apply (applied_expr, _, _) ->
+    begin match applied_expr.mod_desc with
+    | Tmod_ident (path, _)
+    | Tmod_constraint ({ mod_desc = Tmod_ident (path, _); _ }, _, _, _) ->
+      let* name = Name.of_path false path in
+      return (Some (Name.suffix_by_included_instance name))
+    | _ -> get_include_name applied_expr
+    end
+  | Tmod_constraint (module_expr, _, _, _) -> get_include_name module_expr
+  | _ -> return None
+
 (** Import an OCaml structure. *)
 let rec of_structure (structure : structure) : t list Monad.t =
+  let get_include_items
+    (is_in_blacklist : bool) (path : PathName.t) (mod_type : Types.module_type)
+    : t list Monad.t =
+    let* is_first_class =
+      IsFirstClassModule.is_module_typ_first_class mod_type in
+    begin match (is_in_blacklist, is_first_class) with
+    | (false, IsFirstClassModule.Found mod_type_path) ->
+      get_env >>= fun env ->
+      begin match Mtype.scrape env mod_type with
+      | Mty_ident path | Mty_alias path ->
+        error_message
+          (Error "include_module_with_abstract_module_type")
+          NotSupported
+          (
+            "Cannot get the fields of the abstract module type `" ^
+            Path.name path ^ "` to handle the include."
+          )
+      | Mty_signature signature ->
+        signature |> Monad.List.filter_map (fun signature_item ->
+          match signature_item with
+          | Types.Sig_value (ident, _, _) | Sig_type (ident, _, _, _) ->
+            let is_value =
+              match signature_item with
+              | Types.Sig_value _ -> true
+              | _ -> false in
+            let* name = Name.of_ident is_value ident in
+            PathName.of_path_and_name_with_convert mod_type_path name
+              >>= fun field ->
+            return (Some (
+              ModuleExp (
+                name,
+                Exp.Variable (
+                  MixedPath.Access (
+                    path,
+                    [field],
+                    false
+                  ),
+                  []
+                )
+              )
+            ))
+          | _ -> return None
+        )
+      | Mty_functor _ ->
+        error_message
+          (Error "include_functor")
+          Unexpected
+          "Unexpected include of functor."
+      end
+    | _ -> return [ModuleInclude path]
+    end in
   let of_structure_item (item : structure_item) (final_env : Env.t)
     : t list Monad.t =
     set_env item.str_env (
@@ -128,27 +192,7 @@ let rec of_structure (structure : structure) : t list Monad.t =
       end
     | Tstr_module { mb_id; mb_expr; _ } ->
       let* name = Name.of_ident false mb_id in
-      IsFirstClassModule.is_module_typ_first_class mb_expr.mod_type
-        >>= fun is_first_class ->
-      begin match is_first_class with
-      | Found _ ->
-        Exp.of_module_expr
-          Name.Map.empty mb_expr (Some mb_expr.mod_type) >>= fun module_exp ->
-        return [ModuleExp (name, module_exp)]
-      | Not_found reason ->
-        of_module_expr name mb_expr >>= fun module_expr ->
-        begin match module_expr with
-        | Some module_expr -> return [module_expr]
-        | None ->
-          raise
-            []
-            Module
-            (
-              "We expected to find a signature name for this module.\n\n" ^
-              "Reason:\n" ^ reason
-            )
-        end
-      end
+      of_module name mb_expr
     | Tstr_modtype { mtd_type = None; _ } ->
       error_message
         (Error "abstract_module_type")
@@ -206,63 +250,26 @@ let rec of_structure (structure : structure) : t list Monad.t =
       let* configuration = get_configuration in
       let is_in_blacklist =
         Configuration.is_in_first_class_module_backlist configuration path in
-      PathName.of_path_with_convert false path >>= fun reference ->
-      IsFirstClassModule.is_module_typ_first_class mod_type
-        >>= fun is_first_class ->
-      begin match (is_in_blacklist, is_first_class) with
-      | (false, IsFirstClassModule.Found mod_type_path) ->
-        get_env >>= fun env ->
-        begin match Mtype.scrape env mod_type with
-        | Mty_ident path | Mty_alias path ->
-          error_message
-            (Error "include_module_with_abstract_module_type")
-            NotSupported
-            (
-              "Cannot get the fields of the abstract module type `" ^
-              Path.name path ^ "` to handle the include."
-            )
-        | Mty_signature signature ->
-          signature |> Monad.List.filter_map (fun signature_item ->
-            match signature_item with
-            | Types.Sig_value (ident, _, _) | Sig_type (ident, _, _, _) ->
-              let is_value =
-                match signature_item with
-                | Types.Sig_value _ -> true
-                | _ -> false in
-              let* name = Name.of_ident is_value ident in
-              PathName.of_path_and_name_with_convert mod_type_path name
-                >>= fun field ->
-              return (Some (
-                ModuleExp (
-                  name,
-                  Exp.Variable (
-                    MixedPath.Access (
-                      reference,
-                      [field],
-                      false
-                    ),
-                    []
-                  )
-                )
-              ))
-            | _ -> return None
+      let* reference = PathName.of_path_with_convert false path in
+      get_include_items is_in_blacklist reference mod_type
+    | Tstr_include { incl_mod } ->
+      let* include_name = get_include_name incl_mod in
+      begin match include_name with
+      | Some include_name ->
+        let* module_definitionn = of_module include_name incl_mod in
+        let reference = PathName.of_name [] include_name in
+        let* include_items =
+          get_include_items false reference incl_mod.mod_type in
+        return (module_definitionn @ include_items)
+      | None ->
+        error_message
+          (Error "include")
+          NotSupported
+          (
+            "Cannot find a name for this module expression.\n\n" ^
+            "Try to first give a name to this module before doing the include."
           )
-        | Mty_functor _ ->
-          error_message
-            (Error "include_functor")
-            Unexpected
-            "Unexpected include of functor."
-        end
-      | _ -> return [ModuleInclude reference]
       end
-    | Tstr_include _ ->
-      error_message
-        (Error "include")
-        NotSupported
-        (
-          "Cannot include this kind of module expression.\n\n" ^
-          "Try to first give a name to this module."
-        )
     (* We ignore attribute fields. *)
     | Tstr_attribute _ -> return [])) in
   Monad.List.fold_right
@@ -274,6 +281,30 @@ let rec of_structure (structure : structure) : t list Monad.t =
     structure.str_items
     ([], structure.str_final_env) >>= fun (structure, _) ->
   return structure
+
+and of_module (name : Name.t) (module_expr : module_expr)
+  : t list Monad.t =
+  let* is_first_class =
+    IsFirstClassModule.is_module_typ_first_class module_expr.mod_type in
+  match is_first_class with
+  | Found _ ->
+    let* module_expr =
+      Exp.of_module_expr
+        Name.Map.empty module_expr (Some module_expr.mod_type) in
+    return [ModuleExp (name, module_expr)]
+  | Not_found reason ->
+    let* module_expr = of_module_expr name module_expr in
+    begin match module_expr with
+    | Some module_expr -> return [module_expr]
+    | None ->
+      raise
+        []
+        Module
+        (
+          "We expected to find a signature name for this module.\n\n" ^
+          "Reason:\n" ^ reason
+        )
+    end
 
 and of_module_expr (name : Name.t) (module_expr : module_expr)
   : t option Monad.t =

@@ -131,6 +131,16 @@ let of_ident (is_value : bool) (i : Ident.t) : t Monad.t =
 let of_ident_raw (i : Ident.t) : t =
   of_string_raw (Ident.name i)
 
+let of_path (is_value : bool) (path : Path.t) : t Monad.t =
+  let s =
+    Path.name path |> String.map (fun c ->
+      if c = '.' then
+        '_'
+      else
+        c
+    ) in
+  of_string is_value s
+
 let to_string (name : t) : string =
   match name with
   | FunctionParameter -> "function_parameter"
@@ -144,6 +154,9 @@ let prefix_by_t (name : t) : t =
 
 let prefix_by_with (name : t) : t =
   Make ("with_" ^ to_string name)
+
+let suffix_by_included_instance (name : t) : t =
+  Make (to_string name ^ "_included_instance")
 
 let suffix_by_skeleton (name : t) : t =
   Make (to_string name ^ "_skeleton")

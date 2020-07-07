@@ -29,3 +29,13 @@ module Sum
   type t = int
   let y = X.x + Y.x
 end
+
+module WithM = struct
+  include M
+  let z = 0
+end
+
+module WithSum = struct
+  include F (M)
+  let z = 0
+end

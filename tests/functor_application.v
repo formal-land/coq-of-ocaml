@@ -55,3 +55,21 @@ Definition Sum :=
         {|
           Target.y := y
         |}) : {t : Set & Target.signature (t := t)}).
+
+Module WithM.
+  Definition t := (|M|).(Source.t).
+  
+  Definition x := (|M|).(Source.x).
+  
+  Definition z : int := 0.
+End WithM.
+
+Module WithSum.
+  Definition F_included_instance := F (existT (A := Set) _ _ (|M|)).
+  
+  Definition t := (|F_included_instance|).(Target.t).
+  
+  Definition y := (|F_included_instance|).(Target.y).
+  
+  Definition z : int := 0.
+End WithSum.
