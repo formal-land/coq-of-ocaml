@@ -247,6 +247,9 @@ let type_arguments
 
 let from_tags (tags : Type.tags) : Name.t * Type.t list * t =
   let { Type.name; constructors } = tags in
+  print_string "\n";
+  print_int (Type.Map.cardinal constructors);
+  print_string "\n";
   let constructors : (Type.t * Name.t) list = Type.Map.bindings constructors in
   let (typs, items) = constructors |> List.map (fun (typ, name) ->
       (typ,

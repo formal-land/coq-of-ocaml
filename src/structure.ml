@@ -82,7 +82,6 @@ let build_decoder :
   (* | TypeDefinition.Inductive (Some (tags_name, types, constructors), _) -> *)
   | TypeDefinition.Inductive (Some tags, _) ->
     let (name, types, constructors) = AdtConstructors.from_tags tags in
-    let name = Name.prefix_by_dec name in
     let tag_var = Name.Make "tag" in
     let patterns = List.map2 (fun typ { AdtConstructors.constructor_name; typ_vars; _ } ->
         let pat = if List.length typ_vars = 0
@@ -92,7 +91,7 @@ let build_decoder :
         (pat, None, Exp.Type typ)
       ) types constructors in
     let header : Exp.Header.t = {
-      name;
+      name = Name.prefix_by_dec name;
       typ_vars = [];
       args = [(tag_var, Type.Variable name)];
       structs = [];
