@@ -82,17 +82,17 @@ let tags_of_typs
     (typs : t list)
   : tags =
   (* We always add a variable to avoid the need of induction-recursion *)
-  let typs = Variable (Name.of_string_raw "a") :: typs
-             |> List.sort_uniq compare |> List.sort_uniq compare in
-  let constructors = typs |> List.fold_left (fun mapping typ ->
+  let typs = Variable (Name.of_string_raw "a") :: typs in
+  let (_, constructors) = typs |> List.fold_left (fun (constructor_names, mapping) typ ->
       let typ_name = Name.of_string_raw @@ to_string typ in
       let constructor_name = Name.suffix_by_tag @@ Name.snake_concat name typ_name in
-      print_string (Name.to_string constructor_name ^ "\n");
-      Map.add typ constructor_name mapping
-    ) Map.empty in
-  print_string ("\nsizeof " ^ Name.to_string name ^ " tags: ");
-  print_int (Map.cardinal constructors);
-  print_string "\n";
+      if not @@ List.mem constructor_name constructor_names
+      then (constructor_name :: constructor_names, Map.add typ constructor_name mapping)
+      else (constructor_names, mapping)
+    ) ([], Map.empty) in
+  (* print_string ("\nsizeof " ^ Name.to_string name ^ " tags: "); *)
+  (* print_int (Map.cardinal constructors); *)
+  (* print_string "\n"; *)
   { name = tags_name name;
     constructors }
 
@@ -177,10 +177,17 @@ let rec of_typ_expr
     of_typs_exprs with_free_vars typ_vars typs >>= fun (typs, typ_vars, new_typ_vars) ->
     return (Tuple typs, typ_vars, new_typ_vars)
   | Tconstr (path, typs, _) ->
-    of_typs_exprs with_free_vars typ_vars typs >>= fun (typs, typ_vars, new_typ_vars) ->
-    let* typs = tag_typ_constrs path typs in
+    let* (typs, typ_vars, new_typs_vars) = Monad.List.fold_left (fun (typs, typ_vars, new_typs_vars) typ ->
+        let* (typ, typ_vars, new_typs_vars') = of_typ_expr true Name.Map.empty typ in
+        let* typ = tag_typ_constr path typ new_typs_vars' in
+        return (typ :: typs,
+         typ_vars,
+         Name.Set.union new_typs_vars new_typs_vars')
+      ) ([], typ_vars, Name.Set.empty) typs in
+        (* of_typs_exprs with_free_vars typ_vars typs >>= fun (typs, typ_vars, new_typ_vars) -> *)
+    (* let* typs = tag_typ_constrs path typs in *)
     MixedPath.of_path false path None >>= fun mixed_path ->
-    return (Apply (mixed_path, typs), typ_vars, new_typ_vars)
+    return (Apply (mixed_path, List.rev typs), typ_vars, new_typs_vars)
   | Tobject (_, object_descr) ->
     begin match !object_descr with
     | Some (path, _ :: typs) ->
@@ -285,32 +292,36 @@ and get_tags_of
                  (* |> List.map (get_args_of path) *)
                  (* |> List.flatten in *)
       let typs = List.map (get_args_of path) typs |> List.flatten in
-      print_string "\npath: ";
-      Path.print Format.std_formatter path;
-      print_string "\n\n";
-      let _ = List.map (fun x -> Printtyp.raw_type_expr Format.std_formatter x; print_string "\n";) typs in
+      (* print_string "\npath: "; *)
+      (* Path.print Format.std_formatter path; *)
+      (* print_string "\n\n"; *)
+      (* let _ = List.map (fun x -> Printtyp.raw_type_expr Format.std_formatter x; print_string "\n";) typs in *)
       let* (typs, _, _) = of_typs_exprs true Name.Map.empty typs in
       return @@ tags_of_typs name typs
     | _ -> raise { name = tags_name name; constructors = Map.empty }
                      Error.Category.Unexpected "Could not find type declaration"
   end
 
-and tag_typ_constrs
+and tag_typ_constr
     (path : Path.t)
-    (typs : t list)
-  : t list Monad.t =
+    (typ : t)
+    (args : Name.Set.t)
+  : t Monad.t =
   let name = Path.last path in
   if List.exists (function x -> name = x) ["int"; "list"; "option"; "bool"; "string"; "unit"]
-  then return typs
-  else
-  let* { constructors; _ } = get_tags_of path in
-  Monad.List.map (fun typ ->
-      match Map.find_opt typ constructors with
-      | Some tag_name -> return @@ Variable tag_name
-      | None -> return typ
-        (* let name = Name.of_string_raw @@ Path.last path in *)
-        (* raise (Variable name) Error.Category.Unexpected "Couldn't find tags for constructor" *)
-    ) typs
+  then return typ
+  else let* { constructors; _ } = get_tags_of path in
+    match Map.find_opt typ constructors with
+    | Some tag_name ->
+      print_string "some\n";
+      let name = MixedPath.of_name tag_name in
+      let args = Name.Set.elements args |> List.map (fun x -> Variable x) in
+      return @@ Apply (name, args)
+    | None ->
+      print_string "some\n";
+      return typ
+(* let name = Name.of_string_raw @@ Path.last path in *)
+(* raise (Variable name) Error.Category.Unexpected "Couldn't find tags for constructor" *)
 
 and of_typs_exprs
   (with_free_vars: bool)

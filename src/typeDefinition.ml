@@ -366,11 +366,11 @@ let of_ocaml (typs : type_declaration list) : t Monad.t =
     ) ([], [], [], [])) >>= fun (constructor_records, notations, records, typs') ->
 
     (* let (name, _, _) = List.hd typs' in *)
-    let constrs_args_typs = typs' |> List.map (function (_, _, constructor) ->
-        AdtConstructors.type_arguments constructor) |> List.flatten in
-    print_string "constr_args_typs len: ";
-    print_int (List.length constrs_args_typs) ;
-    print_string "\n";
+    (* let constrs_args_typs = typs' |> List.map (function (_, _, constructor) -> *)
+        (* AdtConstructors.type_arguments constructor) |> List.flatten in *)
+    (* print_string "constr_args_typs len: "; *)
+    (* print_int (List.length constrs_args_typs) ; *)
+    (* print_string "\n"; *)
     let {typ_id; _ } = List.hd typs in
     let* tags = Type.get_tags_of (Path.Pident typ_id) in
 
