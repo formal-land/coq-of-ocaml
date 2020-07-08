@@ -11,7 +11,8 @@ type t =
   | Phantom
   | Struct of string
 
-let of_payload_string (id : string) (payload : Parsetree.payload)
+let of_payload_string
+  (error_message : string) (id : string) (payload : Parsetree.payload)
   : string Monad.t =
   match payload with
   | Parsetree.PStr [{
@@ -27,7 +28,13 @@ let of_payload_string (id : string) (payload : Parsetree.payload)
     }] -> return payload
   | _ ->
     let message = "missing_string_for_attribute " ^ id in
-    raise message Unexpected "Expected a single string parameter this attribute"
+    raise
+      message
+      Unexpected
+      (
+        "Expected a single string parameter for this attribute.\n\n" ^
+        error_message
+      )
 
 let of_attributes (attributes : Typedtree.attributes) : t list Monad.t =
   attributes |> Monad.List.filter_map (
@@ -35,17 +42,23 @@ let of_attributes (attributes : Typedtree.attributes) : t list Monad.t =
     set_loc (Loc.of_location attr_name.Asttypes.loc) (
     let id = attr_name.Asttypes.txt in
     match id with
-    | "coq_axiom" -> return (Some Axiom)
+    | "coq_axiom" ->
+      let error_message = "Give a reason for this axiom." in
+      let* _ = of_payload_string error_message id attr_payload in
+      return (Some Axiom)
     | "coq_force_gadt" -> return (Some ForceGadt)
     | "coq_implicit" ->
-      of_payload_string id attr_payload >>= fun payload ->
+      let error_message =
+        "Give a value such as \"(A := unit)\" to define an implicit type." in
+      let* payload = of_payload_string error_message id attr_payload in
       return (Some (Implicit payload))
     | "coq_match_gadt" -> return (Some MatchGadt)
     | "coq_match_gadt_with_result" -> return (Some MatchGadtWithResult)
     | "coq_match_with_default" -> return (Some MatchWithDefault)
     | "coq_phantom" -> return (Some Phantom)
     | "coq_struct" ->
-      of_payload_string id attr_payload >>= fun payload ->
+      let error_message = "Give the name of the parameter to recurse on." in
+      let* payload = of_payload_string error_message id attr_payload in
       return (Some (Struct payload))
     | _ -> return None)
   )
