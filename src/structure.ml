@@ -16,7 +16,7 @@ module Value = struct
         let firt_case = index = 0 in
         nest (
           begin if firt_case then
-            begin if Recursivity.to_bool value.Exp.Definition.is_rec then
+            begin if value.Exp.Definition.is_rec then
               !^ "Fixpoint"
             else
               !^ "Definition"
