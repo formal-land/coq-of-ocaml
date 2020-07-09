@@ -243,6 +243,22 @@ Definition operate (x : string) : int :=
 ```
 Note that you can also use the monadic notation in OCaml with the [binding operators](https://caml.inria.fr/pub/docs/manual-ocaml/bindingops.html).
 
+## renaming_rules
+#### Example
+```
+"renaming_rules": [
+  ["Stdlib.result", "sum"],
+  ["Stdlib.List.map", "List.map"],
+  ["Stdlib.List.rev", "List.rev"]
+]
+```
+
+#### Value
+A list of couple of values, with a name and a name to rename to while doing the translation in Coq.
+
+#### Explanation
+We may want to systematically rename some of the OCaml values to their counterpart in Coq. This rule applies to anything which has a name (value, type, module, constructor, ...). coq-of-ocaml already knows some renaming rules, but it is possible to be more specific with this option.
+
 ## require
 #### Example
 ```
