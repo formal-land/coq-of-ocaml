@@ -231,6 +231,7 @@ let of_ocaml
   let (constructors, constructors_arity) = List.split constructors_and_arities in
   let same_arities = List.for_all (fun y -> List.hd constructors_arity = y) constructors_arity in
 
+  (* TODO: Seems like the second argument is not necessary anymore *)
   if not same_arities
   then
     raise (constructors, [])
