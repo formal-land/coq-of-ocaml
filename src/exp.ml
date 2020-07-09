@@ -566,7 +566,7 @@ and import_let_fun
         match struct_attributes with
         | [] ->
           if Configuration.is_without_guard_checking configuration then
-            match (Recursivity.to_bool is_rec, args_names) with
+            match (is_rec, args_names) with
             | (true, x :: _) -> [Name.to_string x]
             | _ -> []
           else
@@ -582,9 +582,18 @@ and import_let_fun
       return (Some (header, e_body))
     )
   ))) >>= fun cases ->
+  let is_rec =
+    is_rec &&
+    List.for_all
+      (fun ({ Header.args; _ }, _) ->
+        match args with
+        | [] -> false
+        | _ :: _ -> true
+      )
+      cases in
   let result = { Definition.is_rec = is_rec; cases } in
   match (at_top_level, result) with
-  | (false, { is_rec = Recursivity.New true; cases = _ :: _ :: _ }) ->
+  | (false, { is_rec = true; cases = _ :: _ :: _ }) ->
     raise
       result
       NotSupported
@@ -1181,7 +1190,7 @@ let rec to_coq (paren : bool) (e : t) : SmartPrint.t =
         let first_case = index = 0 in
         (if first_case then (
           !^ "let" ^^
-          (if Recursivity.to_bool def.Definition.is_rec then !^ "fix" else empty)
+          (if def.Definition.is_rec then !^ "fix" else empty)
         ) else
           !^ "with") ^^
         Name.to_coq header.Header.name ^^
