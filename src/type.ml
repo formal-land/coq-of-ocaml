@@ -48,7 +48,13 @@ let get_order (typ : t) : int =
   | Error _ -> 10
 
 let compare t1 t2 : int =
-  get_order t1 - get_order t2
+  let x = get_order t2 - get_order t1 in
+  if not (x = 0)
+  then x
+  else match t1, t2 with
+    | Apply (mp1, ts1), Apply (mp2, ts2) ->
+      String.compare (MixedPath.to_string mp1) (MixedPath.to_string mp2)
+    | _ -> 0
 
 module Map = Map.Make (struct
   type nonrec t = t
@@ -91,13 +97,13 @@ let tags_of_typs
       (* let typ_name = Name.of_string_raw @@ to_string typ in *)
       (* let constructor_name = Name.suffix_by_tag @@ Name.snake_concat name typ_name in *)
       let constructor_name = tag_constructor_of name typ in
-      if not @@ List.mem constructor_name constructor_names
+      if not @@ Map.mem typ mapping
       then (constructor_name :: constructor_names, Map.add typ constructor_name mapping)
       else (constructor_names, mapping)
     ) ([], Map.empty) in
-  (* print_string ("\nsizeof " ^ Name.to_string name ^ " tags: "); *)
-  (* print_int (Map.cardinal constructors); *)
-  (* print_string "\n"; *)
+  print_string ("\nsizeof " ^ Name.to_string name ^ " tags: ");
+  print_int (Map.cardinal constructors);
+  print_string "\n";
   { name = tags_name name;
     constructors }
 
