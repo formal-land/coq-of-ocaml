@@ -33,24 +33,22 @@ let to_string : t -> string = function
   | FunTyps _ -> "FunTyps"
   | Error s -> "Error" ^ s
 
-let equal (t1 : t) (t2 : t): bool =
-  match t1, t2 with
-  | Variable _ , Variable _ -> true
-  | Arrow _, Arrow _ -> true
-  | Sum _, Sum _ -> true
-  | Tuple _, Tuple _ -> true
-  | Apply (s1, _), Apply (s2, _) -> s1 = s2
-  | Package _, Package _ -> true
-  | ForallModule _, ForallModule _ -> true
-  | ForallTyps _, ForallTyps _ -> true
-  | FunTyps _, FunTyps _ -> true
-  | Error _, Error _ -> true
-  | _ -> false
+let get_order (typ : t) : int =
+  match typ with
+  | SetTyp -> 0
+  | Variable _ -> 1
+  | Arrow _ -> 2
+  | Sum _ -> 3
+  | Tuple _ -> 4
+  | Apply (_, _) -> 5
+  | Package _ -> 6
+  | ForallModule _ -> 7
+  | ForallTyps _ -> 8
+  | FunTyps _ -> 9
+  | Error _ -> 10
 
 let compare t1 t2 : int =
-  if equal t1 t2
-  then 0
-  else 1
+  get_order t1 - get_order t2
 
 module Map = Map.Make (struct
   type nonrec t = t
@@ -77,6 +75,12 @@ let rec get_args_of
     else []
   | _ -> []
 
+let tag_constructor_of
+    (name : Name.t)
+    (typ : t) =
+  let typ_name = Name.of_string_raw @@ to_string typ in
+  Name.suffix_by_tag @@ Name.snake_concat name typ_name
+
 let tags_of_typs
     (name : Name.t)
     (typs : t list)
@@ -84,8 +88,9 @@ let tags_of_typs
   (* We always add a variable to avoid the need of induction-recursion *)
   let typs = Variable (Name.of_string_raw "a") :: typs in
   let (_, constructors) = typs |> List.fold_left (fun (constructor_names, mapping) typ ->
-      let typ_name = Name.of_string_raw @@ to_string typ in
-      let constructor_name = Name.suffix_by_tag @@ Name.snake_concat name typ_name in
+      (* let typ_name = Name.of_string_raw @@ to_string typ in *)
+      (* let constructor_name = Name.suffix_by_tag @@ Name.snake_concat name typ_name in *)
+      let constructor_name = tag_constructor_of name typ in
       if not @@ List.mem constructor_name constructor_names
       then (constructor_name :: constructor_names, Map.add typ constructor_name mapping)
       else (constructor_names, mapping)
@@ -308,18 +313,28 @@ and tag_typ_constr
     (args : Name.Set.t)
   : t Monad.t =
   let name = Path.last path in
+  print_string "tagging: ";
+  print_string @@ to_string typ ^ " ";
+  print_string begin match typ with
+    | Variable a -> Name.to_string a
+    | _ -> ""
+  end;
+  print_string "\n";
   if List.exists (function x -> name = x) ["int"; "list"; "option"; "bool"; "string"; "unit"]
   then return typ
   else let* { constructors; _ } = get_tags_of path in
+    let args = Name.Set.elements args |> List.map (fun x -> Variable x) in
     match Map.find_opt typ constructors with
     | Some tag_name ->
-      print_string "some\n";
+      print_string @@ "some " ^ " " ^ "\n";
       let name = MixedPath.of_name tag_name in
-      let args = Name.Set.elements args |> List.map (fun x -> Variable x) in
       return @@ Apply (name, args)
     | None ->
-      print_string "some\n";
-      return typ
+      print_string @@ "none " ^ "\n";
+      (* let name = typ |> tag_constructor_of @@ Name.of_string_raw name *)
+                 (* |> MixedPath.of_name in *)
+      (* return @@ Apply (name, args) *)
+      return @@ typ
 (* let name = Name.of_string_raw @@ Path.last path in *)
 (* raise (Variable name) Error.Category.Unexpected "Couldn't find tags for constructor" *)
 

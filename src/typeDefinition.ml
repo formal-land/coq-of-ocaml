@@ -415,7 +415,7 @@ let to_coq_typs
     let l : SmartPrint.t list = List.init arity (fun i ->
         if i = arity - 1
         then !^ "Type"
-        else !^ (Name.to_string (Name.suffix_by_tag name))) in
+        else !^ (Name.to_string (Name.suffix_by_tags name))) in
     separate (!^ " -> ") l
     ^^ !^ ":=" ^-^
     separate empty (
