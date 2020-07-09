@@ -99,11 +99,11 @@ let is_value_to_escape (configuration : t) (name : string) : bool =
 
 let is_in_first_class_module_backlist (configuration : t) (path : Path.t)
   : bool =
-  match Path.to_string_list path with
-  | head :: _ :: []
-    when List.mem head configuration.first_class_module_path_blacklist ->
-    true
-  | _ -> false
+  match List.rev (Path.to_string_list path) with
+  | [] -> false
+  | _ :: path ->
+    let path = String.concat "." path in
+    List.mem path configuration.first_class_module_path_blacklist
 
 let is_monadic_operator (configuration : t) (name : string) : string option =
   let monadic_operator =
