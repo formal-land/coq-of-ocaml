@@ -1,4 +1,5 @@
 ## [Unreleased]
+* Add the configuration option `renaming_rules`.
 * Add support for generative functors (using functors with a `unit` parameter).
 * Add a mandatory string parameter to the `@coq_axiom` attribute in order to give a reason for the axiom.
 
