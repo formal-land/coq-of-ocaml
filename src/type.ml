@@ -94,8 +94,6 @@ let tags_of_typs
   (* We always add a variable to avoid the need of induction-recursion *)
   let typs = Variable (Name.of_string_raw "a") :: typs in
   let (_, constructors) = typs |> List.fold_left (fun (constructor_names, mapping) typ ->
-      (* let typ_name = Name.of_string_raw @@ to_string typ in *)
-      (* let constructor_name = Name.suffix_by_tag @@ Name.snake_concat name typ_name in *)
       let constructor_name = tag_constructor_of name typ in
       if not @@ Map.mem typ mapping
       then (constructor_name :: constructor_names, Map.add typ constructor_name mapping)
@@ -192,8 +190,6 @@ let rec of_typ_expr
          typ_vars,
          Name.Set.union new_typs_vars new_typs_vars')
       ) ([], typ_vars, Name.Set.empty) typs in
-        (* of_typs_exprs with_free_vars typ_vars typs >>= fun (typs, typ_vars, new_typ_vars) -> *)
-    (* let* typs = tag_typ_constrs path typs in *)
     MixedPath.of_path false path None >>= fun mixed_path ->
     return (Apply (mixed_path, List.rev typs), typ_vars, new_typs_vars)
   | Tobject (_, object_descr) ->
