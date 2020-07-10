@@ -12,7 +12,10 @@ let of_name (name : Name.t) : t =
   PathName (PathName.of_name [] name)
 
 let to_string : t -> string = function
-  | Access (path, _, _) -> PathName.to_string path
+  | Access (path, fields, _) ->
+    let fields = List.map PathName.to_string fields in
+    let path = PathName.to_string path in
+    List.fold_left (fun acc field -> acc ^ ".(" ^ field ^ ")") path fields
   | PathName path -> PathName.to_string path
 
 let get_signature_path (path : Path.t) : Path.t option Monad.t =
