@@ -101,9 +101,6 @@ let tags_of_typs
       then (constructor_name :: constructor_names, Map.add typ constructor_name mapping)
       else (constructor_names, mapping)
     ) ([], Map.empty) in
-  print_string ("\nsizeof " ^ Name.to_string name ^ " tags: ");
-  print_int (Map.cardinal constructors);
-  print_string "\n";
   { name = tags_name name;
     constructors }
 
@@ -289,24 +286,10 @@ and get_tags_of
   : tags Monad.t =
   get_env >>= fun env ->
   let name = Name.of_string_raw @@ Path.last path in
-  (* print_string (Path.last path ^ "\n"); *)
   begin match Env.find_type path env with
     | { type_kind = Type_variant constructors ; _ } ->
       let typs = constructors |> List.map (fun { Types.cd_res; _ } -> cd_res) |> List.filter_map (fun x -> x) in
-      (* TODO: Cstr_record *)
-      (* let args = constructors *)
-                 (* |> List.map (fun { Types.cd_args; _ } -> *)
-                     (* match cd_args with *)
-                     (* | Cstr_tuple typs -> typs *)
-                     (* | _ -> []) *)
-                 (* |> List.flatten *)
-                 (* |> List.map (get_args_of path) *)
-                 (* |> List.flatten in *)
       let typs = List.map (get_args_of path) typs |> List.flatten in
-      (* print_string "\npath: "; *)
-      (* Path.print Format.std_formatter path; *)
-      (* print_string "\n\n"; *)
-      (* let _ = List.map (fun x -> Printtyp.raw_type_expr Format.std_formatter x; print_string "\n";) typs in *)
       let* (typs, _, _) = of_typs_exprs true Name.Map.empty typs in
       return @@ tags_of_typs name typs
     | _ -> raise { name = tags_name name; constructors = Map.empty }
@@ -319,30 +302,16 @@ and tag_typ_constr
     (args : Name.Set.t)
   : t Monad.t =
   let name = Path.last path in
-  print_string "tagging: ";
-  print_string @@ to_string typ ^ " ";
-  print_string begin match typ with
-    | Variable a -> Name.to_string a
-    | _ -> ""
-  end;
-  print_string "\n";
   if List.exists (function x -> name = x) ["int"; "list"; "option"; "bool"; "string"; "unit"]
   then return typ
   else let* { constructors; _ } = get_tags_of path in
     let args = Name.Set.elements args |> List.map (fun x -> Variable x) in
     match Map.find_opt typ constructors with
     | Some tag_name ->
-      print_string @@ "some " ^ " " ^ "\n";
       let name = MixedPath.of_name tag_name in
       return @@ Apply (name, args)
     | None ->
-      print_string @@ "none " ^ "\n";
-      (* let name = typ |> tag_constructor_of @@ Name.of_string_raw name *)
-                 (* |> MixedPath.of_name in *)
-      (* return @@ Apply (name, args) *)
       return @@ typ
-(* let name = Name.of_string_raw @@ Path.last path in *)
-(* raise (Variable name) Error.Category.Unexpected "Couldn't find tags for constructor" *)
 
 and of_typs_exprs
   (with_free_vars: bool)
