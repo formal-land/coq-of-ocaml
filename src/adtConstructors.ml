@@ -214,7 +214,7 @@ end
 
 let of_ocaml
     (single_constructors : Single.t list)
-  : (t * AdtParameters.t) Monad.t =
+  : t Monad.t =
 
   let* constructors_and_arities  = single_constructors |> Monad.List.map (
       fun { Single.constructor_name; param_typs; return_typ_params } ->
@@ -231,14 +231,13 @@ let of_ocaml
   let (constructors, constructors_arity) = List.split constructors_and_arities in
   let same_arities = List.for_all (fun y -> List.hd constructors_arity = y) constructors_arity in
 
-  (* TODO: Seems like the second argument is not necessary anymore *)
   if not same_arities
   then
-    raise (constructors, [])
+    raise constructors
       Error.Category.Unexpected
       "Unexpected error made the constructors have different return sizes"
   else
-    return (constructors, [])
+    return constructors
 
 let type_arguments
   (constructors : t)

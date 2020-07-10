@@ -226,7 +226,7 @@ let of_ocaml (typs : type_declaration list) : t Monad.t =
       Monad.List.map
         (AdtConstructors.Single.of_ocaml_row ind_vars)
         row_fields >>= fun single_constructors ->
-      AdtConstructors.of_ocaml single_constructors >>= fun (constructors, _) ->
+      AdtConstructors.of_ocaml single_constructors >>= fun constructors ->
       raise
         (Inductive (None ,{
           constructor_records = [];
@@ -281,7 +281,7 @@ let of_ocaml (typs : type_declaration list) : t Monad.t =
         begin match typ.Types.desc with
         | Tvariant { row_fields; _ } ->
           Monad.List.map (AdtConstructors.Single.of_ocaml_row typ_args) row_fields >>= fun single_constructors ->
-          AdtConstructors.of_ocaml single_constructors >>= fun (constructors, _) ->
+          AdtConstructors.of_ocaml single_constructors >>= fun constructors ->
           raise
             (
               constructor_records,
@@ -348,14 +348,12 @@ let of_ocaml (typs : type_declaration list) : t Monad.t =
           | [] -> constructor_records
           | _ :: _ ->
             (name, new_constructor_records) :: constructor_records in
-        AdtConstructors.of_ocaml
-          single_constructors >>= fun (constructors, merged_typ_params) ->
-        let typ_args = merged_typ_params in
+        AdtConstructors.of_ocaml single_constructors >>= fun constructors ->
         return (
           constructor_records,
           notations,
           records,
-          (name, typ_args, constructors) :: typs
+          (name, [], constructors) :: typs
         )
       | { typ_type = { type_kind = Type_open; _ }; _ } ->
         raise
@@ -365,18 +363,8 @@ let of_ocaml (typs : type_declaration list) : t Monad.t =
       )
     ) ([], [], [], [])) >>= fun (constructor_records, notations, records, typs') ->
 
-    (* let (name, _, _) = List.hd typs' in *)
-    (* let constrs_args_typs = typs' |> List.map (function (_, _, constructor) -> *)
-        (* AdtConstructors.type_arguments constructor) |> List.flatten in *)
-    (* print_string "constr_args_typs len: "; *)
-    (* print_int (List.length constrs_args_typs) ; *)
-    (* print_string "\n"; *)
     let {typ_id; _ } = List.hd typs in
     let* tags = Type.get_tags_of (Path.Pident typ_id) in
-
-      (* if List.length constrs_args_typs = 0 *)
-      (* then None *)
-      (* else Some (Type.tags_of_typs name constrs_args_typs) in *)
     let typs' = typs' |> List.map (fun (name, typ_args, constructors) ->
         (name, AdtParameters.get_parameters typ_args, constructors)) in
 
