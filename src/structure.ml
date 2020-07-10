@@ -95,7 +95,7 @@ let build_decoder :
       typ_vars = [];
       args = [(tag_var, Type.Variable name)];
       structs = [];
-      typ = Some (Type.Variable (Name.Make "Set"));
+      typ = Some Type.SetTyp;
     } in
     let matc : Exp.t =
       Exp.Match (Exp.Variable ((MixedPath.of_name tag_var), []), patterns, false)
