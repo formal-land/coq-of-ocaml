@@ -76,13 +76,12 @@ let top_level_evaluation_error : t list Monad.t =
     SideEffect
     "Top-level evaluations are ignored"
 
-let build_decoder :
+let build_tags :
     TypeDefinition.t
-    -> Value.t option = function
-  (* | TypeDefinition.Inductive (Some (tags_name, types, constructors), _) -> *)
+    -> (Value.t * TypeDefinition.t) option = function
   | TypeDefinition.Inductive (Some tags, _) ->
     let (name, types, constructors) = AdtConstructors.from_tags tags in
-    let tag_var = Name.Make "tag" in
+    let tag_var = Name.of_string_raw "tag" in
     let patterns = List.map2 (fun typ { AdtConstructors.constructor_name; typ_vars; _ } ->
         let pat = if List.length typ_vars = 0
           then Pattern.Variable constructor_name
@@ -97,14 +96,12 @@ let build_decoder :
       structs = [];
       typ = Some Type.SetTyp;
     } in
-    let matc : Exp.t =
-      Exp.Match (Exp.Variable ((MixedPath.of_name tag_var), []), patterns, false)
-      in
+    let e = Exp.Match (Exp.Variable ((MixedPath.of_name tag_var), []), patterns, false) in
     let def : Exp.t option Exp.Definition.t = {
-      is_rec = Recursivity.New false;
-      cases = [(header, Some matc)]
-    } in
-    Some def
+      is_rec = Recursivity.New true;
+      cases = [(header, Some e)] } in
+    let tags = TypeDefinition.Inductive.of_tags tags in
+    Some (def, TypeDefinition.Inductive (None, tags))
   | _ -> None
 
 
@@ -140,11 +137,11 @@ let rec of_structure (structure : structure) : t list Monad.t =
          phantom types. *)
       set_env final_env (
       TypeDefinition.of_ocaml typs >>= fun def ->
-      let decoder = match build_decoder def with
+      let tags = match build_tags def with
         | None -> []
-        | Some decoder -> [Value decoder] in
+        | Some (decoder, tags) -> [TypeDefinition tags; Value decoder] in
 
-      return ([TypeDefinition def] @ decoder))
+      return (tags @ [TypeDefinition def]))
     | Tstr_exception { tyexn_constructor = { ext_id; _ }; _ } ->
       error_message (Error ("exception " ^ Ident.name ext_id)) SideEffect (
         "The definition of exceptions is not handled.\n\n" ^

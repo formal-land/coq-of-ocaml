@@ -25,6 +25,10 @@ module Inductive = struct
       Name.to_coq name
     ))
 
+  let of_tags (tags : Type.tags) : t =
+    let (name, _, constructors) = AdtConstructors.from_tags tags in
+    {constructor_records = []; notations = []; records = []; typs = [(name, [], constructors)]}
+
   let to_coq_constructor_records (inductive : t) : SmartPrint.t option =
     match inductive.constructor_records with
     | [] -> None

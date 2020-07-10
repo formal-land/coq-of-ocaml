@@ -250,9 +250,11 @@ let from_tags (tags : Type.tags) : Name.t * Type.t list * t =
   let constructors : (Type.t * Name.t) list = Type.Map.bindings constructors in
   let (typs, items) = constructors |> List.map (fun (typ, name) ->
       (typ,
+       let param_typs = Type.typ_args_of_typ typ |> Name.Set.elements |>
+           List.map (fun typ -> Type.SetTyp) in
        { constructor_name = name;
-        param_typs = [];
+        param_typs ;
         res_typ_params = [];
-        typ_vars = Type.typ_args_of_typ typ |> Name.Set.elements
+        typ_vars = []
        })) |> List.split in
     (name, typs, items)
