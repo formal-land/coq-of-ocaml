@@ -288,7 +288,8 @@ and get_tags_of
       let typs = List.map (get_args_of path) typs |> List.flatten in
       let* (typs, _, _) = of_typs_exprs true Name.Map.empty typs in
       return @@ tags_of_typs name typs
-    | _ -> raise { name = tags_name name; constructors = Map.empty }
+    | _ | exception Not_found ->
+      raise { name = tags_name name; constructors = Map.empty }
                      Error.Category.Unexpected "Could not find type declaration"
   end
 

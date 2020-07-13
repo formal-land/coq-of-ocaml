@@ -16,6 +16,7 @@ module Inductive = struct
      * | `Constructor.t` ...
      * with `Name.t` (`Name.t list` : set) : Set := ...
      *)
+    (* Name is a raw Ident to facilitate building the tags of a GADT *)
     typs : (Name.t * Name.t list * AdtConstructors.t) list;
   }
 
@@ -28,6 +29,13 @@ module Inductive = struct
   let of_tags (tags : Type.tags) : t =
     let (name, _, constructors) = AdtConstructors.from_tags tags in
     {constructor_records = []; notations = []; records = []; typs = [(name, [], constructors)]}
+
+  (* let build_tags (inductive : t) : t option =
+   *   let {typs; _} = inductive in
+   *   match typs with
+   *   | [] -> None
+   *   | (id, _, _) :: _ ->
+   *     let* tags = Type.get_tags_of (Path.Pident id) in *)
 
   let to_coq_constructor_records (inductive : t) : SmartPrint.t option =
     match inductive.constructor_records with
@@ -281,7 +289,7 @@ let of_ocaml (typs : type_declaration list) : t Monad.t =
       let* name = Name.of_ident false typ.typ_id in
       AdtParameters.of_ocaml typ.typ_type.type_params >>= fun typ_args ->
       match typ with
-      | { typ_type = { type_manifest = Some typ; _ }; _ } ->
+      | { typ_type = { type_manifest = Some typ; _ }; typ_id; _ } ->
         begin match typ.Types.desc with
         | Tvariant { row_fields; _ } ->
           Monad.List.map (AdtConstructors.Single.of_ocaml_row typ_args) row_fields >>= fun single_constructors ->
@@ -341,7 +349,7 @@ let of_ocaml (typs : type_declaration list) : t Monad.t =
            } :: records,
           typs
         )
-      | { typ_type = { type_kind = Type_variant cases; _ }; _ } ->
+      | { typ_type = { type_kind = Type_variant cases; _ }; typ_id; _ } ->
         let typ_args = AdtParameters.get_parameters typ_args in
         Monad.List.map (AdtConstructors.Single.of_ocaml_case name typ_args) cases >>= fun cases ->
         let (single_constructors, new_constructor_records) = List.split cases in
@@ -437,15 +445,15 @@ let to_coq_typs
   )
 
 
-let to_coq_tags
-    (subst : Type.Subst.t)
-    (tags : Type.tags option)
-  : SmartPrint.t option =
-  match tags with
-  | None -> None
-  | Some tags ->
-    let (name, _, constructors) = AdtConstructors.from_tags tags in
-    Some (to_coq_typs ~tag:(true) subst true name [] constructors )
+(* let to_coq_tags
+ *     (subst : Type.Subst.t)
+ *     (tags : Type.tags option)
+ *   : SmartPrint.t option =
+ *   match tags with
+ *   | None -> None
+ *   | Some tags ->
+ *     let (name, _, constructors) = AdtConstructors.from_tags tags in
+ *     Some (to_coq_typs ~tag:(true) subst true name [] constructors ) *)
 
 let to_coq_inductive
     (subst : Type.Subst.t)
@@ -525,10 +533,10 @@ let to_coq (def : t) : SmartPrint.t =
             path_name
         | _ -> path_name
     } in
-      (match to_coq_tags subst tags with
-       | None -> empty
-       | Some tags -> tags ^-^ !^ "." ^^ newline ^^ newline
-      ) ^^
+      (* (match to_coq_tags subst tags with *)
+       (* | None -> empty *)
+       (* | Some tags -> tags ^-^ !^ "." ^^ newline ^^ newline *)
+      (* ) ^^ *)
     to_coq_inductive subst inductive
   | Record (name, typ_args, fields, with_with) ->
     AdtConstructors.RecordSkeleton.to_coq_record name name typ_args fields with_with
