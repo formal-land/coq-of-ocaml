@@ -389,9 +389,9 @@ let of_ocaml (typs : type_declaration list) : t Monad.t =
       ))
 
 let to_coq_typs
-    ?tag:(is_tag=false)
     (subst : Type.Subst.t)
     (is_first : bool)
+    (is_tag : bool)
     (name : Name.t)
     (params : Name.t list)
     (constructors : AdtConstructors.t)
@@ -431,8 +431,9 @@ let to_coq_typs
               if List.length typ_vars = 0
               then empty
               else
+                let parens_or_braces = if is_tag then parens else braces in
                 !^ "forall" ^^
-                parens (separate space
+                parens_or_braces (separate space
                           (typ_vars |> List.map (fun (typ, vars) ->
                                (separate space (vars |> List.rev |> List.map Name.to_coq))
                                ^^ !^ ":" ^^ (Type.to_coq None None typ)
@@ -449,18 +450,9 @@ let to_coq_typs
   )
 
 
-(* let to_coq_tags
- *     (subst : Type.Subst.t)
- *     (tags : Type.tags option)
- *   : SmartPrint.t option =
- *   match tags with
- *   | None -> None
- *   | Some tags ->
- *     let (name, _, constructors) = AdtConstructors.from_tags tags in
- *     Some (to_coq_typs ~tag:(true) subst true name [] constructors ) *)
-
 let to_coq_inductive
     (subst : Type.Subst.t)
+    (is_tag : bool)
     (inductive : Inductive.t)
   : SmartPrint.t =
   let constructor_records = Inductive.to_coq_constructor_records inductive in
@@ -486,7 +478,7 @@ let to_coq_inductive
     separate (newline ^^ newline) (inductive.typs |>
                                    List.mapi (fun index (name, params, constructors) ->
                                        let is_first = index = 0 in
-                                       to_coq_typs subst is_first name params constructors
+                                       to_coq_typs subst is_first is_tag name params constructors
                                      )
                                   ) ^-^
     (match notations_wheres with
@@ -541,7 +533,7 @@ let to_coq (def : t) : SmartPrint.t =
        (* | None -> empty *)
        (* | Some tags -> tags ^-^ !^ "." ^^ newline ^^ newline *)
       (* ) ^^ *)
-    to_coq_inductive subst inductive
+    to_coq_inductive subst (Option.is_none tags) inductive
   | Record (name, typ_args, fields, with_with) ->
     AdtConstructors.RecordSkeleton.to_coq_record name name typ_args fields with_with
   | Synonym (name, typ_args, value) ->
