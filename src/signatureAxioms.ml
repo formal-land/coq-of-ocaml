@@ -86,7 +86,7 @@ let of_first_class_types_signature
       return (Some (
         IncludedFieldValue (
           name,
-          Name.Set.elements new_typ_vars,
+          new_typ_vars |> Name.Map.bindings |> List.map fst,
           typ,
           module_name,
           field_path_name

@@ -119,7 +119,7 @@ module ModuleTypValues = struct
           Type.of_typ_expr true typ_vars val_type >>= fun (_, _, new_typ_vars) ->
           return (Some (Value (
             ident,
-            Name.Set.cardinal new_typ_vars
+            Name.Map.cardinal new_typ_vars
           )))
         | Sig_module (ident, _, { Types.md_type = Mty_functor _; _ }, _, _) ->
           let* name = Name.of_ident false ident in
@@ -572,7 +572,7 @@ and import_let_fun
         | _ :: _ -> struct_attributes in
       let header = {
         Header.name;
-        typ_vars = new_typ_vars |> Name.Set.elements |> List.map (fun typ -> (typ, Type.SetTyp));
+        typ_vars = new_typ_vars |> Name.Map.bindings;
         args = List.combine args_names args_typs;
         structs;
         typ = Some e_body_typ
@@ -621,7 +621,7 @@ and of_let
       | _ -> true
       end ->
       Type.of_typ_expr true typ_vars exp_type >>= fun (_, _, new_typ_vars) ->
-      return (Name.Set.cardinal new_typ_vars <> 0)
+      return (Name.Map.cardinal new_typ_vars <> 0)
     | _ -> return true
     end >>= fun is_function ->
     begin match cases with
@@ -1017,7 +1017,8 @@ and of_include
       begin match signature_item with
       | Sig_value (_, { Types.val_type; _ }, _) ->
         Type.of_typ_expr true typ_vars val_type >>= fun (_, _, new_typ_vars) ->
-        return (Name.Set.elements new_typ_vars)
+        let new_typ_vars = new_typ_vars |> Name.Map.bindings |> List.map fst in
+        return new_typ_vars
       | _ -> return []
       end >>= fun typ_vars ->
       let* name = Name.of_ident is_value ident in
