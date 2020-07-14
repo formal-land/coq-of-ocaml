@@ -16,7 +16,6 @@ module Inductive = struct
      * | `Constructor.t` ...
      * with `Name.t` (`Name.t list` : set) : Set := ...
      *)
-    (* Name is a raw Ident to facilitate building the tags of a GADT *)
     typs : (Name.t * Name.t list * AdtConstructors.t) list;
   }
 
@@ -204,7 +203,7 @@ module Inductive = struct
           nest (
             separate space (
               (params |> List.map (fun _ -> !^ "_")) @
-              (typ_vars |> List.map (fun _ -> !^ "_"))
+              (typ_vars |> Name.Map.bindings |> List.map (fun _ -> !^ "_"))
             )
           )
         ) ^-^ !^ "."
@@ -427,15 +426,20 @@ let to_coq_typs
         } ->
           newline ^^ nest (
             !^ "|" ^^ Name.to_coq constructor_name ^^ !^ ":" ^^
-            (match typ_vars with
-             | [] -> empty
-             | _ ->
-               let braces_or_parens = if is_tag then parens else braces in
-               !^ "forall" ^^ braces_or_parens (
-                 separate space (typ_vars |> List.map Name.to_coq) ^^ !^ ":" ^^ Pp.set
-               ) ^-^ !^ ","
-            ) ^^
-            group @@ separate space (param_typs |> List.map (fun param_typ ->
+            begin
+              let typ_vars = Type.partition_sorted typ_vars |> Type.Map.bindings in
+              if List.length typ_vars = 0
+              then empty
+              else
+                !^ "forall" ^^
+                parens (separate space
+                          (typ_vars |> List.map (fun (typ, vars) ->
+                               (separate space (vars |> List.rev |> List.map Name.to_coq))
+                               ^^ !^ ":" ^^ (Type.to_coq None None typ)
+                             ))
+                       ) ^-^ !^ ","
+              end ^^
+              group @@ separate space (param_typs |> List.map (fun param_typ ->
                 group (Type.to_coq (Some subst) (Some Type.Context.Arrow) param_typ ^^ !^ "->")
               )) ^^
                      Type.to_coq (Some subst) None (Type.Apply (MixedPath.of_name name, res_typ_params))

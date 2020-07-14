@@ -83,10 +83,10 @@ let build_tags :
     let (name, types, constructors) = AdtConstructors.from_tags tags in
     let tag_var = Name.of_string_raw "tag" in
     let patterns = List.map2 (fun typ { AdtConstructors.constructor_name; typ_vars; _ } ->
-        let pat = if List.length typ_vars = 0
+        let pat = if Name.Map.cardinal typ_vars = 0
           then Pattern.Variable constructor_name
           else Pattern.Constructor ((PathName.of_name [] constructor_name),
-                                    typ_vars |> List.map (fun typ -> Pattern.Variable typ)) in
+                                    typ_vars |> Name.Map.bindings |> List.map (fun (typ, _) -> Pattern.Variable typ)) in
         (pat, None, Exp.Type typ)
       ) types constructors in
     let header : Exp.Header.t = {

@@ -96,7 +96,7 @@ type item = {
   param_typs : Type.t list; (** The parameters of the constructor. *)
   res_typ_params : Type.t list;
   (** The type parameters of the result type of the constructor. *)
-  typ_vars : Name.t list; (** The polymorphic type variables. *)
+  typ_vars : Type.t Name.Map.t; (** The polymorphic type variables. *)
 }
 
 type t = item list
@@ -220,6 +220,8 @@ let of_ocaml
       fun { Single.constructor_name; param_typs; return_typ_params } ->
         let typ_vars = param_typs |> Type.typ_args_of_typs in
         let typ_vars = return_typ_params |> Type.typ_args_of_typs |> Name.Set.union typ_vars |> Name.Set.elements in
+        let typ_vars = typ_vars |> List.fold_left (fun acc var -> Name.Map.add
+            var Type.SetTyp acc ) Name.Map.empty in
         return ({
             constructor_name;
             param_typs;
@@ -248,12 +250,18 @@ let type_arguments
 let from_tags (tags : Type.tags) : Name.t * Type.t list * t =
   let { Type.name; constructors } = tags in
   let constructors : (Type.t * Name.t) list = Type.Map.bindings constructors in
-  let (typs, items) = constructors |> List.map (fun (typ, name) ->
+  let (typs, items) = constructors |> List.map (fun (typ, constructor_name) ->
       (typ,
        let typ_vars = Type.typ_args_of_typ typ |> Name.Set.elements in
-       { constructor_name = name;
+       let typ_vars = typ_vars |> List.fold_left (fun acc var ->
+           let var_typ = match typ with
+             | Type.Variable _ -> Type.SetTyp
+             | _ -> Type.Variable name in
+           Name.Map.add var var_typ acc)
+           Name.Map.empty in
+       { constructor_name;
         param_typs = [] ;
         res_typ_params = [];
-        typ_vars
+        typ_vars = typ_vars
        })) |> List.split in
     (name, typs, items)

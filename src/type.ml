@@ -62,11 +62,11 @@ module Map = Map.Make (struct
 end)
 
 let partition_sorted
-    (m : Name.t Map.t)
-    ?(acc : Name.t list Map.t = Map.empty)
+    (m : t Name.Map.t)
+    (* ?(acc : Name.t list Map.t = Map.empty) *)
   : Name.t list Map.t =
-  let elements = Map.bindings m in
-  elements |> List.fold_left (fun map (typ, name) ->
+  let elements = Name.Map.bindings m in
+  elements |> List.fold_left (fun map (name, typ) ->
       if Map.mem typ map
       then
         let l = Map.find typ map in
