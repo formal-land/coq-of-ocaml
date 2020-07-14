@@ -61,6 +61,21 @@ module Map = Map.Make (struct
   let compare = compare
 end)
 
+let partition_sorted
+    (m : Name.t Map.t)
+    ?(acc : Name.t list Map.t = Map.empty)
+  : Name.t list Map.t =
+  let elements = Map.bindings m in
+  elements |> List.fold_left (fun map (typ, name) ->
+      if Map.mem typ map
+      then
+        let l = Map.find typ map in
+        Map.add typ (name :: l) map
+      else
+        Map.add typ [name] map
+    ) Map.empty
+
+
 (** tags represents the encoding of a type as datatype constructors
  ** Each GADT will generate its own tags for the types associated on its indexes *)
 type tags = {
