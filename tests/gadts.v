@@ -38,3 +38,9 @@ Definition x : int :=
   | SingleCase => 0
   | _ => unreachable_gadt_branch
   end.
+
+Inductive gadt_list : Set :=
+| GNil : gadt_list
+| GCons : forall {a : Set}, a -> gadt_list -> gadt_list.
+
+Definition gadt_empty_list : gadt_list := GNil.
