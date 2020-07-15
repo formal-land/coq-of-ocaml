@@ -930,7 +930,14 @@ and of_structure
             raise
               (ErrorMessage (e_next, "typ_definition"))
               NotSupported
-              "Only type synonyms are handled here"
+              (
+                "We only handle type synonyms here." ^
+                "\n\n" ^
+                "Indeed, we compile this module as a dependent record for " ^
+                "the signature:\n" ^ Path.name signature_path ^ "\n\n" ^
+                "Thus we cannot introduce new type definitions. Use a " ^
+                "separated module for the type definition and\nits use."
+              )
           end
         | _ ->
           raise
