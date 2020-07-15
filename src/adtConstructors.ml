@@ -99,6 +99,7 @@ type item = {
   typ_vars : Type.t Name.Map.t; (** The polymorphic type variables. *)
 }
 
+(* We can probably get rid of this now *)
 type t = item list
 
 module Single = struct
@@ -108,6 +109,7 @@ module Single = struct
     return_typ_params : Type.t list;
     (** The return type, in case of GADT constructor, with some inference to
         rule-out GADTs with only existential variables. *)
+    typ_vars : Type.t Name.Map.t;
   }
 
   let of_ocaml_case
@@ -124,15 +126,15 @@ module Single = struct
       let typ_vars = Name.Map.empty in
       begin match cd_args with
         | Cstr_tuple param_typs ->
-          Type.of_typs_exprs true typ_vars param_typs >>= fun (param_typs, _, _) ->
-          return (param_typs, None)
+          Type.of_typs_exprs true typ_vars param_typs >>= fun (param_typs, _, new_typs_vars) ->
+          return (param_typs, new_typs_vars, None)
         | Cstr_record labeled_typs ->
           set_loc (Loc.of_location cd_loc) (
             (
               labeled_typs |>
               List.map (fun { Types.ld_type; _ } -> ld_type) |>
               Type.of_typs_exprs true typ_vars
-            ) >>= fun (record_params, _, _) ->
+            ) >>= fun (record_params, _, new_typ_vars) ->
             let* record_fields =
               labeled_typs |> Monad.List.map ( fun { Types.ld_id; _ } ->
                   Name.of_ident false ld_id
@@ -161,6 +163,7 @@ module Single = struct
                     )
                 )
               ],
+              new_typ_vars,
               Some (
                 {
                   RecordSkeleton.fields = record_fields;
@@ -177,7 +180,7 @@ module Single = struct
                 )
               )
             ))
-      end >>= fun (param_typs, records) ->
+      end >>= fun (param_typs, typ_vars, records) ->
       let* return_typ_params =
         match cd_res with
         | Some typ -> Type.of_typ_expr false Name.Map.empty typ >>= fun (ty, _, _) ->
@@ -193,6 +196,7 @@ module Single = struct
           constructor_name;
           param_typs;
           return_typ_params;
+          typ_vars;
         },
         records
       ))
@@ -204,11 +208,12 @@ module Single = struct
     let (label, field) = row in
     let* constructor_name = Name.of_string false label in
     let typs = Type.type_exprs_of_row_field field in
-    Type.of_typs_exprs true Name.Map.empty typs >>= fun (param_typs, _, _) ->
+    Type.of_typs_exprs true Name.Map.empty typs >>= fun (param_typs, _, typ_vars) ->
     return {
       constructor_name;
       param_typs;
       return_typ_params = List.map (fun x -> Type.Variable x) (AdtParameters.get_parameters defined_typ_params);
+      typ_vars;
     }
 end
 
@@ -217,11 +222,11 @@ let of_ocaml
   : t Monad.t =
 
   let* constructors_and_arities  = single_constructors |> Monad.List.map (
-      fun { Single.constructor_name; param_typs; return_typ_params } ->
-        let typ_vars = param_typs |> Type.typ_args_of_typs in
-        let typ_vars = return_typ_params |> Type.typ_args_of_typs |> Name.Set.union typ_vars |> Name.Set.elements in
-        let typ_vars = typ_vars |> List.fold_left (fun acc var -> Name.Map.add
-            var Type.SetTyp acc ) Name.Map.empty in
+      fun { Single.constructor_name; param_typs; return_typ_params; typ_vars; } ->
+        (* let typ_vars = param_typs |> Type.typ_args_of_typs in *)
+        (* let typ_vars = return_typ_params |> Type.typ_args_of_typs |> Name.Set.union typ_vars |> Name.Set.elements in *)
+        (* let typ_vars = typ_vars |> List.fold_left (fun acc var -> Name.Map.add *)
+            (* var Type.SetTyp acc ) Name.Map.empty in *)
         return ({
             constructor_name;
             param_typs;
