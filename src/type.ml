@@ -114,12 +114,12 @@ let tags_of_typs
   : tags =
   (* We always add a variable to avoid the need of induction-recursion *)
   let typs = Variable (Name.of_string_raw "a") :: typs in
-  let (_, constructors) = typs |> List.fold_left (fun (constructor_names, mapping) typ ->
+  let constructors = typs |> List.fold_left (fun mapping typ ->
       let constructor_name = tag_constructor_of name typ in
       if not @@ Map.mem typ mapping
-      then (constructor_name :: constructor_names, Map.add typ constructor_name mapping)
-      else (constructor_names, mapping)
-    ) ([], Map.empty) in
+      then Map.add typ constructor_name mapping
+      else mapping
+    ) Map.empty in
   { name = name_of_tags name;
     constructors }
 
@@ -187,40 +187,44 @@ let rec of_typ_expr_constr
     | Some x -> return (x, x)
     ) >>= fun (source_name, generated_name) ->
     let* source_name = Name.of_string false source_name in
+    print_string @@ "Translating " ^ generated_name;
     let* generated_name = Name.of_string false generated_name in
-    let (typ_vars, new_typ_vars, name) =
-      if Name.Map.mem source_name typ_vars then (
+    let typ = match constr with
+      | None -> print_string " untagged"; SetTyp
+      | Some path -> print_string " tagged"; Variable (name_of_tags (Name.of_last_path path)) in
+    print_string "\n";
+    let new_typ_vars = Name.Map.singleton generated_name typ in
+    let (typ_vars, name) =
+      if Name.Map.mem source_name typ_vars
+      then
         let name = Name.Map.find source_name typ_vars in
-        (typ_vars, Name.Map.empty, name)
-      ) else (
+        (typ_vars, name)
+      else
         let typ_vars = Name.Map.add source_name generated_name typ_vars in
-        let typ = match constr with
-          | None -> SetTyp
-          | Some path -> Variable (name_of_tags (Name.of_last_path path)) in
-        (typ_vars, Name.Map.singleton generated_name typ, generated_name)
-      ) in
+        (typ_vars, generated_name) in
     return (Variable name, typ_vars, new_typ_vars)
   | Tarrow (_, typ_x, typ_y, _) ->
     of_typ_expr_constr constr with_free_vars typ_vars typ_x >>= fun (typ_x, typ_vars, new_typ_vars_x) ->
     of_typ_expr_constr constr with_free_vars typ_vars typ_y >>= fun (typ_y, typ_vars, new_typ_vars_y) ->
     return (Arrow (typ_x, typ_y), typ_vars, Name.Map.union typ_union new_typ_vars_x new_typ_vars_y)
   | Ttuple typs ->
-    of_typs_exprs with_free_vars typ_vars typs >>= fun (typs, typ_vars, new_typ_vars) ->
+    of_typs_exprs_constr constr with_free_vars typ_vars typs >>= fun (typs, typ_vars, new_typ_vars) ->
     return (Tuple typs, typ_vars, new_typ_vars)
   | Tconstr (path, typs, _) ->
-    let* (typs, typ_vars, new_typs_vars) = Monad.List.fold_left (fun (typs, typ_vars, new_typs_vars) typ ->
-        let* (typ, typ_vars, new_typs_vars') = of_typ_expr_constr (Some path) true Name.Map.empty typ in
-        let* typ = tag_typ_constr path typ new_typs_vars' in
-        return (typ :: typs,
-         typ_vars,
-         Name.Map.union typ_union new_typs_vars new_typs_vars')
-      ) ([], typ_vars, Name.Map.empty) typs in
+    let* (typs, typ_vars, new_typs_vars) = of_typs_exprs_constr (Some path) with_free_vars typ_vars typs in
+    (* let* (typs, typ_vars, new_typs_vars) = Monad.List.fold_left (fun (typs, typ_vars, new_typs_vars) typ -> *)
+        (* let* (typ, typ_vars, new_typs_vars') = of_typ_expr_constr (Some path) true Name.Map.empty typ in *)
+        (* let* typ = tag_typ_constr path typ new_typs_vars' in *)
+        (* return (typ :: typs, *)
+         (* typ_vars, *)
+         (* Name.Map.union typ_union new_typs_vars new_typs_vars') *)
+      (* ) ([], typ_vars, Name.Map.empty) typs in *)
     MixedPath.of_path false path None >>= fun mixed_path ->
     return (Apply (mixed_path, List.rev typs), typ_vars, new_typs_vars)
   | Tobject (_, object_descr) ->
     begin match !object_descr with
     | Some (path, _ :: typs) ->
-      of_typs_exprs with_free_vars typ_vars typs >>= fun (typs, typ_vars, new_typ_vars) ->
+      of_typs_exprs_constr constr with_free_vars typ_vars typs >>= fun (typs, typ_vars, new_typ_vars) ->
       MixedPath.of_path false path None >>= fun mixed_path ->
       return (Apply (mixed_path, typs), typ_vars, new_typ_vars)
     | _ ->
@@ -258,7 +262,7 @@ let rec of_typ_expr_constr
       Monad.List.fold_left
         (fun (fields, typ_vars, new_typ_vars) (name, row_field) ->
           let typs = type_exprs_of_row_field row_field in
-          of_typs_exprs with_free_vars typ_vars typs >>= fun (typs, typ_vars, new_typ_vars') ->
+          of_typs_exprs_constr constr with_free_vars typ_vars typs >>= fun (typs, typ_vars, new_typ_vars') ->
           return (
             (name, Tuple typs) :: fields,
             typ_vars,
@@ -311,7 +315,7 @@ and get_tags_of
     | { type_kind = Type_variant constructors ; _ } ->
       let typs = constructors |> List.map (fun { Types.cd_res; _ } -> cd_res) |> List.filter_map (fun x -> x) in
       let typs = List.map (get_args_of path) typs |> List.flatten in
-      let* (typs, _, _) = of_typs_exprs true Name.Map.empty typs in
+      let* (typs, _, _) = of_typs_exprs_constr (Some path) true Name.Map.empty typs in
       return @@ tags_of_typs name typs
     | _ | exception Not_found ->
       raise { name = name_of_tags name; constructors = Map.empty }
@@ -335,14 +339,15 @@ and tag_typ_constr
     | None ->
       return @@ typ
 
-and of_typs_exprs
+and of_typs_exprs_constr
+  (path : Path.t option)
   (with_free_vars: bool)
   (typ_vars : Name.t Name.Map.t)
   (typs : Types.type_expr list)
   : (t list * Name.t Name.Map.t * t Name.Map.t) Monad.t =
   (Monad.List.fold_left
     (fun (typs, typ_vars, new_typ_vars) typ ->
-      of_typ_expr_constr None with_free_vars typ_vars typ >>= fun (typ, typ_vars, new_typ_vars') ->
+      of_typ_expr_constr path with_free_vars typ_vars typ >>= fun (typ, typ_vars, new_typ_vars') ->
       (* FIXME: if two keys then specialize to non-Set, for now *)
       let new_typ_vars = Name.Map.union typ_union new_typ_vars new_typ_vars' in
       return (typ :: typs, typ_vars, new_typ_vars)
@@ -358,6 +363,13 @@ let of_typ_expr
   (typ : Types.type_expr)
   : (t * Name.t Name.Map.t * t Name.Map.t) Monad.t =
   of_typ_expr_constr None with_free_vars typ_vars typ
+
+let of_typs_exprs
+  (with_free_vars: bool)
+  (typ_vars : Name.t Name.Map.t)
+  (typs : Types.type_expr list)
+  : (t list * Name.t Name.Map.t * t Name.Map.t) Monad.t =
+  of_typs_exprs_constr None with_free_vars typ_vars typs
 
 
 let rec of_type_expr_variable (typ : Types.type_expr) : Name.t Monad.t =

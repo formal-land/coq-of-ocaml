@@ -140,7 +140,6 @@ let rec of_structure (structure : structure) : t list Monad.t =
       let tags = match build_tags def with
         | None -> []
         | Some (decoder, tags) -> [TypeDefinition tags; Value decoder] in
-
       return (tags @ [TypeDefinition def]))
     | Tstr_exception { tyexn_constructor = { ext_id; _ }; _ } ->
       error_message (Error ("exception " ^ Ident.name ext_id)) SideEffect (

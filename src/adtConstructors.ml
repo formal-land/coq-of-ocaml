@@ -181,16 +181,17 @@ module Single = struct
               )
             ))
       end >>= fun (param_typs, typ_vars, records) ->
-      let* return_typ_params =
+      let* (return_typ_params, new_typ_vars) =
         match cd_res with
-        | Some typ -> Type.of_typ_expr false Name.Map.empty typ >>= fun (ty, _, _) ->
+        | Some typ ->
+          Type.of_typ_expr false Name.Map.empty typ >>= fun (ty, _, new_typ_vars) ->
           begin match ty with
-            | Type.Apply (_, typs) -> return typs
-            | _ -> raise [ty] Error.Category.Unexpected "Unexpected Type of record"
+            | Type.Apply (_, typs) -> return (typs, new_typ_vars)
+            | _ -> raise ([ty], new_typ_vars) Error.Category.Unexpected "Unexpected Type of record"
           end
-        | None -> return (List.map (fun v -> Type.Variable v) defined_typ_params)
+        | None -> return (List.map (fun v -> Type.Variable v) defined_typ_params, Name.Map.empty)
       in
-
+      let typ_vars = Name.Map.union Type.typ_union typ_vars new_typ_vars in
       return (
         {
           constructor_name;
