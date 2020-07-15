@@ -433,13 +433,13 @@ let to_coq_typs
               else
                 let parens_or_braces = if is_tag then parens else braces in
                 !^ "forall" ^^
-                parens_or_braces (separate space
-                          (typ_vars |> List.map (fun (typ, vars) ->
-                               (separate space (vars |> List.rev |> List.map Name.to_coq))
-                               ^^ !^ ":" ^^ (Type.to_coq None None typ)
-                             ))
-                       ) ^-^ !^ ","
-              end ^^
+                (separate space
+                   (typ_vars |> List.map (fun (typ, vars) ->
+                        parens_or_braces ((separate space (vars |> List.rev |> List.map Name.to_coq))
+                                          ^^ !^ ":" ^^ (Type.to_coq None None typ))
+                      ))
+                ) ^-^ !^ ","
+            end ^^
               group @@ separate space (param_typs |> List.map (fun param_typ ->
                 group (Type.to_coq (Some subst) (Some Type.Context.Arrow) param_typ ^^ !^ "->")
               )) ^^
