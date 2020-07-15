@@ -131,16 +131,6 @@ let of_ident (is_value : bool) (i : Ident.t) : t Monad.t =
 let of_ident_raw (i : Ident.t) : t =
   of_string_raw (Ident.name i)
 
-let of_path (is_value : bool) (path : Path.t) : t Monad.t =
-  let s =
-    Path.name path |> String.map (fun c ->
-      if c = '.' then
-        '_'
-      else
-        c
-    ) in
-  of_string is_value s
-
 let to_string (name : t) : string =
   match name with
   | FunctionParameter -> "function_parameter"

@@ -422,7 +422,17 @@ let to_string (x : t) : string =
   String.concat "." (List.map Name.to_string (x.path @ [x.base]))
 
 let to_coq (x : t) : SmartPrint.t =
-  separate (!^ ".") (List.map Name.to_coq (x.path @ [x.base]))
+  !^ (to_string x)
+
+let to_name (is_value : bool) (x : t) : Name.t Monad.t =
+  let s =
+    to_string x |> String.map (fun c ->
+      if c = '.' then
+        '_'
+      else
+        c
+    ) in
+  Name.of_string is_value s
 
 let typ_of_variant (label : string) : t option Monad.t =
   let* configuration = get_configuration in

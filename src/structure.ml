@@ -82,7 +82,8 @@ let rec get_include_name (module_expr : module_expr) : Name.t option Monad.t =
     begin match applied_expr.mod_desc with
     | Tmod_ident (path, _)
     | Tmod_constraint ({ mod_desc = Tmod_ident (path, _); _ }, _, _, _) ->
-      let* name = Name.of_path false path in
+      let* path_name = PathName.of_path_with_convert false path in
+      let* name = PathName.to_name false path_name in
       return (Some (Name.suffix_by_included_instance name))
     | _ -> get_include_name applied_expr
     end
