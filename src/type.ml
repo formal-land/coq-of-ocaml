@@ -75,19 +75,21 @@ let partition_sorted
         Map.add typ [name] map
     ) Map.empty
 
+(* A tag constructor have a name and arguments *)
+type tag_constructor = (Name.t * Name.t list)
 (** tags represents the encoding of a type as datatype constructors
  ** Each GADT will generate its own tags for the types associated on its indexes *)
 type tags = {
   name : Name.t;
-  constructors : Name.t Map.t }
+  constructors : tag_constructor Map.t }
 
 let find_tag
     (typ : t)
-    (m : Name.t Map.t)
+    (m : tag_constructor Map.t)
   : Name.t =
   match Map.find_opt typ m with
-  | None -> Map.find (Variable (Name.of_string_raw "a")) m
-  | Some name -> name
+  | None -> Map.find (Variable (Name.of_string_raw "a")) m |> fst
+  | Some (name, _) -> name
 
 let name_of_tags
     (type_constr : Name.t)
@@ -115,6 +117,14 @@ let typ_union (name : Name.t) typ1 typ2 =
   | t, SetTyp -> Some t
   | t, _ -> Some t
 
+let arg_num : t -> int = function
+  | SetTyp -> 0
+  | Apply (p, typs) -> List.length typs
+  | Variable x -> 1
+  | ForallTyps (names, typ) -> 1
+  | FunTyps (names, typ) -> 1
+  | _ -> 2
+
 let tags_of_typs
     (name : Name.t)
     (typs : t list)
@@ -124,7 +134,10 @@ let tags_of_typs
   let constructors = typs |> List.fold_left (fun mapping typ ->
       let constructor_name = tag_constructor_of name typ in
       if not @@ Map.mem typ mapping
-      then Map.add typ constructor_name mapping
+      then
+        let num_args = arg_num typ in
+        let typ_vars = List.init num_args (fun i -> Name.of_string_raw @@ "t" ^ string_of_int i) in
+        Map.add typ (constructor_name, typ_vars) mapping
       else mapping
     ) Map.empty in
   { name = name_of_tags name;
@@ -349,7 +362,7 @@ and tag_typ_constr
 
 and tag_typ_constr_aux
     (path : Path.t)
-    (tag_constrs : Name.t Map.t)
+    (tag_constrs : tag_constructor Map.t)
     (* (typ_vars : t Name.Map.t) *)
     (typ : t)
   : t Monad.t =
