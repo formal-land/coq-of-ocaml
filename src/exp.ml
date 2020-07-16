@@ -69,6 +69,8 @@ type t =
   | ModulePack of t (** Pack a module. *)
   | Functor of Name.t * Type.t * t
     (** A functor. *)
+  | FunctorGenerative of t
+    (** A generative functor. *)
   | TypeAnnotation of t * Type.t
     (** Annotate with a type. *)
   | Assert of Type.t * t (** The assert keyword. *)
@@ -765,29 +767,30 @@ and of_module_expr
         )
     end
   | Tmod_functor (ident, _, module_type_arg, e) ->
+    let* e = of_module_expr typ_vars e None in
     begin match module_type_arg with
-    | None ->
-      error_message
-        (Error "functor_without_argument_annotation")
-        NotSupported
-        "Expected an annotation to get the module type of the parameter of this functor"
+    | None -> return (FunctorGenerative e)
     | Some module_type_arg ->
       let* x = Name.of_ident false ident in
       ModuleTyp.of_ocaml module_type_arg >>= fun module_type_arg ->
-      of_module_expr typ_vars e None >>= fun e ->
       return (Functor (x, ModuleTyp.to_typ module_type_arg, e))
     end
   | Tmod_apply (e1, e2, _) ->
+    let e1_mod_type = e1.mod_type in
     let expected_module_typ_for_e2 =
-      match e1.mod_type with
+      match e1_mod_type with
       | Mty_functor (_, module_typ_arg, _) -> module_typ_arg
       | _ -> None in
     let module_typ_for_application =
-      match e1.mod_type with
+      match e1_mod_type with
       | Mty_functor (_, _, module_typ_result) -> Some module_typ_result
       | _ -> None in
     of_module_expr typ_vars e1 None >>= fun e1 ->
-    of_module_expr typ_vars e2 expected_module_typ_for_e2 >>= fun e2 ->
+    let* e2 =
+      match e1_mod_type with
+      | Mty_functor (_, None, _) ->
+        return (Constructor (PathName.unit_value, [], []))
+      | _ -> of_module_expr typ_vars e2 expected_module_typ_for_e2 in
     let application = Apply (e1, [e2]) in
     begin match (module_type, module_typ_for_application) with
     | (None, _) | (_, None) -> return application
@@ -1329,6 +1332,12 @@ let rec to_coq (paren : bool) (e : t) : SmartPrint.t =
     Pp.parens paren @@ nest (
       !^ "fun" ^^
       parens (nest (Name.to_coq x ^^ !^ ":" ^^ Type.to_coq None None typ)) ^^
+      !^ "=>" ^^ to_coq false e
+    )
+  | FunctorGenerative e ->
+    Pp.parens paren @@ nest (
+      !^ "fun" ^^
+      parens (nest (!^ "_" ^^ !^ ":" ^^ !^ "unit")) ^^
       !^ "=>" ^^ to_coq false e
     )
   | TypeAnnotation (e, typ) ->

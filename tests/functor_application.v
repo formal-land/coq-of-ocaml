@@ -73,3 +73,14 @@ Module WithSum.
   
   Definition z : int := 0.
 End WithSum.
+
+Definition GenFun :=
+  fun (_ : unit) =>
+    ((let t : Set := int in
+    let y := 23 in
+    existT (A := Set) _ _
+      {|
+        Target.y := y
+      |}) : {t : Set & Target.signature (t := t)}).
+
+Definition AppliedGenFun := GenFun tt.

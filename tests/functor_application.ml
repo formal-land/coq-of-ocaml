@@ -39,3 +39,10 @@ module WithSum = struct
   include F (M)
   let z = 0
 end
+
+module GenFun () : Target = struct
+  type t = int
+  let y = 23
+end
+
+module AppliedGenFun = GenFun ()
