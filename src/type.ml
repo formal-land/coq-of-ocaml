@@ -75,12 +75,19 @@ let partition_sorted
         Map.add typ [name] map
     ) Map.empty
 
-
 (** tags represents the encoding of a type as datatype constructors
  ** Each GADT will generate its own tags for the types associated on its indexes *)
 type tags = {
   name : Name.t;
   constructors : Name.t Map.t }
+
+let find_tag
+    (typ : t)
+    (m : Name.t Map.t)
+  : Name.t =
+  match Map.find_opt typ m with
+  | None -> Map.find (Variable (Name.of_string_raw "a")) m
+  | Some name -> name
 
 let name_of_tags
     (type_constr : Name.t)
@@ -187,12 +194,10 @@ let rec of_typ_expr_constr
     | Some x -> return (x, x)
     ) >>= fun (source_name, generated_name) ->
     let* source_name = Name.of_string false source_name in
-    print_string @@ "Translating " ^ generated_name;
     let* generated_name = Name.of_string false generated_name in
     let typ = match constr with
-      | None -> print_string " untagged"; SetTyp
-      | Some path -> print_string " tagged"; Variable (name_of_tags (Name.of_last_path path)) in
-    print_string "\n";
+      | None -> SetTyp
+      | Some path -> Variable (name_of_tags (Name.of_last_path path)) in
     let new_typ_vars = Name.Map.singleton generated_name typ in
     let (typ_vars, name) =
       if Name.Map.mem source_name typ_vars
@@ -211,7 +216,9 @@ let rec of_typ_expr_constr
     of_typs_exprs_constr constr with_free_vars typ_vars typs >>= fun (typs, typ_vars, new_typ_vars) ->
     return (Tuple typs, typ_vars, new_typ_vars)
   | Tconstr (path, typs, _) ->
+    (* let* (typs, typ_vars, new_typs_vars) = of_typs_exprs_constr (Some path) with_free_vars typ_vars typs in *)
     let* (typs, typ_vars, new_typs_vars) = of_typs_exprs_constr (Some path) with_free_vars typ_vars typs in
+    let* typs = typs |> Monad.List.map (tag_typ_constr path) in
     (* let* (typs, typ_vars, new_typs_vars) = Monad.List.fold_left (fun (typs, typ_vars, new_typs_vars) typ -> *)
         (* let* (typ, typ_vars, new_typs_vars') = of_typ_expr_constr (Some path) true Name.Map.empty typ in *)
         (* let* typ = tag_typ_constr path typ new_typs_vars' in *)
@@ -325,19 +332,45 @@ and get_tags_of
 and tag_typ_constr
     (path : Path.t)
     (typ : t)
-    (args : t Name.Map.t)
+    (* (args : t Name.Map.t) *)
   : t Monad.t =
   let name = Path.last path in
   if List.exists (function x -> name = x) ["int"; "list"; "option"; "bool"; "string"; "unit"]
   then return typ
   else let* { constructors; _ } = get_tags_of path in
-    let args = args |> Name.Map.bindings |> List.map fst |> List.map (fun x -> Variable x) in
-    match Map.find_opt typ constructors with
-    | Some tag_name ->
-      let name = MixedPath.of_name tag_name in
-      return @@ Apply (name, args)
-    | None ->
-      return @@ typ
+    tag_typ_constr_aux path constructors typ
+    (* let args = args |> Name.Map.bindings |> List.map fst |> List.map (fun x -> Variable x) in *)
+    (* match Map.find_opt typ constructors with *)
+    (* | Some tag_name -> *)
+      (* let name = MixedPath.of_name tag_name in *)
+      (* return @@ Apply (name, args) *)
+    (* | None -> *)
+      (* return @@ typ *)
+
+and tag_typ_constr_aux
+    (path : Path.t)
+    (tag_constrs : Name.t Map.t)
+    (* (typ_vars : t Name.Map.t) *)
+    (typ : t)
+  : t Monad.t =
+  let tag_ty = tag_typ_constr_aux path tag_constrs in
+  match typ with
+  | Arrow (t1, t2) ->
+    let* t1 = tag_ty t1 in
+    let* t2 = tag_ty t2 in
+    let tag = find_tag typ tag_constrs |> MixedPath.of_name in
+    let t = Apply (tag, [t1; t2]) in
+    return @@ t
+  (* | Sum of (string * t) list *)
+  (* | Tuple of t list *)
+  (* | Apply of MixedPath.t * t list *)
+  (* | Package of bool * PathName.t * arity_or_typ Tree.t *)
+  (* | ForallModule of Name.t * t * t *)
+  (* | ForallTyps of Name.t list * t *)
+  (* | FunTyps of Name.t list * t *)
+  (* | Error of string *)
+  | _ -> return typ
+
 
 and of_typs_exprs_constr
   (path : Path.t option)
