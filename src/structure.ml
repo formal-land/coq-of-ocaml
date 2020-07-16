@@ -80,15 +80,18 @@ let build_tags :
     TypeDefinition.t
     -> (Value.t * TypeDefinition.t) option = function
   | TypeDefinition.Inductive (Some tags, _) ->
-    let (name, types, constructors) = AdtConstructors.from_tags tags in
+    (* let (name, types, constructors) = AdtConstructors.from_tags tags in *)
+    let name = tags.Type.name in
     let tag_var = Name.of_string_raw "tag" in
-    let patterns = List.map2 (fun typ { AdtConstructors.constructor_name; typ_vars; _ } ->
-        let pat = if Name.Map.cardinal typ_vars = 0
-          then Pattern.Variable constructor_name
-          else Pattern.Constructor ((PathName.of_name [] constructor_name),
-                                    typ_vars |> Name.Map.bindings |> List.map (fun (typ, _) -> Pattern.Variable typ)) in
-        (pat, None, Exp.Type typ)
-      ) types constructors in
+    let patterns = Type.decode_tag tags |> List.map (fun (lhs, rhs) -> (lhs,
+                   None, Exp.Type rhs)) in
+    (* let patterns = List.map2 (fun typ { AdtConstructors.constructor_name; typ_vars; _ } -> *)
+        (* let pat = if Name.Map.cardinal typ_vars = 0 *)
+          (* then Pattern.Variable constructor_name *)
+          (* else Pattern.Constructor ((PathName.of_name [] constructor_name), *)
+                                    (* typ_vars |> Name.Map.bindings |> List.map (fun (typ, _) -> Pattern.Variable typ)) in *)
+        (* (pat, None, Exp.Type typ) *)
+      (* ) types constructors in *)
     let header : Exp.Header.t = {
       name = Name.prefix_by_dec name;
       typ_vars = [];

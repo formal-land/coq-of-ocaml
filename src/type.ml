@@ -111,6 +111,41 @@ let tag_constructor_of
   let typ_name = Name.of_string_raw @@ to_string typ in
   Name.suffix_by_tag @@ Name.snake_concat name typ_name
 
+let decode_tag
+    (tag : tags)
+  : (Pattern.t * t) list =
+  let { name ; constructors } = tag in
+  let decoder_name = Name.prefix_by_dec name |> MixedPath.of_name in
+  let constructors = Map.bindings constructors in
+  List.fold_left (fun acc constructor ->
+      let (typ, (constructor_name, args)) = constructor in
+      (* let constructor_name = MixedPath.of_name constructor_name in *)
+      let build_constr_app = fun xs -> Pattern.Constructor (PathName.of_name [] constructor_name, xs) in
+      let build_dec_app = fun x -> Apply (decoder_name, [x]) in
+      let pat = if List.length args = 0
+      then Some (Pattern.Variable constructor_name, typ)
+      else begin match typ with
+        | Variable _ ->
+          let var = List.hd args in
+          Some (build_constr_app [Pattern.Variable var], Variable var)
+        | SetTyp -> Some (build_constr_app [], SetTyp)
+        | Arrow (typ1,typ2) ->
+          let v1 = List.nth args 0 in
+          let v2 = List.nth args 1 in
+          Some (build_constr_app [Pattern.Variable v1; Pattern.Variable v2],
+                Arrow (Variable v1 |> build_dec_app , Variable v2 |> build_dec_app))
+        | Tuple typs ->
+          let v1 = (List.nth args 0) in
+          let v2 = (List.nth args 1) in
+          Some (build_constr_app [Pattern.Variable v1; Pattern.Variable v2],
+                Tuple [Variable v1 |> build_dec_app; Variable v2 |> build_dec_app])
+        | Apply (p, typs) -> None
+        | _ -> None
+      end
+      in pat :: acc
+    ) [] constructors |> List.filter_map (fun x -> x)
+
+
 let typ_union (name : Name.t) typ1 typ2 =
   match typ1, typ2 with
   | SetTyp, t -> Some t

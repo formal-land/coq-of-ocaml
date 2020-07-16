@@ -258,13 +258,6 @@ let from_tags (tags : Type.tags) : Name.t * Type.t list * t =
   let constructors : (Type.t * Type.tag_constructor) list = Type.Map.bindings constructors in
   let (typs, items) = constructors |> List.map (fun (typ, (constructor_name, arg_names)) ->
       (typ,
-       (* let typ_vars = Type.typ_args_of_typ typ |> Name.Set.elements in *)
-       (* let typ_vars = typ_vars |> List.fold_left (fun acc var -> *)
-           (* let var_typ = match typ with *)
-             (* | Type.Variable _ -> Type.SetTyp *)
-             (* | _ -> Type.Variable name in *)
-           (* Name.Map.add var var_typ acc) *)
-           (* Name.Map.empty in *)
        let vars_typ  = match typ with
          | Type.Variable _ -> Type.SetTyp
          | _ -> Type.Variable name in
