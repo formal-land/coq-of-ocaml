@@ -259,8 +259,14 @@ let rec of_structure (structure : structure) : t list Monad.t =
 
 and of_module (name : Name.t) (module_expr : module_expr)
   : t list Monad.t =
+  let path =
+    match module_expr.mod_desc with
+    | Tmod_ident (path, _)
+    | Tmod_constraint ({ mod_desc = Tmod_ident (path, _); _ }, _, _, _) ->
+      Some path
+    | _ -> None in
   let* is_first_class =
-    IsFirstClassModule.is_module_typ_first_class module_expr.mod_type None in
+    IsFirstClassModule.is_module_typ_first_class module_expr.mod_type path in
   match is_first_class with
   | Found _ ->
     let* module_expr =
