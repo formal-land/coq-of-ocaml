@@ -111,7 +111,7 @@ module ModuleTypValues = struct
     (module_typ : Types.module_type)
     : t list Monad.t =
     get_env >>= fun env ->
-    match Mtype.scrape env module_typ with
+    match Env.scrape_alias env module_typ with
     | Mty_signature signature ->
       signature |> Monad.List.filter_map (fun item ->
         match item with
@@ -130,7 +130,7 @@ module ModuleTypValues = struct
           return (Some (Module name))
         | _ -> return None
       )
-    | _ -> return []
+    | _ -> raise [] Unexpected "Module type signature not found"
 end
 
 let rec any_patterns_with_ith_true (is_guarded : bool) (i : int) (n : int)
