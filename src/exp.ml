@@ -145,6 +145,27 @@ let rec any_patterns_with_ith_true (is_guarded : bool) (i : int) (n : int)
         Pattern.Any in
     head :: any_patterns_with_ith_true is_guarded (i - 1) (n - 1)
 
+let rec get_include_name (module_expr : module_expr) : Name.t Monad.t =
+  match module_expr.mod_desc with
+  | Tmod_apply (applied_expr, _, _) ->
+    begin match applied_expr.mod_desc with
+    | Tmod_ident (path, _)
+    | Tmod_constraint ({ mod_desc = Tmod_ident (path, _); _ }, _, _, _) ->
+      let* path_name = PathName.of_path_with_convert false path in
+      let* name = PathName.to_name false path_name in
+      return (Name.suffix_by_included_instance name)
+    | _ -> get_include_name applied_expr
+    end
+  | Tmod_constraint (module_expr, _, _, _) -> get_include_name module_expr
+  | _ ->
+    raise
+      (Name.of_string_raw "nameless_include")
+      NotSupported
+      (
+        "Cannot find a name for this module expression.\n\n" ^
+        "Try to first give a name to this module before doing the include."
+      )
+
 (** Import an OCaml expression. *)
 let rec of_expression (typ_vars : Name.t Name.Map.t) (e : expression)
   : t Monad.t =
@@ -1018,33 +1039,38 @@ and of_structure
           NotSupported
           "Class type not handled"
       | Tstr_include { incl_mod; incl_type; _ } ->
-        begin match incl_mod.mod_desc with
-        | Tmod_ident (path, _)
-        | Tmod_constraint ({ mod_desc = Tmod_ident (path, _); _ }, _, _, _) ->
-          let incl_module_type = Types.Mty_signature incl_type in
-          let* is_first_class =
-            IsFirstClassModule.is_module_typ_first_class
-              incl_module_type (Some path) in
-          begin match is_first_class with
-          | Found incl_signature_path ->
-            PathName.of_path_with_convert false path >>= fun path_name ->
+        let path =
+          match incl_mod.mod_desc with
+          | Tmod_ident (path, _)
+          | Tmod_constraint ({ mod_desc = Tmod_ident (path, _); _ }, _, _, _) ->
+            Some path
+          | _ -> None in
+        let incl_module_type = Types.Mty_signature incl_type in
+        let* is_first_class =
+          IsFirstClassModule.is_module_typ_first_class incl_module_type path in
+        begin match is_first_class with
+        | Found incl_signature_path ->
+          begin match path with
+          | Some path ->
+            let* path_name = PathName.of_path_with_convert false path in
             of_include typ_vars path_name incl_signature_path incl_type e_next
-          | Not_found reason ->
-            raise
-              (ErrorMessage (e_next, "include_without_named_signature"))
-              NotSupported
-              (
-                "We did not find a signature name for the include of this module\n\n" ^
-                reason
-              )
+          | None ->
+            let* name = get_include_name incl_mod in
+            let path_name = PathName.of_name [] name in
+            let* included_module =
+              of_module_expr typ_vars incl_mod (Some incl_module_type) in
+            let* e_next =
+              of_include
+                typ_vars path_name incl_signature_path incl_type e_next in
+            return (LetVar (None, name, [], included_module, e_next))
           end
-        | _ ->
+        | Not_found reason ->
           raise
-            (ErrorMessage (e_next, "unhandled_include"))
+            (ErrorMessage (e_next, "include_without_named_signature"))
             NotSupported
             (
-              "The include of this kind of module is not supported.\n\n" ^
-              "Try to name this module and then include this name."
+              "We did not find a signature name for the include of this module\n\n" ^
+              reason
             )
         end
       | Tstr_attribute _ -> return e_next))

@@ -76,20 +76,6 @@ let top_level_evaluation_error : t list Monad.t =
     SideEffect
     "Top-level evaluations are ignored"
 
-let rec get_include_name (module_expr : module_expr) : Name.t option Monad.t =
-  match module_expr.mod_desc with
-  | Tmod_apply (applied_expr, _, _) ->
-    begin match applied_expr.mod_desc with
-    | Tmod_ident (path, _)
-    | Tmod_constraint ({ mod_desc = Tmod_ident (path, _); _ }, _, _, _) ->
-      let* path_name = PathName.of_path_with_convert false path in
-      let* name = PathName.to_name false path_name in
-      return (Some (Name.suffix_by_included_instance name))
-    | _ -> get_include_name applied_expr
-    end
-  | Tmod_constraint (module_expr, _, _, _) -> get_include_name module_expr
-  | _ -> return None
-
 (** Import an OCaml structure. *)
 let rec of_structure (structure : structure) : t list Monad.t =
   let get_include_items
@@ -253,23 +239,12 @@ let rec of_structure (structure : structure) : t list Monad.t =
       let* reference = PathName.of_path_with_convert false path in
       get_include_items (Some path) reference mod_type
     | Tstr_include { incl_mod } ->
-      let* include_name = get_include_name incl_mod in
-      begin match include_name with
-      | Some include_name ->
-        let* module_definitionn = of_module include_name incl_mod in
-        let reference = PathName.of_name [] include_name in
-        let* include_items =
-          get_include_items None reference incl_mod.mod_type in
-        return (module_definitionn @ include_items)
-      | None ->
-        error_message
-          (Error "include")
-          NotSupported
-          (
-            "Cannot find a name for this module expression.\n\n" ^
-            "Try to first give a name to this module before doing the include."
-          )
-      end
+      let* include_name = Exp.get_include_name incl_mod in
+      let* module_definitionn = of_module include_name incl_mod in
+      let reference = PathName.of_name [] include_name in
+      let* include_items =
+        get_include_items None reference incl_mod.mod_type in
+      return (module_definitionn @ include_items)
     (* We ignore attribute fields. *)
     | Tstr_attribute _ -> return [])) in
   Monad.List.fold_right
