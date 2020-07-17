@@ -425,9 +425,10 @@ and tag_typ_constr_aux
       let* ts = tag_ty ts in
       let tag = find_tag typ tag_constrs |> MixedPath.of_name in
       return @@ Apply (tag, [t; ts])
-
+  | Apply (mpath, ts) ->
+    let tag = find_tag typ tag_constrs |> MixedPath.of_name in
+    return @@ Apply (tag, ts)
   (* | Sum of (string * t) list *)
-  (* | Apply of MixedPath.t * t list *)
   (* | Package of bool * PathName.t * arity_or_typ Tree.t *)
   (* | ForallModule of Name.t * t * t *)
   (* | ForallTyps of Name.t list * t *)
