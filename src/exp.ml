@@ -57,7 +57,7 @@ type t =
     (** Construct a record giving an expression for each field. *)
   | Field of t * PathName.t (** Access to a field of a record. *)
   | IfThenElse of t * t * t (** The "else" part may be unit. *)
-  | Module of int Tree.t * (PathName.t * int * t) list
+  | Module of (int * t option) Tree.t * (PathName.t * int * t) list
     (** The value of a first-class module. *)
   | ModuleNested of (string option * PathName.t * t) list
     (** The value of a first-class module inside another module
@@ -691,24 +691,40 @@ and of_module_expr
             )
           )
         else
-          ModuleTypValues.get typ_vars module_type >>= fun values ->
-          begin
+          let* values = ModuleTypValues.get typ_vars module_type in
+          let mixed_path_of_value_or_typ (name : Name.t) : MixedPath.t Monad.t =
+            match local_module_type_path with
+            | Some local_module_type_path ->
+              let* base = PathName.of_path_with_convert false path in
+              let* field =
+                PathName.of_path_and_name_with_convert
+                  local_module_type_path
+                  name in
+              return (MixedPath.Access (base, [field], false))
+            | None ->
+              let* path_name =
+                PathName.of_path_and_name_with_convert path name in
+              return (MixedPath.PathName path_name) in
+          let* module_typ_params =
+            module_typ_params_arity |> Monad.List.map (function
+              | Tree.Item (name, arity) ->
+                let* mixed_path = mixed_path_of_value_or_typ name in
+                return (Tree.Item (
+                  name,
+                  (arity, Some (Variable (mixed_path, [])))
+                ))
+              | Module (name, tree) ->
+                return (Tree.Module (
+                  name,
+                  Tree.map (fun arity -> (arity, None)) tree
+                ))
+            ) in
+          let* fields =
             values |> Monad.List.map (function
               | ModuleTypValues.Value (value, nb_free_vars) ->
                 PathName.of_path_and_name_with_convert module_type_path value
                   >>= fun field_name ->
-                begin match local_module_type_path with
-                | Some local_module_type_path ->
-                  PathName.of_path_with_convert false path >>= fun base ->
-                  PathName.of_path_and_name_with_convert
-                    local_module_type_path
-                    value >>= fun field ->
-                  return (MixedPath.Access ( base, [field], false))
-                | None ->
-                  PathName.of_path_and_name_with_convert path value
-                    >>= fun path_name ->
-                  return (MixedPath.PathName path_name)
-                end >>= fun mixed_path ->
+                let* mixed_path = mixed_path_of_value_or_typ value in
                 return (
                   field_name,
                   nb_free_vars,
@@ -736,9 +752,8 @@ and of_module_expr
                     []
                   )
                 )
-            )
-          end >>= fun fields ->
-          return (Module (module_typ_params_arity, fields))
+            ) in
+          return (Module (module_typ_params, fields))
       | Not_found _ -> default_result
       end
     end
@@ -858,7 +873,20 @@ and of_structure
     ModuleTypParams.get_module_typ_typ_params_arity module_type >>=
       fun module_typ_params_arity ->
     ModuleTypValues.get typ_vars module_type >>= fun values ->
-    begin
+    let module_typ_params =
+      module_typ_params_arity |> List.map (function
+        | Tree.Item (name, arity) ->
+          Tree.Item (
+            name,
+            (arity, Some (Variable (MixedPath.of_name name, [])))
+          )
+        | Module (name, tree) ->
+          Tree.Module (
+            name,
+            Tree.map (fun arity -> (arity, None)) tree
+          )
+      ) in
+    let* fields =
       values |> Monad.List.map (function
         | ModuleTypValues.Value (value, nb_free_vars) ->
           PathName.of_path_and_name_with_convert signature_path value
@@ -890,9 +918,8 @@ and of_structure
               []
             )
           )
-      )
-    end >>= fun fields ->
-    return (Module (module_typ_params_arity, fields)))
+      ) in
+    return (Module (module_typ_params, fields)))
   | item :: items ->
       set_env item.str_env (
       set_loc (Loc.of_location item.str_loc) (
@@ -1292,8 +1319,16 @@ let rec to_coq (paren : bool) (e : t) : SmartPrint.t =
       indent (to_coq false e2) ^^ newline ^^
       !^ "else" ^^ newline ^^
       indent (to_coq false e3))
-  | Module (module_typ_params_arity, fields) ->
-    to_coq_exist_t paren module_typ_params_arity false (
+  | Module (module_typ_params, fields) ->
+    let module_typ_params =
+      module_typ_params |> Tree.map (fun (arity, typ) ->
+        let typ =
+          match typ with
+          | None -> !^ "_"
+          | Some typ -> to_coq true typ in
+        (arity, typ)
+      ) in
+    to_coq_exist_t paren module_typ_params (
       group (
         !^ "{|" ^^ newline ^^
         indent (separate (!^ ";" ^^ newline) (fields |> List.map (fun (x, nb_free_vars, e) ->
@@ -1326,8 +1361,9 @@ let rec to_coq (paren : bool) (e : t) : SmartPrint.t =
       !^ "|}"
     )
   | ModuleCast (module_typ_params_arity, module_path) ->
-    to_coq_exist_t
-      paren module_typ_params_arity true (MixedPath.to_coq module_path)
+    let module_typ_params =
+      module_typ_params_arity |> Tree.map (fun arity -> (arity, !^ "_")) in
+    to_coq_exist_t paren module_typ_params (MixedPath.to_coq module_path)
   | ModulePack e -> parens @@ nest (!^ "pack" ^^ to_coq true e)
   | Functor (x, typ, e) ->
     Pp.parens paren @@ nest (
@@ -1454,18 +1490,15 @@ and to_coq_cast_existentials
 
 and to_coq_exist_t
   (paren : bool)
-  (module_typ_params_arity : int Tree.t)
-  (infer_all : bool)
+  (module_typ_params : (int * SmartPrint.t) Tree.t)
   (e : SmartPrint.t)
   : SmartPrint.t =
-  let arities = Tree.flatten module_typ_params_arity |> List.map snd in
+  let arities =
+    Tree.flatten module_typ_params |>
+    List.map (fun (_, (arity, _)) -> arity) in
   let typ_names =
-    Tree.flatten module_typ_params_arity |>
-    List.map fst |>
-    List.map (function
-      | { PathName.path = []; base } when not infer_all -> Name.to_coq base
-      | _ -> !^ "_"
-    ) in
+    Tree.flatten module_typ_params |>
+    List.map (fun (_, (_, doc)) -> doc) in
   let nb_of_existential_variables = List.length typ_names in
   Pp.parens paren @@ nest (
     !^ "existT" ^^
