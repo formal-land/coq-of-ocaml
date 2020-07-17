@@ -1293,7 +1293,7 @@ let rec to_coq (paren : bool) (e : t) : SmartPrint.t =
       !^ "else" ^^ newline ^^
       indent (to_coq false e3))
   | Module (module_typ_params_arity, fields) ->
-    to_coq_exist_t paren module_typ_params_arity (
+    to_coq_exist_t paren module_typ_params_arity false (
       group (
         !^ "{|" ^^ newline ^^
         indent (separate (!^ ";" ^^ newline) (fields |> List.map (fun (x, nb_free_vars, e) ->
@@ -1326,7 +1326,8 @@ let rec to_coq (paren : bool) (e : t) : SmartPrint.t =
       !^ "|}"
     )
   | ModuleCast (module_typ_params_arity, module_path) ->
-    to_coq_exist_t paren module_typ_params_arity (MixedPath.to_coq module_path)
+    to_coq_exist_t
+      paren module_typ_params_arity true (MixedPath.to_coq module_path)
   | ModulePack e -> parens @@ nest (!^ "pack" ^^ to_coq true e)
   | Functor (x, typ, e) ->
     Pp.parens paren @@ nest (
@@ -1454,10 +1455,18 @@ and to_coq_cast_existentials
 and to_coq_exist_t
   (paren : bool)
   (module_typ_params_arity : int Tree.t)
+  (infer_all : bool)
   (e : SmartPrint.t)
   : SmartPrint.t =
   let arities = Tree.flatten module_typ_params_arity |> List.map snd in
-  let nb_of_existential_variables = List.length arities in
+  let typ_names =
+    Tree.flatten module_typ_params_arity |>
+    List.map fst |>
+    List.map (function
+      | { PathName.path = []; base } when not infer_all -> Name.to_coq base
+      | _ -> !^ "_"
+    ) in
+  let nb_of_existential_variables = List.length typ_names in
   Pp.parens paren @@ nest (
     !^ "existT" ^^
     parens (nest (
@@ -1468,6 +1477,6 @@ and to_coq_exist_t
     | 0 -> !^ "(fun _ => _)"
     | _ -> !^ "_"
     end ^^
-    Pp.primitive_tuple_infer nb_of_existential_variables ^^
+    Pp.primitive_tuple typ_names ^^
     e
   )
