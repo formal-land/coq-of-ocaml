@@ -65,11 +65,11 @@ Module WithM.
 End WithM.
 
 Module WithSum.
-  Definition F_included_instance := F (existT (A := Set) _ _ (|M|)).
+  Definition F_include := F (existT (A := Set) _ _ (|M|)).
   
-  Definition t := (|F_included_instance|).(Target.t).
+  Definition t := (|F_include|).(Target.t).
   
-  Definition y := (|F_included_instance|).(Target.y).
+  Definition y := (|F_include|).(Target.y).
   
   Definition z : int := 0.
 End WithSum.

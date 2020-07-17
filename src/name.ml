@@ -145,8 +145,8 @@ let prefix_by_t (name : t) : t =
 let prefix_by_with (name : t) : t =
   Make ("with_" ^ to_string name)
 
-let suffix_by_included_instance (name : t) : t =
-  Make (to_string name ^ "_included_instance")
+let suffix_by_include (name : t) : t =
+  Make (to_string name ^ "_include")
 
 let suffix_by_skeleton (name : t) : t =
   Make (to_string name ^ "_skeleton")
