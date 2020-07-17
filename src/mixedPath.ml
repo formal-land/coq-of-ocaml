@@ -16,7 +16,8 @@ let get_signature_path (path : Path.t) : Path.t option Monad.t =
   match Env.find_module path env with
   | module_declaration ->
     let { Types.md_type; _ } = module_declaration in
-    IsFirstClassModule.is_module_typ_first_class md_type >>= fun is_first_class ->
+    let* is_first_class =
+      IsFirstClassModule.is_module_typ_first_class md_type (Some path) in
     begin match is_first_class with
     | IsFirstClassModule.Found signature_path -> return (Some signature_path)
     | IsFirstClassModule.Not_found _ -> return None
@@ -26,14 +27,6 @@ let get_signature_path (path : Path.t) : Path.t option Monad.t =
 let rec of_path_aux (path : Path.t)
   : (Path.t * (Path.t * string) list * Path.t option) Monad.t =
   let* signature_path = get_signature_path path in
-  let* configuration = get_configuration in
-  let is_in_black_list =
-    Configuration.is_in_first_class_module_backlist configuration path in
-  let signature_path =
-    if is_in_black_list then
-      None
-    else
-      signature_path in
   begin match path with
   | Papply _ -> failwith "Unexpected path application"
   | Pdot (path', field_string) ->

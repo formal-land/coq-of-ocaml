@@ -662,7 +662,9 @@ and of_module_expr
   | Tmod_ident (path, loc) ->
     MixedPath.of_path false path (Some loc.txt) >>= fun mixed_path ->
     let default_result = return (Variable (mixed_path, [])) in
-    IsFirstClassModule.is_module_typ_first_class local_module_type >>= fun is_first_class ->
+    let* is_first_class =
+      IsFirstClassModule.is_module_typ_first_class
+        local_module_type (Some path) in
     let local_module_type_path =
       match is_first_class with
       | Found local_module_type_path -> Some local_module_type_path
@@ -670,8 +672,8 @@ and of_module_expr
     begin match module_type with
     | None -> default_result
     | Some module_type ->
-      IsFirstClassModule.is_module_typ_first_class
-        module_type >>= fun is_first_class ->
+      let* is_first_class =
+        IsFirstClassModule.is_module_typ_first_class module_type None in
       begin match is_first_class with
       | Found module_type_path ->
         ModuleTypParams.get_module_typ_typ_params_arity module_type
@@ -762,8 +764,8 @@ and of_module_expr
       match module_type with
       | Some module_type -> module_type
       | None -> local_module_type in
-    IsFirstClassModule.is_module_typ_first_class
-      module_type >>= fun is_first_class ->
+    let* is_first_class =
+      IsFirstClassModule.is_module_typ_first_class module_type None in
     begin match is_first_class with
     | IsFirstClassModule.Found signature_path ->
       of_structure
@@ -1020,8 +1022,9 @@ and of_structure
         | Tmod_ident (path, _)
         | Tmod_constraint ({ mod_desc = Tmod_ident (path, _); _ }, _, _, _) ->
           let incl_module_type = Types.Mty_signature incl_type in
-          IsFirstClassModule.is_module_typ_first_class
-            incl_module_type >>= fun is_first_class ->
+          let* is_first_class =
+            IsFirstClassModule.is_module_typ_first_class
+              incl_module_type (Some path) in
           begin match is_first_class with
           | Found incl_signature_path ->
             PathName.of_path_with_convert false path >>= fun path_name ->
