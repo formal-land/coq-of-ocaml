@@ -63,7 +63,6 @@ end)
 
 let partition_sorted
     (m : t Name.Map.t)
-    (* ?(acc : Name.t list Map.t = Map.empty) *)
   : Name.t list Map.t =
   let elements = Name.Map.bindings m in
   elements |> List.fold_left (fun map (name, typ) ->
@@ -119,7 +118,6 @@ let decode_tag
   let constructors = Map.bindings constructors in
   List.fold_left (fun acc constructor ->
       let (typ, (constructor_name, args)) = constructor in
-      (* let constructor_name = MixedPath.of_name constructor_name in *)
       let build_constr_app = fun xs -> Pattern.Constructor (PathName.of_name [] constructor_name, xs) in
       let build_dec_app = fun x -> Apply (decoder_name, [x]) in
       let pat = if List.length args = 0
@@ -135,10 +133,7 @@ let decode_tag
           Some (build_constr_app [Pattern.Variable v1; Pattern.Variable v2],
                 Arrow (Variable v1 |> build_dec_app , Variable v2 |> build_dec_app))
         | Tuple typs ->
-          (* let v1 = (List.nth args 0) in *)
-          (* let v2 = (List.nth args 1) in *)
           Some (build_constr_app (args |> List.map (fun v -> Pattern.Variable v)),
-                (* Tuple [Variable v1 |> build_dec_app; Variable v2 |> build_dec_app]) *)
                 Tuple (args |> List.map (fun v -> Variable v |> build_dec_app)))
         | Apply (p, typs) ->
           Some (build_constr_app (args |> List.map (fun v -> Pattern.Variable v)),
@@ -149,6 +144,7 @@ let decode_tag
     ) [] constructors |> List.filter_map (fun x -> x)
 
 
+(* FIXME: if two keys then specialize to non-Set, for now *)
 let typ_union (name : Name.t) typ1 typ2 =
   match typ1, typ2 with
   | SetTyp, t -> Some t
@@ -181,26 +177,35 @@ let tags_of_typs
   { name = name_of_tags name;
     constructors }
 
-let rec subst_with
-    (f : Name.t -> Name.t)
+
+let rec tag_typ_constr_aux
+    (tag_constrs : tag_constructor Map.t)
     (typ : t)
-  : t =
+  : t Monad.t =
+  let tag_ty = tag_typ_constr_aux tag_constrs in
   match typ with
-  | Variable x -> Variable (f x)
-  | Arrow (typ1,typ2) ->
-    let typ1 = subst_with f typ1 in
-    let typ2 = subst_with f typ2 in
-    Arrow (typ1, typ2)
-  | Sum typs -> Sum (typs |> List.map (function (s, typ) -> (s, subst_with f typ)))
-  | Tuple typs -> Tuple (typs |> List.map (function typ -> subst_with f typ))
-  | Apply (p, typs) -> Apply (p, typs |> List.map (function typ -> subst_with f typ))
-  | ForallModule (name, typ1, typ2) ->
-    let typ1 = subst_with f typ1 in
-    let typ2 = subst_with f typ2 in
-    ForallModule(name, typ1, typ2)
-  | ForallTyps (names, typ) -> ForallTyps (names, subst_with f typ)
-  | FunTyps (names, typ) -> FunTyps (names, subst_with f typ)
-  | _ as typ -> typ
+  | Arrow (t1, t2) ->
+    let* t1 = tag_ty t1 in
+    let* t2 = tag_ty t2 in
+    let tag = find_tag typ tag_constrs |> MixedPath.of_name in
+    return @@ Apply (tag, [t1; t2])
+  | Tuple ts ->
+    let* t = try return (List.hd ts)
+      with Failure _ -> raise typ Error.Category.Unexpected "Malformed tuple of size < 1"
+    in
+    if List.length ts = 1
+    then
+      tag_ty t
+    else
+      let* t = tag_ty t in
+      let ts = Tuple (List.tl ts) in
+      let* ts = tag_ty ts in
+      let tag = find_tag typ tag_constrs |> MixedPath.of_name in
+      return @@ Apply (tag, [t; ts])
+  | Apply (mpath, ts) ->
+    let tag = find_tag typ tag_constrs |> MixedPath.of_name in
+    return @@ Apply (tag, ts)
+  | _ -> return typ
 
 let get_tags_name
     (path : Path.t)
@@ -210,7 +215,6 @@ let get_tags_name
   let hds = Path.heads path in
   List.fold_right (fun prefix suffix ->
       Path.Pdot (Pident prefix, Path.name suffix)) hds (Path.Pident (Ident.create_local name))
-
 
 let type_exprs_of_row_field (row_field : Types.row_field)
   : Types.type_expr list =
@@ -267,16 +271,8 @@ let rec of_typ_expr_constr
     of_typs_exprs_constr constr with_free_vars typ_vars typs >>= fun (typs, typ_vars, new_typ_vars) ->
     return (Tuple typs, typ_vars, new_typ_vars)
   | Tconstr (path, typs, _) ->
-    (* let* (typs, typ_vars, new_typs_vars) = of_typs_exprs_constr (Some path) with_free_vars typ_vars typs in *)
     let* (typs, typ_vars, new_typs_vars) = of_typs_exprs_constr (Some path) with_free_vars typ_vars typs in
     let* typs = typs |> Monad.List.map (tag_typ_constr path) in
-    (* let* (typs, typ_vars, new_typs_vars) = Monad.List.fold_left (fun (typs, typ_vars, new_typs_vars) typ -> *)
-        (* let* (typ, typ_vars, new_typs_vars') = of_typ_expr_constr (Some path) true Name.Map.empty typ in *)
-        (* let* typ = tag_typ_constr path typ new_typs_vars' in *)
-        (* return (typ :: typs, *)
-         (* typ_vars, *)
-         (* Name.Map.union typ_union new_typs_vars new_typs_vars') *)
-      (* ) ([], typ_vars, Name.Map.empty) typs in *)
     MixedPath.of_path false path None >>= fun mixed_path ->
     return (Apply (mixed_path, List.rev typs), typ_vars, new_typs_vars)
   | Tobject (_, object_descr) ->
@@ -379,63 +375,15 @@ and get_tags_of
       raise { name = name_of_tags name; constructors = Map.empty }
                      Error.Category.Unexpected "Could not find type declaration"
   end
-
 and tag_typ_constr
     (path : Path.t)
     (typ : t)
-    (* (args : t Name.Map.t) *)
   : t Monad.t =
   let name = Path.last path in
   if List.exists (function x -> name = x) ["int"; "list"; "option"; "bool"; "string"; "unit"]
   then return typ
   else let* { constructors; _ } = get_tags_of path in
-    tag_typ_constr_aux path constructors typ
-    (* let args = args |> Name.Map.bindings |> List.map fst |> List.map (fun x -> Variable x) in *)
-    (* match Map.find_opt typ constructors with *)
-    (* | Some tag_name -> *)
-      (* let name = MixedPath.of_name tag_name in *)
-      (* return @@ Apply (name, args) *)
-    (* | None -> *)
-      (* return @@ typ *)
-
-and tag_typ_constr_aux
-    (path : Path.t)
-    (tag_constrs : tag_constructor Map.t)
-    (* (typ_vars : t Name.Map.t) *)
-    (typ : t)
-  : t Monad.t =
-  let tag_ty = tag_typ_constr_aux path tag_constrs in
-  match typ with
-  | Arrow (t1, t2) ->
-    let* t1 = tag_ty t1 in
-    let* t2 = tag_ty t2 in
-    let tag = find_tag typ tag_constrs |> MixedPath.of_name in
-    let t = Apply (tag, [t1; t2]) in
-    return @@ t
-  | Tuple ts ->
-    let* t = try return (List.hd ts)
-      with Failure _ -> raise typ Error.Category.Unexpected "Malformed tuple of size < 1"
-    in
-    if List.length ts = 1
-    then
-      tag_ty t
-    else
-      let* t = tag_ty t in
-      let ts = Tuple (List.tl ts) in
-      let* ts = tag_ty ts in
-      let tag = find_tag typ tag_constrs |> MixedPath.of_name in
-      return @@ Apply (tag, [t; ts])
-  | Apply (mpath, ts) ->
-    let tag = find_tag typ tag_constrs |> MixedPath.of_name in
-    return @@ Apply (tag, ts)
-  (* | Sum of (string * t) list *)
-  (* | Package of bool * PathName.t * arity_or_typ Tree.t *)
-  (* | ForallModule of Name.t * t * t *)
-  (* | ForallTyps of Name.t list * t *)
-  (* | FunTyps of Name.t list * t *)
-  (* | Error of string *)
-  | _ -> return typ
-
+    tag_typ_constr_aux constructors typ
 
 and of_typs_exprs_constr
   (path : Path.t option)
@@ -446,7 +394,6 @@ and of_typs_exprs_constr
   (Monad.List.fold_left
     (fun (typs, typ_vars, new_typ_vars) typ ->
       of_typ_expr_constr path with_free_vars typ_vars typ >>= fun (typ, typ_vars, new_typ_vars') ->
-      (* FIXME: if two keys then specialize to non-Set, for now *)
       let new_typ_vars = Name.Map.union typ_union new_typ_vars new_typ_vars' in
       return (typ :: typs, typ_vars, new_typ_vars)
     )
