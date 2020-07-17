@@ -412,8 +412,21 @@ and tag_typ_constr_aux
     let tag = find_tag typ tag_constrs |> MixedPath.of_name in
     let t = Apply (tag, [t1; t2]) in
     return @@ t
+  | Tuple ts ->
+    let* t = try return (List.hd ts)
+      with Failure _ -> raise typ Error.Category.Unexpected "Malformed tuple of size < 1"
+    in
+    if List.length ts = 1
+    then
+      tag_ty t
+    else
+      let* t = tag_ty t in
+      let ts = Tuple (List.tl ts) in
+      let* ts = tag_ty ts in
+      let tag = find_tag typ tag_constrs |> MixedPath.of_name in
+      return @@ Apply (tag, [t; ts])
+
   (* | Sum of (string * t) list *)
-  (* | Tuple of t list *)
   (* | Apply of MixedPath.t * t list *)
   (* | Package of bool * PathName.t * arity_or_typ Tree.t *)
   (* | ForallModule of Name.t * t * t *)
