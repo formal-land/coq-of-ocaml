@@ -29,13 +29,6 @@ module Inductive = struct
     let (name, _, constructors) = AdtConstructors.from_tags tags in
     {constructor_records = []; notations = []; records = []; typs = [(name, [], constructors)]}
 
-  (* let build_tags (inductive : t) : t option =
-   *   let {typs; _} = inductive in
-   *   match typs with
-   *   | [] -> None
-   *   | (id, _, _) :: _ ->
-   *     let* tags = Type.get_tags_of (Path.Pident id) in *)
-
   let to_coq_constructor_records (inductive : t) : SmartPrint.t option =
     match inductive.constructor_records with
     | [] -> None
@@ -411,9 +404,10 @@ let to_coq_typs
     ) ^^ !^ ":" ^^
     let constructor = List.hd constructors in
     let arity = List.length constructor.res_typ_params + 1 in
-    let l : SmartPrint.t list = List.init arity (fun i ->
+    let inductive_typ = if is_tag then "Type" else "Set" in
+    let l = List.init arity (fun i ->
         if i = arity - 1
-        then !^ "Type"
+        then !^ inductive_typ
         else !^ (Name.to_string (Name.suffix_by_tags name))) in
     separate (!^ " -> ") l
     ^^ !^ ":=" ^-^
@@ -427,7 +421,7 @@ let to_coq_typs
           newline ^^ nest (
             !^ "|" ^^ Name.to_coq constructor_name ^^ !^ ":" ^^
             begin
-              let typ_vars = Type.partition_sorted typ_vars |> Type.Map.bindings in
+              let typ_vars = Type.group_by_type typ_vars |> Type.Map.bindings in
               if List.length typ_vars = 0
               then empty
               else
@@ -529,10 +523,7 @@ let to_coq (def : t) : SmartPrint.t =
             path_name
         | _ -> path_name
     } in
-      (* (match to_coq_tags subst tags with *)
-       (* | None -> empty *)
-       (* | Some tags -> tags ^-^ !^ "." ^^ newline ^^ newline *)
-      (* ) ^^ *)
+    (* We recognize if an inductive is a tag if no tag was provided for it *)
     to_coq_inductive subst (Option.is_none tags) inductive
   | Record (name, typ_args, fields, with_with) ->
     AdtConstructors.RecordSkeleton.to_coq_record name name typ_args fields with_with

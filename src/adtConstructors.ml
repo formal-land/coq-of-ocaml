@@ -221,13 +221,8 @@ end
 let of_ocaml
     (single_constructors : Single.t list)
   : t Monad.t =
-
   let* constructors_and_arities  = single_constructors |> Monad.List.map (
       fun { Single.constructor_name; param_typs; return_typ_params; typ_vars; } ->
-        (* let typ_vars = param_typs |> Type.typ_args_of_typs in *)
-        (* let typ_vars = return_typ_params |> Type.typ_args_of_typs |> Name.Set.union typ_vars |> Name.Set.elements in *)
-        (* let typ_vars = typ_vars |> List.fold_left (fun acc var -> Name.Map.add *)
-            (* var Type.SetTyp acc ) Name.Map.empty in *)
         return ({
             constructor_name;
             param_typs;
@@ -255,7 +250,7 @@ let type_arguments
 
 let from_tags (tags : Type.tags) : Name.t * Type.t list * t =
   let { Type.name; constructors } = tags in
-  let constructors : (Type.t * Type.tag_constructor) list = Type.Map.bindings constructors in
+  let constructors = Type.Map.bindings constructors in
   let (typs, items) = constructors |> List.map (fun (typ, (constructor_name, arg_names)) ->
       (typ,
        let vars_typ  = match typ with

@@ -76,22 +76,47 @@ let top_level_evaluation_error : t list Monad.t =
     SideEffect
     "Top-level evaluations are ignored"
 
+let decode_tag
+    (tag : Type.tags)
+  : (Pattern.t * Type.t) list =
+  let { Type.name ; constructors } = tag in
+  let decoder_name = Name.prefix_by_dec name |> MixedPath.of_name in
+  let constructors = Type.Map.bindings constructors in
+  List.fold_left (fun acc constructor ->
+      let (typ, (constructor_name, args)) = constructor in
+      let build_constr_app = fun xs -> Pattern.Constructor (PathName.of_name [] constructor_name, xs) in
+      let build_dec_app = fun x -> Type.Apply (decoder_name, [x]) in
+      let pat = if List.length args = 0
+      then Some (Pattern.Variable constructor_name, typ)
+      else begin match typ with
+        | Type.Variable _ ->
+          let var = List.hd args in
+          Some (build_constr_app [Pattern.Variable var], Variable var)
+        | SetTyp -> Some (build_constr_app [], SetTyp)
+        | Arrow (typ1,typ2) ->
+          let v1 = List.nth args 0 in
+          let v2 = List.nth args 1 in
+          Some (build_constr_app [Pattern.Variable v1; Pattern.Variable v2],
+                Arrow (Type.Variable v1 |> build_dec_app , Type.Variable v2 |> build_dec_app))
+        | Tuple typs ->
+          Some (build_constr_app (args |> List.map (fun v -> Pattern.Variable v)),
+                Tuple (args |> List.map (fun v -> Type.Variable v |> build_dec_app)))
+        | Apply (p, typs) ->
+          Some (build_constr_app (args |> List.map (fun v -> Pattern.Variable v)),
+                Apply (p, args |> List.map (fun v -> Type.Variable v)))
+        | _ -> None
+      end
+      in pat :: acc
+    ) [] constructors |> List.filter_map (fun x -> x)
+
 let build_tags :
     TypeDefinition.t
     -> (Value.t * TypeDefinition.t) option = function
   | TypeDefinition.Inductive (Some tags, _) ->
-    (* let (name, types, constructors) = AdtConstructors.from_tags tags in *)
     let name = tags.Type.name in
     let tag_var = Name.of_string_raw "tag" in
-    let patterns = Type.decode_tag tags |> List.map (fun (lhs, rhs) -> (lhs,
+    let patterns = decode_tag tags |> List.map (fun (lhs, rhs) -> (lhs,
                    None, Exp.Type rhs)) in
-    (* let patterns = List.map2 (fun typ { AdtConstructors.constructor_name; typ_vars; _ } -> *)
-        (* let pat = if Name.Map.cardinal typ_vars = 0 *)
-          (* then Pattern.Variable constructor_name *)
-          (* else Pattern.Constructor ((PathName.of_name [] constructor_name), *)
-                                    (* typ_vars |> Name.Map.bindings |> List.map (fun (typ, _) -> Pattern.Variable typ)) in *)
-        (* (pat, None, Exp.Type typ) *)
-      (* ) types constructors in *)
     let header : Exp.Header.t = {
       name = Name.prefix_by_dec name;
       typ_vars = [];
