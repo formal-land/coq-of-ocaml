@@ -135,11 +135,14 @@ let decode_tag
           Some (build_constr_app [Pattern.Variable v1; Pattern.Variable v2],
                 Arrow (Variable v1 |> build_dec_app , Variable v2 |> build_dec_app))
         | Tuple typs ->
-          let v1 = (List.nth args 0) in
-          let v2 = (List.nth args 1) in
-          Some (build_constr_app [Pattern.Variable v1; Pattern.Variable v2],
-                Tuple [Variable v1 |> build_dec_app; Variable v2 |> build_dec_app])
-        | Apply (p, typs) -> None
+          (* let v1 = (List.nth args 0) in *)
+          (* let v2 = (List.nth args 1) in *)
+          Some (build_constr_app (args |> List.map (fun v -> Pattern.Variable v)),
+                (* Tuple [Variable v1 |> build_dec_app; Variable v2 |> build_dec_app]) *)
+                Tuple (args |> List.map (fun v -> Variable v |> build_dec_app)))
+        | Apply (p, typs) ->
+          Some (build_constr_app (args |> List.map (fun v -> Pattern.Variable v)),
+                Apply (p, args |> List.map (fun v -> Variable v)))
         | _ -> None
       end
       in pat :: acc

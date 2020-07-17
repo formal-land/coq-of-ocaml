@@ -260,9 +260,14 @@ let from_tags (tags : Type.tags) : Name.t * Type.t list * t =
       (typ,
        let vars_typ  = match typ with
          | Type.Variable _ -> Type.SetTyp
+         | Apply (mpath, _) ->
+           (* FIXME: This will fail if mpath is an access *)
+           let name = MixedPath.to_string mpath in
+           let name = name |> Name.of_string_raw |> Type.name_of_tags in
+           Type.Variable name
          | _ -> Type.Variable name in
-       let typ_vars = List.fold_left (fun acc name ->
-           Name.Map.add name vars_typ acc)
+       let typ_vars = List.fold_left (fun acc arg_name ->
+           Name.Map.add arg_name vars_typ acc)
            Name.Map.empty arg_names in
        { constructor_name;
         param_typs = [] ;
