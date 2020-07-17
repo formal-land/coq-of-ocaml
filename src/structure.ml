@@ -93,12 +93,14 @@ let rec get_include_name (module_expr : module_expr) : Name.t option Monad.t =
 (** Import an OCaml structure. *)
 let rec of_structure (structure : structure) : t list Monad.t =
   let get_include_items
-    (is_in_blacklist : bool) (path : PathName.t) (mod_type : Types.module_type)
+    (module_path : Path.t option)
+    (reference : PathName.t)
+    (mod_type : Types.module_type)
     : t list Monad.t =
     let* is_first_class =
-      IsFirstClassModule.is_module_typ_first_class mod_type in
-    begin match (is_in_blacklist, is_first_class) with
-    | (false, IsFirstClassModule.Found mod_type_path) ->
+      IsFirstClassModule.is_module_typ_first_class mod_type module_path in
+    begin match is_first_class with
+    | IsFirstClassModule.Found mod_type_path ->
       get_env >>= fun env ->
       begin match Mtype.scrape env mod_type with
       | Mty_ident path | Mty_alias path ->
@@ -125,7 +127,7 @@ let rec of_structure (structure : structure) : t list Monad.t =
                 name,
                 Exp.Variable (
                   MixedPath.Access (
-                    path,
+                    reference,
                     [field],
                     false
                   ),
@@ -141,7 +143,7 @@ let rec of_structure (structure : structure) : t list Monad.t =
           Unexpected
           "Unexpected include of functor."
       end
-    | _ -> return [ModuleInclude path]
+    | _ -> return [ModuleInclude reference]
     end in
   let of_structure_item (item : structure_item) (final_env : Env.t)
     : t list Monad.t =
@@ -248,11 +250,8 @@ let rec of_structure (structure : structure) : t list Monad.t =
         };
         _
       } ->
-      let* configuration = get_configuration in
-      let is_in_blacklist =
-        Configuration.is_in_first_class_module_backlist configuration path in
       let* reference = PathName.of_path_with_convert false path in
-      get_include_items is_in_blacklist reference mod_type
+      get_include_items (Some path) reference mod_type
     | Tstr_include { incl_mod } ->
       let* include_name = get_include_name incl_mod in
       begin match include_name with
@@ -260,7 +259,7 @@ let rec of_structure (structure : structure) : t list Monad.t =
         let* module_definitionn = of_module include_name incl_mod in
         let reference = PathName.of_name [] include_name in
         let* include_items =
-          get_include_items false reference incl_mod.mod_type in
+          get_include_items None reference incl_mod.mod_type in
         return (module_definitionn @ include_items)
       | None ->
         error_message
@@ -286,7 +285,7 @@ let rec of_structure (structure : structure) : t list Monad.t =
 and of_module (name : Name.t) (module_expr : module_expr)
   : t list Monad.t =
   let* is_first_class =
-    IsFirstClassModule.is_module_typ_first_class module_expr.mod_type in
+    IsFirstClassModule.is_module_typ_first_class module_expr.mod_type None in
   match is_first_class with
   | Found _ ->
     let* module_expr =

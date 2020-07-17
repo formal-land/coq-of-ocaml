@@ -40,8 +40,8 @@ let items_of_types_signature (signature : Types.signature) : item list Monad.t =
         ("Extensible type '" ^ name ^ "' not handled")
     | Sig_module (ident, _, { md_type; _ }, _, _) ->
       let* name = Name.of_ident false ident in
-      IsFirstClassModule.is_module_typ_first_class
-        md_type >>= fun is_first_class ->
+      let* is_first_class =
+        IsFirstClassModule.is_module_typ_first_class md_type None in
       begin match is_first_class with
       | Found signature_path ->
         PathName.of_path_with_convert false signature_path
