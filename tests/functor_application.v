@@ -24,7 +24,7 @@ End Target.
 Definition M : {t : Set & Source.signature (t := t)} :=
   let t : Set := int in
   let x := 12 in
-  existT (A := Set) _ _
+  existT (A := Set) _ t
     {|
       Source.x := x
     |}.
@@ -51,7 +51,7 @@ Definition Sum :=
     fun (Y : {_ : unit & Source.signature (t := int)}) =>
       ((let t : Set := int in
       let y := Z.add (|X|).(Source.x) (|Y|).(Source.x) in
-      existT (A := Set) _ _
+      existT (A := Set) _ t
         {|
           Target.y := y
         |}) : {t : Set & Target.signature (t := t)}).
@@ -78,7 +78,7 @@ Definition GenFun :=
   fun (_ : unit) =>
     ((let t : Set := int in
     let y := 23 in
-    existT (A := Set) _ _
+    existT (A := Set) _ t
       {|
         Target.y := y
       |}) : {t : Set & Target.signature (t := t)}).

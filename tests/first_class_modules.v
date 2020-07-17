@@ -115,7 +115,7 @@ Definition tripe
     let vc := "" in
     let bar : Set := int in
     let foo := 12 in
-    existT (A := [Set ** Set ** Set ** Set]) _ [_, _, _, _]
+    existT (A := [Set ** Set ** Set ** Set]) _ [a, b, c, bar]
       {|
         Triple.va := va;
         Triple.vb := vb;
