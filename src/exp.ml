@@ -166,6 +166,63 @@ let rec get_include_name (module_expr : module_expr) : Name.t Monad.t =
         "Try to first give a name to this module before doing the include."
       )
 
+let build_module
+  (typ_vars : Name.t Name.Map.t)
+  (params_arity : int ModuleTypParams.t)
+  (values : ModuleTypValues.t list)
+  (signature_path : Path.t)
+  (mixed_path_of_value_or_typ : Name.t -> MixedPath.t Monad.t)
+  : t Monad.t =
+  let* module_typ_params =
+    params_arity |> Monad.List.map (function
+      | Tree.Item (name, arity) ->
+        let* mixed_path = mixed_path_of_value_or_typ name in
+        return (Tree.Item (
+          name,
+          (arity, Some (Variable (mixed_path, [])))
+        ))
+      | Module (name, tree) ->
+        return (Tree.Module (
+          name,
+          Tree.map (fun arity -> (arity, None)) tree
+        ))
+    ) in
+  let* fields =
+    values |> Monad.List.map (function
+      | ModuleTypValues.Value (value, nb_free_vars) ->
+        let* field_name =
+          PathName.of_path_and_name_with_convert signature_path value in
+        let* mixed_path = mixed_path_of_value_or_typ value in
+        return (
+          field_name,
+          nb_free_vars,
+          Variable (mixed_path, [])
+        )
+      | Module modul ->
+        let* field_name =
+          PathName.of_path_and_name_with_convert signature_path modul in
+        return (
+          field_name,
+          0,
+          Variable (
+            MixedPath.Access (PathName.of_name [] modul, [], false),
+            []
+          )
+        )
+      | ModuleFunctor functo ->
+        let* field_name =
+          PathName.of_path_and_name_with_convert signature_path functo in
+        return (
+          field_name,
+          0,
+          Variable (
+            MixedPath.PathName (PathName.of_name [] functo),
+            []
+          )
+        )
+    ) in
+  return (Module (module_typ_params, fields))
+
 (** Import an OCaml expression. *)
 let rec of_expression (typ_vars : Name.t Name.Map.t) (e : expression)
   : t Monad.t =
@@ -715,7 +772,8 @@ and of_module_expr
           )
         else
           let* values = ModuleTypValues.get typ_vars module_type in
-          let mixed_path_of_value_or_typ (name : Name.t) : MixedPath.t Monad.t =
+          let mixed_path_of_value_or_typ (name : Name.t)
+            : MixedPath.t Monad.t =
             match local_module_type_path with
             | Some local_module_type_path ->
               let* base = PathName.of_path_with_convert false path in
@@ -728,55 +786,12 @@ and of_module_expr
               let* path_name =
                 PathName.of_path_and_name_with_convert path name in
               return (MixedPath.PathName path_name) in
-          let* module_typ_params =
-            module_typ_params_arity |> Monad.List.map (function
-              | Tree.Item (name, arity) ->
-                let* mixed_path = mixed_path_of_value_or_typ name in
-                return (Tree.Item (
-                  name,
-                  (arity, Some (Variable (mixed_path, [])))
-                ))
-              | Module (name, tree) ->
-                return (Tree.Module (
-                  name,
-                  Tree.map (fun arity -> (arity, None)) tree
-                ))
-            ) in
-          let* fields =
-            values |> Monad.List.map (function
-              | ModuleTypValues.Value (value, nb_free_vars) ->
-                PathName.of_path_and_name_with_convert module_type_path value
-                  >>= fun field_name ->
-                let* mixed_path = mixed_path_of_value_or_typ value in
-                return (
-                  field_name,
-                  nb_free_vars,
-                  Variable (mixed_path, [])
-                )
-              | Module modul ->
-                PathName.of_path_and_name_with_convert module_type_path modul
-                  >>= fun field_name ->
-                return (
-                  field_name,
-                  0,
-                  Variable (
-                    MixedPath.Access (PathName.of_name [] modul, [], false),
-                    []
-                  )
-                )
-              | ModuleFunctor functo ->
-                PathName.of_path_and_name_with_convert module_type_path functo
-                  >>= fun field_name ->
-                return (
-                  field_name,
-                  0,
-                  Variable (
-                    MixedPath.PathName (PathName.of_name [] functo),
-                    []
-                  )
-                )
-            ) in
-          return (Module (module_typ_params, fields))
+          build_module
+            typ_vars
+            module_typ_params_arity
+            values
+            module_type_path
+            mixed_path_of_value_or_typ
       | Not_found _ -> default_result
       end
     end
@@ -895,54 +910,15 @@ and of_structure
     set_env final_env (
     ModuleTypParams.get_module_typ_typ_params_arity module_type >>=
       fun module_typ_params_arity ->
-    ModuleTypValues.get typ_vars module_type >>= fun values ->
-    let module_typ_params =
-      module_typ_params_arity |> List.map (function
-        | Tree.Item (name, arity) ->
-          Tree.Item (
-            name,
-            (arity, Some (Variable (MixedPath.of_name name, [])))
-          )
-        | Module (name, tree) ->
-          Tree.Module (
-            name,
-            Tree.map (fun arity -> (arity, None)) tree
-          )
-      ) in
-    let* fields =
-      values |> Monad.List.map (function
-        | ModuleTypValues.Value (value, nb_free_vars) ->
-          PathName.of_path_and_name_with_convert signature_path value
-            >>= fun field_name ->
-          return (
-            field_name,
-            nb_free_vars,
-            Variable (MixedPath.of_name value, [])
-          )
-        | Module modul ->
-          PathName.of_path_and_name_with_convert signature_path modul
-            >>= fun field_name ->
-          return (
-            field_name,
-            0,
-            Variable (
-              MixedPath.Access (PathName.of_name [] modul, [], false),
-              []
-            )
-          )
-        | ModuleFunctor functo ->
-          PathName.of_path_and_name_with_convert signature_path functo
-            >>= fun field_name ->
-          return (
-            field_name,
-            0,
-            Variable (
-              MixedPath.PathName (PathName.of_name [] functo),
-              []
-            )
-          )
-      ) in
-    return (Module (module_typ_params, fields)))
+    let* values = ModuleTypValues.get typ_vars module_type in
+    let mixed_path_of_value_or_typ (name : Name.t): MixedPath.t Monad.t =
+      return (MixedPath.of_name name) in
+    build_module
+      typ_vars
+      module_typ_params_arity
+      values
+      signature_path
+      mixed_path_of_value_or_typ)
   | item :: items ->
       set_env item.str_env (
       set_loc (Loc.of_location item.str_loc) (
