@@ -23,3 +23,9 @@ type 'a one_case =
 let x : int =
   match[@coq_match_with_default] SingleCase with
   | SingleCase -> 0
+
+type[@coq_force_gadt] 'a gadt_list =
+  | GNil
+  | GCons of 'a * 'a gadt_list
+
+let gadt_empty_list = GNil

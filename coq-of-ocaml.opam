@@ -18,8 +18,9 @@ install: [
 ]
 depends: [
   "conf-ruby" {with-test}
-  "dune" {build}
+  "dune" {>= "1.11"}
   "ocaml" {>= "4.09" & < "4.10"}
+  "ocamlfind" {>= "1.5.2"}
   "smart-print"
   "yojson" {>= "1.6.0"}
 ]

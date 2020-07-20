@@ -20,6 +20,13 @@ module MonadicOperator = struct
   }
 end
 
+module RenamingRule = struct
+  type t = {
+    source : string;
+    target : string;
+  }
+end
+
 module VariantMapping = struct
   type t = {
     source : string;
@@ -38,6 +45,7 @@ type t = {
   first_class_module_path_blacklist : string list;
   head_suffix : string;
   monadic_operators : MonadicOperator.t list;
+  renaming_rules : RenamingRule.t list;
   require : Import.t list;
   require_import : Import.t list;
   require_long_ident : Import.t list;
@@ -59,6 +67,9 @@ let default (file_name : string) : t = {
   first_class_module_path_blacklist = [];
   head_suffix = "";
   monadic_operators = [];
+  renaming_rules =
+    ConfigurationRenaming.rules |>
+    List.map (fun (source, target) -> { RenamingRule.source; target });
   require = [];
   require_import = [];
   require_long_ident = [];
@@ -99,11 +110,11 @@ let is_value_to_escape (configuration : t) (name : string) : bool =
 
 let is_in_first_class_module_backlist (configuration : t) (path : Path.t)
   : bool =
-  match Path.to_string_list path with
-  | head :: _ :: []
-    when List.mem head configuration.first_class_module_path_blacklist ->
-    true
-  | _ -> false
+  match List.rev (Path.to_string_list path) with
+  | [] -> false
+  | _ :: path ->
+    let path = String.concat "." path in
+    List.mem path configuration.first_class_module_path_blacklist
 
 let is_monadic_operator (configuration : t) (name : string) : string option =
   let monadic_operator =
@@ -113,6 +124,11 @@ let is_monadic_operator (configuration : t) (name : string) : string option =
   match monadic_operator with
   | None -> None
   | Some { MonadicOperator.notation; _ } -> Some notation
+
+let is_in_renaming_rule (configuration : t) (path : string) : string option =
+  configuration.renaming_rules |>
+  List.find_opt (fun { RenamingRule.source; _ } -> source = path) |>
+  Option.map (fun { RenamingRule.target; _ } -> target)
 
 let should_require (configuration : t) (base : string)
   : string option =
@@ -237,6 +253,14 @@ let of_json (file_name : string) (json : Yojson.Basic.t) : t =
               { MonadicOperator.name; notation }
             ) in
           {configuration with monadic_operators = entry}
+        | "renaming_rules" ->
+          let entry =
+            entry |>
+            get_string_couple_list "renaming_rules" |>
+            List.map (fun (source, target) -> { RenamingRule.source; target }) in
+          {configuration with
+            renaming_rules = configuration.renaming_rules @ entry
+          }
         | "require" ->
           let entry =
             entry |>

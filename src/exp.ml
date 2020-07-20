@@ -57,7 +57,7 @@ type t =
     (** Construct a record giving an expression for each field. *)
   | Field of t * PathName.t (** Access to a field of a record. *)
   | IfThenElse of t * t * t (** The "else" part may be unit. *)
-  | Module of int Tree.t * (PathName.t * int * t) list
+  | Module of (int * t option) Tree.t * (PathName.t * int * t) list
     (** The value of a first-class module. *)
   | ModuleNested of (string option * PathName.t * t) list
     (** The value of a first-class module inside another module
@@ -69,6 +69,8 @@ type t =
   | ModulePack of t (** Pack a module. *)
   | Functor of Name.t * Type.t * t
     (** A functor. *)
+  | FunctorGenerative of t
+    (** A generative functor. *)
   | TypeAnnotation of t * Type.t
     (** Annotate with a type. *)
   | Assert of Type.t * t (** The assert keyword. *)
@@ -109,7 +111,7 @@ module ModuleTypValues = struct
     (module_typ : Types.module_type)
     : t list Monad.t =
     get_env >>= fun env ->
-    match Mtype.scrape env module_typ with
+    match Env.scrape_alias env module_typ with
     | Mty_signature signature ->
       signature |> Monad.List.filter_map (fun item ->
         match item with
@@ -128,7 +130,7 @@ module ModuleTypValues = struct
           return (Some (Module name))
         | _ -> return None
       )
-    | _ -> return []
+    | _ -> raise [] Unexpected "Module type signature not found"
 end
 
 let rec any_patterns_with_ith_true (is_guarded : bool) (i : int) (n : int)
@@ -142,6 +144,27 @@ let rec any_patterns_with_ith_true (is_guarded : bool) (i : int) (n : int)
       else
         Pattern.Any in
     head :: any_patterns_with_ith_true is_guarded (i - 1) (n - 1)
+
+let rec get_include_name (module_expr : module_expr) : Name.t Monad.t =
+  match module_expr.mod_desc with
+  | Tmod_apply (applied_expr, _, _) ->
+    begin match applied_expr.mod_desc with
+    | Tmod_ident (path, _)
+    | Tmod_constraint ({ mod_desc = Tmod_ident (path, _); _ }, _, _, _) ->
+      let* path_name = PathName.of_path_with_convert false path in
+      let* name = PathName.to_name false path_name in
+      return (Name.suffix_by_include name)
+    | _ -> get_include_name applied_expr
+    end
+  | Tmod_constraint (module_expr, _, _, _) -> get_include_name module_expr
+  | _ ->
+    raise
+      (Name.of_string_raw "nameless_include")
+      NotSupported
+      (
+        "Cannot find a name for this module expression.\n\n" ^
+        "Try to first give a name to this module before doing the include."
+      )
 
 (** Import an OCaml expression. *)
 let rec of_expression (typ_vars : Name.t Name.Map.t) (e : expression)
@@ -553,15 +576,20 @@ and import_let_fun
     match x with
     | None -> return None
     | Some x ->
-      of_expression typ_vars vb_expr >>= fun e ->
-      let (args_names, e_body) = open_function e in
+      let* (args_names, e_body) =
+        if not is_axiom then
+          let* e = of_expression typ_vars vb_expr in
+          let (args_names, e_body) = open_function e in
+          return (args_names, Some e_body)
+        else
+          return ([], None) in
       let (args_typs, e_body_typ) = Type.open_type e_typ (List.length args_names) in
       get_configuration >>= fun configuration ->
       let structs =
         match struct_attributes with
         | [] ->
           if Configuration.is_without_guard_checking configuration then
-            match (Recursivity.to_bool is_rec, args_names) with
+            match (is_rec, args_names) with
             | (true, x :: _) -> [Name.to_string x]
             | _ -> []
           else
@@ -574,13 +602,21 @@ and import_let_fun
         structs;
         typ = Some e_body_typ
       } in
-      let e_body = if is_axiom then None else Some e_body in
       return (Some (header, e_body))
     )
   ))) >>= fun cases ->
+  let is_rec =
+    is_rec &&
+    List.for_all
+      (fun ({ Header.args; _ }, _) ->
+        match args with
+        | [] -> false
+        | _ :: _ -> true
+      )
+      cases in
   let result = { Definition.is_rec = is_rec; cases } in
   match (at_top_level, result) with
-  | (false, { is_rec = Recursivity.New true; cases = _ :: _ :: _ }) ->
+  | (false, { is_rec = true; cases = _ :: _ :: _ }) ->
     raise
       result
       NotSupported
@@ -647,7 +683,9 @@ and of_module_expr
   | Tmod_ident (path, loc) ->
     MixedPath.of_path false path (Some loc.txt) >>= fun mixed_path ->
     let default_result = return (Variable (mixed_path, [])) in
-    IsFirstClassModule.is_module_typ_first_class local_module_type >>= fun is_first_class ->
+    let* is_first_class =
+      IsFirstClassModule.is_module_typ_first_class
+        local_module_type (Some path) in
     let local_module_type_path =
       match is_first_class with
       | Found local_module_type_path -> Some local_module_type_path
@@ -655,8 +693,8 @@ and of_module_expr
     begin match module_type with
     | None -> default_result
     | Some module_type ->
-      IsFirstClassModule.is_module_typ_first_class
-        module_type >>= fun is_first_class ->
+      let* is_first_class =
+        IsFirstClassModule.is_module_typ_first_class module_type None in
       begin match is_first_class with
       | Found module_type_path ->
         ModuleTypParams.get_module_typ_typ_params_arity module_type
@@ -676,24 +714,40 @@ and of_module_expr
             )
           )
         else
-          ModuleTypValues.get typ_vars module_type >>= fun values ->
-          begin
+          let* values = ModuleTypValues.get typ_vars module_type in
+          let mixed_path_of_value_or_typ (name : Name.t) : MixedPath.t Monad.t =
+            match local_module_type_path with
+            | Some local_module_type_path ->
+              let* base = PathName.of_path_with_convert false path in
+              let* field =
+                PathName.of_path_and_name_with_convert
+                  local_module_type_path
+                  name in
+              return (MixedPath.Access (base, [field], false))
+            | None ->
+              let* path_name =
+                PathName.of_path_and_name_with_convert path name in
+              return (MixedPath.PathName path_name) in
+          let* module_typ_params =
+            module_typ_params_arity |> Monad.List.map (function
+              | Tree.Item (name, arity) ->
+                let* mixed_path = mixed_path_of_value_or_typ name in
+                return (Tree.Item (
+                  name,
+                  (arity, Some (Variable (mixed_path, [])))
+                ))
+              | Module (name, tree) ->
+                return (Tree.Module (
+                  name,
+                  Tree.map (fun arity -> (arity, None)) tree
+                ))
+            ) in
+          let* fields =
             values |> Monad.List.map (function
               | ModuleTypValues.Value (value, nb_free_vars) ->
                 PathName.of_path_and_name_with_convert module_type_path value
                   >>= fun field_name ->
-                begin match local_module_type_path with
-                | Some local_module_type_path ->
-                  PathName.of_path_with_convert false path >>= fun base ->
-                  PathName.of_path_and_name_with_convert
-                    local_module_type_path
-                    value >>= fun field ->
-                  return (MixedPath.Access ( base, [field], false))
-                | None ->
-                  PathName.of_path_and_name_with_convert path value
-                    >>= fun path_name ->
-                  return (MixedPath.PathName path_name)
-                end >>= fun mixed_path ->
+                let* mixed_path = mixed_path_of_value_or_typ value in
                 return (
                   field_name,
                   nb_free_vars,
@@ -721,9 +775,8 @@ and of_module_expr
                     []
                   )
                 )
-            )
-          end >>= fun fields ->
-          return (Module (module_typ_params_arity, fields))
+            ) in
+          return (Module (module_typ_params, fields))
       | Not_found _ -> default_result
       end
     end
@@ -732,8 +785,8 @@ and of_module_expr
       match module_type with
       | Some module_type -> module_type
       | None -> local_module_type in
-    IsFirstClassModule.is_module_typ_first_class
-      module_type >>= fun is_first_class ->
+    let* is_first_class =
+      IsFirstClassModule.is_module_typ_first_class module_type None in
     begin match is_first_class with
     | IsFirstClassModule.Found signature_path ->
       of_structure
@@ -752,29 +805,30 @@ and of_module_expr
         )
     end
   | Tmod_functor (ident, _, module_type_arg, e) ->
+    let* e = of_module_expr typ_vars e None in
     begin match module_type_arg with
-    | None ->
-      error_message
-        (Error "functor_without_argument_annotation")
-        NotSupported
-        "Expected an annotation to get the module type of the parameter of this functor"
+    | None -> return (FunctorGenerative e)
     | Some module_type_arg ->
       let* x = Name.of_ident false ident in
       ModuleTyp.of_ocaml module_type_arg >>= fun module_type_arg ->
-      of_module_expr typ_vars e None >>= fun e ->
       return (Functor (x, ModuleTyp.to_typ module_type_arg, e))
     end
   | Tmod_apply (e1, e2, _) ->
+    let e1_mod_type = e1.mod_type in
     let expected_module_typ_for_e2 =
-      match e1.mod_type with
+      match e1_mod_type with
       | Mty_functor (_, module_typ_arg, _) -> module_typ_arg
       | _ -> None in
     let module_typ_for_application =
-      match e1.mod_type with
+      match e1_mod_type with
       | Mty_functor (_, _, module_typ_result) -> Some module_typ_result
       | _ -> None in
     of_module_expr typ_vars e1 None >>= fun e1 ->
-    of_module_expr typ_vars e2 expected_module_typ_for_e2 >>= fun e2 ->
+    let* e2 =
+      match e1_mod_type with
+      | Mty_functor (_, None, _) ->
+        return (Constructor (PathName.unit_value, [], []))
+      | _ -> of_module_expr typ_vars e2 expected_module_typ_for_e2 in
     let application = Apply (e1, [e2]) in
     begin match (module_type, module_typ_for_application) with
     | (None, _) | (_, None) -> return application
@@ -842,7 +896,20 @@ and of_structure
     ModuleTypParams.get_module_typ_typ_params_arity module_type >>=
       fun module_typ_params_arity ->
     ModuleTypValues.get typ_vars module_type >>= fun values ->
-    begin
+    let module_typ_params =
+      module_typ_params_arity |> List.map (function
+        | Tree.Item (name, arity) ->
+          Tree.Item (
+            name,
+            (arity, Some (Variable (MixedPath.of_name name, [])))
+          )
+        | Module (name, tree) ->
+          Tree.Module (
+            name,
+            Tree.map (fun arity -> (arity, None)) tree
+          )
+      ) in
+    let* fields =
       values |> Monad.List.map (function
         | ModuleTypValues.Value (value, nb_free_vars) ->
           PathName.of_path_and_name_with_convert signature_path value
@@ -874,9 +941,8 @@ and of_structure
               []
             )
           )
-      )
-    end >>= fun fields ->
-    return (Module (module_typ_params_arity, fields)))
+      ) in
+    return (Module (module_typ_params, fields)))
   | item :: items ->
       set_env item.str_env (
       set_loc (Loc.of_location item.str_loc) (
@@ -917,7 +983,14 @@ and of_structure
             raise
               (ErrorMessage (e_next, "typ_definition"))
               NotSupported
-              "Only type synonyms are handled here"
+              (
+                "We only handle type synonyms here." ^
+                "\n\n" ^
+                "Indeed, we compile this module as a dependent record for " ^
+                "the signature:\n" ^ Path.name signature_path ^ "\n\n" ^
+                "Thus we cannot introduce new type definitions. Use a " ^
+                "separated module for the type definition and\nits use."
+              )
           end
         | _ ->
           raise
@@ -966,32 +1039,38 @@ and of_structure
           NotSupported
           "Class type not handled"
       | Tstr_include { incl_mod; incl_type; _ } ->
-        begin match incl_mod.mod_desc with
-        | Tmod_ident (path, _)
-        | Tmod_constraint ({ mod_desc = Tmod_ident (path, _); _ }, _, _, _) ->
-          let incl_module_type = Types.Mty_signature incl_type in
-          IsFirstClassModule.is_module_typ_first_class
-            incl_module_type >>= fun is_first_class ->
-          begin match is_first_class with
-          | Found incl_signature_path ->
-            PathName.of_path_with_convert false path >>= fun path_name ->
+        let path =
+          match incl_mod.mod_desc with
+          | Tmod_ident (path, _)
+          | Tmod_constraint ({ mod_desc = Tmod_ident (path, _); _ }, _, _, _) ->
+            Some path
+          | _ -> None in
+        let incl_module_type = Types.Mty_signature incl_type in
+        let* is_first_class =
+          IsFirstClassModule.is_module_typ_first_class incl_module_type path in
+        begin match is_first_class with
+        | Found incl_signature_path ->
+          begin match path with
+          | Some path ->
+            let* path_name = PathName.of_path_with_convert false path in
             of_include typ_vars path_name incl_signature_path incl_type e_next
-          | Not_found reason ->
-            raise
-              (ErrorMessage (e_next, "include_without_named_signature"))
-              NotSupported
-              (
-                "We did not find a signature name for the include of this module\n\n" ^
-                reason
-              )
+          | None ->
+            let* name = get_include_name incl_mod in
+            let path_name = PathName.of_name [] name in
+            let* included_module =
+              of_module_expr typ_vars incl_mod (Some incl_module_type) in
+            let* e_next =
+              of_include
+                typ_vars path_name incl_signature_path incl_type e_next in
+            return (LetVar (None, name, [], included_module, e_next))
           end
-        | _ ->
+        | Not_found reason ->
           raise
-            (ErrorMessage (e_next, "unhandled_include"))
+            (ErrorMessage (e_next, "include_without_named_signature"))
             NotSupported
             (
-              "The include of this kind of module is not supported.\n\n" ^
-              "Try to name this module and then include this name."
+              "We did not find a signature name for the include of this module\n\n" ^
+              reason
             )
         end
       | Tstr_attribute _ -> return e_next))
@@ -1177,7 +1256,7 @@ let rec to_coq (paren : bool) (e : t) : SmartPrint.t =
         let first_case = index = 0 in
         (if first_case then (
           !^ "let" ^^
-          (if Recursivity.to_bool def.Definition.is_rec then !^ "fix" else empty)
+          (if def.Definition.is_rec then !^ "fix" else empty)
         ) else
           !^ "with") ^^
         Name.to_coq header.Header.name ^^
@@ -1269,8 +1348,16 @@ let rec to_coq (paren : bool) (e : t) : SmartPrint.t =
       indent (to_coq false e2) ^^ newline ^^
       !^ "else" ^^ newline ^^
       indent (to_coq false e3))
-  | Module (module_typ_params_arity, fields) ->
-    to_coq_exist_t paren module_typ_params_arity (
+  | Module (module_typ_params, fields) ->
+    let module_typ_params =
+      module_typ_params |> Tree.map (fun (arity, typ) ->
+        let typ =
+          match typ with
+          | None -> !^ "_"
+          | Some typ -> to_coq true typ in
+        (arity, typ)
+      ) in
+    to_coq_exist_t paren module_typ_params (
       group (
         !^ "{|" ^^ newline ^^
         indent (separate (!^ ";" ^^ newline) (fields |> List.map (fun (x, nb_free_vars, e) ->
@@ -1303,12 +1390,20 @@ let rec to_coq (paren : bool) (e : t) : SmartPrint.t =
       !^ "|}"
     )
   | ModuleCast (module_typ_params_arity, module_path) ->
-    to_coq_exist_t paren module_typ_params_arity (MixedPath.to_coq module_path)
+    let module_typ_params =
+      module_typ_params_arity |> Tree.map (fun arity -> (arity, !^ "_")) in
+    to_coq_exist_t paren module_typ_params (MixedPath.to_coq module_path)
   | ModulePack e -> parens @@ nest (!^ "pack" ^^ to_coq true e)
   | Functor (x, typ, e) ->
     Pp.parens paren @@ nest (
       !^ "fun" ^^
       parens (nest (Name.to_coq x ^^ !^ ":" ^^ Type.to_coq None None typ)) ^^
+      !^ "=>" ^^ to_coq false e
+    )
+  | FunctorGenerative e ->
+    Pp.parens paren @@ nest (
+      !^ "fun" ^^
+      parens (nest (!^ "_" ^^ !^ ":" ^^ !^ "unit")) ^^
       !^ "=>" ^^ to_coq false e
     )
   | TypeAnnotation (e, typ) ->
@@ -1424,11 +1519,16 @@ and to_coq_cast_existentials
 
 and to_coq_exist_t
   (paren : bool)
-  (module_typ_params_arity : int Tree.t)
+  (module_typ_params : (int * SmartPrint.t) Tree.t)
   (e : SmartPrint.t)
   : SmartPrint.t =
-  let arities = Tree.flatten module_typ_params_arity |> List.map snd in
-  let nb_of_existential_variables = List.length arities in
+  let arities =
+    Tree.flatten module_typ_params |>
+    List.map (fun (_, (arity, _)) -> arity) in
+  let typ_names =
+    Tree.flatten module_typ_params |>
+    List.map (fun (_, (_, doc)) -> doc) in
+  let nb_of_existential_variables = List.length typ_names in
   Pp.parens paren @@ nest (
     !^ "existT" ^^
     parens (nest (
@@ -1439,6 +1539,6 @@ and to_coq_exist_t
     | 0 -> !^ "(fun _ => _)"
     | _ -> !^ "_"
     end ^^
-    Pp.primitive_tuple_infer nb_of_existential_variables ^^
+    Pp.primitive_tuple typ_names ^^
     e
   )

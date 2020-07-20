@@ -88,15 +88,26 @@ type maybe_found =
   | Not_found of string
 
 (** Get the path of the signature definition of the [module_typ]
-    if it is a first-class module, [None] otherwise. *)
+    if it is a first-class module, [None] otherwise. Optionally, when given the path of the module we want to check for its signature, verify if it is not
+    in a blacklist. *)
 let rec is_module_typ_first_class
   (module_typ : Types.module_type)
+  (module_path : Path.t option)
   : maybe_found Monad.t =
-  get_env >>= fun env ->
-  match Mtype.scrape env module_typ with
+  let* env = get_env in
+  let* configuration = get_configuration in
+  let is_in_black_list =
+    match module_path with
+    | None -> false
+    | Some module_path ->
+      Configuration.is_in_first_class_module_backlist
+        configuration module_path in
+  if is_in_black_list then
+    return (Not_found "In blacklist")
+  else match Mtype.scrape env module_typ with
   | Mty_alias path | Mty_ident path ->
     begin match Env.find_module path env with
-    | { Types.md_type; _ } -> is_module_typ_first_class md_type
+    | { Types.md_type; _ } -> is_module_typ_first_class md_type module_path
     | exception Not_found ->
       let reason = "Module " ^ Path.name path ^ " not found" in
       return (Not_found reason)

@@ -13,6 +13,9 @@ let __make (path : string list) (base : string) : t =
     base = Name.Make base
   }
 
+let to_string (x : t) : string =
+  String.concat "." (List.map Name.to_string (x.path @ [x.base]))
+
 let try_to_use (head : string) (name : string) : bool option Monad.t =
   let* configuration = get_configuration in
   let require = Configuration.should_require configuration head in
@@ -33,198 +36,43 @@ let try_to_use (head : string) (name : string) : bool option Monad.t =
    taking into accounts that the stdlib was open). *)
 let try_convert (path_name : t) : t option Monad.t =
   let make path base = return (Some (__make path base)) in
-  let { path; base } = path_name in
+  let* renamed_path_name =
+    let* configuration = get_configuration in
+    let path_name_rewrite =
+      Configuration.is_in_renaming_rule configuration (to_string path_name) in
+    match path_name_rewrite with
+    | Some path_name ->
+      begin match List.rev (String.split_on_char '.' path_name) with
+      | [] -> failwith "Unexpected empty list"
+      | base :: rev_path -> make (List.rev rev_path) base
+      end
+    | None ->
+      begin match path_name.path with
+      | Name.Make "Stdlib" :: _ -> return (Some path_name)
+      | _ -> return None
+      end in
+  let { path; base } = Option.value renamed_path_name ~default:path_name in
   let path = path |> List.map Name.to_string in
   let base = Name.to_string base in
-  (* The core library *)
-  match path with
-  | [] ->
-    begin match base with
-    (* Built-in types *)
-    | "int" -> make [] "int"
-    | "float" -> make [] "float"
-    | "char" -> make [] "ascii"
-    | "bytes" -> make [] "bytes"
-    | "string" -> make [] "string"
-    | "bool" -> make [] "bool"
-    | "false" -> make [] "false"
-    | "true" -> make [] "true"
-    | "unit" -> make [] "unit"
-    | "()" -> make [] "tt"
-    | "list" -> make [] "list"
-    | "[]" -> make [] "[]"
-    | "op_coloncolon" -> make [] "cons"
-    | "option" -> make [] "option"
-    | "None" -> make [] "None"
-    | "Some" -> make [] "Some"
-    | "Ok" -> make [] "inl"
-    | "Error" -> make [] "inr"
-    | "exn" -> make [] "extensible_type"
-
-    (* Predefined exceptions *)
-    | "Match_failure" -> make ["OCaml"] "Match_failure"
-    | "Assert_failure" -> make ["OCaml"] "Assert_failure"
-    | "Invalid_argument" -> make ["OCaml"] "Invalid_argument"
-    | "Failure" -> make ["OCaml"] "Failure"
-    | "Not_found" -> make ["OCaml"] "Not_found"
-    | "Out_of_memory" -> make ["OCaml"] "Out_of_memory"
-    | "Stack_overflow" -> make ["OCaml"] "Stack_overflow"
-    | "Sys_error" -> make ["OCaml"] "Sys_error"
-    | "End_of_file" -> make ["OCaml"] "End_of_file"
-    | "Division_by_zero" -> make ["OCaml"] "Division_by_zero"
-    | "Sys_blocked_io" -> make ["OCaml"] "Sys_blocked_io"
-    | "Undefined_recursive_module" -> make ["OCaml"] "Undefined_recursive_module"
-    | _ -> return None
+  let default = renamed_path_name in
+  match (path, base) with
+  | (source :: name :: rest, _) ->
+    let* is_import = try_to_use source name in
+    begin match is_import with
+    | None -> return default
+    | Some import ->
+      if import then
+        make rest base
+      else
+        make (name :: rest) base
     end
-
-  (* Optional parameters *)
-  | ["*predef*"] ->
-    begin match base with
-    | "None" -> make [] "None"
-    | "Some" -> make [] "Some"
-    | _ -> return None
+  | ([source], name) ->
+    let* is_import = try_to_use source name in
+    begin match is_import with
+    | None -> return default
+    | Some _ -> make [] base
     end
-
-  (* Stdlib *)
-  | ["Stdlib"] ->
-    begin match base with
-    (* Exceptions *)
-    | "invalid_arg" -> make ["OCaml"; "Stdlib"] "invalid_arg"
-    | "failwith" -> make ["OCaml"; "Stdlib"] "failwith"
-    | "Exit" -> make ["OCaml"; "Stdlib"] "Exit"
-    (* Comparisons *)
-    | "op_eq" -> make [] "equiv_decb"
-    | "op_ltgt" -> make [] "nequiv_decb"
-    | "op_lt" -> make ["OCaml"; "Stdlib"] "lt"
-    | "op_gt" -> make ["OCaml"; "Stdlib"] "gt"
-    | "op_lteq" -> make ["OCaml"; "Stdlib"] "le"
-    | "op_gteq" -> make ["OCaml"; "Stdlib"] "ge"
-    | "compare" -> make ["OCaml"; "Stdlib"] "compare"
-    | "min" -> make ["OCaml"; "Stdlib"] "min"
-    | "max" -> make ["OCaml"; "Stdlib"] "max"
-    (* Boolean operations *)
-    | "not" -> make [] "negb"
-    | "op_andand" -> make [] "andb"
-    | "op_and" -> make [] "andb"
-    | "op_pipepipe" -> make [] "orb"
-    | "or" -> make [] "orb"
-    (* Integer arithmetic *)
-    | "op_tildeminus" -> make ["Z"] "opp"
-    | "op_tildeplus" -> make []  ""
-    | "succ" -> make ["Z"] "succ"
-    | "pred" -> make ["Z"] "pred"
-    | "op_plus" -> make ["Z"] "add"
-    | "op_minus" -> make ["Z"] "sub"
-    | "op_star" -> make ["Z"] "mul"
-    | "op_div" -> make ["Z"] "div"
-    | "__mod" -> make ["Z"] "modulo"
-    | "abs" -> make ["Z"] "abs"
-    (* Bitwise operations *)
-    | "land" -> make ["Z"] "land"
-    | "lor" -> make ["Z"] "lor"
-    | "lxor" -> make ["Z"] "lxor"
-    | "lsl" -> make ["Z"] "shiftl"
-    | "lsr" -> make ["Z"] "shiftr"
-    (* Floating-point arithmetic *)
-    (* String operations *)
-    | "op_caret" -> make ["String"] "append"
-    (* Character operations *)
-    | "int_of_char" -> make ["OCaml"; "Stdlib"] "int_of_char"
-    | "char_of_int" -> make ["OCaml"; "Stdlib"] "char_of_int"
-    (* Unit operations *)
-    | "ignore" -> make ["OCaml"; "Stdlib"] "ignore"
-    (* String conversion functions *)
-    | "string_of_bool" -> make ["OCaml"; "Stdlib"] "string_of_bool"
-    | "bool_of_string" -> make ["OCaml"; "Stdlib"] "bool_of_string"
-    | "string_of_int" -> make ["OCaml"; "Stdlib"] "string_of_int"
-    | "int_of_string" -> make ["OCaml"; "Stdlib"] "int_of_string"
-    (* Pair operations *)
-    | "fst" -> make [] "fst"
-    | "snd" -> make [] "snd"
-    (* List operations *)
-    | "op_at" -> make ["OCaml"; "Stdlib"] "app"
-    (* Input/output *)
-    (* Output functions on standard output *)
-    | "print_char" -> make ["OCaml"; "Stdlib"] "print_char"
-    | "print_string" -> make ["OCaml"; "Stdlib"] "print_string"
-    | "print_int" -> make ["OCaml"; "Stdlib"] "print_int"
-    | "print_endline" -> make ["OCaml"; "Stdlib"] "print_endline"
-    | "print_newline" -> make ["OCaml"; "Stdlib"] "print_newline"
-    (* Output functions on standard error *)
-    | "prerr_char" -> make ["OCaml"; "Stdlib"] "prerr_char"
-    | "prerr_string" -> make ["OCaml"; "Stdlib"] "prerr_string"
-    | "prerr_int" -> make ["OCaml"; "Stdlib"] "prerr_int"
-    | "prerr_endline" -> make ["OCaml"; "Stdlib"] "prerr_endline"
-    | "prerr_newline" -> make ["OCaml"; "Stdlib"] "prerr_newline"
-    (* Input functions on standard input *)
-    | "read_line" -> make ["OCaml"; "Stdlib"] "read_line"
-    | "read_int" -> make ["OCaml"; "Stdlib"] "read_int"
-    (* General output functions *)
-    (* General input functions *)
-    (* Operations on large files *)
-    (* References *)
-    (* Result type *)
-    | "result" -> make [] "sum"
-    (* Operations on format strings *)
-    (* Program termination *)
-    | _ -> return (Some path_name)
-    end
-
-  (* Bytes *)
-  | ["Stdlib"; "Bytes"] ->
-    begin match base with
-    | "cat" -> make ["String"] "append"
-    | "concat" -> make ["String"] "concat"
-    | "length" -> make ["String"] "length"
-    | "sub" -> make ["String"] "sub"
-    | _ -> return (Some path_name)
-    end
-
-  (* List *)
-  | ["Stdlib"; "List"] ->
-    begin match base with
-    | "exists" -> make ["OCaml"; "List"] "_exists"
-    | "exists2" -> make ["OCaml"; "List"] "_exists2"
-    | "length" -> make ["OCaml"; "List"] "length"
-    | "map" -> make ["List"] "map"
-    | "rev" -> make ["List"] "rev"
-    | _ -> return (Some path_name)
-    end
-
-  (* Seq *)
-  | ["Stdlib"; "Seq"] ->
-    begin match base with
-    | "t" -> make ["OCaml"; "Seq"] "t"
-    | _ -> return (Some path_name)
-    end
-
-  (* String *)
-  | ["Stdlib"; "String"] ->
-    begin match base with
-    | "length" -> make ["OCaml"; "String"] "length"
-    | _ -> return (Some path_name)
-    end
-
-  | _ ->
-    begin match (path, base) with
-    | (source :: name :: rest, _) ->
-      let* is_import = try_to_use source name in
-      begin match is_import with
-      | None -> return None
-      | Some import ->
-        if import then
-          make rest base
-        else
-          make (name :: rest) base
-      end
-    | ([source], name) ->
-      let* is_import = try_to_use source name in
-      begin match is_import with
-      | None -> return None
-      | Some _ -> make [] base
-      end
-    | _ -> return None
-    end
+  | _ -> return default
 
 let convert (path_name : t) : t Monad.t =
   try_convert path_name >>= fun conversion ->
@@ -407,6 +255,9 @@ let false_value : t =
 let true_value : t =
   { path = []; base = Name.Make "true" }
 
+let unit_value : t =
+  { path = []; base = Name.Make "tt" }
+
 let prefix_by_with (path_name : t) : t =
   let { path; base } = path_name in
   { path; base = Name.prefix_by_with base }
@@ -418,11 +269,18 @@ let compare_paths (path1 : Path.t) (path2 : Path.t) : int Monad.t =
   import_path path2 >>= fun path2 ->
   return (compare path1 path2)
 
-let to_string (x : t) : string =
-  String.concat "." (List.map Name.to_string (x.path @ [x.base]))
-
 let to_coq (x : t) : SmartPrint.t =
-  separate (!^ ".") (List.map Name.to_coq (x.path @ [x.base]))
+  !^ (to_string x)
+
+let to_name (is_value : bool) (x : t) : Name.t Monad.t =
+  let s =
+    to_string x |> String.map (fun c ->
+      if c = '.' then
+        '_'
+      else
+        c
+    ) in
+  Name.of_string is_value s
 
 let typ_of_variant (label : string) : t option Monad.t =
   let* configuration = get_configuration in
