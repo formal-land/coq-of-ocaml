@@ -89,10 +89,10 @@ let decode_tag
       let pat = if List.length args = 0
       then Some (Pattern.Variable constructor_name, typ)
       else begin match typ with
-        | Type.Variable _ ->
+        | Type.Variable _ | Type.Kind Kind.Tag _ ->
           let var = List.hd args in
           Some (build_constr_app [Pattern.Variable var], Variable var)
-        | SetTyp -> Some (build_constr_app [], SetTyp)
+        | Type.Kind Kind.Set -> Some (build_constr_app [], Kind Kind.Set)
         | Arrow (typ1,typ2) ->
           let v1 = List.nth args 0 in
           let v2 = List.nth args 1 in
@@ -122,7 +122,7 @@ let build_tags :
       typ_vars = [];
       args = [(tag_var, Type.Variable name)];
       structs = [];
-      typ = Some Type.SetTyp;
+      typ = Some (Type.Kind Kind.Set);
     } in
     let e = Exp.Match (Exp.Variable ((MixedPath.of_name tag_var), []), patterns, false) in
     let def : Exp.t option Exp.Definition.t = {

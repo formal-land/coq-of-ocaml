@@ -5,7 +5,7 @@ open Monad.Notations
 
 type t =
   | Variable of Name.t
-  | SetTyp
+  | Kind of Kind.t
   | Arrow of t * t
   | Sum of (string * t) list
   | Tuple of t list
@@ -25,17 +25,17 @@ let to_string : t -> string = function
   | Arrow _ -> "Arrow"
   | Sum _ -> "Sum"
   | Tuple _ -> "Tuple"
-  | SetTyp -> "Set"
   | Apply (mpath, _) -> MixedPath.to_string mpath
   | Package _ -> "Package"
   | ForallModule _ -> "ForallModule"
   | ForallTyps _ -> "ForallTyps"
   | FunTyps _ -> "FunTyps"
   | Error s -> "Error" ^ s
+  | Kind k -> Kind.to_string k
 
 let get_order (typ : t) : int =
   match typ with
-  | SetTyp -> 0
+  | Kind k -> 0
   | Variable _ -> 1
   | Arrow _ -> 2
   | Sum _ -> 3
@@ -114,16 +114,16 @@ let tag_constructor_of
 
 
 (* TODO: Rethink specializatin of tag types *)
-let typ_union (name : Name.t) typ1 typ2 =
+let typ_union (name : Name.t) typ1 typ2 : t option =
   match typ1, typ2 with
-  | SetTyp, t -> Some t
-  | t, SetTyp -> Some t
+  | Kind Kind.Set , t -> Some t
+  | t, Kind Kind.Set -> Some t
   | t, _ -> Some t
 
 let arg_num : t -> int = function
-  | SetTyp -> 0
+  | Kind Kind.Set -> 0
   | Apply (p, typs) -> List.length typs
-  | Variable x -> 1
+  | Variable _ | Kind Kind.Tag _ -> 1
   | ForallTyps (names, typ) -> 1
   | FunTyps (names, typ) -> 1
   | _ -> 2
@@ -220,7 +220,7 @@ let rec of_typ_expr_in_constr
     let* source_name = Name.of_string false source_name in
     let* generated_name = Name.of_string false generated_name in
     let typ = match constr with
-      | None -> SetTyp
+      | None -> Kind Kind.Set
       | Some path -> Variable (name_of_tags (Name.of_last_path path)) in
     let new_typ_vars = Name.Map.singleton generated_name typ in
     let (typ_vars, name) =
@@ -453,8 +453,8 @@ and existential_typs_of_typs (typs : Types.type_expr list)
 (** The free variables of a type. *)
 let rec typ_args_of_typ (typ : t) : Name.Set.t =
   match typ with
-  | Variable x -> Name.Set.singleton x
-  | SetTyp -> Name.Set.empty
+  | Variable x | Kind Kind.Tag x -> Name.Set.singleton x
+  | Kind Kind.Set-> Name.Set.empty
   | Arrow (typ1, typ2) -> typ_args_of_typs [typ1; typ2]
   | Sum typs -> typ_args_of_typs (List.map snd typs)
   | Tuple typs | Apply (_, typs) -> typ_args_of_typs typs
@@ -481,9 +481,9 @@ and typ_args_of_typs (typs : t list) : Name.Set.t =
     types. *)
 let rec local_typ_constructors_of_typ (typ : t) : Name.Set.t =
   match typ with
-  | Variable x -> Name.Set.singleton x
+  | Variable x | Kind Kind.Tag x -> Name.Set.singleton x
   | Arrow (typ1, typ2) -> local_typ_constructors_of_typs [typ1; typ2]
-  | SetTyp -> Name.Set.empty
+  | Kind Kind.Set -> Name.Set.empty
   | Sum typs -> local_typ_constructors_of_typs (List.map snd typs)
   | Tuple typs -> local_typ_constructors_of_typs typs
   | Apply (mixed_path, typs) ->
@@ -572,13 +572,13 @@ end
 let rec to_coq (subst : Subst.t option) (context : Context.t option) (typ : t)
   : SmartPrint.t =
   match typ with
-  | Variable x ->
+  | Variable x | Kind Kind.Tag x ->
     let x =
       match subst with
       | None -> x
       | Some subst -> subst.name x in
     Name.to_coq x
-  | SetTyp -> Pp.set
+  | Kind Kind.Set -> Pp.set
   | Arrow _ ->
     let (typ_xs, typ_y) = accumulate_nested_arrows typ in
     Context.parens context Context.Arrow @@ group (

@@ -254,7 +254,7 @@ let from_tags (tags : Type.tags) : Name.t * Type.t list * t =
   let (typs, items) = constructors |> List.map (fun (typ, (constructor_name, arg_names)) ->
       (typ,
        let vars_typ  = match typ with
-         | Type.Variable _ -> Type.SetTyp
+         | Type.Variable _ -> Type.Kind Kind.Set
          | Apply (mpath, _) ->
            (* FIXME: This will fail if mpath is an access *)
            let name = MixedPath.to_string mpath in

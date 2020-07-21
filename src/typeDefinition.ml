@@ -406,7 +406,7 @@ let to_coq_typs
     let arity = List.length constructor.res_typ_params + 1 in
     (* TODO: Can we fix universe inconsistencies if we change type_of_adts to Set? *)
     let type_of_adts = "Type" in
-    let inductive_typ = if is_tag then "Set" else type_of_adts in
+    let inductive_typ = if is_tag then "Type" else type_of_adts in
     let l = List.init arity (fun i ->
         if i = arity - 1
         then !^ inductive_typ
