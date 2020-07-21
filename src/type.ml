@@ -19,20 +19,6 @@ and arity_or_typ =
   | Arity of int
   | Typ of t
 
-
-let to_string : t -> string = function
-  | Variable _ -> "Var"
-  | Arrow _ -> "Arrow"
-  | Sum _ -> "Sum"
-  | Tuple _ -> "Tuple"
-  | Apply (mpath, _) -> MixedPath.to_string mpath
-  | Package _ -> "Package"
-  | ForallModule _ -> "ForallModule"
-  | ForallTyps _ -> "ForallTyps"
-  | FunTyps _ -> "FunTyps"
-  | Error s -> "Error" ^ s
-  | Kind k -> Kind.to_string k
-
 let get_order (typ : t) : int =
   match typ with
   | Kind k -> 0
@@ -109,7 +95,19 @@ let get_args_of
 let tag_constructor_of
     (name : Name.t)
     (typ : t) =
-  let typ_name = Name.of_string_raw @@ to_string typ in
+  let typ_name = match typ with
+    | Variable _ -> "Var"
+    | Arrow _ -> "Arrow"
+    | Sum _ -> "Sum"
+    | Tuple _ -> "Tuple"
+    | Apply (mpath, _) -> MixedPath.to_string mpath
+    | Package _ -> "Package"
+    | ForallModule _ -> "ForallModule"
+    | ForallTyps _ -> "ForallTyps"
+    | FunTyps _ -> "FunTyps"
+    | Error s -> "Error" ^ s
+    | Kind k -> Kind.to_string k in
+  let typ_name = Name.of_string_raw @@ typ_name in
   Name.suffix_by_tag @@ Name.snake_concat name typ_name
 
 
