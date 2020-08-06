@@ -179,9 +179,12 @@ let rec of_structure (structure : structure) : t list Monad.t =
           NotSupported
           "We do not support open on complex module expressions"
       end
-    | Tstr_module { mb_id; mb_expr; _ } ->
+    | Tstr_module { mb_id; mb_expr; mb_attributes; _ } ->
       let* name = Name.of_ident false mb_id in
-      of_module name mb_expr
+      let* has_plain_module_attribute =
+        let* attributes = Attribute.of_attributes mb_attributes in
+        return (Attribute.has_plain_module attributes) in
+      of_module name mb_expr has_plain_module_attribute
     | Tstr_modtype { mtd_type = None; _ } ->
       error_message
         (Error "abstract_module_type")
@@ -240,11 +243,11 @@ let rec of_structure (structure : structure) : t list Monad.t =
       get_include_items (Some path) reference mod_type
     | Tstr_include { incl_mod } ->
       let* include_name = Exp.get_include_name incl_mod in
-      let* module_definitionn = of_module include_name incl_mod in
+      let* module_definition = of_module include_name incl_mod false in
       let reference = PathName.of_name [] include_name in
       let* include_items =
         get_include_items None reference incl_mod.mod_type in
-      return (module_definitionn @ include_items)
+      return (module_definition @ include_items)
     (* We ignore attribute fields. *)
     | Tstr_attribute _ -> return [])) in
   Monad.List.fold_right
@@ -257,7 +260,9 @@ let rec of_structure (structure : structure) : t list Monad.t =
     ([], structure.str_final_env) >>= fun (structure, _) ->
   return structure
 
-and of_module (name : Name.t) (module_expr : module_expr)
+and of_module
+  (name : Name.t) (module_expr : module_expr)
+  (has_plain_module_attribute : bool)
   : t list Monad.t =
   let path =
     match module_expr.mod_desc with
@@ -267,17 +272,21 @@ and of_module (name : Name.t) (module_expr : module_expr)
     | _ -> None in
   let* is_first_class =
     IsFirstClassModule.is_module_typ_first_class module_expr.mod_type path in
-  match is_first_class with
-  | Found _ ->
+  match (is_first_class, has_plain_module_attribute) with
+  | (Found _, false) ->
     let* module_expr =
       Exp.of_module_expr
         Name.Map.empty module_expr (Some module_expr.mod_type) in
     return [ModuleExp (name, module_expr)]
-  | Not_found reason ->
+  | _ ->
     let* module_expr = of_module_expr name module_expr in
     begin match module_expr with
     | Some module_expr -> return [module_expr]
     | None ->
+      let reason =
+        match is_first_class with
+        | Not_found reason -> reason
+        | _ -> "plain module attribute" in
       raise
         []
         Module

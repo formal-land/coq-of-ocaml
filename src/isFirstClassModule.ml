@@ -96,12 +96,20 @@ let rec is_module_typ_first_class
   : maybe_found Monad.t =
   let* env = get_env in
   let* configuration = get_configuration in
-  let is_in_black_list =
+  let* is_in_black_list =
     match module_path with
-    | None -> false
+    | None -> return false
     | Some module_path ->
-      Configuration.is_in_first_class_module_backlist
-        configuration module_path in
+      let is_in_configuration_black_list =
+        Configuration.is_in_first_class_module_backlist
+          configuration module_path in
+      let* has_black_list_attribute =
+        match Env.find_module module_path env with
+        | { Types.md_attributes; _ } ->
+          let* attributes = Attribute.of_attributes md_attributes in
+          return (Attribute.has_plain_module attributes)
+        | exception _ -> return false in
+      return (is_in_configuration_black_list || has_black_list_attribute) in
   if is_in_black_list then
     return (Not_found "In blacklist")
   else match Mtype.scrape env module_typ with
