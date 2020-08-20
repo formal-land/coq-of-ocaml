@@ -1309,7 +1309,9 @@ let rec to_coq (paren : bool) (e : t) : SmartPrint.t =
   | Field (e, x) -> to_coq true e ^-^ !^ ".(" ^-^ PathName.to_coq x ^-^ !^ ")"
   | IfThenElse (e1, e2, e3) ->
     Pp.parens paren @@ nest (
-      !^ "if" ^^ to_coq false e1 ^^ !^ "then" ^^ newline ^^
+      group_all (
+        !^ "if" ^^ indent (to_coq false e1) ^^ !^ "then"
+      ) ^^ newline ^^
       indent (to_coq false e2) ^^ newline ^^
       !^ "else" ^^ newline ^^
       indent (to_coq false e3))
