@@ -9,7 +9,7 @@ module Header = struct
     typ_vars : Name.t list;
     args : (Name.t * Type.t) list;
     structs : string list;
-    typ : Type.t option }
+    typ : Type.t }
 
   let to_coq_structs (header : t) : SmartPrint.t =
     match header.structs with
@@ -657,20 +657,11 @@ and import_let_fun
         typ_vars = Name.Set.elements new_typ_vars;
         args = List.combine args_names args_typs;
         structs;
-        typ = Some e_body_typ
+        typ = e_body_typ
       } in
       return (Some (header, e_body))
     )
   ))) >>= fun cases ->
-  let is_rec =
-    is_rec &&
-    List.for_all
-      (fun ({ Header.args; _ }, _) ->
-        match args with
-        | [] -> false
-        | _ :: _ -> true
-      )
-      cases in
   let result = { Definition.is_rec = is_rec; cases } in
   match (at_top_level, result) with
   | (false, { is_rec = true; cases = _ :: _ :: _ }) ->
@@ -1247,9 +1238,7 @@ let rec to_coq (paren : bool) (e : t) : SmartPrint.t =
           )))
         )) ^^
         Header.to_coq_structs header ^^
-        (match header.Header.typ with
-        | None -> empty
-        | Some typ -> !^ ": " ^-^ Type.to_coq None None typ) ^-^
+        !^ ": " ^-^ Type.to_coq None None header.Header.typ ^-^
         !^ " :=" ^^ newline ^^
         indent (
           match e with

@@ -12,41 +12,66 @@ module Value = struct
     match value.Exp.Definition.cases with
     | [] -> empty
     | _ :: _ ->
-      separate (newline ^^ newline) (value.Exp.Definition.cases |> List.mapi (fun index (header, e) ->
-        let firt_case = index = 0 in
-        nest (
-          begin if firt_case then
-            begin if value.Exp.Definition.is_rec then
-              !^ "Fixpoint"
-            else
-              !^ "Definition"
-            end
-          else
-            !^ "with"
-          end ^^
+      let (axiom_cases, cases) =
+        List.fold_right
+          (fun case (axiom_cases, cases) ->
+            match case with
+            | (header, None) -> (header :: axiom_cases, cases)
+            | (header, Some e) -> (axiom_cases, (header, e) :: cases)
+          )
+          value.Exp.Definition.cases
+          ([], []) in
+      separate (newline ^^ newline) (
+        (axiom_cases |> List.map (fun header ->
           let { Exp.Header.name; typ_vars; args; typ; _ } = header in
-          Name.to_coq name ^^
-          begin match typ_vars with
-          | [] -> empty
-          | _ :: _ ->
-            braces @@ group (separate space (List.map Name.to_coq typ_vars) ^^
-            !^ ":" ^^ Pp.set)
-          end ^^
-          group (separate space (args |> List.map (fun (x, t) ->
-            parens @@ nest (Name.to_coq x ^^ !^ ":" ^^ Type.to_coq None None t)
-          ))) ^^
-          Exp.Header.to_coq_structs header ^^
-          begin match typ with
-          | None -> empty
-          | Some typ -> !^ ": " ^-^ Type.to_coq None None typ
-          end ^-^
-          !^ (match typ with None -> ":=" | _ -> " :=") ^^
-          begin match e with
-          | None -> !^ "axiom"
-          | Some e -> Exp.to_coq false e
-          end
-        )
-      )) ^-^ !^ "."
+          nest (
+            !^ "Axiom" ^^ Name.to_coq name ^^ !^ ":" ^^
+            begin match typ_vars with
+            | [] -> empty
+            | _ :: _ ->
+              !^ "forall" ^^
+              braces (group (
+                separate space (List.map Name.to_coq typ_vars) ^^ !^ ":" ^^ Pp.set
+              )) ^-^ !^ ","
+            end ^^
+            Type.to_coq None None typ ^-^
+            !^ "."
+          )
+        )) @ (cases |> List.mapi (fun index (header, e) ->
+          let firt_case = index = 0 in
+          let last_case = index = List.length cases - 1 in
+          nest (
+            begin if firt_case then
+              begin if value.Exp.Definition.is_rec then
+                !^ "Fixpoint"
+              else
+                !^ "Definition"
+              end
+            else
+              !^ "with"
+            end ^^
+            let { Exp.Header.name; typ_vars; args; typ; _ } = header in
+            Name.to_coq name ^^
+            begin match typ_vars with
+            | [] -> empty
+            | _ :: _ ->
+              braces @@ group (separate space (List.map Name.to_coq typ_vars) ^^
+              !^ ":" ^^ Pp.set)
+            end ^^
+            group (separate space (args |> List.map (fun (x, t) ->
+              parens @@ nest (Name.to_coq x ^^ !^ ":" ^^ Type.to_coq None None t)
+            ))) ^^
+            Exp.Header.to_coq_structs header ^^
+            !^ ": " ^-^ Type.to_coq None None typ ^-^ !^ " :=" ^^
+            Exp.to_coq false e ^-^
+            begin if last_case then
+              !^"."
+            else
+              empty
+            end
+          )
+        ))
+      )
 end
 
 (** A structure. *)
