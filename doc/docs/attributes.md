@@ -212,6 +212,68 @@ generates:
 Parameter num : Set.
 ```
 
+## coq_plain_module
+We may prefer to translate a module to a plain Coq module rather than a record. The `[@coq_plain_module]` attribute requires a module to be translated as a plain Coq module. For example:
+```ocaml
+module type T = sig
+  type t
+
+  val v : t
+end
+
+module M = struct
+  type t = int
+
+  let v = 12
+end
+```
+translates to:
+```coq
+Module T.
+  Record signature {t : Set} : Set := {
+    t := t;
+    v : t;
+  }.
+End T.
+
+Definition M :=
+  let t : Set := int in
+  let v := 12 in
+  existT (A := unit) (fun _ => _) tt
+    {|
+      T.v := v
+    |}.
+```
+With the `[@coq_plain_module]` attribute we translate:
+```ocaml
+module type T = sig
+  type t
+
+  val v : t
+end
+
+module[@coq_plain_module] M = struct
+  type t = int
+
+  let v = 12
+end
+```
+to:
+```coq
+Module T.
+  Record signature {t : Set} : Set := {
+    t := t;
+    v : t;
+  }.
+End T.
+
+Module M.
+  Definition t : Set := int.
+  
+  Definition v : int := 12.
+End M.
+```
+
 ## coq_struct
 For recursive definitions, we can force the name of the parameter on which we do structural recursion using the attribute `[@coq_struct "name"]`. This has the same effect as the `{struct name}` keyword in Coq. For example, we translate:
 ```ocaml
