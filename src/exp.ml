@@ -232,7 +232,7 @@ let rec of_expression (typ_vars : Name.t Name.Map.t) (e : expression)
   match e.exp_desc with
   | Texp_ident (path, loc, _) ->
     let implicits = Attribute.get_implicits attributes in
-    MixedPath.of_path true path (Some loc.txt) >>= fun x ->
+    let* x = MixedPath.of_path true path (Some loc.txt) in
     return (Variable (x, implicits))
   | Texp_constant constant ->
     Constant.of_constant constant >>= fun constant ->
@@ -276,19 +276,114 @@ let rec of_expression (typ_vars : Name.t Name.Map.t) (e : expression)
         return (Some e_x)
       | None -> return None
     )) >>= fun e_xs ->
-    let normal_apply = Apply (e_f, e_xs) in
-    begin match (e_f, e_xs) with
-    | (
-        Variable (MixedPath.PathName path_name, []),
-        [e1; Function (x, e2)]
-      ) ->
-      let* configuration = get_configuration in
-      let name = PathName.to_string path_name in
-      begin match Configuration.is_monadic_operator configuration name with
-      | None -> return normal_apply
-      | Some let_symbol -> return (LetVar (Some let_symbol, x, [], e1, e2))
-      end
-    | _ -> return normal_apply
+    (* We consider the OCaml's [@@] and [|>] operators as syntactic sugar. *)
+    let (e_f, e_xs) =
+      match (e_f, e_xs) with
+      | (
+          Variable (
+            MixedPath.PathName {
+              PathName.path = [Name.Make ("Pervasives" | "Stdlib")];
+              base = Name.Make "op_atat"
+            },
+            []
+          ),
+          [f; x]
+        ) ->
+        (f, [x])
+      | (
+          Variable (
+            MixedPath.PathName {
+              PathName.path = [Name.Make ("Pervasives" | "Stdlib")];
+              base = Name.Make "op_pipegt"
+            },
+            []
+          ),
+          [x; f]
+        ) ->
+        (f, [x])
+      | _ -> (e_f, e_xs) in
+    (* We introduce a monadic notation according to the configuration. *)
+    let* configuration = get_configuration in
+    let apply_with_let =
+      match (e_f, e_xs) with
+      | (
+          Variable (MixedPath.PathName path_name, []),
+          [e1; Function (x, e2)]
+        ) ->
+        let name = PathName.to_string path_name in
+        begin match Configuration.is_monadic_let configuration name with
+        | Some let_symbol -> Some (LetVar (Some let_symbol, x, [], e1, e2))
+        | None -> None
+        end
+      | _ -> None in
+    let apply_with_let_return =
+      match (e_f, e_xs) with
+      | (
+          Variable (MixedPath.PathName path_name, []),
+          [e1; Function (x, e2)]
+        ) ->
+        let name = PathName.to_string path_name in
+        begin match Configuration.is_monadic_let_return configuration name with
+        | Some (let_symbol, return_notation) ->
+          let return_operator =
+            Variable (
+              MixedPath.of_name (Name.of_string_raw return_notation),
+              []
+            ) in
+          Some (
+            LetVar (Some let_symbol, x, [], e1, Apply (return_operator, [e2]))
+          )
+        | None -> None
+        end
+      | _ -> None in
+    let apply_with_return =
+      match (e_f, e_xs) with
+      | (
+          Variable (MixedPath.PathName path_name, []),
+          es
+        ) ->
+        let name = PathName.to_string path_name in
+        begin match Configuration.is_monadic_return configuration name with
+        | Some return_notation ->
+          Some (Apply(
+            Variable (
+              MixedPath.of_name (Name.of_string_raw return_notation),
+              []
+            ),
+            es
+          ))
+        | None -> None
+        end
+      | _ -> None in
+    let apply_with_return_let =
+      match (e_f, e_xs) with
+      | (
+          Variable (MixedPath.PathName path_name, []),
+          [e1; Function (x, e2)]
+        ) ->
+        let name = PathName.to_string path_name in
+        begin match Configuration.is_monadic_return_let configuration name with
+        | Some (return_notation, let_symbol) ->
+          let return_operator =
+            Variable (
+              MixedPath.of_name (Name.of_string_raw return_notation),
+              []
+            ) in
+          Some (
+            LetVar (Some let_symbol, x, [], Apply (return_operator, [e1]), e2)
+          )
+        | None -> None
+        end
+      | _ -> None in
+    let applies = [
+      apply_with_let;
+      apply_with_let_return;
+      apply_with_return;
+      apply_with_return_let;
+    ] in
+    begin match Util.List.find_map (fun x -> x) applies with
+    | Some apply -> return apply
+    | None -> return (Apply (e_f, e_xs))
     end
   | Texp_match (e, cases, _) ->
     let is_gadt_match =
@@ -1140,32 +1235,7 @@ let rec to_coq (paren : bool) (e : t) : SmartPrint.t =
       end
     end
   | Apply (e_f, e_xs) ->
-    begin match (e_f, e_xs) with
-    | (
-        Variable (
-          MixedPath.PathName {
-            PathName.path = [Name.Make "Stdlib"];
-            base = Name.Make "op_atat"
-          },
-          []
-        ),
-        [f; x]
-      ) ->
-      to_coq paren (Apply (f, [x]))
-    | (
-        Variable (
-          MixedPath.PathName {
-            PathName.path = [Name.Make "Stdlib"];
-            base = Name.Make "op_pipegt"
-          },
-          []
-        ),
-        [x; f]
-      ) ->
-      to_coq paren (Apply (f, [x]))
-    | _ ->
-      Pp.parens paren @@ nest @@ (separate space (List.map (to_coq true) (e_f :: e_xs)))
-    end
+    Pp.parens paren @@ nest @@ (separate space (List.map (to_coq true) (e_f :: e_xs)))
   | Function (x, e) ->
     Pp.parens paren @@ nest (!^ "fun" ^^ Name.to_coq x ^^ !^ "=>" ^^ to_coq false e)
   | LetVar (let_symbol, x, typ_params, e1, e2) ->
