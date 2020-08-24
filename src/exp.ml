@@ -1404,7 +1404,7 @@ let rec to_coq (paren : bool) (e : t) : SmartPrint.t =
                 PathName.to_coq x ^^
                 begin match nb_free_vars with
                 | 0 -> empty
-                | _ -> braces (nest (separate space (Pp.to_coq_n_underscores nb_free_vars)))
+                | _ -> nest (separate space (Pp.to_coq_n_underscores nb_free_vars))
                 end
               ) ^^
               !^ ":="
