@@ -12,41 +12,66 @@ module Value = struct
     match value.Exp.Definition.cases with
     | [] -> empty
     | _ :: _ ->
-      separate (newline ^^ newline) (value.Exp.Definition.cases |> List.mapi (fun index (header, e) ->
-        let firt_case = index = 0 in
-        nest (
-          begin if firt_case then
-            begin if value.Exp.Definition.is_rec then
-              !^ "Fixpoint"
-            else
-              !^ "Definition"
-            end
-          else
-            !^ "with"
-          end ^^
+      let (axiom_cases, cases) =
+        List.fold_right
+          (fun case (axiom_cases, cases) ->
+            match case with
+            | (header, None) -> (header :: axiom_cases, cases)
+            | (header, Some e) -> (axiom_cases, (header, e) :: cases)
+          )
+          value.Exp.Definition.cases
+          ([], []) in
+      separate (newline ^^ newline) (
+        (axiom_cases |> List.map (fun header ->
           let { Exp.Header.name; typ_vars; args; typ; _ } = header in
-          Name.to_coq name ^^
-          begin match typ_vars with
-          | [] -> empty
-          | _ :: _ ->
-            braces @@ group (separate space (List.map Name.to_coq typ_vars) ^^
-            !^ ":" ^^ Pp.set)
-          end ^^
-          group (separate space (args |> List.map (fun (x, t) ->
-            parens @@ nest (Name.to_coq x ^^ !^ ":" ^^ Type.to_coq None None t)
-          ))) ^^
-          Exp.Header.to_coq_structs header ^^
-          begin match typ with
-          | None -> empty
-          | Some typ -> !^ ": " ^-^ Type.to_coq None None typ
-          end ^-^
-          !^ (match typ with None -> ":=" | _ -> " :=") ^^
-          begin match e with
-          | None -> !^ "axiom"
-          | Some e -> Exp.to_coq false e
-          end
-        )
-      )) ^-^ !^ "."
+          nest (
+            !^ "Axiom" ^^ Name.to_coq name ^^ !^ ":" ^^
+            begin match typ_vars with
+            | [] -> empty
+            | _ :: _ ->
+              !^ "forall" ^^
+              braces (group (
+                separate space (List.map Name.to_coq typ_vars) ^^ !^ ":" ^^ Pp.set
+              )) ^-^ !^ ","
+            end ^^
+            Type.to_coq None None typ ^-^
+            !^ "."
+          )
+        )) @ (cases |> List.mapi (fun index (header, e) ->
+          let firt_case = index = 0 in
+          let last_case = index = List.length cases - 1 in
+          nest (
+            begin if firt_case then
+              begin if value.Exp.Definition.is_rec then
+                !^ "Fixpoint"
+              else
+                !^ "Definition"
+              end
+            else
+              !^ "with"
+            end ^^
+            let { Exp.Header.name; typ_vars; args; typ; _ } = header in
+            Name.to_coq name ^^
+            begin match typ_vars with
+            | [] -> empty
+            | _ :: _ ->
+              braces @@ group (separate space (List.map Name.to_coq typ_vars) ^^
+              !^ ":" ^^ Pp.set)
+            end ^^
+            group (separate space (args |> List.map (fun (x, t) ->
+              parens @@ nest (Name.to_coq x ^^ !^ ":" ^^ Type.to_coq None None t)
+            ))) ^^
+            Exp.Header.to_coq_structs header ^^
+            !^ ": " ^-^ Type.to_coq None None typ ^-^ !^ " :=" ^^
+            Exp.to_coq false e ^-^
+            begin if last_case then
+              !^"."
+            else
+              empty
+            end
+          )
+        ))
+      )
 end
 
 (** A structure. *)
@@ -179,9 +204,12 @@ let rec of_structure (structure : structure) : t list Monad.t =
           NotSupported
           "We do not support open on complex module expressions"
       end
-    | Tstr_module { mb_id; mb_expr; _ } ->
+    | Tstr_module { mb_id; mb_expr; mb_attributes; _ } ->
       let* name = Name.of_ident false mb_id in
-      of_module name mb_expr
+      let* has_plain_module_attribute =
+        let* attributes = Attribute.of_attributes mb_attributes in
+        return (Attribute.has_plain_module attributes) in
+      of_module name mb_expr has_plain_module_attribute
     | Tstr_modtype { mtd_type = None; _ } ->
       error_message
         (Error "abstract_module_type")
@@ -240,11 +268,11 @@ let rec of_structure (structure : structure) : t list Monad.t =
       get_include_items (Some path) reference mod_type
     | Tstr_include { incl_mod } ->
       let* include_name = Exp.get_include_name incl_mod in
-      let* module_definitionn = of_module include_name incl_mod in
+      let* module_definition = of_module include_name incl_mod false in
       let reference = PathName.of_name [] include_name in
       let* include_items =
         get_include_items None reference incl_mod.mod_type in
-      return (module_definitionn @ include_items)
+      return (module_definition @ include_items)
     (* We ignore attribute fields. *)
     | Tstr_attribute _ -> return [])) in
   Monad.List.fold_right
@@ -257,7 +285,9 @@ let rec of_structure (structure : structure) : t list Monad.t =
     ([], structure.str_final_env) >>= fun (structure, _) ->
   return structure
 
-and of_module (name : Name.t) (module_expr : module_expr)
+and of_module
+  (name : Name.t) (module_expr : module_expr)
+  (has_plain_module_attribute : bool)
   : t list Monad.t =
   let path =
     match module_expr.mod_desc with
@@ -267,17 +297,21 @@ and of_module (name : Name.t) (module_expr : module_expr)
     | _ -> None in
   let* is_first_class =
     IsFirstClassModule.is_module_typ_first_class module_expr.mod_type path in
-  match is_first_class with
-  | Found _ ->
+  match (is_first_class, has_plain_module_attribute) with
+  | (Found _, false) ->
     let* module_expr =
       Exp.of_module_expr
         Name.Map.empty module_expr (Some module_expr.mod_type) in
     return [ModuleExp (name, module_expr)]
-  | Not_found reason ->
+  | _ ->
     let* module_expr = of_module_expr name module_expr in
     begin match module_expr with
     | Some module_expr -> return [module_expr]
     | None ->
+      let reason =
+        match is_first_class with
+        | Not_found reason -> reason
+        | _ -> "plain module attribute" in
       raise
         []
         Module

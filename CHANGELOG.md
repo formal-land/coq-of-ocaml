@@ -1,4 +1,6 @@
 ## [Unreleased]
+* Add the configuration options `monadic_lets` (renaming of `monadic_bind`), `monadic_let_returns`, `monadic_rets` and `monadic_ret_lets`.
+* Add a `@coq_plain_module` attribute to force a module to be compiled as a plain module.
 * Add the configuration option `renaming_rules`.
 * Add support for generative functors (using functors with a `unit` parameter).
 * Add a mandatory string parameter to the `@coq_axiom` attribute in order to give a reason for the axiom.

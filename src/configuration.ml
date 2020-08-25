@@ -20,6 +20,14 @@ module MonadicOperator = struct
   }
 end
 
+module MonadicOperators = struct
+  type t = {
+    bind : string;
+    name : string;
+    return : string;
+  }
+end
+
 module RenamingRule = struct
   type t = {
     source : string;
@@ -44,7 +52,10 @@ type t = {
   file_name : string;
   first_class_module_path_blacklist : string list;
   head_suffix : string;
-  monadic_operators : MonadicOperator.t list;
+  monadic_lets : MonadicOperator.t list;
+  monadic_let_returns : MonadicOperators.t list;
+  monadic_returns : MonadicOperator.t list;
+  monadic_return_lets : MonadicOperators.t list;
   renaming_rules : RenamingRule.t list;
   require : Import.t list;
   require_import : Import.t list;
@@ -66,7 +77,10 @@ let default (file_name : string) : t = {
   file_name;
   first_class_module_path_blacklist = [];
   head_suffix = "";
-  monadic_operators = [];
+  monadic_lets = [];
+  monadic_let_returns = [];
+  monadic_returns = [];
+  monadic_return_lets = [];
   renaming_rules =
     ConfigurationRenaming.rules |>
     List.map (fun (source, target) -> { RenamingRule.source; target });
@@ -116,14 +130,43 @@ let is_in_first_class_module_backlist (configuration : t) (path : Path.t)
     let path = String.concat "." path in
     List.mem path configuration.first_class_module_path_blacklist
 
-let is_monadic_operator (configuration : t) (name : string) : string option =
+let is_monadic_let (configuration : t) (name : string) : string option =
   let monadic_operator =
     List.find_opt
       (fun { MonadicOperator.name = name'; _ } -> name' = name)
-      configuration.monadic_operators in
+      configuration.monadic_lets in
   match monadic_operator with
   | None -> None
   | Some { MonadicOperator.notation; _ } -> Some notation
+
+let is_monadic_let_return (configuration : t) (name : string)
+  : (string * string) option =
+  let monadic_operator =
+    List.find_opt
+      (fun { MonadicOperators.name = name'; _ } -> name' = name)
+      configuration.monadic_let_returns in
+  match monadic_operator with
+  | None -> None
+  | Some { MonadicOperators.bind; return; _ } -> Some (bind, return)
+
+let is_monadic_return (configuration : t) (name : string) : string option =
+  let monadic_operator =
+    List.find_opt
+      (fun { MonadicOperator.name = name'; _ } -> name' = name)
+      configuration.monadic_returns in
+  match monadic_operator with
+  | None -> None
+  | Some { MonadicOperator.notation; _ } -> Some notation
+
+let is_monadic_return_let (configuration : t) (name : string)
+  : (string * string) option =
+  let monadic_operator =
+    List.find_opt
+      (fun { MonadicOperators.name = name'; _ } -> name' = name)
+      configuration.monadic_return_lets in
+  match monadic_operator with
+  | None -> None
+  | Some { MonadicOperators.bind; return; _ } -> Some (bind, return)
 
 let is_in_renaming_rule (configuration : t) (path : string) : string option =
   configuration.renaming_rules |>
@@ -245,14 +288,38 @@ let of_json (file_name : string) (json : Yojson.Basic.t) : t =
         | "head_suffix" ->
           let entry = get_string "head_suffix" entry in
           {configuration with head_suffix = entry}
-        | "monadic_operators" ->
+        | "monadic_lets" ->
           let entry =
             entry |>
-            get_string_couple_list "monadic_operators" |>
+            get_string_couple_list "monadic_lets" |>
             List.map (fun (name, notation) ->
               { MonadicOperator.name; notation }
             ) in
-          {configuration with monadic_operators = entry}
+          {configuration with monadic_lets = entry}
+        | "monadic_let_returns" ->
+          let entry =
+            entry |>
+            get_string_triple_list "monadic_let_returns" |>
+            List.map (fun (name, bind, return) ->
+              { MonadicOperators.bind; name; return }
+            ) in
+          {configuration with monadic_let_returns = entry}
+        | "monadic_returns" ->
+          let entry =
+            entry |>
+            get_string_couple_list "monadic_returns" |>
+            List.map (fun (name, notation) ->
+              { MonadicOperator.name; notation }
+            ) in
+          {configuration with monadic_returns = entry}
+        | "monadic_return_lets" ->
+          let entry =
+            entry |>
+            get_string_triple_list "monadic_return_lets" |>
+            List.map (fun (name, bind, return) ->
+              { MonadicOperators.bind; name; return }
+            ) in
+          {configuration with monadic_return_lets = entry}
         | "renaming_rules" ->
           let entry =
             entry |>

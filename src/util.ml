@@ -14,6 +14,15 @@ module List = struct
       | None -> filter_map f l
       | Some x -> x :: filter_map f l
       end
+
+  let rec find_map (f : 'a -> 'b option) (l : 'a list) : 'b option =
+    match l with
+    | [] -> None
+    | x :: l ->
+      begin match f x with
+      | None -> find_map f l
+      | Some _ as y -> y
+      end
 end
 
 module Option = struct

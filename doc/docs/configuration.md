@@ -203,10 +203,10 @@ A string to add in the header of each file.
 #### Explanation
 We can use this option to add some default imports, or turn on some notations or flags.
 
-## monadic_operators
+## monadic_lets
 #### Example
 ```
-"monadic_operators": [
+"monadic_lets": [
   ["Error_monad.op_gtgteq", "let="],
   ["Error_monad.op_gtgteqquestion", "let=?"],
   ["Error_monad.op_gtgtquestion", "let?"]
@@ -214,7 +214,7 @@ We can use this option to add some default imports, or turn on some notations or
 ```
 
 #### Value
-A list of couples of a monadic operator name and a monadic notation to use by coq-of-ocaml. You still have to define the notations somewhere, such as:
+A list of couples of a monadic bind name and a monadic notation to use by coq-of-ocaml. You still have to define the notations somewhere, such as:
 ```coq
 Notation "'let?' x ':=' X 'in' Y" :=
   (Error_monad.op_gtgtquestion X (fun x => Y))
@@ -243,6 +243,99 @@ Definition operate (x : string) : int :=
 ```
 Note that you can also use the monadic notation in OCaml with the [binding operators](https://caml.inria.fr/pub/docs/manual-ocaml/bindingops.html).
 
+## monadic_let_returns
+#### Example
+```
+"monadic_let_returns": [
+  ["Error_monad.op_gtpipeeq", "let=", "return="],
+  ["Error_monad.op_gtpipeeqquestion", "let=?", "return=?"],
+  ["Error_monad.op_gtpipequestion", "let?", "return?"]
+]
+```
+
+#### Value
+A list of triples of a function name, a monadic notation for a binder and a return function.
+
+#### Explanation
+This allows to rewrite a monadic map operator as a combination of a monadic `let` and `return`. For example, we can translate:
+```ocaml
+(* map : 'a m -> ('a -> 'b) -> 'b m *)
+(* f : 'a m -> 'a m *)
+
+let example x =
+  map (f x) (fun x -> x + 1)
+```
+to:
+```coq
+Definition example (x : m int) : m int :=
+  let! x := f x in
+  return! (Z.add x 1).
+```
+
+## monadic_returns
+#### Example
+```
+"monadic_returns": [
+  ["Lwt.__return", "return="],
+  ["Error_monad.__return", "return=?"],
+  ["Error_monad.ok", "return?"]
+]
+```
+
+#### Value
+A list of couples of a function name and a return function.
+
+#### Explanation
+This allows to rewrite a return function as a return operator. For example, we can rewrite:
+```ocaml
+type 'a m = 'a * int
+
+let return (x : 'a) : 'a m =
+  (x, 0)
+
+let incr x =
+  return (x + 1)
+```
+to:
+```coq
+Definition m (a : Set) : Set := a * int.
+
+Definition __return {a : Set} (x : a) : m a := (x, 0).
+
+Definition incr (x : int) : m int := return! (Z.add x 1).
+```
+To define we return notation, we use:
+```coq
+Notation "return! X" := (__return X) (at level 20).
+```
+We add this notation by hand, as opposed to generate it in with coq-of-ocaml. Note that we use a notation for the return operator applied to some argument `X`. This is to have a correct syntax highlighting in the generated documentation with `coqdoc`. The following notation:
+```coq
+Notation "return!" := __return.
+```
+would not generate the correct coloration with our current Coq version (8.12).
+
+## monadic_return_lets
+#### Example
+```
+"monadic_return_lets": [
+  ["Error_monad.op_gtgtquestioneq", "return=", "let=?"]
+]
+```
+
+#### Value
+A list of triples of a function name, a return function and a monadic notation for a binder.
+
+#### Explanation
+This allows to rewrite a monadic code with a special operator of the form:
+```ocaml
+operator e1 (fun x -> e2)
+```
+to:
+```coq
+let! x := return? e1 in
+e2
+```
+
 ## renaming_rules
 #### Example
 ```
@@ -257,7 +350,7 @@ Note that you can also use the monadic notation in OCaml with the [binding opera
 A list of couple of values, with a name and a name to rename to while doing the translation in Coq.
 
 #### Explanation
-We may want to systematically rename some of the OCaml values to their counterpart in Coq. This rule applies to anything which has a name (value, type, module, constructor, ...). coq-of-ocaml already knows some renaming rules, but it is possible to be more specific with this option.
+We may want to systematically rename some of the OCaml values to their counterpart in Coq. This rule applies to anything which has a name (value, type, module, constructor, ...). coq-of-ocaml already knows some renaming rules for the OCaml's standard library, but it is possible to add more with this option.
 
 ## require
 #### Example

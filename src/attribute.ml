@@ -9,6 +9,7 @@ type t =
   | MatchGadtWithResult
   | MatchWithDefault
   | Phantom
+  | PlainModule
   | Struct of string
 
 let of_payload_string
@@ -55,6 +56,7 @@ let of_attributes (attributes : Typedtree.attributes) : t list Monad.t =
     | "coq_match_gadt" -> return (Some MatchGadt)
     | "coq_match_gadt_with_result" -> return (Some MatchGadtWithResult)
     | "coq_match_with_default" -> return (Some MatchWithDefault)
+    | "coq_plain_module" -> return (Some PlainModule)
     | "coq_phantom" -> return (Some Phantom)
     | "coq_struct" ->
       let error_message = "Give the name of the parameter to recurse on." in
@@ -102,6 +104,12 @@ let has_match_with_default (attributes : t list) : bool =
 let has_phantom (attributes : t list) : bool =
   attributes |> List.exists (function
     | Phantom -> true
+    | _ -> false
+  )
+
+let has_plain_module (attributes : t list) : bool =
+  attributes |> List.exists (function
+    | PlainModule -> true
     | _ -> false
   )
 

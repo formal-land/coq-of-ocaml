@@ -7,6 +7,6 @@ Local Open Scope Z_scope.
 Local Open Scope type_scope.
 Import ListNotations.
 
-Definition show {a : Set} : a -> string := axiom.
+Axiom show : forall {a : Set}, a -> string.
 
-Definition recursive {a : Set} : a -> string := axiom.
+Axiom recursive : forall {a : Set}, a -> string.

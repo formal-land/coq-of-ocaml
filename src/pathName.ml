@@ -35,44 +35,45 @@ let try_to_use (head : string) (name : string) : bool option Monad.t =
    to be converted, as conversion also means keeping the name as it (without
    taking into accounts that the stdlib was open). *)
 let try_convert (path_name : t) : t option Monad.t =
-  let make path base = return (Some (__make path base)) in
-  let* renamed_path_name =
-    let* configuration = get_configuration in
-    let path_name_rewrite =
-      Configuration.is_in_renaming_rule configuration (to_string path_name) in
-    match path_name_rewrite with
-    | Some path_name ->
-      begin match List.rev (String.split_on_char '.' path_name) with
-      | [] -> failwith "Unexpected empty list"
-      | base :: rev_path -> make (List.rev rev_path) base
-      end
-    | None ->
-      begin match path_name.path with
-      | Name.Make "Stdlib" :: _ -> return (Some path_name)
-      | _ -> return None
-      end in
-  let { path; base } = Option.value renamed_path_name ~default:path_name in
+  let make path base =
+    return (Some (__make path base)) in
+  let { path; base } = path_name in
   let path = path |> List.map Name.to_string in
   let base = Name.to_string base in
-  let default = renamed_path_name in
-  match (path, base) with
-  | (source :: name :: rest, _) ->
-    let* is_import = try_to_use source name in
-    begin match is_import with
-    | None -> return default
-    | Some import ->
-      if import then
-        make rest base
-      else
-        make (name :: rest) base
+  let* renamed_path_name =
+    match (path, base) with
+    | (source :: name :: rest, _) ->
+      let* is_import = try_to_use source name in
+      begin match is_import with
+      | None -> return None
+      | Some import ->
+        if import then
+          make rest base
+        else
+          make (name :: rest) base
+      end
+    | ([source], name) ->
+      let* is_import = try_to_use source name in
+      begin match is_import with
+      | None -> return None
+      | Some _ -> make [] base
+      end
+    | _ -> return None in
+  let* configuration = get_configuration in
+  let path_name_rewrite =
+    Configuration.is_in_renaming_rule configuration
+      (to_string (Option.value renamed_path_name ~default:path_name)) in
+  match path_name_rewrite with
+  | Some path_name ->
+    begin match List.rev (String.split_on_char '.' path_name) with
+    | [] -> failwith "Unexpected empty list"
+    | base :: rev_path -> make (List.rev rev_path) base
     end
-  | ([source], name) ->
-    let* is_import = try_to_use source name in
-    begin match is_import with
-    | None -> return default
-    | Some _ -> make [] base
+  | None ->
+    begin match path_name.path with
+    | Name.Make "Stdlib" :: _ -> return (Some path_name)
+    | _ -> return renamed_path_name
     end
-  | _ -> return default
 
 let convert (path_name : t) : t Monad.t =
   try_convert path_name >>= fun conversion ->
