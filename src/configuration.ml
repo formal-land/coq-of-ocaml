@@ -127,7 +127,7 @@ let is_in_first_class_module_backlist (configuration : t) (path : Path.t)
   match List.rev (Path.to_string_list path) with
   | [] -> false
   | _ :: path ->
-    let path = String.concat "." path in
+    let path = String.concat "." (List.rev path) in
     List.mem path configuration.first_class_module_path_blacklist
 
 let is_monadic_let (configuration : t) (name : string) : string option =
