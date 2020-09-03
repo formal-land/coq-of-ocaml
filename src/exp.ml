@@ -224,6 +224,18 @@ let build_module
     ) in
   return (Module (module_typ_params, fields))
 
+let rec smart_return (operator : string) (e : t) : t =
+  match e with
+  | LetVar (None, x, typ_params, e1, e2) ->
+    LetVar (None, x, typ_params, e1, smart_return operator e2)
+  | Match (e, cases, is_with_default_case) ->
+    let cases =
+      cases |> List.map (fun (p, existential_cast, e) ->
+        (p, existential_cast, smart_return operator e)
+      ) in
+    Match (e, cases, is_with_default_case)
+  | _ -> Return (operator, e)
+
 (** Import an OCaml expression. *)
 let rec of_expression (typ_vars : Name.t Name.Map.t) (e : expression)
   : t Monad.t =
@@ -326,9 +338,9 @@ let rec of_expression (typ_vars : Name.t Name.Map.t) (e : expression)
         let name = PathName.to_string path_name in
         begin match Configuration.is_monadic_let_return configuration name with
         | Some (let_symbol, return_notation) ->
-          Some (
-            LetVar (Some let_symbol, x, [], e1, Return (return_notation, e2))
-          )
+          Some (LetVar (
+            Some let_symbol, x, [], e1, smart_return return_notation e2
+          ))
         | None -> None
         end
       | _ -> None in
@@ -340,7 +352,7 @@ let rec of_expression (typ_vars : Name.t Name.Map.t) (e : expression)
         ) ->
         let name = PathName.to_string path_name in
         begin match Configuration.is_monadic_return configuration name with
-        | Some return_notation -> Some (Return (return_notation, e))
+        | Some return_notation -> Some (smart_return return_notation e)
         | None -> None
         end
       | _ -> None in
@@ -354,7 +366,7 @@ let rec of_expression (typ_vars : Name.t Name.Map.t) (e : expression)
         begin match Configuration.is_monadic_return_let configuration name with
         | Some (return_notation, let_symbol) ->
           Some (
-            LetVar (Some let_symbol, x, [], Return (return_notation, e1), e2)
+            LetVar (Some let_symbol, x, [], smart_return return_notation e1, e2)
           )
         | None -> None
         end
