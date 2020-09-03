@@ -13,6 +13,14 @@ module Import = struct
   }
 end
 
+module MergeRule = struct
+  type t = {
+    source1 : string;
+    source2 : string;
+    target : string;
+  }
+end
+
 module MonadicOperator = struct
   type t = {
     name : string;
@@ -52,6 +60,7 @@ type t = {
   file_name : string;
   first_class_module_path_blacklist : string list;
   head_suffix : string;
+  merge_types : MergeRule.t list;
   monadic_lets : MonadicOperator.t list;
   monadic_let_returns : MonadicOperators.t list;
   monadic_returns : MonadicOperator.t list;
@@ -77,6 +86,7 @@ let default (file_name : string) : t = {
   file_name;
   first_class_module_path_blacklist = [];
   head_suffix = "";
+  merge_types = [];
   monadic_lets = [];
   monadic_let_returns = [];
   monadic_returns = [];
@@ -129,6 +139,16 @@ let is_in_first_class_module_backlist (configuration : t) (path : Path.t)
   | _ :: path ->
     let path = String.concat "." (List.rev path) in
     List.mem path configuration.first_class_module_path_blacklist
+
+let is_in_merge_types
+  (configuration : t) (source1 : string) (source2 : string) : string option =
+  configuration.merge_types |> Util.List.find_map
+    (fun (merge_rule : MergeRule.t) ->
+      if source1 = merge_rule.source1 && source2 = merge_rule.source2 then
+        Some merge_rule.target
+      else
+        None
+    )
 
 let is_monadic_let (configuration : t) (name : string) : string option =
   let monadic_operator =
@@ -288,6 +308,14 @@ let of_json (file_name : string) (json : Yojson.Basic.t) : t =
         | "head_suffix" ->
           let entry = get_string "head_suffix" entry in
           {configuration with head_suffix = entry}
+        | "merge_types" ->
+          let entry =
+            entry |>
+            get_string_triple_list "merge_types" |>
+            List.map (fun (source1, source2, target) ->
+              { MergeRule.source1; source2; target }
+            ) in
+          {configuration with merge_types = entry}
         | "monadic_lets" ->
           let entry =
             entry |>

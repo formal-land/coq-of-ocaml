@@ -203,6 +203,31 @@ A string to add in the header of each file.
 #### Explanation
 We can use this option to add some default imports, or turn on some notations or flags.
 
+## merge_types
+#### Example
+```
+"merge_types": [
+  ["M=", "M?", "M=?"]
+]
+```
+
+#### Value
+A list of triple of strings, with two type names which get translated into a third when applied together.
+
+#### Explanation
+We use this configuration option for very specific use cases. It allows to merge two types together for when there is a more convenient notation. For example, we can generate the following code:
+```coq
+Definition burn_storage_fees
+  (c : Raw_context.t) (storage_limit : Z.t) (payer : Contract_repr.t)
+  : M=? Raw_context.t :=
+```
+instead of:
+```coq
+Definition burn_storage_fees
+  (c : Raw_context.t) (storage_limit : Z.t) (payer : Contract_repr.t)
+  : M= (M? Raw_context.t) :=
+```
+
 ## monadic_lets
 #### Example
 ```
