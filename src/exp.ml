@@ -41,6 +41,7 @@ type t =
   | Constructor of PathName.t * string list * t list
     (** A constructor name, some implicits, and a list of arguments. *)
   | Apply of t * t list (** An application. *)
+  | Return of string * t (** Application specialized for a return operation. *)
   | Function of Name.t * t (** An argument name and a body. *)
   | LetVar of string option * Name.t * Name.t list * t * t
     (** The let of a variable, with optionally a list of polymorphic variables.
@@ -223,6 +224,26 @@ let build_module
     ) in
   return (Module (module_typ_params, fields))
 
+let rec smart_return (operator : string) (e : t) : t Monad.t =
+  match e with
+  | Return (operator2, e2) ->
+    let* configuration = get_configuration in
+    begin match Configuration.is_in_merge_returns configuration operator operator2 with
+    | None -> return (Return (operator, e))
+    | Some target -> return (Return (target, e2))
+    end
+  | LetVar (None, x, typ_params, e1, e2) ->
+    let* e2 = smart_return operator e2 in
+    return (LetVar (None, x, typ_params, e1, e2))
+  | Match (e, cases, is_with_default_case) ->
+    let* cases =
+      cases |> Monad.List.map (fun (p, existential_cast, e) ->
+        let* e = smart_return operator e in
+        return (p, existential_cast, e)
+      ) in
+    return (Match (e, cases, is_with_default_case))
+  | _ -> return (Return (operator, e))
+
 (** Import an OCaml expression. *)
 let rec of_expression (typ_vars : Name.t Name.Map.t) (e : expression)
   : t Monad.t =
@@ -316,7 +337,7 @@ let rec of_expression (typ_vars : Name.t Name.Map.t) (e : expression)
         | None -> None
         end
       | _ -> None in
-    let apply_with_let_return =
+    let* apply_with_let_return =
       match (e_f, e_xs) with
       | (
           Variable (MixedPath.PathName path_name, []),
@@ -325,37 +346,26 @@ let rec of_expression (typ_vars : Name.t Name.Map.t) (e : expression)
         let name = PathName.to_string path_name in
         begin match Configuration.is_monadic_let_return configuration name with
         | Some (let_symbol, return_notation) ->
-          let return_operator =
-            Variable (
-              MixedPath.of_name (Name.of_string_raw return_notation),
-              []
-            ) in
-          Some (
-            LetVar (Some let_symbol, x, [], e1, Apply (return_operator, [e2]))
-          )
-        | None -> None
+          let* return_e2 = smart_return return_notation e2 in
+          return (Some (LetVar ( Some let_symbol, x, [], e1, return_e2)))
+        | None -> return None
         end
-      | _ -> None in
-    let apply_with_return =
+      | _ -> return None in
+    let* apply_with_return =
       match (e_f, e_xs) with
       | (
           Variable (MixedPath.PathName path_name, []),
-          es
+          [e]
         ) ->
         let name = PathName.to_string path_name in
         begin match Configuration.is_monadic_return configuration name with
         | Some return_notation ->
-          Some (Apply(
-            Variable (
-              MixedPath.of_name (Name.of_string_raw return_notation),
-              []
-            ),
-            es
-          ))
-        | None -> None
+          let* return_e = smart_return return_notation e in
+          return (Some return_e)
+        | None -> return None
         end
-      | _ -> None in
-    let apply_with_return_let =
+      | _ -> return None in
+    let* apply_with_return_let =
       match (e_f, e_xs) with
       | (
           Variable (MixedPath.PathName path_name, []),
@@ -364,17 +374,13 @@ let rec of_expression (typ_vars : Name.t Name.Map.t) (e : expression)
         let name = PathName.to_string path_name in
         begin match Configuration.is_monadic_return_let configuration name with
         | Some (return_notation, let_symbol) ->
-          let return_operator =
-            Variable (
-              MixedPath.of_name (Name.of_string_raw return_notation),
-              []
-            ) in
-          Some (
-            LetVar (Some let_symbol, x, [], Apply (return_operator, [e1]), e2)
-          )
-        | None -> None
+          let* return_e1 = smart_return return_notation e1 in
+          return (Some (
+            LetVar (Some let_symbol, x, [], return_e1, e2)
+          ))
+        | None -> return None
         end
-      | _ -> None in
+      | _ -> return None in
     let applies = [
       apply_with_let;
       apply_with_let_return;
@@ -1236,6 +1242,8 @@ let rec to_coq (paren : bool) (e : t) : SmartPrint.t =
     end
   | Apply (e_f, e_xs) ->
     Pp.parens paren @@ nest @@ (separate space (List.map (to_coq true) (e_f :: e_xs)))
+  | Return (operator, e) ->
+    Pp.parens paren @@ nest @@ (!^ operator ^^ to_coq true e)
   | Function (x, e) ->
     Pp.parens paren @@ nest (!^ "fun" ^^ Name.to_coq x ^^ !^ "=>" ^^ to_coq false e)
   | LetVar (let_symbol, x, typ_params, e1, e2) ->

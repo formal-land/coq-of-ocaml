@@ -154,6 +154,36 @@ and non_phantom_vars_of_typs (typs : Types.type_expr list)
     Name.Set.empty
     typs
 
+let apply_with_merge (mixed_path : MixedPath.t) (typs : t list) : t Monad.t =
+  let* apply_with_merge =
+    match (mixed_path, typs) with
+    | (
+        MixedPath.PathName { path = []; base = Name.Make source1 },
+        [
+          Apply (
+            MixedPath.PathName { path = []; base = Name.Make source2 },
+            typs
+          )
+        ]
+      ) ->
+      let* configuration = get_configuration in
+      let target =
+        Configuration.is_in_merge_types configuration source1 source2 in
+      begin match target with
+      | Some target ->
+        return (Some (
+          Apply (
+            MixedPath.PathName { path = []; base = Name.Make target },
+            typs
+          )
+        ))
+      | None -> return None
+      end
+    | _ -> return None in
+  match apply_with_merge with
+  | None -> return (Apply (mixed_path, typs))
+  | Some apply_with_merge -> return apply_with_merge
+
 (** Import an OCaml type. Add to the environment all the new free type variables. *)
 let rec of_typ_expr
   (with_free_vars: bool)
@@ -193,7 +223,8 @@ let rec of_typ_expr
     non_phantom_typs path typs >>= fun typs ->
     of_typs_exprs with_free_vars typ_vars typs >>= fun (typs, typ_vars, new_typ_vars) ->
     MixedPath.of_path false path None >>= fun mixed_path ->
-    return (Apply (mixed_path, typs), typ_vars, new_typ_vars)
+    let* typ = apply_with_merge mixed_path typs in
+    return (typ, typ_vars, new_typ_vars)
   | Tobject (_, object_descr) ->
     begin match !object_descr with
     | Some (path, _ :: typs) ->
