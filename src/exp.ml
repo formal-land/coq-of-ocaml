@@ -917,7 +917,7 @@ and of_module_expr
     | None -> return (FunctorGenerative e)
     | Some module_type_arg ->
       let* x = Name.of_ident false ident in
-      ModuleTyp.of_ocaml module_type_arg >>= fun module_type_arg ->
+      let* module_type_arg = ModuleTyp.of_ocaml module_type_arg in
       return (Functor (x, ModuleTyp.to_typ module_type_arg, e))
     end
   | Tmod_apply (e1, e2, _) ->
