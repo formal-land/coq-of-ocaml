@@ -32,7 +32,7 @@ Module M.
   
   Definition v : t string := {| t.x := 0; t.y := 1; t.label := "hi" |}.
   
-  Definition module : {t : Set -> Set & Sig.signature (t := t)} :=
+  Definition module :=
     existT (A := Set -> Set) _ t
       {|
         Sig.v := v

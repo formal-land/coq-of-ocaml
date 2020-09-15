@@ -70,8 +70,6 @@ type t =
   | ModulePack of t (** Pack a module. *)
   | Functor of Name.t * Type.t * t
     (** A functor. *)
-  | FunctorGenerative of t
-    (** A generative functor. *)
   | TypeAnnotation of t * Type.t
     (** Annotate with a type. *)
   | Assert of Type.t * t (** The assert keyword. *)
@@ -914,7 +912,7 @@ and of_module_expr
   | Tmod_functor (ident, _, module_type_arg, e) ->
     let* e = of_module_expr typ_vars e None in
     begin match module_type_arg with
-    | None -> return (FunctorGenerative e)
+    | None -> return e
     | Some module_type_arg ->
       let* x = Name.of_ident false ident in
       let* module_type_arg = ModuleTyp.of_ocaml module_type_arg in
@@ -931,12 +929,14 @@ and of_module_expr
       | Mty_functor (_, _, module_typ_result) -> Some module_typ_result
       | _ -> None in
     of_module_expr typ_vars e1 None >>= fun e1 ->
-    let* e2 =
+    let* es =
       match e1_mod_type with
-      | Mty_functor (_, None, _) ->
-        return (Constructor (PathName.unit_value, [], []))
-      | _ -> of_module_expr typ_vars e2 expected_module_typ_for_e2 in
-    let application = Apply (e1, [e2]) in
+      | Mty_functor (_, None, _) -> return []
+      | _ ->
+        let* e2 =
+          of_module_expr typ_vars e2 expected_module_typ_for_e2 in
+        return [e2] in
+    let application = Apply (e1, es) in
     begin match (module_type, module_typ_for_application) with
     | (None, _) | (_, None) -> return application
     | (Some module_type, Some module_typ_for_application) ->
@@ -1443,12 +1443,6 @@ let rec to_coq (paren : bool) (e : t) : SmartPrint.t =
     Pp.parens paren @@ nest (
       !^ "fun" ^^
       parens (nest (Name.to_coq x ^^ !^ ":" ^^ Type.to_coq None None typ)) ^^
-      !^ "=>" ^^ to_coq false e
-    )
-  | FunctorGenerative e ->
-    Pp.parens paren @@ nest (
-      !^ "fun" ^^
-      parens (nest (!^ "_" ^^ !^ ":" ^^ !^ "unit")) ^^
       !^ "=>" ^^ to_coq false e
     )
   | TypeAnnotation (e, typ) ->

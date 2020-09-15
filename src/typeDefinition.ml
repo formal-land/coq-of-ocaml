@@ -734,7 +734,7 @@ let of_ocaml (typs : type_declaration list) : t Monad.t =
       }
     )
 
-let to_coq (def : t) : SmartPrint.t =
+let to_coq (with_args : bool) (def : t) : SmartPrint.t =
   match def with
   | Inductive inductive -> Inductive.to_coq inductive
   | Record (name, typ_args, fields, with_with) ->
@@ -742,6 +742,7 @@ let to_coq (def : t) : SmartPrint.t =
   | Synonym (name, typ_args, value) ->
     nest (
       !^ "Definition" ^^ Name.to_coq name ^^
+      Pp.args with_args ^^
       begin match typ_args with
       | [] -> empty
       | _ -> parens (separate space (List.map Name.to_coq typ_args) ^^ !^ ":" ^^ Pp.set)

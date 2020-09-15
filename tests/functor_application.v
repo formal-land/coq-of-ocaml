@@ -26,7 +26,7 @@ Module M.
   
   Definition x : int := 12.
   
-  Definition module : {t : Set & Source.signature (t := t)} :=
+  Definition module :=
     existT (A := Set) _ t
       {|
         Source.x := x
@@ -34,50 +34,57 @@ Module M.
 End M.
 Definition M := M.module.
 
-Module F. Section Functor.
-  Variable X : {t : Set & Source.signature (t := t)}.
+Module F.
+  Class Args := {
+    X : {t : Set & Source.signature (t := t)};
+  }.
   
-  Definition t : Set := (|X|).(Source.t).
+  Definition t `{Args} : Set := (|X|).(Source.t).
   
-  Definition y : (|X|).(Source.t) := (|X|).(Source.x).
+  Definition y `{Args} : (|X|).(Source.t) := (|X|).(Source.x).
   
-  Definition functor : {_ : unit & Target.signature (t := (|X|).(Source.t))} :=
+  Definition functor `(Args)
+    : {_ : unit & Target.signature (t := (|X|).(Source.t))} :=
     existT (A := unit) (fun _ => _) tt
       {|
         Target.y := y
       |}.
-End Functor. End F.
-Definition F := F.functor.
+End F.
+Definition F X := F.functor {| F.X := X |}.
 
-Module FSubst. Section Functor.
-  Variable X : {t : Set & Source.signature (t := t)}.
+Module FSubst.
+  Class Args := {
+    X : {t : Set & Source.signature (t := t)};
+  }.
   
-  Definition y : (|X|).(Source.t) := (|X|).(Source.x).
+  Definition y `{Args} : (|X|).(Source.t) := (|X|).(Source.x).
   
-  Definition functor : {_ : unit & Target.signature (t := (|X|).(Source.t))} :=
+  Definition functor `(Args)
+    : {_ : unit & Target.signature (t := (|X|).(Source.t))} :=
     existT (A := unit) (fun _ => _) tt
       {|
         Target.y := y
       |}.
-End Functor. End FSubst.
-Definition FSubst := FSubst.functor.
+End FSubst.
+Definition FSubst X := FSubst.functor {| FSubst.X := X |}.
 
-Module Sum. Section Functor.
-  Variable X : {_ : unit & Source.signature (t := int)}.
+Module Sum.
+  Class Args := {
+    X : {_ : unit & Source.signature (t := int)};
+    Y : {_ : unit & Source.signature (t := int)};
+  }.
   
-  Variable Y : {_ : unit & Source.signature (t := int)}.
+  Definition t `{Args} : Set := int.
   
-  Definition t : Set := int.
+  Definition y `{Args} : int := Z.add (|X|).(Source.x) (|Y|).(Source.x).
   
-  Definition y : int := Z.add (|X|).(Source.x) (|Y|).(Source.x).
-  
-  Definition functor : {t : Set & Target.signature (t := t)} :=
+  Definition functor `(Args) : {t : Set & Target.signature (t := t)} :=
     existT (A := Set) _ t
       {|
         Target.y := y
       |}.
-End Functor. End Sum.
-Definition Sum := Sum.functor.
+End Sum.
+Definition Sum X Y := Sum.functor {| Sum.X := X; Sum.Y := Y |}.
 
 Module WithM.
   Definition t := (|M|).(Source.t).
@@ -97,17 +104,17 @@ Module WithSum.
   Definition z : int := 0.
 End WithSum.
 
-Module GenFun. Section Functor.
+Module GenFun.
   Definition t : Set := int.
   
   Definition y : int := 23.
   
-  Definition functor (_ : unit) : {t : Set & Target.signature (t := t)} :=
+  Definition module :=
     existT (A := Set) _ t
       {|
         Target.y := y
       |}.
-End Functor. End GenFun.
-Definition GenFun := GenFun.functor.
+End GenFun.
+Definition GenFun := GenFun.module.
 
-Definition AppliedGenFun := GenFun tt.
+Definition AppliedGenFun := GenFun.
