@@ -11,6 +11,7 @@ Module Source.
   Record signature {t : Set} : Set := {
     t := t;
     x : t;
+    id : forall {a : Set}, a -> a;
   }.
 End Source.
 
@@ -26,10 +27,13 @@ Module M.
   
   Definition x : int := 12.
   
+  Definition id {A : Set} (x : A) : A := x.
+  
   Definition module :=
     existT (A := Set) _ t
       {|
-        Source.x := x
+        Source.x := x;
+        Source.id _ := id
       |}.
 End M.
 Definition M := M.module.
@@ -90,6 +94,8 @@ Module WithM.
   Definition t := (|M|).(Source.t).
   
   Definition x := (|M|).(Source.x).
+  
+  Definition id {a : Set} := (|M|).(Source.id) (a := a).
   
   Definition z : int := 0.
 End WithM.

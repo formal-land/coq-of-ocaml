@@ -85,7 +85,7 @@ type t =
     Name.t * (Name.t * Type.t) list * t list * (Exp.t * Type.t option) option
   | ModuleExpression of Name.t * Exp.t
   | ModuleInclude of PathName.t
-  | ModuleIncludeItem of Name.t * MixedPath.t
+  | ModuleIncludeItem of Name.t * Name.t list * MixedPath.t
   | ModuleSynonym of Name.t * PathName.t
   | Signature of Name.t * Signature.t
   | Error of string
@@ -136,8 +136,17 @@ let rec of_structure (structure : structure) : t list Monad.t =
             let* name = Name.of_ident is_value ident in
             let* field =
               PathName.of_path_and_name_with_convert mod_type_path name in
+            let* typ_vars =
+              match signature_item with
+              | Types.Sig_value (_, { val_type; _ }, _) ->
+                let typ_vars = Name.Map.empty in
+                let* (_, _, new_typ_vars) =
+                  Type.of_typ_expr true typ_vars val_type in
+                return (Name.Set.elements new_typ_vars)
+              | _ -> return [] in
             return (Some (ModuleIncludeItem (
               name,
+              typ_vars,
               MixedPath.Access (reference, [field], false)
             )))
           | _ -> return None
@@ -478,10 +487,29 @@ let rec to_coq (with_args : bool) (defs : t list) : SmartPrint.t =
       )
     | ModuleInclude reference ->
       nest (!^ "Include" ^^ PathName.to_coq reference ^-^ !^ ".")
-    | ModuleIncludeItem (name, mixed_path) ->
+    | ModuleIncludeItem (name, typ_vars, mixed_path) ->
       nest (
-        !^ "Definition" ^^ Name.to_coq name ^^ Pp.args with_args ^^ !^ ":=" ^^
-        MixedPath.to_coq mixed_path ^-^ !^ "."
+        !^ "Definition" ^^ Name.to_coq name ^^ Pp.args with_args ^^
+        begin match typ_vars with
+        | [] -> empty
+        | _ :: _ ->
+          nest (braces (
+            separate space (typ_vars |> List.map (fun typ_var ->
+              Name.to_coq typ_var
+            )) ^^
+            !^ ":" ^^ Pp.set
+          ))
+        end ^^
+        !^ ":=" ^^
+        nest (separate space (
+          MixedPath.to_coq mixed_path ::
+          (typ_vars |> List.map (fun typ_var ->
+            nest (parens (
+              Name.to_coq typ_var ^^ !^ ":=" ^^ Name.to_coq typ_var
+            ))
+          ))
+        )) ^-^
+        !^ "."
       )
     | ModuleSynonym (name, reference) ->
       nest (
