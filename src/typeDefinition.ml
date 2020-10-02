@@ -366,14 +366,11 @@ module Inductive = struct
     (typ_args : Name.t list)
     (typ : Type.t)
     : SmartPrint.t =
-    let subst = {
-      subst with
-      Type.Subst.name = fun name ->
-        if List.mem name typ_args then
-          Name.prefix_by_t name
-        else
-          name
-    } in
+    let typ =
+      List.fold_left (fun typ typ_arg ->
+        Type.subst_name typ_arg (Name.prefix_by_t typ_arg) typ
+      ) typ typ_args in
+    let typ_args = typ_args |> List.map Name.prefix_by_t in
     nest (
       notation ^^ !^ ":=" ^^ parens (
         (match typ_args with
@@ -381,9 +378,7 @@ module Inductive = struct
         | _ :: _ ->
           !^ "fun" ^^ parens (
             nest (
-              separate space (typ_args |> List.map (fun name ->
-                Name.to_coq (Name.prefix_by_t name)
-              )) ^^
+              separate space (typ_args |> List.map Name.to_coq) ^^
               !^ ":" ^^ Pp.set
             )
           ) ^^ !^ "=>" ^^ space
@@ -488,8 +483,7 @@ module Inductive = struct
 
   let to_coq (inductive : t) : SmartPrint.t =
     let subst = {
-      Type.Subst.name = (fun name -> name);
-      path_name = fun path_name ->
+      Type.Subst.path_name = (fun path_name ->
         match path_name with
         | { PathName.path = []; base } ->
           let use_notation =
@@ -512,7 +506,7 @@ module Inductive = struct
             { path = [Name.prefix_by_single_quote prefix]; base }
           else
             path_name
-        | _ -> path_name
+        | _ -> path_name)
     } in
     let constructor_records = to_coq_constructor_records inductive in
     let record_skeletons = to_coq_record_skeletons inductive in
