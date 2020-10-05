@@ -129,7 +129,7 @@ Module UsingTriple.
     T : Triple.signature (a := T_a) (b := T_b) (c := T_c) (bar := T_bar);
     OPS' : S.SET.signature (elt := OPS'_elt) (t := OPS'_t);
     OPS'' : S.SET.signature (elt := elt') (t := (list string));
-    table (a : Set) := list a;
+    table := forall {a : Set}, list a;
   }.
 End UsingTriple.
 

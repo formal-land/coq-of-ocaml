@@ -173,7 +173,13 @@ let subst_name (source : Name.t) (target : Name.t) (typ : t) : t =
     | Sum tagged_typs ->
       Sum (tagged_typs |> List.map (fun (tag, typ) -> (tag, subst typ)))
     | Tuple typs -> Tuple (List.map subst typs)
-    | Apply (constructor, typs) -> Apply (constructor, List.map subst typs)
+    | Apply (constructor, typs) ->
+        let constructor_with_subst =
+          match constructor with
+          | PathName { path = []; base } when Name.equal base source ->
+            MixedPath.PathName { path = []; base = target }
+          | _ -> constructor in
+      Apply (constructor_with_subst, List.map subst typs)
     | Package (is_in_exp, path_name, typ_params) ->
       Package (
         is_in_exp,
