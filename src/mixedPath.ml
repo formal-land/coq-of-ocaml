@@ -138,13 +138,37 @@ let rec of_path_aux (flattened_decomposed_path : FlattenedDecomposedPath.t)
 
 (** If the module was declared in the current unbundled signature definition. *)
 let is_module_path_local (path : Path.t) : bool Monad.t =
+  let* env = get_env in
+  (* Some paths may not exist, for example for the type of a record field in an
+     algebraic type. *)
+  let does_exist =
+    match Env.find_module path env with
+    | _ -> true
+    | exception _ -> false in
   let* env_stack = get_env_stack in
   let envs_without_path = env_stack |> List.filter (fun env ->
     match Env.find_module path env with
     | _ -> false
     | exception _ -> true
   ) in
-  return (List.length envs_without_path mod 2 = 1)
+  return (does_exist && List.length envs_without_path mod 2 = 1)
+
+(** In case the base path is local, we need to make a special transformation.
+    Indeed, unless if the path is a single name, this means that we access to a
+    sub-module with an anonmous signature which has been flattened.  *)
+let rec get_local_base_path (is_value : bool) (path : Path.t)
+  : PathName.t option Monad.t =
+  match path with
+  | Papply _ -> failwith "Unexpected functor path application"
+  | Pident _ -> return None
+  | Pdot (path', _) ->
+    let* is_local = is_module_path_local path' in
+    if is_local then
+      let name_string = String.concat "_" (Path.to_string_list path) in
+      let* name = Name.of_string is_value name_string in
+      return (Some (PathName.of_name [] name))
+    else
+      return None
 
 (** The current environment must include the potential first-class module
     signature definition of the corresponding projection in the [path]. *)
@@ -159,23 +183,31 @@ let of_path
   let (base_path, fields, signature_path) =
     of_path_aux flattened_decomposed_path in
   let fields = List.rev fields in
+  let* local_base_path = get_local_base_path is_value base_path in
   match (fields, signature_path) with
   | ([], None) ->
-    let* path_name = PathName.of_path_without_convert is_value base_path in
-    let* conversion = PathName.try_convert path_name in
-    begin match conversion with
+    begin match local_base_path with
     | None ->
-      begin match long_ident with
-      | None -> return (PathName path_name)
-      | Some long_ident ->
-        let* path_name = PathName.of_long_ident is_value long_ident in
-        return (PathName path_name)
+      let* path_name = PathName.of_path_without_convert is_value base_path in
+      let* conversion = PathName.try_convert path_name in
+      begin match conversion with
+      | None ->
+        begin match long_ident with
+        | None -> return (PathName path_name)
+        | Some long_ident ->
+          let* path_name = PathName.of_long_ident is_value long_ident in
+          return (PathName path_name)
+        end
+      | Some path_name -> return (PathName path_name)
       end
-    | Some path_name -> return (PathName path_name)
+    | Some local_base_path -> return (PathName local_base_path)
     end
   | _ ->
     let* is_local = is_module_path_local base_path in
-    let* base_path_name = PathName.of_path_with_convert is_value base_path in
+    let* base_path_name =
+      match local_base_path with
+      | None -> PathName.of_path_with_convert is_value base_path
+      | Some local_base_path -> return local_base_path in
     let* fields =
       fields |> Monad.List.map (fun (signature_path, fields) ->
         let field = String.concat "_" fields in
