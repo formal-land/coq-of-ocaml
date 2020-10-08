@@ -100,14 +100,22 @@ let rec items_of_types_signature
             "A safer way is to make a sub-module instead of an `include`."
           )
       | Not_found reason ->
-        raise
-          (Error ("module " ^ Ident.name ident), let_in_type)
-          Module
-          (
-            "Signature name for the module '" ^ Ident.name ident ^
-            "' in included signature not found.\n\n" ^
-            reason
-          )
+        begin match md_type with
+        | Mty_signature signature ->
+          let* (items, _) =
+            items_of_types_signature
+              (prefix @ [Ident.name ident]) let_in_type signature in
+          return (ModuleWithSignature items, let_in_type)
+        | _ ->
+          raise
+            (Error ("module " ^ Ident.name ident), let_in_type)
+            Module
+            (
+              "Signature name for the module '" ^ Ident.name ident ^
+              "' in included signature not found.\n\n" ^
+              reason
+            )
+        end
       end
     | Sig_modtype (ident, _, _) ->
       let name = Ident.name ident in
