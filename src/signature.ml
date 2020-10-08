@@ -152,9 +152,11 @@ let rec of_signature_items
   (prefix : string list)
   (let_in_type : let_in_type)
   (items : signature_item list)
+  (last_env : Env.t)
   : item list Monad.t =
   let of_signature_item
     (item : signature_item)
+    (next_env : Env.t)
     : (item list * let_in_type) Monad.t =
     set_env item.sig_env (
     set_loc (Loc.of_location item.sig_loc) (
@@ -176,7 +178,8 @@ let rec of_signature_items
         SideEffect
         "Signature item `exception` not handled."
     | Tsig_include { incl_type; _ } ->
-      items_of_types_signature prefix let_in_type incl_type
+      set_env next_env (
+      items_of_types_signature prefix let_in_type incl_type)
     | Tsig_modsubst _ ->
       raise
         ([Error "module_substitution"], let_in_type)
@@ -194,7 +197,8 @@ let rec of_signature_items
       | Tmty_signature signature ->
         let* items =
           of_signature_items
-            (prefix @ [Ident.name md_id]) let_in_type signature.sig_items in
+            (prefix @ [Ident.name md_id])
+            let_in_type signature.sig_items next_env in
         return ([ModuleWithSignature items], let_in_type)
       | _ ->
         push_env (
@@ -252,13 +256,18 @@ let rec of_signature_items
   match items with
   | [] -> return []
   | item :: items ->
-    let* (first_items, let_in_type) = of_signature_item item in
-    let* last_items = of_signature_items prefix let_in_type items in
+    let next_env =
+      match items with
+      | { sig_env; _ } :: _ -> sig_env
+      | _ -> last_env in
+    let* (first_items, let_in_type) = of_signature_item item next_env in
+    let* last_items = of_signature_items prefix let_in_type items last_env in
     return (first_items @ last_items)
 
 let of_signature (signature : signature) : t Monad.t =
   push_env (
-  let* items = of_signature_items [] [] signature.sig_items in
+  let* items =
+    of_signature_items [] [] signature.sig_items signature.sig_final_env in
   ModuleTypParams.get_signature_typ_params_arity signature.sig_type >>= fun typ_params ->
   return { items; typ_params })
 
