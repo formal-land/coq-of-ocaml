@@ -186,7 +186,7 @@ let rec of_signature_items
       | Tmty_signature signature ->
         let* items =
           of_signature_items
-            (Ident.name md_id :: prefix) let_in_type signature.sig_items in
+            (prefix @ [Ident.name md_id]) let_in_type signature.sig_items in
         return ([ModuleWithSignature items], let_in_type)
       | _ ->
         push_env (

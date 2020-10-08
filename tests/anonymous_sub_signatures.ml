@@ -37,6 +37,10 @@ module type Validator = sig
     val valid_position : int64 -> bool
 
     module Foo : WithBar
+
+    module NestedLevel : sig
+      type t
+    end
   end
 
   module CV : T_encoding
@@ -45,6 +49,6 @@ module type Validator = sig
 end
 
 module F (V : Validator) : WithBar = struct
-  type foo = V.com
+  type foo = V.com * V.Commitment.NestedLevel.t
   let bar = V.Commitment.Foo.bar
 end

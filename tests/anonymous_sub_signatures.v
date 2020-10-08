@@ -38,7 +38,8 @@ Module WithBar.
 End WithBar.
 
 Module Validator.
-  Record signature {Ciphertext_t Commitment_t CV_t : Set} : Set := {
+  Record signature {Ciphertext_t Commitment_t Commitment_NestedLevel_t CV_t :
+    Set} : Set := {
     Ciphertext_t := Ciphertext_t;
     Ciphertext_encoding : list Ciphertext_t;
     Ciphertext_get_memo_size : Ciphertext_t -> int;
@@ -49,6 +50,7 @@ Module Validator.
     Commitment_encoding : list Commitment_t;
     Commitment_valid_position : int64 -> bool;
     Commitment_Foo : WithBar.signature ;
+    Commitment_NestedLevel_t := Commitment_NestedLevel_t;
     CV : T_encoding.signature (t := CV_t);
     com := Commitment_t;
   }.
@@ -57,12 +59,15 @@ End Validator.
 Module F.
   Class Args := {
     V :
-      {'[Ciphertext_t, Commitment_t, CV_t] : [Set ** Set ** Set] &
+      {'[Ciphertext_t, Commitment_t, Commitment_NestedLevel_t, CV_t] :
+        [Set ** Set ** Set ** Set] &
         Validator.signature (Ciphertext_t := Ciphertext_t)
-          (Commitment_t := Commitment_t) (CV_t := CV_t)};
+          (Commitment_t := Commitment_t)
+          (Commitment_NestedLevel_t := Commitment_NestedLevel_t) (CV_t := CV_t)};
   }.
   
-  Definition foo `{Args} : Set := (|V|).(Validator.com).
+  Definition foo `{Args} : Set :=
+    (|V|).(Validator.com) * (|V|).(Validator.Commitment_NestedLevel_t).
   
   Definition bar `{Args} : string :=
     (|V|).(Validator.Commitment_Foo).(WithBar.bar).
