@@ -40,7 +40,7 @@ type t =
   | Tuple of t list (** A tuple of expressions. *)
   | Constructor of PathName.t * string list * t list
     (** A constructor name, some implicits, and a list of arguments. *)
-  | Apply of t * t list (** An application. *)
+  | Apply of t * t option list (** An application. *)
   | Return of string * t (** Application specialized for a return operation. *)
   | Function of Name.t * t (** An argument name and a body. *)
   | LetVar of string option * Name.t * Name.t list * t * t
@@ -70,8 +70,6 @@ type t =
   | ModulePack of t (** Pack a module. *)
   | Functor of Name.t * Type.t * t
     (** A functor. *)
-  | FunctorGenerative of t
-    (** A generative functor. *)
   | TypeAnnotation of t * Type.t
     (** Annotate with a type. *)
   | Assert of Type.t * t (** The assert keyword. *)
@@ -290,7 +288,7 @@ let rec of_expression (typ_vars : Name.t Name.Map.t) (e : expression)
     return (Function (x, e))
   | Texp_apply (e_f, e_xs) ->
     of_expression typ_vars e_f >>= fun e_f ->
-    (e_xs |> Monad.List.filter_map (fun (_, e_x) ->
+    (e_xs |> Monad.List.map (fun (_, e_x) ->
       match e_x with
       | Some e_x ->
         of_expression typ_vars e_x >>= fun e_x ->
@@ -308,7 +306,7 @@ let rec of_expression (typ_vars : Name.t Name.Map.t) (e : expression)
             },
             []
           ),
-          [f; x]
+          [Some f; x]
         ) ->
         (f, [x])
       | (
@@ -319,7 +317,7 @@ let rec of_expression (typ_vars : Name.t Name.Map.t) (e : expression)
             },
             []
           ),
-          [x; f]
+          [x; Some f]
         ) ->
         (f, [x])
       | _ -> (e_f, e_xs) in
@@ -329,7 +327,7 @@ let rec of_expression (typ_vars : Name.t Name.Map.t) (e : expression)
       match (e_f, e_xs) with
       | (
           Variable (MixedPath.PathName path_name, []),
-          [e1; Function (x, e2)]
+          [Some e1; Some (Function (x, e2))]
         ) ->
         let name = PathName.to_string path_name in
         begin match Configuration.is_monadic_let configuration name with
@@ -341,7 +339,7 @@ let rec of_expression (typ_vars : Name.t Name.Map.t) (e : expression)
       match (e_f, e_xs) with
       | (
           Variable (MixedPath.PathName path_name, []),
-          [e1; Function (x, e2)]
+          [Some e1; Some (Function (x, e2))]
         ) ->
         let name = PathName.to_string path_name in
         begin match Configuration.is_monadic_let_return configuration name with
@@ -355,7 +353,7 @@ let rec of_expression (typ_vars : Name.t Name.Map.t) (e : expression)
       match (e_f, e_xs) with
       | (
           Variable (MixedPath.PathName path_name, []),
-          [e]
+          [Some e]
         ) ->
         let name = PathName.to_string path_name in
         begin match Configuration.is_monadic_return configuration name with
@@ -369,7 +367,7 @@ let rec of_expression (typ_vars : Name.t Name.Map.t) (e : expression)
       match (e_f, e_xs) with
       | (
           Variable (MixedPath.PathName path_name, []),
-          [e1; Function (x, e2)]
+          [Some e1; Some (Function (x, e2))]
         ) ->
         let name = PathName.to_string path_name in
         begin match Configuration.is_monadic_return_let configuration name with
@@ -429,7 +427,7 @@ let rec of_expression (typ_vars : Name.t Name.Map.t) (e : expression)
     | None -> return constructor
     | Some e ->
       of_expression typ_vars e >>= fun e ->
-      return (Apply (constructor, [e]))
+      return (Apply (constructor, [Some e]))
     end
   | Texp_record { fields; extended_expression; _ } ->
       Array.to_list fields |> Monad.List.filter_map (
@@ -455,7 +453,7 @@ let rec of_expression (typ_vars : Name.t Name.Map.t) (e : expression)
             (fun extended_e (x, e) ->
               Apply (
                 Variable (MixedPath.PathName (PathName.prefix_by_with x), []),
-                [e; extended_e]
+                [Some e; Some extended_e]
               )
             )
             extended_e
@@ -487,7 +485,7 @@ let rec of_expression (typ_vars : Name.t Name.Map.t) (e : expression)
   | Texp_try (e, _) ->
     of_expression typ_vars e >>= fun e ->
     error_message
-      (Apply (Error "try", [e]))
+      (Apply (Error "try", [Some e]))
       SideEffect
       (
         "Try-with are not handled\n\n" ^
@@ -499,7 +497,7 @@ let rec of_expression (typ_vars : Name.t Name.Map.t) (e : expression)
     error_message
       (Apply (
         Error "set_record_field",
-        [e_record; Constant (Constant.String lbl_name); e]
+        [Some e_record; Some (Constant (Constant.String lbl_name)); Some e]
       ))
       SideEffect
       "Set record field not handled."
@@ -570,7 +568,7 @@ let rec of_expression (typ_vars : Name.t Name.Map.t) (e : expression)
   | Texp_lazy e ->
     of_expression typ_vars e >>= fun e ->
     error_message
-      (Apply (Error "lazy", [e]))
+      (Apply (Error "lazy", [Some e]))
       SideEffect
       "Lazy expressions are not handled"
   | Texp_object _ ->
@@ -914,10 +912,10 @@ and of_module_expr
   | Tmod_functor (ident, _, module_type_arg, e) ->
     let* e = of_module_expr typ_vars e None in
     begin match module_type_arg with
-    | None -> return (FunctorGenerative e)
+    | None -> return e
     | Some module_type_arg ->
       let* x = Name.of_ident false ident in
-      ModuleTyp.of_ocaml module_type_arg >>= fun module_type_arg ->
+      let* module_type_arg = ModuleTyp.of_ocaml module_type_arg in
       return (Functor (x, ModuleTyp.to_typ module_type_arg, e))
     end
   | Tmod_apply (e1, e2, _) ->
@@ -931,12 +929,14 @@ and of_module_expr
       | Mty_functor (_, _, module_typ_result) -> Some module_typ_result
       | _ -> None in
     of_module_expr typ_vars e1 None >>= fun e1 ->
-    let* e2 =
+    let* es =
       match e1_mod_type with
-      | Mty_functor (_, None, _) ->
-        return (Constructor (PathName.unit_value, [], []))
-      | _ -> of_module_expr typ_vars e2 expected_module_typ_for_e2 in
-    let application = Apply (e1, [e2]) in
+      | Mty_functor (_, None, _) -> return []
+      | _ ->
+        let* e2 =
+          of_module_expr typ_vars e2 expected_module_typ_for_e2 in
+        return [Some e2] in
+    let application = Apply (e1, es) in
     begin match (module_type, module_typ_for_application) with
     | (None, _) | (_, None) -> return application
     | (Some module_type, Some module_typ_for_application) ->
@@ -1241,7 +1241,23 @@ let rec to_coq (paren : bool) (e : t) : SmartPrint.t =
       end
     end
   | Apply (e_f, e_xs) ->
-    Pp.parens paren @@ nest @@ (separate space (List.map (to_coq true) (e_f :: e_xs)))
+    let (missing_args, all_args, _) =
+      List.fold_left
+        (fun (missing_args, all_args, index) e_x ->
+          match e_x with
+          | None ->
+            let missing_arg = !^ ("x_" ^ string_of_int index) in
+            (missing_args @ [missing_arg], all_args @ [missing_arg], index + 1)
+          | Some e_x -> (missing_args, all_args @ [to_coq true e_x], index)
+        )
+        ([], [], 1) e_xs in
+    Pp.parens paren (nest (
+      begin match missing_args with
+      | [] -> empty
+      | _ :: _ -> !^ "fun" ^^ separate space missing_args ^^ !^ "=>" ^^ space
+      end ^-^
+      nest (separate space (to_coq true e_f :: all_args))
+    ))
   | Return (operator, e) ->
     Pp.parens paren @@ nest @@ (!^ operator ^^ to_coq true e)
   | Function (x, e) ->
@@ -1443,12 +1459,6 @@ let rec to_coq (paren : bool) (e : t) : SmartPrint.t =
     Pp.parens paren @@ nest (
       !^ "fun" ^^
       parens (nest (Name.to_coq x ^^ !^ ":" ^^ Type.to_coq None None typ)) ^^
-      !^ "=>" ^^ to_coq false e
-    )
-  | FunctorGenerative e ->
-    Pp.parens paren @@ nest (
-      !^ "fun" ^^
-      parens (nest (!^ "_" ^^ !^ ":" ^^ !^ "unit")) ^^
       !^ "=>" ^^ to_coq false e
     )
   | TypeAnnotation (e, typ) ->

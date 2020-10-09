@@ -154,6 +154,50 @@ and non_phantom_vars_of_typs (typs : Types.type_expr list)
     Name.Set.empty
     typs
 
+let subst_name (source : Name.t) (target : Name.t) (typ : t) : t =
+  let rec subst (typ : t) : t =
+    let subst_after_names (names : Name.t list) (typ : t) : t =
+      let should_substitute =
+        not (names |> List.exists (fun name -> Name.equal name source)) in
+      if should_substitute then
+        subst typ
+      else
+        typ in
+    match typ with
+    | Variable name ->
+      if Name.equal name source then
+        Variable target
+      else
+        typ
+    | Arrow (typ1, typ2) -> Arrow (subst typ1, subst typ2)
+    | Sum tagged_typs ->
+      Sum (tagged_typs |> List.map (fun (tag, typ) -> (tag, subst typ)))
+    | Tuple typs -> Tuple (List.map subst typs)
+    | Apply (constructor, typs) ->
+        let constructor_with_subst =
+          match constructor with
+          | PathName { path = []; base } when Name.equal base source ->
+            MixedPath.PathName { path = []; base = target }
+          | _ -> constructor in
+      Apply (constructor_with_subst, List.map subst typs)
+    | Package (is_in_exp, path_name, typ_params) ->
+      Package (
+        is_in_exp,
+        path_name,
+        typ_params |> Tree.map (fun arity_or_typ ->
+          match arity_or_typ with
+          | Arity _ -> arity_or_typ
+          | Typ typ -> Typ (subst typ)
+        )
+      )
+    | ForallModule (name, typ1, typ2) ->
+      ForallModule (name, subst typ1, subst typ2)
+    | ForallTyps (names, typ) ->
+      ForallTyps (names, subst_after_names names typ)
+    | FunTyps (names, typ) -> FunTyps (names, subst_after_names names typ)
+    | Error _ -> typ in
+  subst typ
+
 let apply_with_merge (mixed_path : MixedPath.t) (typs : t list) : t Monad.t =
   let* apply_with_merge =
     match (mixed_path, typs) with
@@ -504,7 +548,6 @@ let rec accumulate_nested_arrows (typ : t) : t list * t =
 
 module Subst = struct
   type t = {
-    name : Name.t -> Name.t;
     path_name : PathName.t -> PathName.t }
 end
 
@@ -513,12 +556,7 @@ end
 let rec to_coq (subst : Subst.t option) (context : Context.t option) (typ : t)
   : SmartPrint.t =
   match typ with
-  | Variable x ->
-    let x =
-      match subst with
-      | None -> x
-      | Some subst -> subst.name x in
-    Name.to_coq x
+  | Variable x -> Name.to_coq x
   | Arrow _ ->
     let (typ_xs, typ_y) = accumulate_nested_arrows typ in
     Context.parens context Context.Arrow @@ group (

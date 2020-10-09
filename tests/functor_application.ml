@@ -1,6 +1,7 @@
 module type Source = sig
   type t
   val x : t
+  val id : 'a -> 'a
 end
 
 module type Target = sig
@@ -11,6 +12,7 @@ end
 module M : Source = struct
   type t = int
   let x = 12
+  let id x = x
 end
 
 module F (X : Source) : Target with type t = X.t = struct

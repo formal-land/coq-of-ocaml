@@ -1,4 +1,6 @@
 ## [Unreleased]
+* Add support for anonymous sub-signatures.
+* Generate functors using a type class of the current arguments.
 * Add the configuration option `merge_returns`.
 * Add the configuration option `merge_types`.
 * Add the configuration options `monadic_lets` (renaming of `monadic_bind`), `monadic_let_returns`, `monadic_rets` and `monadic_ret_lets`.

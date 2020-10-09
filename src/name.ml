@@ -136,6 +136,9 @@ let to_string (name : t) : string =
   | FunctionParameter -> "function_parameter"
   | Make name -> name
 
+let prefix_by_strings (prefix : string list) (name : t) : t =
+  Make (String.concat "_" (prefix @ [to_string name]))
+
 let prefix_by_single_quote (name : t) : t =
   Make ("'" ^ to_string name)
 

@@ -316,7 +316,7 @@ let rec to_coq (signature : t) : SmartPrint.t =
       PathName.to_coq path_name ^-^ !^ "."
     | Open o -> Open.to_coq o
     | Signature (name, signature) -> Signature.to_coq_definition name signature
-    | TypDefinition typ_definition -> TypeDefinition.to_coq typ_definition
+    | TypDefinition typ_definition -> TypeDefinition.to_coq false typ_definition
     | Value (name, typ_vars, typ) ->
       nest (
         !^ "Parameter" ^^ Name.to_coq name ^^ !^ ":" ^^

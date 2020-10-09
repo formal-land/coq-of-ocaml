@@ -8,7 +8,7 @@ module Value = struct
   type t = Exp.t option Exp.Definition.t
 
   (** Pretty-print a value definition to Coq. *)
-  let to_coq (value : t) : SmartPrint.t =
+  let to_coq (with_args : bool) (value : t) : SmartPrint.t =
     match value.Exp.Definition.cases with
     | [] -> empty
     | _ :: _ ->
@@ -52,6 +52,7 @@ module Value = struct
             end ^^
             let { Exp.Header.name; typ_vars; args; typ; _ } = header in
             Name.to_coq name ^^
+            Pp.args with_args ^^
             begin match typ_vars with
             | [] -> empty
             | _ :: _ ->
@@ -80,9 +81,11 @@ type t =
   | AbstractValue of Name.t * Name.t list * Type.t
   | TypeDefinition of TypeDefinition.t
   | Open of Open.t
-  | Module of Name.t * t list
-  | ModuleExp of Name.t * Exp.t
+  | Module of
+    Name.t * (Name.t * Type.t) list * t list * (Exp.t * Type.t option) option
+  | ModuleExpression of Name.t * Exp.t
   | ModuleInclude of PathName.t
+  | ModuleIncludeItem of Name.t * Name.t list * MixedPath.t
   | ModuleSynonym of Name.t * PathName.t
   | Signature of Name.t * Signature.t
   | Error of string
@@ -131,21 +134,21 @@ let rec of_structure (structure : structure) : t list Monad.t =
               | Types.Sig_value _ -> true
               | _ -> false in
             let* name = Name.of_ident is_value ident in
-            PathName.of_path_and_name_with_convert mod_type_path name
-              >>= fun field ->
-            return (Some (
-              ModuleExp (
-                name,
-                Exp.Variable (
-                  MixedPath.Access (
-                    reference,
-                    [field],
-                    false
-                  ),
-                  []
-                )
-              )
-            ))
+            let* field =
+              PathName.of_path_and_name_with_convert mod_type_path name in
+            let* typ_vars =
+              match signature_item with
+              | Types.Sig_value (_, { val_type; _ }, _) ->
+                let typ_vars = Name.Map.empty in
+                let* (_, _, new_typ_vars) =
+                  Type.of_typ_expr true typ_vars val_type in
+                return (Name.Set.elements new_typ_vars)
+              | _ -> return [] in
+            return (Some (ModuleIncludeItem (
+              name,
+              typ_vars,
+              MixedPath.Access (reference, [field], false)
+            )))
           | _ -> return None
         )
       | Mty_functor _ ->
@@ -209,7 +212,9 @@ let rec of_structure (structure : structure) : t list Monad.t =
       let* has_plain_module_attribute =
         let* attributes = Attribute.of_attributes mb_attributes in
         return (Attribute.has_plain_module attributes) in
-      of_module name mb_expr has_plain_module_attribute
+      let* module_definition =
+        of_module name [] mb_expr has_plain_module_attribute in
+      return [module_definition]
     | Tstr_modtype { mtd_type = None; _ } ->
       error_message
         (Error "abstract_module_type")
@@ -268,11 +273,11 @@ let rec of_structure (structure : structure) : t list Monad.t =
       get_include_items (Some path) reference mod_type
     | Tstr_include { incl_mod } ->
       let* include_name = Exp.get_include_name incl_mod in
-      let* module_definition = of_module include_name incl_mod false in
+      let* module_definition = of_module include_name [] incl_mod false in
       let reference = PathName.of_name [] include_name in
       let* include_items =
         get_include_items None reference incl_mod.mod_type in
-      return (module_definition @ include_items)
+      return (module_definition :: include_items)
     (* We ignore attribute fields. *)
     | Tstr_attribute _ -> return [])) in
   Monad.List.fold_right
@@ -286,9 +291,9 @@ let rec of_structure (structure : structure) : t list Monad.t =
   return structure
 
 and of_module
-  (name : Name.t) (module_expr : module_expr)
-  (has_plain_module_attribute : bool)
-  : t list Monad.t =
+  (name : Name.t) (functor_parameters : (Name.t * Type.t) list)
+  (module_expr : module_expr) (has_plain_module_attribute : bool)
+  : t Monad.t =
   let path =
     match module_expr.mod_desc with
     | Tmod_ident (path, _)
@@ -297,50 +302,86 @@ and of_module
     | _ -> None in
   let* is_first_class =
     IsFirstClassModule.is_module_typ_first_class module_expr.mod_type path in
-  match (is_first_class, has_plain_module_attribute) with
-  | (Found _, false) ->
-    let* module_expr =
-      Exp.of_module_expr
-        Name.Map.empty module_expr (Some module_expr.mod_type) in
-    return [ModuleExp (name, module_expr)]
-  | _ ->
-    let* module_expr = of_module_expr name module_expr in
-    begin match module_expr with
-    | Some module_expr -> return [module_expr]
-    | None ->
-      let reason =
-        match is_first_class with
-        | Not_found reason -> reason
-        | _ -> "plain module attribute" in
-      raise
-        []
-        Module
-        (
-          "We expected to find a signature name for this module.\n\n" ^
-          "Reason:\n" ^ reason
-        )
-    end
+  let as_expression =
+    match (is_first_class, has_plain_module_attribute) with
+    | (Found module_type_path, false) ->
+      Some (module_expr.mod_type, module_type_path)
+    | _ -> None in
+  of_module_expr name functor_parameters as_expression None module_expr
 
-and of_module_expr (name : Name.t) (module_expr : module_expr)
-  : t option Monad.t =
+and of_module_expr
+  (name : Name.t) (functor_parameters : (Name.t * Type.t) list)
+  (as_expression : (Types.module_type * Path.t) option)
+  (module_type_annotation : Typedtree.module_type option)
+  (module_expr : module_expr)
+  : t Monad.t =
   match module_expr.mod_desc with
   | Tmod_structure structure ->
-    of_structure structure >>= fun structures ->
-    return (Some (Module (name, structures)))
+    let* structure = of_structure structure in
+    let* e =
+      match as_expression with
+      | Some (module_type, module_type_path) ->
+        let typ_vars = Name.Map.empty in
+        let* module_typ_params_arity =
+          ModuleTypParams.get_module_typ_typ_params_arity module_type in
+        let* values = Exp.ModuleTypValues.get typ_vars module_type in
+        let mixed_path_of_value_or_typ (name : Name.t): MixedPath.t Monad.t =
+          return (MixedPath.of_name name) in
+        let* e =
+          Exp.build_module
+            typ_vars
+            module_typ_params_arity
+            values
+            module_type_path
+            mixed_path_of_value_or_typ in
+        let* module_type_annotation =
+          match module_type_annotation with
+          | Some module_type ->
+            let* module_type = ModuleTyp.of_ocaml module_type in
+            return (Some (ModuleTyp.to_typ module_type))
+          | None -> return None in
+        return (Some (e, module_type_annotation))
+      | None -> return None in
+    return (Module (name, List.rev functor_parameters, structure, e))
   | Tmod_ident (path, _) ->
-    PathName.of_path_with_convert false path >>= fun reference ->
-    return (Some (ModuleSynonym (name, reference)))
-  | Tmod_apply _ | Tmod_functor _ ->
-    Exp.of_module_expr Name.Map.empty module_expr None >>= fun module_exp ->
-    return (Some (ModuleExp (name, module_exp)))
-  | Tmod_constraint (module_expr, _, _, _) -> of_module_expr name module_expr
-  | Tmod_unpack _ -> return None
+    begin match as_expression  with
+    | Some (module_type, _) ->
+      let* module_exp =
+        Exp.of_module_expr Name.Map.empty module_expr (Some module_type) in
+      return (ModuleExpression (name, module_exp))
+    | None ->
+      let* reference = PathName.of_path_with_convert false path in
+      return (ModuleSynonym (name, reference))
+    end
+  | Tmod_apply _ ->
+      let* module_exp = Exp.of_module_expr Name.Map.empty module_expr None in
+      return (ModuleExpression (name, module_exp))
+  | Tmod_functor (ident, _, module_type_arg, module_expr) ->
+    let* functor_parameters =
+      match module_type_arg with
+      | None -> return functor_parameters
+      | Some module_type_arg ->
+        let* x = Name.of_ident false ident in
+        let* module_type_arg = ModuleTyp.of_ocaml module_type_arg in
+        return ((x, ModuleTyp.to_typ module_type_arg) :: functor_parameters) in
+    of_module name functor_parameters module_expr false
+  | Tmod_constraint (module_expr, _, annotation, _) ->
+    let module_type_annotation =
+      match annotation with
+      | Tmodtype_explicit module_type -> Some module_type
+      | Tmodtype_implicit -> module_type_annotation in
+    of_module_expr
+      name functor_parameters as_expression module_type_annotation module_expr
+  | Tmod_unpack _ ->
+    return (Error
+      "Cannot unpack first-class modules at top-level due to a universe inconsistency"
+    )
 
 (** Pretty-print a structure to Coq. *)
-let rec to_coq (defs : t list) : SmartPrint.t =
+let rec to_coq (with_args : bool) (defs : t list) : SmartPrint.t =
   let rec to_coq_one (def : t) : SmartPrint.t =
     match def with
-    | Value value -> Value.to_coq value
+    | Value value -> Value.to_coq with_args value
     | AbstractValue (name, typ_vars, typ) ->
       !^ "Parameter" ^^ Name.to_coq name ^^ !^ ":" ^^
       (match typ_vars with
@@ -350,32 +391,130 @@ let rec to_coq (defs : t list) : SmartPrint.t =
         nest (parens (separate space (typ_vars |> List.map Name.to_coq) ^^ !^ ":" ^^ Pp.set)) ^-^ !^ ","
       ) ^^
       Type.to_coq None None typ ^-^ !^ "."
-    | TypeDefinition typ_def -> TypeDefinition.to_coq typ_def
+    | TypeDefinition typ_def -> TypeDefinition.to_coq with_args typ_def
     | Open o -> Open.to_coq o
-    | Module (name, defs) ->
+    | Module (name, functor_parameters, defs, e) ->
+      let is_functor =
+        match functor_parameters with
+        | [] -> false
+        | _ :: _ -> true in
+      let final_item_name =
+        if is_functor then !^ "functor" else !^ "module" in
       nest (
-        !^ "Module" ^^ Name.to_coq name ^-^ !^ "." ^^ newline ^^
-        indent (to_coq defs) ^^ newline ^^
-        !^ "End" ^^ Name.to_coq name ^-^ !^ "."
-      )
-    | ModuleExp (name, e) ->
-      let (e, typ) =
-        match e with
-        | TypeAnnotation (e, typ) -> (e, Some typ)
-        | _ -> (e, None) in
-      nest (
-        !^ "Definition" ^^ Name.to_coq name ^^
-        begin match typ with
+        !^ "Module" ^^ Name.to_coq name ^-^ !^ "." ^^
+        newline ^^
+        indent (
+          begin if is_functor then
+            nest (
+              !^ "Class" ^^ !^ "Args" ^^ Pp.args with_args ^^ !^ ":=" ^^
+              !^ "{" ^^ newline ^^
+              indent (
+                separate empty (functor_parameters |> List.map (
+                fun (name, typ) ->
+                  nest (
+                    Name.to_coq name ^^ !^ ":" ^^ Type.to_coq None None typ ^-^
+                    !^ ";" ^^ newline
+                  )
+                ))
+              )
+              ^^ !^ "}" ^-^ !^ "." ^^
+              newline ^^ newline
+            )
+          else
+            empty
+          end ^^
+          to_coq (is_functor || with_args) defs ^^
+          begin match e with
+          | Some (e, typ_annotation) ->
+            newline ^^ newline ^^
+            nest (
+              !^ "Definition" ^^ final_item_name ^^
+              begin if is_functor then
+                !^ "`(Args)"
+              else
+                Pp.args with_args
+              end ^^
+              nest (
+                begin match (typ_annotation, is_functor) with
+                | (Some typ_annotation, true) ->
+                  nest (!^ ":" ^^ Type.to_coq None None typ_annotation)
+                | _ -> empty
+                end ^^
+                !^ ":="
+              ) ^^
+              Exp.to_coq false e ^-^ !^ "."
+            )
+          | None -> empty
+          end
+        ) ^^ newline ^^
+        !^ "End" ^^ Name.to_coq name ^-^ !^ "." ^^
+        begin match e with
+        | Some _ ->
+          newline ^^
+          nest (
+            !^ "Definition" ^^ Name.to_coq name ^^ Pp.args with_args ^^
+            separate space (functor_parameters |> List.map (fun (name, _) ->
+              Name.to_coq name
+            )) ^^ !^ ":=" ^^
+            nest (
+              Name.to_coq name ^-^ !^ "." ^-^ final_item_name ^-^
+              begin if is_functor then
+                space ^^
+                nest (
+                  !^ "{|" ^^
+                  separate (!^ ";" ^^ space) (functor_parameters |> List.map (
+                    fun (parameter_name, _) ->
+                      nest (
+                        Name.to_coq name ^-^ !^ "." ^-^ Name.to_coq parameter_name ^^
+                        !^ ":=" ^^ Name.to_coq parameter_name
+                      )
+                  )) ^^
+                  !^ "|}"
+                )
+              else
+                empty
+              end ^-^
+              !^ "."
+            )
+          )
         | None -> empty
-        | Some typ -> !^ ":" ^^ Type.to_coq None None typ
-        end ^^
-        !^ ":=" ^^
+        end
+      )
+    | ModuleExpression (name, e) ->
+      nest (
+        !^ "Definition" ^^ Name.to_coq name ^^ Pp.args with_args ^^ !^ ":=" ^^
         Exp.to_coq false e ^-^ !^ "."
       )
     | ModuleInclude reference ->
       nest (!^ "Include" ^^ PathName.to_coq reference ^-^ !^ ".")
+    | ModuleIncludeItem (name, typ_vars, mixed_path) ->
+      nest (
+        !^ "Definition" ^^ Name.to_coq name ^^ Pp.args with_args ^^
+        begin match typ_vars with
+        | [] -> empty
+        | _ :: _ ->
+          nest (braces (
+            separate space (typ_vars |> List.map (fun typ_var ->
+              Name.to_coq typ_var
+            )) ^^
+            !^ ":" ^^ Pp.set
+          ))
+        end ^^
+        !^ ":=" ^^
+        nest (separate space (
+          MixedPath.to_coq mixed_path ::
+          (typ_vars |> List.map (fun typ_var ->
+            nest (parens (
+              Name.to_coq typ_var ^^ !^ ":=" ^^ Name.to_coq typ_var
+            ))
+          ))
+        )) ^-^
+        !^ "."
+      )
     | ModuleSynonym (name, reference) ->
-      nest (!^ "Module" ^^ Name.to_coq name ^^ !^ ":=" ^^ PathName.to_coq reference ^-^ !^ ".")
+      nest (
+        !^ "Module" ^^ Name.to_coq name ^^ !^ ":=" ^^ PathName.to_coq reference ^-^ !^ "."
+      )
     | Signature (name, signature) -> Signature.to_coq_definition name signature
     | Error message -> !^ ( "(* " ^ message ^ " *)")
     | ErrorMessage (message, def) ->
