@@ -1,4 +1,5 @@
 ## [Unreleased]
+* Remove the generation of `Import` in Coq and expand the names regardless of the `open` commands, in order to be compatible with local opens.
 * Add support for anonymous sub-signatures.
 * Generate functors using a type class of the current arguments.
 * Add the configuration option `merge_returns`.

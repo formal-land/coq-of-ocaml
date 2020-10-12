@@ -80,7 +80,6 @@ type t =
   | Value of Value.t
   | AbstractValue of Name.t * Name.t list * Type.t
   | TypeDefinition of TypeDefinition.t
-  | Open of Open.t
   | Module of
     Name.t * (Name.t * Type.t) list * t list * (Exp.t * Type.t option) option
   | ModuleExpression of Name.t * Exp.t
@@ -196,17 +195,7 @@ let rec of_structure (structure : structure) : t list Monad.t =
         "Alternative: using sum types (\"option\", \"result\", ...) to " ^
         "represent error cases."
       )
-    | Tstr_open { open_expr; _ } ->
-      begin match open_expr with
-      | { mod_desc = Tmod_ident (path, _); _ } ->
-        Open.of_ocaml path >>= fun o ->
-        return [Open o]
-      | _ ->
-        raise
-          [Error "open_module_expression"]
-          NotSupported
-          "We do not support open on complex module expressions"
-      end
+    | Tstr_open { open_expr; _ } -> return []
     | Tstr_module { mb_id; mb_expr; mb_attributes; _ } ->
       let* name = Name.of_ident false mb_id in
       let* has_plain_module_attribute =
@@ -392,7 +381,6 @@ let rec to_coq (with_args : bool) (defs : t list) : SmartPrint.t =
       ) ^^
       Type.to_coq None None typ ^-^ !^ "."
     | TypeDefinition typ_def -> TypeDefinition.to_coq with_args typ_def
-    | Open o -> Open.to_coq o
     | Module (name, functor_parameters, defs, e) ->
       let is_functor =
         match functor_parameters with

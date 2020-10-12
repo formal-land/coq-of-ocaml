@@ -172,11 +172,7 @@ let rec get_local_base_path (is_value : bool) (path : Path.t)
 
 (** The current environment must include the potential first-class module
     signature definition of the corresponding projection in the [path]. *)
-let of_path
-  (is_value : bool)
-  (path : Path.t)
-  (long_ident : Longident.t option)
-  : t Monad.t =
+let of_path (is_value : bool) (path : Path.t) : t Monad.t =
   let* decomposed_path = DecomposedPath.get path in
   let flattened_decomposed_path =
     FlattenedDecomposedPath.get decomposed_path None in
@@ -191,13 +187,7 @@ let of_path
       let* path_name = PathName.of_path_without_convert is_value base_path in
       let* conversion = PathName.try_convert path_name in
       begin match conversion with
-      | None ->
-        begin match long_ident with
-        | None -> return (PathName path_name)
-        | Some long_ident ->
-          let* path_name = PathName.of_long_ident is_value long_ident in
-          return (PathName path_name)
-        end
+      | None -> return (PathName path_name)
       | Some path_name -> return (PathName path_name)
       end
     | Some local_base_path -> return (PathName local_base_path)

@@ -266,14 +266,14 @@ let rec of_typ_expr
   | Tconstr (path, typs, _) ->
     non_phantom_typs path typs >>= fun typs ->
     of_typs_exprs with_free_vars typ_vars typs >>= fun (typs, typ_vars, new_typ_vars) ->
-    MixedPath.of_path false path None >>= fun mixed_path ->
+    MixedPath.of_path false path >>= fun mixed_path ->
     let* typ = apply_with_merge mixed_path typs in
     return (typ, typ_vars, new_typ_vars)
   | Tobject (_, object_descr) ->
     begin match !object_descr with
     | Some (path, _ :: typs) ->
       of_typs_exprs with_free_vars typ_vars typs >>= fun (typs, typ_vars, new_typ_vars) ->
-      MixedPath.of_path false path None >>= fun mixed_path ->
+      MixedPath.of_path false path >>= fun mixed_path ->
       return (Apply (mixed_path, typs), typ_vars, new_typ_vars)
     | _ ->
       raise

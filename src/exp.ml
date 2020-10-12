@@ -251,7 +251,7 @@ let rec of_expression (typ_vars : Name.t Name.Map.t) (e : expression)
   match e.exp_desc with
   | Texp_ident (path, loc, _) ->
     let implicits = Attribute.get_implicits attributes in
-    let* x = MixedPath.of_path true path (Some loc.txt) in
+    let* x = MixedPath.of_path true path in
     return (Variable (x, implicits))
   | Texp_constant constant ->
     Constant.of_constant constant >>= fun constant ->
@@ -828,7 +828,7 @@ and of_module_expr
   set_loc (Loc.of_location mod_loc) (
   match mod_desc with
   | Tmod_ident (path, loc) ->
-    MixedPath.of_path false path (Some loc.txt) >>= fun mixed_path ->
+    MixedPath.of_path false path >>= fun mixed_path ->
     let default_result = return (Variable (mixed_path, [])) in
     let* is_first_class =
       IsFirstClassModule.is_module_typ_first_class

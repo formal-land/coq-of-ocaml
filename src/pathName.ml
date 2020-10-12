@@ -85,7 +85,7 @@ let convert (path_name : t) : t Monad.t =
 let of_name (path : Name.t list) (base : Name.t) : t =
   { path; base }
 
-(** Import an OCaml [Longident.t]. *)
+(* Import an OCaml [Longident.t]. *)
 let of_long_ident (is_value : bool) (long_ident : Longident.t) : t Monad.t =
   let* configuration = get_configuration in
   let* () =

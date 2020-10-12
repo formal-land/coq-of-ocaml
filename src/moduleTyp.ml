@@ -21,13 +21,13 @@ and get_module_typ_path_name (module_typ : Typedtree.module_type)
   get_module_typ_desc_path module_typ.mty_desc
 
 let of_ocaml_module_with_substitutions
-  (long_ident_loc : Longident.t Asttypes.loc)
+  (signature_path : Path.t)
   (substitutions :
     (Path.t * Longident.t Asttypes.loc * Typedtree.with_constraint) list)
   : t Monad.t =
-  let* signature_path_name = PathName.of_long_ident false long_ident_loc.txt in
+  let* signature_path_name = PathName.of_path_with_convert false signature_path in
   get_env >>= fun env ->
-  let (_, module_typ) = Env.lookup_modtype long_ident_loc.txt env in
+  let module_typ = Env.find_modtype signature_path env in
   ModuleTypParams.get_module_typ_declaration_typ_params_arity
     module_typ >>= fun signature_typ_params ->
   (substitutions |> Monad.List.filter_map (fun (path, _, with_constraint) ->
@@ -74,8 +74,8 @@ let rec of_ocaml_desc (module_typ_desc : Typedtree.module_type_desc) : t Monad.t
       (Error "generative_functor")
       NotSupported
       "Generative functors are not handled"
-  | Tmty_ident (_, long_ident_loc) ->
-    of_ocaml_module_with_substitutions long_ident_loc []
+  | Tmty_ident (path, _) ->
+    of_ocaml_module_with_substitutions path []
   | Tmty_signature _ ->
     raise
       (Error "anonymous_signature")
@@ -83,8 +83,8 @@ let rec of_ocaml_desc (module_typ_desc : Typedtree.module_type_desc) : t Monad.t
       "Anonymous definition of signatures is not handled"
   | Tmty_typeof _ ->
     raise (Error "typeof") NotSupported "The typeof in module types is not handled"
-  | Tmty_with ({ mty_desc = Tmty_ident (_, long_ident_loc); _ }, substitutions) ->
-    of_ocaml_module_with_substitutions long_ident_loc substitutions
+  | Tmty_with ({ mty_desc = Tmty_ident (path, _); _ }, substitutions) ->
+    of_ocaml_module_with_substitutions path substitutions
   | Tmty_with _ ->
     raise
       (Error "signature")
