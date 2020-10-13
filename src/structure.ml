@@ -394,7 +394,7 @@ let rec to_coq (with_args : bool) (defs : t list) : SmartPrint.t =
         indent (
           begin if is_functor then
             nest (
-              !^ "Class" ^^ !^ "Args" ^^ Pp.args with_args ^^ !^ ":=" ^^
+              !^ "Class" ^^ !^ "FArgs" ^^ Pp.args with_args ^^ !^ ":=" ^^
               !^ "{" ^^ newline ^^
               indent (
                 separate empty (functor_parameters |> List.map (
@@ -418,7 +418,7 @@ let rec to_coq (with_args : bool) (defs : t list) : SmartPrint.t =
             nest (
               !^ "Definition" ^^ final_item_name ^^
               begin if is_functor then
-                !^ "`(Args)"
+                !^ "`(FArgs)"
               else
                 Pp.args with_args
               end ^^

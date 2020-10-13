@@ -44,7 +44,7 @@ let set : SmartPrint.t =
 
 let args (with_args : bool) : SmartPrint.t =
   if with_args then
-    !^ "`{Args}"
+    !^ "`{FArgs}"
   else
     empty
 
