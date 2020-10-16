@@ -18,10 +18,16 @@ type t = {
 type let_in_type = (Name.t * Name.t) list
 
 let add_new_let_in_type
-  (prefix : string list) (let_in_type : let_in_type) (name : Name.t)
-  : Name.t * let_in_type =
-  let prefixed_name = Name.prefix_by_strings prefix name in
-  (prefixed_name, (name, prefixed_name) :: let_in_type)
+  (prefix : Name.t list) (let_in_type : let_in_type) (name : Name.t)
+  : (Name.t * let_in_type) Monad.t =
+  let prefixed_path_name = PathName.of_name prefix name in
+  let* prefixed_name = PathName.to_name false prefixed_path_name in
+  return (prefixed_name, (name, prefixed_name) :: let_in_type)
+
+let prefix_name (is_value : bool) (prefix : Name.t list) (name : Name.t)
+  : Name.t Monad.t =
+  let prefixed_path_name = PathName.of_name prefix name in
+  PathName.to_name is_value prefixed_path_name
 
 let apply_let_in_type (let_in_type : let_in_type) (typ : Type.t) : Type.t =
   List.fold_left
@@ -29,7 +35,7 @@ let apply_let_in_type (let_in_type : let_in_type) (typ : Type.t) : Type.t =
     typ let_in_type
 
 let rec items_of_types_signature
-  (prefix : string list)
+  (prefix : Name.t list)
   (let_in_type : let_in_type)
   (signature : Types.signature)
   : (item list * let_in_type) Monad.t =
@@ -38,7 +44,7 @@ let rec items_of_types_signature
     match signature_item with
     | Sig_value (ident, { val_type; _ }, _) ->
       let* name = Name.of_ident true ident in
-      let prefixed_name = Name.prefix_by_strings prefix name in
+      let* prefixed_name = prefix_name true prefix name in
       let* typ = Type.of_type_expr_without_free_vars val_type in
       let typ_args = Name.Set.elements (Type.typ_args_of_typ typ) in
       let typ_with_let_in_type =
@@ -46,11 +52,11 @@ let rec items_of_types_signature
       return (Value (prefixed_name, typ_with_let_in_type), let_in_type)
     | Sig_type (ident, { type_manifest = None; _ }, _, _) ->
       let* name = Name.of_ident false ident in
-      let (name, let_in_type) = add_new_let_in_type prefix let_in_type name in
+      let* (name, let_in_type) = add_new_let_in_type prefix let_in_type name in
       return (TypExistential name, let_in_type)
     | Sig_type (ident, { type_manifest = Some typ; type_params; _ }, _, _) ->
       let* name = Name.of_ident false ident in
-      let (name, let_in_type) = add_new_let_in_type prefix let_in_type name in
+      let* (name, let_in_type) = add_new_let_in_type prefix let_in_type name in
       let* typ_args = Monad.List.map Type.of_type_expr_variable type_params in
       let* typ = Type.of_type_expr_without_free_vars typ in
       let typ_with_let_in_type =
@@ -102,9 +108,9 @@ let rec items_of_types_signature
       | Not_found reason ->
         begin match md_type with
         | Mty_signature signature ->
+          let* name = Name.of_ident false ident in
           let* (items, _) =
-            items_of_types_signature
-              (prefix @ [Ident.name ident]) let_in_type signature in
+            items_of_types_signature (prefix @ [name]) let_in_type signature in
           return (ModuleWithSignature items, let_in_type)
         | _ ->
           raise
@@ -149,7 +155,7 @@ let of_types_signature (signature : Types.signature) : t Monad.t =
   return { items; typ_params }
 
 let rec of_signature_items
-  (prefix : string list)
+  (prefix : Name.t list)
   (let_in_type : let_in_type)
   (items : signature_item list)
   (last_env : Env.t)
@@ -192,13 +198,13 @@ let rec of_signature_items
         "Signatures inside signatures are not handled."
     | Tsig_module { md_id; md_type; _ } ->
       let* name = Name.of_ident false md_id in
-      let prefixed_name = Name.prefix_by_strings prefix name in
+      let* prefixed_name = prefix_name false prefix name in
       begin match md_type.mty_desc with
       | Tmty_signature signature ->
+        let* name = Name.of_ident false md_id in
         let* items =
           of_signature_items
-            (prefix @ [Ident.name md_id])
-            let_in_type signature.sig_items next_env in
+            (prefix @ [name]) let_in_type signature.sig_items next_env in
         return ([ModuleWithSignature items], let_in_type)
       | _ ->
         push_env (
@@ -217,7 +223,7 @@ let rec of_signature_items
         "Recursive module signatures are not handled."
     | Tsig_type (_, [ { typ_id; typ_type = { type_manifest = None; _ }; _ } ]) ->
       let* name = Name.of_ident false typ_id in
-      let (name, let_in_type) = add_new_let_in_type prefix let_in_type name in
+      let* (name, let_in_type) = add_new_let_in_type prefix let_in_type name in
       return ([TypExistential name], let_in_type)
     | Tsig_type (_, typs) | Tsig_typesubst typs ->
       begin match typs with
@@ -227,7 +233,7 @@ let rec of_signature_items
           _
         } ] ->
         let* name = Name.of_ident false typ_id in
-        let (name, let_in_type) = add_new_let_in_type prefix let_in_type name in
+        let* (name, let_in_type) = add_new_let_in_type prefix let_in_type name in
         let* typ_args =
           type_params |> Monad.List.map Type.of_type_expr_variable in
         let* typ = Type.of_type_expr_without_free_vars typ in
@@ -247,7 +253,7 @@ let rec of_signature_items
         "We do not handle extensible types"
     | Tsig_value { val_id; val_desc = { ctyp_type; _ }; _ } ->
       let* name = Name.of_ident true val_id in
-      let prefixed_name = Name.prefix_by_strings prefix name in
+      let* prefixed_name = prefix_name true prefix name in
       let* typ = Type.of_type_expr_without_free_vars ctyp_type in
       let typ_args = Name.Set.elements (Type.typ_args_of_typ typ) in
       let typ_with_let_in_type =
