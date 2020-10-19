@@ -113,6 +113,16 @@ let has_plain_module (attributes : t list) : bool =
     | _ -> false
   )
 
+(** We compute the existence of this attribute outside of the monad for
+   performance reasons. *)
+let has_precise_signature (attributes : Typedtree.attributes) : bool =
+  attributes |> List.exists (fun {Parsetree.attr_name; attr_payload; _} ->
+    let id = attr_name.Asttypes.txt in
+    match id with
+    | "coq_precise_signature" -> true
+    | _ -> false
+  )
+
 let get_structs (attributes : t list) : string list =
   attributes |> Util.List.filter_map (function
     | Struct name -> Some name

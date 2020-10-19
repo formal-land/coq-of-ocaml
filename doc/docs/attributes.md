@@ -274,6 +274,107 @@ Module M.
 End M.
 ```
 
+## coq_precise_signature
+In order to distinguish between two signatures with the same value names, we can add the `[@coq_precise_signature]` attribute. For example, we can translate:
+```ocaml
+module type Sig1 = sig
+  type t
+
+  val f : t -> t -> t * t
+end
+[@@coq_precise_signature]
+
+module type Sig2 = sig
+  type t
+
+  val f : t -> t list
+end
+[@@coq_precise_signature]
+
+module M1 : Sig1 = struct
+  type t = int
+
+  let f n m = (n, m)
+end
+
+module M2 : Sig2 = struct
+  type t = int
+
+  let f n = []
+end
+```
+to:
+```coq
+Module Sig1.
+  Record signature {t : Set} : Set := {
+    t := t;
+    f : t -> t -> t * t;
+  }.
+End Sig1.
+
+Module Sig2.
+  Record signature {t : Set} : Set := {
+    t := t;
+    f : t -> list t;
+  }.
+End Sig2.
+
+Module M1.
+  Definition t : Set := int.
+  
+  Definition f {A B : Set} (n : A) (m : B) : A * B := (n, m).
+  
+  Definition module :=
+    existT (A := Set) _ t
+      {|
+        Sig1.f := f
+      |}.
+End M1.
+Definition M1 := M1.module.
+
+Module M2.
+  Definition t : Set := int.
+  
+  Definition f {A B : Set} (n : A) : list B := nil.
+  
+  Definition module :=
+    existT (A := Set) _ t
+      {|
+        Sig2.f := f
+      |}.
+End M2.
+Definition M2 := M2.module.
+```
+Here we can distinguish between the signature `Sig1` and `Sig2` thanks to the type shape of `f`. Without this attribute, we would get the following error message:
+```text
+--- tests/precise_signature.ml:13:1 ----------------------------------------------- module (1/2) ---
+
+  11 | end
+  12 | 
+> 13 | module M1 : Sig1 = struct
+> 14 |   type t = int
+> 15 | 
+> 16 |   let f n m = (n, m)
+> 17 | end
+  18 | 
+  19 | module M2 : Sig2 = struct
+  20 |   type t = int
+
+
+It is unclear which name this signature has. At least two similar
+signatures found, namely:
+
+* Sig1
+* Sig2
+
+We were looking for a module signature name for the following shape:
+[ f ]
+(a shape is a list of names of values and sub-modules)
+
+We use the concept of shape to find the name of a signature for Coq.
+```
+Indeed, by default, we only compare signatures based on the names of their fields. With the `[@coq_precise_signature]` we also use a heuristic to distinguish the types of the values.
+
 ## coq_struct
 For recursive definitions, we can force the name of the parameter on which we do structural recursion using the attribute `[@coq_struct "name"]`. This has the same effect as the `{struct name}` keyword in Coq. For example, we translate:
 ```ocaml
