@@ -717,7 +717,7 @@ and import_let_fun
   let is_rec = Recursivity.of_rec_flag is_rec in
   (cases |> Monad.List.filter_map (fun { vb_pat = p; vb_expr; vb_attributes; _ } ->
     Attribute.of_attributes vb_attributes >>= fun attributes ->
-    let is_axiom = Attribute.has_axiom attributes in
+    let is_axiom = Attribute.has_axiom_with_reason attributes in
     let struct_attributes = Attribute.get_structs attributes in
     set_env vb_expr.exp_env (
     set_loc (Loc.of_location p.pat_loc) (

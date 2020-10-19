@@ -7,10 +7,10 @@ We present the attributes which we can use with coq-of-ocaml. See the [attribute
 
 We prefix all the attributes of coq-of-ocaml by `coq_`. According to the OCaml syntax, depending on the context, you may use a single `@` or a double `@@`.
 
-## coq_axiom
-When we cannot import the definition of a value, we can use the `[@coq_axiom]` attribute to transform it to a Coq axiom. For example:
+## coq_axiom_with_reason
+When we cannot import the definition of a value, we can use the `[@coq_axiom_with_reason]` attribute to transform it to a Coq axiom. For example:
 ```ocaml
-let[@coq_axiom "mutable state"] function_hard_to_translate_to_coq =
+let[@coq_axiom_with_reason "mutable state"] function_hard_to_translate_to_coq =
   let n = ref 0 in
   fun () ->
     n := !n + 1;
@@ -20,7 +20,7 @@ is translated to:
 ```coq
 Definition function_hard_to_translate_to_coq : unit -> Z := axiom.
 ```
-Note that we must give a reason for the use of `[@coq_axiom]` in a string parameter. We define the `axiom` value in the coq-of-ocaml's Coq library. The definition of `axiom` is:
+Note that we must give a reason for the use of `[@coq_axiom_with_reason]` in a string parameter. We define the `axiom` value in the coq-of-ocaml's Coq library. The definition of `axiom` is:
 ```coq
 Axiom axiom : forall {A : Set}, A.
 ```
