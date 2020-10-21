@@ -23,7 +23,6 @@ Printf.ksprintf J.send {|
  (targets
    parser_raw.ml parser_raw.mli
    parser_explain.ml parser_printer.ml parser_recover.ml)
- (enabled_if (= %%{profile} "release"))
  (action
    (progn
      (copy %s/parser_raw.ml     parser_raw.ml)
@@ -38,37 +37,4 @@ Printf.ksprintf J.send {|
   (name preprocess)
   (wrapped false)
   (libraries parsing utils merlin_utils))
-
-(menhir
- (modules parser_raw)
- (enabled_if (<> %%{profile} "release"))
- (mode    (promote-into %s))
- (flags :standard --inspection --table --cmly))
-
-(rule
-  (targets parser_recover.ml)
-  (enabled_if (<> %%{profile} "release"))
-  (deps    parser_raw.cmly)
-  (mode    (promote-into %s))
-  (action
-    (with-stdout-to %%{targets}
-       (run %%{exe:./recover/gen_recover.exe} %%{deps}))))
-
-(rule
-  (targets parser_explain.ml)
-  (enabled_if (<> %%{profile} "release"))
-  (deps    parser_raw.cmly)
-  (mode    (promote-into %s))
-  (action
-    (with-stdout-to %%{targets}
-       (run %%{exe:./explain/gen_explain.exe} %%{deps}))))
-
-(rule
-  (targets parser_printer.ml)
-  (enabled_if (<> %%{profile} "release"))
-  (deps    parser_raw.cmly)
-  (mode    (promote-into %s))
-  (action
-    (with-stdout-to %%{targets}
-       (run %%{exe:./printer/gen_printer.exe} %%{deps}))))
-|} ver ver ver ver ver ver ver ver ver ver ver ver
+|} ver ver ver ver ver ver ver ver
