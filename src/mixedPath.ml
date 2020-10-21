@@ -131,8 +131,7 @@ let rec of_path_aux (flattened_decomposed_path : FlattenedDecomposedPath.t)
   : Path.t * (Path.t * string list) list * Path.t option =
   match flattened_decomposed_path with
   | WithField (path, signature_path, fields, flattened_decomposed_path) ->
-    let (path', fields', signature_path') =
-      of_path_aux flattened_decomposed_path in
+    let (_, fields', _) = of_path_aux flattened_decomposed_path in
     (path, (signature_path, fields) :: fields', Some signature_path)
   | Final { path; signature_path } -> (path, [], signature_path)
 
@@ -156,7 +155,7 @@ let is_module_path_local (path : Path.t) : bool Monad.t =
 (** In case the base path is local, we need to make a special transformation.
     Indeed, unless if the path is a single name, this means that we access to a
     sub-module with an anonmous signature which has been flattened.  *)
-let rec get_local_base_path (is_value : bool) (path : Path.t)
+let get_local_base_path (is_value : bool) (path : Path.t)
   : PathName.t option Monad.t =
   match path with
   | Papply _ -> failwith "Unexpected functor path application"

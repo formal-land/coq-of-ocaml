@@ -166,7 +166,6 @@ let rec get_include_name (module_expr : module_expr) : Name.t Monad.t =
       )
 
 let build_module
-  (typ_vars : Name.t Name.Map.t)
   (params_arity : int ModuleTypParams.t)
   (values : ModuleTypValues.t list)
   (signature_path : Path.t)
@@ -249,7 +248,7 @@ let rec of_expression (typ_vars : Name.t Name.Map.t) (e : expression)
   set_env e.exp_env (
   set_loc (Loc.of_location e.exp_loc) (
   match e.exp_desc with
-  | Texp_ident (path, loc, _) ->
+  | Texp_ident (path, _, _) ->
     let implicits = Attribute.get_implicits attributes in
     let* x = MixedPath.of_path true path in
     return (Variable (x, implicits))
@@ -827,7 +826,7 @@ and of_module_expr
   set_env mod_env (
   set_loc (Loc.of_location mod_loc) (
   match mod_desc with
-  | Tmod_ident (path, loc) ->
+  | Tmod_ident (path, _) ->
     MixedPath.of_path false path >>= fun mixed_path ->
     let default_result = return (Variable (mixed_path, [])) in
     let* is_first_class =
@@ -877,7 +876,6 @@ and of_module_expr
                 PathName.of_path_and_name_with_convert path name in
               return (MixedPath.PathName path_name) in
           build_module
-            typ_vars
             module_typ_params_arity
             values
             module_type_path
@@ -1006,7 +1004,6 @@ and of_structure
     let mixed_path_of_value_or_typ (name : Name.t): MixedPath.t Monad.t =
       return (MixedPath.of_name name) in
     build_module
-      typ_vars
       module_typ_params_arity
       values
       signature_path

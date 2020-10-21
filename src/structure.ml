@@ -23,7 +23,7 @@ module Value = struct
           ([], []) in
       separate (newline ^^ newline) (
         (axiom_cases |> List.map (fun header ->
-          let { Exp.Header.name; typ_vars; args; typ; _ } = header in
+          let { Exp.Header.name; typ_vars; typ; _ } = header in
           nest (
             !^ "Axiom" ^^ Name.to_coq name ^^ !^ ":" ^^
             begin match typ_vars with
@@ -195,7 +195,7 @@ let rec of_structure (structure : structure) : t list Monad.t =
         "Alternative: using sum types (\"option\", \"result\", ...) to " ^
         "represent error cases."
       )
-    | Tstr_open { open_expr; _ } -> return []
+    | Tstr_open _ -> return []
     | Tstr_module { mb_id; mb_expr; mb_attributes; _ } ->
       let* name = Name.of_ident false mb_id in
       let* has_plain_module_attribute =
@@ -260,7 +260,7 @@ let rec of_structure (structure : structure) : t list Monad.t =
       } ->
       let* reference = PathName.of_path_with_convert false path in
       get_include_items (Some path) reference mod_type
-    | Tstr_include { incl_mod } ->
+    | Tstr_include { incl_mod; _ } ->
       let* include_name = Exp.get_include_name incl_mod in
       let* module_definition = of_module include_name [] incl_mod false in
       let reference = PathName.of_name [] include_name in
@@ -318,7 +318,6 @@ and of_module_expr
           return (MixedPath.of_name name) in
         let* e =
           Exp.build_module
-            typ_vars
             module_typ_params_arity
             values
             module_type_path
