@@ -1,4 +1,5 @@
 ## [Unreleased]
+* Add the attribute `@coq_cast` to force an unsafe cast of a sub-expression.
 * Rename the attribute `@coq_axiom` as `@coq_axiom_with_reason`.
 * Add the attribute `@coq_precise_signature` to help to distinguish between ambiguous signatures.
 * Remove the generation of `Import` in Coq and expand the names regardless of the `open` commands, in order to be compatible with local opens.

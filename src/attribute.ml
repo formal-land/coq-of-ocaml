@@ -3,6 +3,7 @@ open Monad.Notations
 
 type t =
   | AxiomWithReason
+  | Cast
   | ForceGadt
   | Implicit of string
   | MatchGadt
@@ -52,6 +53,7 @@ let of_attributes (attributes : Typedtree.attributes) : t list Monad.t =
       let error_message = "Give a reason for this axiom." in
       let* _ = of_payload_string error_message id attr_payload in
       return (Some AxiomWithReason)
+    | "coq_cast" -> return (Some Cast)
     | "coq_force_gadt" -> return (Some ForceGadt)
     | "coq_implicit" ->
       let error_message =
@@ -73,6 +75,12 @@ let of_attributes (attributes : Typedtree.attributes) : t list Monad.t =
 let has_axiom_with_reason (attributes : t list) : bool =
   attributes |> List.exists (function
     | AxiomWithReason -> true
+    | _ -> false
+  )
+
+let has_cast (attributes : t list) : bool =
+  attributes |> List.exists (function
+    | Cast -> true
     | _ -> false
   )
 

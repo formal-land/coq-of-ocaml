@@ -72,6 +72,8 @@ type t =
     (** A functor. *)
   | TypeAnnotation of t * Type.t
     (** Annotate with a type. *)
+  | Cast of t * Type.t
+    (** Force the cast to a type (with an axiom). *)
   | Assert of Type.t * t (** The assert keyword. *)
   | Error of string (** An error message for unhandled expressions. *)
   | ErrorArray of t list (** An error produced by an array of elements. *)
@@ -244,10 +246,12 @@ let rec smart_return (operator : string) (e : t) : t Monad.t =
 (** Import an OCaml expression. *)
 let rec of_expression (typ_vars : Name.t Name.Map.t) (e : expression)
   : t Monad.t =
-  Attribute.of_attributes e.exp_attributes >>= fun attributes ->
   set_env e.exp_env (
   set_loc (Loc.of_location e.exp_loc) (
-  match e.exp_desc with
+  let* attributes = Attribute.of_attributes e.exp_attributes in
+  let typ = e.exp_type in
+  (* We do not indent here to preserve the diff. *)
+  let* e = match e.exp_desc with
   | Texp_ident (path, _, _) ->
     let implicits = Attribute.get_implicits attributes in
     let* x = MixedPath.of_path true path in
@@ -593,7 +597,12 @@ let rec of_expression (typ_vars : Name.t Name.Map.t) (e : expression)
       (Error "extension")
       NotSupported
       "Construction of extensions is not handled"
-  | Texp_open (_, e) -> of_expression typ_vars e))
+  | Texp_open (_, e) -> of_expression typ_vars e in
+  if Attribute.has_cast attributes then
+    let* (typ, _, _) = Type.of_typ_expr false typ_vars typ in
+    return (Cast (e, typ))
+  else
+    return e))
 
 and of_match
   (typ_vars : Name.t Name.Map.t)
@@ -1460,6 +1469,12 @@ let rec to_coq (paren : bool) (e : t) : SmartPrint.t =
     )
   | TypeAnnotation (e, typ) ->
     parens @@ nest (to_coq true e ^^ nest (!^ ":" ^^ Type.to_coq None None typ))
+  | Cast (e, typ) ->
+    parens @@ nest (
+      !^ "cast" ^^
+      Type.to_coq None (Some Type.Context.Apply) typ ^^
+      to_coq true e
+    )
   | Assert (typ, e) ->
     Pp.parens paren @@ nest (
       !^ "assert" ^^ Type.to_coq None (Some Type.Context.Apply) typ ^^
