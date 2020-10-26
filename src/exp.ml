@@ -54,7 +54,7 @@ type t =
     (** Open a first-class module. *)
   | Match of t * (Pattern.t * match_existential_cast option * t) list * bool
     (** Match an expression to a list of patterns. *)
-  | Record of (PathName.t * t) list
+  | Record of (PathName.t * int * t) list
     (** Construct a record giving an expression for each field. *)
   | Field of t * PathName.t (** Access to a field of a record. *)
   | IfThenElse of t * t * t (** The "else" part may be unit. *)
@@ -439,13 +439,16 @@ let rec of_expression (typ_vars : Name.t Name.Map.t) (e : expression)
           | Kept _ -> return None
           | Overridden (_, e) ->
             PathName.of_label_description label_description >>= fun x ->
-            return (Some (x, e))
+            let* typ =
+              Type.of_type_expr_without_free_vars label_description.lbl_arg in
+            let arity = Type.nb_forall_typs typ in
+            return (Some (x, arity, e))
           end >>= fun x_e ->
           match x_e with
           | None -> return None
-          | Some (x, e) ->
+          | Some (x, arity, e) ->
             of_expression typ_vars e >>= fun e ->
-            return (Some (x, e))
+            return (Some (x, arity, e))
       ) >>= fun fields ->
       begin match extended_expression with
       | None -> return (Record fields)
@@ -453,7 +456,7 @@ let rec of_expression (typ_vars : Name.t Name.Map.t) (e : expression)
         of_expression typ_vars extended_expression >>= fun extended_e ->
         return (
           List.fold_left
-            (fun extended_e (x, e) ->
+            (fun extended_e (x, _, e) ->
               Apply (
                 Variable (MixedPath.PathName (PathName.prefix_by_with x), []),
                 [Some e; Some extended_e]
@@ -1402,8 +1405,15 @@ let rec to_coq (paren : bool) (e : t) : SmartPrint.t =
     end
   | Record fields ->
     nest (
-      !^ "{|" ^^ separate (!^ ";" ^^ space) (fields |> List.map (fun (x, e) ->
-        nest (PathName.to_coq x ^-^ !^ " :=" ^^ to_coq false e)
+      !^ "{|" ^^
+      separate (!^ ";" ^^ space) (fields |> List.map (fun (x, arity, e) ->
+        nest (
+          nest (
+            PathName.to_coq x ^^ separate space (Pp.n_underscores arity) ^^
+            !^ ":="
+          ) ^^
+          to_coq false e
+        )
       )) ^^ !^ "|}"
     )
   | Field (e, x) -> to_coq true e ^-^ !^ ".(" ^-^ PathName.to_coq x ^-^ !^ ")"
@@ -1434,7 +1444,7 @@ let rec to_coq (paren : bool) (e : t) : SmartPrint.t =
                 PathName.to_coq x ^^
                 begin match nb_free_vars with
                 | 0 -> empty
-                | _ -> nest (separate space (Pp.to_coq_n_underscores nb_free_vars))
+                | _ -> nest (separate space (Pp.n_underscores nb_free_vars))
                 end
               ) ^^
               !^ ":="

@@ -198,3 +198,22 @@ Module ConstructorWithPolymorphicRecord.
   Definition foo : t int string :=
     Foo {| t.Foo.location := 12; t.Foo.payload := "hi"; t.Foo.size := 23 |}.
 End ConstructorWithPolymorphicRecord.
+
+Module RecordWithInnerPolymorphism.
+  Module t.
+    Record record : Set := Build {
+      f : forall {a : Set}, list a -> list a }.
+    Definition with_f f (r : record) :=
+      Build f.
+  End t.
+  Definition t := t.record.
+  
+  Definition r : t :=
+    {|
+      t.f _ :=
+        fun l =>
+          match l with
+          | [] => l
+          | cons _ l' => l'
+          end |}.
+End RecordWithInnerPolymorphism.

@@ -63,3 +63,14 @@ module ConstructorWithPolymorphicRecord = struct
 
   let foo = Foo { location = 12; payload = "hi"; size = 23 }
 end
+
+module RecordWithInnerPolymorphism = struct
+  type t = { f : 'a. 'a list -> 'a list }
+
+  let r = {
+    f = fun l ->
+      match l with
+      | [] -> l
+      | _ :: l' -> l'
+  }
+end

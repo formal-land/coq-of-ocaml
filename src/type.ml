@@ -462,6 +462,11 @@ and typ_args_of_typs (typs : t list) : Name.Set.t =
   List.fold_left (fun args typ -> Name.Set.union args (typ_args_of_typ typ))
     Name.Set.empty typs
 
+let rec nb_forall_typs (typ : t) : int =
+  match typ with
+  | ForallTyps (typ_params, typ) -> List.length typ_params + nb_forall_typs typ
+  | _ -> 0
+
 (** The local type constructors of a type. Used to detect the existential
     variables which are actually used by a type, once we remove the phantom
     types. *)

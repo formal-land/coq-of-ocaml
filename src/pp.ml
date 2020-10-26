@@ -6,11 +6,11 @@ let parens (b : bool) (doc : SmartPrint.t) : SmartPrint.t =
   else
     doc
 
-let rec to_coq_n_underscores (n : int) : SmartPrint.t list =
+let rec n_underscores (n : int) : SmartPrint.t list =
   if n = 0 then
     []
   else
-    (!^ "_") :: to_coq_n_underscores (n - 1)
+    (!^ "_") :: n_underscores (n - 1)
 
 let primitive_tuple (docs : SmartPrint.t list) : SmartPrint.t =
   match docs with
@@ -31,7 +31,7 @@ let primitive_tuple_type (docs : SmartPrint.t list) : SmartPrint.t =
   | _ :: _ :: _ -> nest (brakets (separate (space ^^ !^ "**" ^^ space) docs))
 
 let primitive_tuple_infer (n : int) : SmartPrint.t =
-  match to_coq_n_underscores n with
+  match n_underscores n with
   | [] -> !^ "tt"
   | [_] -> !^ "_"
   | n_underscores -> brakets (separate (!^ "," ^^ space) n_underscores)
