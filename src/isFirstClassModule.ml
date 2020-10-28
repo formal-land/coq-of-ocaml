@@ -23,7 +23,9 @@ let is_modtype_declaration_similar_to_shape
   : bool =
   match modtype_declaration.mtd_type with
   | Some (Mty_signature signature) ->
-    let shape' = SignatureShape.of_signature signature in
+    let shape' =
+      SignatureShape.of_signature
+        (Some modtype_declaration.mtd_attributes) signature in
     SignatureShape.are_equal shape shape'
   | _ -> false
 
@@ -47,7 +49,7 @@ let merge_similar_paths (paths : Path.t list) : Path.t list Monad.t =
     error message. *)
 let find_similar_signatures (env : Env.t) (signature : Types.signature)
   : (Path.t list * SignatureShape.t) Monad.t =
-  let shape = SignatureShape.of_signature signature in
+  let shape = SignatureShape.of_signature None signature in
   (* We explore signatures in the current namespace. *)
   let similar_signature_paths =
     Env.fold_modtypes

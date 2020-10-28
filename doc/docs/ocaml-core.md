@@ -132,3 +132,59 @@ Require Import TypingFlags.Loader.
 Unset Guard Checking.
 ```
 Unsetting the termination also remove the strict positivity checks for the definition of inductive types. We will probably add an option to re-activate the termination check when possible.
+
+## Monadic notations
+The OCaml language provides a way to define [monadic operators](https://caml.inria.fr/pub/docs/manual-ocaml/bindingops.html) so that we can define programs such as:
+```ocaml
+let return (x : 'a) : 'a option =
+  Some x
+
+let (let*) (x : 'a option) (f : 'a -> 'b option) : 'b option =
+  match x with
+  | Some x -> f x
+  | None -> None
+
+let get_head l =
+  match l with
+  | [] -> None
+  | x :: _ -> Some x
+
+let sum_first_elements l1 l2 =
+  let* x1 = get_head l1 in
+  let* (x2, x3) = get_head l2 in
+  return (x1 + x2 + x3)
+```
+We translate the program using similar let-notations in Coq. We require the user to manually insert these notations. For example, here coq-of-ocaml generates:
+```coq
+Definition __return {a : Set} (x : a) : option a := Some x.
+
+Definition op_letstar {a b : Set} (x : option a) (f : a -> option b)
+  : option b :=
+  match x with
+  | Some x => f x
+  | None => None
+  end.
+
+Definition get_head {A : Set} (l : list A) : option A :=
+  match l with
+  | [] => None
+  | cons x _ => Some x
+  end.
+
+Definition sum_first_elements (l1 : list int) (l2 : list (int * int))
+  : option int :=
+  let* x1 := get_head l1 in
+  let* '(x2, x3) := get_head l2 in
+  __return (Z.add (Z.add x1 x2) x3).
+```
+By adding the following notations in the generated code:
+```coq
+Notation "'let*' x ':=' X 'in' Y" :=
+  (op_letstar X (fun x => Y))
+  (at level 200, x ident, X at level 100, Y at level 200).
+
+Notation "'let*' ' x ':=' X 'in' Y" :=
+  (op_letstar X (fun x => Y))
+  (at level 200, x pattern, X at level 100, Y at level 200).
+```
+the function `get_head` compiles. Note that coq-of-ocaml does not generate these notations, and you have to add them by hand.

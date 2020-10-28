@@ -57,7 +57,7 @@ Module Validator.
 End Validator.
 
 Module F.
-  Class Args := {
+  Class FArgs := {
     V :
       {'[Ciphertext_t, Commitment_t, Commitment_NestedLevel_t, CV_t] :
         [Set ** Set ** Set ** Set] &
@@ -66,13 +66,13 @@ Module F.
           (Commitment_NestedLevel_t := Commitment_NestedLevel_t) (CV_t := CV_t)};
   }.
   
-  Definition foo `{Args} : Set :=
+  Definition foo `{FArgs} : Set :=
     (|V|).(Validator.com) * (|V|).(Validator.Commitment_NestedLevel_t).
   
-  Definition bar `{Args} : string :=
+  Definition bar `{FArgs} : string :=
     (|V|).(Validator.Commitment_Foo).(WithBar.bar).
   
-  Definition functor `(Args) : {_ : unit & WithBar.signature} :=
+  Definition functor `(FArgs) : {_ : unit & WithBar.signature} :=
     existT (A := unit) (fun _ => _) tt
       {|
         WithBar.bar := bar

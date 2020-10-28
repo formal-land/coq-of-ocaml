@@ -23,7 +23,7 @@ module Value = struct
           ([], []) in
       separate (newline ^^ newline) (
         (axiom_cases |> List.map (fun header ->
-          let { Exp.Header.name; typ_vars; args; typ; _ } = header in
+          let { Exp.Header.name; typ_vars; typ; _ } = header in
           nest (
             !^ "Axiom" ^^ Name.to_coq name ^^ !^ ":" ^^
             begin match typ_vars with
@@ -80,7 +80,6 @@ type t =
   | Value of Value.t
   | AbstractValue of Name.t * Name.t list * Type.t
   | TypeDefinition of TypeDefinition.t
-  | Open of Open.t
   | Module of
     Name.t * (Name.t * Type.t) list * t list * (Exp.t * Type.t option) option
   | ModuleExpression of Name.t * Exp.t
@@ -196,17 +195,7 @@ let rec of_structure (structure : structure) : t list Monad.t =
         "Alternative: using sum types (\"option\", \"result\", ...) to " ^
         "represent error cases."
       )
-    | Tstr_open { open_expr; _ } ->
-      begin match open_expr with
-      | { mod_desc = Tmod_ident (path, _); _ } ->
-        Open.of_ocaml path >>= fun o ->
-        return [Open o]
-      | _ ->
-        raise
-          [Error "open_module_expression"]
-          NotSupported
-          "We do not support open on complex module expressions"
-      end
+    | Tstr_open _ -> return []
     | Tstr_module { mb_id; mb_expr; mb_attributes; _ } ->
       let* name = Name.of_ident false mb_id in
       let* has_plain_module_attribute =
@@ -271,7 +260,7 @@ let rec of_structure (structure : structure) : t list Monad.t =
       } ->
       let* reference = PathName.of_path_with_convert false path in
       get_include_items (Some path) reference mod_type
-    | Tstr_include { incl_mod } ->
+    | Tstr_include { incl_mod; _ } ->
       let* include_name = Exp.get_include_name incl_mod in
       let* module_definition = of_module include_name [] incl_mod false in
       let reference = PathName.of_name [] include_name in
@@ -329,7 +318,6 @@ and of_module_expr
           return (MixedPath.of_name name) in
         let* e =
           Exp.build_module
-            typ_vars
             module_typ_params_arity
             values
             module_type_path
@@ -392,7 +380,6 @@ let rec to_coq (with_args : bool) (defs : t list) : SmartPrint.t =
       ) ^^
       Type.to_coq None None typ ^-^ !^ "."
     | TypeDefinition typ_def -> TypeDefinition.to_coq with_args typ_def
-    | Open o -> Open.to_coq o
     | Module (name, functor_parameters, defs, e) ->
       let is_functor =
         match functor_parameters with
@@ -406,7 +393,7 @@ let rec to_coq (with_args : bool) (defs : t list) : SmartPrint.t =
         indent (
           begin if is_functor then
             nest (
-              !^ "Class" ^^ !^ "Args" ^^ Pp.args with_args ^^ !^ ":=" ^^
+              !^ "Class" ^^ !^ "FArgs" ^^ Pp.args with_args ^^ !^ ":=" ^^
               !^ "{" ^^ newline ^^
               indent (
                 separate empty (functor_parameters |> List.map (
@@ -430,7 +417,7 @@ let rec to_coq (with_args : bool) (defs : t list) : SmartPrint.t =
             nest (
               !^ "Definition" ^^ final_item_name ^^
               begin if is_functor then
-                !^ "`(Args)"
+                !^ "`(FArgs)"
               else
                 Pp.args with_args
               end ^^

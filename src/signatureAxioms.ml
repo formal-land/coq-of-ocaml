@@ -9,7 +9,6 @@ type item =
   | IncludedFieldValue of Name.t * Name.t list * Type.t * Name.t * PathName.t
   | Module of Name.t * t
   | ModuleAlias of Name.t * PathName.t
-  | Open of Open.t
   | Signature of Name.t * Signature.t
   | TypDefinition of TypeDefinition.t
   | Value of Name.t * Name.t list * Type.t
@@ -235,9 +234,7 @@ let rec of_signature (signature : Typedtree.signature) : t Monad.t =
         let typ = ModuleTyp.to_typ module_typ in
         return [Value (name, [], typ)]
       end
-    | Tsig_open { open_expr = (path, _); _} ->
-      Open.of_ocaml path >>= fun o ->
-      return [Open o]
+    | Tsig_open _ -> return []
     | Tsig_recmodule _ ->
       raise
         [Error "recursive_module"]
@@ -314,7 +311,6 @@ let rec to_coq (signature : t) : SmartPrint.t =
     | ModuleAlias (name, path_name) ->
       !^ "Module" ^^ Name.to_coq name ^^ !^ ":=" ^^
       PathName.to_coq path_name ^-^ !^ "."
-    | Open o -> Open.to_coq o
     | Signature (name, signature) -> Signature.to_coq_definition name signature
     | TypDefinition typ_definition -> TypeDefinition.to_coq false typ_definition
     | Value (name, typ_vars, typ) ->

@@ -54,7 +54,7 @@ type t =
     (** Open a first-class module. *)
   | Match of t * (Pattern.t * match_existential_cast option * t) list * bool
     (** Match an expression to a list of patterns. *)
-  | Record of (PathName.t * t) list
+  | Record of (PathName.t * int * t) list
     (** Construct a record giving an expression for each field. *)
   | Field of t * PathName.t (** Access to a field of a record. *)
   | IfThenElse of t * t * t (** The "else" part may be unit. *)
@@ -72,6 +72,8 @@ type t =
     (** A functor. *)
   | TypeAnnotation of t * Type.t
     (** Annotate with a type. *)
+  | Cast of t * Type.t
+    (** Force the cast to a type (with an axiom). *)
   | Assert of Type.t * t (** The assert keyword. *)
   | Error of string (** An error message for unhandled expressions. *)
   | ErrorArray of t list (** An error produced by an array of elements. *)
@@ -166,7 +168,6 @@ let rec get_include_name (module_expr : module_expr) : Name.t Monad.t =
       )
 
 let build_module
-  (typ_vars : Name.t Name.Map.t)
   (params_arity : int ModuleTypParams.t)
   (values : ModuleTypValues.t list)
   (signature_path : Path.t)
@@ -245,13 +246,15 @@ let rec smart_return (operator : string) (e : t) : t Monad.t =
 (** Import an OCaml expression. *)
 let rec of_expression (typ_vars : Name.t Name.Map.t) (e : expression)
   : t Monad.t =
-  Attribute.of_attributes e.exp_attributes >>= fun attributes ->
   set_env e.exp_env (
   set_loc (Loc.of_location e.exp_loc) (
-  match e.exp_desc with
-  | Texp_ident (path, loc, _) ->
+  let* attributes = Attribute.of_attributes e.exp_attributes in
+  let typ = e.exp_type in
+  (* We do not indent here to preserve the diff. *)
+  let* e = match e.exp_desc with
+  | Texp_ident (path, _, _) ->
     let implicits = Attribute.get_implicits attributes in
-    let* x = MixedPath.of_path true path (Some loc.txt) in
+    let* x = MixedPath.of_path true path in
     return (Variable (x, implicits))
   | Texp_constant constant ->
     Constant.of_constant constant >>= fun constant ->
@@ -436,13 +439,16 @@ let rec of_expression (typ_vars : Name.t Name.Map.t) (e : expression)
           | Kept _ -> return None
           | Overridden (_, e) ->
             PathName.of_label_description label_description >>= fun x ->
-            return (Some (x, e))
+            let* typ =
+              Type.of_type_expr_without_free_vars label_description.lbl_arg in
+            let arity = Type.nb_forall_typs typ in
+            return (Some (x, arity, e))
           end >>= fun x_e ->
           match x_e with
           | None -> return None
-          | Some (x, e) ->
+          | Some (x, arity, e) ->
             of_expression typ_vars e >>= fun e ->
-            return (Some (x, e))
+            return (Some (x, arity, e))
       ) >>= fun fields ->
       begin match extended_expression with
       | None -> return (Record fields)
@@ -450,7 +456,7 @@ let rec of_expression (typ_vars : Name.t Name.Map.t) (e : expression)
         of_expression typ_vars extended_expression >>= fun extended_e ->
         return (
           List.fold_left
-            (fun extended_e (x, e) ->
+            (fun extended_e (x, _, e) ->
               Apply (
                 Variable (MixedPath.PathName (PathName.prefix_by_with x), []),
                 [Some e; Some extended_e]
@@ -579,11 +585,50 @@ let rec of_expression (typ_vars : Name.t Name.Map.t) (e : expression)
   | Texp_pack module_expr ->
     push_env (of_module_expr typ_vars module_expr None) >>= fun e ->
     return (ModulePack e)
-  | Texp_letop _ ->
-    error_message
-      (Error "let_op")
-      NotSupported
-      "We do not support let operators"
+  | Texp_letop {
+      let_ = { bop_op_path; bop_exp; _ };
+      ands;
+      body = { c_lhs; c_rhs; _ };
+      _
+    } ->
+    begin match ands with
+    | [] ->
+      let let_symbol = Path.last bop_op_path in
+      let* pattern = Pattern.of_pattern c_lhs in
+      let* e1 = of_expression typ_vars bop_exp in
+      let* e2 = of_expression typ_vars c_rhs in
+      begin match pattern with
+      | Some (Variable name) ->
+        return (LetVar (Some let_symbol, name, [], e1, e2))
+      | _ ->
+        let cases =
+          match pattern with
+          | None -> []
+          | Some pattern -> [(pattern, None, e2)] in
+        return (
+          LetVar (
+            Some let_symbol,
+            Name.FunctionParameter, [],
+            e1,
+            Match (
+              Variable (
+                MixedPath.PathName {
+                  PathName.path = [];
+                  base = Name.FunctionParameter
+                },
+                []
+              ),
+              cases,
+              false
+            ))
+        )
+      end
+    | _ :: _ ->
+      error_message
+        (Error "let_op_and")
+        NotSupported
+        "We do not support let operators with and"
+    end
   | Texp_unreachable ->
     error_message
       (Error "unreachable")
@@ -594,7 +639,12 @@ let rec of_expression (typ_vars : Name.t Name.Map.t) (e : expression)
       (Error "extension")
       NotSupported
       "Construction of extensions is not handled"
-  | Texp_open (_, e) -> of_expression typ_vars e))
+  | Texp_open (_, e) -> of_expression typ_vars e in
+  if Attribute.has_cast attributes then
+    let* (typ, _, _) = Type.of_typ_expr false typ_vars typ in
+    return (Cast (e, typ))
+  else
+    return e))
 
 and of_match
   (typ_vars : Name.t Name.Map.t)
@@ -717,7 +767,7 @@ and import_let_fun
   let is_rec = Recursivity.of_rec_flag is_rec in
   (cases |> Monad.List.filter_map (fun { vb_pat = p; vb_expr; vb_attributes; _ } ->
     Attribute.of_attributes vb_attributes >>= fun attributes ->
-    let is_axiom = Attribute.has_axiom attributes in
+    let is_axiom = Attribute.has_axiom_with_reason attributes in
     let struct_attributes = Attribute.get_structs attributes in
     set_env vb_expr.exp_env (
     set_loc (Loc.of_location p.pat_loc) (
@@ -827,8 +877,8 @@ and of_module_expr
   set_env mod_env (
   set_loc (Loc.of_location mod_loc) (
   match mod_desc with
-  | Tmod_ident (path, loc) ->
-    MixedPath.of_path false path (Some loc.txt) >>= fun mixed_path ->
+  | Tmod_ident (path, _) ->
+    MixedPath.of_path false path >>= fun mixed_path ->
     let default_result = return (Variable (mixed_path, [])) in
     let* is_first_class =
       IsFirstClassModule.is_module_typ_first_class
@@ -877,7 +927,6 @@ and of_module_expr
                 PathName.of_path_and_name_with_convert path name in
               return (MixedPath.PathName path_name) in
           build_module
-            typ_vars
             module_typ_params_arity
             values
             module_type_path
@@ -1006,7 +1055,6 @@ and of_structure
     let mixed_path_of_value_or_typ (name : Name.t): MixedPath.t Monad.t =
       return (MixedPath.of_name name) in
     build_module
-      typ_vars
       module_typ_params_arity
       values
       signature_path
@@ -1396,8 +1444,15 @@ let rec to_coq (paren : bool) (e : t) : SmartPrint.t =
     end
   | Record fields ->
     nest (
-      !^ "{|" ^^ separate (!^ ";" ^^ space) (fields |> List.map (fun (x, e) ->
-        nest (PathName.to_coq x ^-^ !^ " :=" ^^ to_coq false e)
+      !^ "{|" ^^
+      separate (!^ ";" ^^ space) (fields |> List.map (fun (x, arity, e) ->
+        nest (
+          nest (
+            PathName.to_coq x ^^ separate space (Pp.n_underscores arity) ^^
+            !^ ":="
+          ) ^^
+          to_coq false e
+        )
       )) ^^ !^ "|}"
     )
   | Field (e, x) -> to_coq true e ^-^ !^ ".(" ^-^ PathName.to_coq x ^-^ !^ ")"
@@ -1428,7 +1483,7 @@ let rec to_coq (paren : bool) (e : t) : SmartPrint.t =
                 PathName.to_coq x ^^
                 begin match nb_free_vars with
                 | 0 -> empty
-                | _ -> nest (separate space (Pp.to_coq_n_underscores nb_free_vars))
+                | _ -> nest (separate space (Pp.n_underscores nb_free_vars))
                 end
               ) ^^
               !^ ":="
@@ -1463,6 +1518,12 @@ let rec to_coq (paren : bool) (e : t) : SmartPrint.t =
     )
   | TypeAnnotation (e, typ) ->
     parens @@ nest (to_coq true e ^^ nest (!^ ":" ^^ Type.to_coq None None typ))
+  | Cast (e, typ) ->
+    parens @@ nest (
+      !^ "cast" ^^
+      Type.to_coq None (Some Type.Context.Apply) typ ^^
+      to_coq true e
+    )
   | Assert (typ, e) ->
     Pp.parens paren @@ nest (
       !^ "assert" ^^ Type.to_coq None (Some Type.Context.Apply) typ ^^

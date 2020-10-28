@@ -39,15 +39,15 @@ End M.
 Definition M := M.module.
 
 Module F.
-  Class Args := {
+  Class FArgs := {
     X : {t : Set & Source.signature (t := t)};
   }.
   
-  Definition t `{Args} : Set := (|X|).(Source.t).
+  Definition t `{FArgs} : Set := (|X|).(Source.t).
   
-  Definition y `{Args} : (|X|).(Source.t) := (|X|).(Source.x).
+  Definition y `{FArgs} : (|X|).(Source.t) := (|X|).(Source.x).
   
-  Definition functor `(Args)
+  Definition functor `(FArgs)
     : {_ : unit & Target.signature (t := (|X|).(Source.t))} :=
     existT (A := unit) (fun _ => _) tt
       {|
@@ -57,13 +57,13 @@ End F.
 Definition F X := F.functor {| F.X := X |}.
 
 Module FSubst.
-  Class Args := {
+  Class FArgs := {
     X : {t : Set & Source.signature (t := t)};
   }.
   
-  Definition y `{Args} : (|X|).(Source.t) := (|X|).(Source.x).
+  Definition y `{FArgs} : (|X|).(Source.t) := (|X|).(Source.x).
   
-  Definition functor `(Args)
+  Definition functor `(FArgs)
     : {_ : unit & Target.signature (t := (|X|).(Source.t))} :=
     existT (A := unit) (fun _ => _) tt
       {|
@@ -73,16 +73,16 @@ End FSubst.
 Definition FSubst X := FSubst.functor {| FSubst.X := X |}.
 
 Module Sum.
-  Class Args := {
+  Class FArgs := {
     X : {_ : unit & Source.signature (t := int)};
     Y : {_ : unit & Source.signature (t := int)};
   }.
   
-  Definition t `{Args} : Set := int.
+  Definition t `{FArgs} : Set := int.
   
-  Definition y `{Args} : int := Z.add (|X|).(Source.x) (|Y|).(Source.x).
+  Definition y `{FArgs} : int := Z.add (|X|).(Source.x) (|Y|).(Source.x).
   
-  Definition functor `(Args) : {t : Set & Target.signature (t := t)} :=
+  Definition functor `(FArgs) : {t : Set & Target.signature (t := t)} :=
     existT (A := Set) _ t
       {|
         Target.y := y

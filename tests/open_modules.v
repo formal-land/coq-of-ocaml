@@ -16,13 +16,9 @@ Module N.
   
   Definition x : bool := n.
   
-  Import M.
-  
-  Definition y : int := n.
+  Definition y : int := M.n.
 End N.
 
 Definition b : bool := N.n.
-
-Import N.
 
 Definition b' : bool := N.n.

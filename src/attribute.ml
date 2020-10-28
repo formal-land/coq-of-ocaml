@@ -2,7 +2,8 @@
 open Monad.Notations
 
 type t =
-  | Axiom
+  | AxiomWithReason
+  | Cast
   | ForceGadt
   | Implicit of string
   | MatchGadt
@@ -44,9 +45,15 @@ let of_attributes (attributes : Typedtree.attributes) : t list Monad.t =
     let id = attr_name.Asttypes.txt in
     match id with
     | "coq_axiom" ->
+      raise
+        None
+        Unexpected
+        "Depreacated attribute. Use @coq_axiom_with_reason instead."
+    | "coq_axiom_with_reason" ->
       let error_message = "Give a reason for this axiom." in
       let* _ = of_payload_string error_message id attr_payload in
-      return (Some Axiom)
+      return (Some AxiomWithReason)
+    | "coq_cast" -> return (Some Cast)
     | "coq_force_gadt" -> return (Some ForceGadt)
     | "coq_implicit" ->
       let error_message =
@@ -65,9 +72,15 @@ let of_attributes (attributes : Typedtree.attributes) : t list Monad.t =
     | _ -> return None)
   )
 
-let has_axiom (attributes : t list) : bool =
+let has_axiom_with_reason (attributes : t list) : bool =
   attributes |> List.exists (function
-    | Axiom -> true
+    | AxiomWithReason -> true
+    | _ -> false
+  )
+
+let has_cast (attributes : t list) : bool =
+  attributes |> List.exists (function
+    | Cast -> true
     | _ -> false
   )
 
@@ -110,6 +123,16 @@ let has_phantom (attributes : t list) : bool =
 let has_plain_module (attributes : t list) : bool =
   attributes |> List.exists (function
     | PlainModule -> true
+    | _ -> false
+  )
+
+(** We compute the existence of this attribute outside of the monad for
+   performance reasons. *)
+let has_precise_signature (attributes : Typedtree.attributes) : bool =
+  attributes |> List.exists (fun {Parsetree.attr_name; _} ->
+    let id = attr_name.Asttypes.txt in
+    match id with
+    | "coq_precise_signature" -> true
     | _ -> false
   )
 
