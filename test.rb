@@ -2,6 +2,21 @@
 # Run the tests in 'tests/'
 require 'fileutils'
 
+def patch_with_monadic_notations(content)
+  pattern = "Definition insert_monadic_notations_here : unit := tt.\n"
+  replacement = <<-END
+Notation "'let*' x ':=' X 'in' Y" :=
+  (op_letstar X (fun x => Y))
+  (at level 200, x ident, X at level 100, Y at level 200).
+
+Notation "'let*' ' x ':=' X 'in' Y" :=
+  (op_letstar X (fun x => Y))
+  (at level 200, x pattern, X at level 100, Y at level 200).
+  END
+
+  content.gsub(pattern, replacement)
+end
+
 class Test
   attr_reader :source_file
 
@@ -24,7 +39,12 @@ class Test
 
   def coq_of_ocaml
     # We remove the fist line which is a success message
-    IO.popen(coq_of_ocaml_cmd, :external_encoding => "utf-8").read.split("\n")[1..-1].join("\n") + "\n"
+    output = IO.popen(coq_of_ocaml_cmd, :external_encoding => "utf-8").read.split("\n")[1..-1].join("\n") + "\n"
+    if base_name == "monadic_notation" then
+      patch_with_monadic_notations(output)
+    else
+      output
+    end
   end
 
   def reference

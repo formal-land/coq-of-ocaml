@@ -585,11 +585,50 @@ let rec of_expression (typ_vars : Name.t Name.Map.t) (e : expression)
   | Texp_pack module_expr ->
     push_env (of_module_expr typ_vars module_expr None) >>= fun e ->
     return (ModulePack e)
-  | Texp_letop _ ->
-    error_message
-      (Error "let_op")
-      NotSupported
-      "We do not support let operators"
+  | Texp_letop {
+      let_ = { bop_op_path; bop_exp; _ };
+      ands;
+      body = { c_lhs; c_rhs; _ };
+      _
+    } ->
+    begin match ands with
+    | [] ->
+      let let_symbol = Path.last bop_op_path in
+      let* pattern = Pattern.of_pattern c_lhs in
+      let* e1 = of_expression typ_vars bop_exp in
+      let* e2 = of_expression typ_vars c_rhs in
+      begin match pattern with
+      | Some (Variable name) ->
+        return (LetVar (Some let_symbol, name, [], e1, e2))
+      | _ ->
+        let cases =
+          match pattern with
+          | None -> []
+          | Some pattern -> [(pattern, None, e2)] in
+        return (
+          LetVar (
+            Some let_symbol,
+            Name.FunctionParameter, [],
+            e1,
+            Match (
+              Variable (
+                MixedPath.PathName {
+                  PathName.path = [];
+                  base = Name.FunctionParameter
+                },
+                []
+              ),
+              cases,
+              false
+            ))
+        )
+      end
+    | _ :: _ ->
+      error_message
+        (Error "let_op_and")
+        NotSupported
+        "We do not support let operators with and"
+    end
   | Texp_unreachable ->
     error_message
       (Error "unreachable")
