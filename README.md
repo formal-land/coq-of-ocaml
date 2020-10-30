@@ -62,14 +62,10 @@ Even in case of errors we try to generate some Coq code. The generated Coq code 
 
 ## Install
 ### Latest stable version
-Using the package manager [opam](https://opam.ocaml.org/), add the [Coq repository](http://coq.io/opam/):
-
-    opam repo add coq-released https://coq.inria.fr/opam/released
-
-and run:
-
-    opam install coq-of-ocaml
-
+Using the package manager [opam](https://opam.ocaml.org/),
+```
+opam install coq-of-ocaml
+```
 ### Current development version
 To install the current development version:
 ```
