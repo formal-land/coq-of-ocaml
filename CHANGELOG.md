@@ -1,4 +1,6 @@
 ## [Unreleased]
+
+## 2.3.0 (November 3, 2020)
 * Add support for the OCaml's monadic notation.
 * Add support for records with polymorphic fields.
 * Add the attribute `@coq_cast` to force an unsafe cast of a sub-expression.
