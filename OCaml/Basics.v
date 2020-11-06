@@ -93,7 +93,7 @@ Definition nativeint := Z.
 
 Definition bytes := string.
 
-Parameter try : forall {A : Set}, A -> A.
+Definition try {A : Set} (x : A) : A := x.
 
 Module Unit.
   Definition lt (x y : unit) : Prop := False.
