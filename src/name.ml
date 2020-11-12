@@ -62,6 +62,7 @@ let reserved_names : string list = [
   "return";
   "right";
   "Set";
+  "Type";
   "Variable";
 ]
 
