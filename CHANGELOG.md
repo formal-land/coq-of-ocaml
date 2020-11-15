@@ -1,4 +1,5 @@
 ## [Unreleased]
+* Add support for OCaml 4.08.
 
 ## 2.3.0 (November 3, 2020)
 * Add support for the OCaml's monadic notation.

@@ -4,6 +4,7 @@ let f x =
 type _ t =
   | Int : int t
 
-let g (type a) (kind : a t) (x : a) : int =
+let g : type a. a t -> a -> int =
+  fun kind x ->
   match kind with
   | Int -> (x[@coq_cast] : int) + 1

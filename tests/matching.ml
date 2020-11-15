@@ -7,6 +7,7 @@ type t = Bar of int | Foo of bool * string
 
 let m x =
   match x with
+  | _ when 1 = 2 -> 3
   | Bar n when n > 12 -> n
   | Bar k when k = 0 -> k
   | Bar n -> -n

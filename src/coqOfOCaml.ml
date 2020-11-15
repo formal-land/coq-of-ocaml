@@ -154,7 +154,8 @@ let main () =
       match !merlin_file_name with
       | None -> Filename.concat directory_name ".merlin"
       | Some merlin_file_name -> merlin_file_name in
-    let merlin_config = Mconfig.load_dotmerlins ~filenames:[merlin_file_name] Mconfig.initial in
+    let merlin_config =
+      Mconfig.get_external_config merlin_file_name Mconfig.initial in
     let merlin_config = {
       merlin_config with
       query = {
