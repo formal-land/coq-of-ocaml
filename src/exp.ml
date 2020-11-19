@@ -706,18 +706,21 @@ and of_match
     ) in
   let guard_checks =
     guards |> List.map (fun (p, guard) ->
-      Match (
-        e,
-        [
-          (p, None, guard);
-          (
+      let is_pattern_always_true =
+        match p with
+        | Pattern.Any | Pattern.Variable _ -> true
+        | _ -> false in
+      let cases =
+        [(p, None, guard)] @
+        if is_pattern_always_true then
+          []
+        else
+          [(
             Pattern.Any,
             None,
             Variable (MixedPath.PathName PathName.false_value, [])
-          )
-        ],
-        false
-      )
+          )] in
+      Match (e, cases, false)
     ) in
   let e =
     match guards with
