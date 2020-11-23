@@ -202,6 +202,8 @@ let is_monadic_return_let (configuration : t) (name : string)
 
 let is_in_renaming_rule (configuration : t) (path : string) : string option =
   configuration.renaming_rules |>
+  (* We reverse the list so that the last entry is taken into account. *)
+  List.rev |>
   List.find_opt (fun { RenamingRule.source; _ } -> source = path) |>
   Option.map (fun { RenamingRule.target; _ } -> target)
 
