@@ -1,4 +1,5 @@
 ## [Unreleased]
+* Add the configuration option `first_class_module_signature_blacklist` to ignore some signatures in the search of a signature name.
 
 ## 2.3.0 (November 3, 2020)
 * Add support for the OCaml's monadic notation.

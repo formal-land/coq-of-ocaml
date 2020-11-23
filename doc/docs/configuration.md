@@ -191,6 +191,20 @@ A list of module names, typically corresponding to the module of a folder. All t
 #### Explanation
 The module system of coq-of-ocaml encodes the modules having a signature name as dependent records. We use the signature name as the record type name. Sometimes, for modules corresponding to files, we want to avoid using records even if there is a named signature. This option prevents the record encoding for modules of the form `A.B` where `A` is in the black-list. For example, when a reference to a value `A.B.c` appears, we generate `A.B.c` rather than `A.B.(signature_name_of_B.c)`. Indeed, `A.B` is a Coq module rather than a record.
 
+## first_class_module_signature_blacklist
+#### Example
+```
+"first_class_module_signature_blacklist": [
+  "Sapling__Core_sig.T_encoding"
+]
+```
+
+#### Value
+A list of OCaml signature names. We ignore these signatures when looking for a signature name to encode modules as records.
+
+#### Explanation
+In coq-of-ocaml, we look for a named signature for each module we encounter. Once we find a named signature we encode the module as a dependent record. If no signatures can be found, we use a plain Coq module. Sometimes, we find an incorrect signature as we use heuristics to find a matching signature. This configuration option helps to ignore incorrect signatures.
+
 ## head_suffix
 #### Example
 ```

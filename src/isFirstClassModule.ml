@@ -34,10 +34,6 @@ let apply_idents_on_path (path : Path.t) (idents : Ident.t list) : Path.t =
     Path.Pdot (path, Ident.name ident)
   ) path idents
 
-let is_black_list (path : Path.t) : bool =
-  match PathName.of_path_without_convert false path with
-  | _ -> false
-
 let merge_similar_paths (paths : Path.t list) : Path.t list Monad.t =
   paths |> Monad.List.sort_uniq PathName.compare_paths
 
@@ -83,14 +79,23 @@ let find_similar_signatures (env : Env.t) (signature : Types.signature)
   merge_similar_paths
     (similar_signature_paths @ similar_signature_paths_in_modules)
     >>= fun paths ->
-  return (List.filter (fun path -> not (is_black_list path)) paths, shape)
+  let* paths =
+    paths |>
+    Monad.List.filter (fun path ->
+      let* configuration = get_configuration in
+      let is_in_black_list =
+        Configuration.is_in_first_class_module_signature_backlist
+          configuration path in
+      return (not is_in_black_list)
+    ) in
+  return (paths, shape)
 
 type maybe_found =
   | Found of Path.t
   | Not_found of string
 
 (** Get the path of the signature definition of the [module_typ]
-    if it is a first-class module, [None] otherwise. Optionally, when given the path of the module we want to check for its signature, verify if it is not
+    if it is a first-class module, [None] otherwise. Optionally, when given the path of the module we want to check for its signature, to verify if it is not
     in a blacklist. *)
 let rec is_module_typ_first_class
   (module_typ : Types.module_type)
@@ -103,7 +108,7 @@ let rec is_module_typ_first_class
     | None -> return false
     | Some module_path ->
       let is_in_configuration_black_list =
-        Configuration.is_in_first_class_module_backlist
+        Configuration.is_in_first_class_module_path_backlist
           configuration module_path in
       let* has_black_list_attribute =
         match Env.find_module module_path env with

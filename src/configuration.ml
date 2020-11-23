@@ -59,6 +59,7 @@ type t = {
   escape_value : string list;
   file_name : string;
   first_class_module_path_blacklist : string list;
+  first_class_module_signature_blacklist : string list;
   head_suffix : string;
   merge_returns : MergeRule.t list;
   merge_types : MergeRule.t list;
@@ -86,6 +87,7 @@ let default (file_name : string) : t = {
   escape_value = [];
   file_name;
   first_class_module_path_blacklist = [];
+  first_class_module_signature_blacklist = [];
   head_suffix = "";
   merge_returns = [];
   merge_types = [];
@@ -134,13 +136,17 @@ let is_message_in_error_blacklist (configuration : t) (message : string)
 let is_value_to_escape (configuration : t) (name : string) : bool =
   List.mem name configuration.escape_value
 
-let is_in_first_class_module_backlist (configuration : t) (path : Path.t)
+let is_in_first_class_module_path_backlist (configuration : t) (path : Path.t)
   : bool =
   match List.rev (Path.to_string_list path) with
   | [] -> false
   | _ :: path ->
     let path = String.concat "." (List.rev path) in
     List.mem path configuration.first_class_module_path_blacklist
+
+let is_in_first_class_module_signature_backlist (configuration : t) (path : Path.t)
+  : bool =
+  List.mem (Path.name path) configuration.first_class_module_signature_blacklist
 
 let is_in_merge_returns
   (configuration : t) (source1 : string) (source2 : string) : string option =
@@ -319,6 +325,10 @@ let of_json (file_name : string) (json : Yojson.Basic.t) : t =
         | "first_class_module_path_blacklist" ->
           let entry = get_string_list "first_class_module_path_blacklist" entry in
           {configuration with first_class_module_path_blacklist = entry}
+        | "first_class_module_signature_blacklist" ->
+          let entry =
+            get_string_list "first_class_module_signature_blacklist" entry in
+          {configuration with first_class_module_signature_blacklist = entry}
         | "head_suffix" ->
           let entry = get_string "head_suffix" entry in
           {configuration with head_suffix = entry}
