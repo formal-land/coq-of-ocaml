@@ -42,6 +42,8 @@ type t =
     (** A constructor name, some implicits, and a list of arguments. *)
   | Apply of t * t option list (** An application. *)
   | Return of string * t (** Application specialized for a return operation. *)
+  | InfixOperator of string * t * t
+    (** Application specialized for an infix operator. *)
   | Function of Name.t * t (** An argument name and a body. *)
   | LetVar of string option * Name.t * Name.t list * t * t
     (** The let of a variable, with optionally a list of polymorphic variables.
@@ -382,11 +384,21 @@ let rec of_expression (typ_vars : Name.t Name.Map.t) (e : expression)
         | None -> return None
         end
       | _ -> return None in
+    let apply_with_infix_operator =
+      match (e_f, e_xs) with
+      | (Variable (mixed_path, []), [Some e1; Some e2]) ->
+        let name = MixedPath.to_string mixed_path in
+        begin match Configuration.is_operator_infix configuration name with
+        | None -> None
+        | Some operator -> Some (InfixOperator (operator, e1, e2))
+        end
+      | _ -> None in
     let applies = [
       apply_with_let;
       apply_with_let_return;
       apply_with_return;
       apply_with_return_let;
+      apply_with_infix_operator;
     ] in
     begin match Util.List.find_map (fun x -> x) applies with
     | Some apply -> return apply
@@ -1311,6 +1323,8 @@ let rec to_coq (paren : bool) (e : t) : SmartPrint.t =
     ))
   | Return (operator, e) ->
     Pp.parens paren @@ nest @@ (!^ operator ^^ to_coq true e)
+  | InfixOperator (operator, e1, e2) ->
+    Pp.parens paren @@ group @@ (to_coq true e1 ^^ !^ operator ^^ to_coq true e2)
   | Function (x, e) ->
     Pp.parens paren @@ nest (!^ "fun" ^^ Name.to_coq x ^^ !^ "=>" ^^ to_coq false e)
   | LetVar (let_symbol, x, typ_params, e1, e2) ->

@@ -205,16 +205,19 @@ let of_path (is_value : bool) (path : Path.t) : t Monad.t =
       ) in
     return (Access (base_path_name, List.rev fields, is_local))
 
-let to_coq (path : t) : SmartPrint.t =
-  match path with
+let to_string (mixed_path : t) : string =
+  match mixed_path with
   | Access (path, fields, is_local) ->
-    let path = PathName.to_coq path in
+    let path = PathName.to_string path in
     let path =
       if is_local then
         path
       else
-        parens (!^ "|" ^-^ path ^-^ !^ "|") in
+        "(|" ^ path ^ "|)" in
     let fields =
-      fields |> List.map (fun field -> parens (PathName.to_coq field)) in
-    separate (!^ ".") (path :: fields)
-  | PathName path_name -> PathName.to_coq path_name
+      fields |> List.map (fun field -> "(" ^ PathName.to_string field ^ ")") in
+    String.concat "." (path :: fields)
+  | PathName path_name -> PathName.to_string path_name
+
+let to_coq (mixed_path : t) : SmartPrint.t =
+  !^ (to_string mixed_path)
