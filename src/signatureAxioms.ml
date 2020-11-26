@@ -16,18 +16,35 @@ type item =
 and t = item list
 
 let rec string_of_included_module_typ (module_typ : Typedtree.module_type)
-  : string =
-  match module_typ.mty_desc with
-  | Tmty_ident (path, _) | Tmty_alias (path, _) -> Path.last path
-  | Tmty_signature _ -> "signature"
-  | Tmty_functor (ident, _, _, _) -> Ident.name ident
+  : (string, item list Monad.t) result =
+  match module_typ.Typedtree.mty_desc with
+  | Tmty_ident (path, _) | Tmty_alias (path, _) -> Ok (Path.last path)
+  | Tmty_signature _ -> Ok "signature"
+  | Tmty_functor (Named (Some ident, _, _), _) -> Ok (Ident.name ident)
+  | Tmty_functor (Named (None, _, _), _) ->
+    Error (
+      raise
+        ([Error "anonymous_module"])
+        NotSupported
+        "Anonymous modules are not handled"
+    )
+  | Tmty_functor (Unit, _) ->
+    Error (
+      raise
+        ([Error "generative_functor"])
+        NotSupported
+        "Generative functors are not handled"
+    )
   | Tmty_with (module_typ, _) -> string_of_included_module_typ module_typ
-  | Tmty_typeof _ -> "typeof"
+  | Tmty_typeof _ -> Ok "typeof"
 
-let name_of_included_module_typ (module_typ : Typedtree.module_type)
-  : Name.t Monad.t =
-  Name.of_string false ("Included_" ^ string_of_included_module_typ module_typ)
-
+let name_of_included_module_typ module_typ =
+  match string_of_included_module_typ module_typ with
+  | Ok name ->
+    let* name = Name.of_string false ("Included_" ^ name) in
+    return (Ok name)
+  | Error error -> return (Result.Error error)
+  
 let of_types_signature (signature : Types.signature) : t Monad.t =
   signature |> Monad.List.map (function
     | Types.Sig_value (ident, { val_type; _ }, _) ->
@@ -176,15 +193,19 @@ let rec of_signature (signature : Typedtree.signature) : t Monad.t =
         "Signature item `exception` not handled"
     | Tsig_include { incl_mod; incl_type; _} ->
       let* module_name = name_of_included_module_typ incl_mod in
-      let signature_path = ModuleTyp.get_module_typ_path_name incl_mod in
-      begin match signature_path with
-      | None -> of_types_signature incl_type
-      | Some signature_path ->
-        ModuleTyp.of_ocaml incl_mod >>= fun module_typ ->
-        let typ = ModuleTyp.to_typ module_typ in
-        of_first_class_types_signature
-          module_name signature_path incl_type final_env >>= fun fields ->
-        return (Value (module_name, [], typ) :: fields)
+      begin match module_name with
+      | Ok module_name ->
+        let signature_path = ModuleTyp.get_module_typ_path_name incl_mod in
+        begin match signature_path with
+        | None -> of_types_signature incl_type
+        | Some signature_path ->
+          ModuleTyp.of_ocaml incl_mod >>= fun module_typ ->
+          let typ = ModuleTyp.to_typ module_typ in
+          of_first_class_types_signature
+            module_name signature_path incl_type final_env >>= fun fields ->
+          return (Value (module_name, [], typ) :: fields)
+        end
+      | Error error -> error
       end
     | Tsig_modsubst _ ->
       raise
@@ -208,7 +229,7 @@ let rec of_signature (signature : Typedtree.signature) : t Monad.t =
           NotSupported
           "Unhandled kind of module type"
       end
-    | Tsig_module { md_id; md_type = { mty_desc; _ }; _ } ->
+    | Tsig_module { md_id = Some md_id; md_type = { mty_desc; _ }; _ } ->
       let* name = Name.of_ident false md_id in
       begin match mty_desc with
       | Tmty_alias (path, _) ->
@@ -234,6 +255,12 @@ let rec of_signature (signature : Typedtree.signature) : t Monad.t =
         let typ = ModuleTyp.to_typ module_typ in
         return [Value (name, [], typ)]
       end
+    
+    | Tsig_module { md_id = None; _ } ->
+      raise
+        [Error "anonymous_module"]
+        NotSupported
+        "Anonymous modules are not handled"
     | Tsig_open _ -> return []
     | Tsig_recmodule _ ->
       raise

@@ -537,7 +537,7 @@ let rec of_expression (typ_vars : Name.t Name.Map.t) (e : expression)
   | Texp_override _ ->
     error_message (Error "override") NotSupported "Overriding is not handled"
   | Texp_letmodule (
-      x,
+      Some x,
       _,
       _,
       {
@@ -553,12 +553,17 @@ let rec of_expression (typ_vars : Name.t Name.Map.t) (e : expression)
     PathName.of_path_with_convert false path >>= fun path_name ->
     of_expression typ_vars e >>= fun e ->
     return (LetModuleUnpack (x, path_name, e))
-  | Texp_letmodule (x, _, _, module_expr, e) ->
+  | Texp_letmodule (Some x, _, _, module_expr, e) ->
     let* x = Name.of_ident true x in
     push_env (of_module_expr typ_vars module_expr None >>= fun value ->
     set_env e.exp_env (
     push_env (of_expression typ_vars e >>= fun e ->
     return (LetVar (None, x, [], value, e)))))
+  | Texp_letmodule (None, _, _, _, _) ->
+    error_message
+      (Error "anonymous_module")
+      NotSupported
+      "Anonymous modules are not handled"
   | Texp_letexception _ ->
     error_message
       (Error "let_exception")
@@ -961,29 +966,35 @@ and of_module_expr
           reason
         )
     end
-  | Tmod_functor (ident, _, module_type_arg, e) ->
+  | Tmod_functor (Named(Some ident, _, module_type_arg), e) ->
     let* e = of_module_expr typ_vars e None in
-    begin match module_type_arg with
-    | None -> return e
-    | Some module_type_arg ->
-      let* x = Name.of_ident false ident in
-      let* module_type_arg = ModuleTyp.of_ocaml module_type_arg in
-      return (Functor (x, ModuleTyp.to_typ module_type_arg, e))
-    end
+    let* x = Name.of_ident false ident in
+    let* module_type_arg = ModuleTyp.of_ocaml module_type_arg in
+    return (Functor (x, ModuleTyp.to_typ module_type_arg, e))
+  | Tmod_functor (Named(None, _, _), _) ->
+    error_message
+      (Error "anonymous_module")
+      NotSupported
+      "Anonymous modules are not handled"
+  | Tmod_functor (Unit, _) ->
+    error_message
+      (Error "generative_functor")
+      NotSupported
+      "Generative functors are not handled"
   | Tmod_apply (e1, e2, _) ->
     let e1_mod_type = e1.mod_type in
     let expected_module_typ_for_e2 =
       match e1_mod_type with
-      | Mty_functor (_, module_typ_arg, _) -> module_typ_arg
+      | Mty_functor (Named(_, module_typ_arg), _) -> Some module_typ_arg
       | _ -> None in
     let module_typ_for_application =
       match e1_mod_type with
-      | Mty_functor (_, _, module_typ_result) -> Some module_typ_result
+      | Mty_functor (_, module_typ_result) -> Some module_typ_result
       | _ -> None in
     of_module_expr typ_vars e1 None >>= fun e1 ->
     let* es =
       match e1_mod_type with
-      | Mty_functor (_, None, _) -> return []
+      | Mty_functor (Unit, _) -> return []
       | _ ->
         let* e2 =
           of_module_expr typ_vars e2 expected_module_typ_for_e2 in
@@ -1127,11 +1138,16 @@ and of_structure
           (ErrorMessage (e_next, "exception"))
           SideEffect
           "Exception not handled"
-      | Tstr_module { mb_id; mb_expr; _ } ->
+      | Tstr_module { mb_id = Some mb_id; mb_expr; _ } ->
         let* name = Name.of_ident false mb_id in
         of_module_expr
           typ_vars mb_expr (Some mb_expr.mod_type) >>= fun value ->
         return (LetVar (None, name, [], value, e_next))
+      | Tstr_module { mb_id = None; _ } ->
+        raise
+          (Error "anonymous_module")
+          NotSupported
+          "Anonymous modules are not handled"
       | Tstr_recmodule _ ->
         raise
           (ErrorMessage (e_next, "recursive_module"))

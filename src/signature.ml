@@ -196,7 +196,7 @@ let rec of_signature_items
         ([Error "module_type"], let_in_type)
         NotSupported
         "Signatures inside signatures are not handled."
-    | Tsig_module { md_id; md_type; _ } ->
+    | Tsig_module { md_id = Some md_id; md_type; _ } ->
       let* name = Name.of_ident false md_id in
       let* prefixed_name = prefix_name false prefix name in
       begin match md_type.mty_desc with
@@ -211,6 +211,11 @@ let rec of_signature_items
         let* module_typ = ModuleTyp.of_ocaml md_type in
         return ([Module (prefixed_name, module_typ)], let_in_type))
       end
+    | Tsig_module { md_id = None; _ } ->
+      raise
+        ([Error "anonymous_module"], let_in_type)
+        NotSupported
+        "Anonymous modules are not handled"
     | Tsig_open _ ->
       raise
         ([Error "open"], let_in_type)

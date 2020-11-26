@@ -196,7 +196,7 @@ let rec of_structure (structure : structure) : t list Monad.t =
         "represent error cases."
       )
     | Tstr_open _ -> return []
-    | Tstr_module { mb_id; mb_expr; mb_attributes; _ } ->
+    | Tstr_module { mb_id = Some mb_id; mb_expr; mb_attributes; _ } ->
       let* name = Name.of_ident false mb_id in
       let* has_plain_module_attribute =
         let* attributes = Attribute.of_attributes mb_attributes in
@@ -204,6 +204,11 @@ let rec of_structure (structure : structure) : t list Monad.t =
       let* module_definition =
         of_module name [] mb_expr has_plain_module_attribute in
       return [module_definition]
+    | Tstr_module { mb_id = None; _ } ->
+      error_message
+        (Error "anonymous_module")
+        NotSupported
+        "Anonymous modules are not handled"
     | Tstr_modtype { mtd_type = None; _ } ->
       error_message
         (Error "abstract_module_type")
@@ -344,15 +349,23 @@ and of_module_expr
   | Tmod_apply _ ->
       let* module_exp = Exp.of_module_expr Name.Map.empty module_expr None in
       return (ModuleExpression (name, module_exp))
-  | Tmod_functor (ident, _, module_type_arg, module_expr) ->
-    let* functor_parameters =
-      match module_type_arg with
-      | None -> return functor_parameters
-      | Some module_type_arg ->
-        let* x = Name.of_ident false ident in
-        let* module_type_arg = ModuleTyp.of_ocaml module_type_arg in
-        return ((x, ModuleTyp.to_typ module_type_arg) :: functor_parameters) in
+  | Tmod_functor (Named(Some ident, _, module_type_arg), module_expr) ->
+    let* functor_parameters = begin
+      let* x = Name.of_ident false ident in
+      let* module_type_arg = ModuleTyp.of_ocaml module_type_arg in
+      return ((x, ModuleTyp.to_typ module_type_arg) :: functor_parameters)
+    end in
     of_module name functor_parameters module_expr false
+  | Tmod_functor (Named(None, _, _), _) ->
+    raise
+      (Error "anonymous_module")
+      NotSupported
+      "Anonymous modules are not handled"
+  | Tmod_functor (Unit, _) ->
+    raise
+      (Error "generative_functor")
+      NotSupported
+      "Generative functors are not handled"
   | Tmod_constraint (module_expr, _, annotation, _) ->
     let module_type_annotation =
       match annotation with
