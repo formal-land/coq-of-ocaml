@@ -1,0 +1,4 @@
+[submodule "src/vendor/merlin"]
+	path = src/vendor/merlin
+	url = https://github.com/rgrinberg/merlin
+	branch = lsp
