@@ -503,6 +503,25 @@ A list of couple of values, with a name and a name to rename to while doing the 
 #### Explanation
 We may want to systematically rename some of the OCaml values to their counterpart in Coq. This rule applies to anything which has a name (value, type, module, constructor, ...). coq-of-ocaml already knows some renaming rules for the OCaml's standard library, but it is possible to add more with this option.
 
+## renaming_type_constructor
+#### Example
+```
+"renaming_type_constructor": [
+  ["(|Compare.Char|).(Compare.S.t)", "ascii"],
+  ["(|Compare.Int|).(Compare.S.t)", "int"],
+  ["(|Compare.Int32|).(Compare.S.t)", "int32"],
+  ["(|Compare.Int64|).(Compare.S.t)", "int64"],
+  ["(|Compare.String|).(Compare.S.t)", "string"],
+  ["(|Compare.Z|).(Compare.S.t)", "Z.t"]
+],
+```
+
+#### Value
+A list of couples of a type constructor's name and a new name to rename to.
+
+#### Explanation
+In order to shorten the size of the generated Coq, we may want to rename some of the types. This is for example the case of types inside modules, like in the example above.
+
 ## require
 #### Example
 ```

@@ -41,6 +41,15 @@ module RenamingRule = struct
     source : string;
     target : string;
   }
+
+  let find (rules : t list) (source : string) : string option =
+    rules |>
+    (* We reverse the list so that the last entry is taken into account. *)
+    List.rev |>
+    List.find_opt (fun { source = current_source; _ } ->
+      current_source = source
+    ) |>
+    Option.map (fun { target; _ } -> target)
 end
 
 module VariantMapping = struct
@@ -70,6 +79,7 @@ type t = {
   monadic_return_lets : MonadicOperators.t list;
   operator_infix : Operator.t list;
   renaming_rules : RenamingRule.t list;
+  renaming_type_constructor : RenamingRule.t list;
   require : Import.t list;
   require_import : Import.t list;
   require_long_ident : Import.t list;
@@ -102,6 +112,7 @@ let default (file_name : string) : t = {
   renaming_rules =
     ConfigurationRenaming.rules |>
     List.map (fun (source, target) -> { RenamingRule.source; target });
+  renaming_type_constructor = [];
   require = [];
   require_import = [];
   require_long_ident = [];
@@ -223,11 +234,11 @@ let is_operator_infix (configuration : t) (name : string) : string option =
   | Some { Operator.notation; _ } -> Some notation
 
 let is_in_renaming_rule (configuration : t) (path : string) : string option =
-  configuration.renaming_rules |>
-  (* We reverse the list so that the last entry is taken into account. *)
-  List.rev |>
-  List.find_opt (fun { RenamingRule.source; _ } -> source = path) |>
-  Option.map (fun { RenamingRule.target; _ } -> target)
+  RenamingRule.find configuration.renaming_rules path
+
+let is_in_renaming_type_constructor (configuration : t) (source : string)
+  : string option =
+  RenamingRule.find configuration.renaming_type_constructor source
 
 let should_require (configuration : t) (base : string)
   : string option =
@@ -421,6 +432,12 @@ let of_json (file_name : string) (json : Yojson.Basic.t) : t =
           {configuration with
             renaming_rules = configuration.renaming_rules @ entry
           }
+        | "renaming_type_constructor" ->
+          let entry =
+            entry |>
+            get_string_couple_list "renaming_type_constructor" |>
+            List.map (fun (source, target) -> { RenamingRule.source; target }) in
+          {configuration with renaming_type_constructor = entry }
         | "require" ->
           let entry =
             entry |>

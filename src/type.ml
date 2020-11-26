@@ -198,8 +198,38 @@ let subst_name (source : Name.t) (target : Name.t) (typ : t) : t =
     | Error _ -> typ in
   subst typ
 
-let apply_with_merge (mixed_path : MixedPath.t) (typs : t list) : t Monad.t =
-  let* apply_with_merge =
+let apply_with_notations (mixed_path : MixedPath.t) (typs : t list)
+  : t Monad.t =
+  let* configuration = get_configuration in
+  let mixed_path =
+    let renaming =
+      Configuration.is_in_renaming_type_constructor
+        configuration (MixedPath.to_string mixed_path) in
+    match renaming with
+    | Some renaming -> MixedPath.of_name (Name.of_string_raw renaming)
+    | None -> mixed_path in
+  (* The following notation is very specific. So we let it there in the code,
+     instead of adding a configuration option. *)
+  let (mixed_path, typs) =
+    match (mixed_path, typs) with
+    | (
+        MixedPath.PathName {
+          path = [Name.Make "Pervasives"];
+          base = Name.Make "result"
+        },
+        [
+          typ1;
+          Apply (
+            MixedPath.PathName {
+              path = [Name.Make "Error_monad"];
+              base = Name.Make "trace"
+            },
+            _
+          )
+        ]
+      ) -> (MixedPath.of_name (Name.of_string_raw "M?"), [typ1])
+    | _ -> (mixed_path, typs) in
+  let apply_with_merge =
     match (mixed_path, typs) with
     | (
         MixedPath.PathName { path = []; base = Name.Make source1 },
@@ -210,20 +240,19 @@ let apply_with_merge (mixed_path : MixedPath.t) (typs : t list) : t Monad.t =
           )
         ]
       ) ->
-      let* configuration = get_configuration in
       let target =
         Configuration.is_in_merge_types configuration source1 source2 in
       begin match target with
       | Some target ->
-        return (Some (
+        Some (
           Apply (
             MixedPath.PathName { path = []; base = Name.Make target },
             typs
           )
-        ))
-      | None -> return None
+        )
+      | None -> None
       end
-    | _ -> return None in
+    | _ -> None in
   match apply_with_merge with
   | None -> return (Apply (mixed_path, typs))
   | Some apply_with_merge -> return apply_with_merge
@@ -267,7 +296,7 @@ let rec of_typ_expr
     non_phantom_typs path typs >>= fun typs ->
     of_typs_exprs with_free_vars typ_vars typs >>= fun (typs, typ_vars, new_typ_vars) ->
     MixedPath.of_path false path >>= fun mixed_path ->
-    let* typ = apply_with_merge mixed_path typs in
+    let* typ = apply_with_notations mixed_path typs in
     return (typ, typ_vars, new_typ_vars)
   | Tobject (_, object_descr) ->
     begin match !object_descr with
