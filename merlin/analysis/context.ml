@@ -31,7 +31,7 @@ open Std
 let {Logger. log} = Logger.for_section "context"
 
 type t =
-  | Constructor of Types.constructor_description
+  | Constructor of Types.constructor_description * Location.t
     (* We attach the constructor description here so in the case of
       disambiguated constructors we actually directly look for the type
       path (cf. #486, #794). *)
@@ -44,7 +44,7 @@ type t =
   | Unknown
 
 let to_string = function
-  | Constructor cd -> Printf.sprintf "constructor %s" cd.cstr_name
+  | Constructor (cd, _) -> Printf.sprintf "constructor %s" cd.cstr_name
   | Expr -> "expression"
   | Label lbl -> Printf.sprintf "record field %s" lbl.lbl_name
   | Module_path -> "module path"
@@ -70,12 +70,11 @@ let cursor_on_longident_end
     in
     Lexing.compare_pos cursor_pos constr_pos >= 0
 
-let inspect_pattern ~cursor ~lid p =
+let inspect_pattern (type a) ~cursor ~lid (p : a Typedtree.general_pattern) =
   log ~title:"inspect_context" "%a" Logger.fmt
     (fun fmt -> Format.fprintf fmt "current pattern is: %a"
                   (Printtyped.pattern 0) p);
-  let open Raw_compat.Pattern in
-  match view p with
+  match p.pat_desc with
   | Tpat_any when Longident.last lid = "_" -> None
   | Tpat_var (_, str_loc) when (Longident.last lid) = str_loc.txt ->
     None
@@ -90,14 +89,10 @@ let inspect_pattern ~cursor ~lid p =
     (* Assumption: if [Browse.enclosing] stopped on this node and not on the
        subpattern, then it must mean that the cursor is on the constructor
        itself.  *)
-    Some (Constructor cd)
+    Some (Constructor (cd, lid_loc.loc))
   | Tpat_construct _ -> Some Module_path
   | _ ->
     Some Patt
-
-let name_of_path path =
-  Option.value ~default:"*type-error*"
-    (List.last (Path.to_string_list path))
 
 let inspect_expression ~cursor ~lid e : t =
   match e.Typedtree.exp_desc with
@@ -105,11 +100,11 @@ let inspect_expression ~cursor ~lid e : t =
     (* TODO: is this first test necessary ? *)
     if (Longident.last lid) = (Longident.last lid_loc.txt) then
       if cursor_on_longident_end ~cursor ~lid_loc cd.cstr_name then
-        Constructor cd
+        Constructor (cd, lid_loc.loc)
       else Module_path
     else Module_path
   | Texp_ident (p, lid_loc, _) ->
-    let name = name_of_path p in
+    let name = Path.last p in
     if name = "*type-error*" then
       (* For type_enclosing: it is enough to return Module_path here.
          - If the cursor was on the end of the lid typing should fail anyway

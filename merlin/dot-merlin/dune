@@ -1,0 +1,3 @@
+(library
+ (name dot_merlin_reader)
+ (libraries findlib merlin_utils merlin_dot_protocol str))

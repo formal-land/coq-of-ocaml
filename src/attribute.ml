@@ -25,7 +25,7 @@ let of_payload_string
       pstr_desc =
         Pstr_eval (
           {
-            pexp_desc = Pexp_constant (Pconst_string (payload, _));
+            pexp_desc = Pexp_constant (Pconst_string (payload, _, _));
             _
           },
           _

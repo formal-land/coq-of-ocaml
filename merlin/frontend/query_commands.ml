@@ -151,6 +151,10 @@ let dump pipeline = function
     let structure = Mbrowse.of_typedtree (Mtyper.get_typedtree typer) in
     Browse_misc.dump_browse (snd (Mbrowse.leaf_node structure))
 
+  | [`String "current-level"] ->
+    let _typer = Mpipeline.typer_result pipeline in
+    `Int (Ctype.get_current_level ())
+
   | [`String "tokens"] ->
     failwith "TODO"
 
@@ -300,10 +304,9 @@ let dispatch pipeline (type a) : a Query_protocol.t -> a =
           `List lst
         )
     in
-    let nodes = Mtyper.node_at typer pos in
     let small_enclosings =
       Type_enclosing.from_reconstructed exprs
-       ~nodes ~cursor:pos ~verbosity
+       ~nodes:structures ~cursor:pos ~verbosity
     in
     Logger.log ~section:Type_enclosing.log_section ~title:"small enclosing" "%a"
       Logger.fmt (fun fmt ->
@@ -415,10 +418,12 @@ let dispatch pipeline (type a) : a Query_protocol.t -> a =
         Some (Locate.get_doc ~config ~env ~local_defs
                 ~comments:(Mpipeline.reader_comments pipeline) ~pos)
     in
+    let keywords = Mpipeline.reader_lexer_keywords pipeline in
     let entries =
       Printtyp.wrap_printing_env env ~verbosity @@ fun () ->
-      Completion.branch_complete config ~kinds ?get_doc ?target_type prefix branch |>
-      print_completion_entries ~with_types config source
+      Completion.branch_complete config ~kinds ?get_doc ?target_type ~keywords
+        prefix branch
+      |> print_completion_entries ~with_types config source
     and context = match context with
       | `Application context when no_labels ->
         `Application {context with Compl.labels = []}
@@ -477,14 +482,14 @@ let dispatch pipeline (type a) : a Query_protocol.t -> a =
   | Refactor_open (mode, pos) ->
     let typer = Mpipeline.typer_result pipeline in
     let pos = Mpipeline.get_lexing_pos pipeline pos in
-    begin match Raw_compat.select_open_node (Mtyper.node_at typer pos) with
+    begin match Mbrowse.select_open_node (Mtyper.node_at typer pos) with
       | None | Some (_, []) -> []
       | Some (path, ((_, node) :: _)) ->
         let paths =
           Browse_tree.all_occurrences_of_prefix ~strict_prefix:true path node in
         let paths = List.concat_map ~f:snd paths in
-        let rec path_to_string acc p =
-          match Path.Nopos.view p with
+        let rec path_to_string acc (p : Path.t) =
+          match p with
           | Pident ident ->
             String.concat ~sep:"." (Ident.name ident :: acc)
           | Pdot (path', s) when
