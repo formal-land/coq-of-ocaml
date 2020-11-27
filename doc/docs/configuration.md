@@ -89,6 +89,31 @@ Definition x : B.t := {| A.t.a := "hi"; A.t.b := true |}.
 ```
 Even if in OCaml we can talk about the field `B.a`, in Coq we transform it to `A.t.a` so that there is a single record definition. To do this transformation, we go through the record aliases up to the alias barriers, if any.
 
+## constant_warning
+#### Example
+```
+"constant_warning": false
+```
+
+#### Value
+A boolean to select if there should be a warning in the generated code on some constants. A typical example are the integer constants which are all treated as `int`. The default of this option is `true`.
+
+#### Explanation
+Without setting this option to `false`, the output of the following code:
+```ocaml
+let n : int64 = 12L
+```
+is:
+```coq
+Definition n : int64 :=
+  (* ❌ Constant of type int64 is converted to int *)
+  12.
+```
+Setting the `constant_warning` option to `false` we get:
+```coq
+Definition n : int64 := 12.
+```
+
 ## constructor_map
 #### Example
 ```
@@ -190,6 +215,20 @@ A list of module names, typically corresponding to the module of a folder. All t
 
 #### Explanation
 The module system of coq-of-ocaml encodes the modules having a signature name as dependent records. We use the signature name as the record type name. Sometimes, for modules corresponding to files, we want to avoid using records even if there is a named signature. This option prevents the record encoding for modules of the form `A.B` where `A` is in the black-list. For example, when a reference to a value `A.B.c` appears, we generate `A.B.c` rather than `A.B.(signature_name_of_B.c)`. Indeed, `A.B` is a Coq module rather than a record.
+
+## first_class_module_signature_blacklist
+#### Example
+```
+"first_class_module_signature_blacklist": [
+  "Sapling__Core_sig.T_encoding"
+]
+```
+
+#### Value
+A list of OCaml signature names. We ignore these signatures when looking for a signature name to encode modules as records.
+
+#### Explanation
+In coq-of-ocaml, we look for a named signature for each module we encounter. Once we find a named signature we encode the module as a dependent record. If no signatures can be found, we use a plain Coq module. Sometimes, we find an incorrect signature as we use heuristics to find a matching signature. This configuration option helps to ignore incorrect signatures.
 
 ## head_suffix
 #### Example
@@ -395,6 +434,59 @@ let! x := return? e1 in
 e2
 ```
 
+## operator_infix
+#### Example
+```
+"operator_infix": [
+  ["Int32.add", "+i32"],
+  ["Int32.sub", "-i32"],
+  ["Int32.mul", "*i32"],
+  ["Int32.div", "/i32"]
+]
+```
+
+#### Value
+A list of couples of an operator name and its notation.
+
+#### Explanation
+In order to generate readable code, for example for arithmetic expressions, we may want to use infix operators. For example, in our code we were able to go from:
+```coq
+let all_votes := Int32.add casted_votes ballots.(Vote_storage.ballots.pass) in
+let supermajority := Int32.div (Int32.mul 8 casted_votes) 10 in
+let participation :=
+  Int64.to_int32
+    (Int64.div (Int64.mul (Int64.of_int32 all_votes) 10000)
+      (Int64.of_int32 maximum_vote)) in
+let approval :=
+  Pervasives.op_andand
+    ((|Compare.Int32|).(Compare.S.op_gteq) participation expected_quorum)
+    ((|Compare.Int32|).(Compare.S.op_gteq) ballots.(Vote_storage.ballots.yay)
+...
+```
+to:
+```coq
+let all_votes := casted_votes +i32 ballots.(Vote_storage.ballots.pass) in
+let supermajority := (8 *i32 casted_votes) /i32 10 in
+let participation :=
+  Int64.to_int32
+    (((Int64.of_int32 all_votes) *i64 10000) /i64
+    (Int64.of_int32 maximum_vote)) in
+let approval :=
+  (participation >=i32 expected_quorum) &&
+  (ballots.(Vote_storage.ballots.yay) >=i32 supermajority) in
+...
+```
+using infix operators. We believe the second form to be much more readable.
+
+Note that you need to define the notations by writing some Coq code. For example, for the `int32` notations we used:
+```coq
+Infix "+i32" := Int32.add (at level 50, left associativity).
+Infix "-i32" := Int32.sub (at level 50, left associativity).
+Infix "*i32" := Int32.mul (at level 40, left associativity).
+Infix "/i32" := Int32.div (at level 40, left associativity).
+```
+There should be no bugs due to the precedence of the operators, as we always parenthesis in case of doubt. However, having the right precedence may be nice when doing the proofs and pretty-printing terms. A good way to know about the precedences is to look at the reserved operator of the [standard library of Coq](https://coq.inria.fr/library/Coq.Init.Notations.html).
+
 ## renaming_rules
 #### Example
 ```
@@ -410,6 +502,25 @@ A list of couple of values, with a name and a name to rename to while doing the 
 
 #### Explanation
 We may want to systematically rename some of the OCaml values to their counterpart in Coq. This rule applies to anything which has a name (value, type, module, constructor, ...). coq-of-ocaml already knows some renaming rules for the OCaml's standard library, but it is possible to add more with this option.
+
+## renaming_type_constructor
+#### Example
+```
+"renaming_type_constructor": [
+  ["(|Compare.Char|).(Compare.S.t)", "ascii"],
+  ["(|Compare.Int|).(Compare.S.t)", "int"],
+  ["(|Compare.Int32|).(Compare.S.t)", "int32"],
+  ["(|Compare.Int64|).(Compare.S.t)", "int64"],
+  ["(|Compare.String|).(Compare.S.t)", "string"],
+  ["(|Compare.Z|).(Compare.S.t)", "Z.t"]
+],
+```
+
+#### Value
+A list of couples of a type constructor's name and a new name to rename to.
+
+#### Explanation
+In order to shorten the size of the generated Coq, we may want to rename some of the types. This is for example the case of types inside modules, like in the example above.
 
 ## require
 #### Example

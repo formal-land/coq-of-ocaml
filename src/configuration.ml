@@ -21,13 +21,6 @@ module MergeRule = struct
   }
 end
 
-module MonadicOperator = struct
-  type t = {
-    name : string;
-    notation : string;
-  }
-end
-
 module MonadicOperators = struct
   type t = {
     bind : string;
@@ -36,11 +29,27 @@ module MonadicOperators = struct
   }
 end
 
+module Operator = struct
+  type t = {
+    name : string;
+    notation : string;
+  }
+end
+
 module RenamingRule = struct
   type t = {
     source : string;
     target : string;
   }
+
+  let find (rules : t list) (source : string) : string option =
+    rules |>
+    (* We reverse the list so that the last entry is taken into account. *)
+    List.rev |>
+    List.find_opt (fun { source = current_source; _ } ->
+      current_source = source
+    ) |>
+    Option.map (fun { target; _ } -> target)
 end
 
 module VariantMapping = struct
@@ -52,6 +61,7 @@ end
 
 type t = {
   alias_barrier_modules : string list;
+  constant_warning : bool;
   constructor_map : ConstructorMapping.t list;
   error_category_blacklist : string list;
   error_filename_blacklist : string list;
@@ -59,14 +69,17 @@ type t = {
   escape_value : string list;
   file_name : string;
   first_class_module_path_blacklist : string list;
+  first_class_module_signature_blacklist : string list;
   head_suffix : string;
   merge_returns : MergeRule.t list;
   merge_types : MergeRule.t list;
-  monadic_lets : MonadicOperator.t list;
+  monadic_lets : Operator.t list;
   monadic_let_returns : MonadicOperators.t list;
-  monadic_returns : MonadicOperator.t list;
+  monadic_returns : Operator.t list;
   monadic_return_lets : MonadicOperators.t list;
+  operator_infix : Operator.t list;
   renaming_rules : RenamingRule.t list;
+  renaming_type_constructor : RenamingRule.t list;
   require : Import.t list;
   require_import : Import.t list;
   require_long_ident : Import.t list;
@@ -79,6 +92,7 @@ type t = {
 
 let default (file_name : string) : t = {
   alias_barrier_modules = [];
+  constant_warning = true;
   constructor_map = [];
   error_category_blacklist = [];
   error_filename_blacklist = [];
@@ -86,6 +100,7 @@ let default (file_name : string) : t = {
   escape_value = [];
   file_name;
   first_class_module_path_blacklist = [];
+  first_class_module_signature_blacklist = [];
   head_suffix = "";
   merge_returns = [];
   merge_types = [];
@@ -93,9 +108,11 @@ let default (file_name : string) : t = {
   monadic_let_returns = [];
   monadic_returns = [];
   monadic_return_lets = [];
+  operator_infix = [];
   renaming_rules =
     ConfigurationRenaming.rules |>
     List.map (fun (source, target) -> { RenamingRule.source; target });
+  renaming_type_constructor = [];
   require = [];
   require_import = [];
   require_long_ident = [];
@@ -117,6 +134,9 @@ let is_constructor_renamed (configuration : t) (typ : string) (name : string)
   ) |>
   Option.map (fun { ConstructorMapping.target; _ } -> target)
 
+let have_constant_warning (configuration : t) : bool =
+  configuration.constant_warning
+
 let is_category_in_error_blacklist (configuration : t) (error_id : string) : bool =
   List.mem error_id configuration.error_category_blacklist
 
@@ -134,13 +154,17 @@ let is_message_in_error_blacklist (configuration : t) (message : string)
 let is_value_to_escape (configuration : t) (name : string) : bool =
   List.mem name configuration.escape_value
 
-let is_in_first_class_module_backlist (configuration : t) (path : Path.t)
+let is_in_first_class_module_path_backlist (configuration : t) (path : Path.t)
   : bool =
   match List.rev (Path.to_string_list path) with
   | [] -> false
   | _ :: path ->
     let path = String.concat "." (List.rev path) in
     List.mem path configuration.first_class_module_path_blacklist
+
+let is_in_first_class_module_signature_backlist (configuration : t) (path : Path.t)
+  : bool =
+  List.mem (Path.name path) configuration.first_class_module_signature_blacklist
 
 let is_in_merge_returns
   (configuration : t) (source1 : string) (source2 : string) : string option =
@@ -165,11 +189,11 @@ let is_in_merge_types
 let is_monadic_let (configuration : t) (name : string) : string option =
   let monadic_operator =
     List.find_opt
-      (fun { MonadicOperator.name = name'; _ } -> name' = name)
+      (fun { Operator.name = name'; _ } -> name' = name)
       configuration.monadic_lets in
   match monadic_operator with
   | None -> None
-  | Some { MonadicOperator.notation; _ } -> Some notation
+  | Some { Operator.notation; _ } -> Some notation
 
 let is_monadic_let_return (configuration : t) (name : string)
   : (string * string) option =
@@ -184,11 +208,11 @@ let is_monadic_let_return (configuration : t) (name : string)
 let is_monadic_return (configuration : t) (name : string) : string option =
   let monadic_operator =
     List.find_opt
-      (fun { MonadicOperator.name = name'; _ } -> name' = name)
+      (fun { Operator.name = name'; _ } -> name' = name)
       configuration.monadic_returns in
   match monadic_operator with
   | None -> None
-  | Some { MonadicOperator.notation; _ } -> Some notation
+  | Some { Operator.notation; _ } -> Some notation
 
 let is_monadic_return_let (configuration : t) (name : string)
   : (string * string) option =
@@ -200,10 +224,21 @@ let is_monadic_return_let (configuration : t) (name : string)
   | None -> None
   | Some { MonadicOperators.bind; return; _ } -> Some (bind, return)
 
+let is_operator_infix (configuration : t) (name : string) : string option =
+  let operator_infix =
+    List.find_opt
+      (fun { Operator.name = name'; _ } -> name' = name)
+      configuration.operator_infix in
+  match operator_infix with
+  | None -> None
+  | Some { Operator.notation; _ } -> Some notation
+
 let is_in_renaming_rule (configuration : t) (path : string) : string option =
-  configuration.renaming_rules |>
-  List.find_opt (fun { RenamingRule.source; _ } -> source = path) |>
-  Option.map (fun { RenamingRule.target; _ } -> target)
+  RenamingRule.find configuration.renaming_rules path
+
+let is_in_renaming_type_constructor (configuration : t) (source : string)
+  : string option =
+  RenamingRule.find configuration.renaming_type_constructor source
 
 let should_require (configuration : t) (base : string)
   : string option =
@@ -246,8 +281,14 @@ let is_without_guard_checking (configuration : t) : bool =
 let is_without_positivity_checking (configuration : t) : bool =
   List.mem configuration.file_name configuration.without_positivity_checking
 
+let get_bool (id : string) (json : Yojson.Basic.t) : bool =
+  let error_message = "Expected a boolean in " ^ id in
+  match json with
+  | `Bool value -> value
+  | _ -> failwith error_message
+
 let get_string (id : string) (json : Yojson.Basic.t) : string =
-  let error_message = "Expected a string list in " ^ id in
+  let error_message = "Expected a string in " ^ id in
   match json with
   | `String value -> value
   | _ -> failwith error_message
@@ -302,6 +343,9 @@ let of_json (file_name : string) (json : Yojson.Basic.t) : t =
               { ConstructorMapping.source; target; typ }
             ) in
           {configuration with constructor_map = entry}
+        | "constant_warning" ->
+          let entry = get_bool "constant_warning" entry in
+          {configuration with constant_warning = entry}
         | "error_category_blacklist" ->
           let entry = get_string_list "error_category_blacklist" entry in
           {configuration with error_category_blacklist = entry}
@@ -317,6 +361,10 @@ let of_json (file_name : string) (json : Yojson.Basic.t) : t =
         | "first_class_module_path_blacklist" ->
           let entry = get_string_list "first_class_module_path_blacklist" entry in
           {configuration with first_class_module_path_blacklist = entry}
+        | "first_class_module_signature_blacklist" ->
+          let entry =
+            get_string_list "first_class_module_signature_blacklist" entry in
+          {configuration with first_class_module_signature_blacklist = entry}
         | "head_suffix" ->
           let entry = get_string "head_suffix" entry in
           {configuration with head_suffix = entry}
@@ -341,7 +389,7 @@ let of_json (file_name : string) (json : Yojson.Basic.t) : t =
             entry |>
             get_string_couple_list "monadic_lets" |>
             List.map (fun (name, notation) ->
-              { MonadicOperator.name; notation }
+              { Operator.name; notation }
             ) in
           {configuration with monadic_lets = entry}
         | "monadic_let_returns" ->
@@ -357,7 +405,7 @@ let of_json (file_name : string) (json : Yojson.Basic.t) : t =
             entry |>
             get_string_couple_list "monadic_returns" |>
             List.map (fun (name, notation) ->
-              { MonadicOperator.name; notation }
+              { Operator.name; notation }
             ) in
           {configuration with monadic_returns = entry}
         | "monadic_return_lets" ->
@@ -368,6 +416,14 @@ let of_json (file_name : string) (json : Yojson.Basic.t) : t =
               { MonadicOperators.bind; name; return }
             ) in
           {configuration with monadic_return_lets = entry}
+        | "operator_infix" ->
+          let entry =
+            entry |>
+            get_string_couple_list "operator_infix" |>
+            List.map (fun (name, notation) ->
+              { Operator.name; notation }
+            ) in
+          {configuration with operator_infix = entry}
         | "renaming_rules" ->
           let entry =
             entry |>
@@ -376,6 +432,12 @@ let of_json (file_name : string) (json : Yojson.Basic.t) : t =
           {configuration with
             renaming_rules = configuration.renaming_rules @ entry
           }
+        | "renaming_type_constructor" ->
+          let entry =
+            entry |>
+            get_string_couple_list "renaming_type_constructor" |>
+            List.map (fun (source, target) -> { RenamingRule.source; target }) in
+          {configuration with renaming_type_constructor = entry }
         | "require" ->
           let entry =
             entry |>

@@ -1,4 +1,8 @@
 ## [Unreleased]
+* Add the configuration option `renaming_type_constructor` to rename some type constructors.
+* Add the configuration option `operator_infix` to have notations for the infix operators.
+* Add the configuration option `constant_warning` to disable warnings when converting constants.
+* Add the configuration option `first_class_module_signature_blacklist` to ignore some signatures in the search of a signature name.
 
 ## 2.3.0 (November 3, 2020)
 * Add support for the OCaml's monadic notation.

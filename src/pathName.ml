@@ -162,6 +162,21 @@ let map_constructor_name (cstr_name : string) (typ_ident : string)
   | Some renaming -> return renaming
   | None -> return cstr_name
 
+let rec iterate_in_aliases (path : Path.t) : Path.t Monad.t =
+  let* configuration = get_configuration in
+  let is_in_barrier_module (path : Path.t) : bool =
+    Configuration.is_alias_in_barrier_module
+      configuration
+      (Ident.name (Path.head path)) in
+  let* env = get_env in
+  match Env.find_type path env with
+  | { type_manifest = Some { desc = Tconstr (path', _, _); _ }; _ } ->
+    if is_in_barrier_module path && not (is_in_barrier_module path') then
+      return path
+    else
+      iterate_in_aliases path'
+  | _ -> return path
+
 let of_constructor_description
   (constructor_description : Types.constructor_description)
   : t Monad.t =
@@ -171,6 +186,7 @@ let of_constructor_description
       cstr_res = { desc = Tconstr (path, _, _); _ };
       _
     } ->
+    let* path = iterate_in_aliases path in
     let typ_ident = Path.head path in
     of_path_without_convert false path >>= fun { path; _ } ->
     let* cstr_name = map_constructor_name cstr_name (Ident.name typ_ident) in
@@ -184,26 +200,11 @@ let of_constructor_description
       Unexpected
       "Unexpected constructor description without a type constructor"
 
-let rec iterate_in_aliases (path : Path.t) : Path.t Monad.t =
-  let* configuration = get_configuration in
-  let is_in_barrier_module (path : Path.t) : bool =
-    Configuration.is_alias_in_barrier_module
-      configuration
-      (Ident.name (Path.head path)) in
-  get_env >>= fun env ->
-  match Env.find_type path env with
-  | { type_manifest = Some { desc = Tconstr (path', _, _); _ }; _ } ->
-    if is_in_barrier_module path && not (is_in_barrier_module path') then
-      return path
-    else
-      iterate_in_aliases path'
-  | _ -> return path
-
 let of_label_description (label_description : Types.label_description)
   : t Monad.t =
   match label_description with
   | { lbl_name; lbl_res = { desc = Tconstr (path, _, _); _ } ; _ } ->
-    iterate_in_aliases path >>= fun path ->
+    let* path = iterate_in_aliases path in
     of_path_without_convert false path >>= fun { path; base } ->
     Name.of_string false lbl_name >>= fun lbl_name ->
     let path_name = {

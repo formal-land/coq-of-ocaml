@@ -10,6 +10,14 @@ type t =
   | String of string
   | Warn of t * string
 
+let warn (c : t) (message : string) : t Monad.t =
+  let* configuration = get_configuration in
+  let with_warning = Configuration.have_constant_warning configuration in
+  if with_warning then
+    return (Warn (c, message))
+  else
+    return c
+
 (** Import an OCaml constant. *)
 let of_constant (c : constant) : t Monad.t =
   match c with
@@ -19,16 +27,16 @@ let of_constant (c : constant) : t Monad.t =
   | Const_float s ->
     let n = int_of_float (float_of_string s) in
     let message = Printf.sprintf "Float constant %s is approximated by the integer %d" s n in
-    return (Warn (Int n, message))
+    warn (Int n) message
   | Const_int32 n ->
     let message = "Constant of type int32 is converted to int" in
-    return (Warn (Int (Int32.to_int n), message))
+    warn (Int (Int32.to_int n)) message
   | Const_int64 n ->
     let message = "Constant of type int64 is converted to int" in
-    return (Warn (Int (Int64.to_int n), message))
+    warn (Int (Int64.to_int n)) message
   | Const_nativeint n ->
     let message = "Constant of type nativeint is converted to int" in
-    return (Warn (Int (Nativeint.to_int n), message))
+    warn (Int (Nativeint.to_int n)) message
 
 (** Pretty-print a constant to Coq. *)
 let rec to_coq (c : t) : SmartPrint.t =
