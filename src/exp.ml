@@ -623,14 +623,11 @@ let rec of_expression (typ_vars : Name.t Name.Map.t) (e : expression)
   else
     return e))
 
-and of_match
-  (typ_vars : Name.t Name.Map.t)
-  (e : t)
-  (cases : case list)
-  (is_gadt_match : bool)
-  (do_cast_results : bool)
-  (is_with_default_case : bool)
-  : t Monad.t =
+and of_match :
+  type pattern_kind.
+  Name.t Name.Map.t -> t -> pattern_kind case list -> bool -> bool -> bool ->
+  t Monad.t =
+  fun typ_vars e cases is_gadt_match do_cast_results is_with_default_case ->
   (cases |> Monad.List.filter_map (fun {c_lhs; c_guard; c_rhs} ->
     set_loc c_lhs.pat_loc (
     let* bound_vars =
@@ -730,8 +727,9 @@ and of_match
 (** Generate a variable and a "match" on this variable from a list of
     patterns. *)
 and open_cases
+  (type pattern_kind) = fun
   (typ_vars : Name.t Name.Map.t)
-  (cases : case list)
+  (cases : pattern_kind case list)
   (is_gadt_match : bool)
   (do_cast_results : bool)
   (is_with_default_case : bool)

@@ -17,7 +17,9 @@ type t =
 
 (** Import an OCaml pattern. If the answer is [None] then the pattern is
     impossible (for example with extensible types). *)
-let rec of_pattern (p : pattern) : t option Monad.t =
+let rec of_pattern
+  : type pattern_kind. pattern_kind general_pattern -> t option Monad.t =
+  fun p ->
   set_loc p.pat_loc (
   match p.pat_desc with
   | Tpat_any -> return (Some Any)
@@ -103,6 +105,7 @@ let rec of_pattern (p : pattern) : t option Monad.t =
   | Tpat_lazy p ->
     of_pattern p >>= fun pattern ->
     raise pattern NotSupported "Lazy patterns are not supported"
+  | Tpat_value p -> of_pattern p
   | Tpat_exception _ ->
     raise None SideEffect "We do not support exception patterns")
 
