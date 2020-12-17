@@ -20,3 +20,49 @@ Definition n : int :=
     | cons x l => Z.add x (sum l)
     end in
   sum [ 1; 2; 3 ].
+
+Reserved Notation "'double".
+
+Fixpoint double_list (l : list int) : list int :=
+  let double := 'double in
+  match l with
+  | [] => l
+  | cons n l => cons (double n) (double_list l)
+  end
+
+where "'double" := (fun (n : int) => Z.mul 2 n).
+
+Definition double := 'double.
+
+Inductive tree (a : Set) : Set :=
+| Leaf : a -> tree a
+| Node : list (tree a) -> tree a.
+
+Arguments Leaf {_}.
+Arguments Node {_}.
+
+Reserved Notation "'zero".
+Reserved Notation "'sums".
+
+Fixpoint sum (t : tree int) : int :=
+  let zero := 'zero in let sums := 'sums in
+  match t with
+  | Leaf n => n
+  | Node ts => sums ts
+  end
+
+where "'zero" :=
+  (fun (function_parameter : unit) =>
+    let '_ := function_parameter in
+    0)
+
+and "'sums" :=
+  (fix sums (ts : list (tree int)) {struct ts} : int :=
+    let zero := 'zero in
+    match ts with
+    | [] => zero tt
+    | cons t ts => Z.add (sum t) (sums ts)
+    end).
+
+Definition zero := 'zero.
+Definition sums := 'sums.

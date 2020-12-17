@@ -9,7 +9,8 @@ module Header = struct
     typ_vars : Name.t list;
     args : (Name.t * Type.t) list;
     structs : string list;
-    typ : Type.t }
+    typ : Type.t;
+    is_notation : bool }
 
   let to_coq_structs (header : t) : SmartPrint.t =
     match header.structs with
@@ -22,7 +23,7 @@ end
 module Definition = struct
   type 'a t = {
     is_rec : Recursivity.t;
-    cases : (Header.t * 'a) list }
+    cases : (Header.t * 'a) list; }
 end
 
 type match_existential_cast = {
@@ -783,7 +784,7 @@ and import_let_fun
   (cases |> Monad.List.filter_map (fun { vb_pat = p; vb_expr; vb_attributes; _ } ->
     Attribute.of_attributes vb_attributes >>= fun attributes ->
     let is_axiom = Attribute.has_axiom_with_reason attributes in
-    let struct_attributes = Attribute.get_structs attributes in
+    let structs = Attribute.get_structs attributes in
     set_env vb_expr.exp_env (
     set_loc (Loc.of_location p.pat_loc) (
     Pattern.of_pattern p >>= fun p ->
@@ -805,23 +806,13 @@ and import_let_fun
         else
           return ([], None) in
       let (args_typs, e_body_typ) = Type.open_type e_typ (List.length args_names) in
-      get_configuration >>= fun configuration ->
-      let structs =
-        match struct_attributes with
-        | [] ->
-          if Configuration.is_without_guard_checking configuration then
-            match (is_rec, args_names) with
-            | (true, x :: _) -> [Name.to_string x]
-            | _ -> []
-          else
-            []
-        | _ :: _ -> struct_attributes in
       let header = {
         Header.name = x;
         typ_vars = Name.Set.elements new_typ_vars;
         args = List.combine args_names args_typs;
         structs;
-        typ = e_body_typ
+        typ = e_body_typ;
+        is_notation = Attribute.has_mutual_as_notation attributes;
       } in
       return (Some (header, e_body))
     )

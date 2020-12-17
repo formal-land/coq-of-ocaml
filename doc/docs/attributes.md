@@ -215,6 +215,101 @@ Axiom unreachable_gadt_branch : forall {A : Set}, A.
 
 We can combine this attribute with `[@coq_match_gadt]` or `[@coq_match_gadt_with_result]` if needed.
 
+## coq_mutual_as_notation
+The attribute `[@coq_mutual_as_notation]` makes the definition of a mutually recursive function a notation. For example, we transform the following OCaml code:
+```ocaml
+let rec double_list l =
+  match l with
+  | [] -> l
+  | n :: l -> double n :: double_list l
+
+and[@coq_mutual_as_notation] double n = 2 * n
+```
+to:
+```coq
+Reserved Notation "'double".
+
+Fixpoint double_list (l : list int) : list int :=
+  let double := 'double in
+  match l with
+  | [] => l
+  | cons n l => cons (double n) (double_list l)
+  end
+
+where "'double" := (fun (n : int) => Z.mul 2 n).
+
+Definition double := 'double.
+```
+Without this attribute, we would generate a mutually recursive definition:
+```coq
+Fixpoint double_list (l : list int) : list int :=
+  match l with
+  | [] => l
+  | cons n l => cons (double n) (double_list l)
+  end
+
+with double (n : int) : int := Z.mul 2 n.
+```
+which is rejected by the type-checker of Coq:
+```
+Error:
+Recursive definition of double_list is ill-formed.
+In environment
+double_list : list int -> list int
+double : int -> int
+l : list int
+n : int
+l0 : list int
+Recursive call to double has principal argument equal to 
+"n" instead of "l0".
+Recursive definition is:
+"fun l : list int =>
+ match l with
+ | [] => l
+ | n :: l0 => double n :: double_list l0
+ end".
+```
+
+For recursive notations, you can combine this attribute with `@coq_struct` to tell coq-of-ocaml to generate a recursive notation. For example, we transform:
+```ocaml
+type 'a tree =
+  | Leaf of 'a
+  | Node of 'a tree list
+
+let rec sum (t : int tree) =
+  match t with
+  | Leaf n -> n
+  | Node ts -> sums ts
+
+and[@coq_mutual_as_notation][@coq_struct "ts"] sums (ts : int tree list) =
+  match ts with
+  | [] -> 0
+  | t :: ts -> sum t + sums ts
+```
+to:
+```coq
+Reserved Notation "'sums".
+
+Fixpoint sum (t : tree int) : int :=
+  let sums := 'sums in
+  match t with
+  | Leaf n => n
+  | Node ts => sums ts
+  end
+
+where "'sums" :=
+  (fix sums (ts : list (tree int)) {struct ts} : int :=
+    match ts with
+    | [] => 0
+    | cons t ts => Z.add (sum t) (sums ts)
+    end).
+
+Definition sums := 'sums.
+```
+using the keyword `fix` for the defintion of `sums`. In this example too, the type-checker of Coq would reject the definition without a notation.
+
+> In the proofs, whenever the definition of `sums` appears unfolded, you can run the tactic `fold sums` to hide it.
+
 ## coq_phantom
 When it can, coq-of-ocaml detects phantom types and remove their type annotations. For example, we translate the following OCaml code:
 ```ocaml

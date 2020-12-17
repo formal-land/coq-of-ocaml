@@ -9,6 +9,7 @@ type t =
   | MatchGadt
   | MatchGadtWithResult
   | MatchWithDefault
+  | MutualAsNotation
   | Phantom
   | PlainModule
   | Struct of string
@@ -63,6 +64,7 @@ let of_attributes (attributes : Typedtree.attributes) : t list Monad.t =
     | "coq_match_gadt" -> return (Some MatchGadt)
     | "coq_match_gadt_with_result" -> return (Some MatchGadtWithResult)
     | "coq_match_with_default" -> return (Some MatchWithDefault)
+    | "coq_mutual_as_notation" -> return (Some MutualAsNotation)
     | "coq_plain_module" -> return (Some PlainModule)
     | "coq_phantom" -> return (Some Phantom)
     | "coq_struct" ->
@@ -111,6 +113,12 @@ let has_match_gadt_with_result (attributes : t list) : bool =
 let has_match_with_default (attributes : t list) : bool =
   attributes |> List.exists (function
     | MatchWithDefault -> true
+    | _ -> false
+  )
+
+let has_mutual_as_notation (attributes : t list) : bool =
+  attributes |> List.exists (function
+    | MutualAsNotation -> true
     | _ -> false
   )
 

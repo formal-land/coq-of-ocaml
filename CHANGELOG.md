@@ -1,4 +1,5 @@
 ## [Unreleased]
+* Add the attribute `@coq_mutual_as_notation` to translate a mutually recursive function as a notation.
 * Add the configuration option `renaming_type_constructor` to rename some type constructors.
 * Add the configuration option `operator_infix` to have notations for the infix operators.
 * Add the configuration option `constant_warning` to disable warnings when converting constants.
