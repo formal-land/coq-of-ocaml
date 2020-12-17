@@ -6,6 +6,7 @@ open Monad.Notations
 type t =
   | FunctionParameter
   | Make of string
+  | Nameless
 
 module Set = Set.Make (struct
   type nonrec t = t
@@ -128,6 +129,11 @@ let of_string_raw (s : string) : t =
 let of_ident (is_value : bool) (i : Ident.t) : t Monad.t =
   of_string is_value (Ident.name i)
 
+let of_optional_ident (is_value : bool) (i : Ident.t option) : t Monad.t =
+  match i with
+  | None -> return Nameless
+  | Some i -> of_ident is_value i
+
 (** Import an OCaml identifier without doing conversion. *)
 let of_ident_raw (i : Ident.t) : t =
   of_string_raw (Ident.name i)
@@ -136,6 +142,7 @@ let to_string (name : t) : string =
   match name with
   | FunctionParameter -> "function_parameter"
   | Make name -> name
+  | Nameless -> "_"
 
 let prefix_by_single_quote (name : t) : t =
   Make ("'" ^ to_string name)

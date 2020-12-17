@@ -331,7 +331,7 @@ let rec of_structure (structure : structure) : t list Monad.t =
       )
     | Tstr_open _ -> return []
     | Tstr_module { mb_id; mb_expr; mb_attributes; _ } ->
-      let* name = Name.of_ident false mb_id in
+      let* name = Name.of_optional_ident false mb_id in
       let* has_plain_module_attribute =
         let* attributes = Attribute.of_attributes mb_attributes in
         return (Attribute.has_plain_module attributes) in
@@ -478,12 +478,12 @@ and of_module_expr
   | Tmod_apply _ ->
       let* module_exp = Exp.of_module_expr Name.Map.empty module_expr None in
       return (ModuleExpression (name, module_typ, module_exp))
-  | Tmod_functor (ident, _, module_type_arg, module_expr) ->
+  | Tmod_functor (parameter, module_expr) ->
     let* functor_parameters =
-      match module_type_arg with
-      | None -> return functor_parameters
-      | Some module_type_arg ->
-        let* x = Name.of_ident false ident in
+      match parameter with
+      | Unit -> return functor_parameters
+      | Named (ident, _, module_type_arg) ->
+        let* x = Name.of_optional_ident false ident in
         let* module_type_arg = ModuleTyp.of_ocaml module_type_arg in
         return ((x, ModuleTyp.to_typ module_type_arg) :: functor_parameters) in
     of_module name functor_parameters module_expr false

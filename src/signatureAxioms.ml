@@ -20,7 +20,7 @@ let rec string_of_included_module_typ (module_typ : Typedtree.module_type)
   match module_typ.mty_desc with
   | Tmty_ident (path, _) | Tmty_alias (path, _) -> Path.last path
   | Tmty_signature _ -> "signature"
-  | Tmty_functor (ident, _, _, _) -> Ident.name ident
+  | Tmty_functor _ -> "functor"
   | Tmty_with (module_typ, _) -> string_of_included_module_typ module_typ
   | Tmty_typeof _ -> "typeof"
 
@@ -209,7 +209,7 @@ let rec of_signature (signature : Typedtree.signature) : t Monad.t =
           "Unhandled kind of module type"
       end
     | Tsig_module { md_id; md_type = { mty_desc; _ }; _ } ->
-      let* name = Name.of_ident false md_id in
+      let* name = Name.of_optional_ident false md_id in
       begin match mty_desc with
       | Tmty_alias (path, _) ->
         PathName.of_path_with_convert false path >>= fun path_name ->

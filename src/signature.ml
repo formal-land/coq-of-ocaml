@@ -208,11 +208,11 @@ let rec of_signature_items
         NotSupported
         "Signatures inside signatures are not handled."
     | Tsig_module { md_id; md_type; _ } ->
-      let* name = Name.of_ident false md_id in
+      let* name = Name.of_optional_ident false md_id in
       let* prefixed_name = prefix_name false prefix name in
       begin match md_type.mty_desc with
       | Tmty_signature signature ->
-        let* name = Name.of_ident false md_id in
+        let* name = Name.of_optional_ident false md_id in
         let* items =
           of_signature_items
             (prefix @ [name]) let_in_type signature.sig_items next_env in
