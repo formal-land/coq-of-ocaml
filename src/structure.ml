@@ -7,20 +7,36 @@ open Monad.Notations
 module Value = struct
   type t = Exp.t option Exp.Definition.t
 
+  let to_coq_parameters (header : Exp.Header.t) : SmartPrint.t =
+    let { Exp.Header.typ_vars; args; _ } = header in
+    begin match typ_vars with
+    | [] -> empty
+    | _ :: _ ->
+      braces @@ group (separate space (List.map Name.to_coq typ_vars) ^^
+      !^ ":" ^^ Pp.set)
+    end ^^
+    group (separate space (args |> List.map (fun (x, t) ->
+      parens @@ nest (Name.to_coq x ^^ !^ ":" ^^ Type.to_coq None None t)
+    )))
+
   (** Pretty-print a value definition to Coq. *)
   let to_coq (with_args : bool) (value : t) : SmartPrint.t =
     match value.Exp.Definition.cases with
     | [] -> empty
     | _ :: _ ->
-      let (axiom_cases, cases) =
+      let (axiom_cases, notation_cases, cases) =
         List.fold_right
-          (fun case (axiom_cases, cases) ->
+          (fun case (axiom_cases, notation_cases, cases) ->
             match case with
-            | (header, None) -> (header :: axiom_cases, cases)
-            | (header, Some e) -> (axiom_cases, (header, e) :: cases)
+            | (header, None) -> (header :: axiom_cases, notation_cases, cases)
+            | (header, Some e) ->
+              if header.Exp.Header.is_notation then
+                (axiom_cases, (header, e) :: notation_cases, cases)
+              else
+                (axiom_cases, notation_cases, (header, e) :: cases)
           )
           value.Exp.Definition.cases
-          ([], []) in
+          ([], [], []) in
       separate (newline ^^ newline) (
         (axiom_cases |> List.map (fun header ->
           let { Exp.Header.name; typ_vars; typ; _ } = header in
@@ -37,11 +53,26 @@ module Value = struct
             Type.to_coq None None typ ^-^
             !^ "."
           )
-        )) @ (cases |> List.mapi (fun index (header, e) ->
-          let firt_case = index = 0 in
-          let last_case = index = List.length cases - 1 in
+        )) @
+          begin match notation_cases with
+          | [] -> []
+          | _ :: _ ->
+            [separate newline (notation_cases |> List.map (fun (header, _) ->
+              let { Exp.Header.name; _ } = header in
+              nest (
+                !^ "Reserved Notation" ^^
+                double_quotes (!^ "'" ^-^ Name.to_coq name) ^-^ !^ "."
+              )
+            ))]
+          end
+        @ (cases |> List.mapi (fun index (header, e) ->
+          let first_case = index = 0 in
+          let last_case =
+            match notation_cases with
+            | [] -> index = List.length cases - 1
+            | _ :: _ -> false in
           nest (
-            begin if firt_case then
+            begin if first_case then
               begin if value.Exp.Definition.is_rec then
                 !^ "Fixpoint"
               else
@@ -50,28 +81,90 @@ module Value = struct
             else
               !^ "with"
             end ^^
-            let { Exp.Header.name; typ_vars; args; typ; _ } = header in
+            let { Exp.Header.name; typ; _ } = header in
             Name.to_coq name ^^
             Pp.args with_args ^^
-            begin match typ_vars with
-            | [] -> empty
-            | _ :: _ ->
-              braces @@ group (separate space (List.map Name.to_coq typ_vars) ^^
-              !^ ":" ^^ Pp.set)
-            end ^^
-            group (separate space (args |> List.map (fun (x, t) ->
-              parens @@ nest (Name.to_coq x ^^ !^ ":" ^^ Type.to_coq None None t)
-            ))) ^^
+            to_coq_parameters header ^^
             Exp.Header.to_coq_structs header ^^
             !^ ": " ^-^ Type.to_coq None None typ ^-^ !^ " :=" ^^
-            Exp.to_coq false e ^-^
+            group (
+              separate space (notation_cases |> List.map (fun (header, e) ->
+                let { Exp.Header.name; _ } = header in
+                nest (
+                  !^ "let" ^^ Name.to_coq name ^^ !^ ":=" ^^
+                  !^ "'" ^-^ Name.to_coq name ^^ !^ "in"
+                )
+              )) ^^
+              Exp.to_coq false e
+             ) ^-^
             begin if last_case then
               !^"."
             else
               empty
             end
           )
-        ))
+        )) @ snd (List.fold_left
+          (fun ((index, previous_notations), definitions) (header, e) ->
+            let first_case = index = 0 in
+            let last_case = index = List.length notation_cases - 1 in
+            let { Exp.Header.name; structs; typ; _ } = header in
+            let definition = nest (
+              begin if first_case then
+                !^ "where"
+              else
+                !^ "and"
+              end ^^
+              double_quotes (!^ "'" ^-^ Name.to_coq name) ^^
+              !^ ":=" ^^
+              parens (nest (
+                nest (
+                  begin match structs with
+                  | [] -> !^ "fun"
+                  | _ :: _ -> !^ "fix" ^^ Name.to_coq name
+                  end ^^
+                  to_coq_parameters header ^^
+                  begin match structs with
+                  | [] -> !^ "=>"
+                  | _ :: _ ->
+                    Exp.Header.to_coq_structs header ^^
+                    !^ ": " ^-^ Type.to_coq None None typ ^-^ !^ " :="
+                  end ^^
+                  group (
+                    separate space (previous_notations |> List.map (fun name ->
+                      nest (
+                        !^ "let" ^^ Name.to_coq name ^^ !^ ":=" ^^
+                        !^ "'" ^-^ Name.to_coq name ^^ !^ "in"
+                      )
+                    )) ^^
+                    Exp.to_coq false e
+                  )
+                )
+              )) ^-^
+              begin if last_case then
+                !^ "."
+              else
+                empty
+              end
+            ) in
+            (
+              (index + 1, previous_notations @ [name]),
+              definitions @ [definition]
+            )
+          )
+          ((0, []), [])
+          notation_cases
+        ) @
+          begin match notation_cases with
+          | [] -> []
+          | _ :: _ ->
+            [separate newline (notation_cases |> List.map (fun (header, _) ->
+              let { Exp.Header.name; _ } = header in
+              nest (
+                !^ "Definition" ^^ Name.to_coq name ^^ !^ ":=" ^^
+                !^ "'" ^-^ Name.to_coq name ^-^ !^ "."
+              )
+            ))]
+          end
       )
 end
 
