@@ -7,17 +7,26 @@ open Monad.Notations
 module Value = struct
   type t = Exp.t option Exp.Definition.t
 
-  let to_coq_parameters (header : Exp.Header.t) : SmartPrint.t =
-    let { Exp.Header.typ_vars; args; _ } = header in
-    begin match typ_vars with
-    | [] -> empty
-    | _ :: _ ->
-      braces @@ group (separate space (List.map Name.to_coq typ_vars) ^^
-      !^ ":" ^^ Pp.set)
-    end ^^
+  let to_coq_typ_vars (header : Exp.Header.t) : SmartPrint.t =
+    let { Exp.Header.typ_vars; _ } = header in
+    Name.to_coq_list_or_empty typ_vars (fun typ_vars ->
+      braces (nest (typ_vars ^^ !^ ":" ^^ Pp.set))
+    )
+
+  let to_coq_args (header : Exp.Header.t) : SmartPrint.t =
+    let { Exp.Header.args; _ } = header in
     group (separate space (args |> List.map (fun (x, t) ->
       parens @@ nest (Name.to_coq x ^^ !^ ":" ^^ Type.to_coq None None t)
     )))
+
+  let to_coq_notation_synonym (name : Name.t) (typ_vars : Name.t list)
+    : SmartPrint.t =
+    nest (
+      !^ "let" ^^ Name.to_coq name ^^
+      Name.to_coq_list_or_empty typ_vars (fun typ_vars -> braces typ_vars) ^^
+      !^ ":=" ^^ !^ "'" ^-^ Name.to_coq name ^^
+      separate space (List.map Name.to_coq typ_vars) ^^ !^ "in" ^^ newline
+    )
 
   (** Pretty-print a value definition to Coq. *)
   let to_coq (with_args : bool) (value : t) : SmartPrint.t =
@@ -42,14 +51,10 @@ module Value = struct
           let { Exp.Header.name; typ_vars; typ; _ } = header in
           nest (
             !^ "Axiom" ^^ Name.to_coq name ^^ !^ ":" ^^
-            begin match typ_vars with
-            | [] -> empty
-            | _ :: _ ->
+            Name.to_coq_list_or_empty typ_vars (fun typ_vars ->
               !^ "forall" ^^
-              braces (group (
-                separate space (List.map Name.to_coq typ_vars) ^^ !^ ":" ^^ Pp.set
-              )) ^-^ !^ ","
-            end ^^
+              braces (nest (typ_vars ^^ !^ ":" ^^ Pp.set)) ^-^ !^ ","
+            ) ^^
             Type.to_coq None None typ ^-^
             !^ "."
           )
@@ -84,16 +89,14 @@ module Value = struct
             let { Exp.Header.name; typ; _ } = header in
             Name.to_coq name ^^
             Pp.args with_args ^^
-            to_coq_parameters header ^^
+            to_coq_typ_vars header ^^
+            to_coq_args header ^^
             Exp.Header.to_coq_structs header ^^
             !^ ": " ^-^ Type.to_coq None None typ ^-^ !^ " :=" ^^
             group (
               separate space (notation_cases |> List.map (fun (header, e) ->
-                let { Exp.Header.name; _ } = header in
-                nest (
-                  !^ "let" ^^ Name.to_coq name ^^ !^ ":=" ^^
-                  !^ "'" ^-^ Name.to_coq name ^^ !^ "in"
-                )
+                let { Exp.Header.name; typ_vars; _ } = header in
+                to_coq_notation_synonym name typ_vars
               )) ^^
               Exp.to_coq false e
              ) ^-^
@@ -107,7 +110,7 @@ module Value = struct
           (fun ((index, previous_notations), definitions) (header, e) ->
             let first_case = index = 0 in
             let last_case = index = List.length notation_cases - 1 in
-            let { Exp.Header.name; structs; typ; _ } = header in
+            let { Exp.Header.name; typ_vars; structs; typ; _ } = header in
             let definition = nest (
               begin if first_case then
                 !^ "where"
@@ -118,11 +121,17 @@ module Value = struct
               !^ ":=" ^^
               parens (nest (
                 nest (
+                  Name.to_coq_list_or_empty typ_vars (fun typ_vars ->
+                    nest (
+                      !^ "fun" ^^ parens (typ_vars ^^ !^ ":" ^^ Pp.set) ^^
+                      !^ "=>"
+                    ) ^^ space
+                  ) ^-^
                   begin match structs with
                   | [] -> !^ "fun"
                   | _ :: _ -> !^ "fix" ^^ Name.to_coq name
                   end ^^
-                  to_coq_parameters header ^^
+                  to_coq_args header ^^
                   begin match structs with
                   | [] -> !^ "=>"
                   | _ :: _ ->
@@ -130,11 +139,8 @@ module Value = struct
                     !^ ": " ^-^ Type.to_coq None None typ ^-^ !^ " :="
                   end ^^
                   group (
-                    separate space (previous_notations |> List.map (fun name ->
-                      nest (
-                        !^ "let" ^^ Name.to_coq name ^^ !^ ":=" ^^
-                        !^ "'" ^-^ Name.to_coq name ^^ !^ "in"
-                      )
+                    separate space (previous_notations |> List.map (fun (name, typ_vars) ->
+                      to_coq_notation_synonym name typ_vars
                     )) ^^
                     Exp.to_coq false e
                   )
@@ -147,7 +153,7 @@ module Value = struct
               end
             ) in
             (
-              (index + 1, previous_notations @ [name]),
+              (index + 1, previous_notations @ [(name, typ_vars)]),
               definitions @ [definition]
             )
           )
@@ -158,10 +164,15 @@ module Value = struct
           | [] -> []
           | _ :: _ ->
             [separate newline (notation_cases |> List.map (fun (header, _) ->
-              let { Exp.Header.name; _ } = header in
+              let { Exp.Header.name; typ_vars; _ } = header in
               nest (
-                !^ "Definition" ^^ Name.to_coq name ^^ !^ ":=" ^^
-                !^ "'" ^-^ Name.to_coq name ^-^ !^ "."
+                !^ "Definition" ^^ Name.to_coq name ^^
+                Name.to_coq_list_or_empty typ_vars (fun typ_vars ->
+                  braces typ_vars
+                ) ^^ !^ ":=" ^^
+                separate space (
+                  (!^ "'" ^-^ Name.to_coq name) :: List.map Name.to_coq typ_vars
+                ) ^-^ !^ "."
               )
             ))]
           end
@@ -465,11 +476,8 @@ let rec to_coq (with_args : bool) (defs : t list) : SmartPrint.t =
     | Value value -> Value.to_coq with_args value
     | AbstractValue (name, typ_vars, typ) ->
       !^ "Parameter" ^^ Name.to_coq name ^^ !^ ":" ^^
-      (match typ_vars with
-      | [] -> empty
-      | _ :: _ ->
-        !^ "forall" ^^
-        nest (parens (separate space (typ_vars |> List.map Name.to_coq) ^^ !^ ":" ^^ Pp.set)) ^-^ !^ ","
+      Name.to_coq_list_or_empty typ_vars (fun typ_vars ->
+        !^ "forall" ^^ nest (parens (typ_vars ^^ !^ ":" ^^ Pp.set)) ^-^ !^ ","
       ) ^^
       Type.to_coq None None typ ^-^ !^ "."
     | TypeDefinition typ_def -> TypeDefinition.to_coq with_args typ_def
@@ -570,16 +578,9 @@ let rec to_coq (with_args : bool) (defs : t list) : SmartPrint.t =
     | ModuleIncludeItem (name, typ_vars, mixed_path) ->
       nest (
         !^ "Definition" ^^ Name.to_coq name ^^ Pp.args with_args ^^
-        begin match typ_vars with
-        | [] -> empty
-        | _ :: _ ->
-          nest (braces (
-            separate space (typ_vars |> List.map (fun typ_var ->
-              Name.to_coq typ_var
-            )) ^^
-            !^ ":" ^^ Pp.set
-          ))
-        end ^^
+        Name.to_coq_list_or_empty typ_vars (fun typ_vars ->
+          nest (braces (typ_vars ^^ !^ ":" ^^ Pp.set))
+        ) ^^
         !^ ":=" ^^
         nest (separate space (
           MixedPath.to_coq mixed_path ::

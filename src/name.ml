@@ -155,3 +155,9 @@ let suffix_by_skeleton (name : t) : t =
 (** Pretty-print a name to Coq. *)
 let to_coq (name : t) : SmartPrint.t =
   !^ (to_string name)
+
+let to_coq_list_or_empty (names : t list)
+  (map : SmartPrint.t -> SmartPrint.t) : SmartPrint.t =
+  match names with
+  | [] -> empty
+  | _ :: _ -> map (separate space (List.map to_coq names))

@@ -32,3 +32,17 @@ and[@coq_mutual_as_notation][@coq_struct "ts"] sums (ts : int tree list) =
   match ts with
   | [] -> zero ()
   | t :: ts -> sum t + sums ts
+
+(* Notation with polymorphism *)
+let rec count t =
+  match t with
+  | Leaf l -> length l
+  | Node ts -> counts ts
+
+and[@coq_mutual_as_notation][@coq_struct "ts"] counts ts =
+  match ts with
+  | [] -> 0
+  | t :: ts -> count t + counts ts
+
+and[@coq_mutual_as_notation] length l =
+  List.length l

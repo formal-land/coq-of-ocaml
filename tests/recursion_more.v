@@ -45,7 +45,8 @@ Reserved Notation "'zero".
 Reserved Notation "'sums".
 
 Fixpoint sum (t : tree int) : int :=
-  let zero := 'zero in let sums := 'sums in
+  let zero := 'zero in
+  let sums := 'sums in
   match t with
   | Leaf n => n
   | Node ts => sums ts
@@ -66,3 +67,29 @@ and "'sums" :=
 
 Definition zero := 'zero.
 Definition sums := 'sums.
+
+Reserved Notation "'counts".
+Reserved Notation "'length".
+
+Fixpoint count {A : Set} (t : tree (list A)) : int :=
+  let counts {A} := 'counts A in
+  let length {A} := 'length A in
+  match t with
+  | Leaf l => length l
+  | Node ts => counts ts
+  end
+
+where "'counts" :=
+  (fun (A : Set) => fix counts (ts : list (tree (list A))) {struct ts} : int :=
+    match ts with
+    | [] => 0
+    | cons t ts => Z.add (count t) (counts ts)
+    end)
+
+and "'length" :=
+  (fun (A : Set) => fun (l : list A) =>
+    let counts {A} := 'counts A in
+    OCaml.List.length l).
+
+Definition counts {A} := 'counts A.
+Definition length {A} := 'length A.
