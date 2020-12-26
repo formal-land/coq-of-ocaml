@@ -36,7 +36,7 @@ Module M.
         Source.id _ := id
       |}.
 End M.
-Definition M := M.module.
+Definition M : {t : Set & Source.signature (t := t)} := M.module.
 
 Module F.
   Class FArgs := {
@@ -121,6 +121,6 @@ Module GenFun.
         Target.y := y
       |}.
 End GenFun.
-Definition GenFun := GenFun.module.
+Definition GenFun : {t : Set & Target.signature (t := t)} := GenFun.module.
 
-Definition AppliedGenFun := GenFun.
+Definition AppliedGenFun : {t : Set & Target.signature (t := t)} := GenFun.

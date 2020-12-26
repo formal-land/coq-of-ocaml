@@ -29,7 +29,6 @@ let try_to_use (head : string) (name : string) : bool option Monad.t =
     return (Some false)
   | (None, None) -> return None
 
-
 (* Convert an identifier from OCaml to its Coq's equivalent, or [None] if no
    conversion is needed. We consider all the paths in the standard library
    to be converted, as conversion also means keeping the name as it (without

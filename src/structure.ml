@@ -186,7 +186,7 @@ type t =
   | TypeDefinition of TypeDefinition.t
   | Module of
     Name.t * (Name.t * Type.t) list * t list * (Exp.t * Type.t option) option
-  | ModuleExpression of Name.t * Exp.t
+  | ModuleExpression of Name.t * Type.t option * Exp.t
   | ModuleInclude of PathName.t
   | ModuleIncludeItem of Name.t * Name.t list * MixedPath.t
   | ModuleSynonym of Name.t * PathName.t
@@ -408,6 +408,12 @@ and of_module_expr
   (module_type_annotation : Typedtree.module_type option)
   (module_expr : module_expr)
   : t Monad.t =
+  let* module_typ =
+    match module_type_annotation with
+    | Some module_type ->
+      let* module_type = ModuleTyp.of_ocaml module_type in
+      return (Some (ModuleTyp.to_typ module_type))
+    | None -> return None in
   match module_expr.mod_desc with
   | Tmod_structure structure ->
     let* structure = of_structure structure in
@@ -426,13 +432,7 @@ and of_module_expr
             values
             module_type_path
             mixed_path_of_value_or_typ in
-        let* module_type_annotation =
-          match module_type_annotation with
-          | Some module_type ->
-            let* module_type = ModuleTyp.of_ocaml module_type in
-            return (Some (ModuleTyp.to_typ module_type))
-          | None -> return None in
-        return (Some (e, module_type_annotation))
+        return (Some (e, module_typ))
       | None -> return None in
     return (Module (name, List.rev functor_parameters, structure, e))
   | Tmod_ident (path, _) ->
@@ -440,14 +440,14 @@ and of_module_expr
     | Some (module_type, _) ->
       let* module_exp =
         Exp.of_module_expr Name.Map.empty module_expr (Some module_type) in
-      return (ModuleExpression (name, module_exp))
+      return (ModuleExpression (name, module_typ, module_exp))
     | None ->
       let* reference = PathName.of_path_with_convert false path in
       return (ModuleSynonym (name, reference))
     end
   | Tmod_apply _ ->
       let* module_exp = Exp.of_module_expr Name.Map.empty module_expr None in
-      return (ModuleExpression (name, module_exp))
+      return (ModuleExpression (name, module_typ, module_exp))
   | Tmod_functor (ident, _, module_type_arg, module_expr) ->
     let* functor_parameters =
       match module_type_arg with
@@ -525,7 +525,7 @@ let rec to_coq (with_args : bool) (defs : t list) : SmartPrint.t =
               nest (
                 begin match (typ_annotation, is_functor) with
                 | (Some typ_annotation, true) ->
-                  nest (!^ ":" ^^ Type.to_coq None None typ_annotation)
+                  !^ ":" ^^ Type.to_coq None None typ_annotation
                 | _ -> empty
                 end ^^
                 !^ ":="
@@ -537,13 +537,17 @@ let rec to_coq (with_args : bool) (defs : t list) : SmartPrint.t =
         ) ^^ newline ^^
         !^ "End" ^^ Name.to_coq name ^-^ !^ "." ^^
         begin match e with
-        | Some _ ->
+        | Some (_, typ_annotation) ->
           newline ^^
           nest (
             !^ "Definition" ^^ Name.to_coq name ^^ Pp.args with_args ^^
             separate space (functor_parameters |> List.map (fun (name, _) ->
               Name.to_coq name
-            )) ^^ !^ ":=" ^^
+            )) ^^
+            begin match (typ_annotation, is_functor) with
+            | (Some typ_annotation, false) -> !^ ":" ^^ Type.to_coq None None typ_annotation
+            | _ -> empty
+            end ^^ !^ ":=" ^^
             nest (
               Name.to_coq name ^-^ !^ "." ^-^ final_item_name ^-^
               begin if is_functor then
@@ -568,9 +572,13 @@ let rec to_coq (with_args : bool) (defs : t list) : SmartPrint.t =
         | None -> empty
         end
       )
-    | ModuleExpression (name, e) ->
+    | ModuleExpression (name, typ, e) ->
       nest (
-        !^ "Definition" ^^ Name.to_coq name ^^ Pp.args with_args ^^ !^ ":=" ^^
+        !^ "Definition" ^^ Name.to_coq name ^^ Pp.args with_args ^^
+        begin match typ with
+        | None -> empty
+        | Some typ -> !^ ":" ^^ Type.to_coq None None typ
+        end ^^ !^ ":=" ^^
         Exp.to_coq false e ^-^ !^ "."
       )
     | ModuleInclude reference ->

@@ -47,4 +47,4 @@ module GenFun () : Target = struct
   let y = 23
 end
 
-module AppliedGenFun = GenFun ()
+module AppliedGenFun : Target = GenFun ()

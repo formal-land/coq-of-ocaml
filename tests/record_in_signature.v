@@ -38,7 +38,7 @@ Module M.
         Sig.v := v
       |}.
 End M.
-Definition M := M.module.
+Definition M : {t : Set -> Set & Sig.signature (t := t)} := M.module.
 
 Definition v : (|M|).(Sig.t) string := (|M|).(Sig.v).
 

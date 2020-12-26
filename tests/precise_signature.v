@@ -32,7 +32,7 @@ Module M1.
         Sig1.f := f
       |}.
 End M1.
-Definition M1 := M1.module.
+Definition M1 : {t : Set & Sig1.signature (t := t)} := M1.module.
 
 Module M2.
   Definition t : Set := int.
@@ -45,4 +45,4 @@ Module M2.
         Sig2.f := f
       |}.
 End M2.
-Definition M2 := M2.module.
+Definition M2 : {t : Set & Sig2.signature (t := t)} := M2.module.
