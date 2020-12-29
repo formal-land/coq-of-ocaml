@@ -67,7 +67,7 @@ Module F.
   }.
   
   Definition foo `{FArgs} : Set :=
-    (|V|).(Validator.com) * (|V|).(Validator.Commitment_NestedLevel_t).
+    (|V|).(Validator.Commitment_t) * (|V|).(Validator.Commitment_NestedLevel_t).
   
   Definition bar `{FArgs} : string :=
     (|V|).(Validator.Commitment_Foo).(WithBar.bar).
