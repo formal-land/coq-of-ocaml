@@ -491,16 +491,13 @@ let rec of_expression (typ_vars : Name.t Name.Map.t) (e : expression)
     | Some e3 -> of_expression typ_vars e3) >>= fun e3 ->
     return (IfThenElse (e1, e2, e3))
   | Texp_sequence (e1, e2) ->
-    of_expression typ_vars e2 >>= fun e2 ->
-    set_loc (Loc.of_location e1.exp_loc) (
-    error_message
-      (ErrorMessage (e2, "instruction_sequence \";\""))
-      SideEffect
-      (
-        "Sequences of instructions are ignored (operator \";\")\n\n" ^
-        "Alternative: use a monad to sequence side-effects."
-      )
-    )
+    let* e1 = of_expression typ_vars e1 in
+    let* e2 = of_expression typ_vars e2 in
+    return (Match (
+      e1,
+      [(Pattern.Any, None, e2)],
+      false
+    ))
   | Texp_try (e, _) ->
     of_expression typ_vars e >>= fun e ->
     error_message

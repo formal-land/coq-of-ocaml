@@ -10,6 +10,7 @@ Import ListNotations.
 (** Init function; without side-effects in Coq *)
 Definition init_module : unit :=
   let '_ := Z.add 1 1 in
+  let '_ := OCaml.Stdlib.ignore 2 in
   tt.
 
 Module M.

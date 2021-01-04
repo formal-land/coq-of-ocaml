@@ -1,5 +1,6 @@
 let () =
   let _ = 1 + 1 in
+  ignore 2;
   ()
 
 module M = struct
