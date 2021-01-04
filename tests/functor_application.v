@@ -91,6 +91,7 @@ End Sum.
 Definition Sum X Y := Sum.functor {| Sum.X := X; Sum.Y := Y |}.
 
 Module WithM.
+  (** Inclusion of the module [M] *)
   Definition t := (|M|).(Source.t).
   
   Definition x := (|M|).(Source.x).
@@ -103,6 +104,7 @@ End WithM.
 Module WithSum.
   Definition F_include := F (existT (A := Set) _ _ (|M|)).
   
+  (** Inclusion of the module [F_include] *)
   Definition t := (|F_include|).(Target.t).
   
   Definition y := (|F_include|).(Target.y).

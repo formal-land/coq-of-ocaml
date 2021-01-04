@@ -191,6 +191,7 @@ type t =
   | ModuleIncludeItem of Name.t * Name.t list * MixedPath.t
   | ModuleSynonym of Name.t * PathName.t
   | Signature of Name.t * Signature.t
+  | Documentation of string * t list
   | Error of string
   | ErrorMessage of string * t
 
@@ -229,31 +230,35 @@ let rec of_structure (structure : structure) : t list Monad.t =
             Path.name path ^ "` to handle the include."
           )
       | Mty_signature signature ->
-        signature |> Monad.List.filter_map (fun signature_item ->
-          match signature_item with
-          | Types.Sig_value (ident, _, _) | Sig_type (ident, _, _, _) ->
-            let is_value =
-              match signature_item with
-              | Types.Sig_value _ -> true
-              | _ -> false in
-            let* name = Name.of_ident is_value ident in
-            let* field =
-              PathName.of_path_and_name_with_convert mod_type_path name in
-            let* typ_vars =
-              match signature_item with
-              | Types.Sig_value (_, { val_type; _ }, _) ->
-                let typ_vars = Name.Map.empty in
-                let* (_, _, new_typ_vars) =
-                  Type.of_typ_expr true typ_vars val_type in
-                return (Name.Set.elements new_typ_vars)
-              | _ -> return [] in
-            return (Some (ModuleIncludeItem (
-              name,
-              typ_vars,
-              MixedPath.Access (reference, [field], false)
-            )))
-          | _ -> return None
-        )
+        let* items =
+          signature |> Monad.List.filter_map (fun signature_item ->
+            match signature_item with
+            | Types.Sig_value (ident, _, _) | Sig_type (ident, _, _, _) ->
+              let is_value =
+                match signature_item with
+                | Types.Sig_value _ -> true
+                | _ -> false in
+              let* name = Name.of_ident is_value ident in
+              let* field =
+                PathName.of_path_and_name_with_convert mod_type_path name in
+              let* typ_vars =
+                match signature_item with
+                | Types.Sig_value (_, { val_type; _ }, _) ->
+                  let typ_vars = Name.Map.empty in
+                  let* (_, _, new_typ_vars) =
+                    Type.of_typ_expr true typ_vars val_type in
+                  return (Name.Set.elements new_typ_vars)
+                | _ -> return [] in
+              return (Some (ModuleIncludeItem (
+                name,
+                typ_vars,
+                MixedPath.Access (reference, [field], false)
+              )))
+            | _ -> return None
+          ) in
+        let documentation =
+          "Inclusion of the module [" ^ PathName.to_string reference ^ "]" in
+        return [Documentation (documentation, items)]
       | Mty_functor _ ->
         error_message
           (Error "include_functor")
@@ -605,6 +610,11 @@ let rec to_coq (with_args : bool) (defs : t list) : SmartPrint.t =
         !^ "Module" ^^ Name.to_coq name ^^ !^ ":=" ^^ PathName.to_coq reference ^-^ !^ "."
       )
     | Signature (name, signature) -> Signature.to_coq_definition name signature
+    | Documentation (message, defs) ->
+      nest (
+        !^ ( "(** " ^ message ^ " *)") ^^ newline ^^
+        to_coq with_args defs
+      )
     | Error message -> !^ ( "(* " ^ message ^ " *)")
     | ErrorMessage (message, def) ->
       nest (
