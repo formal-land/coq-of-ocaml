@@ -1,3 +1,4 @@
+(** Some documentation *)
 module type Source = sig
   type t
   val x : t

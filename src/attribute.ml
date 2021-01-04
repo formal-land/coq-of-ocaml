@@ -42,7 +42,7 @@ let of_payload_string
 let of_attributes (attributes : Typedtree.attributes) : t list Monad.t =
   attributes |> Monad.List.filter_map (
     fun {Parsetree.attr_name; attr_payload; _} ->
-    set_loc (Loc.of_location attr_name.Asttypes.loc) (
+    set_loc attr_name.Asttypes.loc (
     let id = attr_name.Asttypes.txt in
     match id with
     | "coq_axiom" ->

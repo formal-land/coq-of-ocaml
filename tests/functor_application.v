@@ -7,6 +7,7 @@ Open Scope Z_scope.
 Open Scope type_scope.
 Import ListNotations.
 
+(** Some documentation *)
 Module Source.
   Record signature {t : Set} : Set := {
     t := t;

@@ -118,7 +118,7 @@ module Constructors = struct
       (case : Types.constructor_declaration)
       : (t * (RecordSkeleton.t * Name.t list * Type.t) option) Monad.t =
       let { Types.cd_args; cd_id; cd_loc; cd_res; _ } = case in
-      set_loc (Loc.of_location cd_loc) (
+      set_loc cd_loc (
       let* constructor_name =
         PathName.map_constructor_name
           (Ident.name cd_id) (Name.to_string typ_name) in
@@ -129,7 +129,7 @@ module Constructors = struct
         Type.of_typs_exprs true typ_vars param_typs >>= fun (param_typs, _, _) ->
         return (param_typs, None)
       | Cstr_record labeled_typs ->
-        set_loc (Loc.of_location cd_loc) (
+        set_loc cd_loc (
         (
           labeled_typs |>
           List.map (fun { Types.ld_type; _ } -> ld_type) |>
@@ -622,7 +622,7 @@ let of_ocaml (typs : type_declaration list) : t Monad.t =
       "We do not handle extensible types"
   | _ ->
     (typs |> Monad.List.fold_left (fun (constructor_records, notations, records, typs) typ ->
-      set_loc (Loc.of_location typ.typ_loc) (
+      set_loc typ.typ_loc (
       let* name = Name.of_ident false typ.typ_id in
       AdtParameters.of_ocaml typ.typ_type.type_params >>= fun typ_args ->
       match typ with

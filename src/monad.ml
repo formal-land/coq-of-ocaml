@@ -9,9 +9,9 @@
 module Command = struct
   type 'a t =
     | GetConfiguration : Configuration.t t
+    | GetDocumentation : string option t
     | GetEnv : Env.t t
     | GetEnvStack : Env.t list t
-    | GetLoc : Loc.t t
     | Raise : 'a * Error.Category.t * string -> 'a t
     | Use : bool * string * string -> unit t
 end
@@ -20,7 +20,7 @@ module Wrapper = struct
   type t =
     | EnvSet of Env.t
     | EnvStackPush
-    | LocSet of Loc.t
+    | LocSet of Location.t
 end
 
 type 'a t =
@@ -45,19 +45,19 @@ module Notations = struct
   let get_configuration : Configuration.t t =
     Command Command.GetConfiguration
 
+  let get_documentation : string option t =
+    Command Command.GetDocumentation
+
   let get_env : Env.t t =
     Command Command.GetEnv
 
   let get_env_stack : Env.t list t =
     Command Command.GetEnvStack
 
-  let get_loc : Loc.t t =
-    Command Command.GetLoc
-
   let set_env (env : Env.t) (x : 'a t) : 'a t =
     Wrapper (Wrapper.EnvSet env, x)
 
-  let set_loc (loc : Loc.t) (x : 'a t) : 'a t =
+  let set_loc (loc : Location.t) (x : 'a t) : 'a t =
     Wrapper (Wrapper.LocSet loc, x)
 
   let push_env (x : 'a t) : 'a t =

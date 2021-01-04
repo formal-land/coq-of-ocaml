@@ -1,4 +1,5 @@
 ## [Unreleased]
+* Try to import documentation comments from OCaml.
 * Do not ignore sequences of instructions anymore.
 * Add support for top-level definitions as `init_module` functions.
 * Add the attribute `@coq_mutual_as_notation` to translate a mutually recursive function as a notation.

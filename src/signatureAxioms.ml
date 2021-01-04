@@ -106,7 +106,7 @@ let rec of_signature (signature : Typedtree.signature) : t Monad.t =
     (signature_item : Typedtree.signature_item) (final_env : Env.t)
     : item list Monad.t =
     set_env signature_item.sig_env (
-    set_loc (Loc.of_location signature_item.sig_loc) (
+    set_loc signature_item.sig_loc (
     match signature_item.sig_desc with
     | Tsig_attribute _ ->
       raise
@@ -135,9 +135,9 @@ let rec of_signature (signature : Typedtree.signature) : t Monad.t =
             _
           } ->
           set_env cltyp_env (
-          set_loc (Loc.of_location cltyp_loc) (
+          set_loc cltyp_loc (
           (class_signature.csig_fields |> Monad.List.filter_map (fun class_typ_field ->
-            set_loc (Loc.of_location class_typ_field.Typedtree.ctf_loc) (
+            set_loc class_typ_field.Typedtree.ctf_loc (
             match class_typ_field.ctf_desc with
             | Tctf_method (field_name, _, _, { ctyp_type; _ }) ->
               let* field_name = Name.of_string false field_name in

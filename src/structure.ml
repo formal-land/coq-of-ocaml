@@ -202,6 +202,14 @@ let error_message
   : t list Monad.t =
   raise [ErrorMessage (message, structure)] category message
 
+let wrap_documentation (items : t list Monad.t) : t list Monad.t =
+  let* documentation = get_documentation in
+  match documentation with
+  | None -> items
+  | Some documentation ->
+    let* items = items in
+    return [Documentation (documentation, items)]
+
 let top_level_evaluation (e : expression) : t list Monad.t =
   push_env (
   let* e = Exp.of_expression Name.Map.empty e in
@@ -284,7 +292,8 @@ let rec of_structure (structure : structure) : t list Monad.t =
   let of_structure_item (item : structure_item) (final_env : Env.t)
     : t list Monad.t =
     set_env item.str_env (
-    set_loc (Loc.of_location item.str_loc) (
+    set_loc item.str_loc (
+    wrap_documentation (
     match item.str_desc with
     | Tstr_value (_, [ {
         vb_pat = {
@@ -393,7 +402,7 @@ let rec of_structure (structure : structure) : t list Monad.t =
         get_include_items None reference incl_mod.mod_type in
       return (module_definition :: include_items)
     (* We ignore attribute fields. *)
-    | Tstr_attribute _ -> return [])) in
+    | Tstr_attribute _ -> return []))) in
   Monad.List.fold_right
     (fun structure_item (structure, final_env) ->
       let env = structure_item.str_env in

@@ -250,7 +250,7 @@ let rec smart_return (operator : string) (e : t) : t Monad.t =
 let rec of_expression (typ_vars : Name.t Name.Map.t) (e : expression)
   : t Monad.t =
   set_env e.exp_env (
-  set_loc (Loc.of_location e.exp_loc) (
+  set_loc e.exp_loc (
   let* attributes = Attribute.of_attributes e.exp_attributes in
   let typ = e.exp_type in
   (* We do not indent here to preserve the diff. *)
@@ -665,7 +665,7 @@ and of_match
   (is_with_default_case : bool)
   : t Monad.t =
   (cases |> Monad.List.filter_map (fun {c_lhs; c_guard; c_rhs} ->
-    set_loc (Loc.of_location c_lhs.pat_loc) (
+    set_loc c_lhs.pat_loc (
     let* bound_vars =
       Typedtree.pat_bound_idents c_lhs |> List.rev |> Monad.List.map
         (fun ident ->
@@ -783,7 +783,7 @@ and import_let_fun
     let is_axiom = Attribute.has_axiom_with_reason attributes in
     let structs = Attribute.get_structs attributes in
     set_env vb_expr.exp_env (
-    set_loc (Loc.of_location p.pat_loc) (
+    set_loc p.pat_loc (
     Pattern.of_pattern p >>= fun p ->
     (match p with
     | Some Pattern.Any -> return None
@@ -878,7 +878,7 @@ and of_module_expr
   : t Monad.t =
   let { mod_desc; mod_env; mod_loc; mod_type = local_module_type; _ } = module_expr in
   set_env mod_env (
-  set_loc (Loc.of_location mod_loc) (
+  set_loc mod_loc (
   match mod_desc with
   | Tmod_ident (path, _) ->
     MixedPath.of_path false path >>= fun mixed_path ->
@@ -1064,7 +1064,7 @@ and of_structure
       mixed_path_of_value_or_typ)
   | item :: items ->
       set_env item.str_env (
-      set_loc (Loc.of_location item.str_loc) (
+      set_loc item.str_loc (
       of_structure
         typ_vars signature_path module_type items final_env >>= fun e_next ->
       match item.str_desc with

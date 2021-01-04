@@ -1,3 +1,5 @@
+type comments = (string * Location.t) list
+
 module Import = struct
   type t = {
     base : string;
@@ -40,17 +42,20 @@ end
 
 module Context = struct
   type t = {
+    comments : comments;
     configuration : Configuration.t;
     env : Env.t;
     env_stack : EnvStack.t;
-    loc : Loc.t;
+    loc : Location.t;
   }
 
   let init
+    (comments : comments)
     (configuration : Configuration.t)
     (initial_env : Env.t)
-    (initial_loc : Loc.t)
+    (initial_loc : Location.t)
     : t = {
+    comments;
     configuration;
     env = initial_env;
     env_stack = [];
@@ -69,9 +74,12 @@ module Command = struct
     fun context ->
       match command with
       | GetConfiguration -> Result.success context.configuration
+      | GetDocumentation ->
+        let (documentation, _) =
+          Ocamldoc.associate_comment context.comments context.loc context.loc in
+        Result.success documentation
       | GetEnv -> Result.success context.env
       | GetEnvStack -> Result.success context.env_stack
-      | GetLoc -> Result.success context.loc
       | Raise (value, category, message) ->
         let result = Result.success value in
         let errors =
@@ -86,7 +94,7 @@ module Command = struct
                 context.configuration message
             ) in
           if is_valid_error then
-            [{ Error.category; loc = context.loc; message }]
+            [{ Error.category; loc = Loc.of_location context.loc; message }]
           else
             [] in
         { result with errors }

@@ -171,6 +171,7 @@ let main () =
     let file_source = Msource.make file_content in
 
     let pipeline = Mpipeline.make merlin_config file_source in
+    let comments = Mpipeline.reader_comments pipeline in
     let typing = Mpipeline.typer_result pipeline in
     let typedtree = Mtyper.get_typedtree typing in
     let typedtree_errors = Mtyper.get_errors typing in
@@ -178,7 +179,7 @@ let main () =
     let initial_env = Mtyper.get_env typing in
 
     let context =
-      MonadEval.Context.init configuration initial_env initial_loc in
+      MonadEval.Context.init comments configuration initial_env initial_loc in
 
     let output =
       of_ocaml

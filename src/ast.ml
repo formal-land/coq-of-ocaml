@@ -13,16 +13,16 @@ type t = {
   without_positivity_checking : bool;
 }
 
-let get_initial_loc (typedtree : Mtyper.typedtree) : Loc.t =
+let get_initial_loc (typedtree : Mtyper.typedtree) : Location.t =
   match typedtree with
   | `Implementation structure ->
     begin match structure.str_items with
-    | structure_item :: _ -> Loc.of_location structure_item.str_loc
+    | structure_item :: _ -> structure_item.str_loc
     | [] -> failwith "Unexpected empty file"
     end
   | `Interface signature ->
     begin match signature.sig_items with
-    | signature_item :: _ -> Loc.of_location signature_item.sig_loc
+    | signature_item :: _ -> signature_item.sig_loc
     | [] -> failwith "Unexpected empty file"
     end
 
@@ -34,7 +34,7 @@ let report_errors (typedtree_errors : exn list) : unit Monad.t =
       let loc = Location.loc_of_report error in
       let error_buffer = Buffer.create 0 in
       Location.print_report (Format.formatter_of_buffer error_buffer) error;
-      set_loc (Loc.of_location loc) (raise () Error.Category.Merlin (Buffer.contents error_buffer))
+      set_loc loc (raise () Error.Category.Merlin (Buffer.contents error_buffer))
     | _ -> return ()
   )
 

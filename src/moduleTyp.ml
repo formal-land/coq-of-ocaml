@@ -36,7 +36,7 @@ let of_ocaml_module_with_substitutions
       let { Typedtree.typ_loc; typ_type; _ } = typ_declaration in
       begin match typ_type with
       | { type_kind = Type_abstract; type_manifest = Some typ; type_params; _ } ->
-        set_loc (Loc.of_location typ_loc) (
+        set_loc typ_loc (
         Type.of_type_expr_without_free_vars typ >>= fun typ ->
         Monad.List.map Type.of_type_expr_variable type_params >>= fun typ_params ->
         let* path_name = PathName.of_path_without_convert false path in
@@ -93,7 +93,7 @@ let rec of_ocaml_desc (module_typ_desc : Typedtree.module_type_desc) : t Monad.t
 
 and of_ocaml (module_typ : Typedtree.module_type) : t Monad.t =
   set_env module_typ.mty_env (
-  set_loc (Loc.of_location module_typ.mty_loc) (
+  set_loc module_typ.mty_loc (
   of_ocaml_desc module_typ.mty_desc))
 
 let rec to_typ (module_typ : t) : Type.t =

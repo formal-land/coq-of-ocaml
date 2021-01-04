@@ -165,7 +165,7 @@ let rec of_signature_items
     (next_env : Env.t)
     : (item list * let_in_type) Monad.t =
     set_env item.sig_env (
-    set_loc (Loc.of_location item.sig_loc) (
+    set_loc item.sig_loc (
     match item.sig_desc with
     | Tsig_attribute _ -> return ([], let_in_type)
     | Tsig_class _ ->
