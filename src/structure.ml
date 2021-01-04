@@ -202,11 +202,25 @@ let error_message
   : t list Monad.t =
   raise [ErrorMessage (message, structure)] category message
 
-let top_level_evaluation_error : t list Monad.t =
-  error_message
-    (Error "top_level_evaluation")
-    SideEffect
-    "Top-level evaluations are ignored"
+let top_level_evaluation (e : expression) : t list Monad.t =
+  push_env (
+  let* e = Exp.of_expression Name.Map.empty e in
+  let header = {
+    Exp.Header.name = Name.of_string_raw "init_module";
+    typ_vars = [];
+    args = [];
+    structs = [];
+    typ = Type.Apply (MixedPath.of_name (Name.of_string_raw "unit"), []);
+    is_notation = false;
+  } in
+  let documentation = "Init function; without side-effects in Coq" in
+  return [Documentation (documentation, [Value {
+    is_rec = false;
+    cases = [(
+      header,
+      Some e
+    )]
+  }])])
 
 (** Import an OCaml structure. *)
 let rec of_structure (structure : structure) : t list Monad.t =
@@ -282,11 +296,13 @@ let rec of_structure (structure : structure) : t list Monad.t =
             );
           _
         };
+        vb_expr;
         _
       } ])
       when PathName.is_unit path ->
-      top_level_evaluation_error
-    | Tstr_eval _ -> top_level_evaluation_error
+      top_level_evaluation vb_expr
+    | Tstr_eval (e, _) ->
+      top_level_evaluation e
     | Tstr_value (is_rec, cases) ->
       push_env (
       Exp.import_let_fun Name.Map.empty true is_rec cases >>= fun def ->

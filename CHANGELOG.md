@@ -1,4 +1,5 @@
 ## [Unreleased]
+* Add support for top-level definitions as `init_module` functions.
 * Add the attribute `@coq_mutual_as_notation` to translate a mutually recursive function as a notation.
 * Add the configuration option `renaming_type_constructor` to rename some type constructors.
 * Add the configuration option `operator_infix` to have notations for the infix operators.
