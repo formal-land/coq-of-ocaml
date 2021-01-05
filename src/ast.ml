@@ -81,7 +81,13 @@ let to_coq (imports : MonadEval.Import.t list) (ast : t) : SmartPrint.t =
       fun { MonadEval.Import.base; import; mli; name } ->
         let name_to_require = if mli then name ^ "_mli" else name in
         nest (
-          !^ "Require" ^^ !^ base ^-^ !^ "." ^-^ !^ name_to_require ^-^ !^ "." ^^
+          !^ "Require" ^^
+          begin if import && not mli then
+            !^ "Import"
+          else
+            empty
+          end ^^
+          !^ base ^-^ !^ "." ^-^ !^ name_to_require ^-^ !^ "." ^^
           begin if mli then
             nest (
               !^ "Module" ^^ !^ name ^^ !^ ":=" ^^ !^ name_to_require ^-^ !^ "."
@@ -91,7 +97,7 @@ let to_coq (imports : MonadEval.Import.t list) (ast : t) : SmartPrint.t =
           end
         )
         ^^ newline ^^
-        begin if import then
+        begin if import && mli then
           nest (!^ "Import" ^^ !^ name ^-^ !^ ".") ^^ newline
         else
           empty
