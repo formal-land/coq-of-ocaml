@@ -73,6 +73,7 @@ Definition poly := poly.record.
 Definition p : poly int bool := {| poly.first := 12; poly.second := false |}.
 
 Module ConstructorWithRecord.
+  (** Records for the constructor parameters *)
   Module ConstructorRecords_t_exi.
     Module t.
       Module Foo.
@@ -152,6 +153,7 @@ Module ConstructorWithRecord.
 End ConstructorWithRecord.
 
 Module ConstructorWithPolymorphicRecord.
+  (** Records for the constructor parameters *)
   Module ConstructorRecords_t.
     Module t.
       Module Foo.

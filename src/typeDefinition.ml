@@ -263,7 +263,7 @@ module Inductive = struct
 
   let get_notation_module_name (inductive : t) : SmartPrint.t =
     !^ "ConstructorRecords_" ^-^
-    separate (!^ "_") (inductive.typs |> List.map (fun (name, _, _) ->
+    separate (!^ "_") (inductive.constructor_records |> List.map (fun (name, _) ->
       Name.to_coq name
     ))
 
@@ -273,6 +273,7 @@ module Inductive = struct
     | constructor_records ->
       let notation_module_name = get_notation_module_name inductive in
       Some (
+        !^ "(** Records for the constructor parameters *)" ^^ newline ^^
         !^ "Module" ^^ notation_module_name ^-^ !^ "." ^^ newline ^^
         indent (
           separate newline (
