@@ -1,11 +1,5 @@
-Require Import OCaml.OCaml.
-
-Set Primitive Projections.
-Set Printing Projections.
-Open Scope string_scope.
-Open Scope Z_scope.
-Open Scope type_scope.
-Import ListNotations.
+Require Import CoqOfOCaml.CoqOfOCaml.
+Require Import CoqOfOCaml.Settings.
 
 Definition map {A B : Set} (f : A -> B) (l : list A) : list B :=
   let fix map_coq_rec (l : list A) : list B :=

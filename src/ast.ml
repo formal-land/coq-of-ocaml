@@ -61,13 +61,8 @@ let of_typedtree (typedtree : Mtyper.typedtree) (typedtree_errors : exn list)
 
 let to_coq (imports : MonadEval.Import.t list) (ast : t) : SmartPrint.t =
   concat (List.map (fun d -> d ^^ newline) [
-    !^ "Require Import OCaml.OCaml." ^^ newline;
-    !^ "Set Primitive Projections.";
-    !^ "Set Printing Projections.";
-    !^ "Open Scope string_scope.";
-    !^ "Open Scope Z_scope.";
-    !^ "Open Scope type_scope.";
-    !^ "Import ListNotations.";
+    !^ "Require Import CoqOfOCaml.CoqOfOCaml.";
+    !^ "Require Import CoqOfOCaml.Settings.";
   ]) ^^
   begin if ast.without_guard_checking then
     !^ "Unset Guard Checking." ^^ newline

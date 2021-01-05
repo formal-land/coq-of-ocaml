@@ -1,7 +1,8 @@
--R . OCaml
+-R . CoqOfOCaml
 -arg -impredicative-set
 
 Basics.v
+CoqOfOCaml.v
 Libraries.v
 List.v
-OCaml.v
+Settings.v

@@ -1,11 +1,5 @@
-Require Import OCaml.OCaml.
-
-Set Primitive Projections.
-Set Printing Projections.
-Open Scope string_scope.
-Open Scope Z_scope.
-Open Scope type_scope.
-Import ListNotations.
+Require Import CoqOfOCaml.CoqOfOCaml.
+Require Import CoqOfOCaml.Settings.
 
 Definition op_plusplusplus (x : int) (y : int) : int := Z.add x y.
 

@@ -1,11 +1,5 @@
-Require Import OCaml.OCaml.
-
-Set Primitive Projections.
-Set Printing Projections.
-Open Scope string_scope.
-Open Scope Z_scope.
-Open Scope type_scope.
-Import ListNotations.
+Require Import CoqOfOCaml.CoqOfOCaml.
+Require Import CoqOfOCaml.Settings.
 
 Definition n : int :=
   match ([ 1; 2 ], false) with
@@ -24,7 +18,7 @@ Definition m (x : t) : int :=
       (let '_ := x in
       equiv_decb 1 2),
       match x with
-      | Bar n => OCaml.Stdlib.gt n 12
+      | Bar n => CoqOfOCaml.Stdlib.gt n 12
       | _ => false
       end,
       match x with

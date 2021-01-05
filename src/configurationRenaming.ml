@@ -8,18 +8,18 @@ let rules = [
   ("exn", "extensible_type");
 
   (* Predefined exceptions *)
-  ("Match_failure", "OCaml.Match_failure");
-  ("Assert_failure", "OCaml.Assert_failure");
-  ("Invalid_argument", "OCaml.Invalid_argument");
-  ("Failure", "OCaml.Failure");
-  ("Not_found", "OCaml.Not_found");
-  ("Out_of_memory", "OCaml.Out_of_memory");
-  ("Stack_overflow", "OCaml.Stack_overflow");
-  ("Sys_error", "OCaml.Sys_error");
-  ("End_of_file", "OCaml.End_of_file");
-  ("Division_by_zero", "OCaml.Division_by_zero");
-  ("Sys_blocked_io", "OCaml.Sys_blocked_io");
-  ("Undefined_recursive_module", "OCaml.Undefined_recursive_module");
+  ("Match_failure", "CoqOfOCaml.Match_failure");
+  ("Assert_failure", "CoqOfOCaml.Assert_failure");
+  ("Invalid_argument", "CoqOfOCaml.Invalid_argument");
+  ("Failure", "CoqOfOCaml.Failure");
+  ("Not_found", "CoqOfOCaml.Not_found");
+  ("Out_of_memory", "CoqOfOCaml.Out_of_memory");
+  ("Stack_overflow", "CoqOfOCaml.Stack_overflow");
+  ("Sys_error", "CoqOfOCaml.Sys_error");
+  ("End_of_file", "CoqOfOCaml.End_of_file");
+  ("Division_by_zero", "CoqOfOCaml.Division_by_zero");
+  ("Sys_blocked_io", "CoqOfOCaml.Sys_blocked_io");
+  ("Undefined_recursive_module", "CoqOfOCaml.Undefined_recursive_module");
 
   (* Optional parameters *)
   ("*predef*.None", "None");
@@ -27,19 +27,19 @@ let rules = [
 
   (* Stdlib *)
   (* Exceptions *)
-  ("Stdlib.invalid_arg", "OCaml.Stdlib.invalid_arg");
-  ("Stdlib.failwith", "OCaml.Stdlib.failwith");
-  ("Stdlib.Exit", "OCaml.Stdlib.Exit");
+  ("Stdlib.invalid_arg", "CoqOfOCaml.Stdlib.invalid_arg");
+  ("Stdlib.failwith", "CoqOfOCaml.Stdlib.failwith");
+  ("Stdlib.Exit", "CoqOfOCaml.Stdlib.Exit");
   (* Comparisons *)
   ("Stdlib.op_eq", "equiv_decb");
   ("Stdlib.op_ltgt", "nequiv_decb");
-  ("Stdlib.op_lt", "OCaml.Stdlib.lt");
-  ("Stdlib.op_gt", "OCaml.Stdlib.gt");
-  ("Stdlib.op_lteq", "OCaml.Stdlib.le");
-  ("Stdlib.op_gteq", "OCaml.Stdlib.ge");
-  ("Stdlib.compare", "OCaml.Stdlib.compare");
-  ("Stdlib.min", "OCaml.Stdlib.min");
-  ("Stdlib.max", "OCaml.Stdlib.max");
+  ("Stdlib.op_lt", "CoqOfOCaml.Stdlib.lt");
+  ("Stdlib.op_gt", "CoqOfOCaml.Stdlib.gt");
+  ("Stdlib.op_lteq", "CoqOfOCaml.Stdlib.le");
+  ("Stdlib.op_gteq", "CoqOfOCaml.Stdlib.ge");
+  ("Stdlib.compare", "CoqOfOCaml.Stdlib.compare");
+  ("Stdlib.min", "CoqOfOCaml.Stdlib.min");
+  ("Stdlib.max", "CoqOfOCaml.Stdlib.max");
   (* Boolean operations *)
   ("Stdlib.not", "negb");
   ("Stdlib.op_andand", "andb");
@@ -67,36 +67,36 @@ let rules = [
   (* String operations *)
   ("Stdlib.op_caret", "String.append");
   (* Character operations *)
-  ("Stdlib.int_of_char", "OCaml.Stdlib.int_of_char");
-  ("Stdlib.char_of_int", "OCaml.Stdlib.char_of_int");
+  ("Stdlib.int_of_char", "CoqOfOCaml.Stdlib.int_of_char");
+  ("Stdlib.char_of_int", "CoqOfOCaml.Stdlib.char_of_int");
   (* Unit operations *)
-  ("Stdlib.ignore", "OCaml.Stdlib.ignore");
+  ("Stdlib.ignore", "CoqOfOCaml.Stdlib.ignore");
   (* String conversion functions *)
-  ("Stdlib.string_of_bool", "OCaml.Stdlib.string_of_bool");
-  ("Stdlib.bool_of_string", "OCaml.Stdlib.bool_of_string");
-  ("Stdlib.string_of_int", "OCaml.Stdlib.string_of_int");
-  ("Stdlib.int_of_string", "OCaml.Stdlib.int_of_string");
+  ("Stdlib.string_of_bool", "CoqOfOCaml.Stdlib.string_of_bool");
+  ("Stdlib.bool_of_string", "CoqOfOCaml.Stdlib.bool_of_string");
+  ("Stdlib.string_of_int", "CoqOfOCaml.Stdlib.string_of_int");
+  ("Stdlib.int_of_string", "CoqOfOCaml.Stdlib.int_of_string");
   (* Pair operations *)
   ("Stdlib.fst", "fst");
   ("Stdlib.snd", "snd");
   (* List operations *)
-  ("Stdlib.op_at", "OCaml.Stdlib.app");
+  ("Stdlib.op_at", "CoqOfOCaml.Stdlib.app");
   (* Input/output *)
   (* Output functions on standard output *)
-  ("Stdlib.print_char", "OCaml.Stdlib.print_char");
-  ("Stdlib.print_string", "OCaml.Stdlib.print_string");
-  ("Stdlib.print_int", "OCaml.Stdlib.print_int");
-  ("Stdlib.print_endline", "OCaml.Stdlib.print_endline");
-  ("Stdlib.print_newline", "OCaml.Stdlib.print_newline");
+  ("Stdlib.print_char", "CoqOfOCaml.Stdlib.print_char");
+  ("Stdlib.print_string", "CoqOfOCaml.Stdlib.print_string");
+  ("Stdlib.print_int", "CoqOfOCaml.Stdlib.print_int");
+  ("Stdlib.print_endline", "CoqOfOCaml.Stdlib.print_endline");
+  ("Stdlib.print_newline", "CoqOfOCaml.Stdlib.print_newline");
   (* Output functions on standard error *)
-  ("Stdlib.prerr_char", "OCaml.Stdlib.prerr_char");
-  ("Stdlib.prerr_string", "OCaml.Stdlib.prerr_string");
-  ("Stdlib.prerr_int", "OCaml.Stdlib.prerr_int");
-  ("Stdlib.prerr_endline", "OCaml.Stdlib.prerr_endline");
-  ("Stdlib.prerr_newline", "OCaml.Stdlib.prerr_newline");
+  ("Stdlib.prerr_char", "CoqOfOCaml.Stdlib.prerr_char");
+  ("Stdlib.prerr_string", "CoqOfOCaml.Stdlib.prerr_string");
+  ("Stdlib.prerr_int", "CoqOfOCaml.Stdlib.prerr_int");
+  ("Stdlib.prerr_endline", "CoqOfOCaml.Stdlib.prerr_endline");
+  ("Stdlib.prerr_newline", "CoqOfOCaml.Stdlib.prerr_newline");
   (* Input functions on standard input *)
-  ("Stdlib.read_line", "OCaml.Stdlib.read_line");
-  ("Stdlib.read_int", "OCaml.Stdlib.read_int");
+  ("Stdlib.read_line", "CoqOfOCaml.Stdlib.read_line");
+  ("Stdlib.read_int", "CoqOfOCaml.Stdlib.read_int");
   (* General output functions *)
   (* General input functions *)
   (* Operations on large files *)
@@ -113,15 +113,15 @@ let rules = [
   ("Stdlib.Bytes.sub", "String.sub");
 
   (* List *)
-  ("Stdlib.List.exists", "OCaml.List._exists");
-  ("Stdlib.List.exists2", "OCaml.List._exists2");
-  ("Stdlib.List.length", "OCaml.List.length");
+  ("Stdlib.List.exists", "CoqOfOCaml.List._exists");
+  ("Stdlib.List.exists2", "CoqOfOCaml.List._exists2");
+  ("Stdlib.List.length", "CoqOfOCaml.List.length");
   ("Stdlib.List.map", "List.map");
   ("Stdlib.List.rev", "List.rev");
 
   (* Seq *)
-  ("Stdlib.Seq.t", "OCaml.Seq.t");
+  ("Stdlib.Seq.t", "CoqOfOCaml.Seq.t");
 
   (* String *)
-  ("Stdlib.String.length", "OCaml.String.length");
+  ("Stdlib.String.length", "CoqOfOCaml.String.length");
 ]

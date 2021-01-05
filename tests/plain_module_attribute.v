@@ -1,11 +1,5 @@
-Require Import OCaml.OCaml.
-
-Set Primitive Projections.
-Set Printing Projections.
-Open Scope string_scope.
-Open Scope Z_scope.
-Open Scope type_scope.
-Import ListNotations.
+Require Import CoqOfOCaml.CoqOfOCaml.
+Require Import CoqOfOCaml.Settings.
 
 Module T.
   Record signature {t : Set} : Set := {
@@ -17,7 +11,7 @@ End T.
 Module M.
   Definition t : Set := int.
   
-  Definition to_string : int -> string := OCaml.Stdlib.string_of_int.
+  Definition to_string : int -> string := CoqOfOCaml.Stdlib.string_of_int.
 End M.
 
 Definition int_to_string : int -> string := M.to_string.
