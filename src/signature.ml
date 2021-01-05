@@ -5,6 +5,7 @@ open Monad.Notations
 
 type item =
   | Error of string
+  | Documentation of string
   | Module of Name.t * ModuleTyp.t
   | ModuleWithSignature of item list
   | TypExistential of Name.t
@@ -154,6 +155,15 @@ let of_types_signature (signature : Types.signature) : t Monad.t =
   (ModuleTypParams.get_signature_typ_params_arity signature) >>= fun typ_params ->
   return { items; typ_params }
 
+let wrap_documentation (items_value : (item list * 'a) Monad.t)
+  : (item list * 'a) Monad.t =
+  let* documentation = get_documentation in
+  match documentation with
+  | None -> items_value
+  | Some documentation ->
+    let* (items, value) = items_value in
+    return (Documentation documentation :: items, value)
+
 let rec of_signature_items
   (prefix : Name.t list)
   (let_in_type : let_in_type)
@@ -166,6 +176,7 @@ let rec of_signature_items
     : (item list * let_in_type) Monad.t =
     set_env item.sig_env (
     set_loc item.sig_loc (
+    wrap_documentation (
     match item.sig_desc with
     | Tsig_attribute _ -> return ([], let_in_type)
     | Tsig_class _ ->
@@ -258,7 +269,7 @@ let rec of_signature_items
       let typ_args = Name.Set.elements (Type.typ_args_of_typ typ) in
       let typ_with_let_in_type =
         apply_let_in_type let_in_type (Type.ForallTyps (typ_args, typ)) in
-      return ([Value (prefixed_name, typ_with_let_in_type)], let_in_type))) in
+      return ([Value (prefixed_name, typ_with_let_in_type)], let_in_type)))) in
   match items with
   | [] -> return []
   | item :: items ->
@@ -283,6 +294,7 @@ let to_coq_prefixed_name (prefix : Name.t list) (name : Name.t) : SmartPrint.t =
 let rec to_coq_item (signature_item : item) : SmartPrint.t =
   match signature_item with
   | Error message -> !^ ("(* " ^ message ^ " *)")
+  | Documentation message -> !^ ("(** " ^ message ^ " *)")
   | Module (name, module_typ) ->
     nest (
       Name.to_coq name ^^ !^ ":" ^^

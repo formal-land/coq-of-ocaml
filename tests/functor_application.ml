@@ -1,6 +1,7 @@
 (** Some documentation *)
 module type Source = sig
   type t
+  (** The description of [x] *)
   val x : t
   val id : 'a -> 'a
 end

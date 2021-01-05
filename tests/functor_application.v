@@ -11,6 +11,7 @@ Import ListNotations.
 Module Source.
   Record signature {t : Set} : Set := {
     t := t;
+    (** The description of [x] *)
     x : t;
     id : forall {a : Set}, a -> a;
   }.
