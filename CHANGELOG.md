@@ -1,4 +1,8 @@
 ## [Unreleased]
+
+## 2.4.0 (January 11, 2021)
+* Install the Coq proofs in `CoqOfOCaml` rather than `OCaml` for clarity.
+* Simpler header at the top of the generated files.
 * Try to import documentation comments from OCaml.
 * Do not ignore sequences of instructions anymore.
 * Add support for top-level definitions as `init_module` functions.
