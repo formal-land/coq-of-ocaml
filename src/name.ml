@@ -138,6 +138,9 @@ let of_optional_ident (is_value : bool) (i : Ident.t option) : t Monad.t =
 let of_ident_raw (i : Ident.t) : t =
   of_string_raw (Ident.name i)
 
+let of_strings (is_value : bool) (path : string list) : t Monad.t =
+  of_string is_value (String.concat "_" path)
+
 let to_string (name : t) : string =
   match name with
   | FunctionParameter -> "function_parameter"
@@ -168,3 +171,9 @@ let to_coq_list_or_empty (names : t list)
   match names with
   | [] -> empty
   | _ :: _ -> map (separate space (List.map to_coq names))
+
+(** Not related to the name handling, but this is a good place to put it. *)
+let string_of_optional_ident (ident : Ident.t option) : string =
+  match ident with
+  | None -> "_"
+  | Some ident -> Ident.name ident

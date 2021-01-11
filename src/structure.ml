@@ -179,13 +179,18 @@ module Value = struct
       )
 end
 
+type functor_parameters = (Name.t * ModuleTyp.free_vars * Type.t) list
+
 (** A structure. *)
 type t =
   | Value of Value.t
   | AbstractValue of Name.t * Name.t list * Type.t
   | TypeDefinition of TypeDefinition.t
   | Module of
-    Name.t * (Name.t * Type.t) list * t list * (Exp.t * Type.t option) option
+    Name.t *
+    functor_parameters *
+    t list *
+    (Exp.t * Type.t option) option
   | ModuleExpression of Name.t * Type.t option * Exp.t
   | ModuleInclude of PathName.t
   | ModuleIncludeItem of Name.t * Name.t list * MixedPath.t
@@ -274,7 +279,7 @@ let rec of_structure (structure : structure) : t list Monad.t =
               return (Some (ModuleIncludeItem (
                 name,
                 typ_vars,
-                MixedPath.Access (reference, [field], false)
+                MixedPath.Access (reference, [field])
               )))
             | _ -> return None
           ) in
@@ -296,6 +301,7 @@ let rec of_structure (structure : structure) : t list Monad.t =
     wrap_documentation (
     match item.str_desc with
     | Tstr_value (_, [ {
+        vb_attributes;
         vb_pat = {
           pat_desc =
             Tpat_construct (
@@ -309,7 +315,11 @@ let rec of_structure (structure : structure) : t list Monad.t =
         _
       } ])
       when PathName.is_unit path ->
-      top_level_evaluation vb_expr
+      let* attributes = Attribute.of_attributes vb_attributes in
+      if Attribute.has_axiom_with_reason attributes then
+        return []
+      else
+        top_level_evaluation vb_expr
     | Tstr_eval (e, _) ->
       top_level_evaluation e
     | Tstr_value (is_rec, cases) ->
@@ -414,7 +424,8 @@ let rec of_structure (structure : structure) : t list Monad.t =
   return structure
 
 and of_module
-  (name : Name.t) (functor_parameters : (Name.t * Type.t) list)
+  (name : Name.t)
+  (functor_parameters : functor_parameters)
   (module_expr : module_expr) (has_plain_module_attribute : bool)
   : t Monad.t =
   let path =
@@ -433,16 +444,23 @@ and of_module
   of_module_expr name functor_parameters as_expression None module_expr
 
 and of_module_expr
-  (name : Name.t) (functor_parameters : (Name.t * Type.t) list)
+  (name : Name.t)
+  (functor_parameters : functor_parameters)
   (as_expression : (Types.module_type * Path.t) option)
   (module_type_annotation : Typedtree.module_type option)
   (module_expr : module_expr)
   : t Monad.t =
   let* module_typ =
     match module_type_annotation with
-    | Some module_type ->
-      let* module_type = ModuleTyp.of_ocaml module_type in
-      return (Some (ModuleTyp.to_typ module_type))
+    | Some module_typ ->
+      let* module_typ = ModuleTyp.of_ocaml module_typ in
+      let functor_parameter_names =
+        functor_parameters |>
+        List.map (fun (name, _, _) -> name) in
+      let* (_, module_typ) =
+        ModuleTyp.to_typ
+          functor_parameter_names (Name.to_string name) true module_typ in
+      return (Some module_typ)
     | None -> return None in
   match module_expr.mod_desc with
   | Tmod_structure structure ->
@@ -454,7 +472,7 @@ and of_module_expr
         let* module_typ_params_arity =
           ModuleTypParams.get_module_typ_typ_params_arity module_type in
         let* values = Exp.ModuleTypValues.get typ_vars module_type in
-        let mixed_path_of_value_or_typ (name : Name.t): MixedPath.t Monad.t =
+        let mixed_path_of_value_or_typ (name : Name.t) : MixedPath.t Monad.t =
           return (MixedPath.of_name name) in
         let* e =
           Exp.build_module
@@ -464,9 +482,9 @@ and of_module_expr
             mixed_path_of_value_or_typ in
         return (Some (e, module_typ))
       | None -> return None in
-    return (Module (name, List.rev functor_parameters, structure, e))
+    return (Module (name, functor_parameters, structure, e))
   | Tmod_ident (path, _) ->
-    begin match as_expression  with
+    begin match as_expression with
     | Some (module_type, _) ->
       let* module_exp =
         Exp.of_module_expr Name.Map.empty module_expr (Some module_type) in
@@ -485,7 +503,10 @@ and of_module_expr
       | Named (ident, _, module_type_arg) ->
         let* x = Name.of_optional_ident false ident in
         let* module_type_arg = ModuleTyp.of_ocaml module_type_arg in
-        return ((x, ModuleTyp.to_typ module_type_arg) :: functor_parameters) in
+        let id = Name.string_of_optional_ident ident in
+        let* ((_, free_vars_arg), typ_arg) =
+          ModuleTyp.to_typ [] id false module_type_arg in
+        return (functor_parameters @ [(x, free_vars_arg, typ_arg)]) in
     of_module name functor_parameters module_expr false
   | Tmod_constraint (module_expr, _, annotation, _) ->
     let module_type_annotation =
@@ -500,7 +521,11 @@ and of_module_expr
     )
 
 (** Pretty-print a structure to Coq. *)
-let rec to_coq (with_args : bool) (defs : t list) : SmartPrint.t =
+let rec to_coq (fargs : int option) (defs : t list) : SmartPrint.t =
+  let with_args =
+    match fargs with
+    | None -> false
+    | Some _ -> true in
   let rec to_coq_one (def : t) : SmartPrint.t =
     match def with
     | Value value -> Value.to_coq with_args value
@@ -516,6 +541,30 @@ let rec to_coq (with_args : bool) (defs : t list) : SmartPrint.t =
         match functor_parameters with
         | [] -> false
         | _ :: _ -> true in
+      let functor_parameters_free_vars =
+        functor_parameters |>
+        List.map (fun (_, free_vars, _) -> free_vars) |>
+        List.flatten in
+      let fargs_instance =
+        nest (
+          Name.to_coq name ^-^ !^ "." ^-^ !^ "Build_FArgs" ^^
+          separate space (functor_parameters |> List.map (
+            fun (parameter_name, _, _) -> Name.to_coq parameter_name
+          ))
+        ) in
+      let nb_new_fargs_typ_params = List.length functor_parameters_free_vars in
+      let nb_fargs_typ_params =
+        match fargs with
+        | None -> nb_new_fargs_typ_params
+        | Some fargs -> 1 + fargs + nb_new_fargs_typ_params in
+      let fargs =
+        match fargs with
+        | None ->
+          if is_functor then
+            Some nb_new_fargs_typ_params
+          else
+            None
+        | Some fargs -> Some (fargs + nb_new_fargs_typ_params) in
       let final_item_name =
         if is_functor then !^ "functor" else !^ "module" in
       nest (
@@ -524,43 +573,45 @@ let rec to_coq (with_args : bool) (defs : t list) : SmartPrint.t =
         indent (
           begin if is_functor then
             nest (
-              !^ "Class" ^^ !^ "FArgs" ^^ Pp.args with_args ^^ !^ ":=" ^^
+              !^ "Class" ^^ !^ "FArgs" ^^ Pp.args with_args ^^
+              ModuleTyp.to_coq_grouped_free_vars functor_parameters_free_vars ^^
+              !^ ":=" ^^
               !^ "{" ^^ newline ^^
               indent (
                 separate empty (functor_parameters |> List.map (
-                fun (name, typ) ->
+                fun (name, _, typ) ->
                   nest (
                     Name.to_coq name ^^ !^ ":" ^^ Type.to_coq None None typ ^-^
                     !^ ";" ^^ newline
                   )
                 ))
               )
-              ^^ !^ "}" ^-^ !^ "." ^^
-              newline ^^ newline
+              ^^ !^ "}" ^-^ !^ "." ^^ newline ^^
+              begin if nb_fargs_typ_params = 0 then
+                empty
+              else
+                !^ "Arguments" ^^ !^ "Build_FArgs" ^^
+                braces (nest (separate space (
+                  Pp.n_underscores nb_fargs_typ_params
+                ))) ^-^ !^ "." ^^ newline
+              end ^^
+              newline
             )
           else
             empty
           end ^^
-          to_coq (is_functor || with_args) defs ^^
+          to_coq fargs defs ^^
           begin match e with
           | Some (e, typ_annotation) ->
             newline ^^ newline ^^
             nest (
               !^ "Definition" ^^ final_item_name ^^
               begin if is_functor then
-                !^ "`(FArgs)"
+                !^ "`{FArgs}"
               else
                 Pp.args with_args
               end ^^
-              nest (
-                begin match (typ_annotation, is_functor) with
-                | (Some typ_annotation, true) ->
-                  !^ ":" ^^ Type.to_coq None None typ_annotation
-                | _ -> empty
-                end ^^
-                !^ ":="
-              ) ^^
-              Exp.to_coq false e ^-^ !^ "."
+              !^ ":=" ^^ Exp.to_coq false e ^-^ !^ "."
             )
           | None -> empty
           end
@@ -571,32 +622,22 @@ let rec to_coq (with_args : bool) (defs : t list) : SmartPrint.t =
           newline ^^
           nest (
             !^ "Definition" ^^ Name.to_coq name ^^ Pp.args with_args ^^
-            separate space (functor_parameters |> List.map (fun (name, _) ->
-              Name.to_coq name
-            )) ^^
-            begin match (typ_annotation, is_functor) with
-            | (Some typ_annotation, false) -> !^ ":" ^^ Type.to_coq None None typ_annotation
+            ModuleTyp.to_coq_functor_parameters_modules functor_parameters ^^
+            begin match typ_annotation with
+            | Some typ_annotation ->
+              !^ ":" ^^ Type.to_coq None None typ_annotation
             | _ -> empty
             end ^^ !^ ":=" ^^
             nest (
-              Name.to_coq name ^-^ !^ "." ^-^ final_item_name ^-^
               begin if is_functor then
-                space ^^
                 nest (
-                  !^ "{|" ^^
-                  separate (!^ ";" ^^ space) (functor_parameters |> List.map (
-                    fun (parameter_name, _) ->
-                      nest (
-                        Name.to_coq name ^-^ !^ "." ^-^ Name.to_coq parameter_name ^^
-                        !^ ":=" ^^ Name.to_coq parameter_name
-                      )
-                  )) ^^
-                  !^ "|}"
-                )
+                  !^ "let" ^^ !^ "'_" ^^ !^ ":=" ^^ fargs_instance ^^ !^ "in"
+                ) ^^
+                newline
               else
                 empty
-              end ^-^
-              !^ "."
+              end ^^
+              Name.to_coq name ^-^ !^ "." ^-^ final_item_name ^-^ !^ "."
             )
           )
         | None -> empty
@@ -638,7 +679,7 @@ let rec to_coq (with_args : bool) (defs : t list) : SmartPrint.t =
     | Documentation (message, defs) ->
       nest (
         !^ ( "(** " ^ message ^ " *)") ^^ newline ^^
-        to_coq with_args defs
+        to_coq fargs defs
       )
     | Error message -> !^ ( "(* " ^ message ^ " *)")
     | ErrorMessage (message, def) ->

@@ -1,8 +1,10 @@
+(** We use the trees to represent abstract type parameters of signatures.  *)
 open SmartPrint
+open Monad.Notations
 
 type 'a item =
-  | Item of Name.t * 'a
-  | Module of Name.t * 'a t
+  | Item of string * 'a
+  | Module of string * 'a t
 
 and 'a t = 'a item list
 
@@ -13,49 +15,54 @@ let rec map (f : 'a -> 'b) (tree : 'a t) : 'b t =
     | Module (name, tree) -> Module (name, map f tree) in
   tree |> List.map map_item
 
-let rec map_at (tree : 'a t) (path_name : PathName.t) (f : 'a -> 'a) : 'a t =
-  let (head, tail) = PathName.get_head_and_tail path_name in
-  tree |> List.map (fun item ->
+let rec map_at (tree : 'a t) (path : string list) (f : 'a -> 'a) : 'a t =
+  match path with
+  | [] -> tree
+  | head :: tail ->
+    tree |> List.map (fun item ->
+      match (item, tail) with
+      | (Item (name, x), []) when name = head -> Item (name, f x)
+      | (Item _, _) -> item
+      | (Module (name, tree), _) when name = head ->
+        Module (name, map_at tree tail f)
+      | (Module _, _) -> item
+    )
+
+let rec mapi_aux (prefix : string list) (f : string list -> 'a -> 'b Monad.t)
+  (tree : 'a t) : 'b t Monad.t =
+  let map_item (item : 'a item) : 'b item Monad.t =
     match item with
     | Item (name, x) ->
-      if name = head && tail = None then
-        Item (name, f x)
-      else
-        item
+      let* v = f (List.rev (name :: prefix)) x in
+      return (Item (name, v))
     | Module (name, tree) ->
-      if name = head then
-        begin match tail with
-        | None -> item
-        | Some tail -> Module (name, map_at tree tail f)
-        end
-      else
-        item
+      let* tree = mapi_aux (name :: prefix) f tree in
+      return (Module (name, tree)) in
+  tree |> Monad.List.map map_item
+
+let mapi (f : string list -> 'a -> 'b Monad.t) (tree : 'a t) : 'b t Monad.t =
+  mapi_aux [] f tree
+
+let rec flatten_aux (prefix : string list) (tree : 'a t)
+  : (string list * 'a) list =
+  tree |> Util.List.concat_map (fun item ->
+    match item with
+    | Item (name, x) ->
+      let path = List.rev (name :: prefix) in
+      [(path, x)]
+    | Module (name, tree) -> flatten_aux (name :: prefix) tree
   )
 
-let rec flatten_aux (prefix : Name.t list) (tree : 'a t) : (PathName.t * 'a) list =
-  List.flatten (tree |> List.map (fun item ->
-    match item with
-    | Item (name, x) -> [(PathName.of_name (List.rev prefix) name, x)]
-    | Module (name, tree) -> flatten_aux (name :: prefix) tree
-  ))
-
-let flatten (tree : 'a t) : (PathName.t * 'a) list =
+let flatten (tree : 'a t) : (string list * 'a) list =
   flatten_aux [] tree
-
-let rec size (tree : 'a t) : int =
-  tree |> List.fold_left (fun s item ->
-    match item with
-    | Item _ -> s + 1
-    | Module (_, tree) -> s + size tree
-  ) 0
 
 let rec pp (pp_a : 'a -> SmartPrint.t option) (tree : 'a t) : SmartPrint.t =
   let pp_item (item : 'a item) : SmartPrint.t =
     match item with
     | Item (name, value) ->
-      Name.to_coq name ^-^
+      !^ name ^-^
       (match pp_a value with
       | None -> empty
       | Some doc -> !^ ":" ^^ doc)
-    | Module (name, tree) -> Name.to_coq name ^-^ !^ ":" ^^ pp pp_a tree in
+    | Module (name, tree) -> !^ name ^-^ !^ ":" ^^ pp pp_a tree in
   OCaml.list pp_item tree

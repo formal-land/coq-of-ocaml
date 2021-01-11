@@ -233,12 +233,6 @@ let constructor_of_variant (label : string) : t Monad.t =
       NotSupported
       ("Constructor of the variant `" ^ label ^ " unknown")
 
-let get_head_and_tail (path_name : t) : Name.t * t option =
-  let { path; base } = path_name in
-  match path with
-  | [] -> (base, None)
-  | head :: path -> (head, Some { path; base })
-
 let add_prefix (prefix : Name.t) (path_name : t) : t =
   let { path; base } = path_name in
   { path = prefix :: path; base }

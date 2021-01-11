@@ -15,11 +15,11 @@ end
 module M1 : Sig1 = struct
   type t = int
 
-  let f n m = (n, m)
+  let f (n : t) m = (n, m)
 end
 
 module M2 : Sig2 = struct
   type t = int
 
-  let f n = []
+  let f (n : t) = []
 end

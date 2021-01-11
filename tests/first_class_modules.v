@@ -100,7 +100,7 @@ End Triple.
 Definition tripe
   : {'[a, b, c, bar] : [Set ** Set ** Set ** Set] @
     Triple.signature (a := a) (b := b) (c := c) (bar := bar)} :=
-  (pack
+  existS (A := [Set ** Set ** Set ** Set]) _ [_, _, _, _]
     (let a : Set := int in
     let b : Set := bool in
     let c : Set := string in
@@ -109,30 +109,29 @@ Definition tripe
     let vc := "" in
     let bar : Set := int in
     let foo := 12 in
-    existT (A := [Set ** Set ** Set ** Set]) _ [a, b, c, bar]
-      {|
-        Triple.va := va;
-        Triple.vb := vb;
-        Triple.vc := vc;
-        Triple.foo := foo
-      |})).
+    {|
+      Triple.va := va;
+      Triple.vb := vb;
+      Triple.vc := vc;
+      Triple.foo := foo
+    |}).
 
 Module UsingTriple.
   Record signature {elt' T_a T_b T_c T_bar OPS'_elt OPS'_t : Set} : Set := {
     elt' := elt';
     T : Triple.signature (a := T_a) (b := T_b) (c := T_c) (bar := T_bar);
     OPS' : S.SET.signature (elt := OPS'_elt) (t := OPS'_t);
-    OPS'' : S.SET.signature (elt := elt') (t := (list string));
+    OPS'' : S.SET.signature (elt := elt') (t := list string);
     table := forall {a : Set}, list a;
   }.
 End UsingTriple.
 
 Definition set_update {a : Set} (v : a) (b : bool) (Box : set a) : set a :=
   let 'existS _ _ Box := Box in
-  (pack
+  existS (A := Set) _ _
     (let elt : Set := a in
     let elt_ty := Box.(Boxed_set.elt_ty) in
-    let OPS := existT (A := unit) (fun _ => _) tt Box.(Boxed_set.OPS) in
+    let OPS := Box.(Boxed_set.OPS) in
     let boxed :=
       if b then
         Box.(Boxed_set.OPS).(S.SET.add) v Box.(Boxed_set.boxed)
@@ -150,13 +149,12 @@ Definition set_update {a : Set} (v : a) (b : bool) (Box : set a) : set a :=
           Z.add Box.(Boxed_set.size) 1
         else
           Box.(Boxed_set.size) in
-    existT (A := Set) _ _
-      {|
-        Boxed_set.elt_ty := elt_ty;
-        Boxed_set.OPS := (|OPS|);
-        Boxed_set.boxed := boxed;
-        Boxed_set.size := size
-      |})).
+    {|
+      Boxed_set.elt_ty := elt_ty;
+      Boxed_set.OPS := OPS;
+      Boxed_set.boxed := boxed;
+      Boxed_set.size := size
+    |}).
 
 Definition set_mem {elt : Set} (v : elt) (Box : set elt) : bool :=
   let 'existS _ _ Box := Box in
@@ -169,36 +167,34 @@ Definition set_fold {acc elt : Set} (f : elt -> acc -> acc) (Box : set elt)
 
 Definition set_nested {elt : Set} (Box : set elt) : set elt :=
   let 'existS _ _ Box := Box in
-  (pack
+  existS (A := Set) _ _
     (let __result_value :=
-      (pack
+      existS (A := Set) _ _
         (let elt : Set := elt in
         let elt_ty := Box.(Boxed_set.elt_ty) in
-        let OPS := existT (A := unit) (fun _ => _) tt Box.(Boxed_set.OPS) in
+        let OPS := Box.(Boxed_set.OPS) in
         let boxed := Box.(Boxed_set.boxed) in
         let size := Box.(Boxed_set.size) in
-        existT (A := Set) _ _
-          {|
-            Boxed_set.elt_ty := elt_ty;
-            Boxed_set.OPS := (|OPS|);
-            Boxed_set.boxed := boxed;
-            Boxed_set.size := size
-          |})) in
+        {|
+          Boxed_set.elt_ty := elt_ty;
+          Boxed_set.OPS := OPS;
+          Boxed_set.boxed := boxed;
+          Boxed_set.size := size
+        |}) in
     let elt : Set := elt in
     let elt_ty := Box.(Boxed_set.elt_ty) in
-    let OPS := existT (A := unit) (fun _ => _) tt Box.(Boxed_set.OPS) in
+    let OPS := Box.(Boxed_set.OPS) in
     let boxed := Box.(Boxed_set.boxed) in
     let size :=
       let Result := __result_value in
       let 'existS _ _ Result := Result in
       Result.(Boxed_set.size) in
-    existT (A := Set) _ _
-      {|
-        Boxed_set.elt_ty := elt_ty;
-        Boxed_set.OPS := (|OPS|);
-        Boxed_set.boxed := boxed;
-        Boxed_set.size := size
-      |})).
+    {|
+      Boxed_set.elt_ty := elt_ty;
+      Boxed_set.OPS := OPS;
+      Boxed_set.boxed := boxed;
+      Boxed_set.size := size
+    |}).
 
 Module MAP.
   Record signature {key : Set} {t : Set -> Set} : Set := {
