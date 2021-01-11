@@ -36,9 +36,6 @@ let primitive_tuple_infer (n : int) : SmartPrint.t =
   | [_] -> !^ "_"
   | n_underscores -> brakets (separate (!^ "," ^^ space) n_underscores)
 
-let to_string (doc : SmartPrint.t) : string =
-  SmartPrint.to_string 80 2 doc
-
 let set : SmartPrint.t =
   !^ "Set"
 
@@ -52,3 +49,6 @@ let rec typ_arity (arity : int) : SmartPrint.t =
   match arity with
   | 0 -> set
   | arity -> set ^^ !^ "->" ^^ (typ_arity (arity - 1))
+
+let to_string (doc : SmartPrint.t) : string =
+  SmartPrint.to_string 80 2 doc

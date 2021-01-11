@@ -7,17 +7,26 @@ open Monad.Notations
 module Value = struct
   type t = Exp.t option Exp.Definition.t
 
-  let to_coq_parameters (header : Exp.Header.t) : SmartPrint.t =
-    let { Exp.Header.typ_vars; args; _ } = header in
-    begin match typ_vars with
-    | [] -> empty
-    | _ :: _ ->
-      braces @@ group (separate space (List.map Name.to_coq typ_vars) ^^
-      !^ ":" ^^ Pp.set)
-    end ^^
+  let to_coq_typ_vars (header : Exp.Header.t) : SmartPrint.t =
+    let { Exp.Header.typ_vars; _ } = header in
+    Name.to_coq_list_or_empty typ_vars (fun typ_vars ->
+      braces (nest (typ_vars ^^ !^ ":" ^^ Pp.set))
+    )
+
+  let to_coq_args (header : Exp.Header.t) : SmartPrint.t =
+    let { Exp.Header.args; _ } = header in
     group (separate space (args |> List.map (fun (x, t) ->
       parens @@ nest (Name.to_coq x ^^ !^ ":" ^^ Type.to_coq None None t)
     )))
+
+  let to_coq_notation_synonym (name : Name.t) (typ_vars : Name.t list)
+    : SmartPrint.t =
+    nest (
+      !^ "let" ^^ Name.to_coq name ^^
+      Name.to_coq_list_or_empty typ_vars (fun typ_vars -> braces typ_vars) ^^
+      !^ ":=" ^^ !^ "'" ^-^ Name.to_coq name ^^
+      separate space (List.map Name.to_coq typ_vars) ^^ !^ "in" ^^ newline
+    )
 
   (** Pretty-print a value definition to Coq. *)
   let to_coq (with_args : bool) (value : t) : SmartPrint.t =
@@ -42,14 +51,10 @@ module Value = struct
           let { Exp.Header.name; typ_vars; typ; _ } = header in
           nest (
             !^ "Axiom" ^^ Name.to_coq name ^^ !^ ":" ^^
-            begin match typ_vars with
-            | [] -> empty
-            | _ :: _ ->
+            Name.to_coq_list_or_empty typ_vars (fun typ_vars ->
               !^ "forall" ^^
-              braces (group (
-                separate space (List.map Name.to_coq typ_vars) ^^ !^ ":" ^^ Pp.set
-              )) ^-^ !^ ","
-            end ^^
+              braces (nest (typ_vars ^^ !^ ":" ^^ Pp.set)) ^-^ !^ ","
+            ) ^^
             Type.to_coq None None typ ^-^
             !^ "."
           )
@@ -84,16 +89,14 @@ module Value = struct
             let { Exp.Header.name; typ; _ } = header in
             Name.to_coq name ^^
             Pp.args with_args ^^
-            to_coq_parameters header ^^
+            to_coq_typ_vars header ^^
+            to_coq_args header ^^
             Exp.Header.to_coq_structs header ^^
             !^ ": " ^-^ Type.to_coq None None typ ^-^ !^ " :=" ^^
             group (
               separate space (notation_cases |> List.map (fun (header, e) ->
-                let { Exp.Header.name; _ } = header in
-                nest (
-                  !^ "let" ^^ Name.to_coq name ^^ !^ ":=" ^^
-                  !^ "'" ^-^ Name.to_coq name ^^ !^ "in"
-                )
+                let { Exp.Header.name; typ_vars; _ } = header in
+                to_coq_notation_synonym name typ_vars
               )) ^^
               Exp.to_coq false e
              ) ^-^
@@ -107,7 +110,7 @@ module Value = struct
           (fun ((index, previous_notations), definitions) (header, e) ->
             let first_case = index = 0 in
             let last_case = index = List.length notation_cases - 1 in
-            let { Exp.Header.name; structs; typ; _ } = header in
+            let { Exp.Header.name; typ_vars; structs; typ; _ } = header in
             let definition = nest (
               begin if first_case then
                 !^ "where"
@@ -118,11 +121,17 @@ module Value = struct
               !^ ":=" ^^
               parens (nest (
                 nest (
+                  Name.to_coq_list_or_empty typ_vars (fun typ_vars ->
+                    nest (
+                      !^ "fun" ^^ parens (typ_vars ^^ !^ ":" ^^ Pp.set) ^^
+                      !^ "=>"
+                    ) ^^ space
+                  ) ^-^
                   begin match structs with
                   | [] -> !^ "fun"
                   | _ :: _ -> !^ "fix" ^^ Name.to_coq name
                   end ^^
-                  to_coq_parameters header ^^
+                  to_coq_args header ^^
                   begin match structs with
                   | [] -> !^ "=>"
                   | _ :: _ ->
@@ -130,11 +139,8 @@ module Value = struct
                     !^ ": " ^-^ Type.to_coq None None typ ^-^ !^ " :="
                   end ^^
                   group (
-                    separate space (previous_notations |> List.map (fun name ->
-                      nest (
-                        !^ "let" ^^ Name.to_coq name ^^ !^ ":=" ^^
-                        !^ "'" ^-^ Name.to_coq name ^^ !^ "in"
-                      )
+                    separate space (previous_notations |> List.map (fun (name, typ_vars) ->
+                      to_coq_notation_synonym name typ_vars
                     )) ^^
                     Exp.to_coq false e
                   )
@@ -147,7 +153,7 @@ module Value = struct
               end
             ) in
             (
-              (index + 1, previous_notations @ [name]),
+              (index + 1, previous_notations @ [(name, typ_vars)]),
               definitions @ [definition]
             )
           )
@@ -158,10 +164,15 @@ module Value = struct
           | [] -> []
           | _ :: _ ->
             [separate newline (notation_cases |> List.map (fun (header, _) ->
-              let { Exp.Header.name; _ } = header in
+              let { Exp.Header.name; typ_vars; _ } = header in
               nest (
-                !^ "Definition" ^^ Name.to_coq name ^^ !^ ":=" ^^
-                !^ "'" ^-^ Name.to_coq name ^-^ !^ "."
+                !^ "Definition" ^^ Name.to_coq name ^^
+                Name.to_coq_list_or_empty typ_vars (fun typ_vars ->
+                  braces typ_vars
+                ) ^^ !^ ":=" ^^
+                separate space (
+                  (!^ "'" ^-^ Name.to_coq name) :: List.map Name.to_coq typ_vars
+                ) ^-^ !^ "."
               )
             ))]
           end
@@ -175,11 +186,12 @@ type t =
   | TypeDefinition of TypeDefinition.t
   | Module of
     Name.t * (Name.t * Type.t) list * t list * (Exp.t * Type.t option) option
-  | ModuleExpression of Name.t * Exp.t
+  | ModuleExpression of Name.t * Type.t option * Exp.t
   | ModuleInclude of PathName.t
   | ModuleIncludeItem of Name.t * Name.t list * MixedPath.t
   | ModuleSynonym of Name.t * PathName.t
   | Signature of Name.t * Signature.t
+  | Documentation of string * t list
   | Error of string
   | ErrorMessage of string * t
 
@@ -190,11 +202,33 @@ let error_message
   : t list Monad.t =
   raise [ErrorMessage (message, structure)] category message
 
-let top_level_evaluation_error : t list Monad.t =
-  error_message
-    (Error "top_level_evaluation")
-    SideEffect
-    "Top-level evaluations are ignored"
+let wrap_documentation (items : t list Monad.t) : t list Monad.t =
+  let* documentation = get_documentation in
+  match documentation with
+  | None -> items
+  | Some documentation ->
+    let* items = items in
+    return [Documentation (documentation, items)]
+
+let top_level_evaluation (e : expression) : t list Monad.t =
+  push_env (
+  let* e = Exp.of_expression Name.Map.empty e in
+  let header = {
+    Exp.Header.name = Name.of_string_raw "init_module";
+    typ_vars = [];
+    args = [];
+    structs = [];
+    typ = Type.Apply (MixedPath.of_name (Name.of_string_raw "unit"), []);
+    is_notation = false;
+  } in
+  let documentation = "Init function; without side-effects in Coq" in
+  return [Documentation (documentation, [Value {
+    is_rec = false;
+    cases = [(
+      header,
+      Some e
+    )]
+  }])])
 
 (** Import an OCaml structure. *)
 let rec of_structure (structure : structure) : t list Monad.t =
@@ -218,31 +252,35 @@ let rec of_structure (structure : structure) : t list Monad.t =
             Path.name path ^ "` to handle the include."
           )
       | Mty_signature signature ->
-        signature |> Monad.List.filter_map (fun signature_item ->
-          match signature_item with
-          | Types.Sig_value (ident, _, _) | Sig_type (ident, _, _, _) ->
-            let is_value =
-              match signature_item with
-              | Types.Sig_value _ -> true
-              | _ -> false in
-            let* name = Name.of_ident is_value ident in
-            let* field =
-              PathName.of_path_and_name_with_convert mod_type_path name in
-            let* typ_vars =
-              match signature_item with
-              | Types.Sig_value (_, { val_type; _ }, _) ->
-                let typ_vars = Name.Map.empty in
-                let* (_, _, new_typ_vars) =
-                  Type.of_typ_expr true typ_vars val_type in
-                return (Name.Set.elements new_typ_vars)
-              | _ -> return [] in
-            return (Some (ModuleIncludeItem (
-              name,
-              typ_vars,
-              MixedPath.Access (reference, [field], false)
-            )))
-          | _ -> return None
-        )
+        let* items =
+          signature |> Monad.List.filter_map (fun signature_item ->
+            match signature_item with
+            | Types.Sig_value (ident, _, _) | Sig_type (ident, _, _, _) ->
+              let is_value =
+                match signature_item with
+                | Types.Sig_value _ -> true
+                | _ -> false in
+              let* name = Name.of_ident is_value ident in
+              let* field =
+                PathName.of_path_and_name_with_convert mod_type_path name in
+              let* typ_vars =
+                match signature_item with
+                | Types.Sig_value (_, { val_type; _ }, _) ->
+                  let typ_vars = Name.Map.empty in
+                  let* (_, _, new_typ_vars) =
+                    Type.of_typ_expr true typ_vars val_type in
+                  return (Name.Set.elements new_typ_vars)
+                | _ -> return [] in
+              return (Some (ModuleIncludeItem (
+                name,
+                typ_vars,
+                MixedPath.Access (reference, [field], false)
+              )))
+            | _ -> return None
+          ) in
+        let documentation =
+          "Inclusion of the module [" ^ PathName.to_string reference ^ "]" in
+        return [Documentation (documentation, items)]
       | Mty_functor _ ->
         error_message
           (Error "include_functor")
@@ -254,7 +292,8 @@ let rec of_structure (structure : structure) : t list Monad.t =
   let of_structure_item (item : structure_item) (final_env : Env.t)
     : t list Monad.t =
     set_env item.str_env (
-    set_loc (Loc.of_location item.str_loc) (
+    set_loc item.str_loc (
+    wrap_documentation (
     match item.str_desc with
     | Tstr_value (_, [ {
         vb_pat = {
@@ -266,11 +305,13 @@ let rec of_structure (structure : structure) : t list Monad.t =
             );
           _
         };
+        vb_expr;
         _
       } ])
       when PathName.is_unit path ->
-      top_level_evaluation_error
-    | Tstr_eval _ -> top_level_evaluation_error
+      top_level_evaluation vb_expr
+    | Tstr_eval (e, _) ->
+      top_level_evaluation e
     | Tstr_value (is_rec, cases) ->
       push_env (
       Exp.import_let_fun Name.Map.empty true is_rec cases >>= fun def ->
@@ -361,7 +402,7 @@ let rec of_structure (structure : structure) : t list Monad.t =
         get_include_items None reference incl_mod.mod_type in
       return (module_definition :: include_items)
     (* We ignore attribute fields. *)
-    | Tstr_attribute _ -> return [])) in
+    | Tstr_attribute _ -> return []))) in
   Monad.List.fold_right
     (fun structure_item (structure, final_env) ->
       let env = structure_item.str_env in
@@ -397,6 +438,12 @@ and of_module_expr
   (module_type_annotation : Typedtree.module_type option)
   (module_expr : module_expr)
   : t Monad.t =
+  let* module_typ =
+    match module_type_annotation with
+    | Some module_type ->
+      let* module_type = ModuleTyp.of_ocaml module_type in
+      return (Some (ModuleTyp.to_typ module_type))
+    | None -> return None in
   match module_expr.mod_desc with
   | Tmod_structure structure ->
     let* structure = of_structure structure in
@@ -415,13 +462,7 @@ and of_module_expr
             values
             module_type_path
             mixed_path_of_value_or_typ in
-        let* module_type_annotation =
-          match module_type_annotation with
-          | Some module_type ->
-            let* module_type = ModuleTyp.of_ocaml module_type in
-            return (Some (ModuleTyp.to_typ module_type))
-          | None -> return None in
-        return (Some (e, module_type_annotation))
+        return (Some (e, module_typ))
       | None -> return None in
     return (Module (name, List.rev functor_parameters, structure, e))
   | Tmod_ident (path, _) ->
@@ -429,14 +470,14 @@ and of_module_expr
     | Some (module_type, _) ->
       let* module_exp =
         Exp.of_module_expr Name.Map.empty module_expr (Some module_type) in
-      return (ModuleExpression (name, module_exp))
+      return (ModuleExpression (name, module_typ, module_exp))
     | None ->
       let* reference = PathName.of_path_with_convert false path in
       return (ModuleSynonym (name, reference))
     end
   | Tmod_apply _ ->
       let* module_exp = Exp.of_module_expr Name.Map.empty module_expr None in
-      return (ModuleExpression (name, module_exp))
+      return (ModuleExpression (name, module_typ, module_exp))
   | Tmod_functor (ident, _, module_type_arg, module_expr) ->
     let* functor_parameters =
       match module_type_arg with
@@ -465,11 +506,8 @@ let rec to_coq (with_args : bool) (defs : t list) : SmartPrint.t =
     | Value value -> Value.to_coq with_args value
     | AbstractValue (name, typ_vars, typ) ->
       !^ "Parameter" ^^ Name.to_coq name ^^ !^ ":" ^^
-      (match typ_vars with
-      | [] -> empty
-      | _ :: _ ->
-        !^ "forall" ^^
-        nest (parens (separate space (typ_vars |> List.map Name.to_coq) ^^ !^ ":" ^^ Pp.set)) ^-^ !^ ","
+      Name.to_coq_list_or_empty typ_vars (fun typ_vars ->
+        !^ "forall" ^^ nest (parens (typ_vars ^^ !^ ":" ^^ Pp.set)) ^-^ !^ ","
       ) ^^
       Type.to_coq None None typ ^-^ !^ "."
     | TypeDefinition typ_def -> TypeDefinition.to_coq with_args typ_def
@@ -517,7 +555,7 @@ let rec to_coq (with_args : bool) (defs : t list) : SmartPrint.t =
               nest (
                 begin match (typ_annotation, is_functor) with
                 | (Some typ_annotation, true) ->
-                  nest (!^ ":" ^^ Type.to_coq None None typ_annotation)
+                  !^ ":" ^^ Type.to_coq None None typ_annotation
                 | _ -> empty
                 end ^^
                 !^ ":="
@@ -529,13 +567,17 @@ let rec to_coq (with_args : bool) (defs : t list) : SmartPrint.t =
         ) ^^ newline ^^
         !^ "End" ^^ Name.to_coq name ^-^ !^ "." ^^
         begin match e with
-        | Some _ ->
+        | Some (_, typ_annotation) ->
           newline ^^
           nest (
             !^ "Definition" ^^ Name.to_coq name ^^ Pp.args with_args ^^
             separate space (functor_parameters |> List.map (fun (name, _) ->
               Name.to_coq name
-            )) ^^ !^ ":=" ^^
+            )) ^^
+            begin match (typ_annotation, is_functor) with
+            | (Some typ_annotation, false) -> !^ ":" ^^ Type.to_coq None None typ_annotation
+            | _ -> empty
+            end ^^ !^ ":=" ^^
             nest (
               Name.to_coq name ^-^ !^ "." ^-^ final_item_name ^-^
               begin if is_functor then
@@ -560,9 +602,13 @@ let rec to_coq (with_args : bool) (defs : t list) : SmartPrint.t =
         | None -> empty
         end
       )
-    | ModuleExpression (name, e) ->
+    | ModuleExpression (name, typ, e) ->
       nest (
-        !^ "Definition" ^^ Name.to_coq name ^^ Pp.args with_args ^^ !^ ":=" ^^
+        !^ "Definition" ^^ Name.to_coq name ^^ Pp.args with_args ^^
+        begin match typ with
+        | None -> empty
+        | Some typ -> !^ ":" ^^ Type.to_coq None None typ
+        end ^^ !^ ":=" ^^
         Exp.to_coq false e ^-^ !^ "."
       )
     | ModuleInclude reference ->
@@ -570,16 +616,9 @@ let rec to_coq (with_args : bool) (defs : t list) : SmartPrint.t =
     | ModuleIncludeItem (name, typ_vars, mixed_path) ->
       nest (
         !^ "Definition" ^^ Name.to_coq name ^^ Pp.args with_args ^^
-        begin match typ_vars with
-        | [] -> empty
-        | _ :: _ ->
-          nest (braces (
-            separate space (typ_vars |> List.map (fun typ_var ->
-              Name.to_coq typ_var
-            )) ^^
-            !^ ":" ^^ Pp.set
-          ))
-        end ^^
+        Name.to_coq_list_or_empty typ_vars (fun typ_vars ->
+          nest (braces (typ_vars ^^ !^ ":" ^^ Pp.set))
+        ) ^^
         !^ ":=" ^^
         nest (separate space (
           MixedPath.to_coq mixed_path ::
@@ -596,6 +635,11 @@ let rec to_coq (with_args : bool) (defs : t list) : SmartPrint.t =
         !^ "Module" ^^ Name.to_coq name ^^ !^ ":=" ^^ PathName.to_coq reference ^-^ !^ "."
       )
     | Signature (name, signature) -> Signature.to_coq_definition name signature
+    | Documentation (message, defs) ->
+      nest (
+        !^ ( "(** " ^ message ^ " *)") ^^ newline ^^
+        to_coq with_args defs
+      )
     | Error message -> !^ ( "(* " ^ message ^ " *)")
     | ErrorMessage (message, def) ->
       nest (

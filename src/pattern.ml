@@ -18,7 +18,7 @@ type t =
 (** Import an OCaml pattern. If the answer is [None] then the pattern is
     impossible (for example with extensible types). *)
 let rec of_pattern (p : pattern) : t option Monad.t =
-  set_loc (Loc.of_location p.pat_loc) (
+  set_loc p.pat_loc (
   match p.pat_desc with
   | Tpat_any -> return (Some Any)
   | Tpat_var (x, _) ->

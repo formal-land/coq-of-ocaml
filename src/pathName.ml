@@ -29,7 +29,6 @@ let try_to_use (head : string) (name : string) : bool option Monad.t =
     return (Some false)
   | (None, None) -> return None
 
-
 (* Convert an identifier from OCaml to its Coq's equivalent, or [None] if no
    conversion is needed. We consider all the paths in the standard library
    to be converted, as conversion also means keeping the name as it (without
@@ -162,7 +161,7 @@ let map_constructor_name (cstr_name : string) (typ_ident : string)
   | Some renaming -> return renaming
   | None -> return cstr_name
 
-let rec iterate_in_aliases (path : Path.t) : Path.t Monad.t =
+let rec iterate_in_aliases (path : Path.t) (nb_args : int) : Path.t Monad.t =
   let* configuration = get_configuration in
   let is_in_barrier_module (path : Path.t) : bool =
     Configuration.is_alias_in_barrier_module
@@ -170,11 +169,12 @@ let rec iterate_in_aliases (path : Path.t) : Path.t Monad.t =
       (Ident.name (Path.head path)) in
   let* env = get_env in
   match Env.find_type path env with
-  | { type_manifest = Some { desc = Tconstr (path', _, _); _ }; _ } ->
+  | { type_manifest = Some { desc = Tconstr (path', args, _); _ }; _ }
+    when List.length args = nb_args ->
     if is_in_barrier_module path && not (is_in_barrier_module path') then
       return path
     else
-      iterate_in_aliases path'
+      iterate_in_aliases path' nb_args
   | _ -> return path
 
 let of_constructor_description
@@ -183,10 +183,10 @@ let of_constructor_description
   match constructor_description with
   | {
       cstr_name;
-      cstr_res = { desc = Tconstr (path, _, _); _ };
+      cstr_res = { desc = Tconstr (path, args, _); _ };
       _
     } ->
-    let* path = iterate_in_aliases path in
+    let* path = iterate_in_aliases path (List.length args) in
     let typ_ident = Path.head path in
     of_path_without_convert false path >>= fun { path; _ } ->
     let* cstr_name = map_constructor_name cstr_name (Ident.name typ_ident) in
@@ -203,8 +203,8 @@ let of_constructor_description
 let of_label_description (label_description : Types.label_description)
   : t Monad.t =
   match label_description with
-  | { lbl_name; lbl_res = { desc = Tconstr (path, _, _); _ } ; _ } ->
-    let* path = iterate_in_aliases path in
+  | { lbl_name; lbl_res = { desc = Tconstr (path, args, _); _ } ; _ } ->
+    let* path = iterate_in_aliases path (List.length args) in
     of_path_without_convert false path >>= fun { path; base } ->
     Name.of_string false lbl_name >>= fun lbl_name ->
     let path_name = {

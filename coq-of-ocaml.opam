@@ -8,13 +8,13 @@ bug-reports: "https://github.com/clarus/coq-of-ocaml/issues"
 authors: ["Guillaume Claret"]
 license: "MIT"
 build: [
-  ["sh" "-c" "cd OCaml && ./configure.sh"] {coq:installed}
-  [make "-C" "OCaml" "-j%{jobs}%"] {coq:installed}
+  ["sh" "-c" "cd proofs && ./configure.sh"] {coq:installed}
+  [make "-C" "proofs" "-j%{jobs}%"] {coq:installed}
   ["dune" "build" "-p" name "-j" jobs]
   [make "test"] {with-test}
 ]
 install: [
-  [make "-C" "OCaml" "install"] {coq:installed}
+  [make "-C" "proofs" "install"] {coq:installed}
 ]
 depends: [
   "conf-ruby" {with-test}

@@ -1,5 +1,7 @@
+(** Some documentation *)
 module type Source = sig
   type t
+  (** The description of [x] *)
   val x : t
   val id : 'a -> 'a
 end
@@ -47,4 +49,4 @@ module GenFun () : Target = struct
   let y = 23
 end
 
-module AppliedGenFun = GenFun ()
+module AppliedGenFun : Target = GenFun ()

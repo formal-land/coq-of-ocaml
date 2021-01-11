@@ -257,6 +257,22 @@ let apply_with_notations (mixed_path : MixedPath.t) (typs : t list)
   | None -> return (Apply (mixed_path, typs))
   | Some apply_with_merge -> return apply_with_merge
 
+(** Heuristic to find a simpler alias if the path is in a module as a record. *)
+let simplified_contructor_path (path : Path.t) (arity : int)
+  : MixedPath.t Monad.t =
+  let* mixed_path = MixedPath.of_path false path in
+  match mixed_path with
+  | Access _ ->
+    let* path = PathName.iterate_in_aliases path arity in
+    begin try
+      (* By calling this function we check that we do not have a path with
+         functors, which we cannot handle. *)
+      let _ = Path.to_string_list path in
+      MixedPath.of_path false path
+    with _ -> return mixed_path
+    end
+  | _ -> return mixed_path
+
 (** Import an OCaml type. Add to the environment all the new free type variables. *)
 let rec of_typ_expr
   (with_free_vars: bool)
@@ -295,7 +311,7 @@ let rec of_typ_expr
   | Tconstr (path, typs, _) ->
     non_phantom_typs path typs >>= fun typs ->
     of_typs_exprs with_free_vars typ_vars typs >>= fun (typs, typ_vars, new_typ_vars) ->
-    MixedPath.of_path false path >>= fun mixed_path ->
+    let* mixed_path = simplified_contructor_path path (List.length typs) in
     let* typ = apply_with_notations mixed_path typs in
     return (typ, typ_vars, new_typ_vars)
   | Tobject (_, object_descr) ->

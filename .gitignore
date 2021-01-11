@@ -23,7 +23,7 @@ a.out
 Makefile.conf
 _build/
 \#*\#
-OCaml/Makefile
+proofs/Makefile
 tests/extraction
 .merlin
 coq-of-ocaml.install
