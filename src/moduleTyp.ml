@@ -64,12 +64,12 @@ let rec of_ocaml_desc (module_typ_desc : Typedtree.module_type_desc) : t Monad.t
   match module_typ_desc with
   | Tmty_alias _ ->
     raise (Error "alias") NotSupported "Aliases in module types are not handled"
-  | Tmty_functor (ident, _, Some param, result) ->
-    let* name = Name.of_ident false ident in
+  | Tmty_functor (Named (ident, _, param), result) ->
+    let* name = Name.of_optional_ident false ident in
     of_ocaml param >>= fun param ->
     of_ocaml result >>= fun result ->
     return (Functor (name, param, result))
-  | Tmty_functor (_, _, None, _) ->
+  | Tmty_functor (Unit, _) ->
     raise
       (Error "generative_functor")
       NotSupported
