@@ -92,7 +92,6 @@ module RecordSkeleton = struct
 end
 
 (** The constructors of an inductive type, either in a GADT or non-GADT form. *)
-module Constructors = struct
   (** [constructor_name]: forall [typ_vars], [param_typs] -> t [res_typ_params] *)
   type item = {
     constructor_name : Name.t;
@@ -248,4 +247,3 @@ module Constructors = struct
     ) in
     return (constructors, typ_params)
 
-end
