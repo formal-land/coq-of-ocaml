@@ -208,7 +208,7 @@ end
 
   let of_ocaml
     (defined_typ_params : AdtParameters.t)
-    (force_gadt : bool)
+    (def_attributes : Attribute.t list)
     (single_constructors : Single.t list)
     : (t * AdtParameters.t) Monad.t =
     let constructors_return_typ_params =
@@ -219,7 +219,7 @@ end
                 defined_typ_params
                 constructors_return_typ_params in
     let typ_params =
-      if force_gadt then
+      if Attribute.has_force_gadt def_attributes then
         []
       else
         match merged_typ_params with
