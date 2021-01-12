@@ -5,6 +5,7 @@ type t =
   | AxiomWithReason
   | Cast
   | ForceGadt
+  | TaggedGadt
   | Implicit of string
   | MatchGadt
   | MatchGadtWithResult
@@ -56,6 +57,7 @@ let of_attributes (attributes : Typedtree.attributes) : t list Monad.t =
       return (Some AxiomWithReason)
     | "coq_cast" -> return (Some Cast)
     | "coq_force_gadt" -> return (Some ForceGadt)
+    | "coq_tag_gadt" -> return (Some TaggedGadt)
     | "coq_implicit" ->
       let error_message =
         "Give a value such as \"(A := unit)\" to define an implicit type." in
@@ -89,6 +91,12 @@ let has_cast (attributes : t list) : bool =
 let has_force_gadt (attributes : t list) : bool =
   attributes |> List.exists (function
     | ForceGadt -> true
+    | _ -> false
+  )
+
+let has_tag_gadt (attributes : t list) : bool =
+  attributes |> List.exists (function
+    | TaggedGadt -> true
     | _ -> false
   )
 

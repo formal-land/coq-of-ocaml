@@ -2,94 +2,6 @@ open Typedtree
 open SmartPrint
 open Monad.Notations
 
-let to_coq_record
-  (module_name : Name.t)
-  (typ_name : Name.t)
-  (typ_args : Name.t list)
-  (fields : (Name.t * Type.t) list)
-  (with_with : bool)
-  : SmartPrint.t =
-  nest (
-    !^ "Module" ^^ Name.to_coq module_name ^-^ !^ "." ^^ newline ^^
-    indent (
-      !^ "Record" ^^ !^ "record" ^^
-      begin match typ_args with
-      | [] -> empty
-      | _ :: _ ->
-        braces (nest (
-          separate space (List.map Name.to_coq typ_args) ^^
-          !^ ":" ^^ Pp.set
-        ))
-      end ^^
-      nest (!^ ":" ^^ Pp.set) ^^
-      !^ ":=" ^^ !^ "Build" ^^
-      !^ "{" ^^ newline ^^
-      indent (separate (!^ ";" ^^ newline) (fields |> List.map (fun (x, typ) ->
-        nest (Name.to_coq x ^^ !^ ":" ^^ Type.to_coq None None typ)))) ^^
-      !^ "}." ^^
-      begin match typ_args with
-      | [] -> empty
-      | _ :: _ ->
-        newline ^^ !^ "Arguments" ^^ !^ "record" ^^ !^ ":" ^^
-        !^ "clear" ^^ !^ "implicits" ^-^ !^ "."
-      end ^^
-      newline ^^
-      begin if with_with then
-        separate newline (fields |> List.map (fun (name, _) ->
-          let prefixed_typ_args =
-            typ_args |> List.map (fun typ_arg ->
-              Name.to_coq (Name.prefix_by_t typ_arg)
-              ) in
-          let record_typ =
-            nest (separate space (!^ "record" :: prefixed_typ_args)) in
-          nest (
-            !^ "Definition" ^^ Name.to_coq (Name.prefix_by_with name) ^^
-            begin match typ_args with
-            | [] -> empty
-            | _ :: _ -> braces (nest (separate space prefixed_typ_args))
-            end ^^
-            Name.to_coq name ^^
-            nest (parens (!^ "r" ^^ !^ ":" ^^ record_typ)) ^-^
-            !^ " :=" ^^ newline ^^
-            indent @@ nest (
-              !^ "Build" ^^
-              separate space prefixed_typ_args ^^
-              separate space (fields |> List.map (fun (name', _) ->
-                nest (
-                  if Name.equal name name' then
-                    Name.to_coq name
-                  else
-                  !^ "r" ^-^ !^ ".(" ^-^ Name.to_coq name' ^-^ !^ ")"
-                )
-              )) ^-^ !^ "."
-            )
-          )
-        )) ^^ newline
-      else
-        empty
-      end
-    ) ^^
-    !^ "End" ^^ Name.to_coq module_name ^-^ !^ "." ^^ newline ^^
-    nest (
-      !^ "Definition" ^^ Name.to_coq typ_name ^^ !^ ":=" ^^
-      Name.to_coq module_name ^-^ !^ ".record" ^-^ !^ "."
-    )
-  )
-
-module RecordSkeleton = struct
-  type t = {
-    fields : Name.t list;
-    module_name : Name.t;
-    typ_name : Name.t;
-  }
-
-  let to_coq (record_skeleton : t) : SmartPrint.t =
-    let { fields; module_name; typ_name } = record_skeleton in
-    to_coq_record module_name typ_name fields (fields |>
-      List.map (fun field -> (field, Type.Variable field))
-    ) true
-end
-
 (** The constructors of an inductive type, either in a GADT or non-GADT form. *)
 module Constructors = struct
   (** [constructor_name]: forall [typ_vars], [param_typs] -> t [res_typ_params] *)
@@ -116,7 +28,7 @@ module Constructors = struct
       (typ_name : Name.t)
       (defined_typ_params : AdtParameters.t)
       (case : Types.constructor_declaration)
-      : (t * (RecordSkeleton.t * Name.t list * Type.t) option) Monad.t =
+      : (t * (AdtConstructors.RecordSkeleton.t * Name.t list * Type.t) option) Monad.t =
       let { Types.cd_args; cd_id; cd_loc; cd_res; _ } = case in
       set_loc cd_loc (
       let* constructor_name =
@@ -165,7 +77,7 @@ module Constructors = struct
           ],
           Some (
             {
-              RecordSkeleton.fields = record_fields;
+              AdtConstructors.RecordSkeleton.fields = record_fields;
               module_name = constructor_name;
               typ_name = Name.suffix_by_skeleton constructor_name;
             },
@@ -255,9 +167,16 @@ module Inductive = struct
 
   type t = {
     constructor_records
-      : (Name.t * (RecordSkeleton.t * Name.t list * Type.t) list) list;
+      : (Name.t * (AdtConstructors.RecordSkeleton.t * Name.t list * Type.t) list) list;
     notations : notation list;
-    records : RecordSkeleton.t list;
+    records : AdtConstructors.RecordSkeleton.t list;
+    is_tagged : bool;
+    (* typs is a list of mutually defined Inductives
+     * of the form
+     * Inductive `Name.t` (`Name.t list` : Set) : Set :=
+     * | `Constructor.t` ...
+     * with `Name.t` (`Name.t list` : set) : Set := ...
+     *)
     typs : (Name.t * Name.t list * Constructors.t) list;
   }
 
@@ -283,7 +202,7 @@ module Inductive = struct
               separate
                 (newline ^^ newline)
                 (records |> List.map (fun (record, _, _) ->
-                  RecordSkeleton.to_coq record
+                  AdtConstructors.RecordSkeleton.to_coq record
                 ))
             ) ^^ newline ^^
             !^ "End" ^^ Name.to_coq name ^-^ !^ "."
@@ -302,7 +221,7 @@ module Inductive = struct
   let to_coq_notations_reserved (inductive : t) : SmartPrint.t list =
     (inductive.constructor_records |> List.map
       (fun (name, records) ->
-        records |> List.map (fun ({ RecordSkeleton.module_name; _ }, _, _) ->
+        records |> List.map (fun ({ AdtConstructors.RecordSkeleton.module_name; _ }, _, _) ->
           !^ "Reserved Notation" ^^ to_coq_notation_record name module_name ^-^
           !^ "."
         )
@@ -314,7 +233,7 @@ module Inductive = struct
     ))
 
   let to_coq_record_skeletons (inductive : t) : SmartPrint.t list =
-    inductive.records |> List.map RecordSkeleton.to_coq
+    inductive.records |> List.map AdtConstructors.RecordSkeleton.to_coq
 
   let to_coq_typs
     (subst : Type.Subst.t)
@@ -411,7 +330,7 @@ module Inductive = struct
     )) @
     (inductive.constructor_records |> List.map
       (fun (name, records) ->
-        records |> List.map (fun ({ RecordSkeleton.module_name; _ }, typ_args, typ) ->
+        records |> List.map (fun ({ AdtConstructors.RecordSkeleton.module_name; _ }, typ_args, typ) ->
           to_coq_notations_where
             subst
             (to_coq_notation_record name module_name)
@@ -440,7 +359,7 @@ module Inductive = struct
             !^ "Include" ^^ notation_module_name ^-^ !^ "." ^-^
               Name.to_coq name ^-^ !^ "." ^^ newline ^^
             separate newline (records |> List.map
-              (fun ({ RecordSkeleton.module_name; _ }, _, _) ->
+              (fun ({ AdtConstructors.RecordSkeleton.module_name; _ }, _, _) ->
                 to_coq_notations_definition
                   module_name
                   (!^ "'" ^-^ Name.to_coq name ^-^ !^ "." ^-^ Name.to_coq module_name)
@@ -496,7 +415,7 @@ module Inductive = struct
           let use_notation =
             inductive.constructor_records |> List.exists (fun (name, records) ->
               records |> List.exists
-                (fun ({ RecordSkeleton.module_name; _ }, _, _) ->
+                (fun ({ AdtConstructors.RecordSkeleton.module_name; _ }, _, _) ->
                   name = prefix && module_name = base
                 )
             ) in
@@ -582,6 +501,7 @@ let of_ocaml (typs : type_declaration list) : t Monad.t =
           constructor_records = [];
           notations = [];
           records = [];
+          is_tagged = false;
           typs = [(name, typ_args, constructors)];
         })
         NotSupported
@@ -681,7 +601,7 @@ let of_ocaml (typs : type_declaration list) : t Monad.t =
             )
           ) :: notations,
           {
-            RecordSkeleton.fields = fields |> List.map fst;
+            AdtConstructors.RecordSkeleton.fields = fields |> List.map fst;
             module_name = name;
             typ_name = Name.suffix_by_skeleton name;
            } :: records,
@@ -722,6 +642,7 @@ let of_ocaml (typs : type_declaration list) : t Monad.t =
         constructor_records = List.rev constructor_records;
         notations = List.rev notations;
         records;
+        is_tagged = false;
         typs = List.rev typs
       }
     )
@@ -730,7 +651,7 @@ let to_coq (with_args : bool) (def : t) : SmartPrint.t =
   match def with
   | Inductive inductive -> Inductive.to_coq inductive
   | Record (name, typ_args, fields, with_with) ->
-    to_coq_record name name typ_args fields with_with
+    AdtConstructors.RecordSkeleton.to_coq_record name name typ_args fields with_with
   | Synonym (name, typ_args, value) ->
     nest (
       !^ "Definition" ^^ Name.to_coq name ^^
