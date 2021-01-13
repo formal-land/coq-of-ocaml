@@ -7,6 +7,11 @@ module AdtVariable = struct
     | Index of Name.t
     | Unknown
 
+  let to_string (v : t) : string =
+    match v with
+    | Error | Unknown -> "??"
+    | Parameter name | Index name -> Name.to_string name
+
   let rec of_ocaml (typ : Types.type_expr) : t Monad.t =
     match typ.Types.desc with
     | Tvar x | Tunivar x ->
@@ -24,6 +29,11 @@ module AdtVariable = struct
 end
 
 type t = AdtVariable.t list
+
+let to_string (vs : t) : string =
+  let s = List.fold_left (fun acc v -> acc ^ ", " ^ AdtVariable.to_string v) "" vs in
+  "[ " ^ s ^ " ]\n"
+
 
 let get_name : AdtVariable.t -> Name.t option = function
   | AdtVariable.Parameter name | Index name -> Some name
