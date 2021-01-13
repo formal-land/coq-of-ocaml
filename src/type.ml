@@ -42,8 +42,11 @@ let rec non_phantom_typs (path : Path.t) (typs : Types.type_expr list)
     AdtParameters.of_ocaml typ_declaration.type_params >>= fun typ_params ->
     Attribute.of_attributes typ_declaration.type_attributes >>= fun typ_attributes ->
     let is_phantom = Attribute.has_phantom typ_attributes in
+    let is_tagged = Attribute.has_tag_gadt typ_attributes in
     if is_phantom then
       return (Some (typ_params |> List.map (fun _ -> false)))
+    else if is_tagged then
+      return (Some (typ_params |> List.map (fun _ -> true)))
     else
       begin match typ_declaration.type_kind with
       | Type_abstract ->

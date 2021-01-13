@@ -218,11 +218,13 @@ end
     let merged_typ_params = AdtParameters.check_if_not_gadt
                 defined_typ_params
                 constructors_return_typ_params in
+
     let typ_params =
-      if Attribute.has_force_gadt def_attributes then
+      if Attribute.has_tag_gadt def_attributes
+      then defined_typ_params
+      else if Attribute.has_force_gadt def_attributes then
         []
-      else
-        match merged_typ_params with
+      else match merged_typ_params with
         | None -> defined_typ_params
         | Some merged_typ_params -> merged_typ_params in
 
