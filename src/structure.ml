@@ -269,7 +269,7 @@ let rec of_structure (structure : structure) : t list Monad.t =
                   let typ_vars = Name.Map.empty in
                   let* (_, _, new_typ_vars) =
                     Type.of_typ_expr true typ_vars val_type in
-                  return (Name.Set.elements new_typ_vars)
+                  return (List.map fst new_typ_vars)
                 | _ -> return [] in
               return (Some (ModuleIncludeItem (
                 name,
@@ -359,7 +359,7 @@ let rec of_structure (structure : structure) : t list Monad.t =
     | Tstr_primitive { val_id; val_val = { val_type; _ }; _ } ->
       let* name = Name.of_ident true val_id in
       Type.of_typ_expr true Name.Map.empty val_type >>= fun (typ, _, free_typ_vars) ->
-      return [AbstractValue (name, Name.Set.elements free_typ_vars, typ)]
+      return [AbstractValue (name, List.map fst free_typ_vars, typ)]
     | Tstr_typext _ ->
       error_message
         (Error "type_extension")

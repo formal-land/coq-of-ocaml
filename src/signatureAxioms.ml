@@ -73,7 +73,7 @@ let of_first_class_types_signature
       return (Some (
         IncludedFieldValue (
           name,
-          Name.Set.elements new_typ_vars,
+          List.map fst new_typ_vars,
           typ,
           module_name,
           field_path_name

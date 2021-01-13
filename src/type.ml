@@ -278,10 +278,11 @@ let simplified_contructor_path (path : Path.t) (arity : int)
 
 (** Import an OCaml type. Add to the environment all the new free type variables. *)
 let rec of_typ_expr
+  (* (should_tag : bool) *)
   (with_free_vars: bool)
   (typ_vars : Name.t Name.Map.t)
   (typ : Types.type_expr)
-  : (t * Name.t Name.Map.t * Name.Set.t) Monad.t =
+  : (t * Name.t Name.Map.t * VarEnv.t) Monad.t =
   match typ.desc with
   | Tvar x | Tunivar x ->
     (match x with
@@ -295,19 +296,24 @@ let rec of_typ_expr
     ) >>= fun (source_name, generated_name) ->
     let* source_name = Name.of_string false source_name in
     let* generated_name = Name.of_string false generated_name in
+    let typ = Kind.Set in
+      (* if should_tag *)
+      (* then Kind.Tag *)
+      (* else Kind.Set in *)
     let (typ_vars, new_typ_vars, name) =
       if Name.Map.mem source_name typ_vars then (
         let name = Name.Map.find source_name typ_vars in
-        (typ_vars, Name.Set.empty, name)
+        (typ_vars, [(name, typ)], name)
       ) else (
         let typ_vars = Name.Map.add source_name generated_name typ_vars in
-        (typ_vars, Name.Set.singleton generated_name, generated_name)
+        (typ_vars, [(generated_name, typ)], generated_name)
       ) in
     return (Variable name, typ_vars, new_typ_vars)
   | Tarrow (_, typ_x, typ_y, _) ->
     of_typ_expr with_free_vars typ_vars typ_x >>= fun (typ_x, typ_vars, new_typ_vars_x) ->
     of_typ_expr with_free_vars typ_vars typ_y >>= fun (typ_y, typ_vars, new_typ_vars_y) ->
-    return (Arrow (typ_x, typ_y), typ_vars, Name.Set.union new_typ_vars_x new_typ_vars_y)
+    let new_typ_vars = VarEnv.union new_typ_vars_x new_typ_vars_y in
+    return (Arrow (typ_x, typ_y), typ_vars, new_typ_vars)
   | Ttuple typs ->
     of_typs_exprs with_free_vars typ_vars typs >>= fun (typs, typ_vars, new_typ_vars) ->
     return (Tuple typs, typ_vars, new_typ_vars)
@@ -325,7 +331,7 @@ let rec of_typ_expr
       return (Apply (mixed_path, typs), typ_vars, new_typ_vars)
     | _ ->
       raise
-        (Error "unhandled_object_type", typ_vars, Name.Set.empty)
+        (Error "unhandled_object_type", typ_vars, [])
         NotSupported
         "We do not handle this form of object types"
     end
@@ -336,12 +342,12 @@ let rec of_typ_expr
       (
         Tuple [typ1; typ2],
         typ_vars,
-        Name.Set.union new_typ_vars1 new_typ_vars2
+        VarEnv.union new_typ_vars1 new_typ_vars2
       )
       NotSupported "Field types are not handled"
   | Tnil ->
     raise
-      (Error "nil", typ_vars, Name.Set.empty)
+      (Error "nil", typ_vars, [])
       NotSupported
       "Nil type is not handled"
   | Tlink typ | Tsubst typ -> of_typ_expr with_free_vars typ_vars typ
@@ -352,7 +358,7 @@ let rec of_typ_expr
       return (
         Apply (MixedPath.PathName path_name, []),
         typ_vars,
-        Name.Set.empty
+        []
       )
     | None ->
       Monad.List.fold_left
@@ -362,10 +368,10 @@ let rec of_typ_expr
           return (
             (name, Tuple typs) :: fields,
             typ_vars,
-            Name.Set.union new_typ_vars new_typ_vars'
+            VarEnv.union new_typ_vars new_typ_vars'
           )
         )
-        ([], typ_vars, Name.Set.empty)
+        ([], typ_vars, [])
         row_fields >>= fun (fields, typ_vars, new_typ_vars) ->
       return (Sum (List.rev fields), typ_vars, new_typ_vars)
     end
@@ -378,7 +384,8 @@ let rec of_typ_expr
       Name.Set.mem typ_arg non_phantom_vars
     ) in
     of_typ_expr with_free_vars typ_vars typ >>= fun (typ, typ_vars, new_typ_vars_typ) ->
-    let new_typ_vars_typ = Name.Set.diff non_phantom_vars new_typ_vars_typ in
+    let non_phantom_vars = Name.Set.elements non_phantom_vars in
+    let new_typ_vars_typ = VarEnv.remove_many non_phantom_vars new_typ_vars_typ in
     return (ForallTyps (typ_args, typ), typ_vars, new_typ_vars_typ)
   | Tpackage (path, idents, typs) ->
       let* path_name = PathName.of_path_without_convert false path in
@@ -390,10 +397,10 @@ let rec of_typ_expr
           return (
             (path_name, typ) :: typ_substitutions,
             typ_vars,
-            Name.Set.union new_typ_vars new_typ_vars'
+            VarEnv.union new_typ_vars new_typ_vars'
           )
         )
-        ([], typ_vars, Name.Set.empty)
+        ([], typ_vars, [])
         typ_substitutions >>= fun (typ_substitutions, typ_vars, new_typ_vars) ->
       get_env >>= fun env ->
       let module_typ = Env.find_modtype path env in
@@ -411,13 +418,14 @@ and of_typs_exprs
   (with_free_vars: bool)
   (typ_vars : Name.t Name.Map.t)
   (typs : Types.type_expr list)
-  : (t list * Name.t Name.Map.t * Name.Set.t) Monad.t =
+  : (t list * Name.t Name.Map.t * VarEnv.t) Monad.t =
   (Monad.List.fold_left
     (fun (typs, typ_vars, new_typ_vars) typ ->
       of_typ_expr with_free_vars typ_vars typ >>= fun (typ, typ_vars, new_typ_vars') ->
-      return (typ :: typs, typ_vars, Name.Set.union new_typ_vars new_typ_vars')
+      let new_typ_vars = VarEnv.union new_typ_vars new_typ_vars' in
+      return (typ :: typs, typ_vars, new_typ_vars)
     )
-    ([], typ_vars, Name.Set.empty)
+    ([], typ_vars, [])
     typs
   ) >>= fun (typs, typ_vars, new_typ_vars) ->
   return (List.rev typs, typ_vars, new_typ_vars)

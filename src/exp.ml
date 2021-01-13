@@ -124,7 +124,7 @@ module ModuleTypValues = struct
           Type.of_typ_expr true typ_vars val_type >>= fun (_, _, new_typ_vars) ->
           return (Some (Value (
             ident,
-            Name.Set.cardinal new_typ_vars
+            List.length new_typ_vars
           )))
         | Sig_module (ident, _, { Types.md_type = Mty_functor _; _ }, _, _) ->
           let* name = Name.of_ident false ident in
@@ -805,7 +805,7 @@ and import_let_fun
       let (args_typs, e_body_typ) = Type.open_type e_typ (List.length args_names) in
       let header = {
         Header.name = x;
-        typ_vars = Name.Set.elements new_typ_vars;
+        typ_vars = List.map fst new_typ_vars;
         args = List.combine args_names args_typs;
         structs;
         typ = e_body_typ;
@@ -854,7 +854,7 @@ and of_let
       | _ -> true
       end ->
       Type.of_typ_expr true typ_vars exp_type >>= fun (_, _, new_typ_vars) ->
-      return (Name.Set.cardinal new_typ_vars <> 0)
+      return (List.length new_typ_vars <> 0)
     | _ -> return true
     end >>= fun is_function ->
     begin match cases with
@@ -1212,7 +1212,7 @@ and of_include
       begin match signature_item with
       | Sig_value (_, { Types.val_type; _ }, _) ->
         Type.of_typ_expr true typ_vars val_type >>= fun (_, _, new_typ_vars) ->
-        return (Name.Set.elements new_typ_vars)
+        return (List.map fst new_typ_vars)
       | _ -> return []
       end >>= fun typ_vars ->
       let* name = Name.of_ident is_value ident in
