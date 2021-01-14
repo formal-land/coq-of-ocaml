@@ -6,7 +6,7 @@ open Monad.Notations
 module Header = struct
   type t = {
     name : Name.t;
-    typ_vars : Name.t list;
+    typ_vars : VarEnv.t;
     args : (Name.t * Type.t) list;
     structs : string list;
     typ : Type.t;
@@ -805,7 +805,7 @@ and import_let_fun
       let (args_typs, e_body_typ) = Type.open_type e_typ (List.length args_names) in
       let header = {
         Header.name = x;
-        typ_vars = List.map fst new_typ_vars;
+        typ_vars = new_typ_vars;
         args = List.combine args_names args_typs;
         structs;
         typ = e_body_typ;
@@ -1374,11 +1374,7 @@ let rec to_coq (paren : bool) (e : t) : SmartPrint.t =
         ) else
           !^ "with") ^^
         Name.to_coq header.Header.name ^^
-        (if header.Header.typ_vars = []
-        then empty
-        else braces @@ group (
-          separate space (List.map Name.to_coq header.Header.typ_vars) ^^
-          !^ ":" ^^ Pp.set)) ^^
+        Type.typ_vars_to_coq braces empty empty header.Header.typ_vars ^^
         group (separate space (header.Header.args |> List.map (fun (x, x_typ) ->
           parens (nest (
             Name.to_coq x ^^ !^ ":" ^^ Type.to_coq None None x_typ

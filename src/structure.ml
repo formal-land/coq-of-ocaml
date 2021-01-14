@@ -9,9 +9,7 @@ module Value = struct
 
   let to_coq_typ_vars (header : Exp.Header.t) : SmartPrint.t =
     let { Exp.Header.typ_vars; _ } = header in
-    Name.to_coq_list_or_empty typ_vars (fun typ_vars ->
-      braces (nest (typ_vars ^^ !^ ":" ^^ Pp.set))
-    )
+    Type.typ_vars_to_coq braces empty empty typ_vars
 
   let to_coq_args (header : Exp.Header.t) : SmartPrint.t =
     let { Exp.Header.args; _ } = header in
@@ -19,13 +17,13 @@ module Value = struct
       parens @@ nest (Name.to_coq x ^^ !^ ":" ^^ Type.to_coq None None t)
     )))
 
-  let to_coq_notation_synonym (name : Name.t) (typ_vars : Name.t list)
+  let to_coq_notation_synonym (name : Name.t) (typ_vars : VarEnv.t)
     : SmartPrint.t =
     nest (
       !^ "let" ^^ Name.to_coq name ^^
-      Name.to_coq_list_or_empty typ_vars (fun typ_vars -> braces typ_vars) ^^
+      Name.to_coq_list_or_empty (List.map fst typ_vars) braces ^^
       !^ ":=" ^^ !^ "'" ^-^ Name.to_coq name ^^
-      separate space (List.map Name.to_coq typ_vars) ^^ !^ "in" ^^ newline
+      separate space (List.map Name.to_coq (List.map fst typ_vars)) ^^ !^ "in" ^^ newline
     )
 
   (** Pretty-print a value definition to Coq. *)
@@ -51,10 +49,7 @@ module Value = struct
           let { Exp.Header.name; typ_vars; typ; _ } = header in
           nest (
             !^ "Axiom" ^^ Name.to_coq name ^^ !^ ":" ^^
-            Name.to_coq_list_or_empty typ_vars (fun typ_vars ->
-              !^ "forall" ^^
-              braces (nest (typ_vars ^^ !^ ":" ^^ Pp.set)) ^-^ !^ ","
-            ) ^^
+            Type.typ_vars_to_coq braces (!^ "forall") (!^ ",") typ_vars ^^
             Type.to_coq None None typ ^-^
             !^ "."
           )
@@ -121,12 +116,14 @@ module Value = struct
               !^ ":=" ^^
               parens (nest (
                 nest (
-                  Name.to_coq_list_or_empty typ_vars (fun typ_vars ->
-                    nest (
-                      !^ "fun" ^^ parens (typ_vars ^^ !^ ":" ^^ Pp.set) ^^
-                      !^ "=>"
-                    ) ^^ space
-                  ) ^-^
+                  Type.typ_vars_to_coq parens (!^ "fun") (!^ " => ") typ_vars
+                  (* Name.to_coq_list_or_empty typ_vars (fun typ_vars -> *)
+                    (* nest ( *)
+                      (* !^ "fun" ^^ parens (typ_vars ^^ !^ ":" ^^ Pp.set) ^^ *)
+                      (* !^ "=>" *)
+                    (* ) ^^ space *)
+                (* )  *)
+                      ^-^
                   begin match structs with
                   | [] -> !^ "fun"
                   | _ :: _ -> !^ "fix" ^^ Name.to_coq name
@@ -167,11 +164,13 @@ module Value = struct
               let { Exp.Header.name; typ_vars; _ } = header in
               nest (
                 !^ "Definition" ^^ Name.to_coq name ^^
-                Name.to_coq_list_or_empty typ_vars (fun typ_vars ->
-                  braces typ_vars
-                ) ^^ !^ ":=" ^^
+                Type.typ_vars_to_coq braces empty empty typ_vars ^^
+                (* Name.to_coq_list_or_empty typ_vars (fun typ_vars -> *)
+                  (* braces typ_vars *)
+                (* ) *)
+                !^ ":=" ^^
                 separate space (
-                  (!^ "'" ^-^ Name.to_coq name) :: List.map Name.to_coq typ_vars
+                  (!^ "'" ^-^ Name.to_coq name) :: List.map Name.to_coq (List.map fst typ_vars)
                 ) ^-^ !^ "."
               )
             ))]
