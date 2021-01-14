@@ -303,7 +303,7 @@ let rec of_typ_expr
     let (typ_vars, new_typ_vars, name) =
       if Name.Map.mem source_name typ_vars then (
         let name = Name.Map.find source_name typ_vars in
-        (typ_vars, [(name, typ)], name)
+        (typ_vars, [], name)
       ) else (
         let typ_vars = Name.Map.add source_name generated_name typ_vars in
         (typ_vars, [(generated_name, typ)], generated_name)
