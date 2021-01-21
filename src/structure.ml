@@ -179,7 +179,7 @@ module Value = struct
       )
 end
 
-type functor_parameters = (Name.t * ModuleTyp.free_vars * Type.t) list
+type functor_parameters = ModuleTyp.free_vars * (Name.t * Type.t) list
 
 (** A structure. *)
 type t =
@@ -346,7 +346,7 @@ let rec of_structure (structure : structure) : t list Monad.t =
         let* attributes = Attribute.of_attributes mb_attributes in
         return (Attribute.has_plain_module attributes) in
       let* module_definition =
-        of_module name [] mb_expr has_plain_module_attribute in
+        of_module name ([], []) mb_expr has_plain_module_attribute in
       return [module_definition]
     | Tstr_modtype { mtd_type = None; _ } ->
       error_message
@@ -406,7 +406,7 @@ let rec of_structure (structure : structure) : t list Monad.t =
       get_include_items (Some path) reference mod_type
     | Tstr_include { incl_mod; _ } ->
       let* include_name = Exp.get_include_name incl_mod in
-      let* module_definition = of_module include_name [] incl_mod false in
+      let* module_definition = of_module include_name ([], []) incl_mod false in
       let reference = PathName.of_name [] include_name in
       let* include_items =
         get_include_items None reference incl_mod.mod_type in
@@ -455,8 +455,8 @@ and of_module_expr
     | Some module_typ ->
       let* module_typ = ModuleTyp.of_ocaml module_typ in
       let functor_parameter_names =
-        functor_parameters |>
-        List.map (fun (name, _, _) -> name) in
+        snd functor_parameters |>
+        List.map (fun (name, _) -> name) in
       let* (_, module_typ) =
         ModuleTyp.to_typ
           functor_parameter_names (Name.to_string name) true module_typ in
@@ -504,9 +504,13 @@ and of_module_expr
         let* x = Name.of_optional_ident false ident in
         let* module_type_arg = ModuleTyp.of_ocaml module_type_arg in
         let id = Name.string_of_optional_ident ident in
-        let* ((_, free_vars_arg), typ_arg) =
+        let* ((_, _, free_vars_arg), typ_arg) =
           ModuleTyp.to_typ [] id false module_type_arg in
-        return (functor_parameters @ [(x, free_vars_arg, typ_arg)]) in
+        let (free_vars_params, params) = functor_parameters in
+        return (
+          free_vars_params @ free_vars_arg,
+          params @ [(x, typ_arg)]
+        ) in
     of_module name functor_parameters module_expr false
   | Tmod_constraint (module_expr, _, annotation, _) ->
     let module_type_annotation =
@@ -536,23 +540,19 @@ let rec to_coq (fargs : int option) (defs : t list) : SmartPrint.t =
       ) ^^
       Type.to_coq None None typ ^-^ !^ "."
     | TypeDefinition typ_def -> TypeDefinition.to_coq with_args typ_def
-    | Module (name, functor_parameters, defs, e) ->
+    | Module (name, (free_vars_params, params), defs, e) ->
       let is_functor =
-        match functor_parameters with
+        match params with
         | [] -> false
         | _ :: _ -> true in
-      let functor_parameters_free_vars =
-        functor_parameters |>
-        List.map (fun (_, free_vars, _) -> free_vars) |>
-        List.flatten in
       let fargs_instance =
         nest (
           Name.to_coq name ^-^ !^ "." ^-^ !^ "Build_FArgs" ^^
-          separate space (functor_parameters |> List.map (
-            fun (parameter_name, _, _) -> Name.to_coq parameter_name
+          separate space (params |> List.map (
+            fun (name, _) -> Name.to_coq name
           ))
         ) in
-      let nb_new_fargs_typ_params = List.length functor_parameters_free_vars in
+      let nb_new_fargs_typ_params = List.length free_vars_params in
       let nb_fargs_typ_params =
         match fargs with
         | None -> nb_new_fargs_typ_params
@@ -574,12 +574,12 @@ let rec to_coq (fargs : int option) (defs : t list) : SmartPrint.t =
           begin if is_functor then
             nest (
               !^ "Class" ^^ !^ "FArgs" ^^ Pp.args with_args ^^
-              ModuleTyp.to_coq_grouped_free_vars functor_parameters_free_vars ^^
+              ModuleTyp.to_coq_grouped_free_vars free_vars_params ^^
               !^ ":=" ^^
               !^ "{" ^^ newline ^^
               indent (
-                separate empty (functor_parameters |> List.map (
-                fun (name, _, typ) ->
+                separate empty (params |> List.map (
+                fun (name, typ) ->
                   nest (
                     Name.to_coq name ^^ !^ ":" ^^ Type.to_coq None None typ ^-^
                     !^ ";" ^^ newline
@@ -622,10 +622,10 @@ let rec to_coq (fargs : int option) (defs : t list) : SmartPrint.t =
           newline ^^
           nest (
             !^ "Definition" ^^ Name.to_coq name ^^ Pp.args with_args ^^
-            ModuleTyp.to_coq_functor_parameters_modules functor_parameters ^^
+            ModuleTyp.to_coq_functor_parameters_modules free_vars_params params ^^
             begin match typ_annotation with
             | Some typ_annotation ->
-              !^ ":" ^^ Type.to_coq None None typ_annotation
+              !^ ": " ^-^ Type.to_coq None None typ_annotation
             | _ -> empty
             end ^^ !^ ":=" ^^
             nest (

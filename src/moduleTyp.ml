@@ -176,7 +176,7 @@ and of_ocaml (module_typ : Typedtree.module_type) : t Monad.t =
 
 let rec to_typ (functor_params : Name.t list) (module_name : string)
   (with_implicits : bool) (module_typ : t)
-  : (((Name.t * free_vars * Type.t) list * free_vars) * Type.t) Monad.t =
+  : ((free_vars * (Name.t * Type.t) list * free_vars) * Type.t) Monad.t =
   let (params, result) = module_typ in
   let* new_functor_params =
     params |>
@@ -184,35 +184,41 @@ let rec to_typ (functor_params : Name.t list) (module_name : string)
   let* (result_free_vars, result_typ) =
     Module.to_typ
       (functor_params @ new_functor_params) module_name with_implicits result in
-  let* (params_free_vars, typ) =
+  let* (params_free_vars, params) =
     Monad.List.fold_right
-      (fun (name, param) (params_free_vars, typ) ->
+      (fun (name, param) (params_free_vars, params) ->
         let* (param_free_vars, param_typ) = Module.to_typ [] name false param in
         let* name = Name.of_string false name in
-        let typ = Type.ForallModule (name, param_typ, typ) in
-        let typ = match param_free_vars with
-        | [] -> typ
-        | _ :: _ ->
-          let free_vars =
-            param_free_vars |> List.map (fun { name; arity } ->
-            (name, arity)) in
-          Type.ForallTyps (free_vars, typ) in
-        return ((name, param_free_vars, param_typ) :: params_free_vars, typ)
+        return (
+          param_free_vars @ params_free_vars,
+          (name, param_typ) :: params
+        )
       )
       params
-      ([], result_typ) in
-  return ((params_free_vars, result_free_vars), typ)
+      ([], []) in
+  let typ =
+    List.fold_right
+      (fun (param_name, param_typ) typ ->
+        Type.ForallModule (param_name, param_typ, typ)
+      )
+      params
+      result_typ in
+  let typ =
+    match params_free_vars with
+    | [] -> typ
+    | _ :: _ ->
+      Type.ForallTyps (
+        params_free_vars |> List.map (fun { name; arity } -> (name, arity)),
+        typ
+      ) in
+  return ((params_free_vars, params, result_free_vars), typ)
 
 let to_coq_functor_parameters_modules
-  (params : (Name.t * free_vars * Type.t) list)
+  (params_free_vars : free_vars) (params : (Name.t * Type.t) list)
   : SmartPrint.t =
-  separate space (
-    params |> List.map (fun (name, free_vars, typ) ->
-      nest (
-        to_coq_grouped_free_vars free_vars ^^
-        nest (parens (
-          Name.to_coq name ^^ !^ ":" ^^ Type.to_coq None None typ
-        ))
-      )
+  group (to_coq_grouped_free_vars params_free_vars) ^^
+  group (separate space (params |> List.map (fun (name, typ) ->
+    nest (parens (
+      Name.to_coq name ^^ !^ ":" ^^ Type.to_coq None None typ
     )
-  )
+  ))))

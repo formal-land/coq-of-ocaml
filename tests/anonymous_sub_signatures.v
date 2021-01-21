@@ -74,10 +74,10 @@ Module F.
 End F.
 Definition F
   {V_Ciphertext_t V_Commitment_t V_Commitment_NestedLevel_t V_CV_t : Set}
-    (V :
-      Validator.signature (Ciphertext_t := V_Ciphertext_t)
-        (Commitment_t := V_Commitment_t)
-        (Commitment_NestedLevel_t := V_Commitment_NestedLevel_t)
-        (CV_t := V_CV_t)) : WithBar.signature :=
+  (V :
+    Validator.signature (Ciphertext_t := V_Ciphertext_t)
+      (Commitment_t := V_Commitment_t)
+      (Commitment_NestedLevel_t := V_Commitment_NestedLevel_t) (CV_t := V_CV_t))
+  : WithBar.signature :=
   let '_ := F.Build_FArgs V in
   F.functor.

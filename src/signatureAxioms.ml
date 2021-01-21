@@ -9,7 +9,7 @@ type item =
   | IncludedFieldValue of Name.t * Name.t list * Type.t * Name.t * PathName.t
   | Module of Name.t * t
   | ModuleAlias of Name.t * PathName.t
-  | ModuleFreeVar of (Name.t * ModuleTyp.free_vars * Type.t) list * ModuleTyp.free_var
+  | ModuleFreeVar of ModuleTyp.free_vars * (Name.t * Type.t) list * ModuleTyp.free_var
   | Signature of Name.t * Signature.t
   | TypDefinition of TypeDefinition.t
   | Value of Name.t * Name.t list * Type.t
@@ -182,12 +182,12 @@ let rec of_signature (signature : Typedtree.signature) : t Monad.t =
       | None -> of_types_signature incl_type
       | Some signature_path ->
         ModuleTyp.of_ocaml incl_mod >>= fun module_typ ->
-        let* ((free_vars_params, free_vars), typ) =
+        let* ((free_vars_params, params, free_vars), typ) =
           ModuleTyp.to_typ [] module_name false module_typ in
         let free_vars =
           free_vars |>
           List.map (fun free_var ->
-            ModuleFreeVar (free_vars_params, free_var)
+            ModuleFreeVar (free_vars_params, params, free_var)
           ) in
         let* module_name = Name.of_string false module_name in
         of_first_class_types_signature
@@ -240,12 +240,12 @@ let rec of_signature (signature : Typedtree.signature) : t Monad.t =
       | _ ->
         ModuleTyp.of_ocaml_desc mty_desc >>= fun module_typ ->
         let id = Name.string_of_optional_ident md_id in
-        let* ((free_vars_params, free_vars), typ) =
+        let* ((free_vars_params, params, free_vars), typ) =
           ModuleTyp.to_typ [] id false module_typ in
         let free_vars =
           free_vars |>
           List.map (fun free_var ->
-            ModuleFreeVar (free_vars_params, free_var)
+            ModuleFreeVar (free_vars_params, params, free_var)
           ) in
         return (free_vars @ [Value (name, [], typ)])
       end
@@ -325,16 +325,16 @@ let rec to_coq (signature : t) : SmartPrint.t =
     | ModuleAlias (name, path_name) ->
       !^ "Module" ^^ Name.to_coq name ^^ !^ ":=" ^^
       PathName.to_coq path_name ^-^ !^ "."
-    | ModuleFreeVar (free_vars_params, free_var) ->
+    | ModuleFreeVar (free_vars_params, params, free_var) ->
       let { ModuleTyp.name; arity } = free_var in
       nest (
         !^ "Parameter" ^^ Name.to_coq name ^^ !^ ":" ^^
         nest (
-          begin match free_vars_params with
+          begin match params with
           | [] -> empty
           | _ :: _ ->
             !^ "forall" ^^
-            ModuleTyp.to_coq_functor_parameters_modules free_vars_params ^-^
+            ModuleTyp.to_coq_functor_parameters_modules free_vars_params params ^-^
             !^ ","
           end ^^
           Pp.typ_arity arity ^-^ !^ "."

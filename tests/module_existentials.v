@@ -61,9 +61,9 @@ Module F_definition.
       S.v := v
     |}.
 End F_definition.
-Definition F_definition {M1_t : Set} (M1 : S.signature (t := M1_t))
-  {M2_t : Set} (M2 : S.signature (t := M2_t)) :
-  S.signature (t := M1.(S.t) * M2.(S.t) * string) :=
+Definition F_definition {M1_t M2_t : Set}
+  (M1 : S.signature (t := M1_t)) (M2 : S.signature (t := M2_t))
+  : S.signature (t := M1.(S.t) * M2.(S.t) * string) :=
   let '_ := F_definition.Build_FArgs M1 M2 in
   F_definition.functor.
 
@@ -84,7 +84,8 @@ Module F_abstract.
       S.v := v
     |}.
 End F_abstract.
-Definition F_abstract {M1_t : Set} (M1 : S.signature (t := M1_t))
-  {M2_t : Set} (M2 : S.signature (t := M2_t)) : S.signature (t := _) :=
+Definition F_abstract {M1_t M2_t : Set}
+  (M1 : S.signature (t := M1_t)) (M2 : S.signature (t := M2_t))
+  : S.signature (t := _) :=
   let '_ := F_abstract.Build_FArgs M1 M2 in
   F_abstract.functor.
