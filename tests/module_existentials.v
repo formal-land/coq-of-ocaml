@@ -89,3 +89,38 @@ Definition F_abstract {M1_t M2_t : Set}
   : S.signature (t := _) :=
   let '_ := F_abstract.Build_FArgs M1 M2 in
   F_abstract.functor.
+
+Module S_with_functor.
+  Record signature : Set := {
+    F :
+      forall {M_t : Set},
+      forall (M : S.signature (t := M_t)), S.signature (t := M.(S.t) * int);
+  }.
+End S_with_functor.
+
+Module M_with_functor.
+  Module F.
+    Class FArgs {M_t : Set} := {
+      M : S.signature (t := M_t);
+    }.
+    Arguments Build_FArgs {_}.
+    
+    Definition t `{FArgs} : Set := M.(S.t) * int.
+    
+    Definition v `{FArgs} : M.(S.t) * int := (M.(S.v), 12).
+    
+    Definition functor `{FArgs} :=
+      {|
+        S.v := v
+      |}.
+  End F.
+  Definition F {M_t : Set} (M : S.signature (t := M_t)) :=
+    let '_ := F.Build_FArgs M in
+    F.functor.
+  
+  Definition module :=
+    {|
+      S_with_functor.F _ := F
+    |}.
+End M_with_functor.
+Definition M_with_functor : S_with_functor.signature := M_with_functor.module.

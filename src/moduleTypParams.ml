@@ -61,3 +61,20 @@ let get_module_typ_typ_params_arity =
 
 let get_module_typ_declaration_typ_params_arity =
   get_module_typ_declaration_typ_params mapper_get_arity
+
+(** The number of abstract types in a functor's parameters. *)
+let rec get_functor_nb_free_vars_params (module_typ : Types.module_type)
+  : int Monad.t =
+  match module_typ with
+  | Mty_functor (param, module_typ) ->
+    let* param_free_vars_arities =
+      match param with
+      | Unit -> return []
+      | Named (_, param) -> get_module_typ_typ_params_arity param in
+    let nb_free_vars_param =
+      param_free_vars_arities |>
+      Tree.flatten |>
+      List.length in
+    let* nb_free_vars_module_typ = get_functor_nb_free_vars_params module_typ in
+    return (nb_free_vars_param + nb_free_vars_module_typ)
+  | _ -> return 0

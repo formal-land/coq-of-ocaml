@@ -100,8 +100,7 @@ let error_message_in_module
 
 module ModuleTypValues = struct
   type t =
-    | Module of Name.t
-    | ModuleFunctor of Name.t
+    | Module of Name.t * int
     | Value of Name.t * int
 
   let get
@@ -120,12 +119,11 @@ module ModuleTypValues = struct
             ident,
             Name.Set.cardinal new_typ_vars
           )))
-        | Sig_module (ident, _, { Types.md_type = Mty_functor _; _ }, _, _) ->
+        | Sig_module (ident, _, { Types.md_type; _ }, _, _) ->
           let* name = Name.of_ident false ident in
-          return (Some (ModuleFunctor name))
-        | Sig_module (ident, _, _, _, _) ->
-          let* name = Name.of_ident false ident in
-          return (Some (Module name))
+          let* arity =
+            ModuleTypParams.get_functor_nb_free_vars_params md_type in
+          return (Some (Module (name, arity)))
         | _ -> return None
       )
     | _ -> raise [] Unexpected "Module type signature not found"
@@ -181,12 +179,12 @@ let build_module
           nb_free_vars,
           Variable (mixed_path, [])
         )
-      | Module name | ModuleFunctor name ->
+      | Module (name, arity) ->
         let* field_name =
           PathName.of_path_and_name_with_convert signature_path name in
         return (
           field_name,
-          0,
+          arity,
           Variable (
             MixedPath.PathName (PathName.of_name [] name),
             []

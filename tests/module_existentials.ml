@@ -28,3 +28,14 @@ module F_abstract (M1 : S) (M2 : S) : S = struct
   type t = M1.t * M2.t * string
   let v = (M1.v, M2.v, "foo")
 end
+
+module type S_with_functor = sig
+  module F (M : S) : S with type t = M.t * int
+end
+
+module M_with_functor : S_with_functor = struct
+  module F (M : S) = struct
+    type t = M.t * int
+    let v = (M.v, 12)
+  end
+end
