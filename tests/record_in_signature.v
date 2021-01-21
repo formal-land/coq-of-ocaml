@@ -7,6 +7,7 @@ Module Sig.
     v : t string;
   }.
 End Sig.
+Definition Sig {t} := @Sig.signature t.
 
 Module M.
   Module t.
@@ -31,7 +32,7 @@ Module M.
       Sig.v := v
     |}.
 End M.
-Definition M : Sig.signature (t := _) := M.module.
+Definition M : Sig (t := _) := M.module.
 
 Definition v : M.(Sig.t) string := M.(Sig.v).
 

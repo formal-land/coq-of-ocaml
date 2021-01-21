@@ -7,6 +7,7 @@ Module COMPARABLE.
     compare : t -> t -> int;
   }.
 End COMPARABLE.
+Definition COMPARABLE {t} := @COMPARABLE.signature t.
 
 Module S.
   Record signature {t : Set} : Set := {
@@ -23,22 +24,20 @@ Module S.
     min : t -> t -> t;
   }.
 End S.
+Definition S {t} := @S.signature t.
 
 Parameter Make :
   forall {P_t : Set},
-  forall (P : COMPARABLE.signature (t := P_t)),
-  S.signature (t := P.(COMPARABLE.t)).
+  forall (P : COMPARABLE (t := P_t)), S (t := P.(COMPARABLE.t)).
 
-Parameter Char : S.signature (t := ascii).
+Parameter Char : S (t := ascii).
 
 Parameter Abstract_t : Set.
 
-Parameter Abstract : S.signature (t := Abstract_t).
+Parameter Abstract : S (t := Abstract_t).
 
-Parameter Lift_t :
-  forall {P_t : Set} (P : COMPARABLE.signature (t := P_t)), Set.
+Parameter Lift_t : forall {P_t : Set} (P : COMPARABLE (t := P_t)), Set.
 
 Parameter Lift :
   forall {P_t : Set},
-  forall (P : COMPARABLE.signature (t := P_t)),
-  COMPARABLE.signature (t := Lift_t P).
+  forall (P : COMPARABLE (t := P_t)), COMPARABLE (t := Lift_t P).

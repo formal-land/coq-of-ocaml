@@ -10,6 +10,7 @@ Module Source.
     id : forall {a : Set}, a -> a;
   }.
 End Source.
+Definition Source {t} := @Source.signature t.
 
 Module Target.
   Record signature {t : Set} : Set := {
@@ -17,6 +18,7 @@ Module Target.
     y : t;
   }.
 End Target.
+Definition Target {t} := @Target.signature t.
 
 Module M.
   Definition t : Set := int.
@@ -31,11 +33,11 @@ Module M.
       Source.id _ := id
     |}.
 End M.
-Definition M : Source.signature (t := _) := M.module.
+Definition M : Source (t := _) := M.module.
 
 Module F.
   Class FArgs {X_t : Set} := {
-    X : Source.signature (t := X_t);
+    X : Source (t := X_t);
   }.
   Arguments Build_FArgs {_}.
   
@@ -48,8 +50,7 @@ Module F.
       Target.y := y
     |}.
 End F.
-Definition F {X_t : Set} (X : Source.signature (t := X_t))
-  : Target.signature (t := X.(Source.t)) :=
+Definition F {X_t : Set} (X : Source (t := X_t)) : Target (t := X.(Source.t)) :=
   let '_ := F.Build_FArgs X in
   F.functor.
 
@@ -57,7 +58,7 @@ Definition FM := F M.
 
 Module FSubst.
   Class FArgs {X_t : Set} := {
-    X : Source.signature (t := X_t);
+    X : Source (t := X_t);
   }.
   Arguments Build_FArgs {_}.
   
@@ -68,15 +69,15 @@ Module FSubst.
       Target.y := y
     |}.
 End FSubst.
-Definition FSubst {X_t : Set} (X : Source.signature (t := X_t))
-  : Target.signature (t := X.(Source.t)) :=
+Definition FSubst {X_t : Set} (X : Source (t := X_t))
+  : Target (t := X.(Source.t)) :=
   let '_ := FSubst.Build_FArgs X in
   FSubst.functor.
 
 Module Sum.
   Class FArgs := {
-    X : Source.signature (t := int);
-    Y : Source.signature (t := int);
+    X : Source (t := int);
+    Y : Source (t := int);
   }.
   
   Definition t `{FArgs} : Set := int.
@@ -88,9 +89,8 @@ Module Sum.
       Target.y := y
     |}.
 End Sum.
-Definition Sum
-  (X : Source.signature (t := int)) (Y : Source.signature (t := int))
-  : Target.signature (t := _) :=
+Definition Sum (X : Source (t := int)) (Y : Source (t := int)) : Target (t := _)
+  :=
   let '_ := Sum.Build_FArgs X Y in
   Sum.functor.
 
@@ -126,6 +126,6 @@ Module GenFun.
       Target.y := y
     |}.
 End GenFun.
-Definition GenFun : Target.signature (t := _) := GenFun.module.
+Definition GenFun : Target (t := _) := GenFun.module.
 
-Definition AppliedGenFun : Target.signature (t := _) := GenFun.
+Definition AppliedGenFun : Target (t := _) := GenFun.

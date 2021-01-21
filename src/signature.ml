@@ -343,6 +343,9 @@ and to_coq_items (items : item list) : SmartPrint.t list =
   List.map to_coq_item items
 
 let to_coq_definition (name : Name.t) (signature : t) : SmartPrint.t =
+  let typ_params_names =
+    signature.typ_params |>
+    List.map (fun (name, _) -> Name.to_coq name) in
   !^ "Module" ^^ Name.to_coq name ^-^ !^ "." ^^ newline ^^
   indent (
     nest (
@@ -354,4 +357,16 @@ let to_coq_definition (name : Name.t) (signature : t) : SmartPrint.t =
       !^ "}" ^-^ !^ "."
     )
   ) ^^ newline ^^
-  !^ "End" ^^ Name.to_coq name ^-^ !^ "."
+  !^ "End" ^^ Name.to_coq name ^-^ !^ "." ^^ newline ^^
+  nest (
+    !^ "Definition" ^^ Name.to_coq name ^^
+    begin match signature.typ_params with
+    | [] -> empty
+    | _ :: _ -> braces (nest (separate space typ_params_names))
+    end ^^
+    !^ ":=" ^^
+    nest (separate space (
+      (!^ "@" ^-^ Name.to_coq name ^-^ !^ "." ^-^ !^ "signature") ::
+      typ_params_names
+    )) ^-^ !^ "."
+  )

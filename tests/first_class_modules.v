@@ -37,6 +37,7 @@ Module S.
       of_list : list elt -> t;
     }.
   End SET.
+  Definition SET {elt t} := @SET.signature elt t.
 End S.
 
 Inductive type_annot : Set :=
@@ -68,14 +69,15 @@ Module Boxed_set.
   Record signature {elt OPS_t : Set} : Set := {
     elt := elt;
     elt_ty : comparable_ty;
-    OPS : S.SET.signature (elt := elt) (t := OPS_t);
+    OPS : S.SET (elt := elt) (t := OPS_t);
     boxed : OPS.(S.SET.t);
     size : int;
   }.
 End Boxed_set.
+Definition Boxed_set {elt OPS_t} := @Boxed_set.signature elt OPS_t.
 
 Definition set (elt : Set) : Set :=
-  {OPS_t : Set @ Boxed_set.signature (elt := elt) (OPS_t := OPS_t)}.
+  {OPS_t : Set @ Boxed_set (elt := elt) (OPS_t := OPS_t)}.
 
 Module IncludedFoo.
   Record signature {bar : Set} : Set := {
@@ -83,6 +85,7 @@ Module IncludedFoo.
     foo : bar;
   }.
 End IncludedFoo.
+Definition IncludedFoo {bar} := @IncludedFoo.signature bar.
 
 Module Triple.
   Record signature {a b c bar : Set} : Set := {
@@ -96,10 +99,11 @@ Module Triple.
     foo : bar;
   }.
 End Triple.
+Definition Triple {a b c bar} := @Triple.signature a b c bar.
 
 Definition tripe
   : {'[a, b, c, bar] : [Set ** Set ** Set ** Set] @
-    Triple.signature (a := a) (b := b) (c := c) (bar := bar)} :=
+    Triple (a := a) (b := b) (c := c) (bar := bar)} :=
   existS (A := [Set ** Set ** Set ** Set]) _ [_, _, _, _]
     (let a : Set := int in
     let b : Set := bool in
@@ -119,12 +123,14 @@ Definition tripe
 Module UsingTriple.
   Record signature {elt' T_a T_b T_c T_bar OPS'_elt OPS'_t : Set} : Set := {
     elt' := elt';
-    T : Triple.signature (a := T_a) (b := T_b) (c := T_c) (bar := T_bar);
-    OPS' : S.SET.signature (elt := OPS'_elt) (t := OPS'_t);
-    OPS'' : S.SET.signature (elt := elt') (t := list string);
+    T : Triple (a := T_a) (b := T_b) (c := T_c) (bar := T_bar);
+    OPS' : S.SET (elt := OPS'_elt) (t := OPS'_t);
+    OPS'' : S.SET (elt := elt') (t := list string);
     table := forall {a : Set}, list a;
   }.
 End UsingTriple.
+Definition UsingTriple {elt' T_a T_b T_c T_bar OPS'_elt OPS'_t} :=
+  @UsingTriple.signature elt' T_a T_b T_c T_bar OPS'_elt OPS'_t.
 
 Definition set_update {a : Set} (v : a) (b : bool) (Box : set a) : set a :=
   let 'existS _ _ Box := Box in
@@ -205,3 +211,4 @@ Module MAP.
     mem : forall {a : Set}, key -> t a -> bool;
   }.
 End MAP.
+Definition MAP {key t} := @MAP.signature key t.

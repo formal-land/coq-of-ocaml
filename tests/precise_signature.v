@@ -7,6 +7,7 @@ Module Sig1.
     f : t -> t -> t * t;
   }.
 End Sig1.
+Definition Sig1 {t} := @Sig1.signature t.
 
 Module Sig2.
   Record signature {t : Set} : Set := {
@@ -14,6 +15,7 @@ Module Sig2.
     f : t -> list t;
   }.
 End Sig2.
+Definition Sig2 {t} := @Sig2.signature t.
 
 Module M1.
   Definition t : Set := int.
@@ -25,7 +27,7 @@ Module M1.
       Sig1.f := f
     |}.
 End M1.
-Definition M1 : Sig1.signature (t := _) := M1.module.
+Definition M1 : Sig1 (t := _) := M1.module.
 
 Module M2.
   Definition t : Set := int.
@@ -37,4 +39,4 @@ Module M2.
       Sig2.f := f
     |}.
 End M2.
-Definition M2 : Sig2.signature (t := _) := M2.module.
+Definition M2 : Sig2 (t := _) := M2.module.

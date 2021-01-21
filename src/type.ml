@@ -724,7 +724,7 @@ let rec to_coq (subst : Subst.t option) (context : Context.t option) (typ : t)
       (MixedPath.to_coq path :: List.map (to_coq subst (Some Context.Apply)) typs)
   | Signature (path_name, typ_params) ->
     nest (separate space (
-      (PathName.to_coq path_name ^-^ !^ "." ^-^ !^ "signature") ::
+      PathName.to_coq path_name ::
       (typ_params |> List.map (fun (name, typ) ->
         nest (parens (
           Name.to_coq name ^^ !^ ":=" ^^
