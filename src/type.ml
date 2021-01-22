@@ -8,7 +8,8 @@ type t =
   | Arrow of t * t
   | Sum of (string * t) list
   | Tuple of t list
-  | Apply of MixedPath.t * t list
+  (* Application holds the information of what are tags *)
+  | Apply of MixedPath.t * t list * bool list
   | Package of bool * PathName.t * arity_or_typ Tree.t
   | ForallModule of Name.t * t * t
   | ForallTyps of Name.t list * t
@@ -176,13 +177,13 @@ let subst_name (source : Name.t) (target : Name.t) (typ : t) : t =
     | Sum tagged_typs ->
       Sum (tagged_typs |> List.map (fun (tag, typ) -> (tag, subst typ)))
     | Tuple typs -> Tuple (List.map subst typs)
-    | Apply (constructor, typs) ->
+    | Apply (constructor, typs, bs) ->
         let constructor_with_subst =
           match constructor with
           | PathName { path = []; base } when Name.equal base source ->
             MixedPath.PathName { path = []; base = target }
           | _ -> constructor in
-      Apply (constructor_with_subst, List.map subst typs)
+      Apply (constructor_with_subst, List.map subst typs, bs)
     | Package (is_in_exp, path_name, typ_params) ->
       Package (
         is_in_exp,
@@ -213,7 +214,7 @@ let apply_with_notations (mixed_path : MixedPath.t) (typs : t list)
     | None -> mixed_path in
   (* The following notation is very specific. So we let it there in the code,
      instead of adding a configuration option. *)
-  let (mixed_path, typs) =
+  let (mixed_path, typs, bs) =
     match (mixed_path, typs) with
     | (
         MixedPath.PathName {
@@ -227,11 +228,11 @@ let apply_with_notations (mixed_path : MixedPath.t) (typs : t list)
               path = [Name.Make "Error_monad"];
               base = Name.Make "trace"
             },
-            _
+            _, b
           )
         ]
-      ) -> (MixedPath.of_name (Name.of_string_raw "M?"), [typ1])
-    | _ -> (mixed_path, typs) in
+      ) -> (MixedPath.of_name (Name.of_string_raw "M?"), [typ1], [false])
+    | _ -> (mixed_path, typs, List.map (fun _ -> false) typs) in
   let apply_with_merge =
     match (mixed_path, typs) with
     | (
@@ -239,7 +240,7 @@ let apply_with_notations (mixed_path : MixedPath.t) (typs : t list)
         [
           Apply (
             MixedPath.PathName { path = []; base = Name.Make source2 },
-            typs
+            typs, bs
           )
         ]
       ) ->
@@ -250,14 +251,14 @@ let apply_with_notations (mixed_path : MixedPath.t) (typs : t list)
         Some (
           Apply (
             MixedPath.PathName { path = []; base = Name.Make target },
-            typs
+            typs, bs
           )
         )
       | None -> None
       end
     | _ -> None in
   match apply_with_merge with
-  | None -> return (Apply (mixed_path, typs))
+  | None -> return (Apply (mixed_path, typs, bs))
   | Some apply_with_merge -> return apply_with_merge
 
 (** Heuristic to find a simpler alias if the path is in a module as a record. *)
@@ -275,6 +276,18 @@ let simplified_contructor_path (path : Path.t) (arity : int)
     with _ -> return mixed_path
     end
   | _ -> return mixed_path
+
+
+let tag_all_args : 'a list -> bool list =
+  List.map (fun _ -> true)
+
+let tag_no_args : 'a list -> bool list =
+  List.map (fun _ -> false)
+
+let tag_list (b : bool) : 'a list -> bool list =
+  if b
+  then tag_all_args
+  else tag_no_args
 
 (** Import an OCaml type. Add to the environment all the new free type variables. *)
 let rec of_typ_expr
@@ -328,7 +341,8 @@ let rec of_typ_expr
     | Some (path, _ :: typs) ->
       of_typs_exprs with_free_vars typ_vars typs >>= fun (typs, typ_vars, new_typ_vars) ->
       MixedPath.of_path false path >>= fun mixed_path ->
-      return (Apply (mixed_path, typs), typ_vars, new_typ_vars)
+      let are_tags = tag_no_args typs in
+      return (Apply (mixed_path, typs, are_tags), typ_vars, new_typ_vars)
     | _ ->
       raise
         (Error "unhandled_object_type", typ_vars, [])
@@ -356,7 +370,7 @@ let rec of_typ_expr
     begin match path_name with
     | Some path_name ->
       return (
-        Apply (MixedPath.PathName path_name, []),
+        Apply (MixedPath.PathName path_name, [], []),
         typ_vars,
         []
       )
@@ -499,7 +513,7 @@ let rec typ_args_of_typ (typ : t) : Name.Set.t =
   | Variable x -> Name.Set.singleton x
   | Arrow (typ1, typ2) -> typ_args_of_typs [typ1; typ2]
   | Sum typs -> typ_args_of_typs (List.map snd typs)
-  | Tuple typs | Apply (_, typs) -> typ_args_of_typs typs
+  | Tuple typs | Apply (_, typs, _) -> typ_args_of_typs typs
   | Package (_, _, typ_params) ->
     Tree.flatten typ_params |>
     Util.List.filter_map (fun (_, typ) ->
@@ -532,7 +546,7 @@ let rec local_typ_constructors_of_typ (typ : t) : Name.Set.t =
   | Arrow (typ1, typ2) -> local_typ_constructors_of_typs [typ1; typ2]
   | Sum typs -> local_typ_constructors_of_typs (List.map snd typs)
   | Tuple typs -> local_typ_constructors_of_typs typs
-  | Apply (mixed_path, typs) ->
+  | Apply (mixed_path, typs, _) ->
     let local_typ_constructors = local_typ_constructors_of_typs typs in
     begin match mixed_path with
     | MixedPath.PathName { path = []; base } ->
@@ -647,7 +661,7 @@ let rec to_coq (subst : Subst.t option) (context : Context.t option) (typ : t)
       separate (space ^^ !^ "*" ^^ space)
         (List.map (to_coq subst (Some Context.Tuple)) typs)
     end
-  | Apply (path, typs) ->
+  | Apply (path, typs, _) ->
     let path =
       match subst with
       | None -> path

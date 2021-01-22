@@ -151,6 +151,9 @@ end
             )
             []
             (List.map Type.typ_args_of_typ record_params) in
+        let typ_args' = typ_args |> List.map (fun name ->
+                Type.Variable name
+              ) in
         return (
           [
             Type.Apply (
@@ -158,9 +161,8 @@ end
                 path = [typ_name];
                 base = constructor_name;
               },
-              typ_args |> List.map (fun name ->
-                Type.Variable name
-              )
+              typ_args',
+              Type.tag_no_args typ_args'
             )
           ],
           Some (
@@ -175,7 +177,8 @@ end
                 path = [typ_name];
                 base = Name.suffix_by_skeleton constructor_name;
               },
-              record_params
+              record_params,
+              Type.tag_no_args record_params
             )
           )
         ))

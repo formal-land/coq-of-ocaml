@@ -217,7 +217,7 @@ let top_level_evaluation (e : expression) : t list Monad.t =
     typ_vars = [];
     args = [];
     structs = [];
-    typ = Type.Apply (MixedPath.of_name (Name.of_string_raw "unit"), []);
+    typ = Type.Apply (MixedPath.of_name (Name.of_string_raw "unit"), [], []);
     is_notation = false;
   } in
   let documentation = "Init function; without side-effects in Coq" in

@@ -81,6 +81,7 @@ module Inductive = struct
     (name : Name.t)
     (left_typ_args : Name.t list)
     (constructors : AdtConstructors.t)
+    (is_tagged : bool)
     : SmartPrint.t =
     let keyword = if is_first then !^ "Inductive" else !^ "with" in
     nest (
@@ -94,7 +95,16 @@ module Inductive = struct
             !^ ":" ^^ Pp.set
           )
         )
-      ) ^^ !^ ":" ^^ Pp.set ^^ !^ ":=" ^-^
+     ) ^^ !^ ":" ^^
+      let constructor = List.hd constructors in
+      let arity = if not is_tagged then 1 else List.length constructor.res_typ_params + 1 in
+      let index_typs = List.init arity (fun i ->
+          if i = arity - 1
+          then Pp.set
+          else !^ "vtag")
+      in
+      separate (!^ " -> ") index_typs
+      ^^ !^ ":=" ^-^
       separate empty (
         constructors |> List.map (fun {
             AdtConstructors.constructor_name;
@@ -110,8 +120,12 @@ module Inductive = struct
             ) ^^
             group @@ separate space (param_typs |> List.map (fun param_typ ->
               group (Type.to_coq (Some subst) (Some Type.Context.Arrow) param_typ ^^ !^ "->")
-            )) ^^
-            Type.to_coq (Some subst) None (Type.Apply (MixedPath.of_name name, res_typ_params))
+              )) ^^
+              let res_typ_params_are_gadt = if is_tagged
+                then Type.tag_all_args res_typ_params
+                else Type.tag_no_args res_typ_params
+              in
+              Type.to_coq (Some subst) None (Type.Apply (MixedPath.of_name name, res_typ_params, res_typ_params_are_gadt))
           )
         )
       )
@@ -288,7 +302,7 @@ module Inductive = struct
       separate (newline ^^ newline) (inductive.typs |>
         List.mapi (fun index (name, left_typ_args, constructors) ->
           let is_first = index = 0 in
-          to_coq_typs subst is_first name left_typ_args constructors
+          to_coq_typs subst is_first name left_typ_args constructors inductive.is_tagged
         )
       ) ^-^
       (match notations_wheres with
@@ -376,7 +390,7 @@ let of_ocaml (typs : type_declaration list) : t Monad.t =
     return (Record (name, typ_args, fields, true))
   | [ { typ_id; typ_type = { type_kind = Type_open; _ }; _ } ] ->
     let* name = Name.of_ident false typ_id in
-    let typ = Type.Apply (MixedPath.of_name (Name.of_string_raw "extensible_type"), []) in
+    let typ = Type.Apply (MixedPath.of_name (Name.of_string_raw "extensible_type"), [], []) in
     raise
       (Synonym (name, [], typ))
       ExtensibleType
@@ -427,7 +441,8 @@ let of_ocaml (typs : type_declaration list) : t Monad.t =
           Type.of_type_expr_without_free_vars typ >>= fun typ ->
           return (x, typ)
         )) >>= fun fields ->
-        let free_vars = Type.typ_args_of_typs (List.map snd fields) in
+        let (fields_names, fields_types) = List.split fields in
+        let free_vars = Type.typ_args_of_typs fields_types in
         let typ_args = AdtParameters.get_parameters typ_args in
         let typ_args = filter_in_free_vars typ_args free_vars in
         return (
@@ -437,11 +452,12 @@ let of_ocaml (typs : type_declaration list) : t Monad.t =
             typ_args,
             Type.Apply (
               MixedPath.of_name (Name.suffix_by_skeleton name),
-              fields |> List.map snd
+              fields_types,
+              Type.tag_no_args fields_types
             )
           ) :: notations,
           {
-            AdtConstructors.RecordSkeleton.fields = fields |> List.map fst;
+            AdtConstructors.RecordSkeleton.fields = fields_names;
             module_name = name;
             typ_name = Name.suffix_by_skeleton name;
            } :: records,
