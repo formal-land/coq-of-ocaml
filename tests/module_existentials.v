@@ -7,7 +7,8 @@ Module S.
     v : t;
   }.
 End S.
-Definition S {t} := @S.signature t.
+Definition S := @S.signature.
+Arguments S {_}.
 
 Module M_infer.
   Definition t : Set := int.

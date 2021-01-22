@@ -7,7 +7,8 @@ Module T.
     to_string : t -> string;
   }.
 End T.
-Definition T {t} := @T.signature t.
+Definition T := @T.signature.
+Arguments T {_}.
 
 Module M.
   Definition t : Set := int.

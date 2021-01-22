@@ -10,7 +10,8 @@ Module Source.
     id : forall {a : Set}, a -> a;
   }.
 End Source.
-Definition Source {t} := @Source.signature t.
+Definition Source := @Source.signature.
+Arguments Source {_}.
 
 Module Target.
   Record signature {t : Set} : Set := {
@@ -18,7 +19,8 @@ Module Target.
     y : t;
   }.
 End Target.
-Definition Target {t} := @Target.signature t.
+Definition Target := @Target.signature.
+Arguments Target {_}.
 
 Module M.
   Definition t : Set := int.

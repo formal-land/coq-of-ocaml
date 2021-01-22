@@ -7,7 +7,8 @@ Module Sig.
     v : t;
   }.
 End Sig.
-Definition Sig {t} := @Sig.signature t.
+Definition Sig := @Sig.signature.
+Arguments Sig {_}.
 
 Reserved Notation "'foo".
 

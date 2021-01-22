@@ -7,7 +7,8 @@ Module COMPARABLE.
     compare : t -> t -> int;
   }.
 End COMPARABLE.
-Definition COMPARABLE {t} := @COMPARABLE.signature t.
+Definition COMPARABLE := @COMPARABLE.signature.
+Arguments COMPARABLE {_}.
 
 Module S.
   Record signature {t : Set} : Set := {
@@ -24,7 +25,8 @@ Module S.
     min : t -> t -> t;
   }.
 End S.
-Definition S {t} := @S.signature t.
+Definition S := @S.signature.
+Arguments S {_}.
 
 Parameter Make :
   forall {P_t : Set},

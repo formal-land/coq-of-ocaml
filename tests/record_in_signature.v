@@ -7,7 +7,8 @@ Module Sig.
     v : t string;
   }.
 End Sig.
-Definition Sig {t} := @Sig.signature t.
+Definition Sig := @Sig.signature.
+Arguments Sig {_}.
 
 Module M.
   Module t.

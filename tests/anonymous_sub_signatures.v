@@ -8,7 +8,8 @@ Module T_bytes.
     of_bytes_exn : bytes -> t;
   }.
 End T_bytes.
-Definition T_bytes {t} := @T_bytes.signature t.
+Definition T_bytes := @T_bytes.signature.
+Arguments T_bytes {_}.
 
 Module T_encoding.
   Record signature {t : Set} : Set := {
@@ -16,7 +17,8 @@ Module T_encoding.
     encoding : list t;
   }.
 End T_encoding.
-Definition T_encoding {t} := @T_encoding.signature t.
+Definition T_encoding := @T_encoding.signature.
+Arguments T_encoding {_}.
 
 Module T_encoding_bytes.
   Record signature {t : Set} : Set := {
@@ -26,7 +28,8 @@ Module T_encoding_bytes.
     encoding : list t;
   }.
 End T_encoding_bytes.
-Definition T_encoding_bytes {t} := @T_encoding_bytes.signature t.
+Definition T_encoding_bytes := @T_encoding_bytes.signature.
+Arguments T_encoding_bytes {_}.
 
 Module WithBar.
   Record signature : Set := {
@@ -53,9 +56,8 @@ Module Validator.
     com := Commitment_t;
   }.
 End Validator.
-Definition Validator {Ciphertext_t Commitment_t Commitment_NestedLevel_t CV_t}
-  :=
-  @Validator.signature Ciphertext_t Commitment_t Commitment_NestedLevel_t CV_t.
+Definition Validator := @Validator.signature.
+Arguments Validator {_ _ _ _}.
 
 Module F.
   Class FArgs
