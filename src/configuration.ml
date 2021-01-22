@@ -496,4 +496,11 @@ let of_optional_file_name
       Yojson.Basic.from_file
         ~fname:configuration_file_name
         configuration_file_name in
-    of_json source_file_name json
+    begin try of_json source_file_name json with
+    | Failure message ->
+      let message =
+        "Error in the configuration file '" ^ configuration_file_name ^ "':\n" ^
+        message in
+      prerr_endline message;
+      exit 1
+    end

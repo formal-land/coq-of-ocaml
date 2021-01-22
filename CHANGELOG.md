@@ -1,4 +1,5 @@
 ## [Unreleased]
+* Show nicer error messages for errors in the configuration file.
 
 ## 2.4.0 (January 11, 2021)
 * Install the Coq proofs in `CoqOfOCaml` rather than `OCaml` for clarity.
