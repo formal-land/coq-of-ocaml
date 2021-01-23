@@ -36,7 +36,7 @@ Module WithBar.
     bar : string;
   }.
 End WithBar.
-Definition WithBar := @WithBar.signature.
+Definition WithBar := WithBar.signature.
 
 Module Validator.
   Record signature

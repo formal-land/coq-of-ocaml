@@ -39,3 +39,11 @@ module M_with_functor : S_with_functor = struct
     let v = (M.v, 12)
   end
 end
+
+module type S_without_abstract = sig
+  val s : string
+end
+
+module M_without_abstract = struct
+  let s = "foo"
+end

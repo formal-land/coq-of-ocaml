@@ -357,7 +357,11 @@ let to_coq_definition (name : Name.t) (signature : t) : SmartPrint.t =
   !^ "End" ^^ Name.to_coq name ^-^ !^ "." ^^ newline ^^
   nest (
     !^ "Definition" ^^ Name.to_coq name ^^ !^ ":=" ^^
-    !^ "@" ^-^ Name.to_coq name ^-^ !^ "." ^-^ !^ "signature" ^-^ !^ "."
+    begin match signature.typ_params with
+    | [] -> empty
+    | _ :: _ -> !^ "@"
+    end ^-^
+    Name.to_coq name ^-^ !^ "." ^-^ !^ "signature" ^-^ !^ "."
   ) ^^
   begin match signature.typ_params with
   | [] -> empty

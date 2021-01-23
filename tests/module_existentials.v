@@ -96,7 +96,7 @@ Module S_with_functor.
     F : forall {M_t : Set}, forall (M : S (t := M_t)), S (t := M.(S.t) * int);
   }.
 End S_with_functor.
-Definition S_with_functor := @S_with_functor.signature.
+Definition S_with_functor := S_with_functor.signature.
 
 Module M_with_functor.
   Module F.
@@ -124,3 +124,20 @@ Module M_with_functor.
     |}.
 End M_with_functor.
 Definition M_with_functor : S_with_functor := M_with_functor.module.
+
+Module S_without_abstract.
+  Record signature : Set := {
+    s : string;
+  }.
+End S_without_abstract.
+Definition S_without_abstract := S_without_abstract.signature.
+
+Module M_without_abstract.
+  Definition s : string := "foo".
+  
+  Definition module :=
+    {|
+      S_without_abstract.s := s
+    |}.
+End M_without_abstract.
+Definition M_without_abstract := M_without_abstract.module.
