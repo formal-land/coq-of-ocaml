@@ -6,7 +6,7 @@ open Monad.Notations
 type item =
   | Error of string
   | Documentation of string
-  | Module of Name.t * ModuleTyp.t
+  | Module of Name.t * Type.t
   | ModuleWithSignature of item list
   | TypExistential of Name.t
   | TypSynonym of Name.t * Type.t
@@ -14,21 +14,17 @@ type item =
 
 type t = {
   items: item list;
-  typ_params: int ModuleTypParams.t }
+  typ_params: (Name.t * int) list
+}
 
 type let_in_type = (Name.t * Name.t) list
 
 let add_new_let_in_type
-  (prefix : Name.t list) (let_in_type : let_in_type) (name : Name.t)
+  (prefix : string list) (let_in_type : let_in_type) (id : Ident.t)
   : (Name.t * let_in_type) Monad.t =
-  let prefixed_path_name = PathName.of_name prefix name in
-  let* prefixed_name = PathName.to_name false prefixed_path_name in
+  let* name = Name.of_ident false id in
+  let* prefixed_name = Name.of_strings false (prefix @ [Ident.name id]) in
   return (prefixed_name, (name, prefixed_name) :: let_in_type)
-
-let prefix_name (is_value : bool) (prefix : Name.t list) (name : Name.t)
-  : Name.t Monad.t =
-  let prefixed_path_name = PathName.of_name prefix name in
-  PathName.to_name is_value prefixed_path_name
 
 let apply_let_in_type (let_in_type : let_in_type) (typ : Type.t) : Type.t =
   List.fold_left
@@ -36,7 +32,7 @@ let apply_let_in_type (let_in_type : let_in_type) (typ : Type.t) : Type.t =
     typ let_in_type
 
 let rec items_of_types_signature
-  (prefix : Name.t list)
+  (prefix : string list)
   (let_in_type : let_in_type)
   (signature : Types.signature)
   : (item list * let_in_type) Monad.t =
@@ -44,25 +40,29 @@ let rec items_of_types_signature
     : (item * let_in_type) Monad.t =
     match signature_item with
     | Sig_value (ident, { val_type; _ }, _) ->
-      let* name = Name.of_ident true ident in
-      let* prefixed_name = prefix_name true prefix name in
+      let* prefixed_name = Name.of_strings true (prefix @ [Ident.name ident]) in
       let* typ = Type.of_type_expr_without_free_vars val_type in
-      let typ_args = Name.Set.elements (Type.typ_args_of_typ typ) in
+      let typ_args =
+        Type.typ_args_of_typ typ |>
+        Name.Set.elements |>
+        List.map (fun typ -> (typ, 0)) in
       let typ_with_let_in_type =
         apply_let_in_type let_in_type (Type.ForallTyps (typ_args, typ)) in
       return (Value (prefixed_name, typ_with_let_in_type), let_in_type)
     | Sig_type (ident, { type_manifest = None; _ }, _, _) ->
-      let* name = Name.of_ident false ident in
-      let* (name, let_in_type) = add_new_let_in_type prefix let_in_type name in
+      let* (name, let_in_type) = add_new_let_in_type prefix let_in_type ident in
       return (TypExistential name, let_in_type)
     | Sig_type (ident, { type_manifest = Some typ; type_params; _ }, _, _) ->
-      let* name = Name.of_ident false ident in
-      let* (name, let_in_type) = add_new_let_in_type prefix let_in_type name in
-      let* typ_args = Monad.List.map Type.of_type_expr_variable type_params in
+      let* (name, let_in_type) = add_new_let_in_type prefix let_in_type ident in
+      let* typ_args =
+        type_params |> Monad.List.map (fun typ_param ->
+          let* typ = Type.of_type_expr_variable typ_param in
+          return (typ, 0)
+        ) in
       let* typ = Type.of_type_expr_without_free_vars typ in
       let typ_with_let_in_type =
         apply_let_in_type let_in_type (Type.ForallTyps (typ_args, typ)) in
-      return (TypSynonym (name, typ_with_let_in_type),let_in_type)
+      return (TypSynonym (name, typ_with_let_in_type), let_in_type)
     | Sig_typext (_, { ext_type_path; _ }, _, _) ->
       let name = Path.name ext_type_path in
       raise
@@ -78,7 +78,7 @@ let rec items_of_types_signature
         PathName.of_path_with_convert false signature_path
           >>= fun signature_path_name ->
         let mapper ident { Types.type_manifest; type_params; _ } =
-          let* name = Name.of_ident false ident in
+          let name = Ident.name ident in
           begin match type_manifest with
           | None -> return (Type.Arity (List.length type_params))
           | Some type_manifest ->
@@ -88,11 +88,20 @@ let rec items_of_types_signature
             return (Type.Typ typ)
           end >>= fun arity_or_typ ->
           return (Some (Tree.Item (name, arity_or_typ))) in
-        ModuleTypParams.get_module_typ_typ_params
-          mapper md_type >>= fun typ_params ->
+        let* typ_params =
+          ModuleTypParams.get_module_typ_typ_params mapper md_type in
+        let* typ_params =
+          Tree.flatten typ_params |>
+          Monad.List.map (fun (path, arity_or_typ) ->
+            let* name = Name.of_strings false path in
+            let* typ_name = Name.of_strings false (Ident.name ident :: path) in
+            match arity_or_typ with
+            | Type.Arity _ -> return (name, Some (Type.Variable typ_name))
+            | Typ typ -> return (name, Some typ)
+          ) in
         raise
           (
-            Module (name, ModuleTyp.With (signature_path_name, typ_params)),
+            Module (name, Type.Signature (signature_path_name, typ_params)),
             let_in_type
           )
           Module
@@ -109,9 +118,9 @@ let rec items_of_types_signature
       | Not_found reason ->
         begin match md_type with
         | Mty_signature signature ->
-          let* name = Name.of_ident false ident in
+          let prefix = prefix @ [Ident.name ident] in
           let* (items, _) =
-            items_of_types_signature (prefix @ [name]) let_in_type signature in
+            items_of_types_signature prefix let_in_type signature in
           return (ModuleWithSignature items, let_in_type)
         | _ ->
           raise
@@ -152,7 +161,13 @@ let rec items_of_types_signature
 
 let of_types_signature (signature : Types.signature) : t Monad.t =
   let* (items, _) = items_of_types_signature [] [] signature in
-  (ModuleTypParams.get_signature_typ_params_arity signature) >>= fun typ_params ->
+  let* typ_params = ModuleTypParams.get_signature_typ_params_arity signature in
+  let* typ_params =
+    Tree.flatten typ_params |>
+    Monad.List.map (fun (path, arity) ->
+      let* name = Name.of_strings false path in
+      return (name, arity)
+    ) in
   return { items; typ_params }
 
 let wrap_documentation (items_value : (item list * 'a) Monad.t)
@@ -165,7 +180,7 @@ let wrap_documentation (items_value : (item list * 'a) Monad.t)
     return (Documentation documentation :: items, value)
 
 let rec of_signature_items
-  (prefix : Name.t list)
+  (prefix : string list)
   (let_in_type : let_in_type)
   (items : signature_item list)
   (last_env : Env.t)
@@ -208,19 +223,23 @@ let rec of_signature_items
         NotSupported
         "Signatures inside signatures are not handled."
     | Tsig_module { md_id; md_type; _ } ->
-      let* name = Name.of_optional_ident false md_id in
-      let* prefixed_name = prefix_name false prefix name in
+      let id =
+        match md_id with
+        | Some md_id -> Ident.name md_id
+        | None -> "_" in
       begin match md_type.mty_desc with
       | Tmty_signature signature ->
-        let* name = Name.of_optional_ident false md_id in
+        let prefix = prefix @ [id] in
         let* items =
-          of_signature_items
-            (prefix @ [name]) let_in_type signature.sig_items next_env in
+          of_signature_items prefix let_in_type signature.sig_items next_env in
         return ([ModuleWithSignature items], let_in_type)
       | _ ->
         push_env (
+        let prefixed_id = String.concat "_" (prefix @ [id]) in
+        let* prefixed_name = Name.of_string false prefixed_id in
         let* module_typ = ModuleTyp.of_ocaml md_type in
-        return ([Module (prefixed_name, module_typ)], let_in_type))
+        let* (_, typ) = ModuleTyp.to_typ [] prefixed_id false module_typ in
+        return ([Module (prefixed_name, typ)], let_in_type))
       end
     | Tsig_open _ ->
       raise
@@ -233,8 +252,8 @@ let rec of_signature_items
         NotSupported
         "Recursive module signatures are not handled."
     | Tsig_type (_, [ { typ_id; typ_type = { type_manifest = None; _ }; _ } ]) ->
-      let* name = Name.of_ident false typ_id in
-      let* (name, let_in_type) = add_new_let_in_type prefix let_in_type name in
+      let* (name, let_in_type) =
+        add_new_let_in_type prefix let_in_type typ_id in
       return ([TypExistential name], let_in_type)
     | Tsig_type (_, typs) | Tsig_typesubst typs ->
       begin match typs with
@@ -243,10 +262,14 @@ let rec of_signature_items
           typ_type = { type_manifest = Some typ; type_params; _ };
           _
         } ] ->
-        let* name = Name.of_ident false typ_id in
-        let* (name, let_in_type) = add_new_let_in_type prefix let_in_type name in
+        let* (name, let_in_type) =
+          add_new_let_in_type prefix let_in_type typ_id in
         let* typ_args =
-          type_params |> Monad.List.map Type.of_type_expr_variable in
+          type_params |>
+          Monad.List.map (fun typ_param ->
+            let* name = Type.of_type_expr_variable typ_param in
+            return (name, 0)
+          ) in
         let* typ = Type.of_type_expr_without_free_vars typ in
         let typ_with_let_in_type =
           apply_let_in_type let_in_type (Type.ForallTyps (typ_args, typ)) in
@@ -263,10 +286,12 @@ let rec of_signature_items
         ExtensibleType
         "We do not handle extensible types"
     | Tsig_value { val_id; val_desc = { ctyp_type; _ }; _ } ->
-      let* name = Name.of_ident true val_id in
-      let* prefixed_name = prefix_name true prefix name in
+      let* prefixed_name = Name.of_strings true (prefix @ [Ident.name val_id]) in
       let* typ = Type.of_type_expr_without_free_vars ctyp_type in
-      let typ_args = Name.Set.elements (Type.typ_args_of_typ typ) in
+      let typ_args =
+        Type.typ_args_of_typ typ |>
+        Name.Set.elements |>
+        List.map (fun typ -> (typ, 0)) in
       let typ_with_let_in_type =
         apply_let_in_type let_in_type (Type.ForallTyps (typ_args, typ)) in
       return ([Value (prefixed_name, typ_with_let_in_type)], let_in_type)))) in
@@ -286,6 +311,12 @@ let of_signature (signature : signature) : t Monad.t =
   let* items =
     of_signature_items [] [] signature.sig_items signature.sig_final_env in
   ModuleTypParams.get_signature_typ_params_arity signature.sig_type >>= fun typ_params ->
+  let* typ_params =
+    Tree.flatten typ_params |>
+    Monad.List.map (fun (path, arity) ->
+      let* name = Name.of_strings false path in
+      return (name, arity)
+    ) in
   return { items; typ_params })
 
 let to_coq_prefixed_name (prefix : Name.t list) (name : Name.t) : SmartPrint.t =
@@ -295,10 +326,10 @@ let rec to_coq_item (signature_item : item) : SmartPrint.t =
   match signature_item with
   | Error message -> !^ ("(* " ^ message ^ " *)")
   | Documentation message -> !^ ("(** " ^ message ^ " *)")
-  | Module (name, module_typ) ->
+  | Module (name, typ) ->
     nest (
       Name.to_coq name ^^ !^ ":" ^^
-      ModuleTyp.to_coq name module_typ ^-^ !^ ";"
+      Type.to_coq None None typ ^-^ !^ ";"
     )
   | ModuleWithSignature items -> separate newline (to_coq_items items)
   | TypExistential name ->
@@ -311,47 +342,35 @@ let rec to_coq_item (signature_item : item) : SmartPrint.t =
 and to_coq_items (items : item list) : SmartPrint.t list =
   List.map to_coq_item items
 
-let rec to_coq_type_kind (arity : int) : SmartPrint.t =
-  if arity = 0 then
-    Pp.set
-  else
-    Pp.set ^^ !^ "->" ^^ to_coq_type_kind (arity - 1)
-
 let to_coq_definition (name : Name.t) (signature : t) : SmartPrint.t =
-  let typ_params : (SmartPrint.t * int) list =
-    Tree.flatten signature.typ_params |> List.map (fun (path_name, arity) ->
-      (ModuleTypParams.to_coq_typ_param_name path_name, arity)
-    ) in
-  let reversed_grouped_typ_params : (SmartPrint.t list * int) list =
-    List.fold_left
-      (fun grouped (typ_param, arity) ->
-        match grouped with
-        | [] -> [([typ_param], arity)]
-        | (typ_params, arity') :: grouped' ->
-          if arity = arity' then
-            (typ_param :: typ_params, arity') :: grouped'
-          else
-            ([typ_param], arity) :: grouped
-      )
-      []
-      typ_params in
-  let grouped_typ_params =
-    reversed_grouped_typ_params |>
-    List.map (fun (typ_params, arity) -> (List.rev typ_params, arity)) |>
-    List.rev in
   !^ "Module" ^^ Name.to_coq name ^-^ !^ "." ^^ newline ^^
   indent (
     nest (
       !^ "Record" ^^ !^ "signature" ^^
-      separate space (grouped_typ_params |> List.map (fun (typ_params, arity) ->
-        braces (
-          separate space typ_params ^^ !^ ":" ^^ to_coq_type_kind arity
-        )
-      )) ^^
+      Type.to_coq_grouped_typ_params Type.Braces signature.typ_params ^^
       nest (!^ ":" ^^ Pp.set) ^^
       !^ ":=" ^^ !^ "{" ^^ newline ^^
       indent (separate newline (to_coq_items signature.items)) ^^ newline ^^
       !^ "}" ^-^ !^ "."
     )
   ) ^^ newline ^^
-  !^ "End" ^^ Name.to_coq name ^-^ !^ "."
+  !^ "End" ^^ Name.to_coq name ^-^ !^ "." ^^ newline ^^
+  nest (
+    !^ "Definition" ^^ Name.to_coq name ^^ !^ ":=" ^^
+    begin match signature.typ_params with
+    | [] -> empty
+    | _ :: _ -> !^ "@"
+    end ^-^
+    Name.to_coq name ^-^ !^ "." ^-^ !^ "signature" ^-^ !^ "."
+  ) ^^
+  begin match signature.typ_params with
+  | [] -> empty
+  | _ :: _ ->
+    newline ^^
+    nest (
+      !^ "Arguments" ^^ Name.to_coq name ^^
+      nest (braces (separate space (
+        Pp.n_underscores (List.length signature.typ_params)
+      ))) ^-^ !^ "."
+    )
+  end

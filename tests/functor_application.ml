@@ -22,6 +22,8 @@ module F (X : Source) : Target with type t = X.t = struct
   let y = X.x
 end
 
+module FM = F (M)
+
 module FSubst (X : Source) : Target with type t := X.t = struct
   let y = X.x
 end

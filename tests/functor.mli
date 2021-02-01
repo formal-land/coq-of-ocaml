@@ -33,3 +33,5 @@ module Make (P : COMPARABLE) : (S with type t = P.t)
 module Char : S with type t = char
 
 module Abstract : S
+
+module Lift (P : COMPARABLE) : COMPARABLE

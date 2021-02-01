@@ -7,6 +7,8 @@ Module Sig.
     v : t string;
   }.
 End Sig.
+Definition Sig := @Sig.signature.
+Arguments Sig {_}.
 
 Module M.
   Module t.
@@ -27,13 +29,12 @@ Module M.
   Definition v : t string := {| t.x := 0; t.y := 1; t.label := "hi" |}.
   
   Definition module :=
-    existT (A := Set -> Set) _ t
-      {|
-        Sig.v := v
-      |}.
+    {|
+      Sig.v := v
+    |}.
 End M.
-Definition M : {t : Set -> Set & Sig.signature (t := t)} := M.module.
+Definition M : Sig (t := _) := M.module.
 
-Definition v : (|M|).(Sig.t) string := (|M|).(Sig.v).
+Definition v : M.(Sig.t) string := M.(Sig.v).
 
-Definition s : string := (|M|).(Sig.v).(M.t.label).
+Definition s : string := M.(Sig.v).(M.t.label).

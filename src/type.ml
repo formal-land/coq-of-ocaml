@@ -9,13 +9,14 @@ type t =
   | Sum of (string * t) list
   | Tuple of t list
   | Apply of MixedPath.t * t list
-  | Package of bool * PathName.t * arity_or_typ Tree.t
+  | Signature of PathName.t * (Name.t * t option) list
+  | ExistTyps of (Name.t * int) list * t
   | ForallModule of Name.t * t * t
-  | ForallTyps of Name.t list * t
+  | ForallTyps of (Name.t * int) list * t
   | FunTyps of Name.t list * t
   | Error of string
 
-and arity_or_typ =
+type arity_or_typ =
   | Arity of int
   | Typ of t
 
@@ -32,7 +33,6 @@ let filter_typ_params_in_valid_set
   typ_params |> List.map (function
       | AdtParameters.AdtVariable.Parameter name -> Name.Set.mem name valid_set
       | _ -> false )
-
 
 let rec non_phantom_typs (path : Path.t) (typs : Types.type_expr list)
   : Types.type_expr list Monad.t =
@@ -163,6 +163,9 @@ let subst_name (source : Name.t) (target : Name.t) (typ : t) : t =
         subst typ
       else
         typ in
+    let subst_after_names_with_arity (names : (Name.t * int) list) (typ : t)
+      : t =
+      subst_after_names (List.map fst names) typ in
     match typ with
     | Variable name ->
       if Name.equal name source then
@@ -180,20 +183,18 @@ let subst_name (source : Name.t) (target : Name.t) (typ : t) : t =
             MixedPath.PathName { path = []; base = target }
           | _ -> constructor in
       Apply (constructor_with_subst, List.map subst typs)
-    | Package (is_in_exp, path_name, typ_params) ->
-      Package (
-        is_in_exp,
+    | Signature (path_name, typ_params) ->
+      Signature (
         path_name,
-        typ_params |> Tree.map (fun arity_or_typ ->
-          match arity_or_typ with
-          | Arity _ -> arity_or_typ
-          | Typ typ -> Typ (subst typ)
-        )
+        typ_params |>
+        List.map (fun (name, typ) -> (name, Option.map subst typ))
       )
+    | ExistTyps (typ_params, typ) ->
+      ExistTyps (typ_params, subst_after_names_with_arity typ_params typ)
     | ForallModule (name, typ1, typ2) ->
       ForallModule (name, subst typ1, subst typ2)
     | ForallTyps (names, typ) ->
-      ForallTyps (names, subst_after_names names typ)
+      ForallTyps (names, subst_after_names_with_arity names typ)
     | FunTyps (names, typ) -> FunTyps (names, subst_after_names names typ)
     | Error _ -> typ in
   subst typ
@@ -371,8 +372,11 @@ let rec of_typ_expr
       AdtParameters.typ_params_ghost_marked typ_args in
     let typ_args = typ_args |> AdtParameters.get_parameters in
     non_phantom_vars_of_typ typ >>= fun non_phantom_vars ->
-    let typ_args = typ_args |> List.filter (fun typ_arg ->
-      Name.Set.mem typ_arg non_phantom_vars
+    let typ_args = typ_args |> List.filter_map (fun typ_arg ->
+      if Name.Set.mem typ_arg non_phantom_vars then
+        Some (typ_arg, 0)
+      else
+        None
     ) in
     of_typ_expr with_free_vars typ_vars typ >>= fun (typ, typ_vars, new_typ_vars_typ) ->
     let new_typ_vars_typ = Name.Set.diff non_phantom_vars new_typ_vars_typ in
@@ -382,10 +386,10 @@ let rec of_typ_expr
       let typ_substitutions = List.map2 (fun ident typ -> (ident, typ)) idents typs in
       Monad.List.fold_left
         (fun (typ_substitutions, typ_vars, new_typ_vars) (ident, typ) ->
-          let* path_name = PathName.of_long_ident false ident in
+          let path = Longident.flatten ident in
           of_typ_expr with_free_vars typ_vars typ >>= fun (typ, typ_vars, new_typ_vars') ->
           return (
-            (path_name, typ) :: typ_substitutions,
+            (path, typ) :: typ_substitutions,
             typ_vars,
             Name.Set.union new_typ_vars new_typ_vars'
           )
@@ -397,12 +401,34 @@ let rec of_typ_expr
       ModuleTypParams.get_module_typ_declaration_typ_params_arity
         module_typ >>= fun signature_typ_params ->
       let typ_params = List.fold_left
-        (fun typ_values (path_name, typ) ->
-          Tree.map_at typ_values path_name (fun _ -> Typ typ)
+        (fun typ_values (path, typ) ->
+          Tree.map_at typ_values path (fun _ -> Typ typ)
         )
         (signature_typ_params |> Tree.map (fun arity -> Arity arity))
         typ_substitutions in
-      return (Package (true, path_name, typ_params), typ_vars, new_typ_vars)
+      let typ_params = Tree.flatten typ_params in
+      let* exist_vars =
+        typ_params |>
+        Monad.List.filter_map (fun (path, arity_or_typ) ->
+          match arity_or_typ with
+          | Arity arity ->
+            let* name = Name.of_strings false path in
+            return (Some (name, arity))
+          | Typ _ -> return None
+        ) in
+      let* signature_params =
+        typ_params |>
+        Monad.List.map (fun (path, arity_or_typ) ->
+          let* name = Name.of_strings false path in
+          match arity_or_typ with
+          | Arity _ -> return (name, Some (Variable name))
+          | Typ typ -> return (name, Some typ)
+        ) in
+      return (
+        ExistTyps (exist_vars, Signature (path_name, signature_params)),
+        typ_vars,
+        new_typ_vars
+      )
 
 and of_typs_exprs
   (with_free_vars: bool)
@@ -484,23 +510,30 @@ and existential_typs_of_typs (typs : Types.type_expr list)
 
 (** The free variables of a type. *)
 let rec typ_args_of_typ (typ : t) : Name.Set.t =
+  let diff_typ_names (typ : t) (names : Name.t list) : Name.Set.t =
+    Name.Set.diff (typ_args_of_typ typ) (Name.Set.of_list names) in
   match typ with
   | Variable x -> Name.Set.singleton x
   | Arrow (typ1, typ2) -> typ_args_of_typs [typ1; typ2]
   | Sum typs -> typ_args_of_typs (List.map snd typs)
   | Tuple typs | Apply (_, typs) -> typ_args_of_typs typs
-  | Package (_, _, typ_params) ->
-    Tree.flatten typ_params |>
-    Util.List.filter_map (fun (_, typ) ->
+  | Signature (_, typ_params) ->
+    typ_params |>
+    List.map (fun (_, typ) ->
       match typ with
-      | Arity _ -> None
-      | Typ typ -> Some (typ_args_of_typ typ)
+      | None -> Name.Set.empty
+      | Some typ -> typ_args_of_typ typ
     ) |>
     List.fold_left Name.Set.union Name.Set.empty
+  | ExistTyps (typ_params, typ) ->
+    let typ_params = List.map fst typ_params in
+    diff_typ_names typ typ_params
   | ForallModule (_, param, result) ->
     Name.Set.union (typ_args_of_typ param) (typ_args_of_typ result)
-  | ForallTyps (typ_params, typ) | FunTyps (typ_params, typ) ->
-    Name.Set.diff (typ_args_of_typ typ) (Name.Set.of_list typ_params)
+  | ForallTyps (typ_params, typ) ->
+    let typ_params = List.map fst typ_params in
+    diff_typ_names typ typ_params
+  | FunTyps (typ_params, typ) -> diff_typ_names typ typ_params
   | Error _ -> Name.Set.empty
 
 and typ_args_of_typs (typs : t list) : Name.Set.t =
@@ -528,14 +561,15 @@ let rec local_typ_constructors_of_typ (typ : t) : Name.Set.t =
       Name.Set.add base local_typ_constructors
     | _ -> local_typ_constructors
     end
-  | Package (_, _, typ_params) ->
-    Tree.flatten typ_params |>
-    Util.List.filter_map (fun (_, typ) ->
+  | Signature (_, typ_params) ->
+    typ_params |>
+    List.map (fun (_, typ) ->
       match typ with
-      | Arity _ -> None
-      | Typ typ -> Some (local_typ_constructors_of_typ typ)
+      | None -> Name.Set.empty
+      | Some typ -> local_typ_constructors_of_typ typ
     ) |>
     List.fold_left Name.Set.union Name.Set.empty
+  | ExistTyps (_, typ) -> local_typ_constructors_of_typ typ
   | ForallModule (_, param, result) ->
     local_typ_constructors_of_typs [param; result]
   | ForallTyps (_, typ) | FunTyps (_, typ) -> local_typ_constructors_of_typ typ
@@ -601,6 +635,45 @@ module Subst = struct
     path_name : PathName.t -> PathName.t }
 end
 
+let rec to_coq_typ_arity (arity : int) : SmartPrint.t =
+  if arity = 0 then
+    Pp.set
+  else
+    Pp.set ^^ !^ "->" ^^ to_coq_typ_arity (arity - 1)
+
+type parens_or_braces =
+  | Parens
+  | Braces
+
+let to_coq_grouped_typ_params (parens_or_braces : parens_or_braces)
+  (typ_params : (Name.t * int) list) : SmartPrint.t =
+  let typ_params : (SmartPrint.t * int) list =
+    typ_params |> List.map (fun (name, arity) ->
+      (Name.to_coq name, arity)
+    ) in
+  let reversed_grouped_typ_params : (SmartPrint.t list * int) list =
+    List.fold_left
+      (fun grouped (typ_param, arity) ->
+        match grouped with
+        | [] -> [([typ_param], arity)]
+        | (typ_params, arity') :: grouped' ->
+          if arity = arity' then
+            (typ_param :: typ_params, arity') :: grouped'
+          else
+            ([typ_param], arity) :: grouped
+      )
+      []
+      typ_params in
+  let grouped_typ_params =
+    reversed_grouped_typ_params |>
+    List.map (fun (typ_params, arity) -> (List.rev typ_params, arity)) |>
+    List.rev in
+  separate space (grouped_typ_params |> List.map (fun (typ_params, arity) ->
+    nest ((match parens_or_braces with Parens -> parens | Braces -> braces) (
+      separate space typ_params ^^ !^ ":" ^^ to_coq_typ_arity arity
+    ))
+  ))
+
 (** Pretty-print a type. Use the [context] parameter to know if we should add
     parenthesis. *)
 let rec to_coq (subst : Subst.t option) (context : Context.t option) (typ : t)
@@ -649,59 +722,50 @@ let rec to_coq (subst : Subst.t option) (context : Context.t option) (typ : t)
     Pp.parens (Context.should_parens context Context.Apply && typs <> []) @@
     nest @@ separate space
       (MixedPath.to_coq path :: List.map (to_coq subst (Some Context.Apply)) typs)
-  | Package (is_in_exp, path_name, typ_params) ->
-    let existential_typs =
-      Tree.flatten typ_params |>
-      Util.List.filter_map (function
-        | (path_name, Arity arity) -> Some (path_name, arity)
-        | _ -> None
-      ) in
-    let existential_typs_pattern =
-      existential_typs |>
-      List.map (fun (path_name, _) ->
-        ModuleTypParams.to_coq_typ_param_name path_name
-      ) |>
-      Pp.primitive_tuple_pattern in
-    let existential_typs_typ =
-      existential_typs |>
-      List.map (fun (_, arity) -> Pp.typ_arity arity) |>
-      Pp.primitive_tuple_type in
-    nest (braces (
-      existential_typs_pattern ^^ !^ ":" ^^ existential_typs_typ ^^
-      (if is_in_exp then !^ "@" else !^ "&") ^^
-      nest (
-        separate space (
-          nest (PathName.to_coq path_name ^-^ !^ "." ^-^ !^ "signature") ::
-          (Tree.flatten typ_params |> List.map (fun (path_name, typ) ->
-            let name = ModuleTypParams.to_coq_typ_param_name path_name in
-            nest (parens (
-              name ^^ !^ ":=" ^^
-              match typ with
-              | Arity _ -> name
-              | Typ typ -> to_coq subst (Some Context.Apply) typ
-            ))
-          ))
-        )
-      )
+  | Signature (path_name, typ_params) ->
+    nest (separate space (
+      PathName.to_coq path_name ::
+      (typ_params |> List.map (fun (name, typ) ->
+        nest (parens (
+          Name.to_coq name ^^ !^ ":=" ^^
+          begin match typ with
+          | None -> !^ "_"
+          | Some typ -> to_coq subst None typ
+          end
+        ))
+      ))
     ))
+  | ExistTyps (typ_params, typ) ->
+      let existential_typs_pattern =
+        typ_params |>
+        List.map (fun (name, _) -> Name.to_coq name) |>
+        Pp.primitive_tuple_pattern in
+      let existential_typs_typ =
+        typ_params |>
+        List.map (fun (_, arity) -> Pp.typ_arity arity) |>
+        Pp.primitive_tuple_type in
+      nest (braces (
+        existential_typs_pattern ^^ !^ ":" ^^ existential_typs_typ ^^ !^ "@" ^^
+        to_coq subst None typ
+      ))
   | ForallModule (name, param, result) ->
-    Context.parens context Context.Forall @@ nest (
-      !^ "forall" ^^ parens (
-        Name.to_coq name ^^ !^ ":" ^^ to_coq subst None param
-      ) ^-^ !^ "," ^^
-      to_coq subst (Some Context.Forall) result
+    Context.parens context Context.Forall @@ group (
+      nest (
+        !^ "forall" ^^ parens (
+          Name.to_coq name ^^ !^ ":" ^^ to_coq subst None param
+        ) ^-^ !^ ","
+      ) ^^
+      to_coq subst None result
     )
   | ForallTyps (typ_args, typ) ->
     begin match typ_args with
     | [] -> to_coq subst context typ
     | _ :: _ ->
-      Context.parens context Context.Forall @@ nest (
-        !^ "forall" ^^ braces (
-          nest (
-            separate space (List.map Name.to_coq typ_args) ^^ !^ ":" ^^ Pp.set
-          )
-        ) ^-^ !^ "," ^^
-        to_coq subst (Some Context.Forall) typ
+      Context.parens context Context.Forall @@ group (
+        nest (
+          !^ "forall" ^^ to_coq_grouped_typ_params Braces typ_args ^-^ !^ ","
+        ) ^^
+        to_coq subst None typ
       )
     end
   | FunTyps (typ_args, typ) ->

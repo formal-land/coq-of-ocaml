@@ -110,6 +110,6 @@ let to_coq (imports : MonadEval.Import.t list) (ast : t) : SmartPrint.t =
   end ^^
   begin match ast.content with
   | SignatureAxioms signature -> SignatureAxioms.to_coq signature
-  | Structure structure -> Structure.to_coq false structure
+  | Structure structure -> Structure.to_coq None structure
   end ^^
   newline
