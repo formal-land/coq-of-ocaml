@@ -156,8 +156,11 @@ let is_value_to_escape (configuration : t) (name : string) : bool =
 
 let is_in_first_class_module_path_backlist (configuration : t) (path : Path.t)
   : bool =
-  match List.rev (Path.to_string_list path) with
-  | [] | exception _ -> false
+  let path_components =
+    Path.name path |>
+    Str.split (Str.regexp "__\\|\\.") in
+  match List.rev path_components with
+  | [] -> false
   | _ :: path ->
     let path = String.concat "." (List.rev path) in
     List.mem path configuration.first_class_module_path_blacklist
