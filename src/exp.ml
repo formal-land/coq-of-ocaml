@@ -66,9 +66,6 @@ type t =
   | ModulePack of (int Tree.t * t) (** Pack a module. *)
   | Functor of Name.t * Type.t * t
     (** A functor. *)
-  | TypeAnnotation of t * Type.t
-    (** Annotate with a type. *)
-    (* TODO: check if still in use. *)
   | Cast of t * Type.t
     (** Force the cast to a type (with an axiom). *)
   | Assert of Type.t * t (** The assert keyword. *)
@@ -1429,8 +1426,6 @@ let rec to_coq (paren : bool) (e : t) : SmartPrint.t =
       parens (nest (Name.to_coq x ^^ !^ ":" ^^ Type.to_coq None None typ)) ^^
       !^ "=>" ^^ to_coq false e
     )
-  | TypeAnnotation (e, typ) ->
-    parens @@ nest (to_coq true e ^^ nest (!^ ":" ^^ Type.to_coq None None typ))
   | Cast (e, typ) ->
     parens @@ nest (
       !^ "cast" ^^
