@@ -382,23 +382,14 @@ let rec of_expression (typ_vars : Name.t Name.Map.t) (e : expression)
     return (Tuple es)
   | Texp_construct (_, constructor_description, es) ->
     let implicits = Attribute.get_implicits attributes in
-    begin match constructor_description.cstr_tag with
-    | Cstr_extension _ ->
-      raise
-        (Variable (
-          MixedPath.of_name (Name.of_string_raw "extensible_type_value"),
-          []
-        ))
-        ExtensibleType
-        (
-          "Values of extensible types are ignored.\n\n" ^
-          "They are sent to a unit type."
-        )
-    | _ ->
-      PathName.of_constructor_description constructor_description >>= fun x ->
-      (es |> Monad.List.map (of_expression typ_vars)) >>= fun es ->
-      return (Constructor (x, implicits, es))
-    end
+    let* x =
+      match constructor_description.cstr_tag with
+      | Cstr_extension (path, _) ->
+        let* path = PathName.of_path_with_convert false path in
+        return (PathName.prefix_by_ext path)
+      | _ -> PathName.of_constructor_description constructor_description in
+    let* es = Monad.List.map (of_expression typ_vars) es in
+    return (Constructor (x, implicits, es))
   | Texp_variant (label, e) ->
     PathName.constructor_of_variant label >>= fun path_name ->
     let constructor =

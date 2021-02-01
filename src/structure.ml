@@ -235,6 +235,43 @@ let top_level_evaluation (e : expression) : t list Monad.t =
     )]
   }])])
 
+let of_typ_extension_raw (typ_extension : extension_constructor)
+  : (TypeDefinition.t list * Name.t * Type.t) Monad.t =
+  let { ext_id; ext_type = { ext_args; _ }; _ } = typ_extension in
+  let* name = Name.of_ident false ext_id in
+  (* We prefix the name of the constructor to distinguish it from the name
+      of the type of the record parameter in case of named parameters. *)
+  let prefixed_name = Name.prefix_by_ext name in
+  let* (typ_defs, args) =
+    match ext_args with
+    | Types.Cstr_tuple typs ->
+      let* typs =
+        Monad.List.map Type.of_type_expr_without_free_vars typs in
+      return ([], typs)
+    | Cstr_record labels ->
+      let* fields =
+        labels |>
+        Monad.List.map (fun { Types.ld_id; ld_type; _ } ->
+          let* name = Name.of_ident false ld_id in
+          let* typ = Type.of_type_expr_without_free_vars ld_type in
+          return (name, typ)
+        ) in
+      return (
+        [TypeDefinition.Record (name, [], fields, true)],
+        [Type.Apply (MixedPath.of_name name, [])]
+      ) in
+  let typ =
+    List.fold_right (fun arg typ -> Type.Arrow (arg, typ))
+      args Type.extensible_type in
+  return (typ_defs, prefixed_name, typ)
+
+let of_typ_extension (typ_extension : extension_constructor) : t list Monad.t =
+  let* (typ_defs, name, typ) = of_typ_extension_raw typ_extension in
+  return (
+    List.map (fun typ_def -> TypeDefinition typ_def) typ_defs @
+    [AbstractValue (name, [], typ)]
+  )
+
 (** Import an OCaml structure. *)
 let rec of_structure (structure : structure) : t list Monad.t =
   let get_include_items
@@ -333,12 +370,8 @@ let rec of_structure (structure : structure) : t list Monad.t =
       set_env final_env (
       TypeDefinition.of_ocaml typs >>= fun def ->
       return [TypeDefinition def])
-    | Tstr_exception { tyexn_constructor = { ext_id; _ }; _ } ->
-      error_message (Error ("exception " ^ Ident.name ext_id)) SideEffect (
-        "The definition of exceptions is not handled.\n\n" ^
-        "Alternative: using sum types (\"option\", \"result\", ...) to " ^
-        "represent error cases."
-      )
+    | Tstr_exception { tyexn_constructor; _ } ->
+      of_typ_extension tyexn_constructor
     | Tstr_open _ -> return []
     | Tstr_module { mb_id; mb_expr; mb_attributes; _ } ->
       let* name = Name.of_optional_ident false mb_id in
@@ -370,11 +403,8 @@ let rec of_structure (structure : structure) : t list Monad.t =
       let* name = Name.of_ident true val_id in
       Type.of_typ_expr true Name.Map.empty val_type >>= fun (typ, _, free_typ_vars) ->
       return [AbstractValue (name, Name.Set.elements free_typ_vars, typ)]
-    | Tstr_typext _ ->
-      error_message
-        (Error "type_extension")
-        ExtensibleType
-        "We do not handle type extensions"
+    | Tstr_typext { tyext_constructors; _ } ->
+      Monad.List.concat_map of_typ_extension tyext_constructors
     | Tstr_recmodule _ ->
       error_message
         (Error "recursive_module")
@@ -534,11 +564,13 @@ let rec to_coq (fargs : int option) (defs : t list) : SmartPrint.t =
     match def with
     | Value value -> Value.to_coq with_args value
     | AbstractValue (name, typ_vars, typ) ->
-      !^ "Parameter" ^^ Name.to_coq name ^^ !^ ":" ^^
-      Name.to_coq_list_or_empty typ_vars (fun typ_vars ->
-        !^ "forall" ^^ nest (parens (typ_vars ^^ !^ ":" ^^ Pp.set)) ^-^ !^ ","
-      ) ^^
-      Type.to_coq None None typ ^-^ !^ "."
+      nest (
+        !^ "Parameter" ^^ Name.to_coq name ^^ !^ ":" ^^
+        Name.to_coq_list_or_empty typ_vars (fun typ_vars ->
+          !^ "forall" ^^ nest (parens (typ_vars ^^ !^ ":" ^^ Pp.set)) ^-^ !^ ","
+        ) ^^
+        Type.to_coq None None typ ^-^ !^ "."
+      )
     | TypeDefinition typ_def -> TypeDefinition.to_coq with_args typ_def
     | Module (name, (free_vars_params, params), defs, e) ->
       let is_functor =

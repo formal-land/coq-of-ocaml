@@ -616,9 +616,8 @@ let of_ocaml (typs : type_declaration list) : t Monad.t =
     return (Record (name, typ_args, fields, true))
   | [ { typ_id; typ_type = { type_kind = Type_open; _ }; _ } ] ->
     let* name = Name.of_ident false typ_id in
-    let typ = Type.Apply (MixedPath.of_name (Name.of_string_raw "extensible_type"), []) in
     raise
-      (Synonym (name, [], typ))
+      (Synonym (name, [], Type.extensible_type))
       ExtensibleType
       "We do not handle extensible types"
   | _ ->
