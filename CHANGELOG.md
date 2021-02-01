@@ -1,5 +1,7 @@
 ## [Unreleased]
 * Show nicer error messages for errors in the configuration file.
+* Remove existential types from the modules (except for the first-class modules).
+* Upgrade OCaml to the version 4.10.
 
 ## 2.4.0 (January 11, 2021)
 * Install the Coq proofs in `CoqOfOCaml` rather than `OCaml` for clarity.
