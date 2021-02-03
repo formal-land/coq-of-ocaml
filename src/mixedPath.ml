@@ -11,6 +11,9 @@ type t =
 let of_name (name : Name.t) : t =
   PathName (PathName.of_name [] name)
 
+let dec_name : t =
+  PathName ("decode_vtag" |> Name.of_string_raw |> PathName.of_name [])
+
 let get_signature_path (path : Path.t) : Path.t option Monad.t =
   let* env = get_env in
   match Env.find_module path env with

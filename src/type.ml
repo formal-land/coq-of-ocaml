@@ -444,6 +444,58 @@ and of_typs_exprs
   ) >>= fun (typs, typ_vars, new_typ_vars) ->
   return (List.rev typs, typ_vars, new_typ_vars)
 
+
+let rec decode_var_tags_aux
+    (typ_vars : VarEnv.t)
+    (in_native : bool)
+    (is_tag : bool)
+    (typ : t)
+  : t Monad.t =
+  let dec = decode_var_tags_aux typ_vars in_native is_tag in
+  match typ with
+  | Variable name ->
+    begin
+      if not is_tag || in_native
+      then return typ
+      else match List.assoc_opt name typ_vars with
+        | None -> return typ
+        | Some Kind.Tag -> return @@ Apply (MixedPath.dec_name, [typ], [true])
+        | Some _ -> return typ
+    end
+  | Arrow (t1, t2) ->
+    let* t1 = decode_var_tags_aux typ_vars in_native true t1 in
+    let* t2 = decode_var_tags_aux typ_vars in_native true t2 in
+    return @@ Arrow (t1, t2)
+  | Tuple ts ->
+    let* ts = Monad.List.map (decode_var_tags_aux typ_vars in_native true) ts in
+    return @@ Tuple ts
+  | Apply (mpath, ts, bs) ->
+    let path_str = MixedPath.to_string mpath in
+    let in_native = List.mem path_str ["tuple_tag"; "arrow_tag"; "list_tag"; "option_tag"] in
+    let dec = decode_var_tags_aux typ_vars in_native in
+    let ts = List.combine ts bs in
+    let* ts = Monad.List.map (fun (t, b) -> dec b t) ts in
+    return @@ Apply (mpath, ts, bs)
+  | ForallModule (name, t1, t2) ->
+    let* t1 = dec t1 in
+    let* t2 = dec t2 in
+    return @@ ForallModule (name, t1, t2)
+  | ForallTyps (names, t) ->
+    let* t = dec t in
+    return @@ ForallTyps (names, t)
+  | FunTyps (names, t) ->
+    let* t = dec t in
+    return @@ FunTyps (names, t)
+  | _ -> return typ
+
+
+let rec decode_var_tags
+    (typ_vars : VarEnv.t)
+    (is_tag : bool)
+    (typ : t)
+  : t Monad.t = decode_var_tags_aux typ_vars false is_tag typ
+
+
 let rec of_type_expr_variable (typ : Types.type_expr) : Name.t Monad.t =
   match typ.desc with
   | Tvar (Some x) | Tunivar (Some x) -> Name.of_string false x

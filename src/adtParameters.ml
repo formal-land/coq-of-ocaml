@@ -28,6 +28,7 @@ module AdtVariable = struct
 
 end
 
+
 type t = AdtVariable.t list
 
 let to_string (vs : t) : string =
@@ -43,6 +44,12 @@ let get_parameters (typs : t) : Name.t list =
   typs |> List.filter_map (function
       | AdtVariable.Parameter name -> Some name
       | _ -> None)
+
+let get_tag_varenv (typs : t) : VarEnv.t =
+  typs |> get_parameters |> List.map (fun typ -> (typ, Kind.Tag))
+
+let get_set_varenv (typs : t) : VarEnv.t =
+  typs |> get_parameters |> List.map (fun typ -> (typ, Kind.Set))
 
 let of_ocaml : Types.type_expr list -> t Monad.t =
   Monad.List.map AdtVariable.of_ocaml
