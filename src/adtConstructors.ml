@@ -94,6 +94,10 @@ type ret_typ =
   | Variant of AdtParameters.t
   | Tagged of Type.t list
 
+let ret_is_tagged : ret_typ -> bool = function
+  | Variant _ -> false
+  | Tagged _ -> true
+
 (** The constructors of an inductive type, either in a GADT or non-GADT form. *)
 (** [constructor_name]: forall [typ_vars], [param_typs] -> t [res_typ_params] *)
 type item = {
@@ -245,7 +249,6 @@ module Single = struct
     }
 end
 
-(* TODO: Merge Single.t and item list *)
 let of_ocaml
     (defined_typ_params : AdtParameters.t)
     (single_constructors : Single.t list)
@@ -271,26 +274,17 @@ let of_ocaml
     | None -> defined_typ_params
     | Some merged_typ_params -> merged_typ_params in
 
-
     let* constructors : t = single_constructors |> Monad.List.map (
       fun { Single.constructor_name; param_typs; return_typ_params; typ_vars; _ } ->
-          let (typ_vars, res_typ_length, is_tagged) = match return_typ_params with
-            | Variant ls ->
-              let params = typ_params |> AdtParameters.get_parameters in
-              let typ_vars = VarEnv.remove_many params typ_vars in
-              (typ_vars, List.length typ_vars, false)
-            | Tagged ls ->
-              let typ_vars = Type.typ_args_of_typs ls |> Name.Set.elements |> List.map
-                                            (fun x -> (x, Kind.Tag)) in
-              (typ_vars , List.length typ_vars, true)
-          in
+        let params = typ_params |> AdtParameters.get_parameters in
+        let typ_vars = VarEnv.remove_many params typ_vars in
 
           return {
             constructor_name;
             param_typs;
             res_typ_params = return_typ_params;
-            res_typ_length;
-            is_tagged;
+            res_typ_length = List.length typ_vars;
+            is_tagged = ret_is_tagged return_typ_params;
             typ_vars;
 
           }
