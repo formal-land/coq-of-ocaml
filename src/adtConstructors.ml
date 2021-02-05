@@ -274,20 +274,30 @@ let of_ocaml
     | None -> defined_typ_params
     | Some merged_typ_params -> merged_typ_params in
 
-    let* constructors : t = single_constructors |> Monad.List.map (
+  let* constructors : t = single_constructors |> Monad.List.map (
       fun { Single.constructor_name; param_typs; return_typ_params; typ_vars; _ } ->
-        let params = typ_params |> AdtParameters.get_parameters in
-        let typ_vars = VarEnv.remove_many params typ_vars in
+        (* let typ_vars = VarEnv.remove_many params typ_vars in *)
+        let (is_tagged, return_typ_params) = match return_typ_params with
+          | Tagged ls -> (true, Tagged ls)
+          | Variant _ -> (false, Variant typ_params)
+        in
 
-          return {
-            constructor_name;
-            param_typs;
-            res_typ_params = return_typ_params;
-            res_typ_length = List.length typ_vars;
-            is_tagged = ret_is_tagged return_typ_params;
-            typ_vars;
+        let param_names = typ_params |> AdtParameters.get_parameters |> Name.Set.of_list in
+        (** TODO : Build a the proper Varenv to param_typs **)
+        let typ_vars = Name.Set.elements (
+          Name.Set.diff
+            (Type.typ_args_of_typs param_typs)
+            param_names
+        ) |> List.map (fun x -> (x, Kind.Set)) in
 
-          }
+        return {
+          constructor_name;
+          param_typs;
+          res_typ_params = return_typ_params;
+          res_typ_length = List.length typ_vars;
+          is_tagged;
+          typ_vars;
+        }
     ) in
 
   if not same_arities
