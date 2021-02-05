@@ -79,6 +79,7 @@ let value_names_to_escape : string list = [
   "list";
   "nativeint";
   "option";
+  "pair";
   "ref";
   "result";
   "string";
