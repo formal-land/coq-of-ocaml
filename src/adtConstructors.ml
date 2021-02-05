@@ -273,14 +273,11 @@ let of_ocaml
 
 
     let* constructors : t = single_constructors |> Monad.List.map (
-      fun { Single.constructor_name; param_typs; return_typ_params; _ } ->
+      fun { Single.constructor_name; param_typs; return_typ_params; typ_vars; _ } ->
           let (typ_vars, res_typ_length, is_tagged) = match return_typ_params with
             | Variant ls ->
-              (* Filter out ghost variables if necessary *)
-              let params = Type.typ_args_of_typs param_typs |> Name.Set.elements
-                                            |> List.map (fun x -> (x, Kind.Set))
-              in
-              let typ_vars = VarEnv.remove_many (AdtParameters.get_parameters ls) params in
+              let params = typ_params |> AdtParameters.get_parameters in
+              let typ_vars = VarEnv.remove_many params typ_vars in
               (typ_vars, List.length typ_vars, false)
             | Tagged ls ->
               let typ_vars = Type.typ_args_of_typs ls |> Name.Set.elements |> List.map
