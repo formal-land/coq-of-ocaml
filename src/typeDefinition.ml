@@ -350,7 +350,7 @@ let of_ocaml (typs : type_declaration list) : t Monad.t =
     begin match typ.Types.desc with
     | Tvariant { row_fields; _ } ->
       Monad.List.map
-        (AdtConstructors.Single.of_ocaml_row ind_vars)
+        (AdtConstructors.of_ocaml_row ind_vars)
         row_fields >>= fun single_constructors ->
       AdtConstructors.of_ocaml [] single_constructors >>= fun (constructors, _) ->
       raise
@@ -407,7 +407,7 @@ let of_ocaml (typs : type_declaration list) : t Monad.t =
       | { typ_type = { type_manifest = Some typ; _ }; _ } ->
         begin match typ.Types.desc with
         | Tvariant { row_fields; _ } ->
-          Monad.List.map (AdtConstructors.Single.of_ocaml_row typ_args) row_fields >>= fun single_constructors ->
+          Monad.List.map (AdtConstructors.of_ocaml_row typ_args) row_fields >>= fun single_constructors ->
           AdtConstructors.of_ocaml [] single_constructors >>= fun (constructors, _) ->
           raise
             (
@@ -469,7 +469,7 @@ let of_ocaml (typs : type_declaration list) : t Monad.t =
       | { typ_type = { type_kind = Type_variant cases; _ }; typ_attributes; _ } ->
         let* typ_attributes = Attribute.of_attributes typ_attributes in
         let is_tagged = Attribute.has_tag_gadt typ_attributes in
-        Monad.List.map (AdtConstructors.Single.of_ocaml_case name typ_args is_tagged) cases >>= fun cases ->
+        Monad.List.map (AdtConstructors.of_ocaml_case name typ_args is_tagged) cases >>= fun cases ->
         let (single_constructors, new_constructor_records) = List.split cases in
         let new_constructor_records =
           new_constructor_records |> Util.List.filter_map (fun x -> x) in
