@@ -197,7 +197,7 @@ We may want to ignore an error after manual inspection. This option allows to ig
 ```
 
 #### Value
-A list of variable names to escape. We escape by replacing a name `foo` by `__foo_value`. We do not escape type names or modules names.
+A list of variable names to escape. We escape by replacing a name `foo` by `foo_value`. We do not escape type names or modules names.
 
 #### Explanation
 In OCaml, the value and type namespaces are different. For example, we can have a string named `string` of type `string`. In Coq, we need to find an alternate name in order to avoid a name collision. If you have a name collision due to a value having the same name as a type, you can use this option to escape the value name (and only the value name).
@@ -374,8 +374,8 @@ Definition example (x : m int) : m int :=
 #### Example
 ```
 "monadic_returns": [
-  ["Lwt.__return", "return="],
-  ["Error_monad.__return", "return=?"],
+  ["Lwt._return", "return="],
+  ["Error_monad._return", "return=?"],
   ["Error_monad.ok", "return?"]
 ]
 ```
@@ -398,17 +398,17 @@ to:
 ```coq
 Definition m (a : Set) : Set := a * int.
 
-Definition __return {a : Set} (x : a) : m a := (x, 0).
+Definition _return {a : Set} (x : a) : m a := (x, 0).
 
 Definition incr (x : int) : m int := return! (Z.add x 1).
 ```
 To define we return notation, we use:
 ```coq
-Notation "return! X" := (__return X) (at level 20).
+Notation "return! X" := (_return X) (at level 20).
 ```
 We add this notation by hand, as opposed to generate it in with coq-of-ocaml. Note that we use a notation for the return operator applied to some argument `X`. This is to have a correct syntax highlighting in the generated documentation with `coqdoc`. The following notation:
 ```coq
-Notation "return!" := __return.
+Notation "return!" := _return.
 ```
 would not generate the correct coloration with our current Coq version (8.12).
 

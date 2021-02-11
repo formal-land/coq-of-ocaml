@@ -156,7 +156,7 @@ let sum_first_elements l1 l2 =
 ```
 We translate the program using similar let-notations in Coq. We require the user to manually insert these notations. For example, here coq-of-ocaml generates:
 ```coq
-Definition __return {a : Set} (x : a) : option a := Some x.
+Definition _return {a : Set} (x : a) : option a := Some x.
 
 Definition op_letstar {a b : Set} (x : option a) (f : a -> option b)
   : option b :=
@@ -175,7 +175,7 @@ Definition sum_first_elements (l1 : list int) (l2 : list (int * int))
   : option int :=
   let* x1 := get_head l1 in
   let* '(x2, x3) := get_head l2 in
-  __return (Z.add (Z.add x1 x2) x3).
+  _return (Z.add (Z.add x1 x2) x3).
 ```
 By adding the following notations in the generated code:
 ```coq

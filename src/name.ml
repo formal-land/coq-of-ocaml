@@ -95,11 +95,11 @@ let escape_reserved_word (is_value : bool) (s : string) : string Monad.t =
       Configuration.is_value_to_escape configuration s
     ) in
   if is_value_to_escape then
-    return ("__" ^ s ^ "_value")
+    return (s ^ "_value")
   else
     let is_reserved_name = List.mem s reserved_names in
     if is_reserved_name then
-      return ("__" ^ s)
+      return ("_" ^ s)
     else
       return s
 
