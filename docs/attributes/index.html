@@ -230,6 +230,94 @@ Error: Cannot infer the <span class="hljs-keyword">implicit</span> <span class="
 <pre><code class="hljs css language-coq"><span class="hljs-keyword">Axiom</span> unreachable_gadt_branch : <span class="hljs-keyword">forall</span> {A : <span class="hljs-keyword">Set</span>}, A.
 </code></pre>
 <p>We can combine this attribute with <code>[@coq_match_gadt]</code> or <code>[@coq_match_gadt_with_result]</code> if needed.</p>
+<h2><a class="anchor" aria-hidden="true" id="coq_mutual_as_notation"></a><a href="#coq_mutual_as_notation" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>coq_mutual_as_notation</h2>
+<p>The attribute <code>[@coq_mutual_as_notation]</code> makes the definition of a mutually recursive function a notation. For example, we transform the following OCaml code:</p>
+<pre><code class="hljs css language-ocaml"><span class="hljs-keyword">let</span> <span class="hljs-keyword">rec</span> double_list l =
+  <span class="hljs-keyword">match</span> l <span class="hljs-keyword">with</span>
+  | <span class="hljs-literal">[]</span> -&gt; l
+  | n :: l -&gt; double n :: double_list l
+
+<span class="hljs-keyword">and</span>[@coq_mutual_as_notation] double n = <span class="hljs-number">2</span> * n
+</code></pre>
+<p>to:</p>
+<pre><code class="hljs css language-coq"><span class="hljs-keyword">Reserved</span> <span class="hljs-keyword">Notation</span> <span class="hljs-string">"'double"</span>.
+
+<span class="hljs-keyword">Fixpoint</span> double_list (l : list int) : list int :=
+  <span class="hljs-keyword">let</span> <span class="hljs-built_in">double</span> := '<span class="hljs-built_in">double</span> <span class="hljs-built_in">in</span>
+  <span class="hljs-keyword">match</span> l <span class="hljs-built_in">with</span>
+  | <span class="hljs-type">[] =&gt; l</span>
+  | <span class="hljs-type">cons</span> n l =&gt; cons (<span class="hljs-built_in">double</span> n) (double_list l)
+  <span class="hljs-keyword">end</span>
+
+<span class="hljs-keyword">where</span> <span class="hljs-string">"'double"</span> := (<span class="hljs-keyword">fun</span> (n : int) =&gt; Z.mul <span class="hljs-number">2</span> n).
+
+<span class="hljs-keyword">Definition</span> <span class="hljs-built_in">double</span> := '<span class="hljs-built_in">double</span>.
+</code></pre>
+<p>Without this attribute, we would generate a mutually recursive definition:</p>
+<pre><code class="hljs css language-coq"><span class="hljs-keyword">Fixpoint</span> double_list (l : list int) : list int :=
+  <span class="hljs-keyword">match</span> l <span class="hljs-built_in">with</span>
+  | <span class="hljs-type">[] =&gt; l</span>
+  | <span class="hljs-type">cons</span> n l =&gt; cons (<span class="hljs-built_in">double</span> n) (double_list l)
+  <span class="hljs-keyword">end</span>
+
+<span class="hljs-built_in">with</span> <span class="hljs-built_in">double</span> (n : int) : int := Z.mul <span class="hljs-number">2</span> n.
+</code></pre>
+<p>which is rejected by the type-checker of Coq:</p>
+<pre><code class="hljs">Error:
+Recursive definition of double_list <span class="hljs-keyword">is</span> ill-formed.
+In environment
+double_list : <span class="hljs-keyword">list</span> <span class="hljs-keyword">int</span> -&gt; <span class="hljs-keyword">list</span> <span class="hljs-keyword">int</span>
+double : <span class="hljs-keyword">int</span> -&gt; <span class="hljs-keyword">int</span>
+<span class="hljs-keyword">l</span> : <span class="hljs-keyword">list</span> <span class="hljs-keyword">int</span>
+n : <span class="hljs-keyword">int</span>
+l0 : <span class="hljs-keyword">list</span> <span class="hljs-keyword">int</span>
+Recursive <span class="hljs-keyword">call</span> <span class="hljs-keyword">to</span> double <span class="hljs-built_in">has</span> principal <span class="hljs-keyword">argument</span> equal <span class="hljs-keyword">to</span> 
+<span class="hljs-string">"n"</span> instead of <span class="hljs-string">"l0"</span>.
+Recursive definition i<span class="hljs-variable">s:</span>
+<span class="hljs-comment">"fun l : list int =&gt;</span>
+ <span class="hljs-keyword">match</span> <span class="hljs-keyword">l</span> with
+ | [] =&gt; <span class="hljs-keyword">l</span>
+ | n :: l0 =&gt; double n :: double_list l0
+ end<span class="hljs-comment">".</span>
+</code></pre>
+<p>For recursive notations, you can combine this attribute with <code>@coq_struct</code> to tell coq-of-ocaml to generate a recursive notation. For example, we transform:</p>
+<pre><code class="hljs css language-ocaml"><span class="hljs-keyword">type</span> <span class="hljs-symbol">'a</span> tree =
+  | <span class="hljs-type">Leaf</span> <span class="hljs-keyword">of</span> <span class="hljs-symbol">'a</span>
+  | <span class="hljs-type">Node</span> <span class="hljs-keyword">of</span> <span class="hljs-symbol">'a</span> tree <span class="hljs-built_in">list</span>
+
+<span class="hljs-keyword">let</span> <span class="hljs-keyword">rec</span> sum (t : <span class="hljs-built_in">int</span> tree) =
+  <span class="hljs-keyword">match</span> t <span class="hljs-keyword">with</span>
+  | <span class="hljs-type">Leaf</span> n -&gt; n
+  | <span class="hljs-type">Node</span> ts -&gt; sums ts
+
+<span class="hljs-keyword">and</span>[@coq_mutual_as_notation][@coq_struct <span class="hljs-string">"ts"</span>] sums (ts : <span class="hljs-built_in">int</span> tree <span class="hljs-built_in">list</span>) =
+  <span class="hljs-keyword">match</span> ts <span class="hljs-keyword">with</span>
+  | <span class="hljs-literal">[]</span> -&gt; <span class="hljs-number">0</span>
+  | t :: ts -&gt; sum t + sums ts
+</code></pre>
+<p>to:</p>
+<pre><code class="hljs css language-coq"><span class="hljs-keyword">Reserved</span> <span class="hljs-keyword">Notation</span> <span class="hljs-string">"'sums"</span>.
+
+<span class="hljs-keyword">Fixpoint</span> <span class="hljs-built_in">sum</span> (t : tree int) : int :=
+  <span class="hljs-keyword">let</span> sums := 'sums <span class="hljs-built_in">in</span>
+  <span class="hljs-keyword">match</span> t <span class="hljs-built_in">with</span>
+  | <span class="hljs-type">Leaf</span> n =&gt; n
+  | <span class="hljs-type">Node</span> ts =&gt; sums ts
+  <span class="hljs-keyword">end</span>
+
+<span class="hljs-keyword">where</span> <span class="hljs-string">"'sums"</span> :=
+  (<span class="hljs-built_in">fix</span> sums (ts : list (tree int)) {struct ts} : int :=
+    <span class="hljs-keyword">match</span> ts <span class="hljs-built_in">with</span>
+    | <span class="hljs-type">[] =&gt; 0</span>
+    | <span class="hljs-type">cons</span> t ts =&gt; Z.add (<span class="hljs-built_in">sum</span> t) (sums ts)
+    <span class="hljs-keyword">end</span>).
+
+<span class="hljs-keyword">Definition</span> sums := 'sums.
+</code></pre>
+<p>using the keyword <code>fix</code> for the defintion of <code>sums</code>. In this example too, the type-checker of Coq would reject the definition without a notation.</p>
+<blockquote>
+<p>In the proofs, whenever the definition of <code>sums</code> appears unfolded, you can run the tactic <code>fold sums</code> to hide it.</p>
+</blockquote>
 <h2><a class="anchor" aria-hidden="true" id="coq_phantom"></a><a href="#coq_phantom" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>coq_phantom</h2>
 <p>When it can, coq-of-ocaml detects phantom types and remove their type annotations. For example, we translate the following OCaml code:</p>
 <pre><code class="hljs css language-ocaml"><span class="hljs-keyword">type</span> <span class="hljs-symbol">'a</span> num = <span class="hljs-built_in">int</span>
@@ -430,4 +518,18 @@ We use the concept of shape to find the name of a signature for Coq.
   <span class="hljs-keyword">end</span>.
 </code></pre>
 <p>which is invalid in Coq as the decreasing argument is <code>l</code>.</p>
-</span></div></article></div><div class="docs-prevnext"><a class="docs-prev button" href="/coq-of-ocaml/docs/gadts"><span class="arrow-prev">← </span><span>GADTs</span></a><a class="docs-next button" href="/coq-of-ocaml/docs/configuration"><span>Configuration</span><span class="arrow-next"> →</span></a></div></div></div><nav class="onPageNav"><ul class="toc-headings"><li><a href="#coq_axiom_with_reason">coq_axiom_with_reason</a></li><li><a href="#coq_cast">coq_cast</a></li><li><a href="#coq_force_gadt">coq_force_gadt</a></li><li><a href="#coq_implicit">coq_implicit</a></li><li><a href="#coq_match_gadt">coq_match_gadt</a></li><li><a href="#coq_match_gadt_with_result">coq_match_gadt_with_result</a></li><li><a href="#coq_match_with_default">coq_match_with_default</a></li><li><a href="#coq_phantom">coq_phantom</a></li><li><a href="#coq_plain_module">coq_plain_module</a></li><li><a href="#coq_precise_signature">coq_precise_signature</a></li><li><a href="#coq_struct">coq_struct</a></li></ul></nav></div><footer class="nav-footer" id="footer"><section class="sitemap"><a href="/coq-of-ocaml/" class="nav-home"><img src="/coq-of-ocaml/img/favicon.ico" alt="coq-of-ocaml" width="66" height="58"/></a><div><h5>Docs</h5><a href="/coq-of-ocaml/docs/introduction.html">Introduction</a><a href="/coq-of-ocaml/docs/install.html">Getting Started</a><a href="/coq-of-ocaml/docs/ocaml-core.html">Concepts</a></div><div><h5>Community</h5><a href="https://github.com/clarus/coq-of-ocaml/issues?q=is%3Aissue+is%3Aopen+sort%3Aupdated-desc+label%3A%22Enhancement+%3Anew%3A%22" target="_blank" rel="noreferrer noopener">Feature requests and proposals</a><a href="https://github.com/clarus/coq-of-ocaml/issues?q=is%3Aissue+is%3Aopen+sort%3Aupdated-desc+label%3A%22Bug+%3Abug%3A%22" target="_blank" rel="noreferrer noopener">Issues</a><a href="https://gitter.im/clarus/coq-of-ocaml" target="_blank" rel="noreferrer noopener">Chat room</a><a href="https://www.nomadic-labs.com/" target="_blank" rel="noreferrer noopener">Nomadic Labs</a></div><div><h5>More</h5><a href="https://github.com/clarus/coq-of-ocaml">GitHub</a><a class="github-button" href="https://github.com/clarus/coq-of-ocaml" data-icon="octicon-star" data-count-href="/clarus/coq-of-ocaml/stargazers" data-show-count="true" data-count-aria-label="# stargazers on GitHub" aria-label="Star this project on GitHub">Star</a></div></section><section class="copyright">Copyright © 2020 Guillaume Claret</section></footer></div></body></html>
+<h2><a class="anchor" aria-hidden="true" id="coq_type_annotation"></a><a href="#coq_type_annotation" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>coq_type_annotation</h2>
+<p>Sometimes we need to add a type annotation on an expression, either as a documentation or to help the Coq code to compile. We translate this OCaml example:</p>
+<pre><code class="hljs css language-ocaml"><span class="hljs-keyword">let</span> n1 =
+  <span class="hljs-keyword">let</span> m = <span class="hljs-number">12</span> <span class="hljs-keyword">in</span>
+  <span class="hljs-keyword">let</span> n1 = m[@coq_type_annotation] <span class="hljs-keyword">in</span>
+  n1
+</code></pre>
+<p>to:</p>
+<pre><code class="hljs css language-coq"><span class="hljs-keyword">Definition</span> n1 : int :=
+  <span class="hljs-keyword">let</span> m := <span class="hljs-number">12</span> <span class="hljs-built_in">in</span>
+  <span class="hljs-keyword">let</span> n1 := (m : int) <span class="hljs-built_in">in</span>
+  n1.
+</code></pre>
+<p>where we add an annotation <code>: int</code> on the expression <code>m</code>. The type we use for the annotation is the type inferred by the OCaml compiler.</p>
+</span></div></article></div><div class="docs-prevnext"><a class="docs-prev button" href="/coq-of-ocaml/docs/gadts"><span class="arrow-prev">← </span><span>GADTs</span></a><a class="docs-next button" href="/coq-of-ocaml/docs/configuration"><span>Configuration</span><span class="arrow-next"> →</span></a></div></div></div><nav class="onPageNav"><ul class="toc-headings"><li><a href="#coq_axiom_with_reason">coq_axiom_with_reason</a></li><li><a href="#coq_cast">coq_cast</a></li><li><a href="#coq_force_gadt">coq_force_gadt</a></li><li><a href="#coq_implicit">coq_implicit</a></li><li><a href="#coq_match_gadt">coq_match_gadt</a></li><li><a href="#coq_match_gadt_with_result">coq_match_gadt_with_result</a></li><li><a href="#coq_match_with_default">coq_match_with_default</a></li><li><a href="#coq_mutual_as_notation">coq_mutual_as_notation</a></li><li><a href="#coq_phantom">coq_phantom</a></li><li><a href="#coq_plain_module">coq_plain_module</a></li><li><a href="#coq_precise_signature">coq_precise_signature</a></li><li><a href="#coq_struct">coq_struct</a></li><li><a href="#coq_type_annotation">coq_type_annotation</a></li></ul></nav></div><footer class="nav-footer" id="footer"><section class="sitemap"><a href="/coq-of-ocaml/" class="nav-home"><img src="/coq-of-ocaml/img/favicon.ico" alt="coq-of-ocaml" width="66" height="58"/></a><div><h5>Docs</h5><a href="/coq-of-ocaml/docs/introduction.html">Introduction</a><a href="/coq-of-ocaml/docs/install.html">Getting Started</a><a href="/coq-of-ocaml/docs/ocaml-core.html">Concepts</a></div><div><h5>Community</h5><a href="https://github.com/clarus/coq-of-ocaml/issues?q=is%3Aissue+is%3Aopen+sort%3Aupdated-desc+label%3A%22Enhancement+%3Anew%3A%22" target="_blank" rel="noreferrer noopener">Feature requests and proposals</a><a href="https://github.com/clarus/coq-of-ocaml/issues?q=is%3Aissue+is%3Aopen+sort%3Aupdated-desc+label%3A%22Bug+%3Abug%3A%22" target="_blank" rel="noreferrer noopener">Issues</a><a href="https://gitter.im/clarus/coq-of-ocaml" target="_blank" rel="noreferrer noopener">Chat room</a><a href="https://www.nomadic-labs.com/" target="_blank" rel="noreferrer noopener">Nomadic Labs</a></div><div><h5>More</h5><a href="https://github.com/clarus/coq-of-ocaml">GitHub</a><a class="github-button" href="https://github.com/clarus/coq-of-ocaml" data-icon="octicon-star" data-count-href="/clarus/coq-of-ocaml/stargazers" data-show-count="true" data-count-aria-label="# stargazers on GitHub" aria-label="Star this project on GitHub">Star</a></div></section><section class="copyright">Copyright © 2021 Guillaume Claret</section></footer></div></body></html>
