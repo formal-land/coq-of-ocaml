@@ -45,7 +45,8 @@ type t =
   | Return of string * t (** Application specialized for a return operation. *)
   | InfixOperator of string * t * t
     (** Application specialized for an infix operator. *)
-  | Function of Name.t * t (** An argument name and a body. *)
+  | Function of Name.t * Type.t option * t
+    (** An argument name, an optional type and a body. *)
   | LetVar of string option * Name.t * Name.t list * t * t
     (** The let of a variable, with optionally a list of polymorphic variables.
         We optionally specify the symbol of the let operator as it may be
@@ -79,7 +80,7 @@ type t =
     the body. *)
 let rec open_function (e : t) : Name.t list * t =
   match e with
-  | Function (x, e) ->
+  | Function (x, _, e) ->
     let (xs, e) = open_function e in
     (x :: xs, e)
   | _ -> ([], e)
@@ -231,7 +232,7 @@ let rec of_expression (typ_vars : Name.t Name.Map.t) (e : expression)
     of_let typ_vars is_rec cases e2
   | Texp_function {
       cases = [{
-        c_lhs = {pat_desc = Tpat_var (x, _); _};
+        c_lhs = {pat_desc = Tpat_var (x, _); pat_type; _};
         c_rhs = e;
         _
       }];
@@ -239,23 +240,29 @@ let rec of_expression (typ_vars : Name.t Name.Map.t) (e : expression)
     }
   | Texp_function {
       cases = [{
-        c_lhs = { pat_desc = Tpat_alias ({ pat_desc = Tpat_any; _ }, x, _); _ };
+        c_lhs = {
+          pat_desc = Tpat_alias ({ pat_desc = Tpat_any; _ }, x, _);
+          pat_type;
+          _
+        };
         c_rhs = e;
         _
       }];
       _
     } ->
     let* x = Name.of_ident true x in
+    let* (typ, _, _) = Type.of_typ_expr true typ_vars pat_type in
     of_expression typ_vars e >>= fun e ->
-    return (Function (x, e))
+    return (Function (x, Some typ, e))
   | Texp_function { cases; _ } ->
     let is_gadt_match =
       Attribute.has_match_gadt attributes ||
       Attribute.has_match_gadt_with_result attributes in
     let do_cast_results = Attribute.has_match_gadt_with_result attributes in
     let is_with_default_case = Attribute.has_match_with_default attributes in
-    open_cases typ_vars cases is_gadt_match do_cast_results is_with_default_case >>= fun (x, e) ->
-    return (Function (x, e))
+    let* (x, typ, e) =
+      open_cases typ_vars cases is_gadt_match do_cast_results is_with_default_case in
+    return (Function (x, typ, e))
   | Texp_apply (e_f, e_xs) ->
     of_expression typ_vars e_f >>= fun e_f ->
     (e_xs |> Monad.List.map (fun (_, e_x) ->
@@ -297,7 +304,7 @@ let rec of_expression (typ_vars : Name.t Name.Map.t) (e : expression)
       match (e_f, e_xs) with
       | (
           Variable (MixedPath.PathName path_name, []),
-          [Some e1; Some (Function (x, e2))]
+          [Some e1; Some (Function (x, _, e2))]
         ) ->
         let name = PathName.to_string path_name in
         begin match Configuration.is_monadic_let configuration name with
@@ -309,7 +316,7 @@ let rec of_expression (typ_vars : Name.t Name.Map.t) (e : expression)
       match (e_f, e_xs) with
       | (
           Variable (MixedPath.PathName path_name, []),
-          [Some e1; Some (Function (x, e2))]
+          [Some e1; Some (Function (x, _, e2))]
         ) ->
         let name = PathName.to_string path_name in
         begin match Configuration.is_monadic_let_return configuration name with
@@ -337,7 +344,7 @@ let rec of_expression (typ_vars : Name.t Name.Map.t) (e : expression)
       match (e_f, e_xs) with
       | (
           Variable (MixedPath.PathName path_name, []),
-          [Some e1; Some (Function (x, e2))]
+          [Some e1; Some (Function (x, _, e2))]
         ) ->
         let name = PathName.to_string path_name in
         begin match Configuration.is_monadic_return_let configuration name with
@@ -725,13 +732,19 @@ and open_cases
   (is_gadt_match : bool)
   (do_cast_results : bool)
   (is_with_default_case : bool)
-  : (Name.t * t) Monad.t =
+  : (Name.t * Type.t option * t) Monad.t =
   let name = Name.FunctionParameter in
+  let* typ =
+    match cases with
+    | [] -> return None
+    | { c_lhs = {pat_type; _}; _ } :: _ ->
+      let* (typ, _, _) = Type.of_typ_expr true typ_vars pat_type in
+      return (Some typ) in
   let e = Variable (MixedPath.of_name name, []) in
   let* e =
     of_match
       typ_vars e cases is_gadt_match do_cast_results is_with_default_case in
-  return (name, e)
+  return (name, typ, e)
 
 and import_let_fun
   (typ_vars : Name.t Name.Map.t)
@@ -820,12 +833,15 @@ and of_let
     | _ -> return true
     end >>= fun is_function ->
     begin match cases with
-    | [{ vb_pat = p; vb_expr = e1; _ }] when not is_function ->
+    | [{ vb_pat = p; vb_expr = e1; vb_attributes; _ }] when not is_function ->
+      let* attributes = Attribute.of_attributes vb_attributes in
       Pattern.of_pattern p >>= fun p ->
       of_expression typ_vars e1 >>= fun e1 ->
       begin match p with
       | Some (Pattern.Variable x) -> return (LetVar (None, x, [], e1, e2))
-      | Some p -> return (Match (e1, [p, None, e2], false))
+      | Some p ->
+        let is_with_default_case = Attribute.has_match_with_default attributes in
+        return (Match (e1, [p, None, e2], is_with_default_case))
       | None -> return (Match (e1, [], false))
       end
     | _ ->
@@ -1238,8 +1254,15 @@ let rec to_coq (paren : bool) (e : t) : SmartPrint.t =
     Pp.parens paren @@ nest @@ (!^ operator ^^ to_coq true e)
   | InfixOperator (operator, e1, e2) ->
     Pp.parens paren @@ group @@ (to_coq true e1 ^^ !^ operator ^^ to_coq true e2)
-  | Function (x, e) ->
-    Pp.parens paren @@ nest (!^ "fun" ^^ Name.to_coq x ^^ !^ "=>" ^^ to_coq false e)
+  | Function (x, typ, e) ->
+    Pp.parens paren @@ nest (
+      !^ "fun" ^^
+      begin match typ with
+      | None -> Name.to_coq x
+      | Some typ ->
+        parens (Name.to_coq x ^^ !^ ":" ^^ Type.to_coq None None typ)
+      end ^^ !^ "=>" ^^ to_coq false e
+    )
   | LetVar (let_symbol, x, typ_params, e1, e2) ->
     let get_default () =
       Pp.parens paren @@ nest (

@@ -25,4 +25,4 @@ Definition p : int := Z.add (fst (1, 2)) (snd (3, 4)).
 
 Definition l : list int := CoqOfOCaml.Stdlib.app [ 1; 2 ] [ 3 ].
 
-Definition y : int := (fun n => Z.add n 1) 12.
+Definition y : int := (fun (n : int) => Z.add n 1) 12.

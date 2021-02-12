@@ -16,4 +16,4 @@ Fixpoint fold {A B : Set} (f : A -> B -> A) (a : A) (l : list B) : A :=
 Definition l : list int := [ 5; 6; 7; 2 ].
 
 Definition n {A : Set} (incr : int -> A) (plus : int -> A -> int) : int :=
-  fold (fun x => fun y => plus x y) 0 (map incr l).
+  fold (fun (x : int) => fun (y : A) => plus x y) 0 (map incr l).

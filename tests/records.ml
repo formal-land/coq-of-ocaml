@@ -67,10 +67,10 @@ end
 module RecordWithInnerPolymorphism = struct
   type t = { f : 'a. 'a list -> 'a list }
 
-  let r = {
-    f = fun l ->
-      match l with
-      | [] -> l
-      | _ :: l' -> l'
-  }
+  let f l =
+    match l with
+    | [] -> l
+    | _ :: l' -> l'
+
+  let r = { f }
 end
