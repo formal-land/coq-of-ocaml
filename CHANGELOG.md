@@ -1,4 +1,5 @@
 ## [Unreleased]
+* Add the attribute `@coq_type_annotation` to generate the type annotation of an expression.
 * Show nicer error messages for errors in the configuration file.
 * Remove existential types from the modules (except for the first-class modules).
 * Upgrade OCaml to the version 4.10.

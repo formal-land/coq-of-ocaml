@@ -69,6 +69,7 @@ type t =
     (** A functor. *)
   | Cast of t * Type.t
     (** Force the cast to a type (with an axiom). *)
+  | TypAnnotation of t * Type.t (** Annotate an expression by its type. *)
   | Assert of Type.t * t (** The assert keyword. *)
   | Error of string (** An error message for unhandled expressions. *)
   | ErrorArray of t list (** An error produced by an array of elements. *)
@@ -85,7 +86,8 @@ let rec open_function (e : t) : Name.t list * t =
     (x :: xs, e)
   | _ -> ([], e)
 
-let error_message (e : t) (category : Error.Category.t) (message : string) : t Monad.t =
+let error_message (e : t) (category : Error.Category.t) (message : string)
+  : t Monad.t =
   raise (ErrorMessage (e, message)) category message
 
 let error_message_in_module
@@ -617,6 +619,9 @@ let rec of_expression (typ_vars : Name.t Name.Map.t) (e : expression)
   if Attribute.has_cast attributes then
     let* (typ, _, _) = Type.of_typ_expr false typ_vars typ in
     return (Cast (e, typ))
+  else if Attribute.has_typ_annotation attributes then
+    let* (typ, _, _) = Type.of_typ_expr false typ_vars typ in
+    return (TypAnnotation (e, typ))
   else
     return e))
 
@@ -1451,6 +1456,8 @@ let rec to_coq (paren : bool) (e : t) : SmartPrint.t =
       Type.to_coq None (Some Type.Context.Apply) typ ^^
       to_coq true e
     )
+  | TypAnnotation (e, typ) ->
+    parens @@ nest (to_coq true e ^^ !^ ":" ^^ Type.to_coq None None typ)
   | Assert (typ, e) ->
     Pp.parens paren @@ nest (
       !^ "assert" ^^ Type.to_coq None (Some Type.Context.Apply) typ ^^

@@ -3,7 +3,7 @@ Require Import CoqOfOCaml.Settings.
 
 Definition n1 : int :=
   let m := 12 in
-  let n1 := m in
+  let n1 := (m : int) in
   n1.
 
 Definition n2 : int :=
