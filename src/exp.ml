@@ -182,13 +182,11 @@ let build_module
       | Module (name, arity) ->
         let* field_name =
           PathName.of_path_and_name_with_convert signature_path name in
+        let* mixed_path = mixed_path_of_value_or_typ name in
         return (
           field_name,
           arity,
-          Variable (
-            MixedPath.PathName (PathName.of_name [] name),
-            []
-          )
+          Variable (mixed_path, [])
         )
     ) in
   return (Module fields)
