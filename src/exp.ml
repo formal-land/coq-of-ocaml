@@ -1449,7 +1449,7 @@ let rec to_coq (paren : bool) (e : t) : SmartPrint.t =
       !^ "=>" ^^ to_coq false e
     )
   | Cast (e, typ) ->
-    parens @@ nest (
+    Pp.parens paren @@ nest (
       !^ "cast" ^^
       Type.to_coq None (Some Type.Context.Apply) typ ^^
       to_coq true e
