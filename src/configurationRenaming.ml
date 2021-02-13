@@ -55,7 +55,7 @@ let rules = [
   ("Stdlib.op_minus", "Z.sub");
   ("Stdlib.op_star", "Z.mul");
   ("Stdlib.op_div", "Z.div");
-  ("Stdlib.__mod", "Z.modulo");
+  ("Stdlib._mod", "Z.modulo");
   ("Stdlib.abs", "Z.abs");
   (* Bitwise operations *)
   ("Stdlib.land", "Z.land");

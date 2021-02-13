@@ -54,6 +54,7 @@ let escape_operator (s : string) : string =
   Buffer.contents b
 
 let reserved_names : string list = [
+  "at";
   "error";
   "exists";
   "exists2";
@@ -79,6 +80,7 @@ let value_names_to_escape : string list = [
   "list";
   "nativeint";
   "option";
+  "pair";
   "ref";
   "result";
   "string";
@@ -94,11 +96,11 @@ let escape_reserved_word (is_value : bool) (s : string) : string Monad.t =
       Configuration.is_value_to_escape configuration s
     ) in
   if is_value_to_escape then
-    return ("__" ^ s ^ "_value")
+    return (s ^ "_value")
   else
     let is_reserved_name = List.mem s reserved_names in
     if is_reserved_name then
-      return ("__" ^ s)
+      return ("_" ^ s)
     else
       return s
 
@@ -146,6 +148,9 @@ let to_string (name : t) : string =
   | FunctionParameter -> "function_parameter"
   | Make name -> name
   | Nameless -> "_"
+
+let prefix_by_ext (name : t) : t =
+  Make ("ext_" ^ to_string name)
 
 let prefix_by_single_quote (name : t) : t =
   Make ("'" ^ to_string name)

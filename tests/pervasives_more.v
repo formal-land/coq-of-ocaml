@@ -27,9 +27,9 @@ Definition b_and : bool := andb true false.
 
 Definition b_or : bool := orb true false.
 
-Definition app1 : int := (fun x => x) 12.
+Definition app1 : int := (fun (x : int) => x) 12.
 
-Definition app2 : int := (fun x => x) 12.
+Definition app2 : int := (fun (x : int) => x) 12.
 
 Definition n_neg1 : int := Z.opp 12.
 

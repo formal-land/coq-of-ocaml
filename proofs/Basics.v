@@ -81,6 +81,12 @@ Parameter extensible_type : Set.
 
 Parameter extensible_type_value : extensible_type.
 
+Parameter Set_oracle : string -> Set.
+
+Axiom Set_oracle_invoke
+  : forall {name : string} (A : Set),
+    Set_oracle name = A.
+
 Definition int := Z.
 
 Definition float := Z.

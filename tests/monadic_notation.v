@@ -1,7 +1,7 @@
 Require Import CoqOfOCaml.CoqOfOCaml.
 Require Import CoqOfOCaml.Settings.
 
-Definition __return {a : Set} (x : a) : option a := Some x.
+Definition _return {a : Set} (x : a) : option a := Some x.
 
 Definition op_letstar {a b : Set} (x : option a) (f : a -> option b)
   : option b :=
@@ -28,4 +28,4 @@ Definition sum_first_elements (l1 : list int) (l2 : list (int * int))
   : option int :=
   let* x1 := get_head l1 in
   let* '(x2, x3) := get_head l2 in
-  __return (Z.add (Z.add x1 x2) x3).
+  _return (Z.add (Z.add x1 x2) x3).

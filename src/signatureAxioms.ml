@@ -170,11 +170,13 @@ let rec of_signature (signature : Typedtree.signature) : t Monad.t =
           NotSupported
           "We do not handle mutually recursive declaration of class types"
       end
-    | Tsig_exception { tyexn_constructor = { ext_id; _ }; _ } ->
-      raise
-        [Error ("exception " ^ Ident.name ext_id)]
-        SideEffect
-        "Signature item `exception` not handled"
+    | Tsig_exception { tyexn_constructor; _ } ->
+      let* (typ_defs, name, typ) =
+        Structure.of_typ_extension_raw tyexn_constructor in
+      return (
+        List.map (fun typ_def -> TypDefinition typ_def) typ_defs @
+        [Value (name, [], typ)]
+      )
     | Tsig_include { incl_mod; incl_type; _} ->
       let module_name = string_of_included_module_typ incl_mod in
       let signature_path = ModuleTyp.get_module_typ_path_name incl_mod in

@@ -22,7 +22,7 @@ Module S.
       map : (elt -> elt) -> t -> t;
       fold : forall {a : Set}, (elt -> a -> a) -> t -> a -> a;
       for_all : (elt -> bool) -> t -> bool;
-      __exists : (elt -> bool) -> t -> bool;
+      _exists : (elt -> bool) -> t -> bool;
       filter : (elt -> bool) -> t -> t;
       partition : (elt -> bool) -> t -> t * t;
       cardinal : t -> int;
@@ -178,7 +178,7 @@ Definition set_fold {acc elt : Set} (f : elt -> acc -> acc) (Box : set elt)
 Definition set_nested {elt : Set} (Box : set elt) : set elt :=
   let 'existS _ _ Box := Box in
   existS (A := Set) _ _
-    (let __result_value :=
+    (let result_value :=
       existS (A := Set) _ _
         (let elt : Set := elt in
         let elt_ty := Box.(Boxed_set.elt_ty) in
@@ -196,7 +196,7 @@ Definition set_nested {elt : Set} (Box : set elt) : set elt :=
     let OPS := Box.(Boxed_set.OPS) in
     let boxed := Box.(Boxed_set.boxed) in
     let size :=
-      let Result := __result_value in
+      let Result := result_value in
       let 'existS _ _ Result := Result in
       Result.(Boxed_set.size) in
     {|

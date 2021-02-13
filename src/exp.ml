@@ -45,7 +45,8 @@ type t =
   | Return of string * t (** Application specialized for a return operation. *)
   | InfixOperator of string * t * t
     (** Application specialized for an infix operator. *)
-  | Function of Name.t * t (** An argument name and a body. *)
+  | Function of Name.t * Type.t option * t
+    (** An argument name, an optional type and a body. *)
   | LetVar of string option * Name.t * Name.t list * t * t
     (** The let of a variable, with optionally a list of polymorphic variables.
         We optionally specify the symbol of the let operator as it may be
@@ -68,6 +69,7 @@ type t =
     (** A functor. *)
   | Cast of t * Type.t
     (** Force the cast to a type (with an axiom). *)
+  | TypAnnotation of t * Type.t (** Annotate an expression by its type. *)
   | Assert of Type.t * t (** The assert keyword. *)
   | Error of string (** An error message for unhandled expressions. *)
   | ErrorArray of t list (** An error produced by an array of elements. *)
@@ -79,12 +81,13 @@ type t =
     the body. *)
 let rec open_function (e : t) : Name.t list * t =
   match e with
-  | Function (x, e) ->
+  | Function (x, _, e) ->
     let (xs, e) = open_function e in
     (x :: xs, e)
   | _ -> ([], e)
 
-let error_message (e : t) (category : Error.Category.t) (message : string) : t Monad.t =
+let error_message (e : t) (category : Error.Category.t) (message : string)
+  : t Monad.t =
   raise (ErrorMessage (e, message)) category message
 
 let error_message_in_module
@@ -179,13 +182,11 @@ let build_module
       | Module (name, arity) ->
         let* field_name =
           PathName.of_path_and_name_with_convert signature_path name in
+        let* mixed_path = mixed_path_of_value_or_typ name in
         return (
           field_name,
           arity,
-          Variable (
-            MixedPath.PathName (PathName.of_name [] name),
-            []
-          )
+          Variable (mixed_path, [])
         )
     ) in
   return (Module fields)
@@ -231,7 +232,7 @@ let rec of_expression (typ_vars : Name.t Name.Map.t) (e : expression)
     of_let typ_vars is_rec cases e2
   | Texp_function {
       cases = [{
-        c_lhs = {pat_desc = Tpat_var (x, _); _};
+        c_lhs = {pat_desc = Tpat_var (x, _); pat_type; _};
         c_rhs = e;
         _
       }];
@@ -239,23 +240,29 @@ let rec of_expression (typ_vars : Name.t Name.Map.t) (e : expression)
     }
   | Texp_function {
       cases = [{
-        c_lhs = { pat_desc = Tpat_alias ({ pat_desc = Tpat_any; _ }, x, _); _ };
+        c_lhs = {
+          pat_desc = Tpat_alias ({ pat_desc = Tpat_any; _ }, x, _);
+          pat_type;
+          _
+        };
         c_rhs = e;
         _
       }];
       _
     } ->
     let* x = Name.of_ident true x in
+    let* (typ, _, _) = Type.of_typ_expr true typ_vars pat_type in
     of_expression typ_vars e >>= fun e ->
-    return (Function (x, e))
+    return (Function (x, Some typ, e))
   | Texp_function { cases; _ } ->
     let is_gadt_match =
       Attribute.has_match_gadt attributes ||
       Attribute.has_match_gadt_with_result attributes in
     let do_cast_results = Attribute.has_match_gadt_with_result attributes in
     let is_with_default_case = Attribute.has_match_with_default attributes in
-    open_cases typ_vars cases is_gadt_match do_cast_results is_with_default_case >>= fun (x, e) ->
-    return (Function (x, e))
+    let* (x, typ, e) =
+      open_cases typ_vars cases is_gadt_match do_cast_results is_with_default_case in
+    return (Function (x, typ, e))
   | Texp_apply (e_f, e_xs) ->
     of_expression typ_vars e_f >>= fun e_f ->
     (e_xs |> Monad.List.map (fun (_, e_x) ->
@@ -297,7 +304,7 @@ let rec of_expression (typ_vars : Name.t Name.Map.t) (e : expression)
       match (e_f, e_xs) with
       | (
           Variable (MixedPath.PathName path_name, []),
-          [Some e1; Some (Function (x, e2))]
+          [Some e1; Some (Function (x, _, e2))]
         ) ->
         let name = PathName.to_string path_name in
         begin match Configuration.is_monadic_let configuration name with
@@ -309,7 +316,7 @@ let rec of_expression (typ_vars : Name.t Name.Map.t) (e : expression)
       match (e_f, e_xs) with
       | (
           Variable (MixedPath.PathName path_name, []),
-          [Some e1; Some (Function (x, e2))]
+          [Some e1; Some (Function (x, _, e2))]
         ) ->
         let name = PathName.to_string path_name in
         begin match Configuration.is_monadic_let_return configuration name with
@@ -337,7 +344,7 @@ let rec of_expression (typ_vars : Name.t Name.Map.t) (e : expression)
       match (e_f, e_xs) with
       | (
           Variable (MixedPath.PathName path_name, []),
-          [Some e1; Some (Function (x, e2))]
+          [Some e1; Some (Function (x, _, e2))]
         ) ->
         let name = PathName.to_string path_name in
         begin match Configuration.is_monadic_return_let configuration name with
@@ -382,23 +389,14 @@ let rec of_expression (typ_vars : Name.t Name.Map.t) (e : expression)
     return (Tuple es)
   | Texp_construct (_, constructor_description, es) ->
     let implicits = Attribute.get_implicits attributes in
-    begin match constructor_description.cstr_tag with
-    | Cstr_extension _ ->
-      raise
-        (Variable (
-          MixedPath.of_name (Name.of_string_raw "extensible_type_value"),
-          []
-        ))
-        ExtensibleType
-        (
-          "Values of extensible types are ignored.\n\n" ^
-          "They are sent to a unit type."
-        )
-    | _ ->
-      PathName.of_constructor_description constructor_description >>= fun x ->
-      (es |> Monad.List.map (of_expression typ_vars)) >>= fun es ->
-      return (Constructor (x, implicits, es))
-    end
+    let* x =
+      match constructor_description.cstr_tag with
+      | Cstr_extension (path, _) ->
+        let* path = PathName.of_path_with_convert false path in
+        return (PathName.prefix_by_ext path)
+      | _ -> PathName.of_constructor_description constructor_description in
+    let* es = Monad.List.map (of_expression typ_vars) es in
+    return (Constructor (x, implicits, es))
   | Texp_variant (label, e) ->
     PathName.constructor_of_variant label >>= fun path_name ->
     let constructor =
@@ -619,6 +617,9 @@ let rec of_expression (typ_vars : Name.t Name.Map.t) (e : expression)
   if Attribute.has_cast attributes then
     let* (typ, _, _) = Type.of_typ_expr false typ_vars typ in
     return (Cast (e, typ))
+  else if Attribute.has_typ_annotation attributes then
+    let* (typ, _, _) = Type.of_typ_expr false typ_vars typ in
+    return (TypAnnotation (e, typ))
   else
     return e))
 
@@ -647,8 +648,13 @@ and of_match
         return (name, typ)
       )
       bound_vars >>= fun bound_vars ->
-    let free_vars = Type.local_typ_constructors_of_typs (List.map snd bound_vars) in
-    let existentials = Name.Set.inter existentials free_vars in
+    let existentials =
+      if not is_gadt_match then
+        let free_vars =
+          Type.local_typ_constructors_of_typs (List.map snd bound_vars) in
+        Name.Set.inter existentials free_vars
+      else
+        existentials in
     Type.of_typ_expr true typ_vars c_rhs.exp_type >>= fun (typ, _, _) ->
     let existential_cast =
       Some {
@@ -729,13 +735,19 @@ and open_cases
   (is_gadt_match : bool)
   (do_cast_results : bool)
   (is_with_default_case : bool)
-  : (Name.t * t) Monad.t =
+  : (Name.t * Type.t option * t) Monad.t =
   let name = Name.FunctionParameter in
+  let* typ =
+    match cases with
+    | [] -> return None
+    | { c_lhs = {pat_type; _}; _ } :: _ ->
+      let* (typ, _, _) = Type.of_typ_expr true typ_vars pat_type in
+      return (Some typ) in
   let e = Variable (MixedPath.of_name name, []) in
   let* e =
     of_match
       typ_vars e cases is_gadt_match do_cast_results is_with_default_case in
-  return (name, e)
+  return (name, typ, e)
 
 and import_let_fun
   (typ_vars : Name.t Name.Map.t)
@@ -824,12 +836,15 @@ and of_let
     | _ -> return true
     end >>= fun is_function ->
     begin match cases with
-    | [{ vb_pat = p; vb_expr = e1; _ }] when not is_function ->
+    | [{ vb_pat = p; vb_expr = e1; vb_attributes; _ }] when not is_function ->
+      let* attributes = Attribute.of_attributes vb_attributes in
       Pattern.of_pattern p >>= fun p ->
       of_expression typ_vars e1 >>= fun e1 ->
       begin match p with
       | Some (Pattern.Variable x) -> return (LetVar (None, x, [], e1, e2))
-      | Some p -> return (Match (e1, [p, None, e2], false))
+      | Some p ->
+        let is_with_default_case = Attribute.has_match_with_default attributes in
+        return (Match (e1, [p, None, e2], is_with_default_case))
       | None -> return (Match (e1, [], false))
       end
     | _ ->
@@ -1242,8 +1257,15 @@ let rec to_coq (paren : bool) (e : t) : SmartPrint.t =
     Pp.parens paren @@ nest @@ (!^ operator ^^ to_coq true e)
   | InfixOperator (operator, e1, e2) ->
     Pp.parens paren @@ group @@ (to_coq true e1 ^^ !^ operator ^^ to_coq true e2)
-  | Function (x, e) ->
-    Pp.parens paren @@ nest (!^ "fun" ^^ Name.to_coq x ^^ !^ "=>" ^^ to_coq false e)
+  | Function (x, typ, e) ->
+    Pp.parens paren @@ nest (
+      !^ "fun" ^^
+      begin match typ with
+      | None -> Name.to_coq x
+      | Some typ ->
+        parens (Name.to_coq x ^^ !^ ":" ^^ Type.to_coq None None typ)
+      end ^^ !^ "=>" ^^ to_coq false e
+    )
   | LetVar (let_symbol, x, typ_params, e1, e2) ->
     let get_default () =
       Pp.parens paren @@ nest (
@@ -1427,11 +1449,13 @@ let rec to_coq (paren : bool) (e : t) : SmartPrint.t =
       !^ "=>" ^^ to_coq false e
     )
   | Cast (e, typ) ->
-    parens @@ nest (
+    Pp.parens paren @@ nest (
       !^ "cast" ^^
       Type.to_coq None (Some Type.Context.Apply) typ ^^
       to_coq true e
     )
+  | TypAnnotation (e, typ) ->
+    parens @@ nest (to_coq true e ^^ !^ ":" ^^ Type.to_coq None None typ)
   | Assert (typ, e) ->
     Pp.parens paren @@ nest (
       !^ "assert" ^^ Type.to_coq None (Some Type.Context.Apply) typ ^^
