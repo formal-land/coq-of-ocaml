@@ -54,6 +54,7 @@ let escape_operator (s : string) : string =
   Buffer.contents b
 
 let reserved_names : string list = [
+  "at";
   "error";
   "exists";
   "exists2";
