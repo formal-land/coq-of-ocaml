@@ -278,6 +278,38 @@ let simplified_contructor_path (path : Path.t) (arity : int)
   | _ -> return mixed_path
 
 
+let is_native_type
+    (typ : t)
+  : bool =
+  match typ with
+  | Variable var -> List.mem (Name.to_string var) Name.native_types
+  | Apply (mpath, _, _) -> MixedPath.is_native_type mpath
+  | _ -> false
+
+let print_type
+    (path : Path.t)
+  : unit Monad.t =
+  let* env = get_env in
+  match Env.find_type path env with
+  | typ -> return @@ Printtyp.type_declaration (Ident.create_local "a") Format.std_formatter  typ
+  | exception _ -> return ()
+
+let has_type_manifest
+    (path : Path.t)
+  : bool Monad.t =
+  let* env = get_env in
+  match Env.find_type path env with
+  | { type_manifest = Some _; _ } -> return @@ true
+  | _ | exception _ -> return false
+
+let is_type_variant (t : Types.type_expr) : bool Monad.t =
+  match t.desc with
+  | Tconstr (path, _, _) ->
+    let* is_variant = PathName.is_variant_declaration path in
+    return @@ Option.is_some is_variant
+  | _ -> return false
+
+
 let tag_all_args : 'a list -> bool list =
   List.map (fun _ -> true)
 

@@ -208,6 +208,20 @@ let of_path (is_value : bool) (path : Path.t) : t Monad.t =
       ) in
     return (Access (base_path_name, List.rev fields, is_local))
 
+
+let is_tag (path : t) : bool =
+  match path with
+  | Access _ -> false
+  | PathName { base; _ } ->
+    if Name.to_string base = "constr_tag"
+    then true
+    else false
+
+let is_native_type (path : t) : bool =
+  match path with
+  | Access _ -> false
+  | PathName { base; _ } -> List.mem (Name.to_string base) Name.native_type_constructors
+
 let to_string (mixed_path : t) : string =
   match mixed_path with
   | Access (path, fields, is_local) ->

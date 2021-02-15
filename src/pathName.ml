@@ -314,3 +314,11 @@ let typ_of_variants (labels : string list) : t option Monad.t =
           "- " ^ Pp.to_string (to_coq typ)
         ))
       )
+
+let is_variant_declaration
+    (path : Path.t)
+  : (Types.constructor_declaration list * Types.type_expr list) option Monad.t =
+  let* env = get_env in
+  match Env.find_type path env with
+  | { type_kind = Type_variant constructors; type_params = params; _ } -> return @@ Some (constructors, params)
+  | _ | exception _ -> return None
