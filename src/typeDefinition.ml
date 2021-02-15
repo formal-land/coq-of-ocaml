@@ -468,8 +468,7 @@ let of_ocaml (typs : type_declaration list) : t Monad.t =
         )
       | { typ_type = { type_kind = Type_variant cases; _ }; typ_attributes; _ } ->
         let* typ_attributes = Attribute.of_attributes typ_attributes in
-        let is_tagged = Attribute.has_tag_gadt typ_attributes in
-        Monad.List.map (AdtConstructors.of_ocaml_case name typ_args is_tagged) cases >>= fun cases ->
+        Monad.List.map (AdtConstructors.of_ocaml_case name typ_args typ_attributes) cases >>= fun cases ->
         let (single_constructors, new_constructor_records) = List.split cases in
         let new_constructor_records =
           new_constructor_records |> Util.List.filter_map (fun x -> x) in

@@ -115,7 +115,7 @@ type t = item list
 let of_ocaml_case
     (typ_name : Name.t)
     (defined_typ_params : AdtParameters.t)
-    (is_tagged : bool)
+    (attributes : Attribute.t list)
     (case : Types.constructor_declaration)
   : (item * (RecordSkeleton.t * Name.t list * Type.t) option) Monad.t =
   let { Types.cd_args; cd_id; cd_loc; cd_res; _ } = case in
@@ -185,6 +185,8 @@ let of_ocaml_case
             )
           ))
     end >>= fun (param_typs, typ_vars, records) ->
+    let is_tagged = Attribute.has_tag_gadt attributes in
+    let is_gadt = Attribute.has_force_gadt attributes in
     let* (tagged_return, new_typ_vars) =
       match cd_res with
       | Some typ ->
@@ -211,7 +213,9 @@ let of_ocaml_case
       AdtParameters.get_return_typ_params defined_typ_params cd_res in
     let (res_typ_params, res_typ_length) = if is_tagged
       then (Tagged(tagged_return), List.length tagged_return)
-      else (Variant(untagged_return), List.length untagged_return) in
+      else if is_gadt
+        then (Variant [], 0)
+        else (Variant untagged_return, List.length untagged_return) in
 
     return (
       {
@@ -246,7 +250,6 @@ let of_ocaml
     (defined_typ_params : AdtParameters.t)
     (single_constructors : t)
   : (t * AdtParameters.t) Monad.t =
-
   let length_and_return_typ = single_constructors |> List.map (
       fun {res_typ_params; _; } ->
         match res_typ_params with
