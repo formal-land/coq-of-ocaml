@@ -441,8 +441,7 @@ let rec of_typ_expr'
     begin match !object_descr with
     | Some (path, _ :: typs) ->
       let tag_list = tag_args_with should_tag typs in
-      (* TODO: Check if path is tagged or not *)
-      let are_tags = tag_no_args typs in
+      let* are_tags = get_constr_arg_tags path in
       of_typs_exprs' tag_list with_free_vars typ_vars typs >>= fun (typs, typ_vars, new_typ_vars) ->
       MixedPath.of_path false path >>= fun mixed_path ->
       return (Apply (mixed_path, typs, are_tags), typ_vars, new_typ_vars)
@@ -554,6 +553,33 @@ and of_typs_exprs'
     ) >>= fun (typs, typ_vars, new_typ_vars) ->
     return (List.rev typs, typ_vars, new_typ_vars)
 
+
+and get_constr_arg_tags
+    (path : Path.t)
+    : bool list Monad.t =
+  let* env = get_env in
+  match Env.find_type path env with
+  | { type_kind = Type_variant _; type_params = params; type_attributes = attributes; _ } ->
+    (* let name = Path.last path in *)
+    (* if List.mem name Name.native_type_constructors *)
+    let* attributes = Attribute.of_attributes attributes in
+    if Attribute.has_tag_gadt attributes
+    then return @@ tag_all_args params
+    else return @@ tag_no_args params
+  | { type_kind = Type_record _; type_params = params; _} ->
+    (* FIXME: Recursively check if record type should be a tag *)
+    return @@ tag_no_args params
+  | { type_manifest = None; type_kind = Type_abstract; type_params = params; _ } ->
+    return @@ tag_no_args params
+  | { type_manifest = Some typ; type_params = params; _ } ->
+    let* (typ, typ_vars, new_typ_vars) = of_typ_expr' false true Name.Map.empty typ in
+    return @@ List.map (fun (_, kind) ->
+        match kind with
+        | Kind.Tag -> true
+        | _ -> false
+      ) new_typ_vars
+  (* TODO: Preserve order of type parameters *)
+  | _ | exception _ -> return []
 
 let of_typ_expr
   (with_free_vars: bool)
