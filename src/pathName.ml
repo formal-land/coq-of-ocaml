@@ -322,3 +322,12 @@ let is_variant_declaration
   match Env.find_type path env with
   | { type_kind = Type_variant constructors; type_params = params; _ } -> return @@ Some (constructors, params)
   | _ | exception _ -> return None
+
+
+let is_native_type (path : Path.t) : bool =
+   let name = Path.last path in
+   List.exists (function x -> name = x) ["int"; "bool"; "string"; "unit"]
+
+let is_native_datatype (path : Path.t) : bool =
+   let name = Path.last path in
+   List.exists (function x -> name = x) ["list"; "option"; "map"]

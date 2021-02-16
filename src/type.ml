@@ -100,7 +100,7 @@ let rec non_phantom_typs (path : Path.t) (typs : Types.type_expr list)
     if is_phantom then
       return (Some (typ_params |> List.map (fun _ -> false)))
     else if is_tagged then
-      return (Some (typ_params |> List.map (fun _ -> true)))
+      return None
     else
       begin match typ_declaration.type_kind with
       | Type_abstract ->
@@ -255,7 +255,7 @@ let subst_name (source : Name.t) (target : Name.t) (typ : t) : t =
     | _ -> typ in
   subst typ
 
-let apply_with_notations (mixed_path : MixedPath.t) (typs : t list)
+let apply_with_notations (mixed_path : MixedPath.t) (typs : t list) (tag_list : bool list)
   : t Monad.t =
   let* configuration = get_configuration in
   let mixed_path =
@@ -267,7 +267,7 @@ let apply_with_notations (mixed_path : MixedPath.t) (typs : t list)
     | None -> mixed_path in
   (* The following notation is very specific. So we let it there in the code,
      instead of adding a configuration option. *)
-  let (mixed_path, typs, bs) =
+  let (mixed_path, typs, tag_list) =
     match (mixed_path, typs) with
     | (
         MixedPath.PathName {
@@ -285,7 +285,7 @@ let apply_with_notations (mixed_path : MixedPath.t) (typs : t list)
           )
         ]
       ) -> (MixedPath.of_name (Name.of_string_raw "M?"), [typ1], [false])
-    | _ -> (mixed_path, typs, List.map (fun _ -> false) typs) in
+    | _ -> (mixed_path, typs, tag_list) in
   let apply_with_merge =
     match (mixed_path, typs) with
     | (
@@ -311,7 +311,7 @@ let apply_with_notations (mixed_path : MixedPath.t) (typs : t list)
       end
     | _ -> None in
   match apply_with_merge with
-  | None -> return (Apply (mixed_path, typs, bs))
+  | None -> return (Apply (mixed_path, typs, tag_list))
   | Some apply_with_merge -> return apply_with_merge
 
 (** Heuristic to find a simpler alias if the path is in a module as a record. *)
@@ -388,6 +388,16 @@ let normalize_constructor (typ : t) : t * t list =
     (Apply (t, args, bs), eqs)
   | _ -> (typ, [])
 
+
+let is_type_abstract
+    (path : Path.t)
+  : bool Monad.t =
+  let* env = get_env in
+  match Env.find_type path env with
+  | { type_kind = Type_abstract; _ } -> return @@ true
+  | _ | exception _ ->
+    return false
+
 (** Import an OCaml type. Add to the environment all the new free type variables. *)
 let rec of_typ_expr'
   (should_tag : bool)
@@ -432,11 +442,35 @@ let rec of_typ_expr'
   | Tconstr (path, typs, _) ->
     non_phantom_typs path typs >>= fun typs ->
     (* TODO: Implement tagging *)
-    let tag_list = tag_no_args typs in
-    of_typs_exprs' tag_list with_free_vars typ_vars typs >>= fun (typs, typ_vars, new_typ_vars) ->
     let* mixed_path = simplified_contructor_path path (List.length typs) in
-    let* typ = apply_with_notations mixed_path typs in
-    return (typ, typ_vars, new_typ_vars)
+    let* is_abstract = is_type_abstract path in
+    let native_type = List.mem (MixedPath.to_string mixed_path) Name.native_types in
+    let is_pident = match path with
+      | Path.Pident _ -> true
+      | _ -> false in
+
+    (* For unknown reasons a type variable becomes a Tconstr some times (see type of patterns)
+       This `if` is to try to figure out if such constructor was supposed to be a variable *)
+    if is_abstract && not native_type && is_pident && List.length typs = 0
+    then
+      ( let var_name = (Name.of_last_path path) in
+        let var = Variable var_name in
+        let* new_typ_vars =
+            if should_tag
+            then return [(var_name, Kind.Tag)]
+            else return [(var_name, Kind.Set)]
+        in
+      return @@ (var , typ_vars, new_typ_vars)
+    )
+    else
+      begin
+        let* tag_list = get_constr_arg_tags path in
+        let* (typs, typ_vars, new_typs_vars) = of_typs_exprs' tag_list with_free_vars typ_vars typs in
+        let* typs = tag_typ_constr path typs in
+        let* typ = apply_with_notations mixed_path typs tag_list in
+        return (typ, typ_vars, new_typs_vars)
+
+      end
   | Tobject (_, object_descr) ->
     begin match !object_descr with
     | Some (path, _ :: typs) ->
@@ -560,14 +594,12 @@ and get_constr_arg_tags
   let* env = get_env in
   match Env.find_type path env with
   | { type_kind = Type_variant _; type_params = params; type_attributes = attributes; _ } ->
-    (* let name = Path.last path in *)
-    (* if List.mem name Name.native_type_constructors *)
     let* attributes = Attribute.of_attributes attributes in
     if Attribute.has_tag_gadt attributes
     then return @@ tag_all_args params
     else return @@ tag_no_args params
   | { type_kind = Type_record _; type_params = params; _} ->
-    (* FIXME: Recursively check if record type should be a tag *)
+    (* TODO: Recursively check if record type should be a tag *)
     return @@ tag_no_args params
   | { type_manifest = None; type_kind = Type_abstract; type_params = params; _ } ->
     return @@ tag_no_args params
@@ -580,6 +612,21 @@ and get_constr_arg_tags
       ) new_typ_vars
   (* TODO: Preserve order of type parameters *)
   | _ | exception _ -> return []
+
+and tag_typ_constr
+    (path : Path.t)
+    (typs : t list)
+  : t list Monad.t =
+  if PathName.is_native_datatype path
+  then return typs
+  else
+    let* should_tag_list = get_constr_arg_tags path in
+    let tag_typs = List.combine typs should_tag_list in
+    Monad.List.map (fun (typ, should_tag) ->
+        if should_tag
+        then tag_typ_constr_aux typ
+        else return typ
+      ) tag_typs
 
 let of_typ_expr
   (with_free_vars: bool)
