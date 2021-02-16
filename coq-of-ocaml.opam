@@ -32,7 +32,7 @@ conflicts: [
 ]
 tags: [
   "keyword:compilation"
-  "keyword:ocaml"
+  "keyword:OCaml"
   "logpath:CoqOfOCaml"
 ]
 synopsis: "Compile a subset of OCaml to Coq"
