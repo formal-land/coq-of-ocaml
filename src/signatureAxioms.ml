@@ -46,7 +46,7 @@ let of_types_signature (signature : Types.signature) : t Monad.t =
       raise
         (Error "type_extension")
         ExtensibleType
-        "We do not handle extensible types"
+        "We do not handle extensible types here"
     | Sig_module _ ->
       raise (Error "module") NotSupported "Module not handled in included signature"
     | Sig_modtype _ ->
@@ -86,8 +86,7 @@ let of_first_class_types_signature
       return (Some (
         IncludedFieldType (name, module_name, field_path_name)
       ))
-    | Sig_typext _ ->
-      raise None ExtensibleType "We do not handle extensible types"
+    | Sig_typext _ -> return None
     | Sig_module (ident, _, _, _, _) ->
       let* name = Name.of_ident false ident in
       get_field_path_name name >>= fun field_path_name ->
@@ -171,12 +170,9 @@ let rec of_signature (signature : Typedtree.signature) : t Monad.t =
           "We do not handle mutually recursive declaration of class types"
       end
     | Tsig_exception { tyexn_constructor; _ } ->
-      let* (typ_defs, name, typ) =
-        Structure.of_typ_extension_raw tyexn_constructor in
-      return (
-        List.map (fun typ_def -> TypDefinition typ_def) typ_defs @
-        [Value (name, [], typ)]
-      )
+      let* typ_defs =
+        Structure.typ_definitions_of_typ_extension_raw tyexn_constructor in
+      return (typ_defs |> List.map (fun typ_def -> TypDefinition typ_def))
     | Tsig_include { incl_mod; incl_type; _} ->
       let module_name = string_of_included_module_typ incl_mod in
       let signature_path = ModuleTyp.get_module_typ_path_name incl_mod in
@@ -264,11 +260,11 @@ let rec of_signature (signature : Typedtree.signature) : t Monad.t =
       set_env final_env (
       TypeDefinition.of_ocaml typs >>= fun typ_definition ->
       return [TypDefinition typ_definition])
-    | Tsig_typext { tyext_path; _ } ->
-      raise
-        [Error ("extensible_type_definition `" ^ Path.last tyext_path ^ "`")]
-        ExtensibleType
-        "We do not handle extensible types"
+    | Tsig_typext { tyext_constructors; _ } ->
+      let* typ_defs =
+        tyext_constructors |>
+        Monad.List.concat_map Structure.typ_definitions_of_typ_extension_raw in
+      return (typ_defs |> List.map (fun typ_def -> TypDefinition typ_def))
     | Tsig_value { val_id; val_desc = { ctyp_type; _ }; _ } ->
       let* name = Name.of_ident true val_id in
       Type.of_typ_expr true Name.Map.empty ctyp_type >>= fun (typ, _, _) ->

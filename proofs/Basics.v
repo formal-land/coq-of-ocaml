@@ -77,8 +77,11 @@ Parameter unreachable_gadt_branch : forall {A : Set}, A.
 
 Parameter unreachable : forall {A : Set}, A.
 
-Parameter extensible_type : Set.
+Inductive extensible_type : Set :=
+| Build_extensible : string -> forall (A : Set), A -> extensible_type.
+Arguments Build_extensible : clear implicits.
 
+(** For backward compatibility. *)
 Parameter extensible_type_value : extensible_type.
 
 Parameter Set_oracle : string -> Set.

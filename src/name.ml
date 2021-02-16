@@ -149,9 +149,6 @@ let to_string (name : t) : string =
   | Make name -> name
   | Nameless -> "_"
 
-let prefix_by_ext (name : t) : t =
-  Make ("ext_" ^ to_string name)
-
 let prefix_by_single_quote (name : t) : t =
   Make ("'" ^ to_string name)
 

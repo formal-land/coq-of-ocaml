@@ -204,11 +204,7 @@ let rec of_signature_items
         ([Error "class_type"], let_in_type)
         NotSupported
         "Signature item `class_type` not handled."
-    | Tsig_exception _ ->
-      raise
-        ([Error "exception"], let_in_type)
-        SideEffect
-        "Signature item `exception` not handled."
+    | Tsig_exception _ -> return ([], let_in_type)
     | Tsig_include { incl_type; _ } ->
       set_env next_env (
       items_of_types_signature prefix let_in_type incl_type)
@@ -280,11 +276,7 @@ let rec of_signature_items
           NotSupported
           "Mutual type definitions in signatures not handled."
       end
-    | Tsig_typext { tyext_path; _ } ->
-      raise
-        ([Error ("extensible_type " ^ Path.last tyext_path)], let_in_type)
-        ExtensibleType
-        "We do not handle extensible types"
+    | Tsig_typext _ -> return ([], let_in_type)
     | Tsig_value { val_id; val_desc = { ctyp_type; _ }; _ } ->
       let* prefixed_name = Name.of_strings true (prefix @ [Ident.name val_id]) in
       let* typ = Type.of_type_expr_without_free_vars ctyp_type in
