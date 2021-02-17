@@ -554,6 +554,7 @@ type t =
   | Inductive of Inductive.t
   | Record of Name.t * Name.t list * (Name.t * Type.t) list * bool
   | Synonym of Name.t * Name.t list * Type.t
+  | ExtensibleTyp of Name.t
   | Abstract of Name.t * Name.t list
 
 let filter_in_free_vars
@@ -616,10 +617,7 @@ let of_ocaml (typs : type_declaration list) : t Monad.t =
     return (Record (name, typ_args, fields, true))
   | [ { typ_id; typ_type = { type_kind = Type_open; _ }; _ } ] ->
     let* name = Name.of_ident false typ_id in
-    raise
-      (Synonym (name, [], Type.extensible_type))
-      ExtensibleType
-      "We do not handle extensible types"
+    return (ExtensibleTyp name)
   | _ ->
     (typs |> Monad.List.fold_left (fun (constructor_records, notations, records, typs) typ ->
       set_loc typ.typ_loc (
@@ -712,7 +710,7 @@ let of_ocaml (typs : type_declaration list) : t Monad.t =
         raise
           (constructor_records, notations, records, typs)
           ExtensibleType
-          "We do not handle extensible types"
+          "We do not handle extensible types in mutually recursive definitions"
       )
     ) ([], [], [], [])) >>= fun (constructor_records, notations, records, typs) ->
     let typs = typs |> List.map (function (x, y, z) -> (x, AdtParameters.get_parameters y, z)) in
@@ -740,6 +738,11 @@ let to_coq (with_args : bool) (def : t) : SmartPrint.t =
       end ^^
       nest (!^ ":" ^^ Pp.set) ^^
       !^ ":=" ^^ Type.to_coq None None value ^-^ !^ "."
+    )
+  | ExtensibleTyp name ->
+    nest (
+      !^ "Definition" ^^ Name.to_coq name ^^ !^ ":=" ^^ !^ "extensible_type" ^-^
+      !^ "."
     )
   | Abstract (name, typ_args) ->
     nest (

@@ -579,9 +579,6 @@ and local_typ_constructors_of_typs (typs : t list) : Name.Set.t =
   List.fold_left (fun args typ -> Name.Set.union args (local_typ_constructors_of_typ typ))
     Name.Set.empty typs
 
-let extensible_type =
-  Apply (MixedPath.of_name (Name.of_string_raw "extensible_type"), [])
-
 (** In a function's type extract the body's type (up to [n] arguments). *)
 let rec open_type (typ : t) (n : int) : t list * t =
   if n = 0 then

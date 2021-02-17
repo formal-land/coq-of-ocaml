@@ -41,6 +41,8 @@ type t =
   | Tuple of t list (** A tuple of expressions. *)
   | Constructor of PathName.t * string list * t list
     (** A constructor name, some implicits, and a list of arguments. *)
+  | ConstructorExtensible of string * Type.t * t
+    (** A constructor of an extensible type, with a tag and a payload. *)
   | Apply of t * t option list (** An application. *)
   | Return of string * t (** Application specialized for a return operation. *)
   | InfixOperator of string * t * t
@@ -58,6 +60,8 @@ type t =
     (** Open a first-class module. *)
   | Match of t * (Pattern.t * match_existential_cast option * t) list * bool
     (** Match an expression to a list of patterns. *)
+  | MatchExtensible of t * ((string * Pattern.t * Type.t) option * t) list
+    (** Match an expression on a list of extensible type patterns. *)
   | Record of (PathName.t * int * t) list
     (** Construct a record giving an expression for each field. *)
   | Field of t * PathName.t (** Access to a field of a record. *)
@@ -382,29 +386,36 @@ let rec of_expression (typ_vars : Name.t Name.Map.t) (e : expression)
       Attribute.has_match_gadt_with_result attributes in
     let do_cast_results = Attribute.has_match_gadt_with_result attributes in
     let is_with_default_case = Attribute.has_match_with_default attributes in
-    of_expression typ_vars e >>= fun e ->
+    let* e = of_expression typ_vars e in
     of_match typ_vars e cases is_gadt_match do_cast_results is_with_default_case
   | Texp_tuple es ->
     Monad.List.map (of_expression typ_vars) es >>= fun es ->
     return (Tuple es)
   | Texp_construct (_, constructor_description, es) ->
-    let implicits = Attribute.get_implicits attributes in
-    let* x =
-      match constructor_description.cstr_tag with
+      let* es' = Monad.List.map (of_expression typ_vars) es in
+      begin match constructor_description.cstr_tag with
       | Cstr_extension (path, _) ->
-        let* path = PathName.of_path_with_convert false path in
-        return (PathName.prefix_by_ext path)
-      | _ -> PathName.of_constructor_description constructor_description in
-    let* es = Monad.List.map (of_expression typ_vars) es in
-    return (Constructor (x, implicits, es))
+        let* typs =
+          es |>
+          Monad.List.map (fun { exp_type; _ } ->
+            Type.of_type_expr_without_free_vars exp_type
+          ) in
+        let typ = Type.Tuple typs in
+        let e = Tuple es' in
+        return (ConstructorExtensible (Path.last path, typ, e))
+      | _ ->
+        let implicits = Attribute.get_implicits attributes in
+        let* x = PathName.of_constructor_description constructor_description in
+        return (Constructor (x, implicits, es'))
+      end
   | Texp_variant (label, e) ->
-    PathName.constructor_of_variant label >>= fun path_name ->
+    let* path_name = PathName.constructor_of_variant label in
     let constructor =
       Variable (MixedPath.PathName path_name, []) in
     begin match e with
     | None -> return constructor
     | Some e ->
-      of_expression typ_vars e >>= fun e ->
+      let* e = of_expression typ_vars e in
       return (Apply (constructor, [Some e]))
     end
   | Texp_record { fields; extended_expression; _ } ->
@@ -460,15 +471,48 @@ let rec of_expression (typ_vars : Name.t Name.Map.t) (e : expression)
       [(Pattern.Any, None, e2)],
       false
     ))
-  | Texp_try (e, _) ->
-    of_expression typ_vars e >>= fun e ->
-    error_message
-      (Apply (Error "try", [Some e]))
-      SideEffect
-      (
-        "Try-with are not handled\n\n" ^
-        "Alternative: use sum types (\"option\", \"result\", ...) to represent an error case."
-      )
+  | Texp_try (e, cases) ->
+    let* e = of_expression typ_vars e in
+    let default_error =
+      error_message
+        (Error "typ_with_with_non_trivial_matching")
+        SideEffect
+        (
+          "Use a trivial matching for the `with` clause, like:\n" ^
+          "\n" ^
+          "    try ... with exn -> ...\n" ^
+          "\n" ^
+          "You can do a second matching on `exn` in the error handler if needed."
+        ) in
+    begin match cases with
+    | [{ c_lhs; c_rhs; _ }] ->
+      let* name =
+        match c_lhs.pat_desc with
+        | Tpat_var (ident, _) ->
+          let* name = Name.of_ident true ident in
+          return (Some name)
+        | Tpat_any -> return (Some Name.Nameless)
+        | _ -> return None in
+      begin match name with
+      | Some name ->
+        let* error_handler = of_expression typ_vars c_rhs in
+        error_message
+          (Apply (
+            Variable (MixedPath.of_name (Name.of_string_raw "try_with"), []),
+            [
+              Some (Function (Name.Nameless, None, e));
+              Some (Function (name, None, error_handler))
+            ]
+          ))
+          SideEffect
+          (
+            "Try-with are not handled\n\n" ^
+            "Alternative: use sum types (\"option\", \"result\", ...) to represent an error case."
+          )
+      | None -> default_error
+      end
+    | _ -> default_error
+    end
   | Texp_setfield (e_record, _, { lbl_name; _ }, e) ->
     of_expression typ_vars e_record >>= fun e_record ->
     of_expression typ_vars e >>= fun e ->
@@ -631,6 +675,13 @@ and of_match
   (do_cast_results : bool)
   (is_with_default_case : bool)
   : t Monad.t =
+  let is_extensible_type_match =
+    cases |>
+    List.map (fun { c_lhs; _ } -> c_lhs) |>
+    Pattern.are_extensible_patterns_or_any true in
+  if is_extensible_type_match then
+    of_match_extensible typ_vars e cases
+  else
   (cases |> Monad.List.filter_map (fun {c_lhs; c_guard; c_rhs} ->
     set_loc c_lhs.pat_loc (
     let* bound_vars =
@@ -726,6 +777,27 @@ and of_match
       (p, existential_cast, rhs)
     ) in
   return (Match (e, cases, is_with_default_case))
+
+(** We suppose that we know that we have a match of extensible types. *)
+and of_match_extensible
+  (typ_vars : Name.t Name.Map.t)
+  (e : t)
+  (cases : case list)
+  : t Monad.t =
+  let* cases =
+    cases |>
+    Monad.List.map (fun {c_lhs; c_rhs; _} ->
+      set_loc c_lhs.pat_loc (
+      let* p =
+        match c_lhs.pat_desc with
+        | Tpat_any -> return None
+        | _ ->
+          let* (tag, p, typ) = Pattern.of_extensible_pattern c_lhs in
+          return (Some (tag, p, typ)) in
+      let* e = of_expression typ_vars c_rhs in
+      return (p, e))
+    ) in
+  return (MatchExtensible (e, cases))
 
 (** Generate a variable and a "match" on this variable from a list of
     patterns. *)
@@ -1057,16 +1129,8 @@ and of_structure
             NotSupported
             "Mutually recursive type definition not handled here"
         end
-      | Tstr_typext _ ->
-        raise
-          (ErrorMessage (e_next, "type_extension"))
-          ExtensibleType
-          "We do not handle extensible types"
-      | Tstr_exception _ ->
-        raise
-          (ErrorMessage (e_next, "exception"))
-          SideEffect
-          "Exception not handled"
+      | Tstr_typext _ -> return e_next
+      | Tstr_exception _ -> return e_next
       | Tstr_module { mb_id; mb_expr; _ } ->
         let* name = Name.of_optional_ident false mb_id in
         of_module_expr
@@ -1208,10 +1272,12 @@ let rec to_coq (paren : bool) (e : t) : SmartPrint.t =
       )
     end
   | Tuple es ->
-    if es = [] then
-      !^ "tt"
-    else
+    begin match es with
+    | [] -> !^ "tt"
+    | [e] -> to_coq paren e
+    | _ :: _ :: _ ->
       parens @@ nest @@ separate (!^ "," ^^ space) (List.map (to_coq true) es)
+    end
   | Constructor (x, implicits, es) ->
     let implicits = List.map (fun implicit -> !^ implicit) implicits in
     begin match flatten_list e with
@@ -1231,6 +1297,12 @@ let rec to_coq (paren : bool) (e : t) : SmartPrint.t =
           separate space (PathName.to_coq x :: arguments)
       end
     end
+  | ConstructorExtensible (tag, typ, payload) ->
+    Pp.parens paren (nest (
+      !^ "Build_extensible" ^^ !^ ("\"" ^ tag ^ "\"") ^^
+      Type.to_coq None (Some Type.Context.Apply) typ ^^
+      to_coq true payload
+    ))
   | Apply (e_f, e_xs) ->
     begin match e_f with
     | Apply (e_f, e_xs') -> to_coq paren (Apply (e_f, e_xs' @ e_xs))
@@ -1395,6 +1467,54 @@ let rec to_coq (paren : bool) (e : t) : SmartPrint.t =
         else
           empty
         ) ^^
+        !^ "end"
+      )
+    end
+  | MatchExtensible (e, cases) ->
+    begin match cases with
+    | [case] ->
+      (* When there is a single case, we always expect this case to be the
+         default case so we do not pattern-match anything. *)
+      begin match case with
+      | (_, body) ->
+        Pp.parens paren @@ nest (
+          !^ "let" ^^ !^ "'_" ^^ !^ ":=" ^^ to_coq false e ^^ !^ "in" ^^
+          newline ^^ to_coq false body
+        )
+      end
+    | _ ->
+      nest (
+        !^ "match" ^^ to_coq false e ^^ !^ "with" ^^ newline ^^
+        nest (
+          nest (
+            !^ "|" ^^
+            !^ "Build_extensible" ^^ !^ "tag" ^^ !^ "_" ^^ !^ "payload" ^^
+            !^ "=>"
+          ) ^^
+          nest (separate space (cases |> List.map (fun (p, e) ->
+            match p with
+            | None -> to_coq false e
+            | Some (tag, p, typ) ->
+              nest (
+                !^ "if" ^^
+                nest (!^ "String.eqb" ^^ !^ "tag" ^^ !^ ("\"" ^ tag ^ "\"")) ^^
+                !^ "then"
+              ) ^^ newline ^^
+              indent (nest (
+                begin match p with
+                | Pattern.Tuple [] -> empty
+                | _ ->
+                  nest (!^ "let" ^^ !^ "'" ^-^ Pattern.to_coq false p ^^ !^ ":=") ^^
+                  nest (
+                    !^ "cast" ^^ Type.to_coq None (Some Type.Context.Apply) typ ^^
+                    !^ "payload" ^^ !^ "in"
+                  ) ^^ newline
+                end ^^
+                to_coq false e
+              )) ^^ newline ^^
+              !^ "else"
+          )))
+        ) ^^ newline ^^
         !^ "end"
       )
     end

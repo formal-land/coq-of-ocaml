@@ -254,10 +254,6 @@ let true_value : t =
 let unit_value : t =
   { path = []; base = Name.Make "tt" }
 
-let prefix_by_ext (path_name : t) : t =
-  let { path; base } = path_name in
-  { path; base = Name.prefix_by_ext base }
-
 let prefix_by_with (path_name : t) : t =
   let { path; base } = path_name in
   { path; base = Name.prefix_by_with base }

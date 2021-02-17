@@ -73,6 +73,7 @@ let reserved_names : string list = [
 let value_names_to_escape : string list = [
   "bool";
   "bytes";
+  "exn";
   "float";
   "int";
   "int32";
@@ -148,9 +149,6 @@ let to_string (name : t) : string =
   | FunctionParameter -> "function_parameter"
   | Make name -> name
   | Nameless -> "_"
-
-let prefix_by_ext (name : t) : t =
-  Make ("ext_" ^ to_string name)
 
 let prefix_by_single_quote (name : t) : t =
   Make ("'" ^ to_string name)

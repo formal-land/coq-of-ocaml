@@ -77,8 +77,11 @@ Parameter unreachable_gadt_branch : forall {A : Set}, A.
 
 Parameter unreachable : forall {A : Set}, A.
 
-Parameter extensible_type : Set.
+Inductive extensible_type : Set :=
+| Build_extensible : string -> forall (A : Set), A -> extensible_type.
+Arguments Build_extensible : clear implicits.
 
+(** For backward compatibility. *)
 Parameter extensible_type_value : extensible_type.
 
 Parameter Set_oracle : string -> Set.
@@ -100,6 +103,10 @@ Definition nativeint := Z.
 Definition bytes := string.
 
 Definition try {A : Set} (x : A) : A := x.
+
+Definition try_with {A : Set} (e : unit -> A) (_with : extensible_type -> A)
+  : A :=
+  e tt.
 
 Module Unit.
   Definition lt (x y : unit) : Prop := False.
