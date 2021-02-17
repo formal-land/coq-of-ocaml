@@ -471,15 +471,48 @@ let rec of_expression (typ_vars : Name.t Name.Map.t) (e : expression)
       [(Pattern.Any, None, e2)],
       false
     ))
-  | Texp_try (e, _) ->
-    of_expression typ_vars e >>= fun e ->
-    error_message
-      (Apply (Error "try", [Some e]))
-      SideEffect
-      (
-        "Try-with are not handled\n\n" ^
-        "Alternative: use sum types (\"option\", \"result\", ...) to represent an error case."
-      )
+  | Texp_try (e, cases) ->
+    let* e = of_expression typ_vars e in
+    let default_error =
+      error_message
+        (Error "typ_with_with_non_trivial_matching")
+        SideEffect
+        (
+          "Use a trivial matching for the `with` clause, like:\n" ^
+          "\n" ^
+          "    try ... with exn -> ...\n" ^
+          "\n" ^
+          "You can do a second matching on `exn` in the error handler if needed."
+        ) in
+    begin match cases with
+    | [{ c_lhs; c_rhs; _ }] ->
+      let* name =
+        match c_lhs.pat_desc with
+        | Tpat_var (ident, _) ->
+          let* name = Name.of_ident true ident in
+          return (Some name)
+        | Tpat_any -> return (Some Name.Nameless)
+        | _ -> return None in
+      begin match name with
+      | Some name ->
+        let* error_handler = of_expression typ_vars c_rhs in
+        error_message
+          (Apply (
+            Variable (MixedPath.of_name (Name.of_string_raw "try_with"), []),
+            [
+              Some (Function (Name.Nameless, None, e));
+              Some (Function (name, None, error_handler))
+            ]
+          ))
+          SideEffect
+          (
+            "Try-with are not handled\n\n" ^
+            "Alternative: use sum types (\"option\", \"result\", ...) to represent an error case."
+          )
+      | None -> default_error
+      end
+    | _ -> default_error
+    end
   | Texp_setfield (e_record, _, { lbl_name; _ }, e) ->
     of_expression typ_vars e_record >>= fun e_record ->
     of_expression typ_vars e >>= fun e ->
@@ -643,11 +676,9 @@ and of_match
   (is_with_default_case : bool)
   : t Monad.t =
   let is_extensible_type_match =
-    List.length cases >= 2 &&
     cases |>
-    List.for_all (fun { c_lhs; _ } ->
-      Pattern.is_extensible_pattern_or_any c_lhs
-    ) in
+    List.map (fun { c_lhs; _ } -> c_lhs) |>
+    Pattern.are_extensible_patterns_or_any true in
   if is_extensible_type_match then
     of_match_extensible typ_vars e cases
   else
@@ -1440,40 +1471,53 @@ let rec to_coq (paren : bool) (e : t) : SmartPrint.t =
       )
     end
   | MatchExtensible (e, cases) ->
-    nest (
-      !^ "match" ^^ to_coq false e ^^ !^ "with" ^^ newline ^^
+    begin match cases with
+    | [case] ->
+      (* When there is a single case, we always expect this case to be the
+         default case so we do not pattern-match anything. *)
+      begin match case with
+      | (_, body) ->
+        Pp.parens paren @@ nest (
+          !^ "let" ^^ !^ "'_" ^^ !^ ":=" ^^ to_coq false e ^^ !^ "in" ^^
+          newline ^^ to_coq false body
+        )
+      end
+    | _ ->
       nest (
+        !^ "match" ^^ to_coq false e ^^ !^ "with" ^^ newline ^^
         nest (
-          !^ "|" ^^
-          !^ "Build_extensible" ^^ !^ "tag" ^^ !^ "_" ^^ !^ "payload" ^^
-          !^ "=>"
-        ) ^^
-        nest (separate space (cases |> List.map (fun (p, e) ->
-          match p with
-          | None -> to_coq false e
-          | Some (tag, p, typ) ->
-            nest (
-              !^ "if" ^^
-              nest (!^ "String.eqb" ^^ !^ "tag" ^^ !^ ("\"" ^ tag ^ "\"")) ^^
-              !^ "then"
-            ) ^^ newline ^^
-            indent (nest (
-              begin match p with
-              | Pattern.Tuple [] -> empty
-              | _ ->
-                nest (!^ "let" ^^ !^ "'" ^-^ Pattern.to_coq false p ^^ !^ ":=") ^^
-                nest (
-                  !^ "cast" ^^ Type.to_coq None (Some Type.Context.Apply) typ ^^
-                  !^ "payload" ^^ !^ "in"
-                ) ^^ newline
-              end ^^
-              to_coq false e
-            )) ^^ newline ^^
-            !^ "else"
-        )))
-      ) ^^ newline ^^
-      !^ "end"
-    )
+          nest (
+            !^ "|" ^^
+            !^ "Build_extensible" ^^ !^ "tag" ^^ !^ "_" ^^ !^ "payload" ^^
+            !^ "=>"
+          ) ^^
+          nest (separate space (cases |> List.map (fun (p, e) ->
+            match p with
+            | None -> to_coq false e
+            | Some (tag, p, typ) ->
+              nest (
+                !^ "if" ^^
+                nest (!^ "String.eqb" ^^ !^ "tag" ^^ !^ ("\"" ^ tag ^ "\"")) ^^
+                !^ "then"
+              ) ^^ newline ^^
+              indent (nest (
+                begin match p with
+                | Pattern.Tuple [] -> empty
+                | _ ->
+                  nest (!^ "let" ^^ !^ "'" ^-^ Pattern.to_coq false p ^^ !^ ":=") ^^
+                  nest (
+                    !^ "cast" ^^ Type.to_coq None (Some Type.Context.Apply) typ ^^
+                    !^ "payload" ^^ !^ "in"
+                  ) ^^ newline
+                end ^^
+                to_coq false e
+              )) ^^ newline ^^
+              !^ "else"
+          )))
+        ) ^^ newline ^^
+        !^ "end"
+      )
+    end
   | Record fields ->
     nest (
       !^ "{|" ^^

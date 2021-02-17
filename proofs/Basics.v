@@ -104,6 +104,10 @@ Definition bytes := string.
 
 Definition try {A : Set} (x : A) : A := x.
 
+Definition try_with {A : Set} (e : unit -> A) (_with : extensible_type -> A)
+  : A :=
+  e tt.
+
 Module Unit.
   Definition lt (x y : unit) : Prop := False.
 

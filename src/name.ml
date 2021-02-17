@@ -73,6 +73,7 @@ let reserved_names : string list = [
 let value_names_to_escape : string list = [
   "bool";
   "bytes";
+  "exn";
   "float";
   "int";
   "int32";

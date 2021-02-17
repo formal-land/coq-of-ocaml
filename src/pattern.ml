@@ -109,20 +109,27 @@ let rec of_pattern (p : pattern) : t option Monad.t =
   | Tpat_exception _ ->
     raise None SideEffect "We do not support exception patterns")
 
-let is_extensible_pattern_or_any (p : pattern) : bool =
-  match p.pat_desc with
-  | Tpat_construct (_, constructor_description, _) ->
-    begin match constructor_description.cstr_tag with
-    | Cstr_extension _ -> true
+let rec are_extensible_patterns_or_any
+  (need_at_least_one_extensible_pattern : bool) (ps : pattern list)
+  : bool =
+  match ps with
+  | [] -> not need_at_least_one_extensible_pattern
+  | p :: ps ->
+    begin match p.pat_desc with
+    | Tpat_construct (_, constructor_description, _) ->
+      begin match constructor_description.cstr_tag with
+      | Cstr_extension _ -> are_extensible_patterns_or_any false ps
+      | _ -> false
+      end
+    | Tpat_any ->
+      are_extensible_patterns_or_any need_at_least_one_extensible_pattern ps
     | _ -> false
     end
-  | Tpat_any -> true
-  | _ -> false
 
 let rec of_extensible_pattern (p : pattern) : (string * t * Type.t) Monad.t =
   let error =
     raise ("unexpected_kind_of_pattern", Any, Type.Tuple []) Unexpected
-      "Unexpected kind of pattern" in
+      "Unexpected kind of pattern (expected extensible type or an any pattern)" in
   match p.pat_desc with
   | Tpat_construct (_, constructor_description, ps) ->
     begin match constructor_description.cstr_tag with
