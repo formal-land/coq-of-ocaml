@@ -51,7 +51,7 @@ Fixpoint sum (tree : tree int) : int :=
 * existential types ✔️
 * partial support of GADTs 🌊
 * partial support of polymorphic variants 🌊
-* ignores extensible types 🌊
+* partial support of extensible types 🌊
 * ignores side-effects ❌
 
 Even in case of errors we try to generate some Coq code. The generated Coq code should be readable and with a size similar to the OCaml source. One should not hesitate to fix remaining compilation errors, by hand or with a script (name collisions, missing `Require`,...).
