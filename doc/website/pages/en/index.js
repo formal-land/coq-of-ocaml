@@ -108,13 +108,10 @@ class Index extends React.Component {
           </a>
         </h2>
         <MarkdownBlock>
-          Developed at [Nomadic Labs](https://www.nomadic-labs.com/) to formally verify the crypto-currency [Tezos](https://tezos.com/).
+          We develop coq-of-ocaml at [Nomadic Labs](https://www.nomadic-labs.com/). We use it to formally verify the implementation of the crypto-currency [Tezos](https://tezos.com/). We are open to other applications.
         </MarkdownBlock>
-        <Button
-          href="https://www.nomadic-labs.com/jobs.html"
-          target="_blank"
-        >
-          We are hiring
+        <Button href="mailto:contact@nomadic-labs.com">
+          Contact us
         </Button>
       </div>
     );
@@ -153,8 +150,7 @@ class Index extends React.Component {
       <Block background="light">
         {[
           {
-            content:
-              'Formally verify [OCaml](https://ocaml.org/) programs with the [Coq](https://coq.inria.fr/) proof system. Prevent bugs right from the start. For critical applications.',
+            content: '[Formally verify](https://en.wikipedia.org/wiki/Formal_verification) program implementations with the [Coq](https://coq.inria.fr/) proof system. Prevent bugs right from the start. For critical applications.',
             image: `${baseUrl}img/undraw_through_the_desert.svg`,
             imageAlign: 'right',
             title: 'Safe programming',
@@ -167,19 +163,19 @@ class Index extends React.Component {
       <Block layout="fourColumn">
         {[
           {
-            content: 'Handles the functional core of OCaml including functions, pattern-matching, records,...',
+            content: 'Translate the functional core of OCaml including functions, pattern-matching, records,...',
             image: `${baseUrl}img/undraw_code_review.svg`,
             imageAlign: 'top',
             title: 'Functional OCaml',
           },
           {
-            content: 'Translates modules, functors and first-class modules using dependent records as needed.',
+            content: 'Import modules, functors and first-class modules using polymorphic records.',
             image: `${baseUrl}img/undraw_logistics.svg`,
             imageAlign: 'top',
             title: 'Module system',
           },
           {
-            content: 'Generates some Coq even in case of errors.',
+            content: 'Generate some Coq even in case of errors.',
             image: `${baseUrl}img/undraw_convert.svg`,
             imageAlign: 'top',
             title: 'Progressive imports',
