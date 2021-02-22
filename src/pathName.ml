@@ -323,6 +323,16 @@ let is_variant_declaration
   | { type_kind = Type_variant constructors; type_params = params; _ } -> return @@ Some (constructors, params)
   | _ | exception _ -> return None
 
+let is_tagged_variant
+    (path : Path.t)
+  : bool Monad.t =
+  let* env = get_env in
+  match Env.find_type path env with
+  | { type_kind = Type_variant _; type_attributes } ->
+    let* type_attributes = Attribute.of_attributes type_attributes in
+    return @@ Attribute.has_tag_gadt type_attributes
+  | _ | exception _ -> return false
+
 
 let is_native_type (path : Path.t) : bool =
    let name = Path.last path in

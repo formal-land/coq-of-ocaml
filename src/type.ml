@@ -449,6 +449,8 @@ let rec of_typ_expr'
       | Path.Pident _ -> true
       | _ -> false in
 
+    let* is_tagged_variant = PathName.is_tagged_variant path in
+
     (* For unknown reasons a type variable becomes a Tconstr some times (see type of patterns)
        This `if` is to try to figure out if such constructor was supposed to be a variable *)
     if is_abstract && not native_type && is_pident && List.length typs = 0
@@ -462,15 +464,20 @@ let rec of_typ_expr'
         in
       return @@ (var , typ_vars, new_typ_vars)
     )
-    else
-      begin
+    else if is_tagged_variant
+    then begin
         let* tag_list = get_constr_arg_tags path in
         let* (typs, typ_vars, new_typs_vars) = of_typs_exprs' tag_list with_free_vars typ_vars typs in
         let* typs = tag_typ_constr path typs in
         let* typ = apply_with_notations mixed_path typs tag_list in
         return (typ, typ_vars, new_typs_vars)
-
       end
+    else
+      let tag_list = tag_no_args typs in
+      let* (typs, typ_vars, new_typs_vars) = of_typs_exprs' tag_list with_free_vars typ_vars typs in
+      let* typ = apply_with_notations mixed_path typs tag_list in
+      return (typ, typ_vars, new_typs_vars)
+
   | Tobject (_, object_descr) ->
     begin match !object_descr with
     | Some (path, _ :: typs) ->
@@ -617,10 +624,14 @@ and tag_typ_constr
     (path : Path.t)
     (typs : t list)
   : t list Monad.t =
-  if PathName.is_native_datatype path
+  let* is_tagged_variant = PathName.is_tagged_variant path in
+  if not is_tagged_variant
+  then raise [] Error.Category.Unexpected "You shouldn't call tag_typ_constr on a non_tagged variant"
+  else if PathName.is_native_datatype path
   then return typs
   else
     let* should_tag_list = get_constr_arg_tags path in
+    let* name = MixedPath.of_path false path in
     let tag_typs = List.combine typs should_tag_list in
     Monad.List.map (fun (typ, should_tag) ->
         if should_tag
@@ -936,18 +947,24 @@ let rec to_coq (subst : Subst.t option) (context : Context.t option) (typ : t)
         (List.map (to_coq subst (Some Context.Tuple)) typs)
     end
   | Apply (path, typs, _) ->
-    let path =
-      match subst with
-      | None -> path
-      | Some subst ->
-        begin match path with
-        | MixedPath.PathName path_name ->
-          MixedPath.PathName (subst.path_name path_name)
-        | _ -> path
-        end in
-    Pp.parens (Context.should_parens context Context.Apply && typs <> []) @@
-    nest @@ separate space
-      (MixedPath.to_coq path :: List.map (to_coq subst (Some Context.Apply)) typs)
+    (* Prints tags as notations *)
+    let tag = tag_notation typs in
+    if Option.is_some tag
+    then let tag = Option.get tag in
+      to_coq subst (Some Context.Apply) tag
+    else
+      let path =
+        match subst with
+        | None -> path
+        | Some subst ->
+          begin match path with
+            | MixedPath.PathName path_name ->
+              MixedPath.PathName (subst.path_name path_name)
+            | _ -> path
+          end in
+      Pp.parens (Context.should_parens context Context.Apply && typs <> []) @@
+      nest @@ separate space
+        (MixedPath.to_coq path :: List.map (to_coq subst (Some Context.Apply)) typs)
   | Package (is_in_exp, path_name, typ_params) ->
     let existential_typs =
       Tree.flatten typ_params |>
