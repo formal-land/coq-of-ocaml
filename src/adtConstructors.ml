@@ -272,10 +272,9 @@ let of_ocaml
 
   let* constructors : t = single_constructors |> Monad.List.map (
       fun { constructor_name; param_typs; res_typ_params; typ_vars; _ } ->
-        (* let typ_vars = VarEnv.remove_many params typ_vars in *)
-        let (is_tagged, return_typ_params) = match res_typ_params with
-          | Tagged ls -> (true, Tagged ls)
-          | Variant ls -> (false, Variant typ_params)
+        let (is_tagged, return_typ_params, return_len) = match res_typ_params with
+          | Tagged ls -> (true, Tagged ls, List.length ls)
+          | Variant ls -> (false, Variant typ_params, List.length ls)
         in
 
         let rem_names = param_typs |> Type.typ_args_of_typs in
@@ -289,7 +288,7 @@ let of_ocaml
           constructor_name;
           param_typs;
           res_typ_params = return_typ_params;
-          res_typ_length = List.length typ_vars;
+          res_typ_length = return_len;
           is_tagged;
           typ_vars;
         }

@@ -664,7 +664,7 @@ let rec decode_var_tags_aux
   match typ with
   | Variable name ->
     begin
-      if not is_tag || in_native
+      if is_tag || in_native
       then return typ
       else match List.assoc_opt name typ_vars with
         | None -> return typ
