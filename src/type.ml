@@ -49,10 +49,10 @@ let rec tag_typ_constr_aux
   | Arrow (t1, t2) ->
     let* t1 = tag_ty t1 in
     let* t2 = tag_ty t2 in
-    let tag = "arrow_tag" |> Name.of_string_raw |> MixedPath.of_name  in
+    let tag = Name.arrow_tag |> MixedPath.of_name  in
     return (Apply (tag, [t1; t2], [false; false]))
   | Tuple ts ->
-    let tag = "tuple_tag" |> Name.of_string_raw |> MixedPath.of_name  in
+    let tag = Name.tuple_tag |> MixedPath.of_name  in
     let bs = [false; false] in
     if List.length ts = 2
     then
@@ -65,7 +65,7 @@ let rec tag_typ_constr_aux
   | Apply (mpath, ts, bs) ->
     let* ts = Monad.List.map tag_ty ts in
     let arg_names = List.map tag_constructor_of ts in
-    let tag = "constr_tag" |> Name.of_string_raw |> MixedPath.of_name  in
+    let tag = Name.constr_tag |> MixedPath.of_name  in
     let name = (MixedPath.to_string mpath) in
     let str_repr = name ^
                    (List.fold_left (fun acc ty -> acc ^ "_" ^ ty) "" arg_names) in
@@ -451,30 +451,30 @@ let rec of_typ_expr'
 
     let* is_tagged_variant = PathName.is_tagged_variant path in
 
-    (* For unknown reasons a type variable becomes a Tconstr some times (see type of patterns)
-       This `if` is to try to figure out if such constructor was supposed to be a variable *)
-    if is_abstract && not native_type && is_pident && List.length typs = 0
-    then
-      ( let var_name = (Name.of_last_path path) in
-        let var = Variable var_name in
-        let* new_typ_vars =
-            if should_tag
-            then return [(var_name, Kind.Tag)]
-            else return [(var_name, Kind.Set)]
-        in
-      return @@ (var , typ_vars, new_typ_vars)
-    )
-    else if is_tagged_variant
+    if not is_tagged_variant
     then begin
-        let* tag_list = get_constr_arg_tags path in
-        let* (typs, typ_vars, new_typs_vars) = of_typs_exprs' tag_list with_free_vars typ_vars typs in
-        let* typs = tag_typ_constr path typs in
-        let* typ = apply_with_notations mixed_path typs tag_list in
-        return (typ, typ_vars, new_typs_vars)
-      end
-    else
       let tag_list = tag_no_args typs in
       let* (typs, typ_vars, new_typs_vars) = of_typs_exprs' tag_list with_free_vars typ_vars typs in
+      let* typ = apply_with_notations mixed_path typs tag_list in
+      return (typ, typ_vars, new_typs_vars)
+    end
+    (* For unknown reasons a type variable becomes a Tconstr some times (see type of patterns)
+       This `if` is to try to figure out if such constructor was supposed to be a variable *)
+    else if is_abstract && not native_type && is_pident && List.length typs = 0
+    then begin
+      let var_name = (Name.of_last_path path) in
+      let var = Variable var_name in
+      let* new_typ_vars =
+        if should_tag
+        then return [(var_name, Kind.Tag)]
+        else return [(var_name, Kind.Set)]
+      in
+      return @@ (var , typ_vars, new_typ_vars)
+    end
+    else
+      let* tag_list = get_constr_arg_tags path in
+      let* (typs, typ_vars, new_typs_vars) = of_typs_exprs' tag_list with_free_vars typ_vars typs in
+      let* typs = tag_typ_constr path typs in
       let* typ = apply_with_notations mixed_path typs tag_list in
       return (typ, typ_vars, new_typs_vars)
 
@@ -890,8 +890,8 @@ module Subst = struct
 end
 
 
-let tag_notation (typs : t list): t option =
-  if List.length typs <> 2 then None
+let tag_notation (path : MixedPath.t) (typs : t list): t option =
+  if not (MixedPath.is_constr_tag path) || List.length typs <> 2 then None
   else let typ = List.nth typs 1 in
     let name = tag_constructor_of typ in
     let tagged_name = (Name.of_string_raw (name ^ "_tag")) in
@@ -948,7 +948,7 @@ let rec to_coq (subst : Subst.t option) (context : Context.t option) (typ : t)
     end
   | Apply (path, typs, _) ->
     (* Prints tags as notations *)
-    let tag = tag_notation typs in
+    let tag = tag_notation path typs in
     if Option.is_some tag
     then let tag = Option.get tag in
       to_coq subst (Some Context.Apply) tag

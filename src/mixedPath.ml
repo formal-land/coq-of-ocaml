@@ -12,7 +12,11 @@ let of_name (name : Name.t) : t =
   PathName (PathName.of_name [] name)
 
 let dec_name : t =
-  PathName ("decode_vtag" |> Name.of_string_raw |> PathName.of_name [])
+  PathName (Name.decode_vtag |> PathName.of_name [])
+
+let is_constr_tag : t -> bool = function
+  | Access _ -> false
+  | PathName {base; _} -> Name.equal base Name.constr_tag
 
 let get_signature_path (path : Path.t) : Path.t option Monad.t =
   let* env = get_env in

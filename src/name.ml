@@ -177,6 +177,11 @@ let suffix_by_include (name : t) : t =
 let suffix_by_skeleton (name : t) : t =
   Make (to_string name ^ "_skeleton")
 
+let arrow_tag  = of_string_raw "arrow_tag"
+let tuple_tag  = of_string_raw "tuple_tag"
+let constr_tag = of_string_raw "constr_tag"
+let decode_vtag = of_string_raw "decode_vtag"
+
 (** Pretty-print a name to Coq. *)
 let to_coq (name : t) : SmartPrint.t =
   !^ (to_string name)
