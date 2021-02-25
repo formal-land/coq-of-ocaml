@@ -33,6 +33,12 @@ type match_existential_cast = {
   use_axioms : bool;
   cast_result : bool }
 
+type dependent_pattern_match = {
+  cast : Type.t;
+  motive : Type.t;
+  args : Type.t list;
+}
+
 (** The simplified OCaml AST we use. We do not use a mutualy recursive type to
     simplify the importation in Coq. *)
 type t =
@@ -46,6 +52,7 @@ type t =
   | InfixOperator of string * t * t
     (** Application specialized for an infix operator. *)
   | Function of Name.t * t (** An argument name and a body. *)
+  | Functions of Name.t list * t (** An argument names and a body. *)
   | LetVar of string option * Name.t * Name.t list * t * t
     (** The let of a variable, with optionally a list of polymorphic variables.
         We optionally specify the symbol of the let operator as it may be
@@ -55,7 +62,7 @@ type t =
     (** The definition of a type. It is used to represent module values. *)
   | LetModuleUnpack of Name.t * PathName.t * t
     (** Open a first-class module. *)
-  | Match of t * (Pattern.t * match_existential_cast option * t) list * bool
+  | Match of t * dependent_pattern_match option * (Pattern.t * match_existential_cast option * t) list * bool
     (** Match an expression to a list of patterns. *)
   | Record of (PathName.t * int * t) list
     (** Construct a record giving an expression for each field. *)
@@ -83,6 +90,13 @@ type t =
   | ErrorTyp of Type.t (** An error composed of a type. *)
   | ErrorMessage of t * string
     (** An expression together with an error message. *)
+  | Ltac of ltac
+
+and ltac =
+  | Subst
+  | Discriminate
+  | Exact of t
+  | Concat of ltac * ltac
 
 (** Take a function expression and make explicit the list of arguments and
     the body. *)
@@ -136,6 +150,15 @@ module ModuleTypValues = struct
       )
     | _ -> raise [] Unexpected "Module type signature not found"
 end
+
+let dependent_transform (e : t) (dep_match : dependent_pattern_match option) =
+  match dep_match with
+  | None -> e
+  | Some { args; _ } ->
+    let args = args |> List.mapi (fun i _ ->
+        ("eq" ^ string_of_int i) |> Name.of_string_raw) in
+    let e = Ltac (Concat (Subst, Exact e)) in
+    Functions(args, e)
 
 let rec any_patterns_with_ith_true (is_guarded : bool) (i : int) (n : int)
   : Pattern.t list =
@@ -237,13 +260,13 @@ let rec smart_return (operator : string) (e : t) : t Monad.t =
   | LetVar (None, x, typ_params, e1, e2) ->
     let* e2 = smart_return operator e2 in
     return (LetVar (None, x, typ_params, e1, e2))
-  | Match (e, cases, is_with_default_case) ->
+  | Match (e, dep_match, cases, is_with_default_case) ->
     let* cases =
       cases |> Monad.List.map (fun (p, existential_cast, e) ->
         let* e = smart_return operator e in
         return (p, existential_cast, e)
       ) in
-    return (Match (e, cases, is_with_default_case))
+    return (Match (e, dep_match, cases, is_with_default_case))
   | _ -> return (Return (operator, e))
 
 (** Import an OCaml expression. *)
@@ -494,7 +517,7 @@ let rec of_expression (typ_vars : Name.t Name.Map.t) (e : expression)
     let* e1 = of_expression typ_vars e1 in
     let* e2 = of_expression typ_vars e2 in
     return (Match (
-      e1,
+      e1, None,
       [(Pattern.Any, None, e2)],
       false
     ))
@@ -627,7 +650,7 @@ let rec of_expression (typ_vars : Name.t Name.Map.t) (e : expression)
                   base = Name.FunctionParameter
                 },
                 []
-              ),
+              ), None,
               cases,
               false
             ))
@@ -664,6 +687,25 @@ and of_match
   (do_cast_results : bool)
   (is_with_default_case : bool)
   : t Monad.t =
+  let* dep_match : dependent_pattern_match option =
+    begin match cases with
+    | [] -> return None
+    | { c_lhs; c_rhs; _ }  :: _ ->
+      if not is_gadt_match
+      then return None
+      else
+      let* (cast, _, new_typ_vars) = Type.of_typ_expr true Name.Map.empty (c_lhs.pat_type) in
+      let* (motive, _, new_typ_vars') = Type.of_typ_expr true Name.Map.empty (c_rhs.exp_type) in
+      let new_typ_vars = VarEnv.union new_typ_vars new_typ_vars' in
+      let* cast = Type.decode_var_tags new_typ_vars false cast in
+      let* motive = Type.decode_var_tags new_typ_vars false motive in
+      let (cast, args) = Type.normalize_constructor cast in
+      (* Only generates dependent pattern matching for actual gadts *)
+      if List.length args = 0 || (Type.is_native_type cast)
+      then return None
+      else return (Some ({cast; args; motive}))
+    end
+  in
   (cases |> Monad.List.filter_map (fun {c_lhs; c_guard; c_rhs} ->
     set_loc c_lhs.pat_loc (
     let* bound_vars =
@@ -703,6 +745,7 @@ and of_match
     | Texp_unreachable -> return None
     | _ ->
       of_expression typ_vars c_rhs >>= fun e ->
+      let e = dependent_transform e dep_match in
       return (
         Util.Option.map pattern (fun pattern ->
         (pattern, existential_cast, guard, e))
@@ -730,7 +773,7 @@ and of_match
             None,
             Variable (MixedPath.PathName PathName.false_value, [])
           )] in
-      Match (e, cases, false)
+      Match (e, None, cases, false)
     ) in
   let e =
     match guards with
@@ -753,7 +796,13 @@ and of_match
           ) in
       (p, existential_cast, rhs)
     ) in
-  return (Match (e, cases, is_with_default_case))
+  let t = Match (e, dep_match, cases, is_with_default_case) in
+  match dep_match with
+  | None -> return t
+  | Some dep_match ->
+    let eq_refl = "eq_refl" |> Name.of_string_raw |> MixedPath.of_name in
+    let ts = List.map (fun _ -> Some (Variable (eq_refl, []))) dep_match.args in
+  return (Apply (t, ts))
 
 (** Generate a variable and a "match" on this variable from a list of
     patterns. *)
@@ -859,12 +908,15 @@ and of_let
     end >>= fun is_function ->
     begin match cases with
     | [{ vb_pat = p; vb_expr = e1; _ }] when not is_function ->
-      Pattern.of_pattern p >>= fun p ->
-      of_expression typ_vars e1 >>= fun e1 ->
+      let* p_typ = Type.of_type_expr_without_free_vars (p.pat_type) in
+      let* p = Pattern.of_pattern p in
+      let* e1_typ = Type.of_type_expr_without_free_vars (e1.exp_type) in
+      let* e1 = of_expression typ_vars e1 in
+      let dep_match = { cast = p_typ; args = []; motive = e1_typ } in
       begin match p with
       | Some (Pattern.Variable x) -> return (LetVar (None, x, [], e1, e2))
-      | Some p -> return (Match (e1, [p, None, e2], false))
-      | None -> return (Match (e1, [], false))
+      | Some p -> return (Match (e1, Some dep_match, [p, None, e2], false))
+      | None -> return (Match (e1, Some dep_match, [], false))
       end
     | _ ->
       import_let_fun typ_vars false is_rec cases >>= fun def ->
@@ -1315,6 +1367,8 @@ let rec to_coq (paren : bool) (e : t) : SmartPrint.t =
     Pp.parens paren @@ group @@ (to_coq true e1 ^^ !^ operator ^^ to_coq true e2)
   | Function (x, e) ->
     Pp.parens paren @@ nest (!^ "fun" ^^ Name.to_coq x ^^ !^ "=>" ^^ to_coq false e)
+  | Functions (xs, e) ->
+    Pp.parens paren @@ nest (!^ "fun" ^^ separate space (List.map Name.to_coq xs) ^^ !^ "=>" ^^ to_coq false e)
   | LetVar (let_symbol, x, typ_params, e1, e2) ->
     let get_default () =
       Pp.parens paren @@ nest (
@@ -1349,6 +1403,7 @@ let rec to_coq (paren : bool) (e : t) : SmartPrint.t =
             },
             []
           ),
+          _,
           cases,
           is_with_default_case
         )
@@ -1406,7 +1461,7 @@ let rec to_coq (paren : bool) (e : t) : SmartPrint.t =
       PathName.to_coq path_name ^^ !^ "in" ^^ newline ^^
       to_coq false e2
     )
-  | Match (e, cases, is_with_default_case) ->
+  | Match (e, dep_match, cases, is_with_default_case) ->
     let single_let =
       to_coq_try_single_let_pattern
         paren None
@@ -1427,8 +1482,15 @@ let rec to_coq (paren : bool) (e : t) : SmartPrint.t =
           newline
         else
           space in
+      let dep_match = match dep_match with
+        | None -> empty
+        | Some { cast; args; motive } ->
+          !^ "in" ^^ Type.to_coq None None cast
+          ^^ !^ "return" ^^ separate (!^ " -> ") (List.map (Type.to_coq None None) (args @ [motive]))
+      in
       nest (
-        !^ "match" ^^ to_coq false e ^^ !^ "with" ^^ newline ^^
+        !^ "match" ^^ to_coq false e ^^ dep_match ^^
+        !^ "with" ^^ newline ^^
         separate separator (cases |> List.map (fun (p, existential_cast, e) ->
           nest (
             !^ "|" ^^ Pattern.to_coq false p ^^ !^ "=>" ^^
@@ -1436,7 +1498,8 @@ let rec to_coq (paren : bool) (e : t) : SmartPrint.t =
           )
         )) ^^
         (if is_with_default_case then
-          !^ "|" ^^ !^ "_" ^^ !^ "=>" ^^ !^ "unreachable_gadt_branch" ^^ newline
+          (* !^ "|" ^^ !^ "_" ^^ !^ "=>" ^^ !^ "unreachable_gadt_branch" ^^ newline *)
+           !^ "|" ^^ !^ "_" ^^ !^ "=>" ^^ to_coq_ltac Discriminate ^^ newline
         else
           empty
         ) ^^
@@ -1535,6 +1598,17 @@ let rec to_coq (paren : bool) (e : t) : SmartPrint.t =
   | ErrorTyp typ -> Pp.parens paren @@ Type.to_coq None None typ
   | ErrorMessage (e, error_message) ->
     group (Error.to_comment error_message ^^ newline ^^ to_coq paren e)
+  | Ltac tac -> to_coq_ltac tac
+
+and to_coq_ltac (tac : ltac) : SmartPrint.t =
+  !^ "ltac:" ^-^ parens (to_coq_tac tac)
+
+and to_coq_tac (tac : ltac) : SmartPrint.t =
+  match tac with
+  | Subst -> !^ "subst"
+  | Discriminate -> !^ "discriminate"
+  | Exact t -> !^ "exact" ^^ to_coq true t
+  | Concat (t1, t2) -> separate (!^ "; ") [to_coq_tac t1; to_coq_tac t2]
 
 and to_coq_try_single_let_pattern
   (paren : bool)
