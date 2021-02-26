@@ -16,6 +16,20 @@ let rec proj_int (e : int expr) : int =
   | Sum (e1, e2) -> proj_int e1 + proj_int e2
   | _ -> .
 
+type 'a term =
+  | T_Int : int -> int term
+  | T_String : string -> string term
+  | T_Sum : int expr * int expr -> int term
+  | T_Pair : 'a expr * 'b expr -> ('a * 'b) term
+[@@coq_tag_gadt]
+
+let rec get_int (e : int term) : int =
+  match[@coq_tagged_match][@coq_match_with_default] e with
+  | T_Int n -> n
+  | T_Sum (e1, e2) -> proj_int e1 + proj_int e2
+  | _ -> .
+
+
 type 'a one_case =
   | SingleCase : int one_case
   | Impossible : bool one_case

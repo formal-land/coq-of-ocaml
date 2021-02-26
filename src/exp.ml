@@ -1486,14 +1486,14 @@ let rec to_coq (paren : bool) (e : t) : SmartPrint.t =
           newline
         else
           space in
-      let dep_match = match dep_match with
+      let dep_match_print = match dep_match with
         | None -> empty
         | Some { cast; args; motive } ->
           !^ "in" ^^ Type.to_coq None None cast
           ^^ !^ "return" ^^ separate (!^ " -> ") (List.map (Type.to_coq None None) (args @ [motive]))
       in
       nest (
-        !^ "match" ^^ to_coq false e ^^ dep_match ^^
+        !^ "match" ^^ to_coq false e ^^ dep_match_print ^^
         !^ "with" ^^ newline ^^
         separate separator (cases |> List.map (fun (p, existential_cast, e) ->
           nest (
@@ -1502,8 +1502,10 @@ let rec to_coq (paren : bool) (e : t) : SmartPrint.t =
           )
         )) ^^
         (if is_with_default_case then
-          (* !^ "|" ^^ !^ "_" ^^ !^ "=>" ^^ !^ "unreachable_gadt_branch" ^^ newline *)
-           !^ "|" ^^ !^ "_" ^^ !^ "=>" ^^ to_coq_ltac Discriminate ^^ newline
+           if Option.is_some dep_match then
+             !^ "|" ^^ !^ "_" ^^ !^ "=>" ^^ to_coq_ltac Discriminate ^^ newline
+           else
+             !^ "|" ^^ !^ "_" ^^ !^ "=>" ^^ !^ "unreachable_gadt_branch" ^^ newline
         else
           empty
         ) ^^
