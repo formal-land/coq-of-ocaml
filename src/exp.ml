@@ -311,9 +311,10 @@ let rec of_expression (typ_vars : Name.t Name.Map.t) (e : expression)
     let is_gadt_match =
       Attribute.has_match_gadt attributes ||
       Attribute.has_match_gadt_with_result attributes in
+    let is_tagged_match = Attribute.has_tagged_match attributes in
     let do_cast_results = Attribute.has_match_gadt_with_result attributes in
     let is_with_default_case = Attribute.has_match_with_default attributes in
-    open_cases typ_vars cases is_gadt_match do_cast_results is_with_default_case >>= fun (x, e) ->
+    open_cases typ_vars cases is_gadt_match is_tagged_match do_cast_results is_with_default_case >>= fun (x, e) ->
     return (Function (x, e))
   | Texp_apply (e_f, e_xs) ->
     of_expression typ_vars e_f >>= fun e_f ->
@@ -432,10 +433,11 @@ let rec of_expression (typ_vars : Name.t Name.Map.t) (e : expression)
     let is_gadt_match =
       Attribute.has_match_gadt attributes ||
       Attribute.has_match_gadt_with_result attributes in
+    let is_tagged_match = Attribute.has_tagged_match attributes in
     let do_cast_results = Attribute.has_match_gadt_with_result attributes in
     let is_with_default_case = Attribute.has_match_with_default attributes in
     of_expression typ_vars e >>= fun e ->
-    of_match typ_vars e cases is_gadt_match do_cast_results is_with_default_case
+    of_match typ_vars e cases is_gadt_match is_tagged_match do_cast_results is_with_default_case
   | Texp_tuple es ->
     Monad.List.map (of_expression typ_vars) es >>= fun es ->
     return (Tuple es)
@@ -684,6 +686,7 @@ and of_match
   (e : t)
   (cases : case list)
   (is_gadt_match : bool)
+  (is_tagged_match : bool)
   (do_cast_results : bool)
   (is_with_default_case : bool)
   : t Monad.t =
@@ -691,7 +694,7 @@ and of_match
     begin match cases with
     | [] -> return None
     | { c_lhs; c_rhs; _ }  :: _ ->
-      if not is_gadt_match
+      if not is_tagged_match
       then return None
       else
       let* (cast, _, new_typ_vars) = Type.of_typ_expr true Name.Map.empty (c_lhs.pat_type) in
@@ -810,6 +813,7 @@ and open_cases
   (typ_vars : Name.t Name.Map.t)
   (cases : case list)
   (is_gadt_match : bool)
+  (is_tagged_match : bool)
   (do_cast_results : bool)
   (is_with_default_case : bool)
   : (Name.t * t) Monad.t =
@@ -817,7 +821,7 @@ and open_cases
   let e = Variable (MixedPath.of_name name, []) in
   let* e =
     of_match
-      typ_vars e cases is_gadt_match do_cast_results is_with_default_case in
+      typ_vars e cases is_gadt_match is_tagged_match do_cast_results is_with_default_case in
   return (name, e)
 
 and import_let_fun

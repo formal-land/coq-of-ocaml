@@ -9,6 +9,7 @@ type t =
   | Implicit of string
   | MatchGadt
   | MatchGadtWithResult
+  | TaggedMatch
   | MatchWithDefault
   | MutualAsNotation
   | Phantom
@@ -65,6 +66,7 @@ let of_attributes (attributes : Typedtree.attributes) : t list Monad.t =
       return (Some (Implicit payload))
     | "coq_match_gadt" -> return (Some MatchGadt)
     | "coq_match_gadt_with_result" -> return (Some MatchGadtWithResult)
+    | "coq_tagged_match" -> return (Some TaggedMatch)
     | "coq_match_with_default" -> return (Some MatchWithDefault)
     | "coq_mutual_as_notation" -> return (Some MutualAsNotation)
     | "coq_plain_module" -> return (Some PlainModule)
@@ -109,6 +111,12 @@ let get_implicits (attributes : t list) : string list =
 let has_match_gadt (attributes : t list) : bool =
   attributes |> List.exists (function
     | MatchGadt -> true
+    | _ -> false
+  )
+
+let has_tagged_match (attributes : t list) : bool =
+  attributes |> List.exists (function
+    | TaggedMatch -> true
     | _ -> false
   )
 
