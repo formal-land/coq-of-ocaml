@@ -529,3 +529,20 @@ Fixpoint length {A : Set} (l : list A) (accumulator : Z) {struct accumulator}
   end.
 ```
 which is invalid in Coq as the decreasing argument is `l`.
+
+## coq_type_annotation
+Sometimes we need to add a type annotation on an expression, either as a documentation or to help the Coq code to compile. We translate this OCaml example:
+```ocaml
+let n1 =
+  let m = 12 in
+  let n1 = m[@coq_type_annotation] in
+  n1
+```
+to:
+```coq
+Definition n1 : int :=
+  let m := 12 in
+  let n1 := (m : int) in
+  n1.
+```
+where we add an annotation `: int` on the expression `m`. The type we use for the annotation is the type inferred by the OCaml compiler.

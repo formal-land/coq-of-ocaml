@@ -65,7 +65,7 @@ class Test
   end
 
   def coq_cmd
-    "coqc #{generated_name} -R tests Tests -R proofs CoqOfOCaml -impredicative-set"
+    "coqc -R tests Tests -R proofs CoqOfOCaml -impredicative-set #{generated_name}"
   end
 
   def coq

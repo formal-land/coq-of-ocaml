@@ -54,6 +54,7 @@ let escape_operator (s : string) : string =
   Buffer.contents b
 
 let reserved_names : string list = [
+  "at";
   "error";
   "exists";
   "exists2";
@@ -88,6 +89,7 @@ let native_types = [
 let value_names_to_escape : string list = [
   "bool";
   "bytes";
+  "exn";
   "float";
   "int";
   "int32";
@@ -95,6 +97,7 @@ let value_names_to_escape : string list = [
   "list";
   "nativeint";
   "option";
+  "pair";
   "ref";
   "result";
   "string";
@@ -110,11 +113,11 @@ let escape_reserved_word (is_value : bool) (s : string) : string Monad.t =
       Configuration.is_value_to_escape configuration s
     ) in
   if is_value_to_escape then
-    return ("__" ^ s ^ "_value")
+    return (s ^ "_value")
   else
     let is_reserved_name = List.mem s reserved_names in
     if is_reserved_name then
-      return ("__" ^ s)
+      return ("_" ^ s)
     else
       return s
 
@@ -157,6 +160,9 @@ let of_ident_raw (i : Ident.t) : t =
 let of_last_path (p : Path.t) : t =
   of_string_raw (Path.last p)
 
+let of_strings (is_value : bool) (path : string list) : t Monad.t =
+  of_string is_value (String.concat "_" path)
+
 let to_string (name : t) : string =
   match name with
   | FunctionParameter -> "function_parameter"
@@ -192,3 +198,9 @@ let to_coq_list_or_empty (names : t list)
   match names with
   | [] -> empty
   | _ :: _ -> map (separate space (List.map to_coq names))
+
+(** Not related to the name handling, but this is a good place to put it. *)
+let string_of_optional_ident (ident : Ident.t option) : string =
+  match ident with
+  | None -> "_"
+  | Some ident -> Ident.name ident

@@ -204,12 +204,11 @@ Module RecordWithInnerPolymorphism.
   End t.
   Definition t := t.record.
   
-  Definition r : t :=
-    {|
-      t.f _ :=
-        fun l =>
-          match l with
-          | [] => l
-          | cons _ l' => l'
-          end |}.
+  Definition f {A : Set} (l : list A) : list A :=
+    match l with
+    | [] => l
+    | cons _ l' => l'
+    end.
+  
+  Definition r : t := {| t.f _ := f |}.
 End RecordWithInnerPolymorphism.

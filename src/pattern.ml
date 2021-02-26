@@ -37,7 +37,10 @@ let rec of_pattern (p : pattern) : t option Monad.t =
       raise
         None
         ExtensibleType
-        "Patterns of extensible types are not handled"
+        (
+          "We only support extensible types in patterns at the head. Here,\n" ^
+          "the extensible type is in a nested position."
+        )
     | _ ->
       PathName.of_constructor_description constructor_description >>= fun x ->
       Monad.List.map of_pattern ps >>= fun patterns ->
@@ -106,6 +109,42 @@ let rec of_pattern (p : pattern) : t option Monad.t =
   | Tpat_exception _ ->
     raise None SideEffect "We do not support exception patterns")
 
+let rec are_extensible_patterns_or_any
+  (need_at_least_one_extensible_pattern : bool) (ps : pattern list)
+  : bool =
+  match ps with
+  | [] -> not need_at_least_one_extensible_pattern
+  | p :: ps ->
+    begin match p.pat_desc with
+    | Tpat_construct (_, constructor_description, _) ->
+      begin match constructor_description.cstr_tag with
+      | Cstr_extension _ -> are_extensible_patterns_or_any false ps
+      | _ -> false
+      end
+    | Tpat_any ->
+      are_extensible_patterns_or_any need_at_least_one_extensible_pattern ps
+    | _ -> false
+    end
+
+let rec of_extensible_pattern (p : pattern) : (string * t * Type.t) Monad.t =
+  let error =
+    raise ("unexpected_kind_of_pattern", Any, Type.Tuple []) Unexpected
+      "Unexpected kind of pattern (expected extensible type or an any pattern)" in
+  match p.pat_desc with
+  | Tpat_construct (_, constructor_description, ps) ->
+    begin match constructor_description.cstr_tag with
+    | Cstr_extension (path, _) ->
+      let* typs =
+        ps |>
+        Monad.List.map (fun p ->
+          Type.of_type_expr_without_free_vars p.pat_type
+        ) in
+      let* ps = Monad.List.filter_map of_pattern ps in
+      return (Path.last path, Tuple ps, Type.Tuple typs)
+    | _ -> error
+    end
+  | _ -> error
+
 let rec has_or_patterns (p : t) : bool =
   match p with
   | Any -> false
@@ -129,10 +168,12 @@ let rec to_coq (paren : bool) (p : t) : SmartPrint.t =
   | Constant c -> Constant.to_coq c
   | Variable x -> Name.to_coq x
   | Tuple ps ->
-    if ps = [] then
-      !^ "tt"
-    else
+    begin match ps with
+    | [] -> !^ "tt"
+    | [p] -> to_coq paren p
+    | _ :: _ :: _ ->
       parens @@ nest @@ separate (!^ "," ^^ space) (List.map (to_coq false) ps)
+    end
   | Constructor (x, ps) ->
     if ps = [] then
       if PathName.is_tt x then !^ "_" else PathName.to_coq x

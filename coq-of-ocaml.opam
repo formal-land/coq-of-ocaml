@@ -18,7 +18,7 @@ install: [
 ]
 depends: [
   "conf-ruby" {with-test}
-  "dune" {>= "2.0"}
+  "dune" {>= "2.0" & < "2.8"}
   "ocaml" {>= "4.10" & < "4.11"}
   "ocamlfind" {>= "1.5.2"}
   "smart-print"
@@ -32,7 +32,7 @@ conflicts: [
 ]
 tags: [
   "keyword:compilation"
-  "keyword:ocaml"
+  "keyword:OCaml"
   "logpath:CoqOfOCaml"
 ]
 synopsis: "Compile a subset of OCaml to Coq"

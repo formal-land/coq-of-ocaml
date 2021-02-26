@@ -9,24 +9,25 @@ type item =
   | IncludedFieldValue of Name.t * Name.t list * Type.t * Name.t * PathName.t
   | Module of Name.t * t
   | ModuleAlias of Name.t * PathName.t
+  | ModuleFreeVar of ModuleTyp.free_vars * (Name.t * Type.t) list * ModuleTyp.free_var
   | Signature of Name.t * Signature.t
   | TypDefinition of TypeDefinition.t
   | Value of Name.t * Name.t list * Type.t
 
 and t = item list
 
-let rec string_of_included_module_typ (module_typ : Typedtree.module_type)
+let rec string_of_included_module_typ_aux (module_typ : Typedtree.module_type)
   : string =
   match module_typ.mty_desc with
   | Tmty_ident (path, _) | Tmty_alias (path, _) -> Path.last path
   | Tmty_signature _ -> "signature"
   | Tmty_functor _ -> "functor"
-  | Tmty_with (module_typ, _) -> string_of_included_module_typ module_typ
+  | Tmty_with (module_typ, _) -> string_of_included_module_typ_aux module_typ
   | Tmty_typeof _ -> "typeof"
 
-let name_of_included_module_typ (module_typ : Typedtree.module_type)
-  : Name.t Monad.t =
-  Name.of_string false ("Included_" ^ string_of_included_module_typ module_typ)
+let string_of_included_module_typ (module_typ : Typedtree.module_type)
+  : string =
+  "Included_" ^ string_of_included_module_typ_aux module_typ
 
 let of_types_signature (signature : Types.signature) : t Monad.t =
   signature |> Monad.List.map (function
@@ -45,7 +46,7 @@ let of_types_signature (signature : Types.signature) : t Monad.t =
       raise
         (Error "type_extension")
         ExtensibleType
-        "We do not handle extensible types"
+        "We do not handle extensible types here"
     | Sig_module _ ->
       raise (Error "module") NotSupported "Module not handled in included signature"
     | Sig_modtype _ ->
@@ -85,8 +86,7 @@ let of_first_class_types_signature
       return (Some (
         IncludedFieldType (name, module_name, field_path_name)
       ))
-    | Sig_typext _ ->
-      raise None ExtensibleType "We do not handle extensible types"
+    | Sig_typext _ -> return None
     | Sig_module (ident, _, _, _, _) ->
       let* name = Name.of_ident false ident in
       get_field_path_name name >>= fun field_path_name ->
@@ -169,22 +169,28 @@ let rec of_signature (signature : Typedtree.signature) : t Monad.t =
           NotSupported
           "We do not handle mutually recursive declaration of class types"
       end
-    | Tsig_exception { tyexn_constructor = { ext_id; _ }; _ } ->
-      raise
-        [Error ("exception " ^ Ident.name ext_id)]
-        SideEffect
-        "Signature item `exception` not handled"
+    | Tsig_exception { tyexn_constructor; _ } ->
+      let* typ_defs =
+        Structure.typ_definitions_of_typ_extension_raw tyexn_constructor in
+      return (typ_defs |> List.map (fun typ_def -> TypDefinition typ_def))
     | Tsig_include { incl_mod; incl_type; _} ->
-      let* module_name = name_of_included_module_typ incl_mod in
+      let module_name = string_of_included_module_typ incl_mod in
       let signature_path = ModuleTyp.get_module_typ_path_name incl_mod in
       begin match signature_path with
       | None -> of_types_signature incl_type
       | Some signature_path ->
         ModuleTyp.of_ocaml incl_mod >>= fun module_typ ->
-        let typ = ModuleTyp.to_typ module_typ in
+        let* ((free_vars_params, params, free_vars), typ) =
+          ModuleTyp.to_typ [] module_name false module_typ in
+        let free_vars =
+          free_vars |>
+          List.map (fun free_var ->
+            ModuleFreeVar (free_vars_params, params, free_var)
+          ) in
+        let* module_name = Name.of_string false module_name in
         of_first_class_types_signature
           module_name signature_path incl_type final_env >>= fun fields ->
-        return (Value (module_name, [], typ) :: fields)
+        return (free_vars @ (Value (module_name, [], typ) :: fields))
       end
     | Tsig_modsubst _ ->
       raise
@@ -231,8 +237,15 @@ let rec of_signature (signature : Typedtree.signature) : t Monad.t =
         end
       | _ ->
         ModuleTyp.of_ocaml_desc mty_desc >>= fun module_typ ->
-        let typ = ModuleTyp.to_typ module_typ in
-        return [Value (name, [], typ)]
+        let id = Name.string_of_optional_ident md_id in
+        let* ((free_vars_params, params, free_vars), typ) =
+          ModuleTyp.to_typ [] id false module_typ in
+        let free_vars =
+          free_vars |>
+          List.map (fun free_var ->
+            ModuleFreeVar (free_vars_params, params, free_var)
+          ) in
+        return (free_vars @ [Value (name, [], typ)])
       end
     | Tsig_open _ -> return []
     | Tsig_recmodule _ ->
@@ -247,11 +260,11 @@ let rec of_signature (signature : Typedtree.signature) : t Monad.t =
       set_env final_env (
       TypeDefinition.of_ocaml typs >>= fun typ_definition ->
       return [TypDefinition typ_definition])
-    | Tsig_typext { tyext_path; _ } ->
-      raise
-        [Error ("extensible_type_definition `" ^ Path.last tyext_path ^ "`")]
-        ExtensibleType
-        "We do not handle extensible types"
+    | Tsig_typext { tyext_constructors; _ } ->
+      let* typ_defs =
+        tyext_constructors |>
+        Monad.List.concat_map Structure.typ_definitions_of_typ_extension_raw in
+      return (typ_defs |> List.map (fun typ_def -> TypDefinition typ_def))
     | Tsig_value { val_id; val_desc = { ctyp_type; _ }; _ } ->
       let* name = Name.of_ident true val_id in
       Type.of_typ_expr true Name.Map.empty ctyp_type >>= fun (typ, _, _) ->
@@ -270,7 +283,7 @@ let rec of_signature (signature : Typedtree.signature) : t Monad.t =
 let to_coq_included_field (module_name : Name.t) (field_name : PathName.t)
   : SmartPrint.t =
   MixedPath.to_coq (
-    MixedPath.Access (PathName.of_name [] module_name, [field_name], false)
+    MixedPath.Access (PathName.of_name [] module_name, [field_name])
   )
 
 let rec to_coq (signature : t) : SmartPrint.t =
@@ -280,8 +293,7 @@ let rec to_coq (signature : t) : SmartPrint.t =
     | IncludedFieldModule (name, module_name, field_name) ->
       let field = to_coq_included_field module_name field_name in
       nest (
-        !^ "Definition" ^^ Name.to_coq name ^^ !^ ":=" ^^
-        nest (!^ "existT" ^^ !^ "(fun _ => _)" ^^ !^ "tt" ^^ field) ^-^ !^ "."
+        !^ "Definition" ^^ Name.to_coq name ^^ !^ ":=" ^^ field ^-^ !^ "."
       )
     | IncludedFieldType (name, module_name, field_name) ->
       let field = to_coq_included_field module_name field_name in
@@ -311,6 +323,21 @@ let rec to_coq (signature : t) : SmartPrint.t =
     | ModuleAlias (name, path_name) ->
       !^ "Module" ^^ Name.to_coq name ^^ !^ ":=" ^^
       PathName.to_coq path_name ^-^ !^ "."
+    | ModuleFreeVar (free_vars_params, params, free_var) ->
+      let { ModuleTyp.name; arity } = free_var in
+      nest (
+        !^ "Parameter" ^^ Name.to_coq name ^^ !^ ":" ^^
+        nest (
+          begin match params with
+          | [] -> empty
+          | _ :: _ ->
+            !^ "forall" ^^
+            ModuleTyp.to_coq_functor_parameters_modules free_vars_params params ^-^
+            !^ ","
+          end ^^
+          Pp.typ_arity arity ^-^ !^ "."
+        )
+      )
     | Signature (name, signature) -> Signature.to_coq_definition name signature
     | TypDefinition typ_definition -> TypeDefinition.to_coq false typ_definition
     | Value (name, typ_vars, typ) ->

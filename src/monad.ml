@@ -73,6 +73,14 @@ end
 module List = struct
   open Notations
 
+  let rec concat_map (f : 'a -> 'b list t) (l : 'a list) : 'b list t =
+    match l with
+    | [] -> return []
+    | x :: l ->
+      f x >>= fun x ->
+      concat_map f l >>= fun l ->
+      return (x @ l)
+
   let rec filter (f : 'a -> bool t) (l : 'a list) : 'a list t =
     match l with
     | [] -> return []
@@ -94,14 +102,6 @@ module List = struct
       | None -> return l
       | Some x -> return (x :: l)
       end
-
-  let rec flatten_map (f : 'a -> 'b list t) (l : 'a list) : 'b list t =
-    match l with
-    | [] -> return []
-    | x :: l ->
-      f x >>= fun x ->
-      flatten_map f l >>= fun l ->
-      return (x @ l)
 
   let rec fold_left (f : 'a -> 'b -> 'a t) (accumulator : 'a) (l : 'b list)
     : 'a t =

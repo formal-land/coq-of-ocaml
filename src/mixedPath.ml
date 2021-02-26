@@ -4,7 +4,7 @@ open Monad.Notations
 
 (** [Access] corresponds to projections from first-class modules. *)
 type t =
-  | Access of PathName.t * PathName.t list * bool
+  | Access of PathName.t * PathName.t list
   | PathName of PathName.t
 
 (** Shortcut to introduce new local variables for example. *)
@@ -199,7 +199,6 @@ let of_path (is_value : bool) (path : Path.t) : t Monad.t =
     | Some local_base_path -> return (PathName local_base_path)
     end
   | _ ->
-    let* is_local = is_module_path_local base_path in
     let* base_path_name =
       match local_base_path with
       | None -> PathName.of_path_with_convert is_value base_path
@@ -210,7 +209,7 @@ let of_path (is_value : bool) (path : Path.t) : t Monad.t =
         let* field_name = Name.of_string is_value field in
         PathName.of_path_and_name_with_convert signature_path field_name
       ) in
-    return (Access (base_path_name, List.rev fields, is_local))
+    return (Access (base_path_name, List.rev fields))
 
 
 let is_tag (path : t) : bool =
@@ -228,13 +227,8 @@ let is_native_type (path : t) : bool =
 
 let to_string (mixed_path : t) : string =
   match mixed_path with
-  | Access (path, fields, is_local) ->
+  | Access (path, fields) ->
     let path = PathName.to_string path in
-    let path =
-      if is_local then
-        path
-      else
-        "(|" ^ path ^ "|)" in
     let fields =
       fields |> List.map (fun field -> "(" ^ PathName.to_string field ^ ")") in
     String.concat "." (path :: fields)

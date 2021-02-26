@@ -185,7 +185,7 @@ Definition stream_skeleton := stream.record.
 Inductive t (o : Set) : Set :=
 | OkStream : 'stream o -> t o
 | Ok : o -> t o
-| Error : option (list Error_monad.__error) -> t o
+| Error : option (list Error_monad._error) -> t o
 
 where "'stream" := (fun (a : Set) =>
   stream_skeleton (unit -> Lwt.t (option a)) (unit -> unit)).

@@ -15,6 +15,7 @@ type t =
   | Phantom
   | PlainModule
   | Struct of string
+  | TypAnnotation
 
 let of_payload_string
   (error_message : string) (id : string) (payload : Parsetree.payload)
@@ -75,6 +76,7 @@ let of_attributes (attributes : Typedtree.attributes) : t list Monad.t =
       let error_message = "Give the name of the parameter to recurse on." in
       let* payload = of_payload_string error_message id attr_payload in
       return (Some (Struct payload))
+    | "coq_type_annotation" -> return (Some TypAnnotation)
     | _ -> return None)
   )
 
@@ -164,4 +166,10 @@ let get_structs (attributes : t list) : string list =
   attributes |> Util.List.filter_map (function
     | Struct name -> Some name
     | _ -> None
+  )
+
+let has_typ_annotation (attributes : t list) : bool =
+  attributes |> List.exists (function
+    | TypAnnotation -> true
+    | _ -> false
   )

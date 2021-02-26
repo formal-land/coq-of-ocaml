@@ -6,6 +6,9 @@ module File = struct
 end
 
 module List = struct
+  let concat_map (f : 'a -> 'b list) (l : 'a list) : 'b list =
+    List.concat (List.map f l)
+
   let rec filter_map (f : 'a -> 'b option) (l : 'a list) : 'b list =
     match l with
     | [] -> []
