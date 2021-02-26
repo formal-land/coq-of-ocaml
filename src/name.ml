@@ -80,6 +80,7 @@ let native_types = [
   "float";
   (* "char"; *)
   "ascii";
+  "unit";
 ]
 
 (** We only escape these names if they are used as values, as they may collide
