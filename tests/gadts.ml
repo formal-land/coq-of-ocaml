@@ -17,16 +17,16 @@ let rec proj_int (e : int expr) : int =
   | _ -> .
 
 type 'a term =
-  | Int : int -> int term
-  | String : string -> string term
-  | Sum : int term * int term -> int term
-  | Pair : 'a term * 'b term -> ('a * 'b) term
+  | T_Int : int -> int term
+  | T_String : string -> string term
+  | T_Sum : int term * int term -> int term
+  | T_Pair : 'a term * 'b term -> ('a * 'b) term
 [@@coq_tag_gadt]
 
 let rec get_int (e : int term) : int =
   match[@coq_tagged_match][@coq_match_with_default] e with
-  | Int n -> n
-  | Sum (e1, e2) -> get_int e1 + get_int e2
+  | T_Int n -> n
+  | T_Sum (e1, e2) -> get_int e1 + get_int e2
   | _ -> .
 
 

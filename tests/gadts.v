@@ -24,15 +24,15 @@ Fixpoint proj_int (e : expr) : int :=
   end.
 
 Inductive term : vtag -> Set :=
-| Int : int -> term int_tag
-| String : string -> term string_tag
-| Sum : term int_tag -> term int_tag -> term int_tag
-| Pair : forall {a b : vtag}, term a -> term b -> term (tuple_tag a b).
+| T_Int : int -> term int_tag
+| T_String : string -> term string_tag
+| T_Sum : term int_tag -> term int_tag -> term int_tag
+| T_Pair : forall {a b : vtag}, term a -> term b -> term (tuple_tag a b).
 
 Fixpoint get_int (e : term int_tag) : int :=
   match e in term t0 return t0 = int_tag -> int with
-  | Int n => fun eq0 => ltac:(subst; exact n)
-  | Sum e1 e2 =>
+  | T_Int n => fun eq0 => ltac:(subst; exact n)
+  | T_Sum e1 e2 =>
     fun eq0 => ltac:(subst; exact (Z.add (get_int e1) (get_int e2)))
   | _ => ltac:(discriminate)
   end eq_refl.
