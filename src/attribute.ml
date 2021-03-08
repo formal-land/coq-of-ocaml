@@ -9,12 +9,12 @@ type t =
   | Implicit of string
   | MatchGadt
   | MatchGadtWithResult
-  | TaggedMatch
   | MatchWithDefault
   | MutualAsNotation
   | Phantom
   | PlainModule
   | Struct of string
+  | TaggedMatch
   | TypAnnotation
 
 let of_payload_string
@@ -67,7 +67,6 @@ let of_attributes (attributes : Typedtree.attributes) : t list Monad.t =
       return (Some (Implicit payload))
     | "coq_match_gadt" -> return (Some MatchGadt)
     | "coq_match_gadt_with_result" -> return (Some MatchGadtWithResult)
-    | "coq_tagged_match" -> return (Some TaggedMatch)
     | "coq_match_with_default" -> return (Some MatchWithDefault)
     | "coq_mutual_as_notation" -> return (Some MutualAsNotation)
     | "coq_plain_module" -> return (Some PlainModule)
@@ -77,6 +76,7 @@ let of_attributes (attributes : Typedtree.attributes) : t list Monad.t =
       let* payload = of_payload_string error_message id attr_payload in
       return (Some (Struct payload))
     | "coq_type_annotation" -> return (Some TypAnnotation)
+    | "coq_tagged_match" -> return (Some TaggedMatch)
     | _ -> return None)
   )
 
@@ -98,12 +98,6 @@ let has_force_gadt (attributes : t list) : bool =
     | _ -> false
   )
 
-let has_tag_gadt (attributes : t list) : bool =
-  attributes |> List.exists (function
-    | TaggedGadt -> true
-    | _ -> false
-  )
-
 let get_implicits (attributes : t list) : string list =
   attributes |> Util.List.filter_map (function
     | Implicit implicit -> Some implicit
@@ -113,12 +107,6 @@ let get_implicits (attributes : t list) : string list =
 let has_match_gadt (attributes : t list) : bool =
   attributes |> List.exists (function
     | MatchGadt -> true
-    | _ -> false
-  )
-
-let has_tagged_match (attributes : t list) : bool =
-  attributes |> List.exists (function
-    | TaggedMatch -> true
     | _ -> false
   )
 
@@ -149,6 +137,18 @@ let has_phantom (attributes : t list) : bool =
 let has_plain_module (attributes : t list) : bool =
   attributes |> List.exists (function
     | PlainModule -> true
+    | _ -> false
+  )
+
+let has_tagged_match (attributes : t list) : bool =
+  attributes |> List.exists (function
+    | TaggedMatch -> true
+    | _ -> false
+  )
+
+let has_tag_gadt (attributes : t list) : bool =
+  attributes |> List.exists (function
+    | TaggedGadt -> true
     | _ -> false
   )
 
