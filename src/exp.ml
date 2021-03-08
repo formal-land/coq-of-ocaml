@@ -1661,7 +1661,7 @@ and to_coq_tac (tac : ltac) : SmartPrint.t =
   | Subst -> !^ "subst"
   | Discriminate -> !^ "discriminate"
   | Exact t -> !^ "exact" ^^ to_coq true t
-  | Concat (t1, t2) -> separate (!^ "; ") [to_coq_tac t1; to_coq_tac t2]
+  | Concat (t1, t2) -> separate (!^ ";" ^^ space) [to_coq_tac t1; to_coq_tac t2]
 
 and to_coq_try_single_let_pattern
   (paren : bool)
