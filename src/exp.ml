@@ -727,7 +727,7 @@ and of_match :
 (** Generate a variable and a "match" on this variable from a list of
     patterns. *)
 and open_cases
-  (type pattern_kind) = fun
+  (type pattern_kind)
   (typ_vars : Name.t Name.Map.t)
   (cases : pattern_kind case list)
   (is_gadt_match : bool)
