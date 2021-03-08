@@ -20,13 +20,9 @@ let rec union (env1 : t) (env2 : t) : t =
     | Some kind' ->
       let env2 = List.remove_assoc name env2 in
       let kind = Kind.union kind kind' in
-      (* let env = (name, kind) :: (List.remove_assoc name env) in *)
       (name, kind) :: union env env2
 
-let merge (env : t list) : t =
-  match env with
-  | [] -> []
-  | x :: xs -> List.fold_left (fun acc y -> union acc y) x xs
+let merge (env : t list) : t = List.fold_left (fun acc y -> union acc y) [] env
 
 let reorg (names : Name.t list) (env : t): t =
   List.fold_left (fun acc name ->
@@ -72,7 +68,7 @@ let rec remove (key : Name.t) (varenv : t) : t =
     then varenv
     else (name, kind) :: remove key varenv
 
-let rec remove_many (keys : Name.t list) (varenv : t) : t =
+let remove_many (keys : Name.t list) (varenv : t) : t =
   List.fold_left (fun varenv key -> remove key varenv) varenv keys
 
 let rec assq_get (x : 'a) (l : ('a * 'b) list) : ('a * 'b) option =
