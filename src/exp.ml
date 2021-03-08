@@ -1513,7 +1513,7 @@ let rec to_coq (paren : bool) (e : t) : SmartPrint.t =
         | None -> empty
         | Some { cast; args; motive } ->
           !^ "in" ^^ Type.to_coq None None cast
-          ^^ !^ "return" ^^ separate (!^ " -> ") (List.map (Type.to_coq None None) (args @ [motive]))
+          ^^ !^ "return" ^^ separate (space ^^ !^ "->" ^^ space) (List.map (Type.to_coq None None) (args @ [motive]))
       in
       nest (
         !^ "match" ^^ to_coq false e ^^ dep_match_print ^^
