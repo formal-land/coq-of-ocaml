@@ -71,17 +71,5 @@ let rec remove (key : Name.t) (varenv : t) : t =
 let remove_many (keys : Name.t list) (varenv : t) : t =
   List.fold_left (fun varenv key -> remove key varenv) varenv keys
 
-let rec assq_get (x : 'a) (l : ('a * 'b) list) : ('a * 'b) option =
-  match l with
-  | [] -> None
-  | (a, b) :: xs ->
-    if a = x
-    then Some (a, b)
-    else assq_get x xs
-
 let rec keep_only (keys : Name.t list) (varenv : t) : t =
-  List.fold_left (fun l key ->
-      match assq_get key varenv with
-      | Some x -> x :: l
-      | None -> l
-    ) [] keys |> List.rev
+  varenv |> List.filter (fun (name, _) -> List.mem name keys)
