@@ -11,7 +11,7 @@ type t =
   | Sum of (string * t) list
   | Tuple of t list
   (* Application holds the information of what are tags *)
-  | Apply of MixedPath.t * t list * bool list
+  | Apply of MixedPath.t * (t * bool) list
   | Signature of PathName.t * (Name.t * t option) list
   | ForallModule of Name.t * t * t
   | ExistTyps of (Name.t * int) list * t
@@ -32,7 +32,7 @@ let tag_constructor_of
   | Eq _ -> "eq"
   | Sum _ -> "sum"
   | Tuple _ -> "tuple"
-  | Apply (mpath, _, _) -> MixedPath.to_string mpath
+  | Apply (mpath, _) -> MixedPath.to_string mpath
   | Signature _ -> "signature"
   | ForallModule _ -> "forallModule"
   | ExistTyps _ -> "existsTyps"
@@ -52,26 +52,27 @@ let rec tag_typ_constr_aux
     let* t1 = tag_ty t1 in
     let* t2 = tag_ty t2 in
     let tag = Name.arrow_tag |> MixedPath.of_name  in
-    return (Apply (tag, [t1; t2], [false; false]))
+    return (Apply (tag, List.combine [t1; t2] [false; false]))
   | Tuple ts ->
     let tag = Name.tuple_tag |> MixedPath.of_name  in
     let bs = [false; false] in
     if List.length ts = 2
     then
       let* ts = Monad.List.map tag_ty ts in
-      return (Apply (tag, ts, bs))
+      return (Apply (tag, List.combine ts bs))
     else
       let* t = tag_ty (List.hd ts) in
       let* ts = tag_ty @@ Tuple (List.tl ts) in
-      return (Apply (tag, [t; ts], bs))
-  | Apply (mpath, ts, bs) ->
+      return (Apply (tag, List.combine [t; ts] bs))
+  | Apply (mpath, ts) ->
+    let (ts, bs) = List.split ts in
     let* ts = Monad.List.map tag_ty ts in
     let arg_names = List.map tag_constructor_of ts in
     let tag = Name.constr_tag |> MixedPath.of_name  in
     let name = (MixedPath.to_string mpath) in
     let str_repr = name ^
                    (List.fold_left (fun acc ty -> acc ^ "_" ^ ty) "" arg_names) in
-    return (Apply (tag, [String str_repr; typ], [false; false]))
+    return (Apply (tag, List.combine [String str_repr; typ] [false; false]))
   | _ -> return typ
 
 
@@ -234,13 +235,16 @@ let subst_name (source : Name.t) (target : Name.t) (typ : t) : t =
     | Sum tagged_typs ->
       Sum (tagged_typs |> List.map (fun (tag, typ) -> (tag, subst typ)))
     | Tuple typs -> Tuple (List.map subst typs)
-    | Apply (constructor, typs, bs) ->
+    | Apply (constructor, typs) ->
         let constructor_with_subst =
           match constructor with
           | PathName { path = []; base } when Name.equal base source ->
             MixedPath.PathName { path = []; base = target }
           | _ -> constructor in
-      Apply (constructor_with_subst, List.map subst typs, bs)
+        let (ts, bs) = List.split typs in
+        let ts = List.map subst ts in
+        let typs = List.combine ts bs in
+      Apply (constructor_with_subst, typs)
     | Signature (path_name, typ_params) ->
       Signature (
         path_name,
@@ -283,7 +287,7 @@ let apply_with_notations (mixed_path : MixedPath.t) (typs : t list) (tag_list : 
               path = [Name.Make "Error_monad"];
               base = Name.Make "trace"
             },
-            _, b
+            _
           )
         ]
       ) -> (MixedPath.of_name (Name.of_string_raw "M?"), [typ1], [false])
@@ -295,7 +299,7 @@ let apply_with_notations (mixed_path : MixedPath.t) (typs : t list) (tag_list : 
         [
           Apply (
             MixedPath.PathName { path = []; base = Name.Make source2 },
-            typs, bs
+            typs
           )
         ]
       ) ->
@@ -306,14 +310,14 @@ let apply_with_notations (mixed_path : MixedPath.t) (typs : t list) (tag_list : 
         Some (
           Apply (
             MixedPath.PathName { path = []; base = Name.Make target },
-            typs, bs
+            typs
           )
         )
       | None -> None
       end
     | _ -> None in
   match apply_with_merge with
-  | None -> return (Apply (mixed_path, typs, tag_list))
+  | None -> return (Apply (mixed_path, List.combine typs tag_list))
   | Some apply_with_merge -> return apply_with_merge
 
 (** Heuristic to find a simpler alias if the path is in a module as a record. *)
@@ -338,7 +342,7 @@ let is_native_type
   : bool =
   match typ with
   | Variable var -> List.mem (Name.to_string var) Name.native_types
-  | Apply (mpath, _, _) -> MixedPath.is_native_type mpath
+  | Apply (mpath, _) -> MixedPath.is_native_type mpath
   | _ -> false
 
 let print_type
@@ -382,12 +386,13 @@ let tag_args_with (b : bool) : 'a list -> bool list =
     relating each index of the type constructor to its real instantiation *)
 let normalize_constructor (typ : t) : t * t list =
   match typ with
-  | Apply (t, args, bs) ->
+  | Apply (t, args) ->
+    let (args, bs) = List.split args in
     let (args, eqs) = args |> List.mapi (fun i typ ->
         let x = "t" ^ string_of_int i |> Name.of_string_raw in
         (Variable x, Eq (Variable x, typ))
       ) |> List.split in
-    (Apply (t, args, bs), eqs)
+    (Apply (t, List.combine args bs), eqs)
   | _ -> (typ, [])
 
 
@@ -486,7 +491,7 @@ let rec of_typ_expr'
       let* are_tags = get_constr_arg_tags path in
       of_typs_exprs' tag_list with_free_vars typ_vars typs >>= fun (typs, typ_vars, new_typ_vars) ->
       MixedPath.of_path false path >>= fun mixed_path ->
-      return (Apply (mixed_path, typs, are_tags), typ_vars, new_typ_vars)
+      return (Apply (mixed_path, List.combine typs are_tags), typ_vars, new_typ_vars)
     | _ ->
       raise
         (Error "unhandled_object_type", typ_vars, [])
@@ -514,7 +519,7 @@ let rec of_typ_expr'
     begin match path_name with
     | Some path_name ->
       return (
-        Apply (MixedPath.PathName path_name, [], []),
+        Apply (MixedPath.PathName path_name, []),
         typ_vars,
         []
       )
@@ -691,7 +696,7 @@ let rec decode_var_tags_aux
       then return typ
       else match List.assoc_opt name typ_vars with
         | None -> return typ
-        | Some Kind.Tag -> return @@ Apply (MixedPath.dec_name, [typ], [true])
+        | Some Kind.Tag -> return @@ Apply (MixedPath.dec_name, [(typ, true)])
         | Some _ -> return typ
     end
   | Arrow (t1, t2) ->
@@ -701,13 +706,14 @@ let rec decode_var_tags_aux
   | Tuple ts ->
     let* ts = Monad.List.map (decode_var_tags_aux typ_vars in_native true) ts in
     return @@ Tuple ts
-  | Apply (mpath, ts, bs) ->
+  | Apply (mpath, ts) ->
+    let (ts, bs) = List.split ts in
     let path_str = MixedPath.to_string mpath in
     let in_native = List.mem path_str ["tuple_tag"; "arrow_tag"; "list_tag"; "option_tag"] in
     let dec = decode_var_tags_aux typ_vars in_native in
     let ts = List.combine ts bs in
     let* ts = Monad.List.map (fun (t, b) -> dec b t) ts in
-    return @@ Apply (mpath, ts, bs)
+    return @@ Apply (mpath, List.combine ts bs)
   | ForallModule (name, t1, t2) ->
     let* t1 = dec t1 in
     let* t2 = dec t2 in
@@ -800,7 +806,8 @@ let rec typ_args_of_typ (typ : t) : Name.Set.t =
   | Variable x -> Name.Set.singleton x
   | Arrow (typ1, typ2) | Eq (typ1, typ2) -> typ_args_of_typs [typ1; typ2]
   | Sum typs -> typ_args_of_typs (List.map snd typs)
-  | Tuple typs | Apply (_, typs, _) -> typ_args_of_typs typs
+  | Tuple typs -> typ_args_of_typs typs
+  | Apply (_, typs) -> typs |> List.map (fun x -> fst x) |> typ_args_of_typs
   | Signature (_, typ_params) ->
     typ_params |>
     List.map (fun (_, typ) ->
@@ -838,7 +845,8 @@ let rec local_typ_constructors_of_typ (typ : t) : Name.Set.t =
   | Arrow (typ1, typ2) | Eq(typ1, typ2) -> local_typ_constructors_of_typs [typ1; typ2]
   | Sum typs -> local_typ_constructors_of_typs (List.map snd typs)
   | Tuple typs -> local_typ_constructors_of_typs typs
-  | Apply (mixed_path, typs, _) ->
+  | Apply (mixed_path, ts) ->
+    let typs = List.map (fun x -> fst x) ts in
     let local_typ_constructors = local_typ_constructors_of_typs typs in
     begin match mixed_path with
     | MixedPath.PathName { path = []; base } ->
@@ -929,9 +937,9 @@ let tag_notation (path : MixedPath.t) (typs : t list): t option =
     if List.mem name Name.native_types
     then Some (Variable tagged_name)
     else match typ with
-      | Apply (mname, ts, bs) ->
+      | Apply (mname, ts) ->
         if List.mem name Name.native_type_constructors
-        then Some (Apply (MixedPath.of_name tagged_name, ts, bs))
+        then Some (Apply (MixedPath.of_name tagged_name, ts))
         else None
       | _ -> None
 
@@ -1016,7 +1024,8 @@ let rec to_coq (subst : Subst.t option) (context : Context.t option) (typ : t)
       separate (space ^^ !^ "*" ^^ space)
         (List.map (to_coq subst (Some Context.Tuple)) typs)
     end
-  | Apply (path, typs, _) ->
+  | Apply (path, typs) ->
+    let typs = List.map (fun t -> fst t) typs in
     begin match tag_notation path typs with
       | Some tag -> to_coq subst (Some Context.Apply) tag
       | None ->
