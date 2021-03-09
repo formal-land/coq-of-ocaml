@@ -115,10 +115,6 @@ module Inductive = struct
           newline ^^ nest (
             !^ "|" ^^ Name.to_coq constructor_name ^^ !^ ":" ^^
             Type.typ_vars_to_coq braces (!^ "forall") (!^ ",") typ_vars ^^
-            (* Name.to_coq_list_or_empty typ_vars (fun typ_vars -> *)
-              (* !^ "forall" ^^ braces (nest (typ_vars ^^ !^ ":" ^^ Pp.set)) ^-^ *)
-              (* !^ "," *)
-          (* ) ^^ *)
             group @@ separate space (param_typs |> List.map (fun param_typ ->
               group (Type.to_coq (Some subst) (Some Type.Context.Arrow) param_typ ^^ !^ "->")
               )) ^^

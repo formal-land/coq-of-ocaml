@@ -212,14 +212,6 @@ let of_path (is_value : bool) (path : Path.t) : t Monad.t =
     return (Access (base_path_name, List.rev fields))
 
 
-let is_tag (path : t) : bool =
-  match path with
-  | Access _ -> false
-  | PathName { base; _ } ->
-    if Name.to_string base = "constr_tag"
-    then true
-    else false
-
 let is_native_type (path : t) : bool =
   match path with
   | Access _ -> false

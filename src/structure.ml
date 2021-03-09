@@ -117,13 +117,7 @@ module Value = struct
               parens (nest (
                 nest (
                   Type.typ_vars_to_coq parens (!^ "fun") (!^ " => ") typ_vars
-                  (* Name.to_coq_list_or_empty typ_vars (fun typ_vars -> *)
-                    (* nest ( *)
-                      (* !^ "fun" ^^ parens (typ_vars ^^ !^ ":" ^^ Pp.set) ^^ *)
-                      (* !^ "=>" *)
-                    (* ) ^^ space *)
-                (* )  *)
-                      ^-^
+                  ^-^
                   begin match structs with
                   | [] -> !^ "fun"
                   | _ :: _ -> !^ "fix" ^^ Name.to_coq name
@@ -165,9 +159,6 @@ module Value = struct
               nest (
                 !^ "Definition" ^^ Name.to_coq name ^^
                 Type.typ_vars_to_coq braces empty empty typ_vars ^^
-                (* Name.to_coq_list_or_empty typ_vars (fun typ_vars -> *)
-                  (* braces typ_vars *)
-                (* ) *)
                 !^ ":=" ^^
                 separate space (
                   (!^ "'" ^-^ Name.to_coq name) :: List.map Name.to_coq (List.map fst typ_vars)

@@ -79,7 +79,6 @@ let native_types = [
   "string";
   "bool";
   "float";
-  (* "char"; *)
   "ascii";
   "unit";
 ]

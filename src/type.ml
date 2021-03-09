@@ -443,7 +443,6 @@ let rec of_typ_expr'
     return (Tuple typs, typ_vars, new_typ_vars)
   | Tconstr (path, typs, _) ->
     non_phantom_typs path typs >>= fun typs ->
-    (* TODO: Implement tagging *)
     let* mixed_path = simplified_contructor_path path (List.length typs) in
     let* is_abstract = is_type_abstract path in
     let native_type = List.mem (MixedPath.to_string mixed_path) Name.native_types in
@@ -632,7 +631,6 @@ and get_constr_arg_tags
     then return @@ tag_all_args params
     else return @@ tag_no_args params
   | { type_kind = Type_record _; type_params = params; _} ->
-    (* TODO: Recursively check if record type should be a tag *)
     return @@ tag_no_args params
   | { type_manifest = None; type_kind = Type_abstract; type_params = params; _ } ->
     return @@ tag_no_args params
@@ -643,7 +641,6 @@ and get_constr_arg_tags
         | Kind.Tag -> true
         | _ -> false
       ) new_typ_vars
-  (* TODO: Preserve order of type parameters *)
   | _ | exception _ -> return []
 
 and tag_typ_constr
@@ -860,7 +857,7 @@ let rec local_typ_constructors_of_typ (typ : t) : Name.Set.t =
   | ForallModule (_, param, result) ->
     local_typ_constructors_of_typs [param; result]
   | ForallTyps (_, typ) | FunTyps (_, typ) -> local_typ_constructors_of_typ typ
-  | _ -> Name.Set.empty
+  | Error _ | Kind _ | String _ -> Name.Set.empty
 
 and local_typ_constructors_of_typs (typs : t list) : Name.Set.t =
   List.fold_left (fun args typ -> Name.Set.union args (local_typ_constructors_of_typ typ))
@@ -1020,27 +1017,25 @@ let rec to_coq (subst : Subst.t option) (context : Context.t option) (typ : t)
         (List.map (to_coq subst (Some Context.Tuple)) typs)
     end
   | Apply (path, typs, _) ->
-    (* Prints tags as notations *)
-    let tag = tag_notation path typs in
-    if Option.is_some tag
-    then let tag = Option.get tag in
-      to_coq subst (Some Context.Apply) tag
-    else
-      let path =
-        match subst with
-        | None -> path
-        | Some subst ->
-          begin match path with
-            | MixedPath.PathName path_name ->
-              MixedPath.PathName (subst.path_name path_name)
-            | _ -> path
-          end in
-      Pp.parens (Context.should_parens context Context.Apply && typs <> []) @@
-      nest @@ separate space
-        (MixedPath.to_coq path :: List.map (to_coq subst (Some Context.Apply)) typs)
+    begin match tag_notation path typs with
+      | Some tag -> to_coq subst (Some Context.Apply) tag
+      | None ->
+        let path =
+          match subst with
+          | None -> path
+          | Some subst ->
+            begin match path with
+              | MixedPath.PathName path_name ->
+                MixedPath.PathName (subst.path_name path_name)
+              | _ -> path
+            end in
+        Pp.parens (Context.should_parens context Context.Apply && typs <> []) @@
+        nest @@ separate space
+          (MixedPath.to_coq path :: List.map (to_coq subst (Some Context.Apply)) typs)
+    end
   | Signature (path_name, typ_params) ->
     nest (separate space (
-      PathName.to_coq path_name ::
+        PathName.to_coq path_name ::
       (typ_params |> List.map (fun (name, typ) ->
         nest (parens (
           Name.to_coq name ^^ !^ ":=" ^^
