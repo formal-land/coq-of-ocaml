@@ -50,11 +50,12 @@ module Module = struct
               return (param_name, None)
             else
               let* name = Name.of_strings false (module_name :: path) in
+              let functor_params = functor_params |> List.map (fun name -> Type.Variable name) in
+              let typs = List.combine functor_params (Type.tag_no_args functor_params) in
               let typ =
                 Type.Apply (
                   MixedPath.of_name name,
-                  functor_params |> List.map (fun name -> Type.Variable name),
-                  Type.tag_no_args functor_params
+                  typs
                 ) in
               return (param_name, Some typ)
           | Typ typ -> return (param_name, Some typ)

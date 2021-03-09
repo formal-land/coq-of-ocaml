@@ -118,13 +118,14 @@ module Inductive = struct
             group @@ separate space (param_typs |> List.map (fun param_typ ->
               group (Type.to_coq (Some subst) (Some Type.Context.Arrow) param_typ ^^ !^ "->")
               )) ^^
-                     let (res_typ_params, res_typ_params_is_tag_list) = match res_typ_params with
+                     let res_typ_params = match res_typ_params with
                        | Variant vars ->
                          let typs = vars |> AdtParameters.get_parameters |> List.map (fun var -> Type.Variable var) in
-                         (typs, Type.tag_no_args typs)
-                       | Tagged typ_params -> (typ_params, Type.tag_all_args typ_params)
+                         List.combine typs (Type.tag_no_args typs)
+                       | Tagged typ_params ->
+                         List.combine typ_params (Type.tag_all_args typ_params)
               in
-              Type.to_coq (Some subst) None (Type.Apply (MixedPath.of_name name, res_typ_params, res_typ_params_is_tag_list))
+              Type.to_coq (Some subst) None (Type.Apply (MixedPath.of_name name, res_typ_params))
           )
         )
       )
@@ -448,8 +449,7 @@ let of_ocaml (typs : type_declaration list) : t Monad.t =
             typ_args,
             Type.Apply (
               MixedPath.of_name (Name.suffix_by_skeleton name),
-              fields_types,
-              Type.tag_no_args fields_types
+              List.combine fields_types (Type.tag_no_args fields_types)
             )
           ) :: notations,
           {

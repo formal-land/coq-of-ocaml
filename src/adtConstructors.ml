@@ -162,8 +162,7 @@ let of_ocaml_case
                   path = [typ_name];
                   base = constructor_name;
                 },
-                typ_args',
-                Type.tag_no_args typ_args'
+                List.combine typ_args' (Type.tag_no_args typ_args')
               )
             ],
             new_typ_vars,
@@ -179,8 +178,7 @@ let of_ocaml_case
                   path = [typ_name];
                   base = Name.suffix_by_skeleton constructor_name;
                 },
-                record_params,
-                Type.tag_no_args record_params
+                List.combine record_params (Type.tag_no_args record_params)
               )
             )
           ))
@@ -192,7 +190,9 @@ let of_ocaml_case
       | Some typ ->
         Type.of_typ_expr true Name.Map.empty typ >>= fun (ty, _, new_typ_vars) ->
         begin match ty with
-          | Type.Apply (_, typs, _) -> return (typs, new_typ_vars)
+          | Type.Apply (_, typs) ->
+            let typs = List.map (fun t -> fst t) typs in
+            return (typs, new_typ_vars)
           | _ -> raise ([ty], new_typ_vars) Error.Category.Unexpected "Unexpected Type of Constructor"
         end
       | None ->
