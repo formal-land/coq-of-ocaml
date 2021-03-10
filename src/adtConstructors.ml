@@ -127,14 +127,14 @@ let of_ocaml_case
     let typ_vars = Name.Map.empty in
     begin match cd_args with
       | Cstr_tuple param_typs ->
-        Type.of_typs_exprs true typ_vars param_typs >>= fun (param_typs, _, new_typ_vars) ->
+        Type.of_typs_exprs true param_typs typ_vars >>= fun (param_typs, _, new_typ_vars) ->
         return (param_typs, new_typ_vars, None)
       | Cstr_record labeled_typs ->
         set_loc cd_loc (
           (
             labeled_typs |>
             List.map (fun { Types.ld_type; _ } -> ld_type) |>
-            Type.of_typs_exprs true typ_vars
+            (fun ls -> Type.of_typs_exprs true ls typ_vars)
           ) >>= fun (record_params, _, new_typ_vars) ->
           let* record_fields =
             labeled_typs |> Monad.List.map ( fun { Types.ld_id; _ } ->
@@ -236,7 +236,7 @@ let of_ocaml_row
   let (label, field) = row in
   let* constructor_name = Name.of_string false label in
   let typs = Type.type_exprs_of_row_field field in
-  Type.of_typs_exprs true Name.Map.empty typs >>= fun (param_typs, _, typ_vars) ->
+  Type.of_typs_exprs true typs Name.Map.empty >>= fun (param_typs, _, typ_vars) ->
   return {
     constructor_name;
     param_typs;

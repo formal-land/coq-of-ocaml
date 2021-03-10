@@ -406,8 +406,8 @@ let is_type_abstract
     return false
 
 (** Import an OCaml type. Add to the environment all the new free type variables. *)
-let rec of_typ_expr'
-  (should_tag : bool)
+let rec of_typ_expr
+  ?(should_tag = false)
   (with_free_vars: bool)
   (typ_vars : Name.t Name.Map.t)
   (typ : Types.type_expr)
@@ -438,13 +438,13 @@ let rec of_typ_expr'
       ) in
     return (Variable name, typ_vars, new_typ_vars)
   | Tarrow (_, typ_x, typ_y, _) ->
-    of_typ_expr' should_tag with_free_vars typ_vars typ_x >>= fun (typ_x, typ_vars, new_typ_vars_x) ->
-    of_typ_expr' should_tag with_free_vars typ_vars typ_y >>= fun (typ_y, typ_vars, new_typ_vars_y) ->
+    of_typ_expr ~should_tag:should_tag with_free_vars typ_vars typ_x >>= fun (typ_x, typ_vars, new_typ_vars_x) ->
+    of_typ_expr ~should_tag:should_tag with_free_vars typ_vars typ_y >>= fun (typ_y, typ_vars, new_typ_vars_y) ->
     let new_typ_vars = VarEnv.union new_typ_vars_x new_typ_vars_y in
     return (Arrow (typ_x, typ_y), typ_vars, new_typ_vars)
   | Ttuple typs ->
     let tag_list = tag_args_with should_tag typs in
-    of_typs_exprs' tag_list with_free_vars typ_vars typs >>= fun (typs, typ_vars, new_typ_vars) ->
+    of_typs_exprs ~tag_list:tag_list with_free_vars typs typ_vars >>= fun (typs, typ_vars, new_typ_vars) ->
     return (Tuple typs, typ_vars, new_typ_vars)
   | Tconstr (path, typs, _) ->
     non_phantom_typs path typs >>= fun typs ->
@@ -460,7 +460,7 @@ let rec of_typ_expr'
     if not is_tagged_variant
     then begin
       let tag_list = tag_no_args typs in
-      let* (typs, typ_vars, new_typs_vars) = of_typs_exprs' tag_list with_free_vars typ_vars typs in
+      let* (typs, typ_vars, new_typs_vars) = of_typs_exprs with_free_vars typs typ_vars in
       let* typ = apply_with_notations mixed_path typs tag_list in
       return (typ, typ_vars, new_typs_vars)
     end
@@ -479,7 +479,7 @@ let rec of_typ_expr'
     end
     else
       let* tag_list = get_constr_arg_tags path in
-      let* (typs, typ_vars, new_typs_vars) = of_typs_exprs' tag_list with_free_vars typ_vars typs in
+      let* (typs, typ_vars, new_typs_vars) = of_typs_exprs ~tag_list:tag_list with_free_vars typs typ_vars in
       let* typs = tag_typ_constr path typs in
       let* typ = apply_with_notations mixed_path typs tag_list in
       return (typ, typ_vars, new_typs_vars)
@@ -489,7 +489,7 @@ let rec of_typ_expr'
     | Some (path, _ :: typs) ->
       let tag_list = tag_args_with should_tag typs in
       let* are_tags = get_constr_arg_tags path in
-      of_typs_exprs' tag_list with_free_vars typ_vars typs >>= fun (typs, typ_vars, new_typ_vars) ->
+      of_typs_exprs ~tag_list:tag_list with_free_vars typs typ_vars >>= fun (typs, typ_vars, new_typ_vars) ->
       MixedPath.of_path false path >>= fun mixed_path ->
       return (Apply (mixed_path, List.combine typs are_tags), typ_vars, new_typ_vars)
     | _ ->
@@ -499,8 +499,8 @@ let rec of_typ_expr'
         "We do not handle this form of object types"
     end
   | Tfield (_, _, typ1, typ2) ->
-    of_typ_expr' should_tag with_free_vars typ_vars typ1 >>= fun (typ1, typ_vars, new_typ_vars1) ->
-    of_typ_expr' should_tag with_free_vars typ_vars typ2 >>= fun (typ2, typ_vars, new_typ_vars2) ->
+    of_typ_expr ~should_tag:should_tag with_free_vars typ_vars typ1 >>= fun (typ1, typ_vars, new_typ_vars1) ->
+    of_typ_expr ~should_tag:should_tag with_free_vars typ_vars typ2 >>= fun (typ2, typ_vars, new_typ_vars2) ->
     raise
       (
         Tuple [typ1; typ2],
@@ -513,7 +513,7 @@ let rec of_typ_expr'
       (Error "nil", typ_vars, [])
       NotSupported
       "Nil type is not handled"
-  | Tlink typ | Tsubst typ -> of_typ_expr' should_tag with_free_vars typ_vars typ
+  | Tlink typ | Tsubst typ -> of_typ_expr ~should_tag:should_tag with_free_vars typ_vars typ
   | Tvariant { row_fields; _ } ->
     PathName.typ_of_variants (List.map fst row_fields) >>= fun path_name ->
     begin match path_name with
@@ -528,7 +528,7 @@ let rec of_typ_expr'
         (fun (fields, typ_vars, new_typ_vars) (name, row_field) ->
           let typs = type_exprs_of_row_field row_field in
           let tag_list = tag_args_with should_tag typs in
-          of_typs_exprs' tag_list with_free_vars typ_vars typs >>= fun (typs, typ_vars, new_typ_vars') ->
+          of_typs_exprs ~tag_list:tag_list with_free_vars typs typ_vars >>= fun (typs, typ_vars, new_typ_vars') ->
           return (
             (name, Tuple typs) :: fields,
             typ_vars,
@@ -550,7 +550,7 @@ let rec of_typ_expr'
       else
         None
     ) in
-    of_typ_expr' should_tag with_free_vars typ_vars typ >>= fun (typ, typ_vars, new_typ_vars_typ) ->
+    of_typ_expr ~should_tag:should_tag with_free_vars typ_vars typ >>= fun (typ, typ_vars, new_typ_vars_typ) ->
     let non_phantom_vars = Name.Set.elements non_phantom_vars in
     let new_typ_vars_typ = VarEnv.remove_many non_phantom_vars new_typ_vars_typ in
     return (ForallTyps (typ_args, typ), typ_vars, new_typ_vars_typ)
@@ -560,7 +560,7 @@ let rec of_typ_expr'
       Monad.List.fold_left
         (fun (typ_substitutions, typ_vars, new_typ_vars) (ident, typ) ->
           let path = Longident.flatten ident in
-          of_typ_expr' true with_free_vars typ_vars typ >>= fun (typ, typ_vars, new_typ_vars') ->
+          of_typ_expr ~should_tag:true with_free_vars typ_vars typ >>= fun (typ, typ_vars, new_typ_vars') ->
           return (
             (path, typ) :: typ_substitutions,
             typ_vars,
@@ -603,19 +603,18 @@ let rec of_typ_expr'
         new_typ_vars
       )
 
-and of_typs_exprs'
-    (tag_list : bool list)
+and of_typs_exprs
     (with_free_vars: bool)
-    (typ_vars : Name.t Name.Map.t)
     (typs : Types.type_expr list)
+    ?(tag_list = tag_no_args typs)
+    (typ_vars : Name.t Name.Map.t)
   : (t list * Name.t Name.Map.t * VarEnv.t) Monad.t =
   if List.length tag_list <> List.length typs
   then raise ([], typ_vars, []) Error.Category.Unexpected "Calling of_typs_exprs_constr with tag_list of different size of typs (they should have the same size)"
-  else
-    let tag_typs = List.combine typs tag_list in
+  else    let tag_typs = List.combine typs tag_list in
     (Monad.List.fold_left
        (fun (typs, typ_vars, new_typ_vars) (typ, should_tag) ->
-          of_typ_expr' should_tag with_free_vars typ_vars typ >>= fun (typ, typ_vars, new_typ_vars') ->
+          of_typ_expr ~should_tag:should_tag with_free_vars typ_vars typ >>= fun (typ, typ_vars, new_typ_vars') ->
           let new_typ_vars = VarEnv.union new_typ_vars new_typ_vars' in
           return (typ :: typs, typ_vars, new_typ_vars)
        )
@@ -640,7 +639,7 @@ and get_constr_arg_tags
   | { type_manifest = None; type_kind = Type_abstract; type_params = params; _ } ->
     return @@ tag_no_args params
   | { type_manifest = Some typ; type_params = params; _ } ->
-    let* (typ, typ_vars, new_typ_vars) = of_typ_expr' false true Name.Map.empty typ in
+    let* (typ, typ_vars, new_typ_vars) = of_typ_expr true Name.Map.empty typ in
     return @@ List.map (fun (_, kind) ->
         match kind with
         | Kind.Tag -> true
@@ -666,21 +665,6 @@ and tag_typ_constr
         then tag_typ_constr_aux typ
         else return typ
       ) tag_typs
-
-let of_typ_expr
-  (with_free_vars: bool)
-  (typ_vars : Name.t Name.Map.t)
-  (typ : Types.type_expr)
-  : (t * Name.t Name.Map.t * VarEnv.t) Monad.t =
-  of_typ_expr' false with_free_vars typ_vars typ
-
-let of_typs_exprs
-  (with_free_vars: bool)
-  (typ_vars : Name.t Name.Map.t)
-  (typs : Types.type_expr list)
-  : (t list * Name.t Name.Map.t * VarEnv.t) Monad.t =
-  let tag_list = tag_no_args typs in
-  of_typs_exprs' tag_list with_free_vars typ_vars typs
 
 let rec decode_var_tags_aux
     (typ_vars : VarEnv.t)
