@@ -560,7 +560,7 @@ let rec of_typ_expr
       Monad.List.fold_left
         (fun (typ_substitutions, typ_vars, new_typ_vars) (ident, typ) ->
           let path = Longident.flatten ident in
-          of_typ_expr ~should_tag:true with_free_vars typ_vars typ >>= fun (typ, typ_vars, new_typ_vars') ->
+          of_typ_expr ~should_tag:false with_free_vars typ_vars typ >>= fun (typ, typ_vars, new_typ_vars') ->
           return (
             (path, typ) :: typ_substitutions,
             typ_vars,
