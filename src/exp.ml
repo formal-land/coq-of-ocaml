@@ -963,17 +963,20 @@ and of_let
     begin match cases with
     | [{ vb_pat = p; vb_expr = e1; vb_attributes; _ }] when not is_function ->
       let* attributes = Attribute.of_attributes vb_attributes in
+      let has_tagged_match = Attribute.has_tagged_match attributes in
       let* p_typ = Type.of_type_expr_without_free_vars (p.pat_type) in
       let* p = Pattern.of_pattern p in
       let* e1_typ = Type.of_type_expr_without_free_vars (e1.exp_type) in
       let* e1 = of_expression typ_vars e1 in
-      let dep_match = { cast = p_typ; args = []; motive = e1_typ } in
+      let dep_match = if has_tagged_match
+        then Some { cast = p_typ; args = []; motive = e1_typ }
+        else None in
       begin match p with
       | Some (Pattern.Variable x) -> return (LetVar (None, x, [], e1, e2))
       | Some p ->
         let is_with_default_case = Attribute.has_match_with_default attributes in
-        return (Match (e1, Some dep_match, [p, None, e2], is_with_default_case))
-      | None -> return (Match (e1, Some dep_match, [], false))
+        return (Match (e1, dep_match, [p, None, e2], is_with_default_case))
+      | None -> return (Match (e1, dep_match, [], false))
       end
     | _ ->
       import_let_fun typ_vars false is_rec cases >>= fun def ->
