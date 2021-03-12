@@ -97,13 +97,18 @@ module Inductive = struct
         )
      ) ^^ !^ ":" ^^
       let constructor = List.hd constructors in
-      let arity = if not is_tagged then 1 else constructor.res_typ_length + 1 in
+      let res_typ_length = match constructor.res_typ_params with
+        | AdtConstructors.Variant l -> List.length l
+        | Tagged l -> List.length l
+      in
+
+      let arity = if not is_tagged then 1 else res_typ_length + 1 in
       let index_typs = List.init arity (fun i ->
           if i = arity - 1
           then Pp.set
           else !^ "vtag")
       in
-      separate (!^ " -> ") index_typs
+      separate (space ^^ !^ "->" ^^ space) index_typs
       ^^ !^ ":=" ^-^
       separate empty (
         constructors |> List.map (fun {

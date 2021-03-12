@@ -104,7 +104,6 @@ type item = {
   constructor_name : Name.t;
   param_typs : Type.t list; (** The parameters of the constructor. *)
   res_typ_params : ret_typ;
-  res_typ_length : int ;
   is_tagged : bool;
   (** The type parameters of the result type of the constructor. *)
   typ_vars : VarEnv.t; (** The polymorphic type variables. *)
@@ -211,18 +210,17 @@ let of_ocaml_case
     let* tagged_return = Monad.List.map (Type.decode_var_tags typ_vars true) tagged_return in
     let* untagged_return =
       AdtParameters.get_return_typ_params defined_typ_params cd_res in
-    let (res_typ_params, res_typ_length) = if is_tagged
-      then (Tagged(tagged_return), List.length tagged_return)
+    let res_typ_params = if is_tagged
+      then Tagged(tagged_return)
       else if is_gadt
-        then (Variant [], 0)
-        else (Variant untagged_return, List.length untagged_return) in
+        then Variant []
+        else Variant untagged_return in
 
     return (
       {
         constructor_name;
         param_typs;
         res_typ_params;
-        res_typ_length;
         is_tagged;
         typ_vars;
       },
@@ -241,7 +239,6 @@ let of_ocaml_row
     constructor_name;
     param_typs;
     res_typ_params =  Variant(defined_typ_params);
-    res_typ_length = List.length defined_typ_params;
     is_tagged = false;
     typ_vars;
   }
@@ -288,7 +285,6 @@ let of_ocaml
           constructor_name;
           param_typs;
           res_typ_params = return_typ_params;
-          res_typ_length = return_len;
           is_tagged;
           typ_vars;
         }
