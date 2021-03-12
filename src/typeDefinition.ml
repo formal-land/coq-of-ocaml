@@ -350,7 +350,7 @@ let of_ocaml (typs : type_declaration list) : t Monad.t =
       Monad.List.map
         (AdtConstructors.of_ocaml_row ind_vars)
         row_fields >>= fun single_constructors ->
-      AdtConstructors.of_ocaml [] single_constructors >>= fun (constructors, _) ->
+      AdtConstructors.of_ocaml ind_vars single_constructors >>= fun (constructors, _) ->
       raise
         (Inductive {
           constructor_records = [];
@@ -402,7 +402,7 @@ let of_ocaml (typs : type_declaration list) : t Monad.t =
         begin match typ.Types.desc with
         | Tvariant { row_fields; _ } ->
           Monad.List.map (AdtConstructors.of_ocaml_row typ_args) row_fields >>= fun single_constructors ->
-          AdtConstructors.of_ocaml [] single_constructors >>= fun (constructors, _) ->
+          AdtConstructors.of_ocaml typ_args single_constructors >>= fun (constructors, _) ->
           raise
             (
               constructor_records,
