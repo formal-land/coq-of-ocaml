@@ -31,6 +31,8 @@ open Std
 open Query_protocol
 module Printtyp = Type_utils.Printtyp
 
+exception No_nodes
+
 let print_completion_entries ~with_types config source entries =
   if with_types then
     let input_ref = ref [] and output_ref = ref [] in
@@ -603,7 +605,7 @@ let dispatch pipeline (type a) : a Query_protocol.t -> a =
     Destruct.log ~title:"nodes after" "%a"
       Logger.json (fun () -> `List (List.map nodes ~f:dump_node));
     begin match nodes with
-      | [] -> failwith "No node at given range"
+      | [] -> raise No_nodes
       | (env,node) :: parents ->
         let source = Mpipeline.input_source pipeline in
         let config = Mpipeline.final_config pipeline in
@@ -692,6 +694,14 @@ let dispatch pipeline (type a) : a Query_protocol.t -> a =
          (if parsing then parser_errors else []) @
          (if typing then typer_errors else []))
     in
+    (* Add configuration errors *)
+    let errors =
+      let cfg = Mpipeline.final_config pipeline in
+      let failures =
+        List.map ~f:(Location.error ~source:Location.Config) cfg.merlin.failures
+      in
+      failures @ errors
+    in
     (* Filter anything after first parse error *)
     let limit = !first_syntax_error in
     if limit = Lexing.dummy_pos then errors else (
@@ -722,9 +732,7 @@ let dispatch pipeline (type a) : a Query_protocol.t -> a =
     List.concat_map ~f:with_ext exts
 
   | Findlib_list ->
-    let config = Mpipeline.final_config pipeline in
-    let {Mconfig. conf; path; toolchain} = config.Mconfig.findlib in
-    Mconfig_dot.list_packages ?conf ~path ?toolchain ()
+    []
 
   | Extension_list kind ->
     let config = Mpipeline.final_config pipeline in

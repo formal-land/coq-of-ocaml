@@ -1,10 +1,11 @@
-## [Unreleased]
+## 2.4.1 (March 15, 2021)
 * Add basic translation of `try ... with` with extensible types (cannot run in Coq but may be extracted to OCaml).
 * Add basic support for matching on extensible types.
 * Add the attribute `@coq_type_annotation` to generate the type annotation of an expression.
 * Show nicer error messages for errors in the configuration file.
 * Remove existential types from the modules (except for the first-class modules).
 * Upgrade OCaml to the version 4.10.
+* Upgrade Dune to the version 2.8.
 
 ## 2.4.0 (January 11, 2021)
 * Install the Coq proofs in `CoqOfOCaml` rather than `OCaml` for clarity.
