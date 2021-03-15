@@ -17,11 +17,10 @@ module SMap = Misc.String.Map
 (* Mapping from basenames to full filenames *)
 type registry = string SMap.t ref
 
-let state = Local_store.new_bindings ()
-let srefk k = Local_store.ref state (fun () -> k)
+open Local_store
 
-let files : registry = srefk SMap.empty
-let files_uncap : registry = srefk SMap.empty
+let files : registry = s_ref SMap.empty
+let files_uncap : registry = s_ref SMap.empty
 
 module Dir = struct
   type t = {
@@ -36,7 +35,7 @@ module Dir = struct
     { path; files = Array.to_list (Directory_content_cache.read path) }
 end
 
-let dirs = srefk []
+let dirs = s_ref []
 
 let reset () =
   files := SMap.empty;
@@ -56,6 +55,7 @@ let add dir =
   dirs := dir :: !dirs
 
 let remove_dir dir =
+  assert (Local_store.is_bound ());
   let new_dirs = List.filter (fun d -> Dir.path d <> dir) !dirs in
   if new_dirs <> !dirs then begin
     reset ();
@@ -71,6 +71,7 @@ let init l =
 let is_basename fn = Filename.basename fn = fn
 
 let find fn =
+  assert (Local_store.is_bound ());
   if is_basename fn then
     SMap.find fn !files
   else
