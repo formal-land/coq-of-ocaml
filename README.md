@@ -77,11 +77,6 @@ Read the `coq-of-ocaml.opam` file at the root of the project to know the depende
 coq-of-ocaml file.ml
 ```
 
-If this does not work as expected, you may specify the path to a `.merlin` file:
-```
-coq-of-ocaml -merlin src/.merlin path/file.ml
-```
-
 You can start to experiment with the test files in `tests/` or look at our [online examples](https://clarus.github.io/coq-of-ocaml/examples/).
 
 ## License

@@ -115,18 +115,12 @@ let main () =
   let file_name = ref None in
   let json_mode = ref false in
   let configuration_file_name = ref None in
-  let merlin_file_name = ref None in
   let output_file_name = ref None in
   let options = [
     (
       "-config",
       Arg.String (fun value -> configuration_file_name := Some value),
       "file   the configuration file of coq-of-ocaml"
-    );
-    (
-      "-merlin",
-      Arg.String (fun value -> merlin_file_name := Some value),
-      "file   the configuration file of Merlin"
     );
     (
       "-output",
@@ -150,11 +144,7 @@ let main () =
     let configuration =
       Configuration.of_optional_file_name file_name !configuration_file_name in
 
-    let merlin_file_name =
-      match !merlin_file_name with
-      | None -> Filename.concat directory_name ".merlin"
-      | Some merlin_file_name -> merlin_file_name in
-    let merlin_config = Mconfig.load_dotmerlins ~filenames:[merlin_file_name] Mconfig.initial in
+    let merlin_config = Mconfig.get_external_config file_name Mconfig.initial in
     let merlin_config = {
       merlin_config with
       query = {

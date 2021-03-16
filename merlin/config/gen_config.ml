@@ -11,7 +11,7 @@ let ocaml_version_val =
 
 let () =
   Printf.printf {|
-let version = "%%VERSION%%"
+let version = "v3.4.2"
 let ocamlversion :
   [ `OCaml_4_02_0 | `OCaml_4_02_1 | `OCaml_4_02_2 | `OCaml_4_02_3
   | `OCaml_4_03_0 | `OCaml_4_04_0 | `OCaml_4_05_0 | `OCaml_4_06_0

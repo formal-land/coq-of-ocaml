@@ -50,7 +50,6 @@ coq-of-ocaml [options] file.ml
 ```
 
 The options are:
-* `-merlin file`: specify the configuration file of Merlin (by default `.merlin` if this file exists in the current folder)
 * `-output file`: specify the name of the Coq `.v` file to output (by default the capitalized OCaml file name with a `.v` extension)
 * `-json-mode`: produce the list of error messages in JSON format; useful for post-processing
 
