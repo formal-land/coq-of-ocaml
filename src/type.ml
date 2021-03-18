@@ -488,8 +488,8 @@ let rec of_typ_expr
     begin match !object_descr with
     | Some (path, _ :: typs) ->
       let tag_list = tag_args_with should_tag typs in
-      let* are_tags = get_constr_arg_tags path in
       of_typs_exprs ~tag_list:tag_list with_free_vars typs typ_vars >>= fun (typs, typ_vars, new_typ_vars) ->
+      let are_tags = tag_no_args typs in
       MixedPath.of_path false path >>= fun mixed_path ->
       return (Apply (mixed_path, List.combine typs are_tags), typ_vars, new_typ_vars)
     | _ ->

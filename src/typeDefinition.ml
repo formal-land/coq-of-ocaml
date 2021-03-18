@@ -96,10 +96,11 @@ module Inductive = struct
           )
         )
      ) ^^ !^ ":" ^^
-      let constructor = List.hd constructors in
-      let res_typ_length = match constructor.res_typ_params with
-        | AdtConstructors.Variant l -> List.length l
-        | Tagged l -> List.length l
+      let res_typ_length = match constructors with
+        | [] -> 0
+        | constructor :: _ -> match constructor.res_typ_params with
+          | AdtConstructors.Variant l -> List.length l
+          | Tagged l -> List.length l
       in
 
       let arity = if not is_tagged then 1 else res_typ_length + 1 in
@@ -491,7 +492,9 @@ let of_ocaml (typs : type_declaration list) : t Monad.t =
     ) ([], [], [], [])) >>= fun (constructor_records, notations, records, typs) ->
     let typs = typs |> List.map (function (x, y, z) -> (x, AdtParameters.get_parameters y, z)) in
     let is_tagged = typs |> List.hd |> fun (_,_, constructors) ->
-                    constructors |> List.hd |> fun x -> x.is_tagged
+                    match constructors with
+                    | [] -> false
+                    | x :: _ -> x.is_tagged
     in
     return (
       Inductive {
