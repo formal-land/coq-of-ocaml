@@ -885,7 +885,7 @@ and import_let_fun
     | Some Pattern.Any -> return None
     | Some (Pattern.Variable x) -> return (Some x)
     | _ ->
-      raise None Unexpected "A variable name instead of a pattern was expected."
+      raise None Unexpected "A variable name instead of a pattern was expected"
     ) >>= fun x ->
     Type.of_typ_expr true typ_vars vb_expr.exp_type >>= fun (e_typ, typ_vars, new_typ_vars) ->
     match x with
