@@ -68,6 +68,21 @@ let reserved_names : string list = [
   "Variable";
 ]
 
+
+let native_type_constructors = [
+  "list";
+  "option";
+]
+
+let native_types = [
+  "int";
+  "string";
+  "bool";
+  "float";
+  "ascii";
+  "unit";
+]
+
 (** We only escape these names if they are used as values, as they may collide
     with the corresponding type names. *)
 let value_names_to_escape : string list = [
@@ -141,6 +156,9 @@ let of_optional_ident (is_value : bool) (i : Ident.t option) : t Monad.t =
 let of_ident_raw (i : Ident.t) : t =
   of_string_raw (Ident.name i)
 
+let of_last_path (p : Path.t) : t =
+  of_string_raw (Path.last p)
+
 let of_strings (is_value : bool) (path : string list) : t Monad.t =
   of_string is_value (String.concat "_" path)
 
@@ -164,6 +182,11 @@ let suffix_by_include (name : t) : t =
 
 let suffix_by_skeleton (name : t) : t =
   Make (to_string name ^ "_skeleton")
+
+let arrow_tag  = of_string_raw "arrow_tag"
+let tuple_tag  = of_string_raw "tuple_tag"
+let constr_tag = of_string_raw "constr_tag"
+let decode_vtag = of_string_raw "decode_vtag"
 
 (** Pretty-print a name to Coq. *)
 let to_coq (name : t) : SmartPrint.t =

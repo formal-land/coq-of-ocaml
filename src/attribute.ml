@@ -5,6 +5,7 @@ type t =
   | AxiomWithReason
   | Cast
   | ForceGadt
+  | TaggedGadt
   | Implicit of string
   | MatchGadt
   | MatchGadtWithResult
@@ -13,6 +14,7 @@ type t =
   | Phantom
   | PlainModule
   | Struct of string
+  | TaggedMatch
   | TypAnnotation
 
 let of_payload_string
@@ -57,6 +59,7 @@ let of_attributes (attributes : Typedtree.attributes) : t list Monad.t =
       return (Some AxiomWithReason)
     | "coq_cast" -> return (Some Cast)
     | "coq_force_gadt" -> return (Some ForceGadt)
+    | "coq_tag_gadt" -> return (Some TaggedGadt)
     | "coq_implicit" ->
       let error_message =
         "Give a value such as \"(A := unit)\" to define an implicit type." in
@@ -73,6 +76,7 @@ let of_attributes (attributes : Typedtree.attributes) : t list Monad.t =
       let* payload = of_payload_string error_message id attr_payload in
       return (Some (Struct payload))
     | "coq_type_annotation" -> return (Some TypAnnotation)
+    | "coq_tagged_match" -> return (Some TaggedMatch)
     | _ -> return None)
   )
 
@@ -133,6 +137,18 @@ let has_phantom (attributes : t list) : bool =
 let has_plain_module (attributes : t list) : bool =
   attributes |> List.exists (function
     | PlainModule -> true
+    | _ -> false
+  )
+
+let has_tagged_match (attributes : t list) : bool =
+  attributes |> List.exists (function
+    | TaggedMatch -> true
+    | _ -> false
+  )
+
+let has_tag_gadt (attributes : t list) : bool =
+  attributes |> List.exists (function
+    | TaggedGadt -> true
     | _ -> false
   )
 

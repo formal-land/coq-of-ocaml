@@ -6,3 +6,4 @@ CoqOfOCaml.v
 Libraries.v
 List.v
 Settings.v
+Tags.v

@@ -170,7 +170,7 @@ Definition set_mem {elt : Set} (v : elt) (Box : set elt) : bool :=
   let 'existS _ _ Box := Box in
   Box.(Boxed_set.OPS).(S.SET.mem) v Box.(Boxed_set.boxed).
 
-Definition set_fold {acc elt : Set} (f : elt -> acc -> acc) (Box : set elt)
+Definition set_fold {elt acc : Set} (f : elt -> acc -> acc) (Box : set elt)
   : acc -> acc :=
   let 'existS _ _ Box := Box in
   Box.(Boxed_set.OPS).(S.SET.fold) f Box.(Boxed_set.boxed).

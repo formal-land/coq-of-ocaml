@@ -308,3 +308,30 @@ let typ_of_variants (labels : string list) : t option Monad.t =
           "- " ^ Pp.to_string (to_coq typ)
         ))
       )
+
+let is_variant_declaration
+    (path : Path.t)
+  : (Types.constructor_declaration list * Types.type_expr list) option Monad.t =
+  let* env = get_env in
+  match Env.find_type path env with
+  | { type_kind = Type_variant constructors; type_params = params; _ } -> return @@ Some (constructors, params)
+  | _ | exception _ -> return None
+
+let is_tagged_variant
+    (path : Path.t)
+  : bool Monad.t =
+  let* env = get_env in
+  match Env.find_type path env with
+  | { type_kind = Type_variant _; type_attributes } ->
+    let* type_attributes = Attribute.of_attributes type_attributes in
+    return @@ Attribute.has_tag_gadt type_attributes
+  | _ | exception _ -> return false
+
+
+let is_native_type (path : Path.t) : bool =
+   let name = Path.last path in
+   List.exists (function x -> name = x) ["int"; "bool"; "string"; "unit"]
+
+let is_native_datatype (path : Path.t) : bool =
+   let name = Path.last path in
+   List.exists (function x -> name = x) ["list"; "option"; "map"]

@@ -26,6 +26,12 @@ module List = struct
       | None -> find_map f l
       | Some _ as y -> y
       end
+
+  let rec split3 = function
+      [] -> ([], [], [])
+    | (x,y, z)::l ->
+      let (rx, ry, rz) = split3 l in (x::rx, y::ry, z::rz)
+
 end
 
 module Option = struct

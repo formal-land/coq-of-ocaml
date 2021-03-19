@@ -11,6 +11,13 @@ type t =
 let of_name (name : Name.t) : t =
   PathName (PathName.of_name [] name)
 
+let dec_name : t =
+  PathName (Name.decode_vtag |> PathName.of_name [])
+
+let is_constr_tag : t -> bool = function
+  | Access _ -> false
+  | PathName {base; _} -> Name.equal base Name.constr_tag
+
 let get_signature_path (path : Path.t) : Path.t option Monad.t =
   let* env = get_env in
   match Env.find_module path env with
@@ -203,6 +210,12 @@ let of_path (is_value : bool) (path : Path.t) : t Monad.t =
         PathName.of_path_and_name_with_convert signature_path field_name
       ) in
     return (Access (base_path_name, List.rev fields))
+
+
+let is_native_type (path : t) : bool =
+  match path with
+  | Access _ -> false
+  | PathName { base; _ } -> List.mem (Name.to_string base) Name.native_type_constructors
 
 let to_string (mixed_path : t) : string =
   match mixed_path with

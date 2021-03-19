@@ -85,5 +85,5 @@ and "'length" :=
     let counts {A} := 'counts A in
     CoqOfOCaml.List.length l).
 
-Definition counts {A} := 'counts A.
-Definition length {A} := 'length A.
+Definition counts {A : Set} := 'counts A.
+Definition length {A : Set} := 'length A.
