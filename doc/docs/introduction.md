@@ -53,11 +53,11 @@ We support modules, module types, functors and first-class modules. We generate 
 ## Workflow
 `coq-of-ocaml` works by compiling the OCaml files one by one. Thanks to Merlin, we get access to the typing environment of each file. Thus names referencing external definitions are properly interpreted.
 
-In a typical project, we may want to translate some of the `.ml` files and keep the rest as axioms (for the libraries or non-critical files). To generate the axioms, we can run `coq-of-ocaml` on the `.mli` files for the parts we want to abstract. When something is not properly handled, `coq-of-ocaml` generates an error message. These errors do not necessarily need to be fixed. However, there are good warnings to help having a more extensive and reliable Coq formalization.
+In a typical project, we may want to translate some of the `.ml` files and keep the rest as axioms (for the libraries or non-critical files). To generate the axioms, we can run `coq-of-ocaml` on the `.mli` files for the parts we want to abstract. When something is not properly handled, `coq-of-ocaml` generates an error message. These errors do not necessarily need to be fixed. However, they are good warnings to help having a more extensive and reliable Coq formalization.
 
 Generally, the generated Coq code for a project does not compile as it is. This can be due to unsupported OCaml features, or various small errors such as name collisions. In this case, you can:
 * modify the OCaml input code, so that it fits what `coq-of-ocaml` handles or avoids Coq errors (follow the error messages);
-* use the [attributes](attributes) or [configuration](configuration) mechanism to customize the translation of coq-of-ocaml;
+* use the [attributes](attributes) or [configuration](configuration) mechanism to customize the translation of `coq-of-ocaml`;
 * fork `coq-of-ocaml` to modify the code translation;
 * post-process the output with a script;
 * post-process the output by hand.
@@ -66,15 +66,18 @@ Generally, the generated Coq code for a project does not compile as it is. This 
 In the OCaml community:
 * [Cameleer](https://github.com/mariojppereira/cameleer) (verify OCaml programs leveraging the [Why3](http://why3.lri.fr/)'s infrastructure)
 * [CFML](http://chargueraud.org/softs/cfml/) (import OCaml to Coq using characteristic formulae)
-* [coq-of-ocaml-mrmr1993](https://github.com/mrmr1993/coq-of-ocaml) (fork of coq-of-ocaml including side-effects, focusing on the compilation of the OCaml's stdlib)
+* [coq-of-ocaml-mrmr1993](https://github.com/mrmr1993/coq-of-ocaml) (fork of `coq-of-ocaml` including side-effects, focusing on the compilation of the OCaml's stdlib)
 
 In the JavaScript community:
-* [coq-of-js](https://github.com/clarus/coq-of-js) (sister project; *currently on halt to support coq-of-ocaml*)
+* [coq-of-js](https://github.com/clarus/coq-of-js) (sister project; *currently on halt to support `coq-of-ocaml`*)
 
 In the Haskell community:
 * [hs-to-coq](https://github.com/antalsz/hs-to-coq) (import Haskell to Coq)
 * [hs-to-gallina](https://github.com/gdijkstra/hs-to-gallina) (2012, by Gabe Dijkstra, first known project to do a shallow embedding of a mainstream functional programming language to Coq)
 
+In the Go community;
+* [goose](https://github.com/tchajed/goose) (import Go to Coq)
+
 ## Credits
-The coq-of-ocaml project started as part of a PhD directed by [Yann Regis-Gianas](http://yann.regis-gianas.org/) and [Hugo Herbelin
-](http://pauillac.inria.fr/~herbelin/) as the university of [Paris 7](https://u-paris.fr/). Originally, the goal was to formalize real OCaml programs in Coq to study side-effects inference and proof techniques on functional programs. The project is now financed by [Nomadic Labs](https://www.nomadic-labs.com/) to formalize the implementation of the crypto-currency [Tezos](https://tezos.com/).
+The `coq-of-ocaml` project started as part of a PhD directed by [Yann Regis-Gianas](http://yann.regis-gianas.org/) and [Hugo Herbelin
+](http://pauillac.inria.fr/~herbelin/) as the university of [Paris 7](https://u-paris.fr/). Originally, the goal was to formalize real OCaml programs in Coq to study side-effects inference and proof techniques on functional programs. The project is now financed by [Nomadic Labs](https://www.nomadic-labs.com/), with the aim to be able to reason about the implementation of the crypto-currency [Tezos](https://tezos.com/). See this [blog post](http://coq-blog.clarus.me/beginning-of-verification-for-the-parsing-of-smart-contracts.html) to get an example about what we can prove.
