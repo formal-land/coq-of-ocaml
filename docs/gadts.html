@@ -144,7 +144,7 @@
   | <span class="hljs-type">Int</span>, (x : <span class="hljs-built_in">int</span>) -&gt; string_of_int x
   | <span class="hljs-type">String</span>, (x : <span class="hljs-built_in">string</span>) -&gt; x
 </code></pre>
-<p>This also works with the <code>function</code> keyword. For coq-of-ocaml to generate valid code, we add the variable <code>x</code> in the match. Indeed, the type <code>a</code> of <code>x</code> is unified during the match, either to <code>int</code> or <code>string</code>. We also precise this type for each branch with an annotation <code>(x : int)</code> to disambiguate from <code>(x : a)</code>. In Coq, we introduce two unsafe casts <code>obj_magic</code> in each branch:</p>
+<p>This also works with the <code>function</code> keyword. For <code>coq-of-ocaml</code> to generate valid code, we add the variable <code>x</code> in the match. Indeed, the type <code>a</code> of <code>x</code> is unified during the match, either to <code>int</code> or <code>string</code>. We also precise this type for each branch with an annotation <code>(x : int)</code> to disambiguate from <code>(x : a)</code>. In Coq, we introduce two unsafe casts <code>obj_magic</code> in each branch:</p>
 <ul>
 <li>one for the variables of the pattern; this cast may also introduce some existential variables;</li>
 <li>one to unify the types of the results of the branches.</li>
