@@ -78,6 +78,9 @@ In the Haskell community:
 In the Go community;
 * [goose](https://github.com/tchajed/goose) (import Go to Coq)
 
+In the Rust community:
+* [electrolysis](https://github.com/Kha/electrolysis) (import Rust to Lean)
+
 ## Credits
 The `coq-of-ocaml` project started as part of a PhD directed by [Yann Regis-Gianas](http://yann.regis-gianas.org/) and [Hugo Herbelin
 ](http://pauillac.inria.fr/~herbelin/) as the university of [Paris 7](https://u-paris.fr/). Originally, the goal was to formalize real OCaml programs in Coq to study side-effects inference and proof techniques on functional programs. The project is now financed by [Nomadic Labs](https://www.nomadic-labs.com/), with the aim to be able to reason about the implementation of the crypto-currency [Tezos](https://tezos.com/). See this [blog post](http://coq-blog.clarus.me/beginning-of-verification-for-the-parsing-of-smart-contracts.html) to get an example about what we can prove.

@@ -3,7 +3,7 @@ id: configuration
 title: Configuration
 ---
 
-We present the configuration mechanism of coq-of-ocaml to define some global settings. We write the configuration in a file in the [JSON format](https://www.json.org/json-en.html). To run coq-of-ocaml with a configuration file, use the `-config` option:
+We present the configuration mechanism of `coq-of-ocaml` to define some global settings. We write the configuration in a file in the [JSON format](https://www.json.org/json-en.html). To run `coq-of-ocaml` with a configuration file, use the `-config` option:
 ```sh
 coq-of-ocaml -config configuration.json ...
 ```
@@ -128,7 +128,7 @@ Definition n : int64 := 12.
 A list of triples with a type name, a constructor name and a new constructor name to rename to. The type name must be the type name associated to the constructor, and is not prefixed by a module name. This type name is mostly there to help to disambiguate.
 
 #### Explanation
-In OCaml we can have different types with the same constructor names, as long as the OCaml compiler can differentiate them based on type information. In Coq this is not the case. The definition of two constructors with the same name generates a name collision. For this reason, we can selectively rename some constructors in coq-of-ocaml in order to avoid name collisions in Coq.
+In OCaml we can have different types with the same constructor names, as long as the OCaml compiler can differentiate them based on type information. In Coq this is not the case. The definition of two constructors with the same name generates a name collision. For this reason, we can selectively rename some constructors in `coq-of-ocaml` in order to avoid name collisions in Coq.
 
 ## error_category_blacklist
 #### Example
@@ -167,7 +167,7 @@ We may want to ignore some categories of errors in order to focus on other error
 ```
 
 #### Value
-A list of file names on which not to fail, even in case of errors. The return code of coq-of-ocaml is then 0 (success). We still display the error messages.
+A list of file names on which not to fail, even in case of errors. The return code of `coq-of-ocaml` is then 0 (success). We still display the error messages.
 
 #### Explanation
 We may still want to see the error logs of some complicated files while not returning a fatal error.
@@ -214,7 +214,7 @@ In OCaml, the value and type namespaces are different. For example, we can have 
 A list of module names, typically corresponding to the module of a folder. All the modules which are direct children of such modules are considered as plain modules. They are encoded by Coq modules, even if there is a signature to make a corresponding record.
 
 #### Explanation
-The module system of coq-of-ocaml encodes the modules having a signature name as dependent records. We use the signature name as the record type name. Sometimes, for modules corresponding to files, we want to avoid using records even if there is a named signature. This option prevents the record encoding for modules of the form `A.B` where `A` is in the black-list. For example, when a reference to a value `A.B.c` appears, we generate `A.B.c` rather than `A.B.(signature_name_of_B.c)`. Indeed, `A.B` is a Coq module rather than a record.
+The module system of `coq-of-ocaml` encodes the modules having a signature name as dependent records. We use the signature name as the record type name. Sometimes, for modules corresponding to files, we want to avoid using records even if there is a named signature. This option prevents the record encoding for modules of the form `A.B` where `A` is in the black-list. For example, when a reference to a value `A.B.c` appears, we generate `A.B.c` rather than `A.B.(signature_name_of_B.c)`. Indeed, `A.B` is a Coq module rather than a record.
 
 ## first_class_module_signature_blacklist
 #### Example
@@ -228,7 +228,7 @@ The module system of coq-of-ocaml encodes the modules having a signature name as
 A list of OCaml signature names. We ignore these signatures when looking for a signature name to encode modules as records.
 
 #### Explanation
-In coq-of-ocaml, we look for a named signature for each module we encounter. Once we find a named signature we encode the module as a dependent record. If no signatures can be found, we use a plain Coq module. Sometimes, we find an incorrect signature as we use heuristics to find a matching signature. This configuration option helps to ignore incorrect signatures.
+In `coq-of-ocaml`, we look for a named signature for each module we encounter. Once we find a named signature we encode the module as a dependent record. If no signatures can be found, we use a plain Coq module. Sometimes, we find an incorrect signature as we use heuristics to find a matching signature. This configuration option helps to ignore incorrect signatures.
 
 ## head_suffix
 #### Example
@@ -312,7 +312,7 @@ Definition burn_storage_fees
 ```
 
 #### Value
-A list of couples of a monadic bind name and a monadic notation to use by coq-of-ocaml. You still have to define the notations somewhere, such as:
+A list of couples of a monadic bind name and a monadic notation to use by `coq-of-ocaml`. You still have to define the notations somewhere, such as:
 ```coq
 Notation "'let?' x ':=' X 'in' Y" :=
   (Error_monad.op_gtgtquestion X (fun x => Y))
@@ -406,7 +406,7 @@ To define we return notation, we use:
 ```coq
 Notation "return! X" := (_return X) (at level 20).
 ```
-We add this notation by hand, as opposed to generate it in with coq-of-ocaml. Note that we use a notation for the return operator applied to some argument `X`. This is to have a correct syntax highlighting in the generated documentation with `coqdoc`. The following notation:
+We add this notation by hand, as opposed to generate it in with `coq-of-ocaml`. Note that we use a notation for the return operator applied to some argument `X`. This is to have a correct syntax highlighting in the generated documentation with `coqdoc`. The following notation:
 ```coq
 Notation "return!" := _return.
 ```
@@ -501,7 +501,7 @@ There should be no bugs due to the precedence of the operators, as we always par
 A list of couple of values, with a name and a name to rename to while doing the translation in Coq.
 
 #### Explanation
-We may want to systematically rename some of the OCaml values to their counterpart in Coq. This rule applies to anything which has a name (value, type, module, constructor, ...). coq-of-ocaml already knows some renaming rules for the OCaml's standard library, but it is possible to add more with this option.
+We may want to systematically rename some of the OCaml values to their counterpart in Coq. This rule applies to anything which has a name (value, type, module, constructor, ...). `coq-of-ocaml` already knows some renaming rules for the OCaml's standard library, but it is possible to add more with this option.
 
 ## renaming_type_constructor
 #### Example
@@ -577,7 +577,7 @@ In some cases, it is not possible to get the right `Require` directive for an ex
 A list of files to require as `.mli` rather than as `.ml`. The files are described by their corresponding module name.
 
 #### Explanation
-In OCaml, there are two kinds of files, namely `.ml` and `.mli` files. We import both with coq-of-ocaml, but only the `.ml` file is complete and sufficient. The `.mli` import corresponds to axioms without the definitions. However, sometimes the import of the `.ml` version fails but the `.mli` works. Then, we may want to use the imported `.mli` as a dependency in the `Require` directive rather than the imported `.ml` version.
+In OCaml, there are two kinds of files, namely `.ml` and `.mli` files. We import both with `coq-of-ocaml`, but only the `.ml` file is complete and sufficient. The `.mli` import corresponds to axioms without the definitions. However, sometimes the import of the `.ml` version fails but the `.mli` works. Then, we may want to use the imported `.mli` as a dependency in the `Require` directive rather than the imported `.ml` version.
 
 ## variant_constructors
 #### Example
@@ -595,9 +595,9 @@ In OCaml, there are two kinds of files, namely `.ml` and `.mli` files. We import
 A list of polymorphic variant constructor names in OCaml and constructor names in Coq.
 
 #### Explanation
-Coq supports algebraic types through the `Inductive` keyword, but there are no direct equivalents for [polymorphic variants](https://caml.inria.fr/pub/docs/manual-ocaml/lablexamples.html#s:polymorphic-variants). We can replace many occurrences of polymorphic variants by standard algebraic types, updating the input code to help coq-of-ocaml. Sometimes, a direct modification of the source is not possible. We can then explain to coq-of-ocaml how to deal with polymorphic variants as if they were inductive types.
+Coq supports algebraic types through the `Inductive` keyword, but there are no direct equivalents for [polymorphic variants](https://caml.inria.fr/pub/docs/manual-ocaml/lablexamples.html#s:polymorphic-variants). We can replace many occurrences of polymorphic variants by standard algebraic types, updating the input code to help `coq-of-ocaml`. Sometimes, a direct modification of the source is not possible. We can then explain to `coq-of-ocaml` how to deal with polymorphic variants as if they were inductive types.
 
-When there is a type definition with a polymorphic variant, coq-of-ocaml transforms it to the closest inductive:
+When there is a type definition with a polymorphic variant, `coq-of-ocaml` transforms it to the closest inductive:
 ```ocaml
 module Context = struct
   type t = [`Dir | `Key]
@@ -619,7 +619,7 @@ would be transformed to:
 ```coq
 Definition x : Context.t := Dir.
 ```
-which is incorrect. By giving the relation `["Dir", "Context.Dir"]`, we can tell coq-of-ocaml to generate the correct constructor with the correct module prefix:
+which is incorrect. By giving the relation `["Dir", "Context.Dir"]`, we can tell `coq-of-ocaml` to generate the correct constructor with the correct module prefix:
 ```coq
 Definition x : Context.t := Context.Dir.
 ```
@@ -660,7 +660,7 @@ Inductive t : Set :=
 Definition x : t := Dir.
 ```
 
-When removing polymorphic variants is not possible, coq-of-ocaml transforms the type definition to the closest inductive type:
+When removing polymorphic variants is not possible, `coq-of-ocaml` transforms the type definition to the closest inductive type:
 ```coq
 Inductive t : Set :=
 | Dir : t

@@ -3,7 +3,7 @@ id: run
 title: Run
 ---
 
-coq-of-ocaml translates the OCaml files one by one. It uses [Merlin](https://github.com/ocaml/merlin) to get the typing environment of each file. Thus you should first configure Merlin and have a `.merlin` file if your project contains multiple files.
+`coq-of-ocaml` translates the OCaml files one by one. It uses [Merlin](https://github.com/ocaml/merlin) to get the typing environment of each file. Thus you should first have a project which works with Merlin. This is generally the case for a project compiled with [dune](https://github.com/ocaml/dune).
 
 ## Minimal example
 Create a file `example.ml`:
