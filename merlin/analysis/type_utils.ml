@@ -116,6 +116,11 @@ module Printtyp = struct
     let_ref verbosity v (fun () -> wrap_printing_env env f)
 end
 
+let si_modtype_opt = function
+  | Types.Sig_modtype (_, m, _) -> m.mtd_type
+  | Types.Sig_module (_, _, m, _, _) -> Some m.md_type
+  | _ -> None
+
 (* Check if module is smaller (= has less definition, counting nested ones)
  * than a particular threshold. Return (Some n) if module has size n, or None
  * otherwise (module is bigger than threshold).
@@ -136,7 +141,7 @@ let rec mod_smallerthan n m =
                 | Some n2 -> Some (n1 + n2)
                 | None -> None
               in
-              match acc, Raw_compat.si_modtype_opt item with
+              match acc, si_modtype_opt item with
               | None, _ -> None
               | Some n', _ when n' > n -> None
               | Some n1, Some mty -> sub n1 mty
@@ -226,16 +231,15 @@ let print_modpath ppf verbosity env lid =
   in
   print_short_modtype verbosity env ppf (md.md_type)
 
+let print_cstr_desc ppf cstr_desc =
+  !Oprint.out_type ppf (Browse_misc.print_constructor cstr_desc)
+
 let print_constr ppf env lid =
   let cstr_desc =
     Env.find_constructor_by_name lid.Asttypes.txt env
   in
-  (*
-    Format.pp_print_string ppf name;
-    Format.pp_print_string ppf " : ";
-  *)
   (* FIXME: support Reader printer *)
-  !Oprint.out_type ppf (Browse_misc.print_constructor cstr_desc)
+  print_cstr_desc ppf cstr_desc
 
 exception Fallback
 let type_in_env ?(verbosity=0) ?keywords ~context env ppf expr =
@@ -246,8 +250,10 @@ let type_in_env ?(verbosity=0) ?keywords ~context env ppf expr =
         [Ast_helper.Str.eval expression]
     in
     let open Typedtree in
-    let exp = Raw_compat.dest_tstr_eval str in
-    print_type_with_decl ~verbosity env ppf exp.exp_type
+    match str.str_items with
+    | [ { str_desc = Tstr_eval (exp,_); _ }] ->
+      print_type_with_decl ~verbosity env ppf exp.exp_type
+    | _ -> failwith "unhandled expression"
   in
   Printtyp.wrap_printing_env env ~verbosity @@ fun () ->
   Msupport.uncatch_errors @@ fun () ->
@@ -304,6 +310,10 @@ let type_in_env ?(verbosity=0) ?keywords ~context env ppf expr =
     | `Other ->
       try print_expr e; true
       with exn -> print_exn ppf exn; false
+
+let print_constr ~verbosity env ppf cd =
+  Printtyp.wrap_printing_env env ~verbosity @@ fun () ->
+  print_cstr_desc ppf cd
 
 (* From doc-ock
    https://github.com/lpw25/doc-ock/blob/master/src/docOckAttrs.ml *)
