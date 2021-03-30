@@ -1,3 +1,7 @@
+## 2.5.0 (March 30, 2021)
+* Beginning of support of GADTs without axioms, thanks to a pull-request of @pedrotst https://github.com/clarus/coq-of-ocaml/pull/166.
+* Upgrade OCaml to the version 4.12, thanks to @lthms.
+
 ## 2.4.1 (March 15, 2021)
 * Add basic translation of `try ... with` with extensible types (cannot run in Coq but may be extracted to OCaml).
 * Add basic support for matching on extensible types.
