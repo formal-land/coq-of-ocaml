@@ -21,6 +21,7 @@ depends: [
   "csexp"
   "ocaml" {>= "4.12" & < "4.13"}
   "ocamlfind" {>= "1.5.2"}
+  "result"
   "smart-print"
   "yojson" {>= "1.6.0"}
 ]
