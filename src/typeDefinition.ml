@@ -10,7 +10,6 @@ module Inductive = struct
       : (Name.t * (AdtConstructors.RecordSkeleton.t * Name.t list * Type.t) list) list;
     notations : notation list;
     records : AdtConstructors.RecordSkeleton.t list;
-    is_tagged : bool;
     (* typs is a list of mutually defined Inductives
      * of the form
      * Inductive `Name.t` (`Name.t list` : Set) : Set :=
@@ -81,7 +80,6 @@ module Inductive = struct
     (name : Name.t)
     (left_typ_args : Name.t list)
     (constructors : AdtConstructors.t)
-    (is_tagged : bool)
     : SmartPrint.t =
     let keyword = if is_first then !^ "Inductive" else !^ "with" in
     nest (
@@ -101,6 +99,10 @@ module Inductive = struct
         | constructor :: _ -> match constructor.res_typ_params with
           | AdtConstructors.Variant l -> List.length l
           | Tagged l -> List.length l
+      in
+      let is_tagged = match constructors with
+        | [] -> false
+        | c :: _ -> c.is_tagged
       in
 
       let arity = if not is_tagged then 1 else res_typ_length + 1 in
@@ -308,7 +310,7 @@ module Inductive = struct
       separate (newline ^^ newline) (inductive.typs |>
         List.mapi (fun index (name, left_typ_args, constructors) ->
           let is_first = index = 0 in
-          to_coq_typs subst is_first name left_typ_args constructors inductive.is_tagged
+          to_coq_typs subst is_first name left_typ_args constructors
         )
       ) ^-^
       (match notations_wheres with
@@ -362,7 +364,6 @@ let of_ocaml (typs : type_declaration list) : t Monad.t =
           constructor_records = [];
           notations = [];
           records = [];
-          is_tagged = false;
           typs = [(name, typ_args, constructors)];
         })
         NotSupported
@@ -466,8 +467,8 @@ let of_ocaml (typs : type_declaration list) : t Monad.t =
           typs
         )
       | { typ_type = { type_kind = Type_variant cases; _ }; typ_attributes; _ } ->
-        let* typ_attributes = Attribute.of_attributes typ_attributes in
-        Monad.List.map (AdtConstructors.of_ocaml_case name typ_args typ_attributes) cases >>= fun cases ->
+        let* attributes = Attribute.of_attributes typ_attributes in
+        Monad.List.map (AdtConstructors.of_ocaml_case name attributes typ_args) cases >>= fun cases ->
         let (single_constructors, new_constructor_records) = List.split cases in
         let new_constructor_records =
           new_constructor_records |> Util.List.filter_map (fun x -> x) in
@@ -491,17 +492,16 @@ let of_ocaml (typs : type_declaration list) : t Monad.t =
       )
     ) ([], [], [], [])) >>= fun (constructor_records, notations, records, typs) ->
     let typs = typs |> List.map (function (x, y, z) -> (x, AdtParameters.get_parameters y, z)) in
-    let is_tagged = typs |> List.hd |> fun (_,_, constructors) ->
-                    match constructors with
-                    | [] -> false
-                    | x :: _ -> x.is_tagged
-    in
+    (* let is_tagged = typs |> List.hd |> fun (_,_, constructors) -> *)
+                    (* match constructors with *)
+                    (* | [] -> false *)
+                    (* | x :: _ -> x.is_tagged *)
     return (
       Inductive {
         constructor_records = List.rev constructor_records;
         notations = List.rev notations;
         records;
-        is_tagged;
+        (* is_tagged; *)
         typs = List.rev typs
       }
     )

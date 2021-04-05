@@ -113,11 +113,11 @@ type t = item list
 
 let of_ocaml_case
     (typ_name : Name.t)
-    (defined_typ_params : AdtParameters.t)
     (attributes : Attribute.t list)
+    (defined_typ_params : AdtParameters.t)
     (case : Types.constructor_declaration)
   : (item * (RecordSkeleton.t * Name.t list * Type.t) option) Monad.t =
-  let { Types.cd_args; cd_id; cd_loc; cd_res; _ } = case in
+  let { Types.cd_args; cd_id; cd_loc; cd_res; cd_attributes } = case in
   set_loc cd_loc (
     let* constructor_name =
       PathName.map_constructor_name
