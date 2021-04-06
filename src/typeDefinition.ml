@@ -3,11 +3,11 @@ open SmartPrint
 open Monad.Notations
 
 module Inductive = struct
-  type notation = Name.t * Name.t list * Type.t
+  type notation = Name.t * VarEnv.t * Type.t
 
   type t = {
     constructor_records
-      : (Name.t * (AdtConstructors.RecordSkeleton.t * Name.t list * Type.t) list) list;
+      : (Name.t * (AdtConstructors.RecordSkeleton.t * VarEnv.t * Type.t) list) list;
     notations : notation list;
     records : AdtConstructors.RecordSkeleton.t list;
     (* typs is a list of mutually defined Inductives
@@ -142,26 +142,22 @@ module Inductive = struct
   let to_coq_notations_where
     (subst : Type.Subst.t)
     (notation : SmartPrint.t)
-    (typ_args : Name.t list)
+    (typ_args : VarEnv.t)
     (typ : Type.t)
     : SmartPrint.t =
     let typ =
-      List.fold_left (fun typ typ_arg ->
+      List.fold_left (fun typ (typ_arg, _) ->
         Type.subst_name typ_arg (Name.prefix_by_t typ_arg) typ
       ) typ typ_args in
-    let typ_args = typ_args |> List.map Name.prefix_by_t in
+    let typ_args = typ_args |> List.map (fun (name, typ) -> (Name.prefix_by_t name, typ)) in
     nest (
       notation ^^ !^ ":=" ^^ parens (
         (match typ_args with
-        | [] -> empty
-        | _ :: _ ->
-          !^ "fun" ^^ parens (
-            nest (
-              separate space (typ_args |> List.map Name.to_coq) ^^
-              !^ ":" ^^ Pp.set
-            )
-          ) ^^ !^ "=>" ^^ space
-        ) ^-^ Type.to_coq (Some subst) None typ
+         | [] -> empty
+         | _ :: _ ->
+             Type.typ_vars_to_coq parens (!^ "fun") (!^" => ") typ_args
+           ^-^ Type.to_coq (Some subst) None typ
+        )
       )
     )
 
@@ -173,7 +169,7 @@ module Inductive = struct
         let dependencies =
           Name.Set.diff
             (Type.local_typ_constructors_of_typ typ)
-            (Name.Set.of_list typ_args) in
+            (Name.Set.of_list (List.map fst typ_args)) in
         not (dependencies |> Name.Set.exists (fun dependency ->
           List.mem dependency to_sort_names
         ))
@@ -420,9 +416,7 @@ let of_ocaml (typs : type_declaration list) : t Monad.t =
             NotSupported
             "Polymorphic variant types are defined as standard algebraic types"
         | _ ->
-          Type.of_type_expr_without_free_vars typ >>= fun typ ->
-          let free_vars = Type.typ_args_of_typ typ in
-          let typ_args = filter_in_free_vars (AdtParameters.get_parameters typ_args) free_vars in
+          Type.of_typ_expr true Name.Map.empty typ >>= fun (typ, _, typ_args) ->
           return (
             constructor_records,
             (
@@ -442,13 +436,11 @@ let of_ocaml (typs : type_declaration list) : t Monad.t =
       | { typ_type = { type_kind = Type_record (fields, _); _ }; _ } ->
         (fields |> Monad.List.map (fun { Types.ld_id = x; ld_type = typ; _ } ->
           let* x = Name.of_ident false x in
-          Type.of_type_expr_without_free_vars typ >>= fun typ ->
-          return (x, typ)
+          Type.of_typ_expr true Name.Map.empty typ >>= fun (typ, _, new_typ_var) ->
+          return (x, typ, new_typ_var)
         )) >>= fun fields ->
-        let (fields_names, fields_types) = List.split fields in
-        let free_vars = Type.typ_args_of_typs fields_types in
-        let typ_args = AdtParameters.get_parameters typ_args in
-        let typ_args = filter_in_free_vars typ_args free_vars in
+        let (fields_names, fields_types, new_typ_vars) = Util.List.split3 fields in
+        let typ_args = VarEnv.merge new_typ_vars in
         return (
           constructor_records,
           (
@@ -492,16 +484,11 @@ let of_ocaml (typs : type_declaration list) : t Monad.t =
       )
     ) ([], [], [], [])) >>= fun (constructor_records, notations, records, typs) ->
     let typs = typs |> List.map (function (x, y, z) -> (x, AdtParameters.get_parameters y, z)) in
-    (* let is_tagged = typs |> List.hd |> fun (_,_, constructors) -> *)
-                    (* match constructors with *)
-                    (* | [] -> false *)
-                    (* | x :: _ -> x.is_tagged *)
     return (
       Inductive {
         constructor_records = List.rev constructor_records;
         notations = List.rev notations;
         records;
-        (* is_tagged; *)
         typs = List.rev typs
       }
     )
