@@ -1100,9 +1100,9 @@ let typ_vars_to_coq
   let typ_vars = VarEnv.group_by_kind typ_vars in
   if List.length typ_vars = 0
   then empty
-  else sep_before ^^
+  else nest (sep_before ^^
        (separate space
           (typ_vars |> List.map (fun (typ, vars) ->
-               delim ((separate space (vars |> List.rev |> List.map Name.to_coq))
-                      ^^ !^ ":" ^^ (Kind.to_coq typ)))
-       )) ^-^ sep_after
+               ((delim ((separate space (vars |> List.rev |> List.map Name.to_coq))
+                      ^^ !^ ":" ^^ (Kind.to_coq typ)))))
+          )) ^-^ sep_after)
