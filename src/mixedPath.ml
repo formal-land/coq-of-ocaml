@@ -2,6 +2,15 @@
 open SmartPrint
 open Monad.Notations
 
+let path_to_string_list p =
+  let open Path in
+  let rec aux acc = function
+    | Pident id -> Ident.name id :: acc
+    | Pdot (p, str) -> aux (str :: acc) p
+    | _ -> assert false
+  in
+  aux [] p 
+
 (** [Access] corresponds to projections from first-class modules. *)
 type t =
   | Access of PathName.t * PathName.t list
@@ -170,7 +179,7 @@ let get_local_base_path (is_value : bool) (path : Path.t)
   | Pdot (path', _) ->
     let* is_local = is_module_path_local path' in
     if is_local then
-      let name_string = String.concat "_" (Path.to_string_list path) in
+      let name_string = String.concat "_" (path_to_string_list path) in
       let* name = Name.of_string is_value name_string in
       return (Some (PathName.of_name [] name))
     else

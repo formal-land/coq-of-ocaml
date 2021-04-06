@@ -2,5 +2,4 @@
   (name coqOfOCaml)
   (package coq-of-ocaml)
   (public_name coq-of-ocaml)
-  (libraries merlin_analysis merlin_kernel smart_print)
-)
+  (libraries merlin.analysis merlin.kernel smart_print))
