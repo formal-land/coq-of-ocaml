@@ -161,26 +161,28 @@ let main () =
     let file_source = Msource.make file_content in
 
     let pipeline = Mpipeline.make merlin_config file_source in
-    let comments = Mpipeline.reader_comments pipeline in
-    let typing = Mpipeline.typer_result pipeline in
-    let typedtree = Mtyper.get_typedtree typing in
-    let typedtree_errors = Mtyper.get_errors typing in
-    let initial_loc = Ast.get_initial_loc typedtree in
-    let initial_env = Mtyper.get_env typing in
 
-    let context =
-      MonadEval.Context.init comments configuration initial_env initial_loc in
+    Mpipeline.with_pipeline pipeline (fun _ ->
+        let comments = Mpipeline.reader_comments pipeline in
+        let typing = Mpipeline.typer_result pipeline in
+        let typedtree = Mtyper.get_typedtree typing in
+        let typedtree_errors = Mtyper.get_errors typing in
+        let initial_loc = Ast.get_initial_loc typedtree in
+        let initial_env = Mtyper.get_env typing in
 
-    let output =
-      of_ocaml
-        context
-        typedtree
-        typedtree_errors
-        file_name
-        file_content
-        !output_file_name
-        !json_mode in
-    Output.write !json_mode output;
-    exit context output
+        let context =
+          MonadEval.Context.init comments configuration initial_env initial_loc in
+
+        let output =
+          of_ocaml
+            context
+            typedtree
+            typedtree_errors
+            file_name
+            file_content
+            !output_file_name
+            !json_mode in
+        Output.write !json_mode output;
+        exit context output)
 
 ;;main ()

@@ -335,7 +335,7 @@ let simplified_contructor_path (path : Path.t) (arity : int)
     begin try
       (* By calling this function we check that we do not have a path with
          functors, which we cannot handle. *)
-      let _ = Path.to_string_list path in
+      let _ = MixedPath.path_to_string_list path in
       MixedPath.of_path false path
     with _ -> return mixed_path
     end
