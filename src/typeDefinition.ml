@@ -433,14 +433,17 @@ let of_ocaml (typs : type_declaration list) : t Monad.t =
           (constructor_records, notations, records, typs)
           NotSupported
           "Abstract types not supported in mutually recursive definitions"
-      | { typ_type = { type_kind = Type_record (fields, _); _ }; _ } ->
+      | { typ_type = { type_kind = Type_record (fields, _); type_params = params ;_ }; _ } ->
         (fields |> Monad.List.map (fun { Types.ld_id = x; ld_type = typ; _ } ->
           let* x = Name.of_ident false x in
-          Type.of_typ_expr true Name.Map.empty typ >>= fun (typ, _, new_typ_var) ->
-          return (x, typ, new_typ_var)
+          Type.of_typ_expr true Name.Map.empty typ >>= fun (typ, _, new_typ_args) ->
+          return (x, typ, new_typ_args)
         )) >>= fun fields ->
-        let (fields_names, fields_types, new_typ_vars) = Util.List.split3 fields in
-        let typ_args = VarEnv.merge new_typ_vars in
+        let* (_, _, typ_args) = Type.of_typs_exprs true params Name.Map.empty in
+        let typ_args = List.map fst typ_args in
+        let (fields_names, fields_types, new_typ_args) = Util.List.split3 fields in
+        let new_typ_args = VarEnv.merge new_typ_args in
+        let typ_args = VarEnv.reorg typ_args new_typ_args in
         return (
           constructor_records,
           (
