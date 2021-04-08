@@ -639,8 +639,18 @@ and get_constr_arg_tags
     if Attribute.has_tag_gadt attributes
     then return @@ tag_all_args params
     else return @@ tag_no_args params
-  | { type_kind = Type_record _; type_params = params; _} ->
-    return @@ tag_no_args params
+  | { type_kind = Type_record (decls, repr); type_params = params; _} ->
+    (* Get the variables from param. Keep ordering *)
+    let* (params, _, typ_vars) = of_typs_exprs true params Name.Map.empty in
+    let typ_vars = List.map (fun (ty, _) -> ty) typ_vars in
+    let decls =  List.map (fun decl -> decl.ld_type) decls in
+    let* (typ, _, new_typ_vars) = of_typs_exprs true decls Name.Map.empty in
+    let new_typ_vars = VarEnv.reorg typ_vars new_typ_vars in
+    return @@ List.map (fun (_, kind) ->
+        match kind with
+        | Kind.Tag -> true
+        | _ -> false
+      ) new_typ_vars
   | { type_manifest = None; type_kind = Type_abstract; type_params = params; _ } ->
     return @@ tag_no_args params
   | { type_manifest = Some typ; type_params = params; _ } ->
