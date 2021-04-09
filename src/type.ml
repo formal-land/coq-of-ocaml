@@ -552,7 +552,7 @@ let rec of_typ_expr
     ) in
     of_typ_expr ~should_tag:should_tag with_free_vars typ_vars typ >>= fun (typ, typ_vars, new_typ_vars_typ) ->
     let non_phantom_vars = Name.Set.elements non_phantom_vars in
-    let new_typ_vars_typ = VarEnv.remove_many non_phantom_vars new_typ_vars_typ in
+    let new_typ_vars_typ = VarEnv.keep_only non_phantom_vars new_typ_vars_typ in
     return (ForallTyps (typ_args, typ), typ_vars, new_typ_vars_typ)
   | Tpackage (path, idents, typs) ->
       let* path_name = PathName.of_path_without_convert false path in
@@ -610,8 +610,8 @@ and of_typs_exprs
     (typ_vars : Name.t Name.Map.t)
   : (t list * Name.t Name.Map.t * VarEnv.t) Monad.t =
   if List.length tag_list <> List.length typs
-  then raise ([], typ_vars, []) Error.Category.Unexpected "Calling of_typs_exprs_constr with tag_list of different size of typs (they should have the same size)"
-  else    let tag_typs = List.combine typs tag_list in
+  then raise ([], typ_vars, []) Error.Category.Unexpected ("of_typs_exprs_constr: tag_list has size " ^ string_of_int (List.length tag_list) ^ ", while typs has size " ^ string_of_int (List.length typs) ^ ". They should have the same size")
+  else let tag_typs = List.combine typs tag_list in
     (Monad.List.fold_left
        (fun (typs, typ_vars, new_typ_vars) (typ, should_tag) ->
           of_typ_expr ~should_tag:should_tag with_free_vars typ_vars typ >>= fun (typ, typ_vars, new_typ_vars') ->
@@ -636,10 +636,10 @@ and get_constr_arg_tags
     else return @@ tag_no_args params
   | { type_kind = Type_record (decls, repr); type_params = params; _} ->
     (* Get the variables from param. Keep ordering *)
-    let* (params, _, typ_vars) = of_typs_exprs true params Name.Map.empty in
+    let* (_, _, typ_vars) = of_typs_exprs true params Name.Map.empty in
     let typ_vars = List.map (fun (ty, _) -> ty) typ_vars in
     let decls =  List.map (fun decl -> decl.ld_type) decls in
-    let* (typ, _, new_typ_vars) = of_typs_exprs true decls Name.Map.empty in
+    let* (_, _, new_typ_vars) = of_typs_exprs true decls Name.Map.empty in
     let new_typ_vars = VarEnv.reorg typ_vars new_typ_vars in
     return @@ List.map (fun (_, kind) ->
         match kind with
@@ -655,7 +655,7 @@ and get_constr_arg_tags
         | Kind.Tag -> true
         | _ -> false
       ) new_typ_vars
-  | _ | exception _ -> return []
+  | _ | exception _ -> print_string "exception!! \n\n"; return []
 
 and tag_typ_constr
     (path : Path.t)
