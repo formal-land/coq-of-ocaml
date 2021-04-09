@@ -154,10 +154,9 @@ module Inductive = struct
       notation ^^ !^ ":=" ^^ parens (
         (match typ_args with
          | [] -> empty
-         | _ :: _ ->
-             Type.typ_vars_to_coq parens (!^ "fun") (!^" => ") typ_args
-           ^-^ Type.to_coq (Some subst) None typ
+         | _ :: _ -> Type.typ_vars_to_coq parens (!^ "fun") (!^" => ") typ_args
         )
+        ^-^ Type.to_coq (Some subst) None typ
       )
     )
 
@@ -444,6 +443,9 @@ let of_ocaml (typs : type_declaration list) : t Monad.t =
         let (fields_names, fields_types, new_typ_args) = Util.List.split3 fields in
         let new_typ_args = VarEnv.merge new_typ_args in
         let typ_args = VarEnv.reorg typ_args new_typ_args in
+        print_string (Name.to_string name ^"\n");
+        print_string ("size of fields types " ^ string_of_int (List.length fields_types) ^ "\n");
+        print_string ("size of typ_args " ^ string_of_int (List.length typ_args) ^ "\n");
         return (
           constructor_records,
           (
