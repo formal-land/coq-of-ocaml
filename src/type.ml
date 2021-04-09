@@ -655,7 +655,7 @@ and get_constr_arg_tags
         | Kind.Tag -> true
         | _ -> false
       ) new_typ_vars
-  | _ | exception _ -> print_string "exception!! \n\n"; return []
+  | _ | exception _ -> return []
 
 and tag_typ_constr
     (path : Path.t)
