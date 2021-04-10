@@ -46,7 +46,27 @@ Fixpoint sum (tree : tree int) : int :=
   | Node tree1 tree2 => Z.add (sum tree1) (sum tree2)
   end.
 ```
-You can now write proofs by induction over the `sum` function using Coq. To see how you can write proofs, you can simply look at the [Coq documentation](https://coq.inria.fr/documentation). Learning to write proofs is like learning a new programming paradigm. It can take time, but be worthwhile!
+You can now write proofs by induction over the `sum` function using Coq. To see how you can write proofs, you can simply look at the [Coq documentation](https://coq.inria.fr/documentation). Learning to write proofs is like learning a new programming paradigm. It can take time, but be worthwhile! Here is an example of proof:
+```coq
+(** Definition of a tree with only positive integers *)
+Inductive positive : tree int -> Prop :=
+| Positive_leaf : forall n, n > 0 -> positive (Leaf n)
+| Positive_node : forall tree1 tree2,
+  positive tree1 -> positive tree2 -> positive (Node tree1 tree2).
+
+Require Import Coq.micromega.Lia.
+
+Lemma positive_plus n m : n > 0 -> m > 0 -> n + m > 0.
+  lia.
+Qed.
+
+(** Proof thay if a tree is positive, then its sum is positive too *)
+Fixpoint positive_sum (tree : tree int) (H : positive tree)
+  : sum tree > 0.
+  destruct tree; simpl; inversion H; trivial.
+  apply positive_plus; now apply positive_sum.
+Qed.
+```
 
 ## Install
 ### Latest stable version
