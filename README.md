@@ -11,7 +11,7 @@
 The guiding idea of `coq-of-ocaml` is [TypeScript](https://www.typescriptlang.org/). Instead of bringing types to an untyped language, we bring proofs to an already typed language. The approach stays the same: finding the right sweet spot, using heuristics when needed, guiding the user with error messages. We use `coq-of-ocaml` at [Tezos](https://tezos.com/), a crypto-currency implemented in OCaml, in the hope to have near-zero bugs thanks to formal proofs. Tezos is currently one of the most advanced crypto-currencies, with smart contracts, proof-of-stake, encrypted transactions, and protocol upgrades. It aims to compete with Ethereum. Formal verification is claimed to be important for crypto-currencies as there are no central authorities to forbid bug exploits and a lot of money at stake. A Coq translation of the core components of Tezos is available in the project [coq-tezos-of-ocaml](https://gitlab.com/nomadic-labs/coq-tezos-of-ocaml). Protecting the money.
 
 ## Example
-Start with the file `main.ml`:
+Start with the file `main.ml`&nbsp;🐫:
 ```ocaml
 type 'a tree =
   | Leaf of 'a
@@ -26,7 +26,7 @@ Run:
 ```
 coq-of-ocaml main.ml
 ```
-Get a file `Main.v`:
+Get a file `Main.v`&nbsp;🦄:
 ```coq
 Require Import CoqOfOCaml.CoqOfOCaml.
 Require Import CoqOfOCaml.Settings.
