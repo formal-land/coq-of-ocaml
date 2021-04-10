@@ -69,7 +69,12 @@ opam pin add https://github.com/clarus/coq-of-ocaml.git#master
 ```
 
 ### Manually
-Read the `coq-of-ocaml.opam` file at the root of the project to know the dependencies to install and get the list of commands to build the project.
+Clone the Git submodule for [Merlin](https://github.com/ocaml/merlin):
+```
+git submodule init
+git submodule update
+```
+Then read the `coq-of-ocaml.opam` file at the root of the project to know the dependencies to install and get the list of commands to build the project.
 
 ## Usage
 `coq-of-ocaml` compiles the `.ml` or `.mli` files using [Merlin](https://github.com/ocaml/merlin) to understand the dependencies of a project. One first needs to have a **compiled project** with a working configuration of Merlin. The basic command is:
