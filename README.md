@@ -6,11 +6,11 @@
 **Documentation on https://clarus.github.io/coq-of-ocaml/**
 
 ## Aim
-`coq-of-ocaml` aims to enable formal verification of [OCaml](https://ocaml.org/) programs&nbsp;🦄. The more you prove, the happier you are. By transforming OCaml code into similar [Coq](https://coq.inria.fr/) programs, it is possible to prove arbitrarily complex properties using the existing power of Coq. The sweet spot of `coq-of-ocaml` is purely functional and monadic programs. Side-effects outside of a monad, like references, and advanced features like object-oriented programming, may never be supported. By sticking to the supported subset of OCaml, you should be able to import millions of lines of code to Coq and write proofs at large. Running `coq-of-ocaml` after each code change, you can make sure that your proofs are still valid. We recommend organizing your proof files as you would organize your unit-test files.
+`coq-of-ocaml` aims to enable formal verification of [OCaml](https://ocaml.org/) programs&nbsp;🦄. *The more you prove, the happier you are.* By transforming OCaml code into similar [Coq](https://coq.inria.fr/) programs, it is possible to prove arbitrarily complex properties using the existing power of Coq. The sweet spot of `coq-of-ocaml` is purely functional and monadic programs. Side-effects outside of a monad, like references, and advanced features like object-oriented programming, may never be supported. By sticking to the supported subset of OCaml, you should be able to import millions of lines of code to Coq and write proofs at large. Running `coq-of-ocaml` after each code change, you can make sure that your proofs are still valid. We recommend organizing your proof files as you would organize your unit-test files.
 
 The guiding idea of `coq-of-ocaml` is [TypeScript](https://www.typescriptlang.org/). Instead of bringing types to an untyped language, we bring proofs to an already typed language. The approach stays the same: finding the right sweet spot, using heuristics when needed, guiding the user with error messages. We use `coq-of-ocaml` at [Tezos](https://tezos.com/), a crypto-currency implemented in OCaml, in the hope to have near-zero bugs thanks to formal proofs. Tezos is currently one of the most advanced crypto-currencies, with smart contracts, proof-of-stake, encrypted transactions, and protocol upgrades. It aims to compete with Ethereum. Formal verification is claimed to be important for crypto-currencies as there are no central authorities to forbid bug exploits and a lot of money at stake. A Coq translation of the core components of Tezos is available in the project [coq-tezos-of-ocaml](https://gitlab.com/nomadic-labs/coq-tezos-of-ocaml). Protecting the money.
 
-There are still some open problems with `coq-of-ocaml`, like the axiom-free compilation of [GADTs](https://blog.janestreet.com/why-gadts-matter-for-performance/) (ongoing project). If you are willing to work on a particular project, you can contact us by opening an issue in this repository.
+There are still some open problems with `coq-of-ocaml`, like the axiom-free compilation of [GADTs](https://blog.janestreet.com/why-gadts-matter-for-performance/) (ongoing project). If you are willing to work on a particular project, please contact us by opening an issue in this repository.
 
 ## Example
 Start with the file `main.ml`&nbsp;🐫:
@@ -98,7 +98,7 @@ You can start to experiment with the test files in `tests/` or look at our [onli
 ## Documentation
 You can read the documentation on the website of the project at [https://clarus.github.io/coq-of-ocaml/](https://clarus.github.io/coq-of-ocaml/).
 
-## Features
+## Supported
 * the core of OCaml (functions, let bindings, pattern-matching,...) ✔️
 * type definitions (records, inductive types, synonyms, mutual types) ✔️
 * monadic programs ✔️
@@ -111,8 +111,9 @@ You can read the documentation on the website of the project at [https://clarus.
 * partial support of polymorphic variants 🌊
 * partial support of extensible types 🌊
 * ignores side-effects outside of a monad ❌
+* no object-oriented programming ❌
 
-Even in case of errors, we try to generate some Coq code along with an error message. The generated Coq code should be readable and with a size similar to the OCaml source. The generated Coq code does not necessarily compile after a first try. This can be due to various errors, such as name collisions. Do not hesitate to fix these errors by updating the OCaml source. If you want more assistance, contact us by creating an issue.
+Even in case of errors, we try to generate some Coq code along with an error message. The generated Coq code should be readable and with a size similar to the OCaml source. The generated code does not necessarily compile after a first try. This can be due to various errors, such as name collisions. Do not hesitate to fix these errors by updating the OCaml source accordingly. If you want more assistance, please contact us by opening an issue in this repository.
 
 ## License
 MIT (open-source software)
