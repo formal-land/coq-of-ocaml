@@ -50,31 +50,26 @@ class Footer extends React.Component {
           </div>
           <div>
             <h5>Community</h5>
-            <a href="https://github.com/clarus/coq-of-ocaml/issues?q=is%3Aissue+is%3Aopen+sort%3Aupdated-desc+label%3A%22Enhancement+%3Anew%3A%22"
+            <a href="https://github.com/clarus/coq-of-ocaml/issues"
               target="_blank"
-              rel="noreferrer noopener">
-              Feature requests and proposals
-            </a>
-            <a href="https://github.com/clarus/coq-of-ocaml/issues?q=is%3Aissue+is%3Aopen+sort%3Aupdated-desc+label%3A%22Bug+%3Abug%3A%22"
-              target="_blank"
-              rel="noreferrer noopener">
+            >
               Issues
-            </a>
-            <a href="https://gitter.im/clarus/coq-of-ocaml"
-              target="_blank"
-              rel="noreferrer noopener">
-              Chat room
             </a>
             <a href="https://www.nomadic-labs.com/"
               target="_blank"
-              rel="noreferrer noopener">
+            >
               Nomadic Labs
             </a>
           </div>
           <div>
             <h5>More</h5>
             {/* <a href={`${this.props.config.baseUrl}blog`}>Blog</a> */}
-            <a href="https://github.com/clarus/coq-of-ocaml">GitHub</a>
+            <a
+              href="https://github.com/clarus/coq-of-ocaml"
+              target="_blank"
+            >
+              GitHub
+            </a>
             <a
               className="github-button"
               href={this.props.config.repoUrl}

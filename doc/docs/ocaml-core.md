@@ -3,7 +3,7 @@ id: ocaml-core
 title: OCaml core
 ---
 
-coq-of-ocaml translates the functional core of [OCaml](https://ocaml.org/) to the corresponding [Coq](https://coq.inria.fr/) constructs. It adds type annotations for each definition. We present how this translation work.
+`coq-of-ocaml` translates the functional core of [OCaml](https://ocaml.org/) to the corresponding [Coq](https://coq.inria.fr/) constructs. It adds type annotations for each definition. We present how this translation work.
 
 ## Functions
 The OCaml functions are translated to standard Coq functions. For example, the definition of the composition function in OCaml:
@@ -101,7 +101,7 @@ Module answer.
 End answer.
 Definition answer := answer.record.
 ```
-Records in Coq are automatically namespaced into a module of the same name. This prevents name collisions between record fields. As Coq has no builtin constructs for substitution in records, coq-of-ocaml generates a `with_` function for each of the fields.
+Records in Coq are automatically namespaced into a module of the same name. This prevents name collisions between record fields. As Coq has no builtin constructs for substitution in records, `coq-of-ocaml` generates a `with_` function for each of the fields.
 
 To read into the record, the generated code prefixes all the fields by the record's name:
 ```ocaml
@@ -126,7 +126,7 @@ Definition get_answer_code (function_parameter : answer) : Z :=
 ```
 
 ## Recursive definitions
-In Coq all functions must be proven terminating. We disable the termination checks for now by using the [TypingFlags plugin](https://github.com/SimonBoulier/TypingFlags) (this feature should be included in the upcoming Coq 8.11 release). At the start of every generated files, coq-of-ocaml unset the termination flag:
+In Coq all functions must be proven terminating. We disable the termination checks for now by using the [TypingFlags plugin](https://github.com/SimonBoulier/TypingFlags) (this feature should be included in the upcoming Coq 8.11 release). At the start of every generated files, `coq-of-ocaml` unset the termination flag:
 ```coq
 Require Import TypingFlags.Loader.
 Unset Guard Checking.
@@ -154,7 +154,7 @@ let sum_first_elements l1 l2 =
   let* (x2, x3) = get_head l2 in
   return (x1 + x2 + x3)
 ```
-We translate the program using similar let-notations in Coq. We require the user to manually insert these notations. For example, here coq-of-ocaml generates:
+We translate the program using similar let-notations in Coq. We require the user to manually insert these notations. For example, here `coq-of-ocaml` generates:
 ```coq
 Definition _return {a : Set} (x : a) : option a := Some x.
 
@@ -187,4 +187,4 @@ Notation "'let*' ' x ':=' X 'in' Y" :=
   (op_letstar X (fun x => Y))
   (at level 200, x pattern, X at level 100, Y at level 200).
 ```
-the function `get_head` compiles. Note that coq-of-ocaml does not generate these notations, and you have to add them by hand.
+the function `get_head` compiles. Note that `coq-of-ocaml` does not generate these notations, and you have to add them by hand.

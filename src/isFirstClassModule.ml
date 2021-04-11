@@ -154,4 +154,4 @@ let rec is_module_typ_first_class
         "We use the concept of shape to find the name of a signature for Coq."
       )
     end
-  | Mty_functor _ -> return (Not_found "This is a functor type.")
+  | Mty_functor _ -> return (Not_found "This is a functor type")

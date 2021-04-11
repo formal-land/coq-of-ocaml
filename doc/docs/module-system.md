@@ -3,7 +3,7 @@ id: module-system
 title: Module system
 ---
 
-To handle the module system of OCaml, the compiler coq-of-ocaml generates either plain Coq modules or dependent records. It never generates Coq functors or module types. You can use coq-of-ocaml to translate modules, module types, functors and first-class modules.
+To handle the module system of OCaml, the compiler `coq-of-ocaml` generates either plain Coq modules or dependent records. It never generates Coq functors or module types. You can use `coq-of-ocaml` to translate modules, module types, functors and first-class modules.
 
 ## General mechanism
 ### Example
@@ -106,7 +106,7 @@ module M = struct
   let v = "hi"
 end
 ```
-coq-of-ocaml generates without errors:
+`coq-of-ocaml` generates without errors:
 ```coq
 Module S1.
   Record signature := {
@@ -335,7 +335,7 @@ Module S.
   Arguments signature : clear implicits.
 End S.
 ```
-Due to duplications, coq-of-ocaml may generate Coq terms which are larger than the corresponding OCaml code. If you want to keep a generated Coq without duplications, we recommend you to use sub-modules rather than includes.
+Due to duplications, `coq-of-ocaml` may generate Coq terms which are larger than the corresponding OCaml code. If you want to keep a generated Coq without duplications, we recommend you to use sub-modules rather than includes.
 
 ## Functors
 We represent functors as functions over bounded records. Here is the example of a functor declaration:

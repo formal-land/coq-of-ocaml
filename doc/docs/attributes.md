@@ -3,9 +3,9 @@ id: attributes
 title: Attributes
 ---
 
-We present the attributes which we can use with coq-of-ocaml. See the [attributes documentation](https://caml.inria.fr/pub/docs/manual-ocaml/attributes.html) of OCaml for general information about the attributes mechanism. Note that the OCaml attributes do not change the behavior of a program. There are there to help developer tools.
+We present the attributes which we can use with `coq-of-ocaml`. See the [attributes documentation](https://caml.inria.fr/pub/docs/manual-ocaml/attributes.html) of OCaml for general information about the attributes mechanism. Note that the OCaml attributes do not change the behavior of a program. There are there to help developer tools.
 
-We prefix all the attributes of coq-of-ocaml by `coq_`. According to the OCaml syntax, depending on the context, you may use a single `@` or a double `@@`.
+We prefix all the attributes of `coq-of-ocaml` by `coq_`. According to the OCaml syntax, depending on the context, you may use a single `@` or a double `@@`.
 
 ## coq_axiom_with_reason
 When we cannot import the definition of a value, we can use the `[@coq_axiom_with_reason]` attribute to transform it to a Coq axiom. For example:
@@ -20,7 +20,7 @@ is translated to:
 ```coq
 Definition function_hard_to_translate_to_coq : unit -> Z := axiom.
 ```
-Note that we must give a reason for the use of `[@coq_axiom_with_reason]` in a string parameter. We define the `axiom` value in the coq-of-ocaml's Coq library. The definition of `axiom` is:
+Note that we must give a reason for the use of `[@coq_axiom_with_reason]` in a string parameter. We define the `axiom` value in the `coq-of-ocaml`'s Coq library. The definition of `axiom` is:
 ```coq
 Axiom axiom : forall {A : Set}, A.
 ```
@@ -270,7 +270,7 @@ Recursive definition is:
  end".
 ```
 
-For recursive notations, you can combine this attribute with `@coq_struct` to tell coq-of-ocaml to generate a recursive notation. For example, we transform:
+For recursive notations, you can combine this attribute with `@coq_struct` to tell `coq-of-ocaml` to generate a recursive notation. For example, we transform:
 ```ocaml
 type 'a tree =
   | Leaf of 'a
@@ -311,7 +311,7 @@ using the keyword `fix` for the defintion of `sums`. In this example too, the ty
 > In the proofs, whenever the definition of `sums` appears unfolded, you can run the tactic `fold sums` to hide it.
 
 ## coq_phantom
-When it can, coq-of-ocaml detects phantom types and remove their type annotations. For example, we translate the following OCaml code:
+When it can, `coq-of-ocaml` detects phantom types and remove their type annotations. For example, we translate the following OCaml code:
 ```ocaml
 type 'a num = int
 
@@ -330,7 +330,7 @@ Definition two : num := 2.
 ```
 The reason is that phantom types may generate ambiguities during type inference in Coq.
 
-The `[@coq_phantom]` attribute forces coq-of-ocaml to consider a type as phantom. This can be useful for abstract types in `.mli` files, since their definition is not reachable. For example:
+The `[@coq_phantom]` attribute forces `coq-of-ocaml` to consider a type as phantom. This can be useful for abstract types in `.mli` files, since their definition is not reachable. For example:
 ```ocaml
 type 'a num
 ```

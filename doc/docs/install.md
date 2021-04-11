@@ -3,14 +3,10 @@ id: install
 title: Install
 ---
 
-We recommend to install the latest stable version of coq-of-ocaml via [opam](https://opam.ocaml.org/).
+We recommend to install the latest stable version of `coq-of-ocaml` via [opam](https://opam.ocaml.org/).
 
 ## Latest stable version
-Using the package manager opam, add the [Coq repository](http://coq.io/opam/):
-```sh
-opam repo add coq-released https://coq.inria.fr/opam/released
-```
-and run:
+Using the package manager `opam`, run:
 ```sh
 opam install coq-of-ocaml
 ```

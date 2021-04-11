@@ -290,12 +290,19 @@ let typ_of_variants (labels : string list) : t option Monad.t =
   let typs = typs |> List.sort_uniq compare in
   let variants_message =
     String.concat ", " (labels |> List.map (fun label -> "`" ^ label)) in
+  let variant_help_error_message =
+    "Try using non-variant algebraic data types, or configure the " ^
+    "variants in the configuration file." in
   match typs with
   | [] ->
     raise
       None
       NotSupported
-      ("No type known for the following variants: " ^ variants_message)
+      (
+        "No type known for the following variants: " ^ variants_message ^
+        "\n\n" ^
+        variant_help_error_message
+      )
   | [typ] -> return (Some typ)
   | typ :: _ :: _ ->
     raise
@@ -306,7 +313,9 @@ let typ_of_variants (labels : string list) : t option Monad.t =
         ":\n" ^
         String.concat "\n" (typs |> List.map (fun typ ->
           "- " ^ Pp.to_string (to_coq typ)
-        ))
+        )) ^
+        "\n\n" ^
+        variant_help_error_message
       )
 
 let is_variant_declaration
