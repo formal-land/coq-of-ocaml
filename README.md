@@ -12,6 +12,10 @@ The guiding idea of `coq-of-ocaml` is [TypeScript](https://www.typescriptlang.o
 
 There are still some open problems with `coq-of-ocaml`, like the axiom-free compilation of [GADTs](https://blog.janestreet.com/why-gadts-matter-for-performance/) (an ongoing project). If you are willing to work on a particular project, please contact us by opening an issue in this repository.
 
+<p align="center">
+  <img alt="happiness and proofs" width="347" height="auto" src="https://raw.githubusercontent.com/clarus/coq-of-ocaml/master/doc/proofs_happiness.png" />
+</p>
+
 ## Example
 Start with the file `main.ml`&nbsp;🐫:
 ```ocaml
