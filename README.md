@@ -1,16 +1,18 @@
-# ![Logo](https://clarus.github.io/coq-of-ocaml/img/rooster-48.png) coq-of-ocaml
+# ![Logo](https://clarus.github.io/coq-of-ocaml/img/rooster-48.png) coq-of-ocaml [![CI](https://github.com/clarus/coq-of-ocaml/workflows/CI/badge.svg?branch=master)](https://github.com/clarus/coq-of-ocaml/actions?query=workflow%3ACI)
 > Import OCaml programs to Coq for formal verification
-
-[![CI](https://github.com/clarus/coq-of-ocaml/workflows/CI/badge.svg?branch=master)](https://github.com/clarus/coq-of-ocaml/actions?query=workflow%3ACI)
 
 **Documentation on https://clarus.github.io/coq-of-ocaml/**
 
 ## Aim
-`coq-of-ocaml` aims to enable formal verification of [OCaml](https://ocaml.org/) programs&nbsp;🦄. *The more you prove, the happier you are.* By transforming OCaml code into similar [Coq](https://coq.inria.fr/) programs, it is possible to prove arbitrarily complex properties using the existing power of Coq. The sweet spot of `coq-of-ocaml` is purely functional and monadic programs. Side-effects outside of a monad, like references, and advanced features like object-oriented programming, may never be supported. By sticking to the supported subset of OCaml, you should be able to import millions of lines of code to Coq and write proofs at large. Running `coq-of-ocaml` after each code change, you can make sure that your proofs are still valid. We recommend organizing your proof files as you would organize your unit-test files.
+`coq-of-ocaml` aims to enable formal verification of [OCaml](https://ocaml.org/) programs&nbsp;🦄. *The more you prove, the happier you are.* By transforming OCaml code into similar [Coq](https://coq.inria.fr/) programs, it is possible to prove arbitrarily complex properties using the existing power of Coq. The sweet spot of `coq-of-ocaml` is purely functional and monadic programs. Side-effects outside of a monad, like references, and advanced features like object-oriented programming, may never be supported. By sticking to the supported subset of OCaml, you should be able to import millions of lines of code to Coq and write proofs at large. Running `coq-of-ocaml` after each code change, you can make sure that your proofs are still valid. The generated Coq code is designed to be stable, with no generated variable names for example. We recommend organizing your proof files as you would organize your unit-test files.
 
-The guiding idea of `coq-of-ocaml` is [TypeScript](https://www.typescriptlang.org/). Instead of bringing types to an untyped language, we bring proofs to an already typed language. The approach stays the same: finding the right sweet spot, using heuristics when needed, guiding the user with error messages. We use `coq-of-ocaml` at [Tezos](https://tezos.com/), a crypto-currency implemented in OCaml, in the hope to have near-zero bugs thanks to formal proofs. Tezos is currently one of the most advanced crypto-currencies, with smart contracts, proof-of-stake, encrypted transactions, and protocol upgrades. It aims to compete with Ethereum. Formal verification is claimed to be important for crypto-currencies as there are no central authorities to forbid bug exploits and a lot of money at stake. A Coq translation of the core components of Tezos is available in the project [coq-tezos-of-ocaml](https://gitlab.com/nomadic-labs/coq-tezos-of-ocaml). Protecting the money.
+The guiding idea of `coq-of-ocaml` is [TypeScript](https://www.typescriptlang.org/). Instead of bringing types to an untyped language, we are bringing proofs to an already typed language. The approach stays the same: finding the right sweet spot, using heuristics when needed, guiding the user with error messages. We use `coq-of-ocaml` at [Tezos](https://tezos.com/), a crypto-currency implemented in OCaml, in the hope to have near-zero bugs thanks to formal proofs. Tezos is currently one of the most advanced crypto-currencies, with smart contracts, proof-of-stake, encrypted transactions, and protocol upgrades. It aims to compete with Ethereum. Formal verification is claimed to be important for crypto-currencies as there are no central authorities to forbid bug exploits and a lot of money at stake. A Coq translation of the core components of Tezos is available in the project [coq-tezos-of-ocaml](https://gitlab.com/nomadic-labs/coq-tezos-of-ocaml). Protecting the money.
 
-There are still some open problems with `coq-of-ocaml`, like the axiom-free compilation of [GADTs](https://blog.janestreet.com/why-gadts-matter-for-performance/) (ongoing project). If you are willing to work on a particular project, please contact us by opening an issue in this repository.
+There are still some open problems with `coq-of-ocaml`, like the axiom-free compilation of [GADTs](https://blog.janestreet.com/why-gadts-matter-for-performance/) (an ongoing project). If you are willing to work on a particular project, please contact us by opening an issue in this repository.
+
+<p align="center">
+  <img alt="happiness and proofs" width="347" height="auto" src="https://raw.githubusercontent.com/clarus/coq-of-ocaml/master/doc/proofs_happiness.png" />
+</p>
 
 ## Example
 Start with the file `main.ml`&nbsp;🐫:
@@ -60,7 +62,7 @@ Lemma positive_plus n m : n > 0 -> m > 0 -> n + m > 0.
   lia.
 Qed.
 
-(** Proof thay if a tree is positive, then its sum is positive too *)
+(** Proof that if a tree is positive, then its sum is positive too *)
 Fixpoint positive_sum (tree : tree int) (H : positive tree)
   : sum tree > 0.
   destruct tree; simpl; inversion H; trivial.
@@ -69,24 +71,10 @@ Qed.
 ```
 
 ## Install
-### Latest stable version
-Using the package manager [opam](https://opam.ocaml.org/),
+Using the OCaml package manager [opam](https://opam.ocaml.org/), run:
 ```
 opam install coq-of-ocaml
 ```
-### Current development version
-To install the current development version:
-```
-opam pin add https://github.com/clarus/coq-of-ocaml.git#master
-```
-
-### Manually
-Clone the Git submodule for [Merlin](https://github.com/ocaml/merlin):
-```
-git submodule init
-git submodule update
-```
-Then read the `coq-of-ocaml.opam` file at the root of the project to know the dependencies to install and get the list of commands to build the project.
 
 ## Usage
 The basic command is:
@@ -114,6 +102,23 @@ You can read the documentation on the website of the project at [https://clarus.
 * no object-oriented programming ❌
 
 Even in case of errors, we try to generate some Coq code along with an error message. The generated Coq code should be readable and with a size similar to the OCaml source. The generated code does not necessarily compile after a first try. This can be due to various errors, such as name collisions. Do not hesitate to fix these errors by updating the OCaml source accordingly. If you want more assistance, please contact us by opening an issue in this repository.
+
+## Contribute
+If you want to contribute to the project, you can submit a pull-requests.
+
+### Build with opam
+To install the current development version:
+```
+opam pin add https://github.com/clarus/coq-of-ocaml.git#master
+```
+
+### Build manually
+Clone the Git submodule for [Merlin](https://github.com/ocaml/merlin):
+```
+git submodule init
+git submodule update
+```
+Then read the `coq-of-ocaml.opam` file at the root of the project to know the dependencies to install and get the list of commands to build the project.
 
 ## License
 MIT (open-source software)
