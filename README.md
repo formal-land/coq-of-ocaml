@@ -1,7 +1,5 @@
-# ![Logo](https://clarus.github.io/coq-of-ocaml/img/rooster-48.png) coq-of-ocaml
+# ![Logo](https://clarus.github.io/coq-of-ocaml/img/rooster-48.png) coq-of-ocaml [![CI](https://github.com/clarus/coq-of-ocaml/workflows/CI/badge.svg?branch=master)](https://github.com/clarus/coq-of-ocaml/actions?query=workflow%3ACI)
 > Import OCaml programs to Coq for formal verification
-
-[![CI](https://github.com/clarus/coq-of-ocaml/workflows/CI/badge.svg?branch=master)](https://github.com/clarus/coq-of-ocaml/actions?query=workflow%3ACI)
 
 **Documentation on https://clarus.github.io/coq-of-ocaml/**
 
@@ -73,24 +71,10 @@ Qed.
 ```
 
 ## Install
-### Latest stable version
-Using the package manager [opam](https://opam.ocaml.org/),
+Using the OCaml package manager [opam](https://opam.ocaml.org/), run:
 ```
 opam install coq-of-ocaml
 ```
-### Current development version
-To install the current development version:
-```
-opam pin add https://github.com/clarus/coq-of-ocaml.git#master
-```
-
-### Manually
-Clone the Git submodule for [Merlin](https://github.com/ocaml/merlin):
-```
-git submodule init
-git submodule update
-```
-Then read the `coq-of-ocaml.opam` file at the root of the project to know the dependencies to install and get the list of commands to build the project.
 
 ## Usage
 The basic command is:
@@ -118,6 +102,23 @@ You can read the documentation on the website of the project at [https://clarus.
 * no object-oriented programming ❌
 
 Even in case of errors, we try to generate some Coq code along with an error message. The generated Coq code should be readable and with a size similar to the OCaml source. The generated code does not necessarily compile after a first try. This can be due to various errors, such as name collisions. Do not hesitate to fix these errors by updating the OCaml source accordingly. If you want more assistance, please contact us by opening an issue in this repository.
+
+## Contribute
+If you want to contribute to the project, you can submit a pull-requests.
+
+### Build with opam
+To install the current development version:
+```
+opam pin add https://github.com/clarus/coq-of-ocaml.git#master
+```
+
+### Build manually
+Clone the Git submodule for [Merlin](https://github.com/ocaml/merlin):
+```
+git submodule init
+git submodule update
+```
+Then read the `coq-of-ocaml.opam` file at the root of the project to know the dependencies to install and get the list of commands to build the project.
 
 ## License
 MIT (open-source software)
