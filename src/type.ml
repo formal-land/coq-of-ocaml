@@ -103,6 +103,11 @@ let rec non_phantom_typs (path : Path.t) (typs : Types.type_expr list)
       return (Some (typ_params |> List.map (fun _ -> false)))
     else if is_tagged then
       return None
+    (* This is both an optimization and a way to avoid infinite loops on some
+       recursive types, such as recursive records (although we do not support
+       recursive records on the Coq side). *)
+    else if List.length typ_params = 0 then
+      return (Some [])
     else
       begin match typ_declaration.type_kind with
       | Type_abstract ->
@@ -330,7 +335,7 @@ let simplified_contructor_path (path : Path.t) (arity : int)
     begin try
       (* By calling this function we check that we do not have a path with
          functors, which we cannot handle. *)
-      let _ = Path.to_string_list path in
+      let _ = MixedPath.path_to_string_list path in
       MixedPath.of_path false path
     with _ -> return mixed_path
     end

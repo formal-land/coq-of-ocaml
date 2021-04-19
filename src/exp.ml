@@ -692,15 +692,11 @@ let rec of_expression (typ_vars : Name.t Name.Map.t) (e : expression)
   else
     return e))
 
-and of_match
-  (typ_vars : Name.t Name.Map.t)
-  (e : t)
-  (cases : case list)
-  (is_gadt_match : bool)
-  (is_tagged_match : bool)
-  (do_cast_results : bool)
-  (is_with_default_case : bool)
-  : t Monad.t =
+and of_match :
+  type pattern_kind.
+  Name.t Name.Map.t -> t -> pattern_kind case list -> bool -> bool -> bool -> bool ->
+  t Monad.t =
+  fun typ_vars e cases is_gadt_match is_tagged_match do_cast_results is_with_default_case ->
   let is_extensible_type_match =
     cases |>
     List.map (fun { c_lhs; _ } -> c_lhs) |>
@@ -831,21 +827,17 @@ and of_match
   return (Apply (t, ts))
 
 (** We suppose that we know that we have a match of extensible types. *)
-and of_match_extensible
-  (typ_vars : Name.t Name.Map.t)
-  (e : t)
-  (cases : case list)
-  : t Monad.t =
+and of_match_extensible :
+  type kind.
+  Name.t Name.Map.t -> t -> kind case list -> t Monad.t =
+  fun (typ_vars : Name.t Name.Map.t)
+      (e : t)
+      (cases : kind case list) ->
   let* cases =
     cases |>
     Monad.List.map (fun {c_lhs; c_rhs; _} ->
       set_loc c_lhs.pat_loc (
-      let* p =
-        match c_lhs.pat_desc with
-        | Tpat_any -> return None
-        | _ ->
-          let* (tag, p, typ) = Pattern.of_extensible_pattern c_lhs in
-          return (Some (tag, p, typ)) in
+      let* p = Pattern.of_extensible_pattern c_lhs in
       let* e = of_expression typ_vars c_rhs in
       return (p, e))
     ) in
@@ -854,8 +846,9 @@ and of_match_extensible
 (** Generate a variable and a "match" on this variable from a list of
     patterns. *)
 and open_cases
+  (type pattern_kind)
   (typ_vars : Name.t Name.Map.t)
-  (cases : case list)
+  (cases : pattern_kind case list)
   (is_gadt_match : bool)
   (is_tagged_match : bool)
   (do_cast_results : bool)
@@ -892,7 +885,7 @@ and import_let_fun
     | Some Pattern.Any -> return None
     | Some (Pattern.Variable x) -> return (Some x)
     | _ ->
-      raise None Unexpected "A variable name instead of a pattern was expected."
+      raise None Unexpected "A variable name instead of a pattern was expected"
     ) >>= fun x ->
     Type.of_typ_expr true typ_vars vb_expr.exp_type >>= fun (e_typ, typ_vars, new_typ_vars) ->
     match x with

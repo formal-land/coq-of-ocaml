@@ -37,12 +37,6 @@ class HomeSplash extends React.Component {
       </div>
     );
 
-    const Logo = props => (
-      <div className="projectLogo">
-        <img src={props.img_src} alt="Project Logo" />
-      </div>
-    );
-
     const ProjectTitle = props => (
       <h2 className="projectTitle">
         {props.title}
@@ -60,7 +54,6 @@ class HomeSplash extends React.Component {
 
     return (
       <SplashContainer>
-        <Logo img_src={`${baseUrl}img/rooster.svg`} />
         <div className="inner">
           <ProjectTitle tagline={siteConfig.tagline} title={siteConfig.title} />
           <PromoSection>
@@ -108,7 +101,7 @@ class Index extends React.Component {
           </a>
         </h2>
         <MarkdownBlock>
-          We develop coq-of-ocaml at [Nomadic Labs](https://www.nomadic-labs.com/). We use it to formally verify the implementation of the crypto-currency [Tezos](https://tezos.com/). We are open to other applications.
+          We develop `coq-of-ocaml` at [Nomadic Labs](https://www.nomadic-labs.com/). This project initially started as part of a [PhD](http://www.theses.fr/2018USPCC068) at the university of [Paris&nbsp;7](https://u-paris.fr/). We use `coq-of-ocaml` to formally verify the implementation of the crypto-currency [Tezos](https://tezos.com/). We are open to other applications for software verification.
         </MarkdownBlock>
         <Button href="mailto:contact@nomadic-labs.com">
           Contact us

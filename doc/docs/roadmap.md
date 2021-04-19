@@ -20,7 +20,7 @@ Here are some of the tasks that we could do, with an estimated cost in days:
   * we use the Tezos code-base as a huge non-regression test;
   * we could track the lines covered by our unit tests and make sure we get to 100%;
 * have a configuration file **(1 day + 1 day of stabilization and documentation)**:
-  * we currently use a fork of coq-of-ocaml to have special features like renaming some variables with collisions;
+  * we currently use a fork of `coq-of-ocaml` to have special features like renaming some variables with collisions;
   * we would like to have a configuration file instead;
 * upgrade to OCaml 4.09 **(1 day + maybe a few days if this creates nasty bugs)**:
   * necessary since we [upgraded to OCaml 4.09](https://gitlab.com/tezos/tezos/-/merge_requests/1632);
@@ -43,7 +43,7 @@ Here are some of the tasks that we could do, with an estimated cost in days:
   * do the same for the Cartharge version;
 * integrate into the CI of the development of the next Tezos protocol **(3 days, but many preliminary tasks)**:
   * being into the CI of Tezos would help to maintain the proofs for the evolving protocol;
-  * the cheapest way to integrate into the CI seems to be to verify that there no regressions on the warnings from coq-of-ocaml;
+  * the cheapest way to integrate into the CI seems to be to verify that there no regressions on the warnings from `coq-of-ocaml`;
   * requires to be compatible with the current protocol;
   * requires to have a more precise way to sort-out the warnings, as some can not be removed for now;
   * requires to be up-to-date with the current environment.

@@ -76,6 +76,7 @@ module Command = struct
       | GetConfiguration -> Result.success context.configuration
       | GetDocumentation ->
         let (documentation, _) =
+          let open Merlin_analysis in
           Ocamldoc.associate_comment context.comments context.loc context.loc in
         Result.success documentation
       | GetEnv -> Result.success context.env

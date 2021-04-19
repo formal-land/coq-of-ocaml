@@ -25,7 +25,7 @@ let of_payload_string
       pstr_desc =
         Pstr_eval (
           {
-            pexp_desc = Pexp_constant (Pconst_string (payload, _));
+            pexp_desc = Pexp_constant (Pconst_string (payload, _, _));
             _
           },
           _
@@ -54,7 +54,7 @@ let of_attributes (attributes : Typedtree.attributes) : t list Monad.t =
         Unexpected
         "Depreacated attribute. Use @coq_axiom_with_reason instead."
     | "coq_axiom_with_reason" ->
-      let error_message = "Give a reason for this axiom." in
+      let error_message = "Give a reason for this axiom" in
       let* _ = of_payload_string error_message id attr_payload in
       return (Some AxiomWithReason)
     | "coq_cast" -> return (Some Cast)
@@ -62,7 +62,7 @@ let of_attributes (attributes : Typedtree.attributes) : t list Monad.t =
     | "coq_tag_gadt" -> return (Some TaggedGadt)
     | "coq_implicit" ->
       let error_message =
-        "Give a value such as \"(A := unit)\" to define an implicit type." in
+        "Give a value such as \"(A := unit)\" to define an implicit type" in
       let* payload = of_payload_string error_message id attr_payload in
       return (Some (Implicit payload))
     | "coq_match_gadt" -> return (Some MatchGadt)
@@ -72,7 +72,7 @@ let of_attributes (attributes : Typedtree.attributes) : t list Monad.t =
     | "coq_plain_module" -> return (Some PlainModule)
     | "coq_phantom" -> return (Some Phantom)
     | "coq_struct" ->
-      let error_message = "Give the name of the parameter to recurse on." in
+      let error_message = "Give the name of the parameter to recurse on" in
       let* payload = of_payload_string error_message id attr_payload in
       return (Some (Struct payload))
     | "coq_type_annotation" -> return (Some TypAnnotation)

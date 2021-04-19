@@ -17,7 +17,9 @@ type t =
 
 (** Import an OCaml pattern. If the answer is [None] then the pattern is
     impossible (for example with extensible types). *)
-let rec of_pattern (p : pattern) : t option Monad.t =
+let rec of_pattern
+  : type pattern_kind. pattern_kind general_pattern -> t option Monad.t =
+  fun p ->
   set_loc p.pat_loc (
   match p.pat_desc with
   | Tpat_any -> return (Some Any)
@@ -106,29 +108,33 @@ let rec of_pattern (p : pattern) : t option Monad.t =
   | Tpat_lazy p ->
     of_pattern p >>= fun pattern ->
     raise pattern NotSupported "Lazy patterns are not supported"
+  | Tpat_value p -> of_pattern (p :> value general_pattern)
   | Tpat_exception _ ->
     raise None SideEffect "We do not support exception patterns")
 
-let rec are_extensible_patterns_or_any
-  (need_at_least_one_extensible_pattern : bool) (ps : pattern list)
-  : bool =
-  match ps with
-  | [] -> not need_at_least_one_extensible_pattern
-  | p :: ps ->
-    begin match p.pat_desc with
-    | Tpat_construct (_, constructor_description, _) ->
-      begin match constructor_description.cstr_tag with
-      | Cstr_extension _ -> are_extensible_patterns_or_any false ps
-      | _ -> false
-      end
-    | Tpat_any ->
-      are_extensible_patterns_or_any need_at_least_one_extensible_pattern ps
+let rec is_extensible_pattern_or_any : type kind. kind general_pattern -> bool =
+  fun p ->
+  match p.pat_desc with
+  | Tpat_construct (_, constructor_description, _) ->
+    begin match constructor_description.cstr_tag with
+    | Cstr_extension _ -> true
     | _ -> false
     end
+  | Tpat_any -> true
+  | Tpat_value pat -> is_extensible_pattern_or_any (pat :> value general_pattern)
+  | _ -> false
 
-let rec of_extensible_pattern (p : pattern) : (string * t * Type.t) Monad.t =
+let rec are_extensible_patterns_or_any :
+  type kind. bool -> kind general_pattern list -> bool =
+  fun need_at_least_one_extensible_pattern ps ->
+  match ps with
+  | [] -> not need_at_least_one_extensible_pattern
+  | p :: ps -> is_extensible_pattern_or_any p && are_extensible_patterns_or_any false ps
+
+let rec of_extensible_pattern : type k. k general_pattern -> (string * t * Type.t) option Monad.t =
+  fun p ->
   let error =
-    raise ("unexpected_kind_of_pattern", Any, Type.Tuple []) Unexpected
+    raise (Some ("unexpected_kind_of_pattern", Any, Type.Tuple [])) Unexpected
       "Unexpected kind of pattern (expected extensible type or an any pattern)" in
   match p.pat_desc with
   | Tpat_construct (_, constructor_description, ps) ->
@@ -140,9 +146,11 @@ let rec of_extensible_pattern (p : pattern) : (string * t * Type.t) Monad.t =
           Type.of_type_expr_without_free_vars p.pat_type
         ) in
       let* ps = Monad.List.filter_map of_pattern ps in
-      return (Path.last path, Tuple ps, Type.Tuple typs)
+      return (Some (Path.last path, Tuple ps, Type.Tuple typs))
     | _ -> error
     end
+  | Tpat_any -> return None
+  | Tpat_value pat -> of_extensible_pattern (pat :> value general_pattern)
   | _ -> error
 
 let rec has_or_patterns (p : t) : bool =

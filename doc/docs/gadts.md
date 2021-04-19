@@ -99,7 +99,7 @@ let to_string (type a) (kind : a int_or_string) (x : a) : string =
   | Int, (x : int) -> string_of_int x
   | String, (x : string) -> x
 ```
-This also works with the `function` keyword. For coq-of-ocaml to generate valid code, we add the variable `x` in the match. Indeed, the type `a` of `x` is unified during the match, either to `int` or `string`. We also precise this type for each branch with an annotation `(x : int)` to disambiguate from `(x : a)`. In Coq, we introduce two unsafe casts `obj_magic` in each branch:
+This also works with the `function` keyword. For `coq-of-ocaml` to generate valid code, we add the variable `x` in the match. Indeed, the type `a` of `x` is unified during the match, either to `int` or `string`. We also precise this type for each branch with an annotation `(x : int)` to disambiguate from `(x : a)`. In Coq, we introduce two unsafe casts `obj_magic` in each branch:
 * one for the variables of the pattern; this cast may also introduce some existential variables;
 * one to unify the types of the results of the branches.
 ```coq
