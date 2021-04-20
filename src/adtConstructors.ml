@@ -113,11 +113,11 @@ type t = item list
 
 let of_ocaml_case
     (typ_name : Name.t)
-    (defined_typ_params : AdtParameters.t)
     (attributes : Attribute.t list)
+    (defined_typ_params : AdtParameters.t)
     (case : Types.constructor_declaration)
-  : (item * (RecordSkeleton.t * Name.t list * Type.t) option) Monad.t =
-  let { Types.cd_args; cd_id; cd_loc; cd_res; _ } = case in
+  : (item * (RecordSkeleton.t * VarEnv.t * Type.t) option) Monad.t =
+  let { Types.cd_args; cd_id; cd_loc; cd_res; cd_attributes } = case in
   set_loc cd_loc (
     let* constructor_name =
       PathName.map_constructor_name
@@ -151,7 +151,8 @@ let of_ocaml_case
               )
               []
               (List.map Type.typ_args_of_typ record_params) in
-          let typ_args' = typ_args |> List.map (fun name ->
+          let new_typ_vars = VarEnv.reorg typ_args new_typ_vars in
+          let typ_args = new_typ_vars |> List.map (fun (name, _) ->
               Type.Variable name
             ) in
           return (
@@ -161,7 +162,7 @@ let of_ocaml_case
                   path = [typ_name];
                   base = constructor_name;
                 },
-                List.combine typ_args' (Type.tag_no_args typ_args')
+                List.combine typ_args (Type.tag_no_args typ_args)
               )
             ],
             new_typ_vars,
@@ -171,7 +172,7 @@ let of_ocaml_case
                 module_name = constructor_name;
                 typ_name = Name.suffix_by_skeleton constructor_name;
               },
-              typ_args,
+              new_typ_vars,
               Type.Apply (
                 MixedPath.PathName {
                   path = [typ_name];

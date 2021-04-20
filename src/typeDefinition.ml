@@ -3,14 +3,13 @@ open SmartPrint
 open Monad.Notations
 
 module Inductive = struct
-  type notation = Name.t * Name.t list * Type.t
+  type notation = Name.t * VarEnv.t * Type.t
 
   type t = {
     constructor_records
-      : (Name.t * (AdtConstructors.RecordSkeleton.t * Name.t list * Type.t) list) list;
+      : (Name.t * (AdtConstructors.RecordSkeleton.t * VarEnv.t * Type.t) list) list;
     notations : notation list;
     records : AdtConstructors.RecordSkeleton.t list;
-    is_tagged : bool;
     (* typs is a list of mutually defined Inductives
      * of the form
      * Inductive `Name.t` (`Name.t list` : Set) : Set :=
@@ -81,7 +80,6 @@ module Inductive = struct
     (name : Name.t)
     (left_typ_args : Name.t list)
     (constructors : AdtConstructors.t)
-    (is_tagged : bool)
     : SmartPrint.t =
     let keyword = if is_first then !^ "Inductive" else !^ "with" in
     nest (
@@ -101,6 +99,10 @@ module Inductive = struct
         | constructor :: _ -> match constructor.res_typ_params with
           | AdtConstructors.Variant l -> List.length l
           | Tagged l -> List.length l
+      in
+      let is_tagged = match constructors with
+        | [] -> false
+        | c :: _ -> c.is_tagged
       in
 
       let arity = if not is_tagged then 1 else res_typ_length + 1 in
@@ -140,26 +142,21 @@ module Inductive = struct
   let to_coq_notations_where
     (subst : Type.Subst.t)
     (notation : SmartPrint.t)
-    (typ_args : Name.t list)
+    (typ_args : VarEnv.t)
     (typ : Type.t)
     : SmartPrint.t =
     let typ =
-      List.fold_left (fun typ typ_arg ->
+      List.fold_left (fun typ (typ_arg, _) ->
         Type.subst_name typ_arg (Name.prefix_by_t typ_arg) typ
       ) typ typ_args in
-    let typ_args = typ_args |> List.map Name.prefix_by_t in
+    let typ_args = typ_args |> List.map (fun (name, typ) -> (Name.prefix_by_t name, typ)) in
     nest (
       notation ^^ !^ ":=" ^^ parens (
         (match typ_args with
-        | [] -> empty
-        | _ :: _ ->
-          !^ "fun" ^^ parens (
-            nest (
-              separate space (typ_args |> List.map Name.to_coq) ^^
-              !^ ":" ^^ Pp.set
-            )
-          ) ^^ !^ "=>" ^^ space
-        ) ^-^ Type.to_coq (Some subst) None typ
+         | [] -> empty
+         | _ :: _ -> Type.typ_vars_to_coq parens (!^ "fun") (!^" => ") typ_args
+        )
+        ^-^ Type.to_coq (Some subst) None typ
       )
     )
 
@@ -171,7 +168,7 @@ module Inductive = struct
         let dependencies =
           Name.Set.diff
             (Type.local_typ_constructors_of_typ typ)
-            (Name.Set.of_list typ_args) in
+            (Name.Set.of_list (List.map fst typ_args)) in
         not (dependencies |> Name.Set.exists (fun dependency ->
           List.mem dependency to_sort_names
         ))
@@ -308,7 +305,7 @@ module Inductive = struct
       separate (newline ^^ newline) (inductive.typs |>
         List.mapi (fun index (name, left_typ_args, constructors) ->
           let is_first = index = 0 in
-          to_coq_typs subst is_first name left_typ_args constructors inductive.is_tagged
+          to_coq_typs subst is_first name left_typ_args constructors
         )
       ) ^-^
       (match notations_wheres with
@@ -362,7 +359,6 @@ let of_ocaml (typs : type_declaration list) : t Monad.t =
           constructor_records = [];
           notations = [];
           records = [];
-          is_tagged = false;
           typs = [(name, typ_args, constructors)];
         })
         NotSupported
@@ -419,9 +415,7 @@ let of_ocaml (typs : type_declaration list) : t Monad.t =
             NotSupported
             "Polymorphic variant types are defined as standard algebraic types"
         | _ ->
-          Type.of_type_expr_without_free_vars typ >>= fun typ ->
-          let free_vars = Type.typ_args_of_typ typ in
-          let typ_args = filter_in_free_vars (AdtParameters.get_parameters typ_args) free_vars in
+          Type.of_typ_expr true Name.Map.empty typ >>= fun (typ, _, typ_args) ->
           return (
             constructor_records,
             (
@@ -438,16 +432,17 @@ let of_ocaml (typs : type_declaration list) : t Monad.t =
           (constructor_records, notations, records, typs)
           NotSupported
           "Abstract types not supported in mutually recursive definitions"
-      | { typ_type = { type_kind = Type_record (fields, _); _ }; _ } ->
+      | { typ_type = { type_kind = Type_record (fields, _); type_params = params ;_ }; _ } ->
         (fields |> Monad.List.map (fun { Types.ld_id = x; ld_type = typ; _ } ->
           let* x = Name.of_ident false x in
-          Type.of_type_expr_without_free_vars typ >>= fun typ ->
-          return (x, typ)
+          Type.of_typ_expr true Name.Map.empty typ >>= fun (typ, _, new_typ_args) ->
+          return (x, typ, new_typ_args)
         )) >>= fun fields ->
-        let (fields_names, fields_types) = List.split fields in
-        let free_vars = Type.typ_args_of_typs fields_types in
-        let typ_args = AdtParameters.get_parameters typ_args in
-        let typ_args = filter_in_free_vars typ_args free_vars in
+        let* (_, _, typ_args) = Type.of_typs_exprs true params Name.Map.empty in
+        let typ_args = List.map fst typ_args in
+        let (fields_names, fields_types, new_typ_args) = Util.List.split3 fields in
+        let new_typ_args = VarEnv.merge new_typ_args in
+        let typ_args = VarEnv.reorg typ_args new_typ_args in
         return (
           constructor_records,
           (
@@ -466,8 +461,8 @@ let of_ocaml (typs : type_declaration list) : t Monad.t =
           typs
         )
       | { typ_type = { type_kind = Type_variant cases; _ }; typ_attributes; _ } ->
-        let* typ_attributes = Attribute.of_attributes typ_attributes in
-        Monad.List.map (AdtConstructors.of_ocaml_case name typ_args typ_attributes) cases >>= fun cases ->
+        let* attributes = Attribute.of_attributes typ_attributes in
+        Monad.List.map (AdtConstructors.of_ocaml_case name attributes typ_args) cases >>= fun cases ->
         let (single_constructors, new_constructor_records) = List.split cases in
         let new_constructor_records =
           new_constructor_records |> Util.List.filter_map (fun x -> x) in
@@ -491,17 +486,11 @@ let of_ocaml (typs : type_declaration list) : t Monad.t =
       )
     ) ([], [], [], [])) >>= fun (constructor_records, notations, records, typs) ->
     let typs = typs |> List.map (function (x, y, z) -> (x, AdtParameters.get_parameters y, z)) in
-    let is_tagged = typs |> List.hd |> fun (_,_, constructors) ->
-                    match constructors with
-                    | [] -> false
-                    | x :: _ -> x.is_tagged
-    in
     return (
       Inductive {
         constructor_records = List.rev constructor_records;
         notations = List.rev notations;
         records;
-        is_tagged;
         typs = List.rev typs
       }
     )

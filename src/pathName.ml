@@ -334,6 +334,7 @@ let is_tagged_variant
   | { type_kind = Type_variant _; type_attributes } ->
     let* type_attributes = Attribute.of_attributes type_attributes in
     return @@ Attribute.has_tag_gadt type_attributes
+  | { type_kind = Type_record _; _ } -> return true
   | _ | exception _ -> return false
 
 
