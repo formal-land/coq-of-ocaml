@@ -436,7 +436,7 @@ let rec of_typ_expr
     let (typ_vars, new_typ_vars, name) =
       if Name.Map.mem source_name typ_vars then (
         let name = Name.Map.find source_name typ_vars in
-        (typ_vars, [], name)
+        (typ_vars, [(name, typ)], name)
       ) else (
         let typ_vars = Name.Map.add source_name generated_name typ_vars in
         (typ_vars, [(generated_name, typ)], generated_name)
@@ -459,9 +459,7 @@ let rec of_typ_expr
     let is_pident = match path with
       | Path.Pident _ -> true
       | _ -> false in
-
     let* is_tagged_variant = PathName.is_tagged_variant path in
-
     if not is_tagged_variant
     then begin
       let tag_list = tag_no_args typs in

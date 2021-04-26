@@ -204,10 +204,7 @@ let of_ocaml_case
         return ((List.map (fun v -> Type.Variable v) typ_args), List.rev new_typ_vars)
     in
     let typ_vars = VarEnv.union typ_vars new_typ_vars in
-    let* param_typs = if is_tagged
-      then Monad.List.map (Type.decode_var_tags typ_vars false) param_typs
-      else return param_typs
-    in
+    let* param_typs = Monad.List.map (Type.decode_var_tags typ_vars false) param_typs in
     let* tagged_return = Monad.List.map (Type.decode_var_tags typ_vars true) tagged_return in
     let* untagged_return =
       AdtParameters.get_return_typ_params defined_typ_params cd_res in
