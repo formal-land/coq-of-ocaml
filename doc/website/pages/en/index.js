@@ -57,11 +57,9 @@ class HomeSplash extends React.Component {
         <div className="inner">
           <ProjectTitle tagline={siteConfig.tagline} title={siteConfig.title} />
           <PromoSection>
-            <Button href={docUrl('introduction.html')}>Introduction</Button>
-            <Button href={docUrl('install.html')}>Getting started</Button>
-            <Button href="https://clarus.github.io/coq-of-ocaml/examples/tezos/">
-              Examples
-            </Button>
+            <Button href={docUrl('introduction')}>Introduction</Button>
+            <Button href={docUrl('install')}>Getting started</Button>
+            <Button href={docUrl('examples')}>Examples</Button>
           </PromoSection>
         </div>
       </SplashContainer>
