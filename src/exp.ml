@@ -952,8 +952,12 @@ and of_let
       | Texp_function _ -> false
       | _ -> true
       end ->
-      Type.of_typ_expr true typ_vars exp_type >>= fun (_, _, new_typ_vars) ->
-      return (List.length new_typ_vars <> 0)
+      Type.of_typ_expr true typ_vars exp_type >>= fun (_, typ_vars', _) ->
+      let typ_vars = List.map fst (Name.Map.bindings typ_vars) in
+      let new_vars = List.fold_left (fun map var ->
+          Name.Map.remove var map
+        ) typ_vars' typ_vars in
+      return (not @@ Name.Map.is_empty new_vars)
     | _ -> return true
     end >>= fun is_function ->
     begin match cases with
