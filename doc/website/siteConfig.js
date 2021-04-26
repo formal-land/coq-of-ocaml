@@ -41,7 +41,7 @@ const siteConfig = {
   // For no header links in the top nav bar -> headerLinks: [],
   headerLinks: [
     {doc: 'introduction', label: 'Docs'},
-    {external: true, href: 'https://clarus.github.io/coq-of-ocaml/examples/', label: 'Examples'},
+    {doc: 'examples', label: 'Examples'},
     {external: true, href: 'https://github.com/clarus/coq-of-ocaml', label: 'GitHub'},
   ],
 
