@@ -718,7 +718,7 @@ and of_match :
       let* motive = Type.decode_var_tags new_typ_vars false motive in
       let (cast, args) = Type.normalize_constructor cast in
       (* Only generates dependent pattern matching for actual gadts *)
-      if List.length args = 0 || (Type.is_native_type cast)
+      if List.length args = 0 || Type.is_native_type cast
       then return None
       else return (Some ({cast; args; motive}))
     end
@@ -887,7 +887,10 @@ and import_let_fun
     | _ ->
       raise None Unexpected "A variable name instead of a pattern was expected"
     ) >>= fun x ->
+    let predefined_variables = List.map snd (Name.Map.bindings typ_vars) in
     Type.of_typ_expr true typ_vars vb_expr.exp_type >>= fun (e_typ, typ_vars, new_typ_vars) ->
+    let* e_typ = Type.decode_var_tags new_typ_vars false e_typ in
+    let new_typ_vars = VarEnv.remove_many predefined_variables new_typ_vars in
     match x with
     | None -> return None
     | Some x ->
