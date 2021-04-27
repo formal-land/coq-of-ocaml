@@ -152,6 +152,11 @@ let of_ocaml_case
               []
               (List.map Type.typ_args_of_typ record_params) in
           let new_typ_vars = VarEnv.reorg typ_args new_typ_vars in
+          let tag_typs = List.map (fun (_, kind) ->
+              match kind with
+              | Kind.Tag -> true
+              | _ -> false
+            ) new_typ_vars in
           let typ_args = new_typ_vars |> List.map (fun (name, _) ->
               Type.Variable name
             ) in
@@ -162,7 +167,7 @@ let of_ocaml_case
                   path = [typ_name];
                   base = constructor_name;
                 },
-                List.combine typ_args (Type.tag_no_args typ_args)
+                List.combine typ_args tag_typs
               )
             ],
             new_typ_vars,
