@@ -40,7 +40,7 @@ let tag_constructor_of
   | FunTyps _ -> "funTyps"
   | Error s -> "error" ^ s
   | Kind k -> Kind.to_string k
-  | String s -> "string"
+  | String _ -> "string"
 
 
 let rec tag_typ_constr_aux
@@ -65,7 +65,7 @@ let rec tag_typ_constr_aux
       let* ts = tag_ty @@ Tuple (List.tl ts) in
       return (Apply (tag, List.combine [t; ts] bs))
   | Apply (mpath, ts) ->
-    let (ts, bs) = List.split ts in
+    let (ts, _) = List.split ts in
     let* ts = Monad.List.map tag_ty ts in
     let arg_names = List.map tag_constructor_of ts in
     let tag = Name.constr_tag |> MixedPath.of_name  in
@@ -375,11 +375,11 @@ let is_type_variant (t : Types.type_expr) : bool Monad.t =
 
 let rec tag_all_args : 'a. 'a list -> bool list = function
   | [] -> []
-  | x :: xs -> true :: tag_all_args xs
+  | _ :: xs -> true :: tag_all_args xs
 
 let rec tag_no_args : 'a. 'a list -> bool list = function
   | [] -> []
-  | x :: xs -> false :: tag_no_args xs
+  | _ :: xs -> false :: tag_no_args xs
 
 let tag_args_with (b : bool) : 'a list -> bool list =
   if b
@@ -639,7 +639,7 @@ and get_constr_arg_tags
     if Attribute.has_tag_gadt attributes
     then return @@ tag_all_args params
     else return @@ tag_no_args params
-  | { type_kind = Type_record (decls, repr); type_params = params; _} ->
+  | { type_kind = Type_record (decls, _); type_params = params; _} ->
     (* Get the variables from param. Keep ordering *)
     let* (_, _, typ_vars) = of_typs_exprs true params Name.Map.empty in
     let typ_vars = List.map (fun (ty, _) -> ty) typ_vars in
@@ -653,8 +653,8 @@ and get_constr_arg_tags
       ) new_typ_vars
   | { type_manifest = None; type_kind = Type_abstract; type_params = params; _ } ->
     return @@ tag_no_args params
-  | { type_manifest = Some typ; type_params = params; _ } ->
-    let* (typ, typ_vars, new_typ_vars) = of_typ_expr true Name.Map.empty typ in
+  | { type_manifest = Some typ; _ } ->
+    let* (_, _, new_typ_vars) = of_typ_expr true Name.Map.empty typ in
     return @@ List.map (fun (_, kind) ->
         match kind with
         | Kind.Tag -> true
@@ -673,7 +673,6 @@ and tag_typ_constr
   then return typs
   else
     let* should_tag_list = get_constr_arg_tags path in
-    let* name = MixedPath.of_path false path in
     let tag_typs = List.combine typs should_tag_list in
     Monad.List.map (fun (typ, should_tag) ->
         if should_tag
@@ -726,7 +725,7 @@ let rec decode_var_tags_aux
   | _ -> return typ
 
 
-let rec decode_var_tags
+let decode_var_tags
     (typ_vars : VarEnv.t)
     (is_tag : bool)
     (typ : t)
@@ -936,7 +935,7 @@ let tag_notation (path : MixedPath.t) (typs : t list): t option =
     if List.mem name Name.native_types
     then Some (Variable tagged_name)
     else match typ with
-      | Apply (mname, ts) ->
+      | Apply (_, ts) ->
         if List.mem name Name.native_type_constructors
         then Some (Apply (MixedPath.of_name tagged_name, ts))
         else None

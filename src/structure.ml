@@ -89,7 +89,7 @@ module Value = struct
             Exp.Header.to_coq_structs header ^^
             !^ ": " ^-^ Type.to_coq None None typ ^-^ !^ " :=" ^^
             group (
-              separate space (notation_cases |> List.map (fun (header, e) ->
+              separate space (notation_cases |> List.map (fun (header, _) ->
                 let { Exp.Header.name; typ_vars; _ } = header in
                 to_coq_notation_synonym name typ_vars
               )) ^^
@@ -611,7 +611,7 @@ let rec to_coq (fargs : int option) (defs : t list) : SmartPrint.t =
           end ^^
           to_coq fargs defs ^^
           begin match e with
-          | Some (e, typ_annotation) ->
+          | Some (e, _) ->
             newline ^^ newline ^^
             nest (
               !^ "Definition" ^^ final_item_name ^^

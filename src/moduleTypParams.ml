@@ -1,4 +1,3 @@
-open SmartPrint
 open Monad.Notations
 
 type 'a mapper =

@@ -190,7 +190,7 @@ let rec get_include_name (module_expr : module_expr) : Name.t Monad.t =
       )
 
 let build_module
-  (params_arity : int Tree.t)
+  (_ : int Tree.t)
   (values : ModuleTypValues.t list)
   (signature_path : Path.t)
   (mixed_path_of_value_or_typ : Name.t -> MixedPath.t Monad.t)
@@ -1087,7 +1087,7 @@ and of_module_expr
           of_module_expr typ_vars e2 expected_module_typ_for_e2 in
         return [Some e2] in
     return (Apply (e1, es))
-  | Tmod_constraint (module_expr, mod_type, annotation, _) ->
+  | Tmod_constraint (module_expr, mod_type, _, _) ->
     let module_type =
       match module_type with
       | Some _ -> module_type

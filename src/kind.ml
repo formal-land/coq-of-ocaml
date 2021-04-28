@@ -1,5 +1,4 @@
 open SmartPrint
-open Monad.Notations
 
 type t =
   | Set

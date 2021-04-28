@@ -117,7 +117,7 @@ let of_ocaml_case
     (defined_typ_params : AdtParameters.t)
     (case : Types.constructor_declaration)
   : (item * (RecordSkeleton.t * VarEnv.t * Type.t) option) Monad.t =
-  let { Types.cd_args; cd_id; cd_loc; cd_res; cd_attributes } = case in
+  let { Types.cd_args; cd_id; cd_loc; cd_res; _ } = case in
   set_loc cd_loc (
     let* constructor_name =
       PathName.map_constructor_name
@@ -270,7 +270,7 @@ let of_ocaml
 
   let* constructors : t = single_constructors |> Monad.List.map (
       fun { constructor_name; param_typs; res_typ_params; typ_vars; _ } ->
-        let (is_tagged, return_typ_params, return_len) = match res_typ_params with
+        let (is_tagged, return_typ_params, _) = match res_typ_params with
           | Tagged ls -> (true, Tagged ls, List.length ls)
           | Variant ls -> (false, Variant typ_params, List.length ls)
         in
