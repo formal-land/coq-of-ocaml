@@ -329,7 +329,7 @@ end
 
 type t =
   | Inductive of Inductive.t
-  | Record of Name.t * Name.t list * (Name.t * Type.t) list * bool
+  | Record of Name.t * VarEnv.t * (Name.t * Type.t) list * bool
   | Synonym of Name.t * Name.t list * Type.t
   | ExtensibleTyp of Name.t
   | Abstract of Name.t * Name.t list
@@ -385,12 +385,22 @@ let of_ocaml (typs : type_declaration list) : t Monad.t =
     AdtParameters.of_ocaml type_params >>= fun typ_args ->
     (fields |> Monad.List.map (fun { Types.ld_id = x; ld_type = typ; _ } ->
       let* x = Name.of_ident false x in
-      Type.of_type_expr_without_free_vars typ >>= fun typ ->
-      return (x, typ)
+      Type.of_typ_expr true Name.Map.empty typ >>= fun (typ, _, new_typ_args) ->
+      return (x, typ, new_typ_args)
     )) >>= fun fields ->
-    let free_vars = Type.typ_args_of_typs (List.map snd fields) in
-    let typ_args = AdtParameters.get_parameters typ_args in
-    let typ_args = filter_in_free_vars typ_args free_vars in
+
+    let* (_, _, typ_args) = Type.of_typs_exprs true type_params Name.Map.empty in
+    let typ_args = List.map fst typ_args in
+    let (fields_names, fields_types, new_typ_args) = Util.List.split3 fields in
+    let new_typ_args = VarEnv.merge new_typ_args in
+    let typ_args = VarEnv.reorg typ_args new_typ_args in
+    let* fields_types = Monad.List.map (Type.decode_var_tags typ_args false) fields_types in
+    let fields = List.combine fields_names fields_types in
+
+    (* let free_vars = Type.typ_args_of_typs (List.map snd fields) in
+     * let typ_args = AdtParameters.get_parameters typ_args in
+     * let typ_args = filter_in_free_vars typ_args free_vars in *)
+
     return (Record (name, typ_args, fields, true))
   | [ { typ_id; typ_type = { type_kind = Type_open; _ }; _ } ] ->
     let* name = Name.of_ident false typ_id in
