@@ -126,6 +126,7 @@ let rec of_signature (signature : Typedtree.signature) : t Monad.t =
           AdtParameters.of_ocaml
         ) >>= fun typ_params ->
         let typ_params = AdtParameters.get_parameters typ_params in
+        let typ_params = typ_params |> List.map (fun field -> (field, Kind.Set)) in
         let* name = Name.of_ident false ci_id_class_type in
         begin match ci_expr with
         | {
