@@ -33,8 +33,11 @@ class Test
   end
 
   def coq_of_ocaml_cmd
-    coq_of_ocaml = '_build/default/src/coqOfOCaml.exe'
-    cmd = [coq_of_ocaml, '-output', '/dev/stdout', @source_file]
+    coq_of_ocaml =
+      ARGV[0] == '--with-coverage' ?
+        ['dune', 'exec', '--instrument-with', 'bisect_ppx', 'src/coqOfOCaml.exe', '--'] :
+        ['_build/default/src/coqOfOCaml.exe']
+    cmd = [*coq_of_ocaml, '-output', '/dev/stdout', @source_file]
   end
 
   def coq_of_ocaml
