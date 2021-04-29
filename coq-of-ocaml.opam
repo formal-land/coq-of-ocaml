@@ -17,9 +17,11 @@ install: [
   [make "-C" "proofs" "install"] {coq:installed}
 ]
 depends: [
+  "bisect_ppx" {dev & >= "2.5.0"}
   "conf-ruby" {with-test}
   "csexp"
   "dune" {>= "2.8"}
+  "menhir" {dev}
   "ocaml" {>= "4.12" & < "4.13"}
   "ocamlfind" {>= "1.5.2"}
   "result"

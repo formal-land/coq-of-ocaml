@@ -27,3 +27,5 @@ proofs/Makefile
 tests/extraction
 .merlin
 coq-of-ocaml.install
+*.coverage
+_coverage/
