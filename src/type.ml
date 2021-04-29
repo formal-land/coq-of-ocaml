@@ -692,11 +692,11 @@ let rec decode_var_tags_aux
         | Some _ -> return typ
     end
   | Arrow (t1, t2) ->
-    let* t1 = decode_var_tags_aux typ_vars in_native true t1 in
-    let* t2 = decode_var_tags_aux typ_vars in_native true t2 in
+    let* t1 = decode_var_tags_aux typ_vars in_native is_tag t1 in
+    let* t2 = decode_var_tags_aux typ_vars in_native is_tag t2 in
     return @@ Arrow (t1, t2)
   | Tuple ts ->
-    let* ts = Monad.List.map (decode_var_tags_aux typ_vars in_native true) ts in
+    let* ts = Monad.List.map (decode_var_tags_aux typ_vars in_native is_tag) ts in
     return @@ Tuple ts
   | Apply (mpath, ts) ->
     let (ts, bs) = List.split ts in
