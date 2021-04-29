@@ -11,7 +11,7 @@ type free_vars = free_var list
 
 let to_coq_grouped_free_vars (free_vars : free_vars) : SmartPrint.t =
   free_vars |>
-  List.map (fun { name; arity } -> (name, arity)) |>
+  List.map (fun { name; arity; _ } -> (name, arity)) |>
   Type.to_coq_grouped_typ_params Type.Braces
 
 module Module = struct
@@ -21,7 +21,7 @@ module Module = struct
 
   (** Return a type together with the list of its free variables with arity. We
       prefix the names of the free variables by the module name. *)
-  let rec to_typ (functor_params : Name.t list) (module_name : string)
+  let to_typ (functor_params : Name.t list) (module_name : string)
     (with_implicits : bool) (module_typ : t) : (free_vars * Type.t) Monad.t =
     match module_typ with
     | Error message -> return ([], Type.Error message)
@@ -89,7 +89,7 @@ let of_ocaml_module_with_substitutions
   let module_typ = Env.find_modtype signature_path env in
   ModuleTypParams.get_module_typ_declaration_typ_params_arity
     module_typ >>= fun signature_typ_params ->
-  (substitutions |> Monad.List.filter_map (fun (_, { Asttypes.txt = long_ident }, with_constraint) ->
+  (substitutions |> Monad.List.filter_map (fun (_, { Asttypes.txt = long_ident; _ }, with_constraint) ->
     begin match with_constraint with
     | Typedtree.Twith_type typ_declaration | Twith_typesubst typ_declaration ->
       let { Typedtree.typ_loc; typ_type; _ } = typ_declaration in
@@ -176,7 +176,7 @@ and of_ocaml (module_typ : Typedtree.module_type) : t Monad.t =
   set_loc module_typ.mty_loc (
   of_ocaml_desc module_typ.mty_desc))
 
-let rec to_typ (functor_params : Name.t list) (module_name : string)
+let to_typ (functor_params : Name.t list) (module_name : string)
   (with_implicits : bool) (module_typ : t)
   : ((free_vars * (Name.t * Type.t) list * free_vars) * Type.t) Monad.t =
   let (params, result) = module_typ in
@@ -210,7 +210,7 @@ let rec to_typ (functor_params : Name.t list) (module_name : string)
     | [] -> typ
     | _ :: _ ->
       Type.ForallTyps (
-        params_free_vars |> List.map (fun { name; arity } -> (name, arity)),
+        params_free_vars |> List.map (fun { name; arity; _ } -> (name, arity)),
         typ
       ) in
   return ((params_free_vars, params, result_free_vars), typ)

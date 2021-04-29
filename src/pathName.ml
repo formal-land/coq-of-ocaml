@@ -331,7 +331,7 @@ let is_tagged_variant
   : bool Monad.t =
   let* env = get_env in
   match Env.find_type path env with
-  | { type_kind = Type_variant _; type_attributes } ->
+  | { type_kind = Type_variant _; type_attributes; _ } ->
     let* type_attributes = Attribute.of_attributes type_attributes in
     return @@ Attribute.has_tag_gadt type_attributes
   | { type_kind = Type_record _; _ } -> return true

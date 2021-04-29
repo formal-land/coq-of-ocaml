@@ -324,7 +324,7 @@ let rec to_coq (signature : t) : SmartPrint.t =
       !^ "Module" ^^ Name.to_coq name ^^ !^ ":=" ^^
       PathName.to_coq path_name ^-^ !^ "."
     | ModuleFreeVar (free_vars_params, params, free_var) ->
-      let { ModuleTyp.name; arity } = free_var in
+      let { ModuleTyp.name; arity; _ } = free_var in
       nest (
         !^ "Parameter" ^^ Name.to_coq name ^^ !^ ":" ^^
         nest (

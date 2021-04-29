@@ -119,6 +119,7 @@ module Inductive = struct
             param_typs;
             res_typ_params;
             typ_vars;
+            _
           } ->
           newline ^^ nest (
             !^ "|" ^^ Name.to_coq constructor_name ^^ !^ ":" ^^

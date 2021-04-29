@@ -1,4 +1,3 @@
-open Monad.Notations
 type t = (Name.t * Kind.t) list
 
 let to_string (env : t) : string =
@@ -71,5 +70,5 @@ let rec remove (key : Name.t) (varenv : t) : t =
 let remove_many (keys : Name.t list) (varenv : t) : t =
   List.fold_left (fun varenv key -> remove key varenv) varenv keys
 
-let rec keep_only (keys : Name.t list) (varenv : t) : t =
+let keep_only (keys : Name.t list) (varenv : t) : t =
   varenv |> List.filter (fun (name, _) -> List.mem name keys)
