@@ -1,4 +1,5 @@
-(** Error messages. *)
+(** Error messages. We handle the errors with a monad, and allopw multiple
+    errors per file. *)
 open SmartPrint
 
 module Category = struct
