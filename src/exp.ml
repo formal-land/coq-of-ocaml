@@ -887,6 +887,8 @@ and import_let_fun
     | _ ->
       raise None Unexpected "A variable name instead of a pattern was expected"
     ) >>= fun x ->
+    (* Don't forget to save the implicit variables that are already in scope
+     * and remove them later  *)
     let predefined_variables = List.map snd (Name.Map.bindings typ_vars) in
     Type.of_typ_expr true typ_vars vb_expr.exp_type >>= fun (e_typ, typ_vars, new_typ_vars) ->
     let* e_typ = Type.decode_var_tags new_typ_vars false e_typ in
@@ -952,6 +954,10 @@ and of_let
       | Texp_function _ -> false
       | _ -> true
       end ->
+      (* Figure out if the let expression being translated is a function by
+       * checking if it introduced any new variables to typ_vars
+       * Is there a better way to do this?
+       * *)
       Type.of_typ_expr true typ_vars exp_type >>= fun (_, typ_vars', _) ->
       let typ_vars = List.map fst (Name.Map.bindings typ_vars) in
       let new_vars = List.fold_left (fun map var ->

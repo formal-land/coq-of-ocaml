@@ -19,15 +19,6 @@ module RecordSkeleton = struct
       !^ "Module" ^^ Name.to_coq module_name ^-^ !^ "." ^^ newline ^^
       indent (
         !^ "Record" ^^ !^ "record" ^^
-        (* begin match typ_args with *)
-          (* | [] -> empty *)
-          (* | _ :: _ -> *)
-            (* Type. *)
-            (* braces (nest (
-             *     separate space (List.map Name.to_coq typ_args) ^^
-             *     !^ ":" ^^ Pp.set
-             *   )) *)
-        (* end *)
         Type.typ_vars_to_coq braces space space typ_args
         ^^
         nest (!^ ":" ^^ Pp.set) ^^
