@@ -101,13 +101,13 @@ let of_ocaml
     success_message;
   }
 
-let exit (context : MonadEval.Context.t) (output : Output.t) : unit =
+let get_exit_code (context : MonadEval.Context.t) (output : Output.t) : int =
   let is_blacklist =
     Configuration.is_filename_in_error_blacklist context.configuration in
   if output.has_errors && not is_blacklist then
-    exit 1
+    1
   else
-    exit 0
+    0
 
 (** The main function. *)
 let main () =
@@ -163,6 +163,7 @@ let main () =
     let pipeline = Mpipeline.make merlin_config file_source in
 
     Mpipeline.with_pipeline pipeline (fun _ ->
+      try
         let comments = Mpipeline.reader_comments pipeline in
         let typing = Mpipeline.typer_result pipeline in
         let typedtree = Mtyper.get_typedtree typing in
@@ -183,6 +184,11 @@ let main () =
             !output_file_name
             !json_mode in
         Output.write !json_mode output;
-        exit context output)
+        let exit_code = get_exit_code context output in
+        exit exit_code
+      with Failure message ->
+        prerr_endline message;
+        exit 1
+    )
 
 ;;main ()
