@@ -382,7 +382,6 @@ let of_ocaml (typs : type_declaration list) : t Monad.t =
     return (Abstract (name, typ_args_with_unknowns))
   | [ { typ_id; typ_type = { type_kind = Type_record (fields, _); type_params; _ }; _ } ] ->
     let* name = Name.of_ident false typ_id in
-    AdtParameters.of_ocaml type_params >>= fun typ_args ->
     (fields |> Monad.List.map (fun { Types.ld_id = x; ld_type = typ; _ } ->
       let* x = Name.of_ident false x in
       Type.of_typ_expr true Name.Map.empty typ >>= fun (typ, _, new_typ_args) ->
