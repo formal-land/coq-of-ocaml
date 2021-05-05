@@ -745,7 +745,7 @@ and of_match
       )
       bound_vars >>= fun bound_vars ->
     let existentials =
-      if not is_gadt_match then
+      if not (is_gadt_match || is_tagged_match) then
         let free_vars =
           Type.local_typ_constructors_of_typs (List.map snd bound_vars) in
         Name.Set.inter existentials free_vars
@@ -823,12 +823,13 @@ and of_match
       (p, existential_cast, rhs)
     ) in
   let t = Match (e, dep_match, cases, is_with_default_case) in
+  (* If its a deppendent pattern matching then add eq_refl at the end of the match *)
   match dep_match with
   | None -> return t
   | Some dep_match ->
     let eq_refl = "eq_refl" |> Name.of_string_raw |> MixedPath.of_name in
     let ts = List.map (fun _ -> Some (Variable (eq_refl, []))) dep_match.args in
-  return (Apply (t, ts))
+    return (Apply (t, ts))
 
 (** We suppose that we know that we have a match of extensible types. *)
 and of_match_extensible

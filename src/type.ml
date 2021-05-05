@@ -44,9 +44,10 @@ let tag_constructor_of
 
 
 let rec tag_typ_constr_aux
+    (existencial_typs : Name.Set.t)
     (typ : t)
   : t Monad.t =
-  let tag_ty = tag_typ_constr_aux in
+  let tag_ty = tag_typ_constr_aux existencial_typs in
   match typ with
   | Arrow (t1, t2) ->
     let* t1 = tag_ty t1 in
@@ -65,14 +66,21 @@ let rec tag_typ_constr_aux
       let* ts = tag_ty @@ Tuple (List.tl ts) in
       return (Apply (tag, List.combine [t; ts] bs))
   | Apply (mpath, ts) ->
-    let (ts, bs) = List.split ts in
-    let* ts = Monad.List.map tag_ty ts in
-    let arg_names = List.map tag_constructor_of ts in
-    let tag = Name.constr_tag |> MixedPath.of_name  in
-    let name = (MixedPath.to_string mpath) in
-    let str_repr = name ^
-                   (List.fold_left (fun acc ty -> acc ^ "_" ^ ty) "" arg_names) in
-    return (Apply (tag, List.combine [String str_repr; typ] [false; false]))
+    let is_existencial = match mpath with
+      | PathName { path=[]; base } -> Name.Set.mem base existencial_typs
+      | Access _ | PathName _ -> false
+    in
+    if is_existencial
+    then return typ
+    else
+      let (ts, bs) = List.split ts in
+      let* ts = Monad.List.map tag_ty ts in
+      let arg_names = List.map tag_constructor_of ts in
+      let tag = Name.constr_tag |> MixedPath.of_name  in
+      let name = (MixedPath.to_string mpath) in
+      let str_repr = name ^
+                     (List.fold_left (fun acc ty -> acc ^ "_" ^ ty) "" arg_names) in
+      return (Apply (tag, List.combine [String str_repr; typ] [false; false]))
   | _ -> return typ
 
 
@@ -405,6 +413,64 @@ let is_type_abstract
   | _ | exception _ ->
     return false
 
+let is_type_undeclared
+    (path : Path.t)
+  : bool Monad.t =
+  let* env = get_env in
+  match Env.find_type path env with
+  | _ -> return false
+  | exception _ ->
+    return true
+
+(** We do not generate error messages for this function. Indeed, if there are
+    errors for the following types, they should be noticed elsewhere (by the
+    conversion function to Coq for example). *)
+let rec existential_typs_of_typ (typ : Types.type_expr) : Name.Set.t Monad.t =
+  match typ.desc with
+  | Tvar _ | Tunivar _ -> return Name.Set.empty
+  | Tarrow (_, typ_x, typ_y, _) -> existential_typs_of_typs [typ_x; typ_y]
+  | Ttuple typs -> existential_typs_of_typs typs
+  | Tconstr (path, typs, _) ->
+    get_env >>= fun env ->
+    let* path_existential =
+      match path with
+      | Path.Pident ident ->
+        begin match Env.find_type path env with
+        | _ -> return Name.Set.empty
+        | exception Not_found ->
+          let* ident = Name.of_ident false ident in
+          return (Name.Set.singleton ident)
+        end
+      | _ -> return Name.Set.empty in
+    existential_typs_of_typs typs >>= fun existentials ->
+    return (Name.Set.union path_existential existentials)
+  | Tobject (_, object_descr) ->
+    let param_typs =
+      match !object_descr with
+      | Some (_, _ :: param_typs) -> List.tl param_typs
+      | _ -> [] in
+    existential_typs_of_typs param_typs
+  | Tfield (_, _, typ1, typ2) -> existential_typs_of_typs [typ1; typ2]
+  | Tnil -> return Name.Set.empty
+  | Tlink typ | Tsubst typ -> existential_typs_of_typ typ
+  | Tvariant { row_fields; _ } ->
+    existential_typs_of_typs (
+      row_fields |>
+      List.map (fun (_, row_field) -> type_exprs_of_row_field row_field) |>
+      List.concat
+    )
+  | Tpoly (typ, typs) -> existential_typs_of_typs (typ :: typs)
+  | Tpackage (_, _, typs) -> existential_typs_of_typs typs
+
+and existential_typs_of_typs (typs : Types.type_expr list)
+  : Name.Set.t Monad.t =
+  Monad.List.fold_left
+    (fun existentials typ ->
+      existential_typs_of_typ typ >>= fun existentials_typ ->
+      return (Name.Set.union existentials existentials_typ)
+    )
+    Name.Set.empty typs
+
 (** Import an OCaml type. Add to the environment all the new free type variables. *)
 let rec of_typ_expr
   ?(should_tag = false)
@@ -450,11 +516,16 @@ let rec of_typ_expr
     non_phantom_typs path typs >>= fun typs ->
     let* mixed_path = simplified_contructor_path path (List.length typs) in
     let* is_abstract = is_type_abstract path in
+    let* is_typ_undecl = is_type_undeclared path in
+    (* let is_hidden_tag = is_typ_undecl && should_tag in *)
     let native_type = List.mem (MixedPath.to_string mixed_path) Name.native_types in
     let is_pident = match path with
       | Path.Pident _ -> true
       | _ -> false in
     let* is_tagged_variant = PathName.is_tagged_variant path in
+    let is_variable = not native_type && is_pident && List.length typs = 0 in
+    (* For unknown reasons a type variable becomes a Tconstr some times (see type of patterns)
+       This `if` is to try to figure out if such constructor was supposed to be a variable *)
     if not is_tagged_variant
     then begin
       let tag_list = tag_no_args typs in
@@ -462,9 +533,7 @@ let rec of_typ_expr
       let* typ = apply_with_notations mixed_path typs tag_list in
       return (typ, typ_vars, new_typs_vars)
     end
-    (* For unknown reasons a type variable becomes a Tconstr some times (see type of patterns)
-       This `if` is to try to figure out if such constructor was supposed to be a variable *)
-    else if is_abstract && not native_type && is_pident && List.length typs = 0
+    else if is_abstract && is_variable
     then begin
       let var_name = (Name.of_last_path path) in
       let var = Variable var_name in
@@ -477,8 +546,9 @@ let rec of_typ_expr
     end
     else
       let* tag_list = get_constr_arg_tags path in
+      let* existencial_typs = existential_typs_of_typs typs in
       let* (typs, typ_vars, new_typs_vars) = of_typs_exprs ~tag_list:tag_list with_free_vars typs typ_vars in
-      let* typs = tag_typ_constr path typs in
+      let* typs = tag_typ_constr path existencial_typs typs in
       let* typ = apply_with_notations mixed_path typs tag_list in
       return (typ, typ_vars, new_typs_vars)
 
@@ -657,6 +727,7 @@ and get_constr_arg_tags
 
 and tag_typ_constr
     (path : Path.t)
+    (existencial_typs : Name.Set.t)
     (typs : t list)
   : t list Monad.t =
   let* is_tagged_variant = PathName.is_tagged_variant path in
@@ -670,7 +741,7 @@ and tag_typ_constr
     let tag_typs = List.combine typs should_tag_list in
     Monad.List.map (fun (typ, should_tag) ->
         if should_tag
-        then tag_typ_constr_aux typ
+        then tag_typ_constr_aux existencial_typs typ
         else return typ
       ) tag_typs
 
@@ -739,55 +810,6 @@ let rec of_type_expr_variable (typ : Types.type_expr) : Name.t Monad.t =
 let of_type_expr_without_free_vars (typ : Types.type_expr) : t Monad.t =
   of_typ_expr false Name.Map.empty typ >>= fun (typ, _, _) ->
   return typ
-
-(** We do not generate error messages for this function. Indeed, if there are
-    errors for the following types, they should be noticed elsewhere (by the
-    conversion function to Coq for example). *)
-let rec existential_typs_of_typ (typ : Types.type_expr) : Name.Set.t Monad.t =
-  match typ.desc with
-  | Tvar _ | Tunivar _ -> return Name.Set.empty
-  | Tarrow (_, typ_x, typ_y, _) -> existential_typs_of_typs [typ_x; typ_y]
-  | Ttuple typs -> existential_typs_of_typs typs
-  | Tconstr (path, typs, _) ->
-    get_env >>= fun env ->
-    let* path_existential =
-      match path with
-      | Path.Pident ident ->
-        begin match Env.find_type path env with
-        | _ -> return Name.Set.empty
-        | exception Not_found ->
-          let* ident = Name.of_ident false ident in
-          return (Name.Set.singleton ident)
-        end
-      | _ -> return Name.Set.empty in
-    existential_typs_of_typs typs >>= fun existentials ->
-    return (Name.Set.union path_existential existentials)
-  | Tobject (_, object_descr) ->
-    let param_typs =
-      match !object_descr with
-      | Some (_, _ :: param_typs) -> List.tl param_typs
-      | _ -> [] in
-    existential_typs_of_typs param_typs
-  | Tfield (_, _, typ1, typ2) -> existential_typs_of_typs [typ1; typ2]
-  | Tnil -> return Name.Set.empty
-  | Tlink typ | Tsubst typ -> existential_typs_of_typ typ
-  | Tvariant { row_fields; _ } ->
-    existential_typs_of_typs (
-      row_fields |>
-      List.map (fun (_, row_field) -> type_exprs_of_row_field row_field) |>
-      List.concat
-    )
-  | Tpoly (typ, typs) -> existential_typs_of_typs (typ :: typs)
-  | Tpackage (_, _, typs) -> existential_typs_of_typs typs
-
-and existential_typs_of_typs (typs : Types.type_expr list)
-  : Name.Set.t Monad.t =
-  Monad.List.fold_left
-    (fun existentials typ ->
-      existential_typs_of_typ typ >>= fun existentials_typ ->
-      return (Name.Set.union existentials existentials_typ)
-    )
-    Name.Set.empty typs
 
 (** The free variables of a type. *)
 let rec typ_args_of_typ (typ : t) : Name.Set.t =
