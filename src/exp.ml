@@ -27,7 +27,7 @@ module Definition = struct
 end
 
 type match_existential_cast = {
-  new_typ_vars : Name.t list;
+  new_typ_vars : VarEnv.t;
   bound_vars : (Name.t * Type.t) list;
   return_typ : Type.t;
   use_axioms : bool;
@@ -740,10 +740,13 @@ and of_match
     Type.existential_typs_of_typs (List.map snd bound_vars) >>= fun existentials ->
     Monad.List.map
       (fun (name, typ) ->
-        Type.of_typ_expr true typ_vars typ >>= fun (typ, _, _) ->
-        return (name, typ)
+        Type.of_typ_expr true typ_vars typ >>= fun (typ, _, new_typ_vars) ->
+        return (name, typ, new_typ_vars)
       )
-      bound_vars >>= fun bound_vars ->
+      bound_vars >>= fun bound_vars_typs ->
+    let bound_vars = List.map (fun (name, typ, _) -> (name,typ)) bound_vars_typs in
+    let new_typ_vars = List.map (fun (_, _, new_typ_vars) -> new_typ_vars) bound_vars_typs in
+    let new_typ_vars = VarEnv.merge new_typ_vars in
     let existentials =
       if not (is_gadt_match || is_tagged_match) then
         let free_vars =
@@ -751,10 +754,17 @@ and of_match
         Name.Set.inter existentials free_vars
       else
         existentials in
+    let existentials = Name.Set.elements existentials in
+    let new_typ_vars = existentials |> List.map (fun var ->
+        match List.assoc_opt var new_typ_vars with
+        | None -> (var, Kind.Set)
+        | Some ki -> (var, ki)
+      ) in
+
     Type.of_typ_expr true typ_vars c_rhs.exp_type >>= fun (typ, _, _) ->
     let existential_cast =
       Some {
-        new_typ_vars = Name.Set.elements existentials;
+        new_typ_vars;
         bound_vars;
         return_typ = typ;
         use_axioms = is_gadt_match;
@@ -1740,10 +1750,12 @@ and to_coq_cast_existentials
       else
         e
     | _ ->
+      let new_typ_vars_names = List.map (fun var -> Name.to_coq @@ fst var) new_typ_vars in
+      let new_typ_vars_kinds = List.map (fun var -> Kind.to_coq @@ snd var) new_typ_vars in
       let existential_names =
-        Pp.primitive_tuple (List.map Name.to_coq new_typ_vars) in
+        Pp.primitive_tuple new_typ_vars_names in
       let existential_names_pattern =
-        Pp.primitive_tuple_pattern (List.map Name.to_coq new_typ_vars) in
+        Pp.primitive_tuple_pattern new_typ_vars_names in
       nest (
         !^ "let" ^^ !^ "'existT" ^^ !^ "_" ^^ existential_names ^^
         variable_names ^^ !^ ":=" ^^
@@ -1756,7 +1768,7 @@ and to_coq_cast_existentials
           !^ operator ^^
           nest (parens (
             !^ option ^^ !^ ":=" ^^
-            Pp.primitive_tuple_type (List.map (fun _ -> Pp.set) new_typ_vars)
+            Pp.primitive_tuple_type new_typ_vars_kinds
           )) ^^
           parens (nest (
             !^ "fun" ^^ existential_names_pattern ^^ !^ "=>" ^^ variable_typ false
