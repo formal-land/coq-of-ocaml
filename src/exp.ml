@@ -754,14 +754,21 @@ and of_match
         Name.Set.inter existentials free_vars
       else
         existentials in
-    let existentials = Name.Set.elements existentials in
-    let new_typ_vars = existentials |> List.map (fun var ->
+    (* We probably don't need this because we already added this to new_typ_vars
+     * in Type.of_typ_expr *)
+    let new_typ_vars = existentials |> Name.Set.elements |> List.map (fun var ->
         match List.assoc_opt var new_typ_vars with
         | None -> (var, Kind.Set)
         | Some ki -> (var, ki)
       ) in
 
-    Type.of_typ_expr true typ_vars c_rhs.exp_type >>= fun (typ, _, _) ->
+    let typ = Ctype.full_expand c_rhs.exp_env c_rhs.exp_type in
+    Type.of_typ_expr true typ_vars typ >>= fun (typ, _, new_typs) ->
+    let* typ = typ |> Type.tag_typ_constr_aux existentials in
+    let* typ = Type.decode_in_native typ in
+    (* let typ = return_existentials typ in *)
+    (* Function to decode native *)
+    (* let* typ = Type.decode_var_tags new_typ_vars true typ in *)
     let existential_cast =
       Some {
         new_typ_vars;
@@ -1719,7 +1726,7 @@ and to_coq_cast_existentials
     | _ -> to_coq false e in
   match existential_cast with
   | None -> e
-  | Some { new_typ_vars; bound_vars; use_axioms; _ } ->
+  | Some { new_typ_vars; bound_vars; use_axioms; return_typ; _ } ->
     let variable_names =
       Pp.primitive_tuple (bound_vars |> List.map (fun (name, _) ->
         Name.to_coq name
@@ -1758,7 +1765,7 @@ and to_coq_cast_existentials
         Pp.primitive_tuple_pattern new_typ_vars_names in
       nest (
         !^ "let" ^^ !^ "'existT" ^^ !^ "_" ^^ existential_names ^^
-        variable_names ^^ !^ ":=" ^^
+        variable_names ^^ !^ "as" ^^ !^ "exi" ^^ !^ ":=" ^^
         nest (
           let (operator, option) =
             if use_axioms then
@@ -1779,7 +1786,10 @@ and to_coq_cast_existentials
             Pp.primitive_tuple_infer (List.length new_typ_vars)
           end ^^
           variable_names
-        ) ^^ !^ "in" ^^ newline ^^
+        ) ^^
+        nest (!^ "return" ^^  Type.to_coq None (Some Type.Context.Apply) return_typ)
+        ^^
+        !^ "in" ^^ newline ^^
         e
       )
     end

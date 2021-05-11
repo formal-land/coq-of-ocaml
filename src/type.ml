@@ -56,21 +56,25 @@ let rec tag_typ_constr_aux
     return (Apply (tag, List.combine [t1; t2] [false; false]))
   | Tuple ts ->
     let tag = Name.tuple_tag |> MixedPath.of_name  in
-    let bs = [false; false] in
-    if List.length ts = 2
-    then
+    begin match ts with
+    | a :: b :: (_ :: _ as ts) ->
+      let* t = tag_ty @@ Tuple [a; b] in
+      let* ts = tag_ty @@ Tuple (t :: ts) in
+      return ts
+      (* return (Apply (tag, [(ts, false)])) *)
+    | _ ->
       let* ts = Monad.List.map tag_ty ts in
+      let bs = [false; false] in
       return (Apply (tag, List.combine ts bs))
-    else
-      let* t = tag_ty (List.hd ts) in
-      let* ts = tag_ty @@ Tuple (List.tl ts) in
-      return (Apply (tag, List.combine [t; ts] bs))
+    end
   | Apply (mpath, ts) ->
+    let tuple_tag = Name.tuple_tag |> MixedPath.of_name  in
+    let is_tuple_tag = mpath = tuple_tag in
     let is_existencial = match mpath with
       | PathName { path=[]; base } -> Name.Set.mem base existencial_typs
       | Access _ | PathName _ -> false
     in
-    if is_existencial
+    if is_existencial || is_tuple_tag
     then return typ
     else
       let (ts, bs) = List.split ts in
@@ -550,6 +554,8 @@ let rec of_typ_expr
       let* (typs, typ_vars, new_typs_vars) = of_typs_exprs ~tag_list:tag_list with_free_vars typs typ_vars in
       let* typs = tag_typ_constr path existencial_typs typs in
       let* typ = apply_with_notations mixed_path typs tag_list in
+      let existencial_typs = existencial_typs |> Name.Set.elements |> List.map (fun name -> (name, Kind.Tag)) in
+      let new_typs_vars = VarEnv.union new_typs_vars existencial_typs in
       return (typ, typ_vars, new_typs_vars)
 
   | Tobject (_, object_descr) ->
@@ -789,6 +795,15 @@ let rec decode_var_tags_aux
     return @@ FunTyps (names, t)
   | _ -> return typ
 
+let decode_in_native
+  (typ : t) : t Monad.t =
+    let natives = ["tuple_tag"; "arrow_tag"; "list_tag"; "option_tag"] in
+    match typ with
+    | Apply (mpath, ts) ->
+      if List.mem (MixedPath.to_string mpath) natives
+      then return @@ Apply (MixedPath.dec_name, [(typ, true)])
+      else return typ
+    | _ -> return typ
 
 let rec decode_var_tags
     (typ_vars : VarEnv.t)
