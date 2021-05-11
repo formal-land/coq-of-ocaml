@@ -336,3 +336,14 @@ let is_native_type (path : Path.t) : bool =
 let is_native_datatype (path : Path.t) : bool =
    let name = Path.last path in
    List.exists (function x -> name = x) ["list"; "option"; "map"]
+
+
+let prim_proj_fst : t =
+  {base = Name.of_string_raw "fst";
+   path = [Name.of_string_raw "Primitive"]
+  }
+
+let prim_proj_snd : t =
+  { base = Name.of_string_raw "snd";
+    path = [Name.of_string_raw "Primitive"]
+  }

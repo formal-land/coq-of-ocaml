@@ -218,6 +218,28 @@ let build_module
     ) in
   return (Module fields)
 
+let rec bind_existentials
+  (existentials : Name.t list)
+  (typ : Type.t) : Type.t =
+  let name = Name.of_string_raw "fst" in
+  let fst = Type.build_apply_from_name MixedPath.prim_proj_fst name in
+  let snd = Type.build_apply_from_name MixedPath.prim_proj_snd name in
+  match existentials with
+  | [] -> typ
+  | [x; y] -> Type.Let (x, snd, Type.Let(y, fst, typ))
+  | x :: xs ->
+    let typ = bind_existentials xs typ in
+    Type.Let (x, snd, Type.Let(name, fst, typ))
+
+let build_existential_return
+  (existentials : Name.t list)
+  (typ : Type.t) : Type.t =
+  let fst = Name.of_string_raw "fst" in
+  let exi = Name.of_string_raw "exi" in
+  let exityp = Type.build_apply_from_name MixedPath.projT1 exi in
+  let typ = bind_existentials (List.rev existentials) typ in
+  Type.Let (fst, exityp, typ)
+
 let rec smart_return (operator : string) (e : t) : t Monad.t =
   match e with
   | Return (operator2, e2) ->
@@ -766,9 +788,7 @@ and of_match
     Type.of_typ_expr true typ_vars typ >>= fun (typ, _, new_typs) ->
     let* typ = typ |> Type.tag_typ_constr_aux existentials in
     let* typ = Type.decode_in_native typ in
-    (* let typ = return_existentials typ in *)
-    (* Function to decode native *)
-    (* let* typ = Type.decode_var_tags new_typ_vars true typ in *)
+    let typ = build_existential_return (Name.Set.elements existentials) typ in
     let existential_cast =
       Some {
         new_typ_vars;

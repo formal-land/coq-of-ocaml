@@ -14,6 +14,15 @@ let of_name (name : Name.t) : t =
 let dec_name : t =
   PathName (Name.decode_vtag |> PathName.of_name [])
 
+let projT1 : t =
+  of_name (Name.of_string_raw "projT1")
+
+let prim_proj_fst : t =
+  PathName PathName.prim_proj_fst
+
+let prim_proj_snd : t =
+  PathName PathName.prim_proj_snd
+
 let is_constr_tag : t -> bool = function
   | Access _ -> false
   | PathName {base; _} -> Name.equal base Name.constr_tag

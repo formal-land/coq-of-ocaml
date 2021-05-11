@@ -18,6 +18,7 @@ type t =
   | ForallTyps of (Name.t * int) list * t
   | String of string
   | FunTyps of Name.t list * t
+  | Let of Name.t * t * t
   | Error of string
 
 type arity_or_typ =
@@ -38,6 +39,7 @@ let tag_constructor_of
   | ExistTyps _ -> "existsTyps"
   | ForallTyps _ -> "forallTyps"
   | FunTyps _ -> "funTyps"
+  | Let _ -> "let"
   | Error s -> "error" ^ s
   | Kind k -> Kind.to_string k
   | String s -> "string"
@@ -833,7 +835,7 @@ let rec typ_args_of_typ (typ : t) : Name.Set.t =
   match typ with
   | Kind _ | String _ -> Name.Set.empty
   | Variable x -> Name.Set.singleton x
-  | Arrow (typ1, typ2) | Eq (typ1, typ2) -> typ_args_of_typs [typ1; typ2]
+  | Arrow (typ1, typ2) | Eq (typ1, typ2) | Let (_, typ1, typ2) -> typ_args_of_typs [typ1; typ2]
   | Sum typs -> typ_args_of_typs (List.map snd typs)
   | Tuple typs -> typ_args_of_typs typs
   | Apply (_, typs) -> typs |> List.map (fun x -> fst x) |> typ_args_of_typs
@@ -865,13 +867,19 @@ let rec nb_forall_typs (typ : t) : int =
   | ForallTyps (typ_params, typ) -> List.length typ_params + nb_forall_typs typ
   | _ -> 0
 
+let build_apply_from_name
+  (mpath : MixedPath.t)
+  (name : Name.t) =
+  Apply (mpath, [(Variable name, false)])
+
+
 (** The local type constructors of a type. Used to detect the existential
     variables which are actually used by a type, once we remove the phantom
     types. *)
 let rec local_typ_constructors_of_typ (typ : t) : Name.Set.t =
   match typ with
   | Variable x -> Name.Set.singleton x
-  | Arrow (typ1, typ2) | Eq(typ1, typ2) -> local_typ_constructors_of_typs [typ1; typ2]
+  | Arrow (typ1, typ2) | Eq (typ1, typ2) | Let (_, typ1, typ2) -> local_typ_constructors_of_typs [typ1; typ2]
   | Sum typs -> local_typ_constructors_of_typs (List.map snd typs)
   | Tuple typs -> local_typ_constructors_of_typs typs
   | Apply (mixed_path, ts) ->
@@ -919,6 +927,7 @@ module Context = struct
     | Sum
     | Tuple
     | Forall
+    | Let
     | Eq
 
   let get_order (context : t) : int =
@@ -927,8 +936,9 @@ module Context = struct
     | Arrow -> 3
     | Sum -> 2
     | Tuple -> 1
-    | Forall -> 4
-    | Eq -> 5
+    | Let -> 4
+    | Forall -> 5
+    | Eq -> 6
 
   let should_parens (context : t option) (current_context : t) : bool =
     match context with
@@ -1130,6 +1140,13 @@ let rec to_coq (subst : Subst.t option) (context : Context.t option) (typ : t)
         to_coq subst (Some Context.Forall) typ
       )
     end
+  | Let (name, typ1, typ2) ->
+    nest (
+      !^ "let" ^^ Name.to_coq name ^^ !^ ":=" ^^
+      to_coq subst (Some Context.Let) typ1 ^^
+      !^ "in" ^^ newline ^^
+      to_coq subst (Some Context.Let) typ2
+    )
   | Error message -> !^ message
 
 let typ_vars_to_coq
