@@ -26,8 +26,7 @@ Fixpoint proj_int (e : expr) : int :=
 Inductive term : vtag -> Set :=
 | T_Int : int -> term int_tag
 | T_String : string -> term string_tag
-| T_Sum : term int_tag -> term int_tag -> term int_tag
-| T_Pair : forall {a b : vtag}, term a -> term b -> term (tuple_tag a b).
+| T_Sum : term int_tag -> term int_tag -> term int_tag.
 
 Fixpoint get_int (e : term int_tag) : int :=
   match e in term t0 return t0 = int_tag -> int with
@@ -36,6 +35,13 @@ Fixpoint get_int (e : term int_tag) : int :=
     fun eq0 => ltac:(subst; exact (Z.add (get_int e1) (get_int e2)))
   | _ => ltac:(discriminate)
   end eq_refl.
+
+Fixpoint interp {a : vtag} (function_parameter : term a) : decode_vtag a :=
+  match function_parameter with
+  | T_Int n => n
+  | T_String s => s
+  | T_Sum s1 s2 => Z.add (interp s1) (interp s2)
+  end.
 
 Inductive one_case : Set :=
 | SingleCase : one_case

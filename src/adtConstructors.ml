@@ -11,7 +11,7 @@ module RecordSkeleton = struct
   let to_coq_record
       (module_name : Name.t)
       (typ_name : Name.t)
-      (typ_args : Name.t list)
+      (typ_args : VarEnv.t)
       (fields : (Name.t * Type.t) list)
       (with_with : bool)
     : SmartPrint.t =
@@ -19,14 +19,8 @@ module RecordSkeleton = struct
       !^ "Module" ^^ Name.to_coq module_name ^-^ !^ "." ^^ newline ^^
       indent (
         !^ "Record" ^^ !^ "record" ^^
-        begin match typ_args with
-          | [] -> empty
-          | _ :: _ ->
-            braces (nest (
-                separate space (List.map Name.to_coq typ_args) ^^
-                !^ ":" ^^ Pp.set
-              ))
-        end ^^
+        Type.typ_vars_to_coq braces space space typ_args
+        ^^
         nest (!^ ":" ^^ Pp.set) ^^
         !^ ":=" ^^ !^ "Build" ^^
         !^ "{" ^^ newline ^^
@@ -43,7 +37,7 @@ module RecordSkeleton = struct
         begin if with_with then
             separate newline (fields |> List.map (fun (name, _) ->
                 let prefixed_typ_args =
-                  typ_args |> List.map (fun typ_arg ->
+                  typ_args |> List.map (fun (typ_arg, _) ->
                       Name.to_coq (Name.prefix_by_t typ_arg)
                     ) in
                 let record_typ =
@@ -85,9 +79,9 @@ module RecordSkeleton = struct
 
   let to_coq (record_skeleton : t) : SmartPrint.t =
     let { fields; module_name; typ_name } = record_skeleton in
-    to_coq_record module_name typ_name fields (fields |>
-                                               List.map (fun field -> (field, Type.Variable field))
-                                              ) true
+    let typ_vars = List.map (fun field -> (field, Kind.Set)) fields in
+    let body = (fields |> List.map (fun field -> (field, Type.Variable field))) in
+    to_coq_record module_name typ_name typ_vars body true
 end
 
 type ret_typ =
@@ -152,6 +146,11 @@ let of_ocaml_case
               []
               (List.map Type.typ_args_of_typ record_params) in
           let new_typ_vars = VarEnv.reorg typ_args new_typ_vars in
+          let tag_typs = List.map (fun (_, kind) ->
+              match kind with
+              | Kind.Tag -> true
+              | _ -> false
+            ) new_typ_vars in
           let typ_args = new_typ_vars |> List.map (fun (name, _) ->
               Type.Variable name
             ) in
@@ -162,7 +161,7 @@ let of_ocaml_case
                   path = [typ_name];
                   base = constructor_name;
                 },
-                List.combine typ_args (Type.tag_no_args typ_args)
+                List.combine typ_args tag_typs
               )
             ],
             new_typ_vars,
@@ -204,10 +203,7 @@ let of_ocaml_case
         return ((List.map (fun v -> Type.Variable v) typ_args), List.rev new_typ_vars)
     in
     let typ_vars = VarEnv.union typ_vars new_typ_vars in
-    let* param_typs = if is_tagged
-      then Monad.List.map (Type.decode_var_tags typ_vars false) param_typs
-      else return param_typs
-    in
+    let* param_typs = Monad.List.map (Type.decode_var_tags typ_vars false) param_typs in
     let* tagged_return = Monad.List.map (Type.decode_var_tags typ_vars true) tagged_return in
     let* untagged_return =
       AdtParameters.get_return_typ_params defined_typ_params cd_res in

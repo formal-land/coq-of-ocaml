@@ -718,7 +718,7 @@ and of_match :
       let* motive = Type.decode_var_tags new_typ_vars false motive in
       let (cast, args) = Type.normalize_constructor cast in
       (* Only generates dependent pattern matching for actual gadts *)
-      if List.length args = 0 || (Type.is_native_type cast)
+      if List.length args = 0 || Type.is_native_type cast
       then return None
       else return (Some ({cast; args; motive}))
     end
@@ -887,7 +887,12 @@ and import_let_fun
     | _ ->
       raise None Unexpected "A variable name instead of a pattern was expected"
     ) >>= fun x ->
+    (* Don't forget to save the implicit variables that are already in scope
+     * and remove them later  *)
+    let predefined_variables = List.map snd (Name.Map.bindings typ_vars) in
     Type.of_typ_expr true typ_vars vb_expr.exp_type >>= fun (e_typ, typ_vars, new_typ_vars) ->
+    let* e_typ = Type.decode_var_tags new_typ_vars false e_typ in
+    let new_typ_vars = VarEnv.remove_many predefined_variables new_typ_vars in
     match x with
     | None -> return None
     | Some x ->
@@ -949,8 +954,16 @@ and of_let
       | Texp_function _ -> false
       | _ -> true
       end ->
-      Type.of_typ_expr true typ_vars exp_type >>= fun (_, _, new_typ_vars) ->
-      return (List.length new_typ_vars <> 0)
+      (* Figure out if the let expression being translated is a function by
+       * checking if it introduced any new variables to typ_vars
+       * Is there a better way to do this?
+       * *)
+      Type.of_typ_expr true typ_vars exp_type >>= fun (_, typ_vars', _) ->
+      let typ_vars = List.map fst (Name.Map.bindings typ_vars) in
+      let new_vars = List.fold_left (fun map var ->
+          Name.Map.remove var map
+        ) typ_vars' typ_vars in
+      return (not @@ Name.Map.is_empty new_vars)
     | _ -> return true
     end >>= fun is_function ->
     begin match cases with
