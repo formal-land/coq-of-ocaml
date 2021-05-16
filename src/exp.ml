@@ -785,16 +785,21 @@ and of_match
         | Some ki -> (var, ki)
       ) in
 
-    let typ = Ctype.full_expand c_rhs.exp_env c_rhs.exp_type in
-    Type.of_typ_expr true typ_vars typ >>= fun (typ, _, new_typs) ->
     let new_typs_has_tag = List.exists (fun (_, kind) -> kind == Kind.Tag) new_typ_vars in
     let* typ = if is_gadt_match || do_cast_results || not new_typs_has_tag
-      then return typ
-      else let* typ = typ |> Type.tag_typ_constr_aux existentials in
+      then
+        let* (typ, _, new_typs) = Type.of_typ_expr true typ_vars c_rhs.exp_type in
+        return typ
+      else
+        (* Only expand type if you really need to. It may cause the translation to break *)
+        let typ = Ctype.full_expand c_rhs.exp_env c_rhs.exp_type in
+        let* (typ, _, new_typs) = Type.of_typ_expr true typ_vars typ in
+        let* typ = typ |> Type.tag_typ_constr_aux existentials in
         let* typ = Type.decode_in_native typ in
         let typ = build_existential_return (Name.Set.elements existentials) typ in
         return typ
     in
+
     let existential_cast =
       Some {
         new_typ_vars;
