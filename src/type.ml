@@ -556,7 +556,9 @@ let rec of_typ_expr
       let* (typs, typ_vars, new_typs_vars) = of_typs_exprs ~tag_list:tag_list with_free_vars typs typ_vars in
       let* typs = tag_typ_constr path existencial_typs typs in
       let* typ = apply_with_notations mixed_path typs tag_list in
-      let existencial_typs = existencial_typs |> Name.Set.elements |> List.map (fun name -> (name, Kind.Tag)) in
+      let* is_record = PathName.is_record path in
+      let existencials_kind = if is_record then Kind.Set else Kind.Tag in
+      let existencial_typs = existencial_typs |> Name.Set.elements |> List.map (fun name -> (name, existencials_kind)) in
       let new_typs_vars = VarEnv.union new_typs_vars existencial_typs in
       return (typ, typ_vars, new_typs_vars)
 

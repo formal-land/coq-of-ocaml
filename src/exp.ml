@@ -226,6 +226,7 @@ let rec bind_existentials
   let snd = Type.build_apply_from_name MixedPath.prim_proj_snd name in
   match existentials with
   | [] -> typ
+  | [x] -> Type.Let (x, Variable name, typ)
   | [x; y] -> Type.Let (x, snd, Type.Let(y, fst, typ))
   | x :: xs ->
     let typ = bind_existentials xs typ in
@@ -786,9 +787,14 @@ and of_match
 
     let typ = Ctype.full_expand c_rhs.exp_env c_rhs.exp_type in
     Type.of_typ_expr true typ_vars typ >>= fun (typ, _, new_typs) ->
-    let* typ = typ |> Type.tag_typ_constr_aux existentials in
-    let* typ = Type.decode_in_native typ in
-    let typ = build_existential_return (Name.Set.elements existentials) typ in
+    let new_typs_has_tag = List.exists (fun (_, kind) -> kind == Kind.Tag) new_typ_vars in
+    let* typ = if is_gadt_match || do_cast_results || not new_typs_has_tag
+      then return typ
+      else let* typ = typ |> Type.tag_typ_constr_aux existentials in
+        let* typ = Type.decode_in_native typ in
+        let typ = build_existential_return (Name.Set.elements existentials) typ in
+        return typ
+    in
     let existential_cast =
       Some {
         new_typ_vars;

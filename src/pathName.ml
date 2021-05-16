@@ -317,6 +317,14 @@ let is_variant_declaration
   | { type_kind = Type_variant constructors; type_params = params; _ } -> return @@ Some (constructors, params)
   | _ | exception _ -> return None
 
+let is_record
+    (path : Path.t)
+  : bool Monad.t =
+  let* env = get_env in
+  match Env.find_type path env with
+  | { type_kind = Type_record _; _ } -> return true
+  | _ | exception _ -> return false
+
 let is_tagged_variant
     (path : Path.t)
   : bool Monad.t =
