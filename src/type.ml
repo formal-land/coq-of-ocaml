@@ -815,7 +815,6 @@ let rec decode_only_variables
   let dec = decode_only_variables new_typ_vars in
   match typ with
   | Variable x ->
-    print_string "var\n";
     begin
       match List.assoc_opt x new_typ_vars with
       | Some Kind.Tag -> Apply (MixedPath.dec_name, [(typ, true)])
@@ -834,7 +833,6 @@ let rec decode_only_variables
   | Arrow (t1, t2) ->
     Arrow (dec t1, dec t2)
   | Tuple ts ->
-    print_string "decoding_tuple\n";
     Tuple (List.map dec ts)
   | Sum ts ->
     let (strs, ts) = List.split ts in

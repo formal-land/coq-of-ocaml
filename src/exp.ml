@@ -770,13 +770,19 @@ and of_match
     let bound_vars = List.map (fun (name, typ, _) -> (name,typ)) bound_vars_typs in
     let new_typ_vars = List.map (fun (_, _, new_typ_vars) -> new_typ_vars) bound_vars_typs in
     let new_typ_vars = VarEnv.merge new_typ_vars in
+    let new_typs_has_tag = List.exists (fun (_, kind) -> kind == Kind.Tag) new_typ_vars in
     let existentials =
-      if not (is_gadt_match || is_tagged_match) then
+      if not (is_gadt_match && new_typs_has_tag) then
         let free_vars =
           Type.local_typ_constructors_of_typs (List.map snd bound_vars) in
         Name.Set.inter existentials free_vars
       else
         existentials in
+    let existentials = List.fold_left (fun existentials (name, kind) ->
+        match kind with
+        | Kind.Tag -> Name.Set.add name existentials
+        | _ -> existentials
+      ) existentials new_typ_vars in
     (* We probably don't need this because we already added this to new_typ_vars
      * in Type.of_typ_expr *)
     let new_typ_vars = existentials |> Name.Set.elements |> List.map (fun var ->
@@ -785,7 +791,6 @@ and of_match
         | Some ki -> (var, ki)
       ) in
 
-    let new_typs_has_tag = List.exists (fun (_, kind) -> kind == Kind.Tag) new_typ_vars in
     let* typ = if is_gadt_match || do_cast_results || not new_typs_has_tag
       then
         let* (typ, _, new_typs) = Type.of_typ_expr true typ_vars c_rhs.exp_type in
