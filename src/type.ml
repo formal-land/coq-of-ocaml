@@ -809,6 +809,57 @@ let decode_in_native
       else return typ
     | _ -> return typ
 
+let rec decode_only_variables
+  (new_typ_vars : VarEnv.t)
+  (typ : t) : t  =
+  let dec = decode_only_variables new_typ_vars in
+  match typ with
+  | Variable x ->
+    print_string "var\n";
+    begin
+      match List.assoc_opt x new_typ_vars with
+      | Some Kind.Tag -> Apply (MixedPath.dec_name, [(typ, true)])
+      | _ -> typ
+    end
+  | ForallModule (name, t1, t2) ->
+    let t1 = dec t1 in
+    let t2 = dec t2 in
+    ForallModule (name, t1, t2)
+  | ForallTyps (names, t) ->
+    let t = dec t in
+    ForallTyps (names, t)
+  | FunTyps (names, t) ->
+    let t = dec t in
+    FunTyps (names, t)
+  | Arrow (t1, t2) ->
+    Arrow (dec t1, dec t2)
+  | Tuple ts ->
+    print_string "decoding_tuple\n";
+    Tuple (List.map dec ts)
+  | Sum ts ->
+    let (strs, ts) = List.split ts in
+    let ts = List.map dec ts in
+    Sum (List.combine strs ts)
+  | Signature (path, ts) ->
+    let (names, ts) = List.split ts in
+    let ts = ts |> List.map @@ Option.map dec in
+    Signature (path, List.combine names ts)
+  | Apply (mpath, ts) ->
+    let (ts, bs) = List.split ts in
+    let ts = List.map dec ts in
+    let exis_tag = match mpath with
+      | PathName { path=[]; base } ->
+        begin match List.assoc_opt base new_typ_vars with
+          | Some Kind.Tag -> Some base
+          | _ -> None
+        end
+      | _ -> None in
+    (match exis_tag with
+    | Some name -> Apply (MixedPath.dec_name, [(Variable name, true)])
+    | None ->  Apply (mpath, List.combine ts bs))
+  | _ -> typ
+
+
 let rec decode_var_tags
     (typ_vars : VarEnv.t)
     (is_tag : bool)

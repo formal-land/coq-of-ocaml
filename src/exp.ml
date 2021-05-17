@@ -794,8 +794,8 @@ and of_match
         (* Only expand type if you really need to. It may cause the translation to break *)
         let typ = Ctype.full_expand c_rhs.exp_env c_rhs.exp_type in
         let* (typ, _, new_typs) = Type.of_typ_expr true typ_vars typ in
-        let* typ = typ |> Type.tag_typ_constr_aux existentials in
-        let* typ = Type.decode_in_native typ in
+        (* let* typ = typ |> Type.tag_typ_constr_aux existentials in *)
+        let typ = Type.decode_only_variables new_typ_vars typ in
         let typ = build_existential_return (Name.Set.elements existentials) typ in
         return typ
     in
