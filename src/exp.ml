@@ -751,70 +751,56 @@ and of_match
     end
   in
   (cases |> Monad.List.filter_map (fun {c_lhs; c_guard; c_rhs} ->
-    set_loc c_lhs.pat_loc (
-    let* bound_vars =
-      Typedtree.pat_bound_idents c_lhs |> List.rev |> Monad.List.map
-        (fun ident ->
-          let { Types.val_type; _ } =
-            Env.find_value (Path.Pident ident) c_rhs.exp_env in
-          let* name = Name.of_ident true ident in
-          return (name, val_type)
-        ) in
-    Type.existential_typs_of_typs (List.map snd bound_vars) >>= fun existentials ->
-    Monad.List.map
-      (fun (name, typ) ->
-        Type.of_typ_expr true typ_vars typ >>= fun (typ, _, new_typ_vars) ->
-        return (name, typ, new_typ_vars)
-      )
-      bound_vars >>= fun bound_vars_typs ->
-    let bound_vars = List.map (fun (name, typ, _) -> (name,typ)) bound_vars_typs in
-    let new_typ_vars = List.map (fun (_, _, new_typ_vars) -> new_typ_vars) bound_vars_typs in
-    let new_typ_vars = VarEnv.merge new_typ_vars in
-    let new_typs_has_tag = List.exists (fun (_, kind) -> kind == Kind.Tag) new_typ_vars in
-    let existentials =
-      if not (is_gadt_match && new_typs_has_tag) then
-        let free_vars =
-          Type.local_typ_constructors_of_typs (List.map snd bound_vars) in
-        Name.Set.inter existentials free_vars
-      else
-        existentials in
+       set_loc c_lhs.pat_loc (
+         let* bound_vars =
+           Typedtree.pat_bound_idents c_lhs |> List.rev |> Monad.List.map
+             (fun ident ->
+                let { Types.val_type; _ } =
+                  Env.find_value (Path.Pident ident) c_rhs.exp_env in
+                let* name = Name.of_ident true ident in
+                return (name, val_type)
+             ) in
+         let typs = List.map snd bound_vars in
+         let tag_list = Type.tag_no_args typs in
+         let* new_typ_vars = Type.typed_existential_typs_of_typs typs tag_list in
+         Monad.List.map
+           (fun (name, typ) ->
+              Type.of_typ_expr true typ_vars typ >>= fun (typ, _, _) ->
+              return (name, typ)
+           )
+           bound_vars >>= fun bound_vars ->
+         let env_has_tag = List.exists (fun (_, ki) -> ki = Kind.Tag) new_typ_vars in
+         let new_typ_vars =
+           if not (is_gadt_match || env_has_tag) then
+             let free_vars =
+               Type.local_typ_constructors_of_typs (List.map snd bound_vars) |> Name.Set.elements in
+             VarEnv.remove_many free_vars new_typ_vars
+           else
+             new_typ_vars in
 
-    let exi = existentials |> Name.Set.elements |> List.map (fun name -> (name, Kind.Set)) in
-    let existentials = List.fold_left (fun existentials (name, kind) ->
-        match kind with
-        | Kind.Tag -> Name.Set.add name existentials
-        | _ -> existentials
-      ) existentials new_typ_vars in
-    (* We probably don't need this because we already added this to new_typ_vars
-     * in Type.of_typ_expr *)
-    let new_typ_vars = existentials |> Name.Set.elements |> List.map (fun var ->
-        match List.assoc_opt var new_typ_vars with
-        | None -> (var, Kind.Set)
-        | Some ki -> (var, ki)
-      ) in
+         let* typ = if is_gadt_match || do_cast_results || not env_has_tag
+           then
+             let* (typ, _, _) = Type.of_typ_expr true typ_vars c_rhs.exp_type in
+             return typ
+           else
+             (* Only expand type if you really need to. It may cause the translation to break *)
+             let typ = Ctype.full_expand c_rhs.exp_env c_rhs.exp_type in
+             let* (typ, _, _) = Type.of_typ_expr true typ_vars typ in
+             (* let* typ = typ |> Type.tag_typ_constr_aux existentials in *)
+             let typ = Type.decode_only_variables new_typ_vars typ in
+             let typ = build_existential_return (List.map fst new_typ_vars) typ in
+             return typ
+         in
 
-    let* typ = if is_gadt_match || do_cast_results || not new_typs_has_tag
-      then
-        let* (typ, _, new_typs) = Type.of_typ_expr true typ_vars c_rhs.exp_type in
-        return typ
-      else
-        (* Only expand type if you really need to. It may cause the translation to break *)
-        let typ = Ctype.full_expand c_rhs.exp_env c_rhs.exp_type in
-        let* (typ, _, new_typs) = Type.of_typ_expr true typ_vars typ in
-        (* let* typ = typ |> Type.tag_typ_constr_aux existentials in *)
-        let typ = Type.decode_only_variables new_typ_vars typ in
-        let typ = build_existential_return (Name.Set.elements existentials) typ in
-        return typ
-    in
+         let existential_cast =
+           Some {
+             new_typ_vars;
+             bound_vars;
+             return_typ = typ;
+             use_axioms = is_gadt_match;
+             cast_result = do_cast_results;
+           } in
 
-    let existential_cast =
-      Some {
-        new_typ_vars;
-        bound_vars;
-        return_typ = typ;
-        use_axioms = is_gadt_match;
-        cast_result = do_cast_results;
-      } in
     begin match c_guard with
     | Some guard ->
       of_expression typ_vars guard >>= fun guard ->
