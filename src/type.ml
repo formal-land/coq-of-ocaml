@@ -227,6 +227,41 @@ and non_phantom_vars_of_typs (typs : Types.type_expr list)
     Name.Set.empty
     typs
 
+(** The free variables of a type. *)
+let rec typ_args_of_typ (typ : t) : Name.Set.t =
+  let diff_typ_names (typ : t) (names : Name.t list) : Name.Set.t =
+    Name.Set.diff (typ_args_of_typ typ) (Name.Set.of_list names) in
+  match typ with
+  | Kind _ | String _ -> Name.Set.empty
+  | Variable x -> Name.Set.singleton x
+  | Arrow (typ1, typ2) | Eq (typ1, typ2) | Let (_, typ1, typ2) -> typ_args_of_typs [typ1; typ2]
+  | Sum typs -> typ_args_of_typs (List.map snd typs)
+  | Tuple typs -> typ_args_of_typs typs
+  | Apply (_, typs) -> typs |> List.map (fun x -> fst x) |> typ_args_of_typs
+  | Signature (_, typ_params) ->
+    typ_params |>
+    List.map (fun (_, typ) ->
+      match typ with
+      | None -> Name.Set.empty
+      | Some typ -> typ_args_of_typ typ
+    ) |>
+    List.fold_left Name.Set.union Name.Set.empty
+  | ExistTyps (typ_params, typ) ->
+    let typ_params = List.map fst typ_params in
+    diff_typ_names typ typ_params
+  | ForallModule (_, param, result) ->
+    Name.Set.union (typ_args_of_typ param) (typ_args_of_typ result)
+  | ForallTyps (typ_params, typ) ->
+    let typ_params = List.map fst typ_params in
+    diff_typ_names typ typ_params
+  | FunTyps (typ_params, typ) -> diff_typ_names typ typ_params
+  | Error _ -> Name.Set.empty
+
+and typ_args_of_typs (typs : t list) : Name.Set.t =
+  List.fold_left (fun args typ -> Name.Set.union args (typ_args_of_typ typ))
+    Name.Set.empty typs
+
+
 let subst_name (source : Name.t) (target : Name.t) (typ : t) : t =
   let rec subst (typ : t) : t =
     let subst_after_names (names : Name.t list) (typ : t) : t =
@@ -349,6 +384,16 @@ let simplified_contructor_path (path : Path.t) (arity : int)
     with _ -> return mixed_path
     end
   | _ -> return mixed_path
+
+let get_variable
+  (typ : Types.type_expr)
+  : Name.t option =
+  match typ.desc with
+  | Tvar x | Tunivar x ->
+    (match x with
+    | Some x -> Some (Name.of_string_raw x)
+    | None -> None)
+  | _ -> None
 
 
 let is_native_type
@@ -548,7 +593,7 @@ let rec of_typ_expr
         then return [(var_name, Kind.Tag)]
         else return [(var_name, Kind.Set)]
       in
-      return @@ (var , typ_vars, new_typ_vars)
+      return @@ (var, typ_vars, new_typ_vars)
     end
     else
       let* tag_list = get_constr_arg_tags path in
@@ -557,8 +602,16 @@ let rec of_typ_expr
       let* typs = tag_typ_constr path existencial_typs typs in
       let* typ = apply_with_notations mixed_path typs tag_list in
       let* is_record = PathName.is_record path in
-      let existencials_kind = if is_record then Kind.Set else Kind.Tag in
-      let existencial_typs = existencial_typs |> Name.Set.elements |> List.map (fun name -> (name, existencials_kind)) in
+      (* let existencials_kind = if is_record then Kind.Set else Kind.Tag in *)
+
+      let* var_env = get_constr_arg_tags_env path in
+      let var_env = List.map snd var_env in
+      let existencial_typs = existencial_typs |> Name.Set.elements in
+
+      let existencial_typs = if is_record then
+          List.combine existencial_typs var_env
+      else List.map (fun x -> (x, Kind.Set)) existencial_typs in
+
       let new_typs_vars = VarEnv.union new_typs_vars existencial_typs in
       return (typ, typ_vars, new_typs_vars)
 
@@ -702,6 +755,34 @@ and of_typs_exprs
     return (List.rev typs, typ_vars, new_typ_vars)
 
 
+and get_constr_arg_tags_env
+    (path : Path.t)
+    : VarEnv.t Monad.t =
+  let* env = get_env in
+  match Env.find_type path env with
+  | { type_kind = Type_variant _; type_params = params; type_attributes = attributes; _ } ->
+    let* attributes = Attribute.of_attributes attributes in
+    let params = List.filter_map get_variable params in
+    if Attribute.has_tag_gadt attributes
+    then return @@ List.map (fun param -> (param, Kind.Tag)) params
+    else return @@ List.map (fun param -> (param, Kind.Set)) params
+  | { type_kind = Type_record (decls, repr); type_params = params; _} ->
+    (* Get the variables from param. Keep ordering *)
+    (* let* (_, _, typ_vars) = of_typs_exprs true params Name.Map.empty in
+     * let typ_vars = List.map (fun (ty, _) -> ty) typ_vars in
+     * let decls =  List.map (fun decl -> decl.ld_type) decls in
+     * let* (_, _, new_typ_vars) = of_typs_exprs true decls Name.Map.empty in
+     * let new_typ_vars = VarEnv.reorg typ_vars new_typ_vars in *)
+    let* (_, new_typ_vars) = record_args decls in
+    return new_typ_vars
+  | { type_manifest = None; type_kind = Type_abstract; type_params = params; _ } ->
+    let params = List.filter_map get_variable params in
+    return @@ List.map (fun param -> (param, Kind.Set)) params
+  | { type_manifest = Some typ; type_params = params; _ } ->
+    let* (typ, typ_vars, new_typ_vars) = of_typ_expr true Name.Map.empty typ in
+    return new_typ_vars
+  | _ | exception _ -> return []
+
 and get_constr_arg_tags
     (path : Path.t)
     : bool list Monad.t =
@@ -754,6 +835,27 @@ and tag_typ_constr
         then tag_typ_constr_aux existencial_typs typ
         else return typ
       ) tag_typs
+
+and record_args
+  (labeled_typs : Types.label_declaration list)
+  : (t list * VarEnv.t) Monad.t =
+  let* (record_params, _, new_typ_vars) = labeled_typs |>
+    List.map (fun { Types.ld_type; _ } -> ld_type) |>
+    (fun ls -> of_typs_exprs true ls Name.Map.empty)
+  in
+  let typ_args =
+    List.fold_left
+      (fun typ_args new_typ_args ->
+         (typ_args @
+          Name.Set.elements (
+            Name.Set.diff new_typ_args (Name.Set.of_list typ_args)
+          ))
+      )
+      []
+      (List.map typ_args_of_typ record_params) in
+  let new_typ_vars = VarEnv.reorg typ_args new_typ_vars in
+  return (record_params, new_typ_vars)
+
 
 let rec decode_var_tags_aux
     (typ_vars : VarEnv.t)
@@ -878,40 +980,6 @@ let rec of_type_expr_variable (typ : Types.type_expr) : Name.t Monad.t =
 let of_type_expr_without_free_vars (typ : Types.type_expr) : t Monad.t =
   of_typ_expr false Name.Map.empty typ >>= fun (typ, _, _) ->
   return typ
-
-(** The free variables of a type. *)
-let rec typ_args_of_typ (typ : t) : Name.Set.t =
-  let diff_typ_names (typ : t) (names : Name.t list) : Name.Set.t =
-    Name.Set.diff (typ_args_of_typ typ) (Name.Set.of_list names) in
-  match typ with
-  | Kind _ | String _ -> Name.Set.empty
-  | Variable x -> Name.Set.singleton x
-  | Arrow (typ1, typ2) | Eq (typ1, typ2) | Let (_, typ1, typ2) -> typ_args_of_typs [typ1; typ2]
-  | Sum typs -> typ_args_of_typs (List.map snd typs)
-  | Tuple typs -> typ_args_of_typs typs
-  | Apply (_, typs) -> typs |> List.map (fun x -> fst x) |> typ_args_of_typs
-  | Signature (_, typ_params) ->
-    typ_params |>
-    List.map (fun (_, typ) ->
-      match typ with
-      | None -> Name.Set.empty
-      | Some typ -> typ_args_of_typ typ
-    ) |>
-    List.fold_left Name.Set.union Name.Set.empty
-  | ExistTyps (typ_params, typ) ->
-    let typ_params = List.map fst typ_params in
-    diff_typ_names typ typ_params
-  | ForallModule (_, param, result) ->
-    Name.Set.union (typ_args_of_typ param) (typ_args_of_typ result)
-  | ForallTyps (typ_params, typ) ->
-    let typ_params = List.map fst typ_params in
-    diff_typ_names typ typ_params
-  | FunTyps (typ_params, typ) -> diff_typ_names typ typ_params
-  | Error _ -> Name.Set.empty
-
-and typ_args_of_typs (typs : t list) : Name.Set.t =
-  List.fold_left (fun args typ -> Name.Set.union args (typ_args_of_typ typ))
-    Name.Set.empty typs
 
 let rec nb_forall_typs (typ : t) : int =
   match typ with

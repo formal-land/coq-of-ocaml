@@ -778,6 +778,8 @@ and of_match
         Name.Set.inter existentials free_vars
       else
         existentials in
+
+    let exi = existentials |> Name.Set.elements |> List.map (fun name -> (name, Kind.Set)) in
     let existentials = List.fold_left (fun existentials (name, kind) ->
         match kind with
         | Kind.Tag -> Name.Set.add name existentials
