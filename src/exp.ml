@@ -771,10 +771,10 @@ and of_match
            bound_vars >>= fun bound_vars ->
          let env_has_tag = List.exists (fun (_, ki) -> ki = Kind.Tag) new_typ_vars in
          let new_typ_vars =
-           if not (is_gadt_match || env_has_tag) then
+           if not is_gadt_match && not env_has_tag then
              let free_vars =
                Type.local_typ_constructors_of_typs (List.map snd bound_vars) |> Name.Set.elements in
-             VarEnv.remove_many free_vars new_typ_vars
+             VarEnv.keep_only free_vars new_typ_vars
            else
              new_typ_vars in
 

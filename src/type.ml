@@ -616,7 +616,10 @@ let rec of_typ_expr
        *     List.combine existencial_typs var_env
        * else List.map (fun x -> (x, Kind.Set)) existencial_typs in *)
 
-      (* let new_typs_vars = VarEnv.union new_typs_vars existencial_typs in *)
+      (* let* var_env = get_constr_arg_tags_env path in
+       * let existencial_typs = existencial_typs |> Name.Set.elements |>
+       *                        List.map2 (fun (_, ki) exi -> (exi, ki)) var_env in
+       * let new_typs_vars = VarEnv.union new_typs_vars existencial_typs in *)
       return (typ, typ_vars, new_typs_vars)
 
   | Tobject (_, object_descr) ->
@@ -788,6 +791,7 @@ and get_constr_arg_tags_env
   | _ | exception _ -> return []
 
 and get_constr_arg_tags
+    ?(full = false)
     (path : Path.t)
     : bool list Monad.t =
   let* env = get_env in
@@ -802,8 +806,16 @@ and get_constr_arg_tags
     let* (_, _, typ_vars) = of_typs_exprs true params Name.Map.empty in
     let typ_vars = List.map (fun (ty, _) -> ty) typ_vars in
     let decls =  List.map (fun decl -> decl.ld_type) decls in
-    let* (_, _, new_typ_vars) = of_typs_exprs true decls Name.Map.empty in
+
+    let* new_typ_vars = if full
+      then typed_existential_typs_of_typs decls (tag_no_args decls)
+      else let* (_, _, new_typ_vars) = of_typs_exprs true decls Name.Map.empty
+        in return new_typ_vars in
+    (* let* new_typ_vars = typed_existential_typs_of_typs decls (tag_no_args decls) in *)
+    (* print_string ("new_typ_vars of record: " ^ VarEnv.to_string new_typ_vars ^ "\n"); *)
     let new_typ_vars = VarEnv.reorg typ_vars new_typ_vars in
+    (* print_string ("new_typ_vars of after reorg: " ^ VarEnv.to_string new_typ_vars ^ "\n"); *)
+
     return @@ List.map (fun (_, kind) ->
         match kind with
         | Kind.Tag -> true
@@ -860,6 +872,90 @@ and record_args
       (List.map typ_args_of_typ record_params) in
   let new_typ_vars = VarEnv.reorg typ_args new_typ_vars in
   return (record_params, new_typ_vars)
+
+
+and typed_existential_typs_of_typ
+    (should_tag : bool)
+    (typ : Types.type_expr)
+  : VarEnv.t Monad.t =
+  match typ.desc with
+  | Tvar x | Tunivar x ->
+    begin match x with
+    | None -> return []
+    | Some x ->
+      let* x = Name.of_string false x in
+      return [(x, if should_tag then Kind.Tag else Kind.Set)]
+    end
+  | Tarrow (_, typ_x, typ_y, _) ->
+    typed_existential_typs_of_typs [typ_x; typ_y] [should_tag; should_tag]
+  | Ttuple typs ->
+    let tag_list = tag_args_with should_tag typs in
+    typed_existential_typs_of_typs typs tag_list
+  | Tconstr (path, typs, _) ->
+    let* env = get_env in
+    let* path_existential =
+      match path with
+      | Path.Pident ident ->
+        begin match Env.find_type path env with
+        | _ -> return []
+        | exception Not_found ->
+          let* ident = Name.of_ident false ident in
+          let kind = if should_tag then Kind.Tag else Kind.Set in
+          return [(ident, kind)]
+        end
+      | _ -> return [] in
+
+    (* non_phantom_typs path typs >>= fun typs -> *)
+    let* is_tagged_variant = PathName.is_tagged_variant path in
+    let* mixed_path = MixedPath.of_path true path in
+    (* print_string ("begin existential of TConstr: " ^ MixedPath.to_string mixed_path ^"\n"); *)
+    let* tag_list = if is_tagged_variant
+      then get_constr_arg_tags ~full:true path
+      else return @@ tag_no_args typs in
+    (* print_string ("end existential of TConstr: " ^ MixedPath.to_string mixed_path ^"\n");
+     * print_string ("is_tagged_variant: " ^ string_of_bool is_tagged_variant ^"\n");
+     * print_string ("tag_list size: " ^ (string_of_int @@ List.length tag_list) ^ "\n");
+     * print_string ("typs size: " ^ (string_of_int @@ List.length typs) ^ "\n"); *)
+    let* existentials = typed_existential_typs_of_typs typs tag_list in
+    (* print_string ("final existentials : " ^ VarEnv.to_string existentials  ^ "\n");
+     * print_string ("final path_existentials : " ^ VarEnv.to_string path_existential  ^ "\n"); *)
+    let new_typ_vars = VarEnv.union path_existential existentials in
+    (* print_string ("final new_typ_vars : " ^ VarEnv.to_string new_typ_vars  ^ "\n"); *)
+    return new_typ_vars
+  | Tobject (_, object_descr) ->
+    let param_typs =
+      match !object_descr with
+      | Some (_, _ :: param_typs) -> List.tl param_typs
+      | _ -> [] in
+    let tag_list = tag_args_with should_tag param_typs in
+    typed_existential_typs_of_typs param_typs tag_list
+  | Tfield (_, _, typ1, typ2) -> typed_existential_typs_of_typs [typ1; typ2] [should_tag; should_tag]
+  | Tnil -> return []
+  | Tlink typ | Tsubst typ -> typed_existential_typs_of_typ should_tag typ
+  | Tvariant { row_fields; _ } ->
+    let typs = row_fields |>
+               List.map (fun (_, row_field) -> type_exprs_of_row_field row_field) |>
+               List.concat in
+    let tag_list = tag_args_with should_tag typs in
+    typed_existential_typs_of_typs typs tag_list
+  | Tpoly (typ, typs) ->
+    let tag_list = tag_args_with should_tag (typ :: typs) in
+    typed_existential_typs_of_typs (typ :: typs) tag_list
+  | Tpackage (_, _, typs) ->
+    let tag_list = tag_args_with should_tag (typs) in
+    typed_existential_typs_of_typs (typs) tag_list
+
+and typed_existential_typs_of_typs
+    (typs : Types.type_expr list)
+    (tag_list : bool list)
+  : VarEnv.t Monad.t =
+  Monad.List.fold_left
+    (fun existentials (typ, should_tag) ->
+      let* existentials_typ = typed_existential_typs_of_typ should_tag typ in
+      return (VarEnv.union existentials existentials_typ)
+    )
+    [] (List.combine typs tag_list)
+
 
 
 let rec decode_var_tags_aux
@@ -996,77 +1092,6 @@ let build_apply_from_name
   (name : Name.t) =
   Apply (mpath, [(Variable name, false)])
 
-
-let rec typed_existential_typs_of_typ
-    (should_tag : bool)
-    (typ : Types.type_expr)
-  : VarEnv.t Monad.t =
-  match typ.desc with
-  | Tvar _ | Tunivar _ -> return []
-  | Tarrow (_, typ_x, typ_y, _) ->
-    typed_existential_typs_of_typs [typ_x; typ_y] [should_tag; should_tag]
-  | Ttuple typs ->
-    let tag_list = tag_args_with should_tag typs in
-    typed_existential_typs_of_typs typs tag_list
-  | Tconstr (path, typs, _) ->
-    let* env = get_env in
-    let* path_existential =
-      match path with
-      | Path.Pident ident ->
-        begin match Env.find_type path env with
-        | _ -> return []
-        | exception Not_found ->
-          let* ident = Name.of_ident false ident in
-          let kind = if should_tag then Kind.Tag else Kind.Set in
-          return [(ident, kind)]
-        end
-      | _ -> return [] in
-
-    non_phantom_typs path typs >>= fun typs ->
-    let* is_tagged_variant = PathName.is_tagged_variant path in
-    let* tag_list = if is_tagged_variant
-      then get_constr_arg_tags path
-      else return @@ tag_no_args typs in
-    let* mixed_path = MixedPath.of_path true path in
-    (* print_string ("existential of TConstr: " ^ MixedPath.to_string mixed_path ^"\n");
-     * print_string ("is_tagged_variant: " ^ string_of_bool is_tagged_variant ^"\n");
-     * print_string ("tag_list size: " ^ (string_of_int @@ List.length tag_list) ^ "\n");
-     * print_string ("typs size: " ^ (string_of_int @@ List.length typs) ^ "\n"); *)
-    let* existentials = typed_existential_typs_of_typs typs tag_list in
-    return (VarEnv.union path_existential existentials)
-  | Tobject (_, object_descr) ->
-    let param_typs =
-      match !object_descr with
-      | Some (_, _ :: param_typs) -> List.tl param_typs
-      | _ -> [] in
-    let tag_list = tag_args_with should_tag param_typs in
-    typed_existential_typs_of_typs param_typs tag_list
-  | Tfield (_, _, typ1, typ2) -> typed_existential_typs_of_typs [typ1; typ2] [should_tag; should_tag]
-  | Tnil -> return []
-  | Tlink typ | Tsubst typ -> typed_existential_typs_of_typ should_tag typ
-  | Tvariant { row_fields; _ } ->
-    let typs = row_fields |>
-               List.map (fun (_, row_field) -> type_exprs_of_row_field row_field) |>
-               List.concat in
-    let tag_list = tag_args_with should_tag typs in
-    typed_existential_typs_of_typs typs tag_list
-  | Tpoly (typ, typs) ->
-    let tag_list = tag_args_with should_tag (typ :: typs) in
-    typed_existential_typs_of_typs (typ :: typs) tag_list
-  | Tpackage (_, _, typs) ->
-    let tag_list = tag_args_with should_tag (typs) in
-    typed_existential_typs_of_typs (typs) tag_list
-
-and typed_existential_typs_of_typs
-    (typs : Types.type_expr list)
-    (tag_list : bool list)
-  : VarEnv.t Monad.t =
-  Monad.List.fold_left
-    (fun existentials (typ, should_tag) ->
-      let* existentials_typ = typed_existential_typs_of_typ should_tag typ in
-      return (VarEnv.union existentials existentials_typ)
-    )
-    [] (List.combine typs tag_list)
 
 
 (** The local type constructors of a type. Used to detect the existential
