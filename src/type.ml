@@ -602,24 +602,6 @@ let rec of_typ_expr
       let* typs = tag_typ_constr path existencial_typs typs in
       let* typ = apply_with_notations mixed_path typs tag_list in
       let* is_record = PathName.is_record path in
-      (* let existencials_kind = if is_record then Kind.Set else Kind.Tag in *)
-
-      (* let* var_env = get_constr_arg_tags_env path in
-       * print_string ("var_env: " ^ VarEnv.to_string var_env ^ "\n");
-       * let var_env = List.map snd var_env in
-       * let existencial_typs = existencial_typs |> Name.Set.elements in
-       * print_string ("existencial_typs: " ^ (existencial_typs |>
-       *               List.map (fun x -> (x, Kind.Set)) |> VarEnv.to_string) ^ "\n");
-       *
-       * print_string ("translating Tconstr: " ^ MixedPath.to_string mixed_path ^ "\n");
-       * let existencial_typs = if is_record then
-       *     List.combine existencial_typs var_env
-       * else List.map (fun x -> (x, Kind.Set)) existencial_typs in *)
-
-      (* let* var_env = get_constr_arg_tags_env path in
-       * let existencial_typs = existencial_typs |> Name.Set.elements |>
-       *                        List.map2 (fun (_, ki) exi -> (exi, ki)) var_env in
-       * let new_typs_vars = VarEnv.union new_typs_vars existencial_typs in *)
       return (typ, typ_vars, new_typs_vars)
 
   | Tobject (_, object_descr) ->
@@ -774,12 +756,6 @@ and get_constr_arg_tags_env
     then return @@ List.map (fun param -> (param, Kind.Tag)) params
     else return @@ List.map (fun param -> (param, Kind.Set)) params
   | { type_kind = Type_record (decls, repr); type_params = params; _} ->
-    (* Get the variables from param. Keep ordering *)
-    (* let* (_, _, typ_vars) = of_typs_exprs true params Name.Map.empty in
-     * let typ_vars = List.map (fun (ty, _) -> ty) typ_vars in
-     * let decls =  List.map (fun decl -> decl.ld_type) decls in
-     * let* (_, _, new_typ_vars) = of_typs_exprs true decls Name.Map.empty in
-     * let new_typ_vars = VarEnv.reorg typ_vars new_typ_vars in *)
     let* (_, new_typ_vars) = record_args decls in
     return new_typ_vars
   | { type_manifest = None; type_kind = Type_abstract; type_params = params; _ } ->
@@ -811,10 +787,7 @@ and get_constr_arg_tags
       then typed_existential_typs_of_typs decls (tag_no_args decls)
       else let* (_, _, new_typ_vars) = of_typs_exprs true decls Name.Map.empty
         in return new_typ_vars in
-    (* let* new_typ_vars = typed_existential_typs_of_typs decls (tag_no_args decls) in *)
-    (* print_string ("new_typ_vars of record: " ^ VarEnv.to_string new_typ_vars ^ "\n"); *)
     let new_typ_vars = VarEnv.reorg typ_vars new_typ_vars in
-    (* print_string ("new_typ_vars of after reorg: " ^ VarEnv.to_string new_typ_vars ^ "\n"); *)
 
     return @@ List.map (fun (_, kind) ->
         match kind with
@@ -908,19 +881,11 @@ and typed_existential_typs_of_typ
     (* non_phantom_typs path typs >>= fun typs -> *)
     let* is_tagged_variant = PathName.is_tagged_variant path in
     let* mixed_path = MixedPath.of_path true path in
-    (* print_string ("begin existential of TConstr: " ^ MixedPath.to_string mixed_path ^"\n"); *)
     let* tag_list = if is_tagged_variant
       then get_constr_arg_tags ~full:true path
       else return @@ tag_no_args typs in
-    (* print_string ("end existential of TConstr: " ^ MixedPath.to_string mixed_path ^"\n");
-     * print_string ("is_tagged_variant: " ^ string_of_bool is_tagged_variant ^"\n");
-     * print_string ("tag_list size: " ^ (string_of_int @@ List.length tag_list) ^ "\n");
-     * print_string ("typs size: " ^ (string_of_int @@ List.length typs) ^ "\n"); *)
     let* existentials = typed_existential_typs_of_typs typs tag_list in
-    (* print_string ("final existentials : " ^ VarEnv.to_string existentials  ^ "\n");
-     * print_string ("final path_existentials : " ^ VarEnv.to_string path_existential  ^ "\n"); *)
     let new_typ_vars = VarEnv.union path_existential existentials in
-    (* print_string ("final new_typ_vars : " ^ VarEnv.to_string new_typ_vars  ^ "\n"); *)
     return new_typ_vars
   | Tobject (_, object_descr) ->
     let param_typs =
