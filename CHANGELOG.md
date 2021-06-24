@@ -1,3 +1,6 @@
+## 2.5.1 (June 24, 2021)
+* Improvement of the GADTs support.
+
 ## 2.5.0 (March 30, 2021)
 * Beginning of support of GADTs without axioms, thanks to a pull-request of @pedrotst https://github.com/clarus/coq-of-ocaml/pull/166.
 * Upgrade OCaml to the version 4.12, thanks to @lthms.
