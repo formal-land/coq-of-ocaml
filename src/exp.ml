@@ -903,7 +903,7 @@ and import_let_fun
           return (args_names, Some e_body)
         else
           return ([], None) in
-      let (args_typs, e_body_typ) = Type.open_type e_typ (List.length args_names) in
+      let* (args_typs, e_body_typ) = Type.open_type e_typ (List.length args_names) in
       let header = {
         Header.name = x;
         typ_vars = new_typ_vars;
