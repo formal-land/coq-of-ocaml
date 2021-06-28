@@ -170,7 +170,7 @@ let is_module_path_local (path : Path.t) : bool Monad.t =
 
 (** In case the base path is local, we need to make a special transformation.
     Indeed, unless if the path is a single name, this means that we access to a
-    sub-module with an anonmous signature which has been flattened.  *)
+    sub-module with an anonmous signature which has been flattened. *)
 let get_local_base_path (is_value : bool) (path : Path.t)
   : PathName.t option Monad.t =
   match path with
