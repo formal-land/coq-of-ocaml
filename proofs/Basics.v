@@ -77,6 +77,9 @@ Parameter unreachable_gadt_branch : forall {A : Set}, A.
 
 Parameter unreachable : forall {A : Set}, A.
 
+(** Mutation of a record field. *)
+Parameter set_record_field : forall {A B : Set}, A -> string -> B -> unit.
+
 Inductive extensible_type : Set :=
 | Build_extensible : string -> forall (A : Set), A -> extensible_type.
 Arguments Build_extensible : clear implicits.
