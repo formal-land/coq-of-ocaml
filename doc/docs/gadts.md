@@ -142,3 +142,42 @@ Lemma to_string_on_string_is_id (s : string)
   reflexivity.
 Qed.
 ```
+
+## Tagged GADTs
+Sometimes erasing the type parameters is undesirable because it will drastically change the semantics of your OCaml programs, this can make some properties to be unprovable.
+With this in mind we provide a tagging mechanism to achieve this through the flag `[@@coq_tag_gadt]`
+
+For example, we would translate
+```ocaml
+type 'a term =
+  | T_Int : int -> int term
+  | T_String : string -> string term
+[@@coq_tag_gadt]
+```
+
+to: 
+```coq
+Inductive term : vtag -> Set :=
+| T_Int : int -> term int_tag
+| T_String : string -> term string_tag
+| T_Sum : term int_tag -> term int_tag -> term int_tag.
+```
+
+This allows us to directly translate impossible branches over GADTs without the use of the axiom `unreachable_gadt_branch` as follows:
+```ocaml
+let rec get_int (e : int term) : int =
+  match[@coq_tagged_match][@coq_match_with_default] e with
+  | T_Int n -> n
+  | _ -> .
+```
+Please notice that we have to indicate that we are pattern matching against a tagged GADT with the flag `coq_tagged_match`.
+
+```coq
+Fixpoint get_int (e : term int_tag) : int :=
+  match e in term t0 return t0 = int_tag -> int with
+  | T_Int n => fun eq0 => ltac:(subst; exact n)
+  | _ => ltac:(discriminate)
+  end eq_refl.
+```
+
+For more details on the mechanisms behind this translation please check [this blog post](https://pedroabreu0.github.io/blog/2020/08/05/OCaml-GADTs-In-Coq)
