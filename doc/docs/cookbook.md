@@ -5,6 +5,42 @@ title: Cookbook
 
 Here we list typical situations where we need to change the OCaml source code so that the translated code compiles in Coq.
 
+## Abstractions in `.mli` files
+When generating the Coq code, we do not use the notion of `.mli` because there are no such interface files in Coq. So the typical setup is to generate a `.v` file for each `.ml` file, and only translate the `.mli` files of the external dependencies to axiom files.
+
+An issue in this process is that there can be differences between what a `.v` file sees and what a `.ml` file was seeing. For example, let us say that we have the following files:
+* `a.ml`:
+```ocaml
+module type S = sig
+  val pub : int -> int
+end
+
+module type S_internal = sig
+  val pub : int -> int
+  val priv : int -> int
+end
+
+module M : S_internal = struct
+  let pub x = x + 1
+  let priv x = x - 1
+end
+```
+* `a.mli`:
+```ocaml
+module type S = sig
+  val pub : int -> int
+end
+
+module M : S
+```
+* `b.ml`:
+```ocaml
+let f x = A.M.pub x
+```
+Then from the point of view of `b.ml`, `A.M` is of signature `A.S` and there are no ways to know about `A.S_internal`. However, in Coq, since we did not translate the `.mli` file, `A.M` appears as having the signature `S_internal`. Since we translate signatures to records, which do not have the notion of inclusion, `A.M` does not have the same type in Coq and in OCaml. This can introduce bugs when we translate a signature annotation `S` to Coq, as Coq expects a signature `S_internal`.
+
+A solution for this issue is to open the abtraction in `a.mli` by using the signature `S_internal` instead of `S`. A general solution on the side of `coq-of-ocaml` would be to translate the `.mli` to `.v` files doing the plumbing from `S` to `S_internal`. We have not done that yet, because of lack of time and because we believe that having `.v` files to do plumbing can also have a cost for the proofs.
+
 ## Fixpoint struct annotations
 In Coq, fixpoints (recursive functions) must be structurally decreasing on one of the arguments in order to make sure that the function always terminates. When structural termination is not obvious, we can disable this check with the configuration option [without_guard_checking](configuration#without_guard_checking). However, Coq still requires to consider one of the parameter as the decreasing one, even if this is not structurally the case. A decreasing parameter is still required to know how far to unfold recursive definitions while doing proofs.
 
@@ -23,6 +59,32 @@ Fixpoint op_minusminusgt (i : int) (j : int) {struct i} : list int :=
     cons i (op_minusminusgt (Pervasives.succ i) j).
 ```
 The annotation `{struct i}` specifies in Coq that the decreasing parameter is `i`.
+
+## Ignore complex functions
+Sometimes definitions are too complex to translate to Coq, but we still want to go on with the rest of the files. A solution is to add the [coq_axiom_with_reason](attributes#coq_axiom_with_reason) to ignore a definition and replace it by an axiom of the same type.
+
+For example, the following definition would not work in Coq as is it is, due to the use of GADTs:
+```ocaml
+  let fold_all f set acc =
+    List.fold_left
+      (fun acc (_, Ex_Kind kind) -> fold kind (f.f kind) set acc)
+      acc
+      all
+```
+We then add the attribute `@coq_axiom_with_reason`:
+```ocaml
+let fold_all f set acc =
+    List.fold_left
+      (fun acc (_, Ex_Kind kind) -> fold kind (f.f kind) set acc)
+      acc
+      all
+    [@@coq_axiom_with_reason "gadt"]
+```
+This generates the following Coq code:
+```coq
+Axiom fold_all : forall {A : Set}, fold_f A -> t -> A -> A.
+```
+which compiles and has the right type, even if we lost the translation of the body of `fold_all`. With this attribute we must add a reason, so that we document we chose to introduce an axiom. Among frequent reasons are the use of GADTs or complex recursive functions.
 
 ## Mutual definitions as notations
 Sometimes mutual definitions for a recursive function are used more as notations rather than to express a true mutual recursion. See the attribute [coq_mutual_as_notation](attributes#coq_mutual_as_notation) for more details about how to handle this kind of definitions. Here is an example where this attribute is needed:
@@ -50,7 +112,131 @@ where "'double" := (fun (n : int) => Z.mul 2 n).
 Definition double := 'double.
 ```
 
-## Nested signatures
+## Named signatures
+We translate modules used in functors as records in Coq. We require a name for the signatures in order to have a name for the corresonding records. Sometime, in OCaml, when a signature is used just once it is inlined and not named. Here is an example of code with an anonymous signature for the return signature of the functor `Make_indexed_carbonated_data_storage`:
+```ocaml
+module Make_indexed_carbonated_data_storage
+    (C : Raw_context.T)
+    (I : INDEX)
+    (V : VALUE) : sig
+  include
+    Non_iterable_indexed_carbonated_data_storage
+      with type t = C.t
+       and type key = I.t
+       and type value = V.t
+
+  val list_values :
+    ?offset:int ->
+    ?length:int ->
+    C.t ->
+    (Raw_context.t * V.t list) tzresult Lwt.t
+end = struct
+  include Make_indexed_carbonated_data_storage_INTERNAL (C) (I) (V)
+end
+```
+This generates the following error message in `coq-of-ocaml`:
+```
+--- storage_functors.ml:527:19 --------------------------------------------- not_supported (1/1) ---
+
+  525 |     (C : Raw_context.T)
+  526 |     (I : INDEX)
+> 527 |     (V : VALUE) : sig
+> 528 |   include
+> 529 |     Non_iterable_indexed_carbonated_data_storage
+> 530 |       with type t = C.t
+> 531 |        and type key = I.t
+> 532 |        and type value = V.t
+> 533 | 
+> 534 |   val list_values :
+> 535 |     ?offset:int ->
+> 536 |     ?length:int ->
+> 537 |     C.t ->
+> 538 |     (Raw_context.t * V.t list) tzresult Lwt.t
+> 539 | end = struct
+  540 |   include Make_indexed_carbonated_data_storage_INTERNAL (C) (I) (V)
+  541 | end
+  542 | 
+
+
+Anonymous definition of signatures is not handled
+```
+We replace it by the following OCaml code, which translates into Coq without errors:
+```ocaml
+module type Non_iterable_indexed_carbonated_data_storage_with_values = sig
+  include Non_iterable_indexed_carbonated_data_storage
+
+  val list_values :
+    ?offset:int ->
+    ?length:int ->
+    t ->
+    (Raw_context.t * value list) tzresult Lwt.t
+end
+
+module Make_indexed_carbonated_data_storage
+    (C : Raw_context.T)
+    (I : INDEX)
+    (V : VALUE) :
+  Non_iterable_indexed_carbonated_data_storage_with_values
+    with type t = C.t
+     and type key = I.t
+     and type value = V.t = struct
+  include Make_indexed_carbonated_data_storage_INTERNAL (C) (I) (V)
+end
+```
+There we named the return signature of the functor `Non_iterable_indexed_carbonated_data_storage_with_values`.
+
+## Named polymorphic variant types
+In the following OCaml code, the type of the parameter `depth` is a polymorphic variant type:
+```ocaml
+val fold :
+  ?depth:[`Eq of int | `Le of int | `Lt of int | `Ge of int | `Gt of int] ->
+  t ->
+  key ->
+  init:'a ->
+  f:(key -> tree -> 'a -> 'a Lwt.t) ->
+  'a Lwt.t
+```
+We do not handle this kind of types in `coq-of-ocaml`, because there are no clear equivalent features in Coq. In most of the code, we would replace this declaration by an algebraic datatype as follows:
+```ocaml
+type depth =
+  | Eq of int
+  | Le of int
+  | Lt of int
+  | Ge of int
+  | Gt of int
+
+val fold :
+  ?depth:depth ->
+  t ->
+  key ->
+  init:'a ->
+  f:(key -> tree -> 'a -> 'a Lwt.t) ->
+  'a Lwt.t
+```
+Sometimes it is not possible to do this kind of change, for backward compatibility of an API for example. In this case we name the polymorphic variant type:
+```ocaml
+type depth = [`Eq of int | `Le of int | `Lt of int | `Ge of int | `Gt of int]
+
+val fold :
+  ?depth:depth ->
+  t ->
+  key ->
+  init:'a ->
+  f:(key -> tree -> 'a -> 'a Lwt.t) ->
+  'a Lwt.t
+```
+We translate the definition of `depth` as if it was an algebraic datatype:
+```coq
+Inductive depth : Set :=
+| Ge : int -> depth
+| Lt : int -> depth
+| Eq : int -> depth
+| Le : int -> depth
+| Gt : int -> depth.
+```
+Then, using the configuration parameters [variant_constructors](configuration#variant_constructors) and [variant_types](configuration#variant_types), we instruct `coq-of-ocaml` to recognize that there is a type `depth` whenever it finds a constructor `` `Eq``, ..., or `` `Gt`` in the OCaml code.
+
+## Nested anonymous signatures
 There is a support for nested anonymous signatures in `coq-of-ocaml`, but this often does not work well for various reasons. The key reason is that we translate signatures to records, which can only be flat. An example of nested anonymous signature is the following:
 ```ocaml
 module type TitleWithId = sig
@@ -120,30 +306,6 @@ Module TitleWithId.
 End TitleWithId.
 Definition TitleWithId := @TitleWithId.signature.
 Arguments TitleWithId {_ _}.
-```
-
-## Non-mutually recursive definitions
-Sometimes we use the `and` keyword for definitions which are not mutually recursive:
-```ocaml
-let numbits x =
-  let x = ref x and n = ref 0 in
-  (* ... *)
-```
-Since we do not check if the definitions are truly mutually recursive, `coq-of-ocaml` would generate the following Coq code:
-```coq
-Definition numbits (x : int) : int :=
-  let x : Stdlib.ref int :=
-    Stdlib.ref_value x
-  with n : Stdlib.ref int :=
-    Stdlib.ref_value 0 in
-  (* ... *)
-```
-on which Coq fails because the `with` keyword only works for mutually recursive definitions. The solution is then to explicit that `x` and `n` are not mutually recursive:
-```ocaml
-let numbits x =
-  let x = ref x in
-  let n = ref 0 in
-  (* ... *)
 ```
 
 ## Non-mutually recursive types
