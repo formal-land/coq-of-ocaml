@@ -145,7 +145,7 @@ Qed.
 
 ## Tagged GADTs
 Sometimes erasing the type parameters is undesirable because it will drastically change the semantics of your OCaml programs, this can make some properties to be unprovable.
-With this in mind we provide a taging mechanism to achieve this through the flag `[@@coq_tag_gadt]`
+With this in mind we provide a tagging mechanism to achieve this through the flag `[@@coq_tag_gadt]`
 
 For example, we would translate
 ```ocaml
