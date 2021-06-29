@@ -1,0 +1,371 @@
+<!DOCTYPE html><html lang="en"><head><meta charSet="utf-8"/><meta http-equiv="X-UA-Compatible" content="IE=edge"/><title>Cookbook · coq-of-ocaml</title><meta name="viewport" content="width=device-width, initial-scale=1.0"/><meta name="generator" content="Docusaurus"/><meta name="description" content="Here we list typical situations where we need to change the OCaml source code so that the translated code compiles in Coq."/><meta name="docsearch:language" content="en"/><meta property="og:title" content="Cookbook · coq-of-ocaml"/><meta property="og:type" content="website"/><meta property="og:url" content="https://clarus.github.io/coq-of-ocaml/"/><meta property="og:description" content="Here we list typical situations where we need to change the OCaml source code so that the translated code compiles in Coq."/><meta property="og:image" content="https://clarus.github.io/coq-of-ocaml/img/undraw_online.svg"/><meta name="twitter:card" content="summary"/><meta name="twitter:image" content="https://clarus.github.io/coq-of-ocaml/img/undraw_tweetstorm.svg"/><link rel="shortcut icon" href="/coq-of-ocaml/img/favicon.ico"/><link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/default.min.css"/><script type="text/javascript" src="https://buttons.github.io/buttons.js"></script><script type="text/javascript" src="/coq-of-ocaml/js/language-name.js"></script><script src="/coq-of-ocaml/js/scrollSpy.js"></script><link rel="stylesheet" href="/coq-of-ocaml/css/main.css"/><script src="/coq-of-ocaml/js/codetabs.js"></script></head><body class="sideNavVisible separateOnPageNav"><div class="fixedHeaderContainer"><div class="headerWrapper wrapper"><header><a href="/coq-of-ocaml/"><img class="logo" src="/coq-of-ocaml/img/favicon.ico" alt="coq-of-ocaml"/><h2 class="headerTitleWithLogo">coq-of-ocaml</h2></a><div class="navigationWrapper navigationSlider"><nav class="slidingNav"><ul class="nav-site nav-site-internal"><li class="siteNavGroupActive"><a href="/coq-of-ocaml/docs/introduction" target="_self">Docs</a></li><li class="siteNavGroupActive"><a href="/coq-of-ocaml/docs/examples" target="_self">Examples</a></li><li class=""><a href="https://github.com/clarus/coq-of-ocaml" target="_blank">GitHub</a></li></ul></nav></div></header></div></div><div class="navPusher"><div class="docMainWrapper wrapper"><div class="docsNavContainer" id="docsNav"><nav class="toc"><div class="toggleNav"><section class="navWrapper wrapper"><div class="navBreadcrumb wrapper"><div class="navToggle" id="navToggler"><div class="hamburger-menu"><div class="line1"></div><div class="line2"></div><div class="line3"></div></div></div><h2><i>›</i><span>Getting started</span></h2><div class="tocToggler" id="tocToggler"><i class="icon-toc"></i></div></div><div class="navGroups"><div class="navGroup"><h3 class="navGroupCategoryTitle">Introduction</h3><ul class=""><li class="navListItem"><a class="navItem" href="/coq-of-ocaml/docs/introduction">What is coq-of-ocaml</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">Getting started</h3><ul class=""><li class="navListItem"><a class="navItem" href="/coq-of-ocaml/docs/install">Install</a></li><li class="navListItem"><a class="navItem" href="/coq-of-ocaml/docs/run">Run</a></li><li class="navListItem navListItemActive"><a class="navItem" href="/coq-of-ocaml/docs/cookbook">Cookbook</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">Concepts</h3><ul class=""><li class="navListItem"><a class="navItem" href="/coq-of-ocaml/docs/ocaml-core">OCaml core</a></li><li class="navListItem"><a class="navItem" href="/coq-of-ocaml/docs/type-definitions">Type definitions</a></li><li class="navListItem"><a class="navItem" href="/coq-of-ocaml/docs/module-system">Module system</a></li><li class="navListItem"><a class="navItem" href="/coq-of-ocaml/docs/gadts">GADTs</a></li><li class="navListItem"><a class="navItem" href="/coq-of-ocaml/docs/attributes">Attributes</a></li><li class="navListItem"><a class="navItem" href="/coq-of-ocaml/docs/configuration">Configuration</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">Examples</h3><ul class=""><li class="navListItem"><a class="navItem" href="/coq-of-ocaml/docs/examples">Examples</a></li></ul></div></div></section></div><script>
+            var coll = document.getElementsByClassName('collapsible');
+            var checkActiveCategory = true;
+            for (var i = 0; i < coll.length; i++) {
+              var links = coll[i].nextElementSibling.getElementsByTagName('*');
+              if (checkActiveCategory){
+                for (var j = 0; j < links.length; j++) {
+                  if (links[j].classList.contains('navListItemActive')){
+                    coll[i].nextElementSibling.classList.toggle('hide');
+                    coll[i].childNodes[1].classList.toggle('rotate');
+                    checkActiveCategory = false;
+                    break;
+                  }
+                }
+              }
+
+              coll[i].addEventListener('click', function() {
+                var arrow = this.childNodes[1];
+                arrow.classList.toggle('rotate');
+                var content = this.nextElementSibling;
+                content.classList.toggle('hide');
+              });
+            }
+
+            document.addEventListener('DOMContentLoaded', function() {
+              createToggler('#navToggler', '#docsNav', 'docsSliderActive');
+              createToggler('#tocToggler', 'body', 'tocActive');
+
+              var headings = document.querySelector('.toc-headings');
+              headings && headings.addEventListener('click', function(event) {
+                var el = event.target;
+                while(el !== headings){
+                  if (el.tagName === 'A') {
+                    document.body.classList.remove('tocActive');
+                    break;
+                  } else{
+                    el = el.parentNode;
+                  }
+                }
+              }, false);
+
+              function createToggler(togglerSelector, targetSelector, className) {
+                var toggler = document.querySelector(togglerSelector);
+                var target = document.querySelector(targetSelector);
+
+                if (!toggler) {
+                  return;
+                }
+
+                toggler.onclick = function(event) {
+                  event.preventDefault();
+
+                  target.classList.toggle(className);
+                };
+              }
+            });
+        </script></nav></div><div class="container mainContainer docsContainer"><div class="wrapper"><div class="post"><header class="postHeader"><h1 id="__docusaurus" class="postHeaderTitle">Cookbook</h1></header><article><div><span><p>Here we list typical situations where we need to change the OCaml source code so that the translated code compiles in Coq.</p>
+<h2><a class="anchor" aria-hidden="true" id="abstractions-in-mli-files"></a><a href="#abstractions-in-mli-files" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Abstractions in <code>.mli</code> files</h2>
+<p>When generating the Coq code, we do not use the notion of <code>.mli</code> because there are no such interface files in Coq. So the typical setup is to generate a <code>.v</code> file for each <code>.ml</code> file, and only translate the <code>.mli</code> files of the external dependencies to axiom files.</p>
+<p>An issue in this process is that there can be differences between what a <code>.v</code> file sees and what a <code>.ml</code> file was seeing. For example, let us say that we have the following files:</p>
+<ul>
+<li><code>a.ml</code>:</li>
+</ul>
+<pre><code class="hljs css language-ocaml"><span class="hljs-keyword">module</span> <span class="hljs-keyword">type</span> <span class="hljs-type">S</span> = <span class="hljs-keyword">sig</span>
+  <span class="hljs-keyword">val</span> pub : <span class="hljs-built_in">int</span> -&gt; <span class="hljs-built_in">int</span>
+<span class="hljs-keyword">end</span>
+
+<span class="hljs-keyword">module</span> <span class="hljs-keyword">type</span> <span class="hljs-type">S_internal</span> = <span class="hljs-keyword">sig</span>
+  <span class="hljs-keyword">val</span> pub : <span class="hljs-built_in">int</span> -&gt; <span class="hljs-built_in">int</span>
+  <span class="hljs-keyword">val</span> priv : <span class="hljs-built_in">int</span> -&gt; <span class="hljs-built_in">int</span>
+<span class="hljs-keyword">end</span>
+
+<span class="hljs-keyword">module</span> <span class="hljs-type">M</span> : <span class="hljs-type">S_internal</span> = <span class="hljs-keyword">struct</span>
+  <span class="hljs-keyword">let</span> pub x = x + <span class="hljs-number">1</span>
+  <span class="hljs-keyword">let</span> priv x = x - <span class="hljs-number">1</span>
+<span class="hljs-keyword">end</span>
+</code></pre>
+<ul>
+<li><code>a.mli</code>:</li>
+</ul>
+<pre><code class="hljs css language-ocaml"><span class="hljs-keyword">module</span> <span class="hljs-keyword">type</span> <span class="hljs-type">S</span> = <span class="hljs-keyword">sig</span>
+  <span class="hljs-keyword">val</span> pub : <span class="hljs-built_in">int</span> -&gt; <span class="hljs-built_in">int</span>
+<span class="hljs-keyword">end</span>
+
+<span class="hljs-keyword">module</span> <span class="hljs-type">M</span> : <span class="hljs-type">S</span>
+</code></pre>
+<ul>
+<li><code>b.ml</code>:</li>
+</ul>
+<pre><code class="hljs css language-ocaml"><span class="hljs-keyword">let</span> f x = <span class="hljs-type">A</span>.<span class="hljs-type">M</span>.pub x
+</code></pre>
+<p>Then from the point of view of <code>b.ml</code>, <code>A.M</code> is of signature <code>A.S</code> and there are no ways to know about <code>A.S_internal</code>. However, in Coq, since we did not translate the <code>.mli</code> file, <code>A.M</code> appears as having the signature <code>S_internal</code>. Since we translate signatures to records, which do not have the notion of inclusion, <code>A.M</code> does not have the same type in Coq and OCaml. This can introduce bugs when we translate a signature annotation <code>S</code> to Coq, as Coq expects a signature <code>S_internal</code>.</p>
+<p>A solution for this issue is to open the abstraction in <code>a.mli</code> by using the signature <code>S_internal</code> instead of <code>S</code>. A general solution on the side of <code>coq-of-ocaml</code> would be to translate the <code>.mli</code> to <code>.v</code> files doing the plumbing from <code>S</code> to <code>S_internal</code>. We have not done that yet, because of lack of time and because we believe that having <code>.v</code> files to do plumbing can also have a cost for the proofs.</p>
+<h2><a class="anchor" aria-hidden="true" id="fixpoint-struct-annotations"></a><a href="#fixpoint-struct-annotations" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Fixpoint struct annotations</h2>
+<p>In Coq, fixpoints (recursive functions) must be structurally decreasing on one of the arguments to make sure that the function always terminates. When structural termination is not obvious, we can disable this check with the configuration option <a href="configuration#without_guard_checking">without_guard_checking</a>. However, Coq still requires to consider one of the parameters as the decreasing one, even if this is not structurally the case. A decreasing parameter is still required to know how far to unfold recursive definitions while doing proofs.</p>
+<p>The way to specify the decreasing parameter is to use the attribute <a href="attributes#coq_struct">coq_struct</a>. For example we annotate the operator <code>--&gt;</code> as follows:</p>
+<pre><code class="hljs css language-ocaml"><span class="hljs-keyword">let</span>[@coq_struct <span class="hljs-string">"i"</span>] <span class="hljs-keyword">rec</span> ( --&gt; ) i j =
+  <span class="hljs-comment">(* [i; i+1; ...; j] *)</span>
+  <span class="hljs-keyword">if</span> <span class="hljs-type">Compare</span>.<span class="hljs-type">Int</span>.(i &gt; j) <span class="hljs-keyword">then</span> <span class="hljs-literal">[]</span> <span class="hljs-keyword">else</span> i :: (succ i --&gt; j)
+</code></pre>
+<p>Here <code>i</code> is decreasing when we consider the natural order on <code>-i</code>. This generates the following Coq code:</p>
+<pre><code class="hljs css language-coq"><span class="hljs-keyword">Fixpoint</span> op_minusminusgt (i : int) (j : int) {struct i} : list int :=
+  <span class="hljs-keyword">if</span> i &gt;i j <span class="hljs-keyword">then</span>
+    nil
+  <span class="hljs-keyword">else</span>
+    cons i (op_minusminusgt (Pervasives.succ i) j).
+</code></pre>
+<p>The annotation <code>{struct i}</code> specifies in Coq that the decreasing parameter is <code>i</code>.</p>
+<h2><a class="anchor" aria-hidden="true" id="ignored-functions"></a><a href="#ignored-functions" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Ignored functions</h2>
+<p>Sometimes definitions are too complex to translate to Coq, but we still want to go on with the rest of the files. A solution is to add the <a href="attributes#coq_axiom_with_reason">coq_axiom_with_reason</a> to ignore a definition and replace it with an axiom of the same type.</p>
+<p>For example, the following definition would not work in Coq as is it is, due to the use of GADTs:</p>
+<pre><code class="hljs css language-ocaml">  <span class="hljs-keyword">let</span> fold_all f set acc =
+    <span class="hljs-type">List</span>.fold_left
+      (<span class="hljs-keyword">fun</span> acc (_, <span class="hljs-type">Ex_Kind</span> kind) -&gt; fold kind (f.f kind) set acc)
+      acc
+      all
+</code></pre>
+<p>We then add the attribute <code>@coq_axiom_with_reason</code>:</p>
+<pre><code class="hljs css language-ocaml"><span class="hljs-keyword">let</span> fold_all f set acc =
+    <span class="hljs-type">List</span>.fold_left
+      (<span class="hljs-keyword">fun</span> acc (_, <span class="hljs-type">Ex_Kind</span> kind) -&gt; fold kind (f.f kind) set acc)
+      acc
+      all
+    [@@coq_axiom_with_reason <span class="hljs-string">"gadt"</span>]
+</code></pre>
+<p>This generates the following Coq code:</p>
+<pre><code class="hljs css language-coq"><span class="hljs-keyword">Axiom</span> fold_all : <span class="hljs-keyword">forall</span> {A : <span class="hljs-keyword">Set</span>}, fold_f A -&gt; t -&gt; A -&gt; A.
+</code></pre>
+<p>which compiles and has the right type, even if we lost the translation of the body of <code>fold_all</code>. With this attribute we must add a reason, so that we document we chose to introduce an axiom. Among frequent reasons are the use of GADTs and complex recursive functions.</p>
+<h2><a class="anchor" aria-hidden="true" id="mutual-definitions-as-notations"></a><a href="#mutual-definitions-as-notations" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Mutual definitions as notations</h2>
+<p>Sometimes mutual definitions for a recursive function are used more as notations rather than to express a true mutual recursion. See the attribute <a href="attributes#coq_mutual_as_notation">coq_mutual_as_notation</a> for more details about how to handle this kind of definition. Here is an example where this attribute is needed:</p>
+<pre><code class="hljs css language-ocaml"><span class="hljs-keyword">let</span> <span class="hljs-keyword">rec</span> double_list l =
+  <span class="hljs-keyword">match</span> l <span class="hljs-keyword">with</span>
+  | <span class="hljs-literal">[]</span> -&gt; l
+  | n :: l -&gt; double n :: double_list l
+
+<span class="hljs-keyword">and</span>[@coq_mutual_as_notation] double n = <span class="hljs-number">2</span> * n
+</code></pre>
+<p>which translates in Coq to:</p>
+<pre><code class="hljs css language-coq"><span class="hljs-keyword">Reserved</span> <span class="hljs-keyword">Notation</span> <span class="hljs-string">"'double"</span>.
+
+<span class="hljs-keyword">Fixpoint</span> double_list (l : list int) : list int :=
+  <span class="hljs-keyword">let</span> <span class="hljs-built_in">double</span> := '<span class="hljs-built_in">double</span> <span class="hljs-built_in">in</span>
+  <span class="hljs-keyword">match</span> l <span class="hljs-built_in">with</span>
+  | <span class="hljs-type">[] =&gt; l</span>
+  | <span class="hljs-type">cons</span> n l =&gt; cons (<span class="hljs-built_in">double</span> n) (double_list l)
+  <span class="hljs-keyword">end</span>
+
+<span class="hljs-keyword">where</span> <span class="hljs-string">"'double"</span> := (<span class="hljs-keyword">fun</span> (n : int) =&gt; Z.mul <span class="hljs-number">2</span> n).
+
+<span class="hljs-keyword">Definition</span> <span class="hljs-built_in">double</span> := '<span class="hljs-built_in">double</span>.
+</code></pre>
+<h2><a class="anchor" aria-hidden="true" id="named-signatures"></a><a href="#named-signatures" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Named signatures</h2>
+<p>We translate modules used in functors as records in Coq. We require a name for the signatures to have a name for the corresponding records. Sometimes, in OCaml, when a signature is used just once it is inlined and not named. Here is an example of code with an anonymous signature for the return signature of the functor <code>Make_indexed_carbonated_data_storage</code>:</p>
+<pre><code class="hljs css language-ocaml"><span class="hljs-keyword">module</span> <span class="hljs-type">Make_indexed_carbonated_data_storage</span>
+    (<span class="hljs-type">C</span> : <span class="hljs-type">Raw_context</span>.<span class="hljs-type">T</span>)
+    (<span class="hljs-type">I</span> : <span class="hljs-type">INDEX</span>)
+    (<span class="hljs-type">V</span> : <span class="hljs-type">VALUE</span>) : <span class="hljs-keyword">sig</span>
+  <span class="hljs-keyword">include</span>
+    <span class="hljs-type">Non_iterable_indexed_carbonated_data_storage</span>
+      <span class="hljs-keyword">with</span> <span class="hljs-keyword">type</span> t = <span class="hljs-type">C</span>.t
+       <span class="hljs-keyword">and</span> <span class="hljs-keyword">type</span> key = <span class="hljs-type">I</span>.t
+       <span class="hljs-keyword">and</span> <span class="hljs-keyword">type</span> <span class="hljs-keyword">value</span> = <span class="hljs-type">V</span>.t
+
+  <span class="hljs-keyword">val</span> list_values :
+    ?offset:<span class="hljs-built_in">int</span> -&gt;
+    ?length:<span class="hljs-built_in">int</span> -&gt;
+    <span class="hljs-type">C</span>.t -&gt;
+    (<span class="hljs-type">Raw_context</span>.t * <span class="hljs-type">V</span>.t <span class="hljs-built_in">list</span>) tzresult <span class="hljs-type">Lwt</span>.t
+<span class="hljs-keyword">end</span> = <span class="hljs-keyword">struct</span>
+  <span class="hljs-keyword">include</span> <span class="hljs-type">Make_indexed_carbonated_data_storage_INTERNAL</span> (<span class="hljs-type">C</span>) (<span class="hljs-type">I</span>) (<span class="hljs-type">V</span>)
+<span class="hljs-keyword">end</span>
+</code></pre>
+<p>This generates the following error message in <code>coq-of-ocaml</code>:</p>
+<pre><code class="hljs">--- storage_functors.ml:527:19 --------------------------------------------- not_supported (1/1) ---
+
+  525 |     (C : Raw_context.T)
+  526 |     (I : INDEX)
+&gt; 527 |     (V : VALUE) : sig
+&gt; 528 |   include
+&gt; 529 |     Non_iterable_indexed_carbonated_data_storage
+&gt; 530 |       with<span class="hljs-built_in"> type </span>t = C.t
+&gt; 531 |        <span class="hljs-keyword">and</span><span class="hljs-built_in"> type </span>key = I.t
+&gt; 532 |        <span class="hljs-keyword">and</span><span class="hljs-built_in"> type </span>value = V.t
+&gt; 533 | 
+&gt; 534 |   val list_values :
+&gt; 535 |     ?offset:int -&gt;
+&gt; 536 |     ?length:int -&gt;
+&gt; 537 |     C.t -&gt;
+&gt; 538 |     (Raw_context.t * V.t list) tzresult Lwt.t
+&gt; 539 | end = struct
+  540 |   include Make_indexed_carbonated_data_storage_INTERNAL (C) (I) (V)
+  541 | end
+  542 | 
+
+
+Anonymous definition of signatures is <span class="hljs-keyword">not</span> handled
+</code></pre>
+<p>We replace it by the following OCaml code, which translates into Coq without errors:</p>
+<pre><code class="hljs css language-ocaml"><span class="hljs-keyword">module</span> <span class="hljs-keyword">type</span> <span class="hljs-type">Non_iterable_indexed_carbonated_data_storage_with_values</span> = <span class="hljs-keyword">sig</span>
+  <span class="hljs-keyword">include</span> <span class="hljs-type">Non_iterable_indexed_carbonated_data_storage</span>
+
+  <span class="hljs-keyword">val</span> list_values :
+    ?offset:<span class="hljs-built_in">int</span> -&gt;
+    ?length:<span class="hljs-built_in">int</span> -&gt;
+    t -&gt;
+    (<span class="hljs-type">Raw_context</span>.t * <span class="hljs-keyword">value</span> <span class="hljs-built_in">list</span>) tzresult <span class="hljs-type">Lwt</span>.t
+<span class="hljs-keyword">end</span>
+
+<span class="hljs-keyword">module</span> <span class="hljs-type">Make_indexed_carbonated_data_storage</span>
+    (<span class="hljs-type">C</span> : <span class="hljs-type">Raw_context</span>.<span class="hljs-type">T</span>)
+    (<span class="hljs-type">I</span> : <span class="hljs-type">INDEX</span>)
+    (<span class="hljs-type">V</span> : <span class="hljs-type">VALUE</span>) :
+  <span class="hljs-type">Non_iterable_indexed_carbonated_data_storage_with_values</span>
+    <span class="hljs-keyword">with</span> <span class="hljs-keyword">type</span> t = <span class="hljs-type">C</span>.t
+     <span class="hljs-keyword">and</span> <span class="hljs-keyword">type</span> key = <span class="hljs-type">I</span>.t
+     <span class="hljs-keyword">and</span> <span class="hljs-keyword">type</span> <span class="hljs-keyword">value</span> = <span class="hljs-type">V</span>.t = <span class="hljs-keyword">struct</span>
+  <span class="hljs-keyword">include</span> <span class="hljs-type">Make_indexed_carbonated_data_storage_INTERNAL</span> (<span class="hljs-type">C</span>) (<span class="hljs-type">I</span>) (<span class="hljs-type">V</span>)
+<span class="hljs-keyword">end</span>
+</code></pre>
+<p>There we named the return signature of the functor <code>Non_iterable_indexed_carbonated_data_storage_with_values</code>.</p>
+<h2><a class="anchor" aria-hidden="true" id="named-polymorphic-variant-types"></a><a href="#named-polymorphic-variant-types" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Named polymorphic variant types</h2>
+<p>In the following OCaml code, the type of the parameter <code>depth</code> is a polymorphic variant type:</p>
+<pre><code class="hljs css language-ocaml"><span class="hljs-keyword">val</span> fold :
+  ?depth:[<span class="hljs-type">`Eq</span> <span class="hljs-keyword">of</span> <span class="hljs-built_in">int</span> | <span class="hljs-type">`Le</span> <span class="hljs-keyword">of</span> <span class="hljs-built_in">int</span> | <span class="hljs-type">`Lt</span> <span class="hljs-keyword">of</span> <span class="hljs-built_in">int</span> | <span class="hljs-type">`Ge</span> <span class="hljs-keyword">of</span> <span class="hljs-built_in">int</span> | <span class="hljs-type">`Gt</span> <span class="hljs-keyword">of</span> <span class="hljs-built_in">int</span>] -&gt;
+  t -&gt;
+  key -&gt;
+  init:<span class="hljs-symbol">'a</span> -&gt;
+  f:(key -&gt; tree -&gt; <span class="hljs-symbol">'a</span> -&gt; <span class="hljs-symbol">'a</span> <span class="hljs-type">Lwt</span>.t) -&gt;
+  <span class="hljs-symbol">'a</span> <span class="hljs-type">Lwt</span>.t
+</code></pre>
+<p>We do not handle this kind of type in <code>coq-of-ocaml</code>, because there are no clear equivalent features in Coq. In most of the code, we would replace this declaration with an algebraic datatype as follows:</p>
+<pre><code class="hljs css language-ocaml"><span class="hljs-keyword">type</span> depth =
+  | <span class="hljs-type">Eq</span> <span class="hljs-keyword">of</span> <span class="hljs-built_in">int</span>
+  | <span class="hljs-type">Le</span> <span class="hljs-keyword">of</span> <span class="hljs-built_in">int</span>
+  | <span class="hljs-type">Lt</span> <span class="hljs-keyword">of</span> <span class="hljs-built_in">int</span>
+  | <span class="hljs-type">Ge</span> <span class="hljs-keyword">of</span> <span class="hljs-built_in">int</span>
+  | <span class="hljs-type">Gt</span> <span class="hljs-keyword">of</span> <span class="hljs-built_in">int</span>
+
+<span class="hljs-keyword">val</span> fold :
+  ?depth:depth -&gt;
+  t -&gt;
+  key -&gt;
+  init:<span class="hljs-symbol">'a</span> -&gt;
+  f:(key -&gt; tree -&gt; <span class="hljs-symbol">'a</span> -&gt; <span class="hljs-symbol">'a</span> <span class="hljs-type">Lwt</span>.t) -&gt;
+  <span class="hljs-symbol">'a</span> <span class="hljs-type">Lwt</span>.t
+</code></pre>
+<p>Sometimes it is not possible to do this kind of change, for backward compatibility of an API for example. In this case we name the polymorphic variant type:</p>
+<pre><code class="hljs css language-ocaml"><span class="hljs-keyword">type</span> depth = [<span class="hljs-type">`Eq</span> <span class="hljs-keyword">of</span> <span class="hljs-built_in">int</span> | <span class="hljs-type">`Le</span> <span class="hljs-keyword">of</span> <span class="hljs-built_in">int</span> | <span class="hljs-type">`Lt</span> <span class="hljs-keyword">of</span> <span class="hljs-built_in">int</span> | <span class="hljs-type">`Ge</span> <span class="hljs-keyword">of</span> <span class="hljs-built_in">int</span> | <span class="hljs-type">`Gt</span> <span class="hljs-keyword">of</span> <span class="hljs-built_in">int</span>]
+
+<span class="hljs-keyword">val</span> fold :
+  ?depth:depth -&gt;
+  t -&gt;
+  key -&gt;
+  init:<span class="hljs-symbol">'a</span> -&gt;
+  f:(key -&gt; tree -&gt; <span class="hljs-symbol">'a</span> -&gt; <span class="hljs-symbol">'a</span> <span class="hljs-type">Lwt</span>.t) -&gt;
+  <span class="hljs-symbol">'a</span> <span class="hljs-type">Lwt</span>.t
+</code></pre>
+<p>We translate the definition of <code>depth</code> as if it was an algebraic datatype:</p>
+<pre><code class="hljs css language-coq"><span class="hljs-keyword">Inductive</span> depth : <span class="hljs-keyword">Set</span> :=
+| <span class="hljs-type">Ge</span> : int -&gt; depth
+| <span class="hljs-type">Lt</span> : int -&gt; depth
+| <span class="hljs-type">Eq</span> : int -&gt; depth
+| <span class="hljs-type">Le</span> : int -&gt; depth
+| <span class="hljs-type">Gt</span> : int -&gt; depth.
+</code></pre>
+<p>Then, using the configuration parameters <a href="configuration#variant_constructors">variant_constructors</a> and <a href="configuration#variant_types">variant_types</a>, we instruct <code>coq-of-ocaml</code> to recognize that there is a type <code>depth</code> whenever it finds a constructor <code>`Eq</code>, ..., or <code>`Gt</code> in the OCaml code.</p>
+<h2><a class="anchor" aria-hidden="true" id="nested-anonymous-signatures"></a><a href="#nested-anonymous-signatures" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Nested anonymous signatures</h2>
+<p>There is support for nested anonymous signatures in <code>coq-of-ocaml</code>, but this often does not work well for various reasons. The key reason is that we translate signatures to records, which can only be flat. An example of a nested anonymous signature is the following:</p>
+<pre><code class="hljs css language-ocaml"><span class="hljs-keyword">module</span> <span class="hljs-keyword">type</span> <span class="hljs-type">TitleWithId</span> = <span class="hljs-keyword">sig</span>
+  <span class="hljs-keyword">val</span> title : <span class="hljs-built_in">string</span>
+
+  <span class="hljs-keyword">module</span> <span class="hljs-type">Id</span> : <span class="hljs-keyword">sig</span>
+    <span class="hljs-keyword">include</span> <span class="hljs-type">ID</span>
+
+    <span class="hljs-keyword">module</span> <span class="hljs-type">Temp</span> : <span class="hljs-type">Temp_id</span> <span class="hljs-keyword">with</span> <span class="hljs-keyword">type</span> t = <span class="hljs-keyword">private</span> t
+  <span class="hljs-keyword">end</span>
+
+  <span class="hljs-keyword">module</span> <span class="hljs-type">IdSet</span> : <span class="hljs-type">Set</span>.<span class="hljs-type">S</span> <span class="hljs-keyword">with</span> <span class="hljs-keyword">type</span> elt = <span class="hljs-type">Id</span>.t
+<span class="hljs-keyword">end</span>
+</code></pre>
+<p>Here the signature of <code>Id</code> is anonymous and nested in the signature <code>TitleWithId</code>. By default, <code>coq-of-ocaml</code> will try to prefix all the fields of the sub-module <code>Id</code> by <code>Id_</code> and flatten these fields into the fields of <code>TitleWithId</code>:</p>
+<pre><code class="hljs css language-coq"><span class="hljs-keyword">Module</span> TitleWithId.
+  <span class="hljs-keyword">Record</span> signature {Id_t IdSet_t : <span class="hljs-keyword">Set</span>} : <span class="hljs-keyword">Set</span> := {
+    title : string;
+    Id_t := Id_t;
+    Id_compare : Id_t -&gt; Id_t -&gt; int;
+    <span class="hljs-comment">(* ... included fields from [ID] *)</span>
+    Id_Temp : Temp_id (t := t); <span class="hljs-comment">(* there is an error: should be [(t := Id_t)] *)</span>
+    IdSet : _Set.S (elt := Id.(IdWithTemp.t)) (t := IdSet_t);
+  }.
+<span class="hljs-keyword">End</span> TitleWithId.
+<span class="hljs-keyword">Definition</span> TitleWithId := @TitleWithId.signature.
+<span class="hljs-keyword">Arguments</span> TitleWithId {<span class="hljs-keyword">_</span> <span class="hljs-keyword">_</span>}.
+</code></pre>
+<p>This works well if <code>Id</code> is used as a namespace in <code>TitleWithId</code> to group the fields in different categories. However, this fails if we aim to directly reference the sub-module <code>Id</code> later on.</p>
+<p>A better solution is often to name the anonymous sub-signatures, by doing:</p>
+<pre><code class="hljs css language-ocaml"><span class="hljs-keyword">module</span> <span class="hljs-keyword">type</span> <span class="hljs-type">IdWithTemp</span> = <span class="hljs-keyword">sig</span>
+  <span class="hljs-keyword">include</span> <span class="hljs-type">ID</span>
+
+  <span class="hljs-keyword">module</span> <span class="hljs-type">Temp</span> : <span class="hljs-type">Temp_id</span> <span class="hljs-keyword">with</span> <span class="hljs-keyword">type</span> t = <span class="hljs-keyword">private</span> t
+<span class="hljs-keyword">end</span>
+
+<span class="hljs-keyword">module</span> <span class="hljs-keyword">type</span> <span class="hljs-type">TitleWithId</span> = <span class="hljs-keyword">sig</span>
+  <span class="hljs-keyword">val</span> title : <span class="hljs-built_in">string</span>
+
+  <span class="hljs-keyword">module</span> <span class="hljs-type">Id</span> : <span class="hljs-type">IdWithTemp</span>
+
+  <span class="hljs-keyword">module</span> <span class="hljs-type">IdSet</span> : <span class="hljs-type">Set</span>.<span class="hljs-type">S</span> <span class="hljs-keyword">with</span> <span class="hljs-keyword">type</span> elt = <span class="hljs-type">Id</span>.t
+<span class="hljs-keyword">end</span>
+</code></pre>
+<p>The translation is then:</p>
+<pre><code class="hljs css language-coq"><span class="hljs-keyword">Module</span> IdWithTemp.
+  <span class="hljs-keyword">Record</span> signature {t : <span class="hljs-keyword">Set</span>} : <span class="hljs-keyword">Set</span> := {
+    t := t;
+    <span class="hljs-built_in">compare</span> : t -&gt; t -&gt; int;
+    <span class="hljs-comment">(* ... included fields from [ID] *)</span>
+    Temp : Temp_id (t := t);
+  }.
+<span class="hljs-keyword">End</span> IdWithTemp.
+<span class="hljs-keyword">Definition</span> IdWithTemp := @IdWithTemp.signature.
+<span class="hljs-keyword">Arguments</span> IdWithTemp {<span class="hljs-keyword">_</span>}.
+
+<span class="hljs-keyword">Module</span> TitleWithId.
+  <span class="hljs-keyword">Record</span> signature {Id_t IdSet_t : <span class="hljs-keyword">Set</span>} : <span class="hljs-keyword">Set</span> := {
+    title : string;
+    Id : IdWithTemp (t := Id_t);
+    IdSet : _Set.S (elt := Id.(IdWithTemp.t)) (t := IdSet_t);
+  }.
+<span class="hljs-keyword">End</span> TitleWithId.
+<span class="hljs-keyword">Definition</span> TitleWithId := @TitleWithId.signature.
+<span class="hljs-keyword">Arguments</span> TitleWithId {<span class="hljs-keyword">_</span> <span class="hljs-keyword">_</span>}.
+</code></pre>
+<h2><a class="anchor" aria-hidden="true" id="non-mutually-recursive-types"></a><a href="#non-mutually-recursive-types" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Non-mutually recursive types</h2>
+<p>Sometimes, because this is convenient, we use the syntax <code>type ... and</code> for types which are not mutually dependent. For example, we could write in OCaml:</p>
+<pre><code class="hljs css language-ocaml"><span class="hljs-keyword">type</span> <span class="hljs-symbol">'a</span> matching_function = <span class="hljs-symbol">'a</span> -&gt; match_result
+
+<span class="hljs-keyword">and</span> match_result = (<span class="hljs-built_in">string</span> * <span class="hljs-built_in">int</span> option) <span class="hljs-built_in">list</span>
+</code></pre>
+<p>to show the definition of <code>matching_function</code> first. This example would not work in Coq because mutually recursive definitions have to be with at least one algebraic type definition. Even for cases where the translation works, having too many mutually recursive type definitions may complexify the proofs.</p>
+<p>For all these reasons, it is better to only use the <code>and</code> keyword for types that are truly mutually recursive. In this case, we rewrite our example as:</p>
+<pre><code class="hljs css language-ocaml"><span class="hljs-keyword">type</span> match_result = (<span class="hljs-built_in">string</span> * <span class="hljs-built_in">int</span> option) <span class="hljs-built_in">list</span>
+
+<span class="hljs-keyword">type</span> <span class="hljs-symbol">'a</span> matching_function = <span class="hljs-symbol">'a</span> -&gt; match_result
+</code></pre>
+<h2><a class="anchor" aria-hidden="true" id="top-level-name-collisions"></a><a href="#top-level-name-collisions" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Top-level name collisions</h2>
+<p>In Coq, it is not possible to have two definitions of the same name at top-level. For example, if we translate the following OCaml code:</p>
+<pre><code class="hljs css language-ocaml"><span class="hljs-keyword">let</span> path = <span class="hljs-type">RPC_path</span>.(open_root / <span class="hljs-string">"context"</span> / <span class="hljs-string">"delegates"</span>)
+
+<span class="hljs-keyword">let</span> path = <span class="hljs-type">RPC_path</span>.(path /: <span class="hljs-type">Signature</span>.<span class="hljs-type">Public_key_hash</span>.rpc_arg)
+</code></pre>
+<p>we get in Coq:</p>
+<pre><code class="hljs css language-coq"><span class="hljs-keyword">Definition</span> path : RPC_path.path Updater.rpc_context Updater.rpc_context :=
+  RPC_path.op_div (RPC_path.op_div RPC_path.open_root <span class="hljs-string">"context"</span>) <span class="hljs-string">"delegates"</span>.
+
+<span class="hljs-keyword">Definition</span> path
+  : RPC_path.path Updater.rpc_context
+    (Updater.rpc_context * Signature.public_key_hash) :=
+  RPC_path.op_divcolon path
+    Signature.Public_key_hash.(S.SIGNATURE_PUBLIC_KEY_HASH.rpc_arg).
+</code></pre>
+<p>which generates the error:</p>
+<pre><code class="hljs"><span class="hljs-keyword">Error: </span>path already exists.
+</code></pre>
+<p>A solution is to rename one of the two paths in OCaml:</p>
+<pre><code class="hljs css language-ocaml"><span class="hljs-keyword">let</span> raw_path = <span class="hljs-type">RPC_path</span>.(open_root / <span class="hljs-string">"context"</span> / <span class="hljs-string">"delegates"</span>)
+
+<span class="hljs-keyword">let</span> path = <span class="hljs-type">RPC_path</span>.(raw_path /: <span class="hljs-type">Signature</span>.<span class="hljs-type">Public_key_hash</span>.rpc_arg)
+</code></pre>
+<p>This kind of situation can also happen when including modules. For example, there is a collision if an included module has names that already exist at the current level. We believe this is a good thing that Coq forbids redefining names at top-level. So using <code>coq-of-ocaml</code> can be a good thing to forbid this practice in OCaml. Note however that it is still possible to redefine names inside an expression in Coq.</p>
+</span></div></article></div><div class="docs-prevnext"><a class="docs-prev button" href="/coq-of-ocaml/docs/run"><span class="arrow-prev">← </span><span>Run</span></a><a class="docs-next button" href="/coq-of-ocaml/docs/ocaml-core"><span>OCaml core</span><span class="arrow-next"> →</span></a></div></div></div><nav class="onPageNav"><ul class="toc-headings"><li><a href="#abstractions-in-mli-files">Abstractions in <code>.mli</code> files</a></li><li><a href="#fixpoint-struct-annotations">Fixpoint struct annotations</a></li><li><a href="#ignored-functions">Ignored functions</a></li><li><a href="#mutual-definitions-as-notations">Mutual definitions as notations</a></li><li><a href="#named-signatures">Named signatures</a></li><li><a href="#named-polymorphic-variant-types">Named polymorphic variant types</a></li><li><a href="#nested-anonymous-signatures">Nested anonymous signatures</a></li><li><a href="#non-mutually-recursive-types">Non-mutually recursive types</a></li><li><a href="#top-level-name-collisions">Top-level name collisions</a></li></ul></nav></div><footer class="nav-footer" id="footer"><section class="sitemap"><a href="/coq-of-ocaml/" class="nav-home"><img src="/coq-of-ocaml/img/favicon.ico" alt="coq-of-ocaml" width="66" height="58"/></a><div><h5>Docs</h5><a href="/coq-of-ocaml/docs/introduction.html">Introduction</a><a href="/coq-of-ocaml/docs/install.html">Getting Started</a><a href="/coq-of-ocaml/docs/ocaml-core.html">Concepts</a></div><div><h5>Community</h5><a href="https://github.com/clarus/coq-of-ocaml/issues" target="_blank">Issues</a><a href="https://www.nomadic-labs.com/" target="_blank">Nomadic Labs</a></div><div><h5>More</h5><a href="https://github.com/clarus/coq-of-ocaml" target="_blank">GitHub</a><a class="github-button" href="https://github.com/clarus/coq-of-ocaml" data-icon="octicon-star" data-count-href="/clarus/coq-of-ocaml/stargazers" data-show-count="true" data-count-aria-label="# stargazers on GitHub" aria-label="Star this project on GitHub">Star</a></div></section><section class="copyright">Copyright © 2021 Guillaume Claret</section></footer></div></body></html>
