@@ -530,6 +530,82 @@ Fixpoint length {A : Set} (l : list A) (accumulator : Z) {struct accumulator}
 ```
 which is invalid in Coq as the decreasing argument is `l`.
 
+## coq_tag_gadt
+We use this tag in order to generate GADTs with a closer semantics to OCaml. Using this tag we translate the following code:
+
+```ocaml
+type 'a term =
+  | T_Int : int -> int term
+  | T_String : string -> string term
+  | T_Sum : int term * int term -> int term
+[@@coq_tag_gadt]
+```
+
+to:
+
+```coq
+Inductive term : vtag -> Set :=
+| T_Int : int -> term int_tag
+| T_String : string -> term string_tag
+| T_Sum : term int_tag -> term int_tag -> term int_tag.
+```
+
+To see its usefulness translating impossible branches without extra axioms check `coq_tagged_match`
+
+## coq_tagged_match
+With the `coq_tag_gadt` attribute we can translate OCaml code closer to its actual semantics. This allows us to translate pattern matches with impossible branches without the use of axioms. For example:
+
+```ocaml
+type 'a term =
+  | Int : int -> int term
+  | String : string -> string term
+  | Sum : int term * int term -> int term
+[@@coq_tag_gadt]
+
+let rec get_int (e : int term) : int =
+  match[@coq_tagged_match][@coq_match_with_default] e with
+  | Int n -> n
+  | Sum (e1, e2) -> get_int e1 + get_int e2
+  | _ -> .
+```
+
+Will be translated to:
+
+```coq
+Inductive term : vtag -> Set :=
+| Int : int -> term int_tag
+| String : string -> term string_tag
+| Sum : term int_tag -> term int_tag -> term int_tag.
+
+Fixpoint get_int (e : term int_tag) : int :=
+  match e in term t0 return t0 = int_tag -> int with
+  | Int n => fun eq0 => ltac:(subst; exact n)
+  | Sum e1 e2 =>
+    fun eq0 => ltac:(subst; exact (Z.add (get_int e1) (get_int e2)))
+  | _ => ltac:(discriminate)
+  end eq_refl.
+```
+
+Notice that without the use of tags we would have the following code instead:
+
+```coq
+Inductive term : Set :=
+| Int : int -> term
+| String : string -> term
+| Sum : expr -> expr -> term
+| Pair : expr -> expr -> term.
+
+
+Fixpoint get_int (e : term) : int :=
+  match e with
+  | Int n => n
+  | Sum e1 e2 => Z.add (get_int e1) (get_int e2)
+  | _ => unreachable_gadt_branch
+  end.
+```
+
+As we can see this naive translation uses the `unreachable_gadt_branch` axiom.
+
 ## coq_type_annotation
 Sometimes we need to add a type annotation on an expression, either as a documentation or to help the Coq code to compile. We translate this OCaml example:
 ```ocaml
