@@ -164,9 +164,10 @@ let map_constructor_name (cstr_name : string) (typ_ident : string)
 let rec iterate_in_aliases (path : Path.t) (nb_args : int) : Path.t Monad.t =
   let* configuration = get_configuration in
   let is_in_barrier_module (path : Path.t) : bool =
-    Configuration.is_alias_in_barrier_module
-      configuration
-      (Ident.name (Path.head path)) in
+    match Path.head path with
+    | head ->
+      Configuration.is_alias_in_barrier_module configuration (Ident.name head)
+    | exception _ -> false in
   let* env = get_env in
   match Env.find_type path env with
   | { type_manifest = Some { desc = Tconstr (path', args, _); _ }; _ }

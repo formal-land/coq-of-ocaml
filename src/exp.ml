@@ -903,7 +903,7 @@ and import_let_fun
           return (args_names, Some e_body)
         else
           return ([], None) in
-      let (args_typs, e_body_typ) = Type.open_type e_typ (List.length args_names) in
+      let* (args_typs, e_body_typ) = Type.open_type e_typ (List.length args_names) in
       let header = {
         Header.name = x;
         typ_vars = new_typ_vars;
@@ -1455,7 +1455,7 @@ let rec to_coq (paren : bool) (e : t) : SmartPrint.t =
     | _ -> get_default ()
     end
   | LetFun (def, e) ->
-    (* There should be only on case for recursive definitionss. *)
+    (* There should be only one case for recursive definitionss. *)
     Pp.parens paren @@ nest (separate newline
       (def.Definition.cases |> List.mapi (fun index (header, e) ->
         let first_case = index = 0 in
@@ -1463,7 +1463,7 @@ let rec to_coq (paren : bool) (e : t) : SmartPrint.t =
           !^ "let" ^^
           (if def.Definition.is_rec then !^ "fix" else empty)
         ) else
-          !^ "with") ^^
+          if def.Definition.is_rec then !^ "with" else !^ "in" ^^ !^ "let") ^^
         Name.to_coq header.Header.name ^^
         Type.typ_vars_to_coq braces empty empty header.Header.typ_vars ^^
         group (separate space (header.Header.args |> List.map (fun (x, x_typ) ->

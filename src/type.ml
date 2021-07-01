@@ -868,15 +868,19 @@ and local_typ_constructors_of_typs (typs : t list) : Name.Set.t =
     Name.Set.empty typs
 
 (** In a function's type extract the body's type (up to [n] arguments). *)
-let rec open_type (typ : t) (n : int) : t list * t =
+let rec open_type (typ : t) (n : int) : (t list * t) Monad.t =
   if n = 0 then
-    ([], typ)
+    return ([], typ)
   else
     match typ with
     | Arrow (typ1, typ2) ->
-      let (typs, typ) = open_type typ2 (n - 1) in
-      (typ1 :: typs, typ)
-    | _ -> failwith "Expected an arrow type."
+      let* (typs, typ) = open_type typ2 (n - 1) in
+      return (typ1 :: typs, typ)
+    | _ ->
+      raise
+        (List.init n (fun _ -> Tuple []), typ)
+        Unexpected
+        "Expected an arrow type"
 
 (** The context to know if parenthesis are needed. *)
 module Context = struct
