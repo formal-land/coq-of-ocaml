@@ -786,10 +786,12 @@ and of_match
              (* Only expand type if you really need to. It may cause the translation to break *)
              let typ = Ctype.full_expand c_rhs.exp_env c_rhs.exp_type in
              let* (typ, _, _) = Type.of_typ_expr true typ_vars typ in
-             let typ = Type.decode_only_variables new_typ_vars typ in
-             let typ = build_existential_return (List.map fst new_typ_vars) typ in
+             (* let typ = Type.decode_only_variables new_typ_vars typ in
+              * let typ = build_existential_return (List.map fst new_typ_vars) typ in *)
              return typ
          in
+         let typ = Type.decode_only_variables new_typ_vars typ in
+         let typ = build_existential_return (List.map fst new_typ_vars) typ in
 
          let existential_cast =
            Some {
