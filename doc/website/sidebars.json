@@ -5,7 +5,8 @@
     ],
     "Getting started": [
       "install",
-      "run"
+      "run",
+      "cookbook"
     ],
     "Concepts": [
       "ocaml-core",
