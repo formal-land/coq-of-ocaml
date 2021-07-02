@@ -802,24 +802,24 @@ and of_match
              cast_result = do_cast_results;
            } in
 
-    begin match c_guard with
-    | Some guard ->
-      of_expression typ_vars guard >>= fun guard ->
-      return (Some guard)
-    | None -> return None
-    end >>= fun guard ->
-    Pattern.of_pattern c_lhs >>= fun pattern ->
-    match c_rhs.exp_desc with
-    | Texp_unreachable -> return None
-    | _ ->
-      of_expression typ_vars c_rhs >>= fun e ->
-      let e = dependent_transform e dep_match in
-      return (
-        Util.Option.map pattern (fun pattern ->
-        (pattern, existential_cast, guard, e))
-      )
-    )
-  )) >>= fun cases_with_guards ->
+         begin match c_guard with
+           | Some guard ->
+             of_expression typ_vars guard >>= fun guard ->
+             return (Some guard)
+           | None -> return None
+         end >>= fun guard ->
+         Pattern.of_pattern c_lhs >>= fun pattern ->
+         match c_rhs.exp_desc with
+         | Texp_unreachable -> return None
+         | _ ->
+           of_expression typ_vars c_rhs >>= fun e ->
+           let e = dependent_transform e dep_match in
+           return (
+             Util.Option.map pattern (fun pattern ->
+                 (pattern, existential_cast, guard, e))
+           )
+       )
+     )) >>= fun cases_with_guards ->
   let guards =
     cases_with_guards |> Util.List.filter_map (function
       | (p, _, Some guard, _) -> Some (p, guard)
