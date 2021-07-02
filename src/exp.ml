@@ -786,12 +786,8 @@ and of_match
              (* Only expand type if you really need to. It may cause the translation to break *)
              let typ = Ctype.full_expand c_rhs.exp_env c_rhs.exp_type in
              let* (typ, _, _) = Type.of_typ_expr true typ_vars typ in
-             (* let typ = Type.decode_only_variables new_typ_vars typ in
-              * let typ = build_existential_return (List.map fst new_typ_vars) typ in *)
              return typ
          in
-         let typ = Type.decode_only_variables new_typ_vars typ in
-         let typ = build_existential_return (List.map fst new_typ_vars) typ in
 
          let existential_cast =
            Some {
@@ -1738,6 +1734,7 @@ and to_coq_cast_existentials
   (existential_cast : match_existential_cast option)
   (e : t)
   : SmartPrint.t =
+  (* print_string "invoked cast_exis\n"; *)
   let e =
     match existential_cast with
     | Some { return_typ; cast_result = true; _ } ->
@@ -1788,6 +1785,8 @@ and to_coq_cast_existentials
         Pp.primitive_tuple new_typ_vars_names in
       let existential_names_pattern =
         Pp.primitive_tuple_pattern new_typ_vars_names in
+      let return_typ = Type.decode_only_variables new_typ_vars return_typ in
+      let return_typ = build_existential_return (List.map fst new_typ_vars) return_typ in
       nest (
         !^ "let" ^^ !^ "'existT" ^^ !^ "_" ^^ existential_names ^^
         variable_names ^^ !^ "as" ^^ !^ "exi" ^^ !^ ":=" ^^
