@@ -776,12 +776,15 @@ and of_match
            bound_vars >>= fun bound_vars ->
          let env_has_tag = List.exists (fun (_, ki) -> ki = Kind.Tag) new_typ_vars in
          let new_typ_vars =
-           if is_gadt_match || env_has_tag
+           if is_gadt_match
+           (* || env_has_tag *)
            then new_typ_vars
            else
              let free_vars =
                Type.local_typ_constructors_of_typs (List.map snd bound_vars) |> Name.Set.elements in
-             VarEnv.keep_only free_vars new_typ_vars in
+             let tag_vars =
+               new_typ_vars |> List.filter_map (fun (name, ki) -> if ki = Kind.Tag then Some name else None) in
+             VarEnv.keep_only (free_vars @ tag_vars) new_typ_vars in
 
          let* typ = if is_gadt_match || do_cast_results || not env_has_tag
            then
