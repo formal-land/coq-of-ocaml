@@ -83,7 +83,7 @@ let rec tag_typ_constr_aux
       let* ts = Monad.List.map tag_ty ts in
       let arg_names = List.map tag_constructor_of ts in
       let tag = Name.constr_tag |> MixedPath.of_name  in
-      let name = (MixedPath.to_string mpath) in
+      let name = (MixedPath.to_string_no_modules mpath) in
       let str_repr = name ^
                      (List.fold_left (fun acc ty -> acc ^ "_" ^ ty) "" arg_names) in
       return (Apply (tag, List.combine [String str_repr; typ] [false; false]))

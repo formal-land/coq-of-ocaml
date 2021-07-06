@@ -16,6 +16,9 @@ let __make (path : string list) (base : string) : t =
 let to_string (x : t) : string =
   String.concat "." (List.map Name.to_string (x.path @ [x.base]))
 
+let to_string_base (x : t) : string =
+    Name.to_string x.base
+
 let try_to_use (head : string) (name : string) : bool option Monad.t =
   let* configuration = get_configuration in
   let require = Configuration.should_require configuration head in

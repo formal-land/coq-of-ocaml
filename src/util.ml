@@ -32,6 +32,12 @@ module List = struct
     | (x,y, z)::l ->
       let (rx, ry, rz) = split3 l in (x::rx, y::ry, z::rz)
 
+  let rec last (l : 'a list) : 'a =
+    match l with
+    | [] -> failwith "Empty List"
+    | [x] -> x
+    | x :: xs -> last xs
+
 end
 
 module Option = struct
