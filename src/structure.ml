@@ -501,7 +501,12 @@ and of_module_expr
       return (ModuleSynonym (name, reference))
     end
   | Tmod_apply _ ->
-      let* module_exp = Exp.of_module_expr Name.Map.empty module_expr None in
+      let module_type_annotation =
+        match module_type_annotation with
+        | None -> None
+        | Some module_type_annotation -> Some module_type_annotation.mty_type in
+      let* module_exp =
+        Exp.of_module_expr Name.Map.empty module_expr module_type_annotation in
       return (ModuleExpression (name, module_typ, module_exp))
   | Tmod_functor (parameter, module_expr) ->
     let* functor_parameters =
