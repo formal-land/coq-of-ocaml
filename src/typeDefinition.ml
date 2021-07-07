@@ -395,11 +395,6 @@ let of_ocaml (typs : type_declaration list) : t Monad.t =
     let typ_args = VarEnv.reorg typ_args new_typ_args in
     let* fields_types = Monad.List.map (Type.decode_var_tags typ_args false) fields_types in
     let fields = List.combine fields_names fields_types in
-
-    (* let free_vars = Type.typ_args_of_typs (List.map snd fields) in
-     * let typ_args = AdtParameters.get_parameters typ_args in
-     * let typ_args = filter_in_free_vars typ_args free_vars in *)
-
     return (Record (name, typ_args, fields, true))
   | [ { typ_id; typ_type = { type_kind = Type_open; _ }; _ } ] ->
     let* name = Name.of_ident false typ_id in
