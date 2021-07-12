@@ -249,6 +249,15 @@ let typ_definitions_of_typ_extension (typ_extension : extension_constructor)
     List.map (fun typ_definition -> TypeDefinition typ_definition)
   )
 
+let rec kind_of_signature (module_typ : Typedtree.module_type) : string =
+  match module_typ.mty_desc with
+  | Tmty_alias _ -> "alias"
+  | Tmty_ident _ -> "ident"
+  | Tmty_signature _ -> "signature"
+  | Tmty_functor _ -> "functor"
+  | Tmty_with (module_typ, _) -> kind_of_signature module_typ
+  | Tmty_typeof _ -> "typeof"
+
 (** Import an OCaml structure. *)
 let rec of_structure (structure : structure) : t list Monad.t =
   let get_include_items
@@ -363,18 +372,19 @@ let rec of_structure (structure : structure) : t list Monad.t =
         (Error "abstract_module_type")
         NotSupported
         "Abstract module types not handled."
-    | Tstr_modtype { mtd_id; mtd_type = Some { mty_desc; _ }; _ } ->
+    | Tstr_modtype { mtd_id; mtd_type = Some module_typ; _ } ->
       let* name = Name.of_ident false mtd_id in
       begin
-        match mty_desc with
+        match module_typ.mty_desc with
         | Tmty_signature signature ->
           Signature.of_signature signature >>= fun signature ->
           return [Signature (name, signature)]
         | _ ->
+          let signature_kind = kind_of_signature module_typ in
           error_message
             (Error "unhandled_module_type")
             NotSupported
-            "This kind of signature is not handled."
+            ("This kind of signature (" ^ signature_kind ^ ") is not handled.")
       end
     | Tstr_primitive { val_id; val_val = { val_type; _ }; _ } ->
       let* name = Name.of_ident true val_id in
