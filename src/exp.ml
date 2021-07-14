@@ -777,7 +777,6 @@ and of_match
          let env_has_tag = List.exists (fun (_, ki) -> ki = Kind.Tag) new_typ_vars in
          let new_typ_vars =
            if is_gadt_match
-           (* || env_has_tag *)
            then new_typ_vars
            else
              let free_vars =

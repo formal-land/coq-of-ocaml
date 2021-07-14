@@ -567,8 +567,6 @@ let rec of_typ_expr
     non_phantom_typs path typs >>= fun typs ->
     let* mixed_path = simplified_contructor_path path (List.length typs) in
     let* is_abstract = is_type_abstract path in
-    let* is_typ_undecl = is_type_undeclared path in
-    (* let is_hidden_tag = is_typ_undecl && should_tag in *)
     let native_type = List.mem (MixedPath.to_string mixed_path) Name.native_types in
     let is_pident = match path with
       | Path.Pident _ -> true
@@ -601,7 +599,6 @@ let rec of_typ_expr
       let* (typs, typ_vars, new_typs_vars) = of_typs_exprs ~tag_list:tag_list with_free_vars typs typ_vars in
       let* typs = tag_typ_constr path existencial_typs typs in
       let* typ = apply_with_notations mixed_path typs tag_list in
-      let* is_record = PathName.is_record path in
       return (typ, typ_vars, new_typs_vars)
 
   | Tobject (_, object_descr) ->
@@ -877,8 +874,6 @@ and typed_existential_typs_of_typ
           return [(ident, kind)]
         end
       | _ -> return [] in
-
-    (* non_phantom_typs path typs >>= fun typs -> *)
     let* is_tagged_variant = PathName.is_tagged_variant path in
     let* mixed_path = MixedPath.of_path true path in
     let* tag_list = if is_tagged_variant
