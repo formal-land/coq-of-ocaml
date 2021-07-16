@@ -1,22 +1,19 @@
+type _ exp =
+  | E_Int : int -> int exp
+[@@coq_tag_gadt]
+
 type 'a term =
-  | T_Int : int -> int term
-  | T_String : string -> string term
-  (* | T_Sum : int term * int term -> int term *)
-  (* | T_Pair : 'a term * 'b term -> ('a * 'b) term *)
-(* [@@coq_tag_gadt] *)
+  | T_constr : {
+      b : 'a exp
+    } -> 'a term
+[@@coq_tag_gadt]
 
-type 'kind operation_metadata = {contents : 'kind term}
+type wrapper =
+  (* | W_int : int -> wrapper *)
+  | W_exp : { x : 'kind exp } -> wrapper
+  | W_term : { x : 'kind term } -> wrapper
 
-type operation =
-  | Op : 'kind operation_metadata -> operation
-  | Op1 : operation
-
-(* let unpack (op : operation) : int =
- *     match op with
- *     | Op {contents} -> 2
- *     | Op1 -> 5 *)
-
-let unpack1 (op : operation) : int =
-    match op with
-    | Op oop -> 2
-    | Op1 -> 5
+let unwrap w1 w2  =
+  match (w1, w2) with
+  | W_exp e1, W_term e2 -> 2
+  | _ -> 4
