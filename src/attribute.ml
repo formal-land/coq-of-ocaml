@@ -4,6 +4,7 @@ open Monad.Notations
 type t =
   | AxiomWithReason
   | Cast
+  | DisableExistential
   | ForceGadt
   | TaggedGadt
   | Implicit of string
@@ -58,6 +59,7 @@ let of_attributes (attributes : Typedtree.attributes) : t list Monad.t =
       let* _ = of_payload_string error_message id attr_payload in
       return (Some AxiomWithReason)
     | "coq_cast" -> return (Some Cast)
+    | "coq_disable_existential" -> return (Some DisableExistential)
     | "coq_force_gadt" -> return (Some ForceGadt)
     | "coq_tag_gadt" -> return (Some TaggedGadt)
     | "coq_implicit" ->
@@ -89,6 +91,12 @@ let has_axiom_with_reason (attributes : t list) : bool =
 let has_cast (attributes : t list) : bool =
   attributes |> List.exists (function
     | Cast -> true
+    | _ -> false
+  )
+
+let has_disable_existential (attributes : t list) : bool =
+  attributes |> List.exists (function
+    | DisableExistential -> true
     | _ -> false
   )
 

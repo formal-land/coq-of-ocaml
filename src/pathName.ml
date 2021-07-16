@@ -16,6 +16,9 @@ let __make (path : string list) (base : string) : t =
 let to_string (x : t) : string =
   String.concat "." (List.map Name.to_string (x.path @ [x.base]))
 
+let to_string_base (x : t) : string =
+    Name.to_string x.base
+
 let try_to_use (head : string) (name : string) : bool option Monad.t =
   let* configuration = get_configuration in
   let require = Configuration.should_require configuration head in
@@ -327,6 +330,14 @@ let is_variant_declaration
   | { type_kind = Type_variant constructors; type_params = params; _ } -> return @@ Some (constructors, params)
   | _ | exception _ -> return None
 
+let is_record
+    (path : Path.t)
+  : bool Monad.t =
+  let* env = get_env in
+  match Env.find_type path env with
+  | { type_kind = Type_record _; _ } -> return true
+  | _ | exception _ -> return false
+
 let is_tagged_variant
     (path : Path.t)
   : bool Monad.t =
@@ -346,3 +357,14 @@ let is_native_type (path : Path.t) : bool =
 let is_native_datatype (path : Path.t) : bool =
    let name = Path.last path in
    List.exists (function x -> name = x) ["list"; "option"; "map"]
+
+
+let prim_proj_fst : t =
+  {base = Name.of_string_raw "fst";
+   path = [Name.of_string_raw "Primitive"]
+  }
+
+let prim_proj_snd : t =
+  { base = Name.of_string_raw "snd";
+    path = [Name.of_string_raw "Primitive"]
+  }

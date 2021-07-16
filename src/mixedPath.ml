@@ -23,6 +23,15 @@ let of_name (name : Name.t) : t =
 let dec_name : t =
   PathName (Name.decode_vtag |> PathName.of_name [])
 
+let projT1 : t =
+  of_name (Name.of_string_raw "projT1")
+
+let prim_proj_fst : t =
+  PathName PathName.prim_proj_fst
+
+let prim_proj_snd : t =
+  PathName PathName.prim_proj_snd
+
 let is_constr_tag : t -> bool = function
   | Access _ -> false
   | PathName {base; _} -> Name.equal base Name.constr_tag
@@ -220,7 +229,6 @@ let of_path (is_value : bool) (path : Path.t) : t Monad.t =
       ) in
     return (Access (base_path_name, List.rev fields))
 
-
 let is_native_type (path : t) : bool =
   match path with
   | Access _ -> false
@@ -234,6 +242,15 @@ let to_string (mixed_path : t) : string =
       fields |> List.map (fun field -> "(" ^ PathName.to_string field ^ ")") in
     String.concat "." (path :: fields)
   | PathName path_name -> PathName.to_string path_name
+
+let to_string_no_modules (mixed_path : t) : string =
+  match mixed_path with
+  | Access (path, fields) ->
+    let path = PathName.to_string path in
+    let fields =
+      fields |> List.map (fun field -> "(" ^ PathName.to_string field ^ ")") in
+    String.concat "." (path :: fields)
+  | PathName path_name -> PathName.to_string_base path_name
 
 let to_coq (mixed_path : t) : SmartPrint.t =
   !^ (to_string mixed_path)

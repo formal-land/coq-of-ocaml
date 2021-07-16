@@ -27,11 +27,13 @@ module Definition = struct
 end
 
 type match_existential_cast = {
-  new_typ_vars : Name.t list;
+  new_typ_vars : VarEnv.t;
   bound_vars : (Name.t * Type.t) list;
   return_typ : Type.t;
   use_axioms : bool;
-  cast_result : bool }
+  cast_result : bool;
+  disable : bool
+}
 
 type dependent_pattern_match = {
   cast : Type.t;
@@ -218,6 +220,29 @@ let build_module
     ) in
   return (Module fields)
 
+let rec bind_existentials
+  (existentials : Name.t list)
+  (typ : Type.t) : Type.t =
+  let name = Name.of_string_raw "fst" in
+  let fst = Type.build_apply_from_name MixedPath.prim_proj_fst name in
+  let snd = Type.build_apply_from_name MixedPath.prim_proj_snd name in
+  match existentials with
+  | [] -> typ
+  | [x] -> Type.Let (x, Variable name, typ)
+  | [x; y] -> Type.Let (x, snd, Type.Let(y, fst, typ))
+  | x :: xs ->
+    let typ = bind_existentials xs typ in
+    Type.Let (x, snd, Type.Let(name, fst, typ))
+
+let build_existential_return
+  (existentials : Name.t list)
+  (typ : Type.t) : Type.t =
+  let fst = Name.of_string_raw "fst" in
+  let exi = Name.of_string_raw "exi" in
+  let exityp = Type.build_apply_from_name MixedPath.projT1 exi in
+  let typ = bind_existentials (List.rev existentials) typ in
+  Type.Let (fst, exityp, typ)
+
 let rec smart_return (operator : string) (e : t) : t Monad.t =
   match e with
   | Return (operator2, e2) ->
@@ -288,8 +313,9 @@ let rec of_expression (typ_vars : Name.t Name.Map.t) (e : expression)
     let is_tagged_match = Attribute.has_tagged_match attributes in
     let do_cast_results = Attribute.has_match_gadt_with_result attributes in
     let is_with_default_case = Attribute.has_match_with_default attributes in
+    let is_disable_existentials = Attribute.has_disable_existential attributes in
     let* (x, typ, e) =
-      open_cases typ_vars cases is_gadt_match is_tagged_match do_cast_results is_with_default_case in
+      open_cases typ_vars cases is_gadt_match is_tagged_match do_cast_results is_with_default_case is_disable_existentials in
     return (Function (x, typ, e))
   | Texp_apply (e_f, e_xs) ->
     of_expression typ_vars e_f >>= fun e_f ->
@@ -411,8 +437,9 @@ let rec of_expression (typ_vars : Name.t Name.Map.t) (e : expression)
     let is_tagged_match = Attribute.has_tagged_match attributes in
     let do_cast_results = Attribute.has_match_gadt_with_result attributes in
     let is_with_default_case = Attribute.has_match_with_default attributes in
+    let is_disable_existential = Attribute.has_disable_existential attributes in
     let* e = of_expression typ_vars e in
-    of_match typ_vars e cases is_gadt_match is_tagged_match do_cast_results is_with_default_case
+    of_match typ_vars e cases is_gadt_match is_tagged_match do_cast_results is_with_default_case is_disable_existential
   | Texp_tuple es ->
     Monad.List.map (of_expression typ_vars) es >>= fun es ->
     return (Tuple es)
@@ -693,10 +720,10 @@ let rec of_expression (typ_vars : Name.t Name.Map.t) (e : expression)
     return e))
 
 and of_match :
-  type pattern_kind.
-  Name.t Name.Map.t -> t -> pattern_kind case list -> bool -> bool -> bool -> bool ->
-  t Monad.t =
-  fun typ_vars e cases is_gadt_match is_tagged_match do_cast_results is_with_default_case ->
+  type k .  Name.t Name.Map.t -> t -> k case list -> bool -> bool -> bool ->
+  bool -> bool -> t Monad.t =
+  fun typ_vars e cases is_gadt_match is_tagged_match do_cast_results
+   is_with_default_case is_disable_existential ->
   let is_extensible_type_match =
     cases |>
     List.map (fun { c_lhs; _ } -> c_lhs) |>
@@ -724,56 +751,74 @@ and of_match :
     end
   in
   (cases |> Monad.List.filter_map (fun {c_lhs; c_guard; c_rhs} ->
-    set_loc c_lhs.pat_loc (
-    let* bound_vars =
-      Typedtree.pat_bound_idents c_lhs |> List.rev |> Monad.List.map
-        (fun ident ->
-          let { Types.val_type; _ } =
-            Env.find_value (Path.Pident ident) c_rhs.exp_env in
-          let* name = Name.of_ident true ident in
-          return (name, val_type)
-        ) in
-    Type.existential_typs_of_typs (List.map snd bound_vars) >>= fun existentials ->
-    Monad.List.map
-      (fun (name, typ) ->
-        Type.of_typ_expr true typ_vars typ >>= fun (typ, _, _) ->
-        return (name, typ)
-      )
-      bound_vars >>= fun bound_vars ->
-    let existentials =
-      if not is_gadt_match then
-        let free_vars =
-          Type.local_typ_constructors_of_typs (List.map snd bound_vars) in
-        Name.Set.inter existentials free_vars
-      else
-        existentials in
-    Type.of_typ_expr true typ_vars c_rhs.exp_type >>= fun (typ, _, _) ->
-    let existential_cast =
-      Some {
-        new_typ_vars = Name.Set.elements existentials;
-        bound_vars;
-        return_typ = typ;
-        use_axioms = is_gadt_match;
-        cast_result = do_cast_results;
-      } in
-    begin match c_guard with
-    | Some guard ->
-      of_expression typ_vars guard >>= fun guard ->
-      return (Some guard)
-    | None -> return None
-    end >>= fun guard ->
-    Pattern.of_pattern c_lhs >>= fun pattern ->
-    match c_rhs.exp_desc with
-    | Texp_unreachable -> return None
-    | _ ->
-      of_expression typ_vars c_rhs >>= fun e ->
-      let e = dependent_transform e dep_match in
-      return (
-        Util.Option.map pattern (fun pattern ->
-        (pattern, existential_cast, guard, e))
-      )
-    )
-  )) >>= fun cases_with_guards ->
+       set_loc c_lhs.pat_loc (
+         let* bound_vars =
+           Typedtree.pat_bound_idents c_lhs |> List.rev |> Monad.List.map
+             (fun ident ->
+                let { Types.val_type; _ } =
+                  Env.find_value (Path.Pident ident) c_rhs.exp_env in
+                let* name = Name.of_ident true ident in
+                return (name, val_type)
+             ) in
+         let typs = List.map snd bound_vars in
+         let tag_list = Type.tag_no_args typs in
+         let* new_typ_vars = Type.typed_existential_typs_of_typs typs tag_list in
+         Monad.List.map
+           (fun (name, typ) ->
+              Type.of_typ_expr true typ_vars typ >>= fun (typ, _, _) ->
+              return (name, typ)
+           )
+           bound_vars >>= fun bound_vars ->
+         let env_has_tag = List.exists (fun (_, ki) -> ki = Kind.Tag) new_typ_vars in
+         let new_typ_vars =
+           if is_gadt_match
+           then new_typ_vars
+           else
+             let free_vars =
+               Type.local_typ_constructors_of_typs (List.map snd bound_vars) |> Name.Set.elements in
+             let tag_vars =
+               new_typ_vars |> List.filter_map (fun (name, ki) -> if ki = Kind.Tag then Some name else None) in
+             VarEnv.keep_only (free_vars @ tag_vars) new_typ_vars in
+
+         let* typ = if is_gadt_match || do_cast_results || not env_has_tag
+           then
+             let* (typ, _, _) = Type.of_typ_expr true typ_vars c_rhs.exp_type in
+             return typ
+           else
+             (* Only expand type if you really need to. It may cause the translation to break *)
+             let typ = Ctype.full_expand c_rhs.exp_env c_rhs.exp_type in
+             let* (typ, _, _) = Type.of_typ_expr true typ_vars typ in
+             return typ
+         in
+
+         let existential_cast =
+           Some {
+             new_typ_vars;
+             bound_vars;
+             return_typ = typ;
+             use_axioms = is_gadt_match;
+             cast_result = do_cast_results;
+             disable = is_disable_existential;
+           } in
+
+         begin match c_guard with
+           | Some guard ->
+             of_expression typ_vars guard >>= fun guard ->
+             return (Some guard)
+           | None -> return None
+         end >>= fun guard ->
+         Pattern.of_pattern c_lhs >>= fun pattern ->
+         match c_rhs.exp_desc with
+         | Texp_unreachable -> return None
+         | _ ->
+           of_expression typ_vars c_rhs >>= fun e ->
+           let e = dependent_transform e dep_match in
+           return (
+             Util.Option.map pattern (fun pattern ->
+                 (pattern, existential_cast, guard, e))
+           )
+       )
+     )) >>= fun cases_with_guards ->
   let guards =
     cases_with_guards |> Util.List.filter_map (function
       | (p, _, Some guard, _) -> Some (p, guard)
@@ -819,12 +864,13 @@ and of_match :
       (p, existential_cast, rhs)
     ) in
   let t = Match (e, dep_match, cases, is_with_default_case) in
+  (* If its a deppendent pattern matching then add eq_refl at the end of the match *)
   match dep_match with
   | None -> return t
   | Some dep_match ->
     let eq_refl = "eq_refl" |> Name.of_string_raw |> MixedPath.of_name in
     let ts = List.map (fun _ -> Some (Variable (eq_refl, []))) dep_match.args in
-  return (Apply (t, ts))
+    return (Apply (t, ts))
 
 (** We suppose that we know that we have a match of extensible types. *)
 and of_match_extensible :
@@ -853,6 +899,7 @@ and open_cases
   (is_tagged_match : bool)
   (do_cast_results : bool)
   (is_with_default_case : bool)
+  (is_disable_existential: bool)
   : (Name.t * Type.t option * t) Monad.t =
   let name = Name.FunctionParameter in
   let* typ =
@@ -864,7 +911,7 @@ and open_cases
   let e = Variable (MixedPath.of_name name, []) in
   let* e =
     of_match
-      typ_vars e cases is_gadt_match is_tagged_match do_cast_results is_with_default_case in
+      typ_vars e cases is_gadt_match is_tagged_match do_cast_results is_with_default_case is_disable_existential in
   return (name, typ, e)
 
 and import_let_fun
@@ -887,8 +934,6 @@ and import_let_fun
     | _ ->
       raise None Unexpected "A variable name instead of a pattern was expected"
     ) >>= fun x ->
-    (* Don't forget to save the implicit variables that are already in scope
-     * and remove them later  *)
     let predefined_variables = List.map snd (Name.Map.bindings typ_vars) in
     Type.of_typ_expr true typ_vars vb_expr.exp_type >>= fun (e_typ, typ_vars, new_typ_vars) ->
     let* e_typ = Type.decode_var_tags new_typ_vars false e_typ in
@@ -954,10 +999,6 @@ and of_let
       | Texp_function _ -> false
       | _ -> true
       end ->
-      (* Figure out if the let expression being translated is a function by
-       * checking if it introduced any new variables to typ_vars
-       * Is there a better way to do this?
-       * *)
       Type.of_typ_expr true typ_vars exp_type >>= fun (_, typ_vars', _) ->
       let typ_vars = List.map fst (Name.Map.bindings typ_vars) in
       let new_vars = List.fold_left (fun map var ->
@@ -1694,6 +1735,7 @@ and to_coq_cast_existentials
   (existential_cast : match_existential_cast option)
   (e : t)
   : SmartPrint.t =
+  (* print_string "invoked cast_exis\n"; *)
   let e =
     match existential_cast with
     | Some { return_typ; cast_result = true; _ } ->
@@ -1707,7 +1749,7 @@ and to_coq_cast_existentials
     | _ -> to_coq false e in
   match existential_cast with
   | None -> e
-  | Some { new_typ_vars; bound_vars; use_axioms; _ } ->
+  | Some { new_typ_vars; bound_vars; use_axioms; return_typ; disable; _ } ->
     let variable_names =
       Pp.primitive_tuple (bound_vars |> List.map (fun (name, _) ->
         Name.to_coq name
@@ -1721,53 +1763,61 @@ and to_coq_cast_existentials
         Pp.primitive_tuple_type (bound_vars |> List.map (fun (_, typ) ->
           Type.to_coq None None typ
         )) in
-    begin match (bound_vars, new_typ_vars) with
-    | ([], _) -> e
-    | (_, []) ->
-      if use_axioms then
-        let variable_names_pattern =
-          match bound_vars with
-          | [_] -> variable_names
-          | _ -> !^ "'" ^-^ variable_names in
+    begin match (disable, bound_vars, new_typ_vars) with
+      | (true, _, _) -> e
+      | (_, [], _) -> e
+      | (_, _, []) ->
+        if use_axioms then
+          let variable_names_pattern =
+            match bound_vars with
+            | [_] -> variable_names
+            | _ -> !^ "'" ^-^ variable_names in
+          nest (
+            !^ "let" ^^ variable_names_pattern ^^ !^ ":=" ^^
+            nest (!^ "cast" ^^ variable_typ true ^^ variable_names) ^^
+            !^ "in" ^^ newline ^^
+            e
+          )
+        else
+          e
+      | _ ->
+        let new_typ_vars_names = List.map (fun var -> Name.to_coq @@ fst var) new_typ_vars in
+        let new_typ_vars_kinds = List.map (fun var -> Kind.to_coq @@ snd var) new_typ_vars in
+        let existential_names =
+          Pp.primitive_tuple new_typ_vars_names in
+        let existential_names_pattern =
+          Pp.primitive_tuple_pattern new_typ_vars_names in
+        let return_typ = Type.decode_only_variables new_typ_vars return_typ in
+        let return_typ = build_existential_return (List.map fst new_typ_vars) return_typ in
         nest (
-          !^ "let" ^^ variable_names_pattern ^^ !^ ":=" ^^
-          nest (!^ "cast" ^^ variable_typ true ^^ variable_names) ^^
+          !^ "let" ^^ !^ "'existT" ^^ !^ "_" ^^ existential_names ^^
+          variable_names ^^ !^ "as" ^^ !^ "exi" ^^ !^ ":=" ^^
+          nest (
+            let (operator, option) =
+              if use_axioms then
+                ("cast_exists", "Es")
+              else
+                ("existT", "A") in
+            !^ operator ^^
+            nest (parens (
+                !^ option ^^ !^ ":=" ^^
+                Pp.primitive_tuple_type new_typ_vars_kinds
+              )) ^^
+            parens (nest (
+                !^ "fun" ^^ existential_names_pattern ^^ !^ "=>" ^^ variable_typ false
+              )) ^^
+            begin if use_axioms then
+                empty
+              else
+                Pp.primitive_tuple_infer (List.length new_typ_vars)
+            end ^^
+            variable_names
+          ) ^^
+          nest (!^ "return" ^^  Type.to_coq None (Some Type.Context.Apply) return_typ)
+          ^^
           !^ "in" ^^ newline ^^
           e
         )
-      else
-        e
-    | _ ->
-      let existential_names =
-        Pp.primitive_tuple (List.map Name.to_coq new_typ_vars) in
-      let existential_names_pattern =
-        Pp.primitive_tuple_pattern (List.map Name.to_coq new_typ_vars) in
-      nest (
-        !^ "let" ^^ !^ "'existT" ^^ !^ "_" ^^ existential_names ^^
-        variable_names ^^ !^ ":=" ^^
-        nest (
-          let (operator, option) =
-            if use_axioms then
-              ("cast_exists", "Es")
-            else
-              ("existT", "A") in
-          !^ operator ^^
-          nest (parens (
-            !^ option ^^ !^ ":=" ^^
-            Pp.primitive_tuple_type (List.map (fun _ -> Pp.set) new_typ_vars)
-          )) ^^
-          parens (nest (
-            !^ "fun" ^^ existential_names_pattern ^^ !^ "=>" ^^ variable_typ false
-          )) ^^
-          begin if use_axioms then
-            empty
-          else
-            Pp.primitive_tuple_infer (List.length new_typ_vars)
-          end ^^
-          variable_names
-        ) ^^ !^ "in" ^^ newline ^^
-        e
-      )
     end
 
 and to_coq_exist_s (module_typ_params : int Tree.t) (e : SmartPrint.t)

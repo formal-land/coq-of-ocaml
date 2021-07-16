@@ -124,28 +124,11 @@ let of_ocaml_case
         return (param_typs, new_typ_vars, None)
       | Cstr_record labeled_typs ->
         set_loc cd_loc (
-          (
-            labeled_typs |>
-            List.map (fun { Types.ld_type; _ } -> ld_type) |>
-            (fun ls -> Type.of_typs_exprs true ls typ_vars)
-          ) >>= fun (record_params, _, new_typ_vars) ->
           let* record_fields =
             labeled_typs |> Monad.List.map ( fun { Types.ld_id; _ } ->
                 Name.of_ident false ld_id
               ) in
-          (* We get the order of the type arguments from their order of
-             introduction in the record fields. *)
-          let typ_args =
-            List.fold_left
-              (fun typ_args new_typ_args ->
-                 (typ_args @
-                  Name.Set.elements (
-                    Name.Set.diff new_typ_args (Name.Set.of_list typ_args)
-                  ))
-              )
-              []
-              (List.map Type.typ_args_of_typ record_params) in
-          let new_typ_vars = VarEnv.reorg typ_args new_typ_vars in
+          let* (record_params, new_typ_vars) = Type.record_args labeled_typs in
           let tag_typs = List.map (fun (_, kind) ->
               match kind with
               | Kind.Tag -> true
