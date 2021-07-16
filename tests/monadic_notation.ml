@@ -2,7 +2,7 @@ let return (x : 'a) : 'a option =
   Some x
 
 let (let*) (x : 'a option) (f : 'a -> 'b option) : 'b option =
-  match x with
+  match [@coq_disable_existential] x with
   | Some x -> f x
   | None -> None
 
