@@ -131,3 +131,41 @@ End GenFun.
 Definition GenFun : Target (t := _) := GenFun.module.
 
 Definition AppliedGenFun : Target (t := _) := GenFun.
+
+Module LargeTarget.
+  Record signature {t : Set} : Set := {
+    t := t;
+    y : t;
+    z : t;
+  }.
+End LargeTarget.
+Definition LargeTarget := @LargeTarget.signature.
+Arguments LargeTarget {_}.
+
+Module LargeF.
+  Class FArgs {X_t : Set} := {
+    X : Source (t := X_t);
+  }.
+  Arguments Build_FArgs {_}.
+  
+  Definition t `{FArgs} : Set := X.(Source.t).
+  
+  Definition y `{FArgs} : X.(Source.t) := X.(Source.x).
+  
+  Definition z `{FArgs} : X.(Source.t) := y.
+  
+  Definition functor `{FArgs} :=
+    {|
+      LargeTarget.y := y;
+      LargeTarget.z := z
+    |}.
+End LargeF.
+Definition LargeF {X_t : Set} (X : Source (t := X_t)) : LargeTarget (t := _) :=
+  let '_ := LargeF.Build_FArgs X in
+  LargeF.functor.
+
+Definition CastedLarge : Target (t := _) :=
+  let functor_result := LargeF M in
+  {|
+    Target.y := functor_result.(LargeTarget.y)
+  |}.

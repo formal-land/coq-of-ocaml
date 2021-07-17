@@ -52,3 +52,16 @@ module GenFun () : Target = struct
 end
 
 module AppliedGenFun : Target = GenFun ()
+
+module type LargeTarget = sig
+  include Target
+  val z : t
+end
+
+module LargeF (X : Source) : LargeTarget = struct
+  type t = X.t
+  let y = X.x
+  let z = y
+end
+
+module CastedLarge : Target = LargeF (M)
