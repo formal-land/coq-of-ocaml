@@ -1735,7 +1735,6 @@ and to_coq_cast_existentials
   (existential_cast : match_existential_cast option)
   (e : t)
   : SmartPrint.t =
-  (* print_string "invoked cast_exis\n"; *)
   let e =
     match existential_cast with
     | Some { return_typ; cast_result = true; _ } ->

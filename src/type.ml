@@ -63,7 +63,6 @@ let rec tag_typ_constr_aux
       let* t = tag_ty @@ Tuple [a; b] in
       let* ts = tag_ty @@ Tuple (t :: ts) in
       return ts
-      (* return (Apply (tag, [(ts, false)])) *)
     | _ ->
       let* ts = Monad.List.map tag_ty ts in
       let bs = [false; false] in
