@@ -22,6 +22,8 @@ Import ConstructorRecords_term.
 Reserved Notation "'term.T_Rec".
 
 Inductive term : vtag -> Set :=
+| T_Int : int -> term int_tag
+| T_String : string -> term string_tag
 | T_Pair : forall {a b : vtag}, term a -> term b -> term (tuple_tag a b)
 | T_Rec : forall {a b : vtag},
   'term.T_Rec a (decode_vtag b) -> term (tuple_tag a b)
@@ -36,6 +38,8 @@ End term.
 
 Fixpoint interp {a : vtag} (function_parameter : term a) : decode_vtag a :=
   match function_parameter with
+  | T_Int n => n
+  | T_String s => s
   | T_Pair p1 p2 =>
     let 'existT _ [__1, __0] [p2, p1] as exi :=
       existT (A := [vtag ** vtag]) (fun '[__1, __0] => [term __1 ** term __0])
