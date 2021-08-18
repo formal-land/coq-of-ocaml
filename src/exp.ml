@@ -723,154 +723,154 @@ and of_match :
   type k .  Name.t Name.Map.t -> t -> k case list -> bool -> bool -> bool ->
   bool -> bool -> t Monad.t =
   fun typ_vars e cases is_gadt_match is_tagged_match do_cast_results
-   is_with_default_case is_disable_existential ->
-  let is_extensible_type_match =
-    cases |>
-    List.map (fun { c_lhs; _ } -> c_lhs) |>
-    Pattern.are_extensible_patterns_or_any true in
-  if is_extensible_type_match then
-    of_match_extensible typ_vars e cases
-  else
-  let* dep_match : dependent_pattern_match option =
-    begin match cases with
-    | [] -> return None
-    | { c_lhs; c_rhs; _ }  :: _ ->
-      if not is_tagged_match
-      then return None
-      else
-      let* (cast, _, new_typ_vars) = Type.of_typ_expr true Name.Map.empty (c_lhs.pat_type) in
-      let* (motive, _, new_typ_vars') = Type.of_typ_expr true Name.Map.empty (c_rhs.exp_type) in
-      let new_typ_vars = VarEnv.union new_typ_vars new_typ_vars' in
-      let* cast = Type.decode_var_tags new_typ_vars false cast in
-      let* motive = Type.decode_var_tags new_typ_vars false motive in
-      let (cast, args) = Type.normalize_constructor cast in
-      (* Only generates dependent pattern matching for actual gadts *)
-      if List.length args = 0 || Type.is_native_type cast
-      then return None
-      else return (Some ({cast; args; motive}))
-    end
-  in
-  (cases |> Monad.List.filter_map (fun {c_lhs; c_guard; c_rhs} ->
-       set_loc c_lhs.pat_loc (
-         let* bound_vars =
-           Typedtree.pat_bound_idents c_lhs |> List.rev |> Monad.List.map
-             (fun ident ->
-                let { Types.val_type; _ } =
-                  Env.find_value (Path.Pident ident) c_rhs.exp_env in
-                let* name = Name.of_ident true ident in
-                return (name, val_type)
-             ) in
-         let typs = List.map snd bound_vars in
-         let tag_list = Type.tag_no_args typs in
-         let* new_typ_vars = Type.typed_existential_typs_of_typs typs tag_list in
-         Monad.List.map
-           (fun (name, typ) ->
-              Type.of_typ_expr true typ_vars typ >>= fun (typ, _, _) ->
-              return (name, typ)
+    is_with_default_case is_disable_existential ->
+    let is_extensible_type_match =
+      cases |>
+      List.map (fun { c_lhs; _ } -> c_lhs) |>
+      Pattern.are_extensible_patterns_or_any true in
+    if is_extensible_type_match then
+      of_match_extensible typ_vars e cases
+    else
+      let* dep_match : dependent_pattern_match option =
+        begin match cases with
+          | [] -> return None
+          | { c_lhs; c_rhs; _ }  :: _ ->
+            if not is_tagged_match
+            then return None
+            else
+              let* (cast, _, new_typ_vars) = Type.of_typ_expr true Name.Map.empty (c_lhs.pat_type) in
+              let* (motive, _, new_typ_vars') = Type.of_typ_expr true Name.Map.empty (c_rhs.exp_type) in
+              let new_typ_vars = VarEnv.union new_typ_vars new_typ_vars' in
+              let* cast = Type.decode_var_tags new_typ_vars false cast in
+              let* motive = Type.decode_var_tags new_typ_vars false motive in
+              let (cast, args) = Type.normalize_constructor cast in
+              (* Only generates dependent pattern matching for actual gadts *)
+              if List.length args = 0 || Type.is_native_type cast
+              then return None
+              else return (Some ({cast; args; motive}))
+        end
+      in
+      (cases |> Monad.List.filter_map (fun {c_lhs; c_guard; c_rhs} ->
+           set_loc c_lhs.pat_loc (
+             let* bound_vars =
+               Typedtree.pat_bound_idents c_lhs |> List.rev |> Monad.List.map
+                 (fun ident ->
+                    let { Types.val_type; _ } =
+                      Env.find_value (Path.Pident ident) c_rhs.exp_env in
+                    let* name = Name.of_ident true ident in
+                    return (name, val_type)
+                 ) in
+             let typs = List.map snd bound_vars in
+             let tag_list = Type.tag_no_args typs in
+             let* new_typ_vars = Type.typed_existential_typs_of_typs typs tag_list in
+             Monad.List.map
+               (fun (name, typ) ->
+                  Type.of_typ_expr true typ_vars typ >>= fun (typ, _, _) ->
+                  return (name, typ)
+               )
+               bound_vars >>= fun bound_vars ->
+             let env_has_tag = List.exists (fun (_, ki) -> ki = Kind.Tag) new_typ_vars in
+             let new_typ_vars =
+               if is_gadt_match
+               then new_typ_vars
+               else
+                 let free_vars =
+                   Type.local_typ_constructors_of_typs (List.map snd bound_vars) |> Name.Set.elements in
+                 let tag_vars =
+                   new_typ_vars |> List.filter_map (fun (name, ki) -> if ki = Kind.Tag then Some name else None) in
+                 VarEnv.keep_only (free_vars @ tag_vars) new_typ_vars in
+
+             let* typ = if is_gadt_match || do_cast_results || not env_has_tag
+               then
+                 let* (typ, _, _) = Type.of_typ_expr true typ_vars c_rhs.exp_type in
+                 return typ
+               else
+                 (* Only expand type if you really need to. It may cause the translation to break *)
+                 let typ = Ctype.full_expand c_rhs.exp_env c_rhs.exp_type in
+                 let* (typ, _, _) = Type.of_typ_expr true typ_vars typ in
+                 return typ
+             in
+
+             let existential_cast =
+               Some {
+                 new_typ_vars;
+                 bound_vars;
+                 return_typ = typ;
+                 use_axioms = is_gadt_match;
+                 cast_result = do_cast_results;
+                 disable = is_disable_existential;
+               } in
+
+             begin match c_guard with
+               | Some guard ->
+                 of_expression typ_vars guard >>= fun guard ->
+                 return (Some guard)
+               | None -> return None
+             end >>= fun guard ->
+             Pattern.of_pattern c_lhs >>= fun pattern ->
+             match c_rhs.exp_desc with
+             | Texp_unreachable -> return None
+             | _ ->
+               of_expression typ_vars c_rhs >>= fun e ->
+               let e = dependent_transform e dep_match in
+               return (
+                 Util.Option.map pattern (fun pattern ->
+                     (pattern, existential_cast, guard, e))
+               )
            )
-           bound_vars >>= fun bound_vars ->
-         let env_has_tag = List.exists (fun (_, ki) -> ki = Kind.Tag) new_typ_vars in
-         let new_typ_vars =
-           if is_gadt_match
-           then new_typ_vars
-           else
-             let free_vars =
-               Type.local_typ_constructors_of_typs (List.map snd bound_vars) |> Name.Set.elements in
-             let tag_vars =
-               new_typ_vars |> List.filter_map (fun (name, ki) -> if ki = Kind.Tag then Some name else None) in
-             VarEnv.keep_only (free_vars @ tag_vars) new_typ_vars in
-
-         let* typ = if is_gadt_match || do_cast_results || not env_has_tag
-           then
-             let* (typ, _, _) = Type.of_typ_expr true typ_vars c_rhs.exp_type in
-             return typ
-           else
-             (* Only expand type if you really need to. It may cause the translation to break *)
-             let typ = Ctype.full_expand c_rhs.exp_env c_rhs.exp_type in
-             let* (typ, _, _) = Type.of_typ_expr true typ_vars typ in
-             return typ
-         in
-
-         let existential_cast =
-           Some {
-             new_typ_vars;
-             bound_vars;
-             return_typ = typ;
-             use_axioms = is_gadt_match;
-             cast_result = do_cast_results;
-             disable = is_disable_existential;
-           } in
-
-         begin match c_guard with
-           | Some guard ->
-             of_expression typ_vars guard >>= fun guard ->
-             return (Some guard)
-           | None -> return None
-         end >>= fun guard ->
-         Pattern.of_pattern c_lhs >>= fun pattern ->
-         match c_rhs.exp_desc with
-         | Texp_unreachable -> return None
-         | _ ->
-           of_expression typ_vars c_rhs >>= fun e ->
-           let e = dependent_transform e dep_match in
-           return (
-             Util.Option.map pattern (fun pattern ->
-                 (pattern, existential_cast, guard, e))
-           )
-       )
-     )) >>= fun cases_with_guards ->
-  let guards =
-    cases_with_guards |> Util.List.filter_map (function
-      | (p, _, Some guard, _) -> Some (p, guard)
-      | _ -> None
-    ) in
-  let guard_checks =
-    guards |> List.map (fun (p, guard) ->
-      let is_pattern_always_true =
-        match p with
-        | Pattern.Any | Pattern.Variable _ -> true
-        | _ -> false in
-      let cases =
-        [(p, None, guard)] @
-        if is_pattern_always_true then
-          []
-        else
-          [(
-            Pattern.Any,
-            None,
-            Variable (MixedPath.PathName PathName.false_value, [])
-          )] in
-      Match (e, None, cases, false)
-    ) in
-  let e =
-    match guards with
-    | [] -> e
-    | _ :: _ -> Tuple (e :: guard_checks) in
-  let i = ref (-1) in
-  let nb_guards = List.length guard_checks in
-  let cases =
-    cases_with_guards |> List.map (fun (p, existential_cast, guard, rhs) ->
-      let is_guarded = match guard with Some _ -> true | None -> false in
-      begin if is_guarded then
-        i := !i + 1
-      end;
-      let p =
-        if nb_guards = 0 then
-          p
-        else
-          Pattern.Tuple (
-            p :: any_patterns_with_ith_true is_guarded !i nb_guards
+         )) >>= fun cases_with_guards ->
+      let guards =
+        cases_with_guards |> Util.List.filter_map (function
+            | (p, _, Some guard, _) -> Some (p, guard)
+            | _ -> None
           ) in
-      (p, existential_cast, rhs)
-    ) in
-  let t = Match (e, dep_match, cases, is_with_default_case) in
-  (* If its a deppendent pattern matching then add eq_refl at the end of the match *)
-  match dep_match with
-  | None -> return t
-  | Some dep_match ->
-    let eq_refl = "eq_refl" |> Name.of_string_raw |> MixedPath.of_name in
-    let ts = List.map (fun _ -> Some (Variable (eq_refl, []))) dep_match.args in
-    return (Apply (t, ts))
+      let guard_checks =
+        guards |> List.map (fun (p, guard) ->
+            let is_pattern_always_true =
+              match p with
+              | Pattern.Any | Pattern.Variable _ -> true
+              | _ -> false in
+            let cases =
+              [(p, None, guard)] @
+              if is_pattern_always_true then
+                []
+              else
+                [(
+                  Pattern.Any,
+                  None,
+                  Variable (MixedPath.PathName PathName.false_value, [])
+                )] in
+            Match (e, None, cases, false)
+          ) in
+      let e =
+        match guards with
+        | [] -> e
+        | _ :: _ -> Tuple (e :: guard_checks) in
+      let i = ref (-1) in
+      let nb_guards = List.length guard_checks in
+      let cases =
+        cases_with_guards |> List.map (fun (p, existential_cast, guard, rhs) ->
+            let is_guarded = match guard with Some _ -> true | None -> false in
+            begin if is_guarded then
+                i := !i + 1
+            end;
+            let p =
+              if nb_guards = 0 then
+                p
+              else
+                Pattern.Tuple (
+                  p :: any_patterns_with_ith_true is_guarded !i nb_guards
+                ) in
+            (p, existential_cast, rhs)
+          ) in
+      let t = Match (e, dep_match, cases, is_with_default_case) in
+      (* If its a deppendent pattern matching then add eq_refl at the end of the match *)
+      match dep_match with
+      | None -> return t
+      | Some dep_match ->
+        let eq_refl = "eq_refl" |> Name.of_string_raw |> MixedPath.of_name in
+        let ts = List.map (fun _ -> Some (Variable (eq_refl, []))) dep_match.args in
+        return (Apply (t, ts))
 
 (** We suppose that we know that we have a match of extensible types. *)
 and of_match_extensible :
