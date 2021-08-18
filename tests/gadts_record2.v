@@ -4,29 +4,18 @@ Require Import CoqOfOCaml.Settings.
 Inductive exp : vtag -> Set :=
 | E_Int : int -> exp int_tag.
 
-(** Records for the constructor parameters *)
-Module ConstructorRecords_term.
-  Module term.
-    Module T_constr.
-      Record record {b : Set} : Set := Build {
-        b : b }.
-      Arguments record : clear implicits.
-      Definition with_b {t_b} b (r : record t_b) :=
-        Build t_b b.
-    End T_constr.
-    Definition T_constr_skeleton := T_constr.record.
-  End term.
-End ConstructorRecords_term.
-Import ConstructorRecords_term.
+Module my_record.
+  Record record {a : vtag} : Set := Build {
+    x : exp a;
+    y : int }.
+  Arguments record : clear implicits.
+  Definition with_x {t_a} x (r : record t_a) :=
+    Build t_a x r.(y).
+  Definition with_y {t_a} y (r : record t_a) :=
+    Build t_a r.(x) y.
+End my_record.
+Definition my_record := my_record.record.
 
-Reserved Notation "'term.T_constr".
-
-Inductive term : vtag -> Set :=
-| T_constr : forall {a : vtag}, 'term.T_constr a -> term a
-
-where "'term.T_constr" := (fun (t_a : vtag) => term.T_constr_skeleton (exp t_a)).
-
-Module term.
-  Include ConstructorRecords_term.term.
-  Definition T_constr := 'term.T_constr.
-End term.
+Definition get_x {a : vtag} (r : my_record a) : exp a :=
+  let '{| my_record.x := x; my_record.y := y |} := r in
+  x.
