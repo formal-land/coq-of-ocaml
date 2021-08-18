@@ -265,7 +265,6 @@ and typ_args_of_typs (typs : t list) : Name.Set.t =
   List.fold_left (fun args typ -> Name.Set.union args (typ_args_of_typ typ))
     Name.Set.empty typs
 
-
 let subst_name (source : Name.t) (target : Name.t) (typ : t) : t =
   let rec subst (typ : t) : t =
     let subst_after_names (names : Name.t list) (typ : t) : t =
@@ -399,7 +398,6 @@ let get_variable
     | None -> None)
   | _ -> None
 
-
 let is_native_type
     (typ : t)
   : bool =
@@ -457,7 +455,6 @@ let normalize_constructor (typ : t) : t * t list =
       ) |> List.split in
     (Apply (t, List.combine args bs), eqs)
   | _ -> (typ, [])
-
 
 let is_type_abstract
     (path : Path.t)
@@ -804,10 +801,10 @@ and get_constr_arg_tags
       ) new_typ_vars
   | _ | exception _ -> return []
 
-(* We need a mapping of existencial_typs because they shouldn't be tagged *)
+(* We need a mapping of existential_typs because they shouldn't be tagged *)
 and tag_typ_constr
     (path : Path.t)
-    (existencial_typs : Name.Set.t)
+    (existential_typs : Name.Set.t)
     (typs : t list)
   : t list Monad.t =
   let* is_tagged_variant = PathName.is_tagged_variant path in
@@ -820,7 +817,7 @@ and tag_typ_constr
     let tag_typs = List.combine typs should_tag_list in
     Monad.List.map (fun (typ, should_tag) ->
         if should_tag
-        then tag_typ_constr_aux existencial_typs typ
+        then tag_typ_constr_aux existential_typs typ
         else return typ
       ) tag_typs
 
@@ -844,7 +841,8 @@ and record_args
   let new_typ_vars = VarEnv.reorg typ_args new_typ_vars in
   return (record_params, new_typ_vars)
 
-
+(** This function is similar to existential_typs_of_typ but it also returns the
+underlying type environment for the existential variables *)
 and typed_existential_typs_of_typ
     (should_tag : bool)
     (typ : Types.type_expr)
@@ -916,8 +914,6 @@ and typed_existential_typs_of_typs
       return (VarEnv.union existentials existentials_typ)
     )
     [] (List.combine typs tag_list)
-
-
 
 let rec decode_var_tags_aux
     (typ_vars : VarEnv.t)
@@ -1052,8 +1048,6 @@ let build_apply_from_name
   (mpath : MixedPath.t)
   (name : Name.t) =
   Apply (mpath, [(Variable name, false)])
-
-
 
 (** The local type constructors of a type. Used to detect the existential
     variables which are actually used by a type, once we remove the phantom
