@@ -780,6 +780,18 @@ and of_match :
                    new_typ_vars |> List.filter_map (fun (name, ki) -> if ki = Kind.Tag then Some name else None) in
                  VarEnv.keep_only (free_vars @ tag_vars) new_typ_vars in
 
+             print_string @@ "New_typ_vars:";
+             print_string @@ VarEnv.to_string new_typ_vars;
+             print_string @@ "\n";
+             print_string @@ "Bound Vars:";
+             print_string @@ VarEnv.to_string new_typ_vars;
+             print_string @@ "\n";
+
+             let* bound_vars = Monad.List.map (fun (x,ty) ->
+                 let* ty = Type.decode_var_tags new_typ_vars false ty in
+                 return (x, ty)
+               ) bound_vars in
+
              let* typ = if is_gadt_match || do_cast_results || not env_has_tag
                then
                  let* (typ, _, _) = Type.of_typ_expr true typ_vars c_rhs.exp_type in

@@ -924,13 +924,14 @@ let rec decode_var_tags_aux
   let dec = decode_var_tags_aux typ_vars in_native is_tag in
   match typ with
   | Variable name ->
+    print_string ("decoding: " ^ Name.to_string name ^ "\n");
     begin
       if is_tag || in_native
-      then return typ
-      else match List.assoc_opt name typ_vars with
-        | None -> return typ
-        | Some Kind.Tag -> return @@ Apply (MixedPath.dec_name, [(typ, true)])
-        | Some _ -> return typ
+      then (print_string "is_tag || in_native\n"; return typ)
+      else (print_string @@ "checking env for " ^ Name.to_string name ^ "\n";
+              match List.assoc_opt name typ_vars with
+              | Some Kind.Tag -> return @@ Apply (MixedPath.dec_name, [(typ, true)])
+              | _ -> return typ)
     end
   | Arrow (t1, t2) ->
     let* t1 = decode_var_tags_aux typ_vars in_native is_tag t1 in
@@ -940,13 +941,18 @@ let rec decode_var_tags_aux
     let* ts = Monad.List.map (decode_var_tags_aux typ_vars in_native is_tag) ts in
     return @@ Tuple ts
   | Apply (mpath, ts) ->
-    let (ts, bs) = List.split ts in
-    let path_str = MixedPath.to_string mpath in
-    let in_native = List.mem path_str ["tuple_tag"; "arrow_tag"; "list_tag"; "option_tag"] in
-    let dec = decode_var_tags_aux typ_vars in_native in
-    let ts = List.combine ts bs in
-    let* ts = Monad.List.map (fun (t, b) -> dec b t) ts in
-    return @@ Apply (mpath, List.combine ts bs)
+    begin match List.assoc_opt (MixedPath.get_pathName_base mpath) typ_vars with
+    | Some Kind.Tag when not (is_tag || in_native) ->
+      return @@ Apply (MixedPath.dec_name, [(typ, true)])
+    | _ ->
+      let (ts, bs) = List.split ts in
+      let path_str = MixedPath.to_string mpath in
+      let in_native = List.mem path_str ["tuple_tag"; "arrow_tag"; "list_tag"; "option_tag"] in
+      let dec = decode_var_tags_aux typ_vars in_native in
+      let ts = List.combine ts bs in
+      let* ts = Monad.List.map (fun (t, b) -> dec b t) ts in
+      return @@ Apply (mpath, List.combine ts bs)
+    end
   | ForallModule (name, t1, t2) ->
     let* t1 = dec t1 in
     let* t2 = dec t2 in
@@ -957,7 +963,7 @@ let rec decode_var_tags_aux
   | FunTyps (names, t) ->
     let* t = dec t in
     return @@ FunTyps (names, t)
-  | _ -> return typ
+  | _ -> (print_string "felt through\n"; return typ)
 
 let decode_in_native
   (typ : t) : t Monad.t =

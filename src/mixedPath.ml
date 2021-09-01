@@ -36,6 +36,10 @@ let is_constr_tag : t -> bool = function
   | Access _ -> false
   | PathName {base; _} -> Name.equal base Name.constr_tag
 
+let get_pathName_base : t -> Name.t = function
+  | PathName {base; _} -> base
+  | _ -> Name.Make ""
+
 let get_signature_path (path : Path.t) : Path.t option Monad.t =
   let* env = get_env in
   match Env.find_module path env with
