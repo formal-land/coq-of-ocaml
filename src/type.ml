@@ -924,14 +924,12 @@ let rec decode_var_tags_aux
   let dec = decode_var_tags_aux typ_vars in_native is_tag in
   match typ with
   | Variable name ->
-    print_string ("decoding: " ^ Name.to_string name ^ "\n");
     begin
       if is_tag || in_native
-      then (print_string "is_tag || in_native\n"; return typ)
-      else (print_string @@ "checking env for " ^ Name.to_string name ^ "\n";
-              match List.assoc_opt name typ_vars with
-              | Some Kind.Tag -> return @@ Apply (MixedPath.dec_name, [(typ, true)])
-              | _ -> return typ)
+      then return typ
+      else match List.assoc_opt name typ_vars with
+        | Some Kind.Tag -> return @@ Apply (MixedPath.dec_name, [(typ, true)])
+        | _ -> return typ
     end
   | Arrow (t1, t2) ->
     let* t1 = decode_var_tags_aux typ_vars in_native is_tag t1 in
