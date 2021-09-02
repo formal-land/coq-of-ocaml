@@ -1043,81 +1043,88 @@ and of_module_expr
   let { mod_desc; mod_env; mod_loc; mod_type = local_module_type; _ } = module_expr in
   set_env mod_env (
   set_loc mod_loc (
-  match mod_desc with
-  | Tmod_ident (path, _) ->
-    MixedPath.of_path false path >>= fun mixed_path ->
-    let default_result = return (Variable (mixed_path, [])) in
-    let* is_first_class =
-      IsFirstClassModule.is_module_typ_first_class
-        local_module_type (Some path) in
-    let local_module_type_path =
-      match is_first_class with
-      | Found local_module_type_path -> Some local_module_type_path
-      | Not_found _ -> None in
-    begin match module_type with
-    | None -> default_result
+  let* is_local_module_typ_first_class =
+    let path =
+      match mod_desc with
+      | Tmod_ident (path, _) -> Some path
+      | _ -> None in
+    IsFirstClassModule.is_module_typ_first_class local_module_type path in
+  let* is_module_typ_first_class =
+    match module_type with
+    | None -> return None
     | Some module_type ->
       let* is_first_class =
         IsFirstClassModule.is_module_typ_first_class module_type None in
-      begin match is_first_class with
-      | Found module_type_path ->
-        ModuleTypParams.get_module_typ_typ_params_arity module_type
-          >>= fun module_typ_params_arity ->
-        let* are_module_paths_similar =
-          match local_module_type_path with
-          | None -> return false
-          | Some local_module_type_path ->
-            let* comparison =
-              PathName.compare_paths local_module_type_path module_type_path in
-              return (comparison = 0) in
-        if are_module_paths_similar then
-          return (Variable (mixed_path, []))
-        else
-          let* values = ModuleTypValues.get typ_vars module_type in
-          let mixed_path_of_value_or_typ (name : Name.t)
-            : MixedPath.t Monad.t =
-            match local_module_type_path with
-            | Some local_module_type_path ->
-              let* base = PathName.of_path_with_convert false path in
-              let* field =
-                PathName.of_path_and_name_with_convert
-                  local_module_type_path
-                  name in
-              return (MixedPath.Access (base, [field]))
-            | None ->
-              let* path_name =
-                PathName.of_path_and_name_with_convert path name in
-              return (MixedPath.PathName path_name) in
-          build_module
-            module_typ_params_arity
-            values
-            module_type_path
-            mixed_path_of_value_or_typ
-      | Not_found _ -> default_result
-      end
+      return (Some (is_first_class, module_type)) in
+  (* We consider casts to a first-class module of a different kind, either from
+     another first-class module or from a plain module. *)
+  let get_is_cast_needed module_type_path =
+    match is_local_module_typ_first_class with
+    | Found local_module_type_path ->
+      let* comparison =
+        PathName.compare_paths local_module_type_path module_type_path in
+      return (comparison <> 0)
+    | _ -> return true in
+  let cast_path path module_type module_type_path =
+    let* values = ModuleTypValues.get typ_vars module_type in
+    let* module_typ_params_arity =
+      ModuleTypParams.get_module_typ_typ_params_arity module_type in
+    let mixed_path_of_value_or_typ (name : Name.t)
+      : MixedPath.t Monad.t =
+      match is_local_module_typ_first_class with
+      | Found local_module_type_path ->
+        let* base = PathName.of_path_with_convert false path in
+        let* field =
+          PathName.of_path_and_name_with_convert
+            local_module_type_path
+            name in
+        return (MixedPath.Access (base, [field]))
+      | _ ->
+        let* path_name =
+          PathName.of_path_and_name_with_convert path name in
+        return (MixedPath.PathName path_name) in
+    build_module
+      module_typ_params_arity
+      values
+      module_type_path
+      mixed_path_of_value_or_typ in
+  match mod_desc with
+  | Tmod_ident (path, _) ->
+    let* mixed_path = MixedPath.of_path false path in
+    let default_result = return (Variable (mixed_path, [])) in
+    begin match is_module_typ_first_class with
+    | Some (Found module_type_path, module_type) ->
+      let* is_cast_needed = get_is_cast_needed module_type_path in
+      if not is_cast_needed then
+        default_result
+      else
+        cast_path path module_type module_type_path
+    | _ -> default_result
     end
   | Tmod_structure structure ->
-    let module_type =
-      match module_type with
-      | Some module_type -> module_type
-      | None -> local_module_type in
-    let* is_first_class =
-      IsFirstClassModule.is_module_typ_first_class module_type None in
-    begin match is_first_class with
-    | IsFirstClassModule.Found signature_path ->
+    begin match is_module_typ_first_class with
+    | Some (Found signature_path, module_type) ->
       of_structure
         typ_vars
         signature_path
         module_type
         structure.str_items
         structure.str_final_env
-    | IsFirstClassModule.Not_found reason ->
+    | Some (IsFirstClassModule.Not_found reason, _) ->
       error_message
         (Error "first_class_module_value_of_unknown_signature")
         Module
         (
           "The signature name of this module could not be found\n\n" ^
           reason
+        )
+    | None ->
+      error_message
+        (Error "no_expected_module_type_found")
+        Unexpected
+        (
+          "No module type was found for this structure.\n" ^
+          "Try to add a module type annotation."
         )
     end
   | Tmod_functor (parameter, e) ->
@@ -1137,7 +1144,7 @@ and of_module_expr
       match e1_mod_type with
       | Mty_functor (Named (_, module_typ_arg), _) -> Some module_typ_arg
       | _ -> None in
-    of_module_expr typ_vars e1 None >>= fun e1 ->
+    let* e1 = of_module_expr typ_vars e1 None in
     let* es =
       match e1_mod_type with
       | Mty_functor (Unit, _) -> return []
@@ -1145,7 +1152,20 @@ and of_module_expr
         let* e2 =
           of_module_expr typ_vars e2 expected_module_typ_for_e2 in
         return [Some e2] in
-    return (Apply (e1, es))
+    let application = Apply (e1, es) in
+    begin match is_module_typ_first_class with
+    | Some (Found module_type_path, module_type) ->
+      let* is_cast_needed = get_is_cast_needed module_type_path in
+      if not is_cast_needed then
+        return application
+      else
+        let ident = Ident.create_local "functor_result" in
+        let* name = Name.of_ident false ident in
+        let path = Path.Pident ident in
+        let* casted_result = cast_path path module_type module_type_path in
+        return (LetVar (None, name, [], application, casted_result))
+    | _ -> return application
+    end
   | Tmod_constraint (module_expr, mod_type, _, _) ->
     let module_type =
       match module_type with
