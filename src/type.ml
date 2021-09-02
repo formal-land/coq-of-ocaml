@@ -961,7 +961,7 @@ let rec decode_var_tags_aux
   | FunTyps (names, t) ->
     let* t = dec t in
     return @@ FunTyps (names, t)
-  | _ -> (print_string "felt through\n"; return typ)
+  | _ -> return typ
 
 let decode_in_native
   (typ : t) : t Monad.t =
