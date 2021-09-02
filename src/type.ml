@@ -78,7 +78,7 @@ let rec tag_typ_constr_aux
     if is_existencial || is_tuple_tag
     then return typ
     else
-      let (ts, bs) = List.split ts in
+      let (ts, _) = List.split ts in
       let* ts = Monad.List.map tag_ty ts in
       let arg_names = List.map tag_constructor_of ts in
       let tag = Name.constr_tag |> MixedPath.of_name  in
@@ -753,14 +753,14 @@ and get_constr_arg_tags_env
     if Attribute.has_tag_gadt attributes
     then return @@ List.map (fun param -> (param, Kind.Tag)) params
     else return @@ List.map (fun param -> (param, Kind.Set)) params
-  | { type_kind = Type_record (decls, repr); type_params = params; _} ->
+  | { type_kind = Type_record (decls, _); _} ->
     let* (_, new_typ_vars) = record_args decls in
     return new_typ_vars
   | { type_manifest = None; type_kind = Type_abstract; type_params = params; _ } ->
     let params = List.filter_map get_variable params in
     return @@ List.map (fun param -> (param, Kind.Set)) params
-  | { type_manifest = Some typ; type_params = params; _ } ->
-    let* (typ, typ_vars, new_typ_vars) = of_typ_expr true Name.Map.empty typ in
+  | { type_manifest = Some typ; _ } ->
+    let* (_, _, new_typ_vars) = of_typ_expr true Name.Map.empty typ in
     return new_typ_vars
   | _ | exception _ -> return []
 
@@ -775,7 +775,7 @@ and get_constr_arg_tags
     if Attribute.has_tag_gadt attributes
     then return @@ tag_all_args params
     else return @@ tag_no_args params
-  | { type_kind = Type_record (decls, repr); type_params = params; _} ->
+  | { type_kind = Type_record (decls, _); type_params = params; _} ->
     (* Get the variables from param. Keep ordering *)
     let* (_, _, typ_vars) = of_typs_exprs true params Name.Map.empty in
     let typ_vars = List.map (fun (ty, _) -> ty) typ_vars in
@@ -874,7 +874,6 @@ and typed_existential_typs_of_typ
         end
       | _ -> return [] in
     let* is_tagged_variant = PathName.is_tagged_variant path in
-    let* mixed_path = MixedPath.of_path true path in
     let* tag_list = if is_tagged_variant
       then get_constr_arg_tags ~full:true path
       else return @@ tag_no_args typs in
@@ -967,7 +966,7 @@ let decode_in_native
   (typ : t) : t Monad.t =
     let natives = ["tuple_tag"; "arrow_tag"; "list_tag"; "option_tag"] in
     match typ with
-    | Apply (mpath, ts) ->
+    | Apply (mpath, _) ->
       if List.mem (MixedPath.to_string mpath) natives
       then return @@ Apply (MixedPath.dec_name, [(typ, true)])
       else return typ

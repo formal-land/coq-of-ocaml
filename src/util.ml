@@ -36,7 +36,7 @@ module List = struct
     match l with
     | [] -> failwith "Empty List"
     | [x] -> x
-    | x :: xs -> last xs
+    | _ :: xs -> last xs
 
 end
 
