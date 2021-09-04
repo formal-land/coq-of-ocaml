@@ -8,15 +8,18 @@
       "run",
       "cookbook"
     ],
-    "Concepts": [
+    "Language": [
       "ocaml-core",
       "type-definitions",
       "module-system",
-      "gadts",
+      "gadts"
+    ],
+    "Options": [
       "attributes",
       "configuration"
     ],
-    "Examples": [
+    "More": [
+      "faq",
       "examples"
     ]
   }
