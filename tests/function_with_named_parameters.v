@@ -3,13 +3,7 @@ Require Import CoqOfOCaml.Settings.
 
 Definition option_value {a : Set} (x : option a) (default : a) : a :=
   match x with
-  | Some x =>
-    let 'existT _ a x as exi := existT (A := Set) (fun a => a) _ x
-      return
-        let fst := projT1 exi in
-        let a := fst in
-        a in
-    x
+  | Some x => x
   | None => default
   end.
 
