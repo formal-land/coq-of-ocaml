@@ -8,5 +8,11 @@ Inductive t : Set :=
 Fixpoint t_of_list {a : Set} (l : list a) : t :=
   match l with
   | [] => Empty
-  | cons _ l => Node (t_of_list l)
+  | cons _ l =>
+    let 'existT _ a l as exi := existT (A := Set) (fun a => list a) _ l
+      return
+        let fst := projT1 exi in
+        let a := fst in
+        t in
+    Node (t_of_list l)
   end.
