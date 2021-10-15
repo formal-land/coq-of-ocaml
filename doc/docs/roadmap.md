@@ -6,7 +6,7 @@ title: Future
 We present some of the things we have done, and what we could do in the future.
 
 ## Done
-Our main achievement is the translation of the economic protocol (kernel) of the [Tezos crypto-currency](https://tezos.com/) to a valid [Coq](https://coq.inria.fr/) program. We present the results on our [example page](https://clarus.github.io/coq-of-ocaml/examples/tezos/). This amounts to the translation of around 40.000 lines of [OCaml](https://ocaml.org/), including the definition of interfaces.
+Our main achievement is the translation of the economic protocol (kernel) of the [Tezos crypto-currency](https://tezos.com/) to a valid [Coq](https://coq.inria.fr/) program. We present the results on our [example page](https://foobar-land.github.io/coq-of-ocaml/examples/tezos/). This amounts to the translation of around 40.000 lines of [OCaml](https://ocaml.org/), including the definition of interfaces.
 
 ## coq-of-ocaml as a kit
 Here are some of the tasks that we could do, with an estimated cost in days:
