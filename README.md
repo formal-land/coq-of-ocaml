@@ -1,7 +1,7 @@
-# ![Logo](https://clarus.github.io/coq-of-ocaml/img/rooster-48.png) coq-of-ocaml [![CI](https://github.com/clarus/coq-of-ocaml/workflows/CI/badge.svg?branch=master)](https://github.com/clarus/coq-of-ocaml/actions?query=workflow%3ACI)
+# ![Logo](https://foobar-land.github.io/coq-of-ocaml/img/rooster-48.png) coq-of-ocaml [![CI](https://github.com/clarus/coq-of-ocaml/workflows/CI/badge.svg?branch=master)](https://github.com/clarus/coq-of-ocaml/actions?query=workflow%3ACI)
 > Import OCaml programs to Coq for formal verification
 
-**Documentation on https://clarus.github.io/coq-of-ocaml/**
+**Documentation on https://foobar-land.github.io/coq-of-ocaml/**
 
 ## Aim
 `coq-of-ocaml` aims to enable formal verification of [OCaml](https://ocaml.org/) programs&nbsp;🦄. *The more you prove, the happier you are.* By transforming OCaml code into similar [Coq](https://coq.inria.fr/) programs, it is possible to prove arbitrarily complex properties using the existing power of Coq. The sweet spot of `coq-of-ocaml` is purely functional and monadic programs. Side-effects outside of a monad, like references, and advanced features like object-oriented programming, may never be supported. By sticking to the supported subset of OCaml, you should be able to import millions of lines of code to Coq and write proofs at large. Running `coq-of-ocaml` after each code change, you can make sure that your proofs are still valid. The generated Coq code is designed to be stable, with no generated variable names for example. We recommend organizing your proof files as you would organize your unit-test files.
@@ -81,10 +81,10 @@ The basic command is:
 ```
 coq-of-ocaml file.ml
 ```
-You can start to experiment with the test files in `tests/` or look at our [online examples](https://clarus.github.io/coq-of-ocaml/examples/). `coq-of-ocaml` compiles the `.ml` or `.mli` files using [Merlin](https://github.com/ocaml/merlin) to understand the dependencies of a project. One first needs to have a **compiled project** with a working configuration of Merlin. This is automatically the case if you use [dune](https://dune.build/) as a build system.
+You can start to experiment with the test files in `tests/` or look at our [online examples](https://foobar-land.github.io/coq-of-ocaml/examples/). `coq-of-ocaml` compiles the `.ml` or `.mli` files using [Merlin](https://github.com/ocaml/merlin) to understand the dependencies of a project. One first needs to have a **compiled project** with a working configuration of Merlin. This is automatically the case if you use [dune](https://dune.build/) as a build system.
 
 ## Documentation
-You can read the documentation on the website of the project at [https://clarus.github.io/coq-of-ocaml/](https://clarus.github.io/coq-of-ocaml/).
+You can read the documentation on the website of the project at [https://foobar-land.github.io/coq-of-ocaml/](https://foobar-land.github.io/coq-of-ocaml/).
 
 ## Supported
 * the core of OCaml (functions, let bindings, pattern-matching,...) ✔️

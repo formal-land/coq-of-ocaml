@@ -25,7 +25,7 @@ const baseUrl = '/coq-of-ocaml/';
 const siteConfig = {
   title: 'coq-of-ocaml', // Title for your website.
   tagline: 'Import OCaml programs to Coq',
-  url: 'https://clarus.github.io', // Your website URL
+  url: 'https://foobar-land.github.io', // Your website URL
   baseUrl, // Base URL for your project */
   // For github.io type URLs, you would set the url and baseUrl like:
   //   url: 'https://facebook.github.io',
