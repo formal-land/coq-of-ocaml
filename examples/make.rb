@@ -155,7 +155,7 @@ File.open("tezos/index.html", "w") do |file|
   file << project(
     :tezos,
     "Protocol of Tezos",
-    "These are the sources of the <a href=\"https://gitlab.com/tezos/tezos/tree/master/src/proto_alpha/lib_protocol\">protocol</a> of <a href=\"https://tezos.com/\">Tezos</a> imported to <a href=\"https://coq.inria.fr/\">Coq</a> by the current development version of <a href=\"https://github.com/clarus/coq-of-ocaml\">coq-of-ocaml</a>. Tezos is a crypto-currency with smart-contracts and an upgradable protocol. To see the valid generated Coq files, go on <a href=\"https://clarus.github.io/coq-of-ocaml/build-tezos/html/toc.html\">coq-of-ocaml/build-tezos/html/toc.html</a>.",
+    "These are the sources of the <a href=\"https://gitlab.com/tezos/tezos/tree/master/src/proto_alpha/lib_protocol\">protocol</a> of <a href=\"https://tezos.com/\">Tezos</a> imported to <a href=\"https://coq.inria.fr/\">Coq</a> by the current development version of <a href=\"https://github.com/clarus/coq-of-ocaml\">coq-of-ocaml</a>. Tezos is a crypto-currency with smart-contracts and an upgradable protocol. To see the valid generated Coq files, go on <a href=\"https://foobar-land.github.io/coq-of-ocaml/build-tezos/html/toc.html\">coq-of-ocaml/build-tezos/html/toc.html</a>.",
     "(2020-03-11) Compiling all the protocol! 🎉🐓",
     tezos_directory,
     :does_compile,
