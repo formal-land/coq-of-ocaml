@@ -235,7 +235,10 @@ let constructor_of_variant (label : string) : t Monad.t =
     raise
       { path = []; base }
       NotSupported
-      ("Constructor of the variant `" ^ label ^ " unknown")
+      (
+        "Constructor of the variant `" ^ label ^ " unknown. Prefer to use\n" ^
+        "standard algebraic data types when possible."
+      )
 
 let add_prefix (prefix : Name.t) (path_name : t) : t =
   let { path; base } = path_name in
