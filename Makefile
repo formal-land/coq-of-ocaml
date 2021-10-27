@@ -16,3 +16,9 @@ coverage:
 	ruby test.rb --with-coverage
 	bisect-ppx-report html
 	@echo "Outputting the coverage report in '_coverage/index.html'"
+
+fmt:
+	ocamlformat --inplace src/*.ml
+
+fmt-check:
+	ocamlformat --check src/*.ml
