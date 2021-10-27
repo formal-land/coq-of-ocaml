@@ -4,8 +4,8 @@ open Monad.Notations
 type t =
   | AxiomWithReason
   | Cast
-  | DisableExistential
   | ForceGadt
+  | GrabExistentials
   | TaggedGadt
   | Implicit of string
   | MatchGadt
@@ -59,8 +59,8 @@ let of_attributes (attributes : Typedtree.attributes) : t list Monad.t =
       let* _ = of_payload_string error_message id attr_payload in
       return (Some AxiomWithReason)
     | "coq_cast" -> return (Some Cast)
-    | "coq_disable_existential" -> return (Some DisableExistential)
     | "coq_force_gadt" -> return (Some ForceGadt)
+    | "coq_grab_existentials" -> return (Some GrabExistentials)
     | "coq_tag_gadt" -> return (Some TaggedGadt)
     | "coq_implicit" ->
       let error_message =
@@ -94,15 +94,15 @@ let has_cast (attributes : t list) : bool =
     | _ -> false
   )
 
-let has_disable_existential (attributes : t list) : bool =
-  attributes |> List.exists (function
-    | DisableExistential -> true
-    | _ -> false
-  )
-
 let has_force_gadt (attributes : t list) : bool =
   attributes |> List.exists (function
     | ForceGadt -> true
+    | _ -> false
+  )
+
+let has_grab_existentials (attributes : t list) : bool =
+  attributes |> List.exists (function
+    | GrabExistentials -> true
     | _ -> false
   )
 

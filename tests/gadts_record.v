@@ -40,24 +40,6 @@ Fixpoint interp {a : vtag} (function_parameter : term a) : decode_vtag a :=
   match function_parameter with
   | T_Int n => n
   | T_String s => s
-  | T_Pair p1 p2 =>
-    let 'existT _ [__1, __0] [p2, p1] as exi :=
-      existT (A := [vtag ** vtag]) (fun '[__1, __0] => [term __1 ** term __0])
-        [_, _] [p2, p1]
-      return
-        let fst := projT1 exi in
-        let __0 := Primitive.snd fst in
-        let __1 := Primitive.fst fst in
-        decode_vtag __0 * decode_vtag __1 in
-    ((interp p1), (interp p2))
-  | T_Rec {| term.T_Rec.x := x; term.T_Rec.y := y |} =>
-    let 'existT _ [__3, __2] [y, x] as exi :=
-      existT (A := [Set ** vtag]) (fun '[__3, __2] => [__3 ** term __2]) [_, _]
-        [y, x]
-      return
-        let fst := projT1 exi in
-        let __2 := Primitive.snd fst in
-        let __3 := Primitive.fst fst in
-        decode_vtag __2 * __3 in
-    ((interp x), y)
+  | T_Pair p1 p2 => ((interp p1), (interp p2))
+  | T_Rec {| term.T_Rec.x := x; term.T_Rec.y := y |} => ((interp x), y)
   end.

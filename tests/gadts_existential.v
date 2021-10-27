@@ -75,17 +75,6 @@ End wrapper.
 
 Definition unwrap (w1 : wrapper) (w2 : wrapper) : int :=
   match (w1, w2) with
-  | (W_exp e1, W_term e2) =>
-    let 'existT _ [__W_term_'kind, __W_exp_'kind] [e2, e1] as exi :=
-      existT (A := [vtag ** vtag])
-        (fun '[__W_term_'kind, __W_exp_'kind] =>
-          [wrapper.W_term __W_term_'kind ** wrapper.W_exp __W_exp_'kind]) [_, _]
-        [e2, e1]
-      return
-        let fst := projT1 exi in
-        let __W_exp_'kind := Primitive.snd fst in
-        let __W_term_'kind := Primitive.fst fst in
-        int in
-    2
+  | (W_exp e1, W_term e2) => 2
   | _ => 4
   end.

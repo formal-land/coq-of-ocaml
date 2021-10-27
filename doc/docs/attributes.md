@@ -94,6 +94,53 @@ Inductive gadt_list : Set :=
 
 One possible reason to force a type to be a GADT is to make sure that all the inductive types in a mutually recursive type definition have the same (zero) arity, as it is expected by Coq.
 
+## coq_grab_existentials
+When translating terms that mentions existential variables it might be necessary to make that existential variable explicit.
+To achieve this we use the `[@coq_grab_existentials]` attribute. Here is an example:
+
+```ocaml
+type wrap1 =
+  | Cw1 : ('a -> 'b) -> wrap1
+
+type wrap2 =
+  | Cw2 : ('a -> 'a) -> wrap2
+
+let w2_of_w1 (w : wrap2) : wrap1  =
+  match [@coq_grab_existentials]w with
+  | Cw2 f ->
+    Cw1 (fun y -> f y)
+```
+
+Notice that the type of `inj` is `'a -> 'a` for some existential variable `'a`.
+Since `coq-of-ocaml` always generates fully anotated code, we need to explicitely
+name `'a` in order to properly anotate the type of `y` in the body of `Cw1`. 
+This gives us the following translation:
+
+```coq
+Inductive wrap1 : Set :=
+| Cw1 : forall {a b : Set}, (a -> b) -> wrap1.
+
+Inductive wrap2 : Set :=
+| Cw2 : forall {a : Set}, (a -> a) -> wrap2.
+
+Definition w2_of_w1 (w : wrap2) : wrap1 :=
+  let 'Cw2 f := w in
+  let 'existT _ __Cw2_'a f as exi :=
+    existT (A := Set) (fun __Cw2_'a => __Cw2_'a -> __Cw2_'a) _ f
+    return
+      let fst := projT1 exi in
+      let __Cw2_'a := fst in
+      wrap1 in
+  Cw1 (fun (y : __Cw2_'a) => f y).
+```
+
+In the coq side we use an `existT` to grab these existential variables.  The key
+here is that this allows us to explicitely name `'a` as `__Cw2_'a`. 
+
+The return clause is used to bind this new name in the return type of the term
+that is being built, in this example it wouldn't be necessary but we generate
+the same code for a simpler boilerplate.
+
 ## coq_implicit
 The `[@coq_implicit "(A := ...)"]` attribute adds an arbitrary annotation on an OCaml identifier or constructor. We typically use this attribute to help Coq to infer implicit types where there is an ambiguity:
 ```ocaml

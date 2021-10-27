@@ -32,7 +32,7 @@ type match_existential_cast = {
   return_typ : Type.t;
   use_axioms : bool;
   cast_result : bool;
-  disable : bool
+  enable : bool
 }
 
 type dependent_pattern_match = {
@@ -313,9 +313,9 @@ let rec of_expression (typ_vars : Name.t Name.Map.t) (e : expression)
     let is_tagged_match = Attribute.has_tagged_match attributes in
     let do_cast_results = Attribute.has_match_gadt_with_result attributes in
     let is_with_default_case = Attribute.has_match_with_default attributes in
-    let is_disable_existentials = Attribute.has_disable_existential attributes in
+    let is_grab_existentials = Attribute.has_grab_existentials attributes in
     let* (x, typ, e) =
-      open_cases typ_vars cases is_gadt_match is_tagged_match do_cast_results is_with_default_case is_disable_existentials in
+      open_cases typ_vars cases is_gadt_match is_tagged_match do_cast_results is_with_default_case is_grab_existentials in
     return (Function (x, typ, e))
   | Texp_apply (e_f, e_xs) ->
     of_expression typ_vars e_f >>= fun e_f ->
@@ -437,9 +437,9 @@ let rec of_expression (typ_vars : Name.t Name.Map.t) (e : expression)
     let is_tagged_match = Attribute.has_tagged_match attributes in
     let do_cast_results = Attribute.has_match_gadt_with_result attributes in
     let is_with_default_case = Attribute.has_match_with_default attributes in
-    let is_disable_existential = Attribute.has_disable_existential attributes in
+    let is_grab_existential = Attribute.has_grab_existentials attributes in
     let* e = of_expression typ_vars e in
-    of_match typ_vars e cases is_gadt_match is_tagged_match do_cast_results is_with_default_case is_disable_existential
+    of_match typ_vars e cases is_gadt_match is_tagged_match do_cast_results is_with_default_case is_grab_existential
   | Texp_tuple es ->
     Monad.List.map (of_expression typ_vars) es >>= fun es ->
     return (Tuple es)
@@ -723,7 +723,7 @@ and of_match :
   type k .  Name.t Name.Map.t -> t -> k case list -> bool -> bool -> bool ->
   bool -> bool -> t Monad.t =
   fun typ_vars e cases is_gadt_match is_tagged_match do_cast_results
-    is_with_default_case is_disable_existential ->
+    is_with_default_case is_grab_existentials ->
     let is_extensible_type_match =
       cases |>
       List.map (fun { c_lhs; _ } -> c_lhs) |>
@@ -803,7 +803,7 @@ and of_match :
                  return_typ = typ;
                  use_axioms = is_gadt_match;
                  cast_result = do_cast_results;
-                 disable = is_disable_existential;
+                 enable = is_grab_existentials;
                } in
 
              begin match c_guard with
@@ -904,7 +904,7 @@ and open_cases
   (is_tagged_match : bool)
   (do_cast_results : bool)
   (is_with_default_case : bool)
-  (is_disable_existential: bool)
+  (is_grab_existentials: bool)
   : (Name.t * Type.t option * t) Monad.t =
   let name = Name.FunctionParameter in
   let* typ =
@@ -916,7 +916,7 @@ and open_cases
   let e = Variable (MixedPath.of_name name, []) in
   let* e =
     of_match
-      typ_vars e cases is_gadt_match is_tagged_match do_cast_results is_with_default_case is_disable_existential in
+      typ_vars e cases is_gadt_match is_tagged_match do_cast_results is_with_default_case is_grab_existentials in
   return (name, typ, e)
 
 and import_let_fun
@@ -1773,7 +1773,7 @@ and to_coq_cast_existentials
     | _ -> to_coq false e in
   match existential_cast with
   | None -> e
-  | Some { new_typ_vars; bound_vars; use_axioms; return_typ; disable; _ } ->
+  | Some { new_typ_vars; bound_vars; use_axioms; return_typ; enable; _ } ->
     let variable_names =
       Pp.primitive_tuple (bound_vars |> List.map (fun (name, _) ->
         Name.to_coq name
@@ -1787,9 +1787,8 @@ and to_coq_cast_existentials
         Pp.primitive_tuple_type (bound_vars |> List.map (fun (_, typ) ->
           Type.to_coq None None typ
         )) in
-    begin match (disable, bound_vars, new_typ_vars) with
-      | (true, _, _) -> e
-      | (_, [], _) -> e
+    begin match (enable, bound_vars, new_typ_vars) with
+      | (false, _, _) | (_, [], _) -> e
       | (_, _, []) ->
         if use_axioms then
           let variable_names_pattern =

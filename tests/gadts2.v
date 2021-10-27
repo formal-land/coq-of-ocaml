@@ -45,12 +45,4 @@ Fixpoint interp {a : vtag} (t : Test.term a) : int :=
         Test.term.T_Pair.x2 := x2;
         Test.term.T_Pair.x3 := x3
         |} := t in
-  let 'existT _ [__1, __0] [x3, x2, x1] as exi :=
-    existT (A := [Set ** Set]) (fun '[__1, __0] => [__1 ** __0 ** int]) [_, _]
-      [x3, x2, x1]
-    return
-      let fst := projT1 exi in
-      let __0 := Primitive.snd fst in
-      let __1 := Primitive.fst fst in
-      int in
   x1.
