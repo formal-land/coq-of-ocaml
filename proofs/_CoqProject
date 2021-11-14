@@ -6,4 +6,5 @@ CoqOfOCaml.v
 Libraries.v
 List.v
 Settings.v
+Stdlib.v
 Tags.v
