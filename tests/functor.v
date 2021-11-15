@@ -33,7 +33,7 @@ Parameter Make :
   forall {P_t : Set},
   forall (P : COMPARABLE (t := P_t)), S (t := P.(COMPARABLE.t)).
 
-Parameter Char : S (t := ascii).
+Parameter Char : S (t := char).
 
 Parameter Abstract_t : Set.
 

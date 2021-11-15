@@ -113,6 +113,8 @@ Definition int64 := Z.
 
 Definition nativeint := Z.
 
+Definition char := ascii.
+
 Definition bytes := string.
 
 Definition try {A : Set} (x : A) : A := x.
@@ -233,58 +235,6 @@ Module Stdlib.
     | Lt => -1
     | Gt => 1
     end.
-
-  (** * Boolean operations *)
-
-  (** * Composition operators *)
-  Definition reverse_apply {A B : Type} (x : A) (f : A -> B) : B :=
-    f x.
-
-  (** * Integer arithmetic *)
-
-  (** * Bitwise operations *)
-
-  (** * Floating-point arithmetic *)
-  (* TODO *)
-
-  (** * String operations *)
-
-  (** * Character operations *)
-  Definition int_of_char (c : ascii) : Z :=
-    Z.of_nat (nat_of_ascii c).
-
-  (** * Unit operations *)
-  Definition ignore {A : Type} (_ : A) : unit :=
-    tt.
-
-  (** * String conversion functions *)
-  Definition string_of_bool (b : bool) : string :=
-    if b then
-      "true" % string
-    else
-      "false" % string.
-
-  (* TODO *)
-  Definition bool_of_string (s : string) : bool :=
-    false.
-
-  (* TODO *)
-  Definition string_of_int (n : Z) : string :=
-    "0" % string.
-
-  (* TODO *)
-  Definition int_of_string (s : string) : Z :=
-    0.
-
-  (** * Pair operations *)
-
-  (** * List operations *)
-  (** The concatenation of lists with an implicit parameter. *)
-  Definition app {A : Type} (l1 l2 : list A) : list A :=
-    app l1 l2.
-
-  (** * Operations on format strings *)
-  (* TODO *)
 End Stdlib.
 
 Module Char.

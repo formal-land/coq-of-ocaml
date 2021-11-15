@@ -5,41 +5,41 @@ Require Import Program.Program.
 Local Open Scope Z_scope.
 Import ListNotations.
 
-Fixpoint length_aux {A : Type} (len : Z) (x : list A) : Z :=
+Fixpoint length_aux {A : Set} (len : Z) (x : list A) : Z :=
   match x with
   | [] => len
   | cons a l => length_aux (Z.add len 1) l
   end.
 
-Definition length {A : Type} (l : list A) : Z := length_aux 0 l.
+Definition length {A : Set} (l : list A) : Z := length_aux 0 l.
 
-Lemma length_cons {A : Type} (x : A) (l : list A)
+Lemma length_cons {A : Set} (x : A) (l : list A)
   : length (x :: l) = length l + 1.
 Admitted.
 
-Lemma length_is_pos {A : Type} (l : list A) : 0 <= length l.
+Lemma length_is_pos {A : Set} (l : list A) : 0 <= length l.
 Admitted.
 
-Definition append {A : Type} : (list A) -> (list A) -> list A :=
-  Stdlib.app.
+Definition append {A : Set} : (list A) -> (list A) -> list A :=
+  List.app (A := A).
 
-Fixpoint rev_append {A : Type} (l1 : list A) (l2 : list A) : list A :=
+Fixpoint rev_append {A : Set} (l1 : list A) (l2 : list A) : list A :=
   match l1 with
   | [] => l2
   | cons a l => rev_append l (cons a l2)
   end.
 
-Definition rev {A : Type} (l : list A) : list A := rev_append l [].
+Definition rev {A : Set} (l : list A) : list A := rev_append l [].
 
-Fixpoint flatten {A : Type} (x : list (list A)) : list A :=
+Fixpoint flatten {A : Set} (x : list (list A)) : list A :=
   match x with
   | [] => []
-  | cons l r => Stdlib.app l (flatten r)
+  | cons l r => List.app l (flatten r)
   end.
 
-Definition concat {A : Type} : (list (list A)) -> list A := flatten.
+Definition concat {A : Set} : (list (list A)) -> list A := flatten.
 
-Fixpoint map {A B : Type} (f : A -> B) (x : list A) : list B :=
+Fixpoint map {A B : Set} (f : A -> B) (x : list A) : list B :=
   match x with
   | [] => []
   | cons a l =>
@@ -47,7 +47,7 @@ Fixpoint map {A B : Type} (f : A -> B) (x : list A) : list B :=
     cons r (map f l)
   end.
 
-Fixpoint mapi_aux {A B : Type} (i : Z) (f : Z -> A -> B) (x : list A)
+Fixpoint mapi_aux {A B : Set} (i : Z) (f : Z -> A -> B) (x : list A)
   : list B :=
   match x with
   | [] => []
@@ -56,10 +56,10 @@ Fixpoint mapi_aux {A B : Type} (i : Z) (f : Z -> A -> B) (x : list A)
     cons r (mapi_aux (Z.add i 1) f l)
   end.
 
-Definition mapi {A B : Type} (f : Z -> A -> B) (l : list A) : list B :=
+Definition mapi {A B : Set} (f : Z -> A -> B) (l : list A) : list B :=
   mapi_aux 0 f l.
 
-Definition rev_map {A B : Type} (f : A -> B) (l : list A) : list B :=
+Definition rev_map {A B : Set} (f : A -> B) (l : list A) : list B :=
   let fix rmap_f (accu : list B) (x : list A) : list B :=
     match x with
     | [] => accu
@@ -67,32 +67,32 @@ Definition rev_map {A B : Type} (f : A -> B) (l : list A) : list B :=
     end in
   rmap_f [] l.
 
-Fixpoint fold_left {A B : Type} (f : A -> B -> A) (accu : A) (l : list B) : A :=
+Fixpoint fold_left {A B : Set} (f : A -> B -> A) (accu : A) (l : list B) : A :=
   match l with
   | [] => accu
   | cons a l => fold_left f (f accu a) l
   end.
 
-Fixpoint fold_right {A B : Type} (f : A -> B -> B) (l : list A) (accu : B)
+Fixpoint fold_right {A B : Set} (f : A -> B -> B) (l : list A) (accu : B)
   : B :=
   match l with
   | [] => accu
   | cons a l => f a (fold_right f l accu)
   end.
 
-Fixpoint for_all {A : Type} (p : A -> bool) (x : list A) : bool :=
+Fixpoint for_all {A : Set} (p : A -> bool) (x : list A) : bool :=
   match x with
   | [] => true
   | cons a l => andb (p a) (for_all p l)
   end.
 
-Fixpoint _exists {A : Type} (p : A -> bool) (x : list A) : bool :=
+Fixpoint _exists {A : Set} (p : A -> bool) (x : list A) : bool :=
   match x with
   | [] => false
   | cons a l => orb (p a) (_exists p l)
   end.
 
-Fixpoint mem {A : Type} `{EqDec A} (x : A) (l : list A) : bool :=
+Fixpoint mem {A : Set} `{EqDec A} (x : A) (l : list A) : bool :=
   match l with
   | [] => false
   | y :: l =>
@@ -102,7 +102,7 @@ Fixpoint mem {A : Type} `{EqDec A} (x : A) (l : list A) : bool :=
       mem x l
   end.
 
-Definition find_all {A : Type} (p : A -> bool) : (list A) -> list A :=
+Definition find_all {A : Set} (p : A -> bool) : (list A) -> list A :=
   let fix find (accu : list A) (x : list A) : list A :=
     match x with
     | [] => rev accu
@@ -114,9 +114,9 @@ Definition find_all {A : Type} (p : A -> bool) : (list A) -> list A :=
     end in
   find [].
 
-Definition filter {A : Type} : (A -> bool) -> (list A) -> list A := find_all.
+Definition filter {A : Set} : (A -> bool) -> (list A) -> list A := find_all.
 
-Definition partition {A : Type} (p : A -> bool) (l : list A)
+Definition partition {A : Set} (p : A -> bool) (l : list A)
   : (list A) * (list A) :=
   let fix part (yes : list A) (no : list A) (x : list A)
     : (list A) * (list A) :=
@@ -130,7 +130,7 @@ Definition partition {A : Type} (p : A -> bool) (l : list A)
     end in
   part [] [] l.
 
-Fixpoint mem_assoc {A B : Type} `{EqDec A} (x : A) (l : list (A * B)) : bool :=
+Fixpoint mem_assoc {A B : Set} `{EqDec A} (x : A) (l : list (A * B)) : bool :=
   match l with
   | [] => false
   | (y, v) :: l =>
@@ -140,7 +140,7 @@ Fixpoint mem_assoc {A B : Type} `{EqDec A} (x : A) (l : list (A * B)) : bool :=
       mem_assoc x l
   end.
 
-Fixpoint remove_assoc {A B : Type} `{EqDec A} (x : A) (l : list (A * B))
+Fixpoint remove_assoc {A B : Set} `{EqDec A} (x : A) (l : list (A * B))
   : list (A * B) :=
   match l with
   | [] => l
@@ -151,7 +151,7 @@ Fixpoint remove_assoc {A B : Type} `{EqDec A} (x : A) (l : list (A * B))
       remove_assoc x l
   end.
 
-Fixpoint split {A B : Type} (x : list (A * B)) : (list A) * (list B) :=
+Fixpoint split {A B : Set} (x : list (A * B)) : (list A) * (list B) :=
   match x with
   | [] => ([], [])
   | cons (x, y) l =>
@@ -160,7 +160,7 @@ Fixpoint split {A B : Type} (x : list (A * B)) : (list A) * (list B) :=
     end
   end.
 
-Fixpoint merge {A : Type} (cmp : A -> A -> Z) (l1 : list A) (l2 : list A)
+Fixpoint merge {A : Set} (cmp : A -> A -> Z) (l1 : list A) (l2 : list A)
   : list A :=
   let fix merge_aux (l2 : list A) : list A :=
     match (l1, l2) with

@@ -1,12 +1,10 @@
 let rules =
   [
     (* Built-in types *)
-    ("char", "ascii");
     ("()", "tt");
     ("op_coloncolon", "cons");
     ("Ok", "inl");
     ("Error", "inr");
-    ("exn", "extensible_type");
     (* Predefined exceptions *)
     ("Match_failure", "CoqOfOCaml.Match_failure");
     ("Assert_failure", "CoqOfOCaml.Assert_failure");
