@@ -1443,6 +1443,7 @@ let rec to_coq (paren : bool) (e : t) : SmartPrint.t =
                 | _ :: _ ->
                     !^"fun" ^^ separate space missing_args ^^ !^"=>" ^^ space)
                ^-^ nest (separate space (to_coq true e_f :: all_args)))))
+  | Return ("", e) -> to_coq paren e
   | Return (operator, e) ->
       Pp.parens paren @@ nest @@ !^operator ^^ to_coq true e
   | InfixOperator (operator, e1, e2) ->

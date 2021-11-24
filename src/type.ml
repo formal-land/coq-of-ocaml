@@ -1194,6 +1194,8 @@ let rec to_coq (subst : Subst.t option) (context : Context.t option) (typ : t) :
           @@ separate
                (space ^^ !^"*" ^^ space)
                (List.map (to_coq subst (Some Context.Tuple)) typs))
+  | Apply (PathName { path = []; base = Name.Make "" }, [ (typ, false) ]) ->
+      to_coq subst context typ
   | Apply (path, typs) -> (
       let typs = List.map (fun t -> fst t) typs in
       match tag_notation path typs with
