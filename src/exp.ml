@@ -952,7 +952,7 @@ and import_let_fun (typ_vars : Name.t Name.Map.t) (at_top_level : bool)
                 >>= fun (e_typ, typ_vars, new_typ_vars) ->
                 let* e_typ = Type.decode_var_tags new_typ_vars false e_typ in
                 let new_typ_vars =
-                  VarEnv.remove_many predefined_variables new_typ_vars
+                  VarEnv.remove predefined_variables new_typ_vars
                 in
                 match x with
                 | None -> return None

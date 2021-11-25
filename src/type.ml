@@ -42,9 +42,9 @@ let tag_constructor_of (typ : t) =
   | Kind k -> Kind.to_string k
   | String _ -> "string"
 
-let rec tag_typ_constr_aux (existencial_typs : Name.Set.t) (typ : t) : t Monad.t
+let rec tag_typ_constr_aux (existential_typs : Name.Set.t) (typ : t) : t Monad.t
     =
-  let tag_ty = tag_typ_constr_aux existencial_typs in
+  let tag_ty = tag_typ_constr_aux existential_typs in
   match typ with
   | Arrow (t1, t2) ->
       let* t1 = tag_ty t1 in
@@ -67,7 +67,7 @@ let rec tag_typ_constr_aux (existencial_typs : Name.Set.t) (typ : t) : t Monad.t
       let is_tuple_tag = mpath = tuple_tag in
       let is_existencial =
         match mpath with
-        | PathName { path = []; base } -> Name.Set.mem base existencial_typs
+        | PathName { path = []; base } -> Name.Set.mem base existential_typs
         | Access _ | PathName _ -> false
       in
       if is_existencial || is_tuple_tag then return typ
@@ -568,11 +568,11 @@ let rec of_typ_expr ?(should_tag = false) (with_free_vars : bool)
         return @@ (var, typ_vars, new_typ_vars)
       else
         let* tag_list = get_constr_arg_tags path in
-        let* existencial_typs = existential_typs_of_typs typs in
+        let* existential_typs = existential_typs_of_typs typs in
         let* typs, typ_vars, new_typs_vars =
           of_typs_exprs ~tag_list with_free_vars typs typ_vars
         in
-        let* typs = tag_typ_constr path existencial_typs typs in
+        let* typs = tag_typ_constr path existential_typs typs in
         let* typ = apply_with_notations mixed_path typs tag_list in
         return (typ, typ_vars, new_typs_vars)
   | Tobject (_, object_descr) -> (
@@ -1145,7 +1145,8 @@ let to_coq_grouped_typ_params (parens_or_braces : parens_or_braces)
     )
 
 (** Pretty-print a type. Use the [context] parameter to know if we should add
-    parenthesis. *)
+    parenthesis. There is a substitution parameter because sometimes it is
+    convenient to do substitutions on the fly, for example for notations. *)
 let rec to_coq (subst : Subst.t option) (context : Context.t option) (typ : t) :
     SmartPrint.t =
   match typ with
