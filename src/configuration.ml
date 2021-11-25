@@ -146,7 +146,7 @@ let is_in_first_class_module_signature_backlist (configuration : t)
 let is_in_merge_returns (configuration : t) (source1 : string)
     (source2 : string) : string option =
   configuration.merge_returns
-  |> Util.List.find_map (fun (merge_rule : MergeRule.t) ->
+  |> List.find_map (fun (merge_rule : MergeRule.t) ->
          if source1 = merge_rule.source1 && source2 = merge_rule.source2 then
            Some merge_rule.target
          else None)
@@ -154,7 +154,7 @@ let is_in_merge_returns (configuration : t) (source1 : string)
 let is_in_merge_types (configuration : t) (source1 : string) (source2 : string)
     : string option =
   configuration.merge_types
-  |> Util.List.find_map (fun (merge_rule : MergeRule.t) ->
+  |> List.find_map (fun (merge_rule : MergeRule.t) ->
          if source1 = merge_rule.source1 && source2 = merge_rule.source2 then
            Some merge_rule.target
          else None)

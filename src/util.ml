@@ -6,20 +6,6 @@ module File = struct
 end
 
 module List = struct
-  let concat_map (f : 'a -> 'b list) (l : 'a list) : 'b list =
-    List.concat (List.map f l)
-
-  let rec filter_map (f : 'a -> 'b option) (l : 'a list) : 'b list =
-    match l with
-    | [] -> []
-    | x :: l -> (
-        match f x with None -> filter_map f l | Some x -> x :: filter_map f l)
-
-  let rec find_map (f : 'a -> 'b option) (l : 'a list) : 'b option =
-    match l with
-    | [] -> None
-    | x :: l -> ( match f x with None -> find_map f l | Some _ as y -> y)
-
   let rec split3 = function
     | [] -> ([], [], [])
     | (x, y, z) :: l ->
@@ -31,14 +17,9 @@ module List = struct
 end
 
 module Option = struct
-  let bind (x : 'a option) (f : 'a -> 'b option) : 'b option =
-    match x with None -> None | Some x -> f x
-
-  let map (x : 'a option) (f : 'a -> 'b) : 'b option =
-    match x with None -> None | Some x -> Some (f x)
-
   let rec all (l : 'a option list) : 'a list option =
     match l with
     | [] -> Some []
-    | x :: xs -> bind x (fun x -> bind (all xs) (fun xs -> Some (x :: xs)))
+    | x :: xs ->
+        Option.bind x (fun x -> Option.bind (all xs) (fun xs -> Some (x :: xs)))
 end

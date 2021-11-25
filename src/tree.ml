@@ -47,7 +47,7 @@ let mapi (f : string list -> 'a -> 'b Monad.t) (tree : 'a t) : 'b t Monad.t =
 let rec flatten_aux (prefix : string list) (tree : 'a t) :
     (string list * 'a) list =
   tree
-  |> Util.List.concat_map (fun item ->
+  |> List.concat_map (fun item ->
          match item with
          | Item (name, x) ->
              let path = List.rev (name :: prefix) in

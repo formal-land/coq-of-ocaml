@@ -10,7 +10,7 @@ let get_modtype_declarations_of_module_declaration (env : Env.t)
   match Env.scrape_alias env module_declaration.md_type with
   | Mty_signature signature ->
       signature
-      |> Util.List.filter_map (function
+      |> List.filter_map (function
            | Types.Sig_modtype (module_type_ident, module_type, _) ->
                Some ([ module_type_ident ], module_type)
            | _ -> None)

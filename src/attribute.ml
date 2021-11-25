@@ -96,9 +96,7 @@ let has_grab_existentials (attributes : t list) : bool =
 
 let get_implicits (attributes : t list) : string list =
   attributes
-  |> Util.List.filter_map (function
-       | Implicit implicit -> Some implicit
-       | _ -> None)
+  |> List.filter_map (function Implicit implicit -> Some implicit | _ -> None)
 
 let has_match_gadt (attributes : t list) : bool =
   attributes |> List.exists (function MatchGadt -> true | _ -> false)
@@ -135,7 +133,7 @@ let has_precise_signature (attributes : Typedtree.attributes) : bool =
 
 let get_structs (attributes : t list) : string list =
   attributes
-  |> Util.List.filter_map (function Struct name -> Some name | _ -> None)
+  |> List.filter_map (function Struct name -> Some name | _ -> None)
 
 let has_typ_annotation (attributes : t list) : bool =
   attributes |> List.exists (function TypAnnotation -> true | _ -> false)
