@@ -23,3 +23,9 @@ module Option = struct
     | x :: xs ->
         Option.bind x (fun x -> Option.bind (all xs) (fun xs -> Some (x :: xs)))
 end
+
+module String = struct
+  let starts_with prefix s =
+    String.length prefix <= String.length s
+    && String.sub s 0 (String.length prefix) = prefix
+end

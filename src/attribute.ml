@@ -78,9 +78,12 @@ let of_attributes (attributes : Typedtree.attributes) : t list Monad.t =
                   of_payload_string error_message id attr_payload
                 in
                 return (Some (Struct payload))
-            | "coq_type_annotation" -> return (Some TypAnnotation)
             | "coq_tagged_match" -> return (Some TaggedMatch)
-            | _ -> return None))
+            | "coq_type_annotation" -> return (Some TypAnnotation)
+            | _ ->
+                if Util.String.starts_with "coq_" id then
+                  raise None Unexpected "Unknown attribute starting with @coq_."
+                else return None))
 
 let has_axiom_with_reason (attributes : t list) : bool =
   attributes |> List.exists (function AxiomWithReason -> true | _ -> false)
