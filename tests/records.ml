@@ -74,3 +74,9 @@ module RecordWithInnerPolymorphism = struct
 
   let r = { f }
 end
+
+module RecordWithInnerAndOuterPolymorphism = struct
+  type 'a t = {
+    f : 'b. 'b -> 'b -> 'a;
+  }
+end

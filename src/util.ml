@@ -17,6 +17,13 @@ module List = struct
 end
 
 module Option = struct
+  let merge (o1 : 'a option) (o2 : 'a option) (merge : 'a -> 'a -> 'a) :
+      'a option =
+    match (o1, o2) with
+    | None, _ -> o2
+    | _, None -> o1
+    | Some v1, Some v2 -> Some (merge v1 v2)
+
   let rec all (l : 'a option list) : 'a list option =
     match l with
     | [] -> Some []
