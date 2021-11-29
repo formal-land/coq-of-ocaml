@@ -48,3 +48,14 @@ type[@coq_force_gadt] 'a gadt_list =
   | GCons of 'a * 'a gadt_list
 
 let gadt_empty_list = GNil
+
+module With_cast = struct
+  type 'a int_or_bool =
+    | Int : int int_or_bool
+    | Bool : bool int_or_bool
+
+  let to_int (type a) (kind : a int_or_bool) (x : a) : int =
+    match[@coq_match_gadt] (kind, x) with
+    | (Int, (x : int)) -> x
+    | (Bool, (x : bool)) -> if x then 1 else 0
+end
