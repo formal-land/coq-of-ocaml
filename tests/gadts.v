@@ -58,3 +58,22 @@ Inductive gadt_list : Set :=
 | GCons : forall {a : Set}, a -> gadt_list -> gadt_list.
 
 Definition gadt_empty_list : gadt_list := GNil.
+
+Module With_cast.
+  Inductive int_or_bool : Set :=
+  | Int : int_or_bool
+  | Bool : int_or_bool.
+  
+  Definition to_int {a : Set} (kind : int_or_bool) (x : a) : int :=
+    match (kind, x) with
+    | (Int, x) =>
+      let x := cast int x in
+      x
+    | (Bool, x) =>
+      let x := cast bool x in
+      if x then
+        1
+      else
+        0
+    end.
+End With_cast.

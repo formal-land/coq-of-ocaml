@@ -814,7 +814,7 @@ and of_match :
                     return_typ = typ;
                     use_axioms = is_gadt_match;
                     cast_result = do_cast_results;
-                    enable = is_grab_existentials;
+                    enable = is_grab_existentials || is_gadt_match;
                   }
               in
 
