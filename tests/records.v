@@ -212,3 +212,14 @@ Module RecordWithInnerPolymorphism.
   
   Definition r : t := {| t.f _ := f |}.
 End RecordWithInnerPolymorphism.
+
+Module RecordWithInnerAndOuterPolymorphism.
+  Module t.
+    Record record {a : Set} : Set := Build {
+      f : forall {b : Set}, b -> b -> a }.
+    Arguments record : clear implicits.
+    Definition with_f {t_a} f (r : record t_a) :=
+      Build t_a f.
+  End t.
+  Definition t := t.record.
+End RecordWithInnerAndOuterPolymorphism.

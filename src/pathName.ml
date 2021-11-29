@@ -292,10 +292,9 @@ let is_record (path : Path.t) : bool Monad.t =
 let is_tagged_variant (path : Path.t) : bool Monad.t =
   let* env = get_env in
   match Env.find_type path env with
-  | { type_kind = Type_variant _; type_attributes; _ } ->
+  | { type_kind = Type_variant _ | Type_record _; type_attributes; _ } ->
       let* type_attributes = Attribute.of_attributes type_attributes in
       return @@ Attribute.has_tag_gadt type_attributes
-  | { type_kind = Type_record _; _ } -> return true
   | _ | (exception _) -> return false
 
 let is_native_type (path : Path.t) : bool =

@@ -47,15 +47,11 @@ let get_set_varenv (typs : t) : VarEnv.t =
 let of_ocaml : Types.type_expr list -> t Monad.t =
   Monad.List.map AdtVariable.of_ocaml
 
-let filter_params (typs : Types.type_expr list) : t Monad.t =
-  of_ocaml typs >>= fun typs ->
-  typs
-  |> Monad.List.filter (function
-       | AdtVariable.Parameter _ -> return true
-       | _ -> return false)
-
 let typ_params_ghost_marked (typs : Types.type_expr list) : t Monad.t =
-  typs |> filter_params
+  let* typs = of_ocaml typs in
+  return
+    (typs
+    |> List.filter (function AdtVariable.Parameter _ -> true | _ -> false))
 
 let equal (param1 : AdtVariable.t) (param2 : AdtVariable.t) : bool =
   match (param1, param2) with

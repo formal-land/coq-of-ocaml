@@ -88,8 +88,8 @@ type item = {
   constructor_name : Name.t;
   param_typs : Type.t list;  (** The parameters of the constructor. *)
   res_typ_params : ret_typ;
-  is_tagged : bool;
       (** The type parameters of the result type of the constructor. *)
+  is_tagged : bool;
   typ_vars : VarEnv.t;  (** The polymorphic type variables. *)
 }
 (** The constructors of an inductive type, either in a GADT or non-GADT form.
