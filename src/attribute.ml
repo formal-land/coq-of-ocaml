@@ -78,9 +78,12 @@ let of_attributes (attributes : Typedtree.attributes) : t list Monad.t =
                   of_payload_string error_message id attr_payload
                 in
                 return (Some (Struct payload))
-            | "coq_type_annotation" -> return (Some TypAnnotation)
             | "coq_tagged_match" -> return (Some TaggedMatch)
-            | _ -> return None))
+            | "coq_type_annotation" -> return (Some TypAnnotation)
+            | _ ->
+                if Util.String.starts_with "coq_" id then
+                  raise None Unexpected "Unknown attribute starting with @coq_."
+                else return None))
 
 let has_axiom_with_reason (attributes : t list) : bool =
   attributes |> List.exists (function AxiomWithReason -> true | _ -> false)
@@ -96,9 +99,7 @@ let has_grab_existentials (attributes : t list) : bool =
 
 let get_implicits (attributes : t list) : string list =
   attributes
-  |> Util.List.filter_map (function
-       | Implicit implicit -> Some implicit
-       | _ -> None)
+  |> List.filter_map (function Implicit implicit -> Some implicit | _ -> None)
 
 let has_match_gadt (attributes : t list) : bool =
   attributes |> List.exists (function MatchGadt -> true | _ -> false)
@@ -135,7 +136,7 @@ let has_precise_signature (attributes : Typedtree.attributes) : bool =
 
 let get_structs (attributes : t list) : string list =
   attributes
-  |> Util.List.filter_map (function Struct name -> Some name | _ -> None)
+  |> List.filter_map (function Struct name -> Some name | _ -> None)
 
 let has_typ_annotation (attributes : t list) : bool =
   attributes |> List.exists (function TypAnnotation -> true | _ -> false)

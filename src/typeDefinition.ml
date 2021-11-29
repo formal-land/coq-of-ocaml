@@ -360,7 +360,7 @@ type t =
 let filter_in_free_vars (typ_args : Name.t list) (free_vars : Name.Set.t) :
     Name.t list =
   typ_args
-  |> Util.List.filter_map (function typ_arg ->
+  |> List.filter_map (function typ_arg ->
          if Name.Set.mem typ_arg free_vars then Some typ_arg else None)
 
 let of_ocaml (typs : type_declaration list) : t Monad.t =
@@ -428,7 +428,7 @@ let of_ocaml (typs : type_declaration list) : t Monad.t =
       in
       let typ_args = List.map fst typ_args in
       let fields_names, fields_types, new_typ_args = Util.List.split3 fields in
-      let new_typ_args = VarEnv.merge new_typ_args in
+      let new_typ_args = VarEnv.unions new_typ_args in
       let typ_args = VarEnv.reorg typ_args new_typ_args in
       let* fields_types =
         Monad.List.map (Type.decode_var_tags typ_args false) fields_types
@@ -507,7 +507,7 @@ let of_ocaml (typs : type_declaration list) : t Monad.t =
                     let fields_names, fields_types, new_typ_args =
                       Util.List.split3 fields
                     in
-                    let new_typ_args = VarEnv.merge new_typ_args in
+                    let new_typ_args = VarEnv.unions new_typ_args in
                     let typ_args = VarEnv.reorg typ_args new_typ_args in
                     let* fields_types =
                       Monad.List.map
@@ -544,8 +544,7 @@ let of_ocaml (typs : type_declaration list) : t Monad.t =
                       List.split cases
                     in
                     let new_constructor_records =
-                      new_constructor_records
-                      |> Util.List.filter_map (fun x -> x)
+                      new_constructor_records |> List.filter_map (fun x -> x)
                     in
                     let constructor_records =
                       match new_constructor_records with

@@ -30,7 +30,7 @@ let rec of_pattern :
         Monad.List.map of_pattern ps >>= fun patterns ->
         return
           (let patterns = Util.Option.all patterns in
-           Util.Option.map patterns (fun patterns -> Tuple patterns))
+           patterns |> Option.map (fun patterns -> Tuple patterns))
     | Tpat_construct (_, constructor_description, ps) -> (
         match constructor_description.cstr_tag with
         | Cstr_extension _ ->
@@ -43,12 +43,12 @@ let rec of_pattern :
             Monad.List.map of_pattern ps >>= fun patterns ->
             return
               (let patterns = Util.Option.all patterns in
-               Util.Option.map patterns (fun patterns ->
-                   Constructor (x, patterns))))
+               patterns
+               |> Option.map (fun patterns -> Constructor (x, patterns))))
     | Tpat_alias (p, x, _) ->
         of_pattern p >>= fun pattern ->
         Name.of_ident true x >>= fun x ->
-        return (Util.Option.map pattern (fun pattern -> Alias (pattern, x)))
+        return (pattern |> Option.map (fun pattern -> Alias (pattern, x)))
     | Tpat_constant c ->
         Constant.of_constant c >>= fun constant ->
         return (Some (Constant constant))
@@ -58,34 +58,32 @@ let rec of_pattern :
         | None -> return (Some [])
         | Some p ->
             of_pattern p >>= fun pattern ->
-            return (Util.Option.map pattern (fun pattern -> [ pattern ])))
+            return (pattern |> Option.map (fun pattern -> [ pattern ])))
         >>= fun patterns ->
         return
-          (Util.Option.map patterns (fun patterns ->
-               Constructor (path_name, patterns)))
+          (patterns
+          |> Option.map (fun patterns -> Constructor (path_name, patterns)))
     | Tpat_record (fields, _) ->
         fields
         |> Monad.List.map (fun (_, label_description, p) ->
                PathName.of_label_description label_description >>= fun x ->
                of_pattern p >>= fun pattern ->
-               return (Util.Option.map pattern (fun pattern -> (x, pattern))))
+               return (pattern |> Option.map (fun pattern -> (x, pattern))))
         >>= fun fields ->
         return
-          (Util.Option.map (Util.Option.all fields) (fun fields ->
-               Record fields))
+          (Util.Option.all fields |> Option.map (fun fields -> Record fields))
     | Tpat_array ps ->
         Monad.List.map of_pattern ps >>= fun patterns ->
         raise
-          (Util.Option.map (Util.Option.all patterns) (fun patterns ->
-               Tuple patterns))
+          (Util.Option.all patterns
+          |> Option.map (fun patterns -> Tuple patterns))
           NotSupported "Patterns on array are not supported"
     | Tpat_or (p1, p2, _) ->
         of_pattern p1 >>= fun pattern1 ->
         of_pattern p2 >>= fun pattern2 ->
         return
-          (Util.Option.bind pattern1 (fun pattern1 ->
-               Util.Option.map pattern2 (fun pattern2 ->
-                   Or (pattern1, pattern2))))
+          (Option.bind pattern1 (fun pattern1 ->
+               pattern2 |> Option.map (fun pattern2 -> Or (pattern1, pattern2))))
     | Tpat_lazy p ->
         of_pattern p >>= fun pattern ->
         raise pattern NotSupported "Lazy patterns are not supported"

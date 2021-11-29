@@ -43,7 +43,7 @@ let of_signature_without_hash (attributes : Typedtree.attributes option)
     (signature : Types.signature) : t =
   let shape_list =
     signature
-    |> Util.List.filter_map (fun item ->
+    |> List.filter_map (fun item ->
            match item with
            | Types.Sig_value (ident, typ, _) ->
                let typ_shape = TypeShape.of_typ typ.val_type in

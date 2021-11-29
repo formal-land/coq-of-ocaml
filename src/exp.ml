@@ -425,7 +425,7 @@ let rec of_expression (typ_vars : Name.t Name.Map.t) (e : expression) :
                   apply_with_infix_operator;
                 ]
               in
-              match Util.List.find_map (fun x -> x) applies with
+              match List.find_map (fun x -> x) applies with
               | Some apply -> return apply
               | None -> return (Apply (e_f, e_xs)))
           | Texp_match (e, cases, _) ->
@@ -831,12 +831,13 @@ and of_match :
                   of_expression typ_vars c_rhs >>= fun e ->
                   let e = dependent_transform e dep_match in
                   return
-                    (Util.Option.map pattern (fun pattern ->
-                         (pattern, existential_cast, guard, e)))))
+                    (pattern
+                    |> Option.map (fun pattern ->
+                           (pattern, existential_cast, guard, e)))))
     >>= fun cases_with_guards ->
     let guards =
       cases_with_guards
-      |> Util.List.filter_map (function
+      |> List.filter_map (function
            | p, _, Some guard, _ -> Some (p, guard)
            | _ -> None)
     in
@@ -952,7 +953,7 @@ and import_let_fun (typ_vars : Name.t Name.Map.t) (at_top_level : bool)
                 >>= fun (e_typ, typ_vars, new_typ_vars) ->
                 let* e_typ = Type.decode_var_tags new_typ_vars false e_typ in
                 let new_typ_vars =
-                  VarEnv.remove_many predefined_variables new_typ_vars
+                  VarEnv.remove predefined_variables new_typ_vars
                 in
                 match x with
                 | None -> return None
@@ -1443,6 +1444,7 @@ let rec to_coq (paren : bool) (e : t) : SmartPrint.t =
                 | _ :: _ ->
                     !^"fun" ^^ separate space missing_args ^^ !^"=>" ^^ space)
                ^-^ nest (separate space (to_coq true e_f :: all_args)))))
+  | Return ("", e) -> to_coq paren e
   | Return (operator, e) ->
       Pp.parens paren @@ nest @@ !^operator ^^ to_coq true e
   | InfixOperator (operator, e1, e2) ->
