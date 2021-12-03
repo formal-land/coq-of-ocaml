@@ -4,7 +4,7 @@ Require Import CoqOfOCaml.Settings.
 Module Sig.
   Record signature {t : Set -> Set} : Set := {
     t := t;
-    v : t string;
+    v_value : t string;
   }.
 End Sig.
 Definition Sig := @Sig.signature.
@@ -26,15 +26,15 @@ Module M.
   End t.
   Definition t := t.record.
   
-  Definition v : t string := {| t.x := 0; t.y := 1; t.label := "hi" |}.
+  Definition v_value : t string := {| t.x := 0; t.y := 1; t.label := "hi" |}.
   
   Definition module :=
     {|
-      Sig.v := v
+      Sig.v_value := v_value
     |}.
 End M.
 Definition M : Sig (t := _) := M.module.
 
-Definition v : M.(Sig.t) string := M.(Sig.v).
+Definition v_value : M.(Sig.t) string := M.(Sig.v_value).
 
-Definition s : string := M.(Sig.v).(M.t.label).
+Definition s_value : string := M.(Sig.v_value).(M.t.label).

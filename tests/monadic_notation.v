@@ -1,19 +1,19 @@
 Require Import CoqOfOCaml.CoqOfOCaml.
 Require Import CoqOfOCaml.Settings.
 
-Definition _return {a : Set} (x : a) : option a := Some x.
+Definition _return {a : Set} (x_value : a) : option a := Some x_value.
 
-Definition op_letstar {a b : Set} (x : option a) (f : a -> option b)
+Definition op_letstar {a b : Set} (x_value : option a) (f_value : a -> option b)
   : option b :=
-  match x with
-  | Some x => f x
+  match x_value with
+  | Some x_value => f_value x_value
   | None => None
   end.
 
-Definition get_head {A : Set} (l : list A) : option A :=
-  match l with
+Definition get_head {A : Set} (l_value : list A) : option A :=
+  match l_value with
   | [] => None
-  | cons x _ => Some x
+  | cons x_value _ => Some x_value
   end.
 
 Notation "'let*' x ':=' X 'in' Y" :=

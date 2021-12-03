@@ -1,18 +1,20 @@
 Require Import CoqOfOCaml.CoqOfOCaml.
 Require Import CoqOfOCaml.Settings.
 
-Definition map {A B : Set} (f : A -> B) (l : list A) : list B :=
-  let fix map_coq_rec (l : list A) : list B :=
-    match l with
+Definition map {A B : Set} (f_value : A -> B) (l_value : list A) : list B :=
+  let fix map_coq_rec (l_value : list A) : list B :=
+    match l_value with
     | [] => nil
-    | cons x l => cons (f x) (map_coq_rec l)
+    | cons x_value l_value => cons (f_value x_value) (map_coq_rec l_value)
     end in
-  map_coq_rec l.
+  map_coq_rec l_value.
 
-Definition map2 {A B : Set} (f : A -> B) (l : list A) : list B :=
-  let fix map2_coq_rec {C D : Set} (f : C -> D) (l : list C) : list D :=
-    match l with
+Definition map2 {A B : Set} (f_value : A -> B) (l_value : list A) : list B :=
+  let fix map2_coq_rec {C D : Set} (f_value : C -> D) (l_value : list C)
+    : list D :=
+    match l_value with
     | [] => nil
-    | cons x l => cons (f x) (map2_coq_rec f l)
+    | cons x_value l_value =>
+      cons (f_value x_value) (map2_coq_rec f_value l_value)
     end in
-  map2_coq_rec f l.
+  map2_coq_rec f_value l_value.

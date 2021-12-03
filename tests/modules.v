@@ -9,27 +9,27 @@ Module List2.
   Arguments Nil {_}.
   Arguments Cons {_}.
   
-  Fixpoint sum (l : t int) : int :=
-    match l with
+  Fixpoint sum (l_value : t int) : int :=
+    match l_value with
     | Nil => 0
-    | Cons x xs => Z.add x (sum xs)
+    | Cons x_value xs => Z.add x_value (sum xs)
     end.
   
   Fixpoint of_list {A : Set} (function_parameter : list A) : t A :=
     match function_parameter with
     | [] => Nil
-    | cons x xs => Cons x (of_list xs)
+    | cons x_value xs => Cons x_value (of_list xs)
     end.
   
   Module Inside.
-    Definition x : int := 12.
+    Definition x_value : int := 12.
   End Inside.
 End List2.
 
-Definition n {A : Set} (function_parameter : A) : int :=
+Definition n_value {A : Set} (function_parameter : A) : int :=
   let '_ := function_parameter in
-  List2.sum (List2.of_list [ 5; 7; 6; List2.Inside.x ]).
+  List2.sum (List2.of_list [ 5; 7; 6; List2.Inside.x_value ]).
 
 Module Syn := List2.Inside.
 
-Definition xx : int := Syn.x.
+Definition xx : int := Syn.x_value.

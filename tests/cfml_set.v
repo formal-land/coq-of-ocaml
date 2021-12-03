@@ -7,28 +7,28 @@ Inductive set : Set :=
 
 Definition empty : set := Empty.
 
-Fixpoint member (x : int) (s : set) : bool :=
-  match s with
+Fixpoint member (x_value : int) (s_value : set) : bool :=
+  match s_value with
   | Empty => false
-  | Node s1 y s2 =>
-    if CoqOfOCaml.Stdlib.lt x y then
-      member x s1
+  | Node s1 y_value s2 =>
+    if CoqOfOCaml.Stdlib.lt x_value y_value then
+      member x_value s1
     else
-      if CoqOfOCaml.Stdlib.lt y x then
-        member x s2
+      if CoqOfOCaml.Stdlib.lt y_value x_value then
+        member x_value s2
       else
         true
   end.
 
-Fixpoint insert (x : int) (s : set) : set :=
-  match s with
-  | Empty => Node Empty x Empty
-  | Node s1 y s2 =>
-    if CoqOfOCaml.Stdlib.lt x y then
-      Node (insert x s1) y s2
+Fixpoint insert (x_value : int) (s_value : set) : set :=
+  match s_value with
+  | Empty => Node Empty x_value Empty
+  | Node s1 y_value s2 =>
+    if CoqOfOCaml.Stdlib.lt x_value y_value then
+      Node (insert x_value s1) y_value s2
     else
-      if CoqOfOCaml.Stdlib.lt y x then
-        Node s1 y (insert x s2)
+      if CoqOfOCaml.Stdlib.lt y_value x_value then
+        Node s1 y_value (insert x_value s2)
       else
-        s
+        s_value
   end.
