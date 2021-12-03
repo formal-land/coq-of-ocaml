@@ -949,7 +949,18 @@ and import_let_fun (typ_vars : Name.t Name.Map.t) (at_top_level : bool)
                 let predefined_variables =
                   List.map snd (Name.Map.bindings typ_vars)
                 in
-                Type.of_typ_expr true typ_vars vb_expr.exp_type
+                let exp_type =
+                  (* Special case for functions whose type is given by a type
+                     synonym at the end rather than with a type on each
+                     parameter or an explicit arrow type. *)
+                  match (vb_expr.exp_desc, vb_expr.exp_type.desc) with
+                  | Texp_function _, Tconstr (path, _, _) -> (
+                      match Env.find_type path vb_expr.exp_env with
+                      | { type_manifest = Some ty; _ } -> ty
+                      | _ | (exception _) -> vb_expr.exp_type)
+                  | _ -> vb_expr.exp_type
+                in
+                Type.of_typ_expr true typ_vars exp_type
                 >>= fun (e_typ, typ_vars, new_typ_vars) ->
                 let* e_typ = Type.decode_var_tags new_typ_vars false e_typ in
                 let new_typ_vars =
