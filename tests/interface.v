@@ -7,7 +7,7 @@ Parameter foo : t.
 
 Parameter arg : forall (a b : Set), Set.
 
-Parameter x : forall {a b : Set}, a -> b -> arg a b.
+Parameter x_value : forall {a b : Set}, a -> b -> arg a b.
 
 Module M.
   Inductive l (a : Set) : Set :=
@@ -17,5 +17,5 @@ Module M.
   Arguments Nil {_}.
   Arguments Cons {_}.
   
-  Parameter b : bool.
+  Parameter b_value : bool.
 End M.

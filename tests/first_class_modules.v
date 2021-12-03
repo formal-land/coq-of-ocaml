@@ -136,26 +136,28 @@ End UsingTriple.
 Definition UsingTriple := @UsingTriple.signature.
 Arguments UsingTriple {_ _ _ _ _ _ _}.
 
-Definition set_update {a : Set} (v : a) (b : bool) (Box : set a) : set a :=
+Definition set_update {a : Set} (v_value : a) (b_value : bool) (Box : set a)
+  : set a :=
   let 'existS _ _ Box := Box in
   existS (A := Set) _ _
     (let elt : Set := a in
     let elt_ty := Box.(Boxed_set.elt_ty) in
     let OPS := Box.(Boxed_set.OPS) in
     let boxed :=
-      if b then
-        Box.(Boxed_set.OPS).(S.SET.add) v Box.(Boxed_set.boxed)
+      if b_value then
+        Box.(Boxed_set.OPS).(S.SET.add) v_value Box.(Boxed_set.boxed)
       else
-        Box.(Boxed_set.OPS).(S.SET.remove) v Box.(Boxed_set.boxed) in
+        Box.(Boxed_set.OPS).(S.SET.remove) v_value Box.(Boxed_set.boxed) in
     let size :=
-      let mem := Box.(Boxed_set.OPS).(S.SET.mem) v Box.(Boxed_set.boxed) in
+      let mem := Box.(Boxed_set.OPS).(S.SET.mem) v_value Box.(Boxed_set.boxed)
+        in
       if mem then
-        if b then
+        if b_value then
           Box.(Boxed_set.size)
         else
           Z.sub Box.(Boxed_set.size) 1
       else
-        if b then
+        if b_value then
           Z.add Box.(Boxed_set.size) 1
         else
           Box.(Boxed_set.size) in
@@ -166,14 +168,14 @@ Definition set_update {a : Set} (v : a) (b : bool) (Box : set a) : set a :=
       Boxed_set.size := size
     |}).
 
-Definition set_mem {elt : Set} (v : elt) (Box : set elt) : bool :=
+Definition set_mem {elt : Set} (v_value : elt) (Box : set elt) : bool :=
   let 'existS _ _ Box := Box in
-  Box.(Boxed_set.OPS).(S.SET.mem) v Box.(Boxed_set.boxed).
+  Box.(Boxed_set.OPS).(S.SET.mem) v_value Box.(Boxed_set.boxed).
 
-Definition set_fold {elt acc : Set} (f : elt -> acc -> acc) (Box : set elt)
-  : acc -> acc :=
+Definition set_fold {elt acc : Set}
+  (f_value : elt -> acc -> acc) (Box : set elt) : acc -> acc :=
   let 'existS _ _ Box := Box in
-  Box.(Boxed_set.OPS).(S.SET.fold) f Box.(Boxed_set.boxed).
+  Box.(Boxed_set.OPS).(S.SET.fold) f_value Box.(Boxed_set.boxed).
 
 Definition set_nested {elt : Set} (Box : set elt) : set elt :=
   let 'existS _ _ Box := Box in

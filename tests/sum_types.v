@@ -6,11 +6,11 @@ Inductive t1 : Set :=
 | C2 : bool -> int -> t1
 | C3 : t1.
 
-Definition n : t1 := C2 false 3.
+Definition n_value : t1 := C2 false 3.
 
-Definition m : bool :=
-  match n with
-  | C2 b _ => b
+Definition m_value : bool :=
+  match n_value with
+  | C2 b_value _ => b_value
   | _ => true
   end.
 
@@ -21,19 +21,19 @@ Inductive t2 (a : Set) : Set :=
 Arguments D1 {_}.
 Arguments D2 {_}.
 
-Fixpoint of_list {A : Set} (l : list A) : t2 A :=
-  match l with
+Fixpoint of_list {A : Set} (l_value : list A) : t2 A :=
+  match l_value with
   | [] => D1
-  | cons x xs => D2 x (of_list xs)
+  | cons x_value xs => D2 x_value (of_list xs)
   end.
 
-Fixpoint sum (l : t2 int) : int :=
-  match l with
+Fixpoint sum (l_value : t2 int) : int :=
+  match l_value with
   | D1 => 0
-  | D2 x xs => Z.add x (sum xs)
+  | D2 x_value xs => Z.add x_value (sum xs)
   end.
 
-Definition s {A : Set} (function_parameter : A) : int :=
+Definition s_value {A : Set} (function_parameter : A) : int :=
   let '_ := function_parameter in
   sum (of_list [ 5; 7; 3 ]).
 
@@ -47,6 +47,6 @@ Inductive t5 : Set :=
 Inductive single_string : Set :=
 | Single : string -> single_string.
 
-Definition get_string (s : single_string) : string :=
-  let 'Single s := s in
-  s.
+Definition get_string (s_value : single_string) : string :=
+  let 'Single s_value := s_value in
+  s_value.

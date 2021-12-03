@@ -94,9 +94,13 @@ let value_names_to_escape : string list =
 
 let escape_reserved_word (is_value : bool) (s : string) : string Monad.t =
   let* configuration = get_configuration in
+  (* We always espace single letter values as they typically collide with type
+     variables. *)
+  let is_single_letter = String.length s = 1 && 'a' <= s.[0] && s.[0] <= 'z' in
   let is_value_to_escape =
     is_value
-    && (List.mem s value_names_to_escape
+    && (is_single_letter
+       || List.mem s value_names_to_escape
        || Configuration.is_value_to_escape configuration s)
   in
   if is_value_to_escape then return (s ^ "_value")

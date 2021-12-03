@@ -16,6 +16,6 @@ Module my_record.
 End my_record.
 Definition my_record := my_record.record.
 
-Definition get_x {a : vtag} (r : my_record a) : exp a :=
-  let '{| my_record.x := x; my_record.y := y |} := r in
-  x.
+Definition get_x {a : vtag} (r_value : my_record a) : exp a :=
+  let '{| my_record.x := x_value; my_record.y := y_value |} := r_value in
+  x_value.

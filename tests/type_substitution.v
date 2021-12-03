@@ -4,7 +4,7 @@ Require Import CoqOfOCaml.Settings.
 Module Sig.
   Record signature {t : Set} : Set := {
     t := t;
-    v : t;
+    v_value : t;
   }.
 End Sig.
 Definition Sig := @Sig.signature.

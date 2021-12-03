@@ -1,7 +1,7 @@
 Require Import CoqOfOCaml.CoqOfOCaml.
 Require Import CoqOfOCaml.Settings.
 
-Definition u : unit := tt.
+Definition u_value : unit := tt.
 
 Definition l1 {A : Set} : list A := nil.
 
@@ -13,7 +13,7 @@ Definition o1 {A : Set} : option A := None.
 
 Definition o2 : option int := Some 12.
 
-Definition c : ascii := "g" % char.
+Definition c_value : ascii := "g" % char.
 
 Definition s1 : string := "bla".
 
