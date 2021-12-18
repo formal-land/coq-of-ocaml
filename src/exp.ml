@@ -1765,7 +1765,7 @@ and to_coq_cast_existentials (existential_cast : match_existential_cast option)
   in
   match existential_cast with
   | None -> e
-  | Some { new_typ_vars; bound_vars; use_axioms; return_typ; enable; _ } -> (
+  | Some { new_typ_vars; bound_vars; use_axioms; enable; _ } -> (
       let variable_names =
         Pp.primitive_tuple
           (bound_vars |> List.map (fun (name, _) -> Name.to_coq name))
@@ -1805,13 +1805,9 @@ and to_coq_cast_existentials (existential_cast : match_existential_cast option)
           let existential_names_pattern =
             Pp.primitive_tuple_pattern new_typ_vars_names
           in
-          let return_typ = Type.decode_only_variables new_typ_vars return_typ in
-          let return_typ =
-            build_existential_return (List.map fst new_typ_vars) return_typ
-          in
           nest
             (!^"let" ^^ !^"'existT" ^^ !^"_" ^^ existential_names
-           ^^ variable_names ^^ !^"as" ^^ !^"exi" ^^ !^":="
+           ^^ variable_names ^^ !^":="
             ^^ nest
                  (let operator, option =
                     if use_axioms then ("cast_exists", "Es") else ("existT", "A")
@@ -1828,9 +1824,6 @@ and to_coq_cast_existentials (existential_cast : match_existential_cast option)
                   ^^ (if use_axioms then empty
                      else Pp.primitive_tuple_infer (List.length new_typ_vars))
                   ^^ variable_names)
-            ^^ nest
-                 (!^"return"
-                 ^^ Type.to_coq None (Some Type.Context.Apply) return_typ)
             ^^ !^"in" ^^ newline ^^ e))
 
 and to_coq_exist_s (module_typ_params : int Tree.t) (e : SmartPrint.t) :
