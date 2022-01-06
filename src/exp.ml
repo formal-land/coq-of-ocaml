@@ -1560,18 +1560,6 @@ let rec to_coq (paren : bool) (e : t) : SmartPrint.t =
       match single_let with
       | Some single_let -> single_let
       | None ->
-          let has_existential_cases =
-            cases
-            |> List.exists (function
-                 | _, Some { new_typ_vars = _ :: _; _ }, _
-                 | _, Some { use_axioms = true; _ }, _ ->
-                     true
-                 | _ -> false)
-          in
-          let is_large_match =
-            has_existential_cases && List.length cases >= 5
-          in
-          let separator = if is_large_match then newline else space in
           let dep_match_print =
             match dep_match with
             | None -> empty
@@ -1584,7 +1572,7 @@ let rec to_coq (paren : bool) (e : t) : SmartPrint.t =
           nest
             (!^"match" ^^ to_coq false e ^^ dep_match_print ^^ !^"with"
            ^^ newline
-            ^^ separate separator
+            ^^ separate space
                  (cases
                  |> List.map (fun (p, existential_cast, e) ->
                         nest
