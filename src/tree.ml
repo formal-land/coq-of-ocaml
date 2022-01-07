@@ -4,7 +4,6 @@ open SmartPrint
 open Monad.Notations
 
 type 'a item = Item of string * 'a | Module of string * 'a t
-
 and 'a t = 'a item list
 
 let rec map (f : 'a -> 'b) (tree : 'a t) : 'b t =

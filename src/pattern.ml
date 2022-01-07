@@ -31,7 +31,7 @@ let rec of_pattern :
         return
           (let patterns = Util.Option.all patterns in
            patterns |> Option.map (fun patterns -> Tuple patterns))
-    | Tpat_construct (_, constructor_description, ps) -> (
+    | Tpat_construct (_, constructor_description, ps, _) -> (
         match constructor_description.cstr_tag with
         | Cstr_extension _ ->
             raise None ExtensibleType
@@ -94,7 +94,7 @@ let rec of_pattern :
 let rec is_extensible_pattern_or_any : type kind. kind general_pattern -> bool =
  fun p ->
   match p.pat_desc with
-  | Tpat_construct (_, constructor_description, _) -> (
+  | Tpat_construct (_, constructor_description, _, _) -> (
       match constructor_description.cstr_tag with
       | Cstr_extension _ -> true
       | _ -> false)
@@ -121,7 +121,7 @@ let rec of_extensible_pattern :
       "Unexpected kind of pattern (expected extensible type or an any pattern)"
   in
   match p.pat_desc with
-  | Tpat_construct (_, constructor_description, ps) -> (
+  | Tpat_construct (_, constructor_description, ps, _) -> (
       match constructor_description.cstr_tag with
       | Cstr_extension (path, _) ->
           let* typs =

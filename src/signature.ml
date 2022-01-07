@@ -14,7 +14,6 @@ type item =
   | Value of Name.t * Type.t
 
 type t = { items : item list; typ_params : (Name.t * int) list }
-
 type let_in_type = (Name.t * Name.t) list
 
 let add_new_let_in_type (prefix : string list) (let_in_type : let_in_type)
