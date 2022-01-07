@@ -14,7 +14,7 @@ module AdtVariable = struct
         match x with
         | None | Some "_" -> return Unknown
         | Some x -> Name.of_string false x >>= fun x -> return (Parameter x))
-    | Tlink typ | Tsubst typ -> of_ocaml typ
+    | Tlink typ | Tsubst (typ, _) -> of_ocaml typ
     | Tconstr (typ, _, _) ->
         Path.last typ |> Name.of_string false >>= fun typ -> return (Index typ)
     | _ -> return Error

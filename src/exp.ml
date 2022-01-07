@@ -1073,7 +1073,10 @@ and of_match :
                   return typ
                 else
                   (* Only expand type if you really need to. It may cause the translation to break *)
-                  let typ = Ctype.full_expand c_rhs.exp_env c_rhs.exp_type in
+                  let typ =
+                    Ctype.full_expand ~may_forget_scope:false c_rhs.exp_env
+                      c_rhs.exp_type
+                  in
                   let* typ, _, _ = Type.of_typ_expr true typ_vars typ in
                   return typ
               in
@@ -1311,7 +1314,7 @@ and of_let (typ_vars : Name.t Name.Map.t) (is_rec : Asttypes.rec_flag)
        {
          pat_desc =
            Tpat_construct
-             (_, { cstr_res = { desc = Tconstr (path, _, _); _ }; _ }, _);
+             (_, { cstr_res = { desc = Tconstr (path, _, _); _ }; _ }, _, _);
          _;
        };
      _;
