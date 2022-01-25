@@ -1,3 +1,6 @@
+## 2.5.2 (January 25, 2022)
+* Various small improvements.
+
 ## 2.5.1 (June 24, 2021)
 * Improvement of the GADTs support.
 
