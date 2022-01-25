@@ -31,6 +31,7 @@ and get_module_typ_typ_params (mapper : 'a mapper)
       | module_typ -> get_module_typ_declaration_typ_params mapper module_typ
       | exception Not_found -> return [])
   | Mty_functor _ -> return []
+  | Mty_for_hole -> return []
 
 and get_module_typ_declaration_typ_params (mapper : 'a mapper)
     (module_typ_declaration : Types.modtype_declaration) : 'a Tree.t Monad.t =

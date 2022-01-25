@@ -195,11 +195,13 @@ let rec of_signature (signature : Typedtree.signature) : t Monad.t =
              raise
                [ Error "unhandled_module_substitution" ]
                NotSupported "We do not handle module substitution"
-         | Tsig_modtype { mtd_type = None; _ } ->
+         | Tsig_modtype { mtd_type = None; _ }
+         | Tsig_modtypesubst { mtd_type = None; _ } ->
              raise
                [ Error "abstract_module_type" ]
                NotSupported "Abstract module type not handled"
-         | Tsig_modtype { mtd_id; mtd_type = Some { mty_desc; _ }; _ } -> (
+         | Tsig_modtype { mtd_id; mtd_type = Some { mty_desc; _ }; _ }
+         | Tsig_modtypesubst { mtd_id; mtd_type = Some { mty_desc; _ }; _ } -> (
              let* name = Name.of_ident false mtd_id in
              match mty_desc with
              | Tmty_signature signature ->
