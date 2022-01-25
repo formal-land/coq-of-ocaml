@@ -206,7 +206,7 @@ let rec of_signature_items (prefix : string list) (let_in_type : let_in_type)
                 raise
                   ([ Error "module_substitution" ], let_in_type)
                   NotSupported "We do not handle module substitutions"
-            | Tsig_modtype _ ->
+            | Tsig_modtype _ | Tsig_modtypesubst _ ->
                 raise
                   ([ Error "module_type" ], let_in_type)
                   NotSupported "Signatures inside signatures are not handled."

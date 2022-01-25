@@ -965,6 +965,9 @@ let rec of_expression (typ_vars : Name.t Name.Map.t) (e : expression) :
               error_message (Error "extension") NotSupported
                 "Construction of extensions is not handled"
           | Texp_open (_, e) -> of_expression typ_vars e
+          | Texp_hole ->
+              error_message (Error "expression_hole") Unexpected
+                "Unexpected expression hole"
         in
         if Attribute.has_cast attributes then
           let* typ, _, _ = Type.of_typ_expr false typ_vars typ in
@@ -1503,7 +1506,9 @@ and of_module_expr (typ_vars : Name.t Name.Map.t)
               ("We do not support unpacking of first-class module outside of "
              ^ "expressions.\n\n"
              ^ "This is to prevent universe inconsistencies in Coq. A module \
-                can " ^ "become first-class but not the other way around.")))
+                can " ^ "become first-class but not the other way around.")
+        | Tmod_hole ->
+            raise (Error "module_hole") Unexpected "Unexpected module hole."))
 
 and of_structure (typ_vars : Name.t Name.Map.t) (signature_path : Path.t)
     (module_type : Types.module_type) (items : Typedtree.structure_item list)
