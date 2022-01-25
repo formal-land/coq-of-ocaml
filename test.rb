@@ -64,6 +64,8 @@ class Test
   end
 
   def check
+    # Uncomment the following line to update the test snapshots.
+    # update
     coq_of_ocaml == reference
   end
 

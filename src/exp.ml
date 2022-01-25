@@ -949,7 +949,18 @@ and import_let_fun (typ_vars : Name.t Name.Map.t) (at_top_level : bool)
                 let predefined_variables =
                   List.map snd (Name.Map.bindings typ_vars)
                 in
-                Type.of_typ_expr true typ_vars vb_expr.exp_type
+                let exp_type =
+                  (* Special case for functions whose type is given by a type
+                     synonym at the end rather than with a type on each
+                     parameter or an explicit arrow type. *)
+                  match (vb_expr.exp_desc, vb_expr.exp_type.desc) with
+                  | Texp_function _, Tconstr (path, _, _) -> (
+                      match Env.find_type path vb_expr.exp_env with
+                      | { type_manifest = Some ty; _ } -> ty
+                      | _ | (exception _) -> vb_expr.exp_type)
+                  | _ -> vb_expr.exp_type
+                in
+                Type.of_typ_expr true typ_vars exp_type
                 >>= fun (e_typ, typ_vars, new_typ_vars) ->
                 let* e_typ = Type.decode_var_tags new_typ_vars false e_typ in
                 let new_typ_vars =
@@ -1560,18 +1571,6 @@ let rec to_coq (paren : bool) (e : t) : SmartPrint.t =
       match single_let with
       | Some single_let -> single_let
       | None ->
-          let has_existential_cases =
-            cases
-            |> List.exists (function
-                 | _, Some { new_typ_vars = _ :: _; _ }, _
-                 | _, Some { use_axioms = true; _ }, _ ->
-                     true
-                 | _ -> false)
-          in
-          let is_large_match =
-            has_existential_cases && List.length cases >= 5
-          in
-          let separator = if is_large_match then newline else space in
           let dep_match_print =
             match dep_match with
             | None -> empty
@@ -1584,7 +1583,7 @@ let rec to_coq (paren : bool) (e : t) : SmartPrint.t =
           nest
             (!^"match" ^^ to_coq false e ^^ dep_match_print ^^ !^"with"
            ^^ newline
-            ^^ separate separator
+            ^^ separate space
                  (cases
                  |> List.map (fun (p, existential_cast, e) ->
                         nest
