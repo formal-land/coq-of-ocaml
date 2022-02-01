@@ -346,6 +346,9 @@ let rec of_structure (structure : structure) : t list Monad.t =
             | Tstr_exception { tyexn_constructor; _ } ->
                 typ_definitions_of_typ_extension tyexn_constructor
             | Tstr_open _ -> return []
+            | Tstr_module { mb_id = Some ident; mb_expr; mb_attributes; _ }
+              when Ident.name ident = "Internal_for_tests" ->
+                return []
             | Tstr_module { mb_id; mb_expr; mb_attributes; _ } ->
                 let* name = Name.of_optional_ident false mb_id in
                 let* has_plain_module_attribute =
