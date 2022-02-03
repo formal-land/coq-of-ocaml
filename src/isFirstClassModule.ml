@@ -4,16 +4,21 @@ open Monad.Notations
 
 (** Recursively get all the module type declarations inside a module declaration.
     We retreive the path and definition of each. *)
-let get_modtype_declarations_of_module_declaration (env : Env.t)
+let rec get_modtype_declarations_of_module_declaration (env : Env.t)
     (module_declaration : Types.module_declaration) :
     (Ident.t list * Types.modtype_declaration) list =
   match Env.scrape_alias env module_declaration.md_type with
   | Mty_signature signature ->
       signature
-      |> List.filter_map (function
+      |> List.concat_map (function
            | Types.Sig_modtype (module_type_ident, module_type, _) ->
-               Some ([ module_type_ident ], module_type)
-           | _ -> None)
+               [ ([ module_type_ident ], module_type) ]
+           | Sig_module (ident, _, module_declaration, _, _) ->
+               get_modtype_declarations_of_module_declaration env
+                 module_declaration
+               |> List.map (fun (idents, declaration) ->
+                      (ident :: idents, declaration))
+           | _ -> [])
   | _ -> []
   | exception _ -> []
 
