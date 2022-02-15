@@ -65,3 +65,13 @@ module LargeF (X : Source) : LargeTarget = struct
 end
 
 module CastedLarge : Target = LargeF (M)
+
+module FunctorWithInductive (X : Source) = struct
+  type 'a foo = Foo of 'a * X.t
+
+  let v = Foo (true, X.x)
+
+  type foo_int = Foo_int of int * X.t
+
+  let v_int = Foo_int (12, X.x)
+end

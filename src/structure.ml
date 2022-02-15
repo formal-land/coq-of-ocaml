@@ -31,7 +31,7 @@ module Value = struct
       ^^ !^"in" ^^ newline)
 
   (** Pretty-print a value definition to Coq. *)
-  let to_coq (with_args : bool) (value : t) : SmartPrint.t =
+  let to_coq (fargs : FArgs.t) (value : t) : SmartPrint.t =
     match value.Exp.Definition.cases with
     | [] -> empty
     | _ :: _ ->
@@ -82,7 +82,7 @@ module Value = struct
                       else !^"with")
                      ^^
                      let { Exp.Header.name; typ; _ } = header in
-                     Name.to_coq name ^^ Pp.args with_args
+                     Name.to_coq name ^^ FArgs.to_coq fargs
                      ^^ to_coq_typ_vars header ^^ to_coq_args header
                      ^^ Exp.Header.to_coq_structs header
                      ^^ !^": " ^-^ Type.to_coq None None typ ^-^ !^" :="
@@ -540,11 +540,10 @@ and of_module_expr (name : Name.t) (functor_parameters : functor_parameters)
             inconsistency")
 
 (** Pretty-print a structure to Coq. *)
-let rec to_coq (fargs : int option) (defs : t list) : SmartPrint.t =
-  let with_args = match fargs with None -> false | Some _ -> true in
+let rec to_coq (fargs : FArgs.t) (defs : t list) : SmartPrint.t =
   let rec to_coq_one (def : t) : SmartPrint.t =
     match def with
-    | Value value -> Value.to_coq with_args value
+    | Value value -> Value.to_coq fargs value
     | AbstractValue (name, typ_vars, typ) ->
         nest
           (!^"Parameter" ^^ Name.to_coq name ^^ !^":"
@@ -553,7 +552,7 @@ let rec to_coq (fargs : int option) (defs : t list) : SmartPrint.t =
                  ^^ nest (parens (typ_vars ^^ !^":" ^^ Pp.set))
                  ^-^ !^",")
           ^^ Type.to_coq None None typ ^-^ !^".")
-    | TypeDefinition typ_def -> TypeDefinition.to_coq with_args typ_def
+    | TypeDefinition typ_def -> TypeDefinition.to_coq fargs typ_def
     | Module (name, (free_vars_params, params), defs, e) ->
         let is_functor = match params with [] -> false | _ :: _ -> true in
         let fargs_instance =
@@ -568,7 +567,7 @@ let rec to_coq (fargs : int option) (defs : t list) : SmartPrint.t =
           | None -> nb_new_fargs_typ_params
           | Some fargs -> 1 + fargs + nb_new_fargs_typ_params
         in
-        let fargs =
+        let inner_fargs =
           match fargs with
           | None -> if is_functor then Some nb_new_fargs_typ_params else None
           | Some fargs -> Some (fargs + nb_new_fargs_typ_params)
@@ -579,7 +578,7 @@ let rec to_coq (fargs : int option) (defs : t list) : SmartPrint.t =
           ^^ indent
                ((if is_functor then
                  nest
-                   (!^"Class" ^^ !^"FArgs" ^^ Pp.args with_args
+                   (!^"Class" ^^ !^"FArgs" ^^ FArgs.to_coq fargs
                    ^^ ModuleTyp.to_coq_grouped_free_vars free_vars_params
                    ^^ !^":=" ^^ !^"{" ^^ newline
                    ^^ indent
@@ -601,7 +600,7 @@ let rec to_coq (fargs : int option) (defs : t list) : SmartPrint.t =
                         ^-^ !^"." ^^ newline)
                    ^^ newline)
                 else empty)
-               ^^ to_coq fargs defs
+               ^^ to_coq inner_fargs defs
                ^^
                match e with
                | Some (e, _) ->
@@ -609,7 +608,7 @@ let rec to_coq (fargs : int option) (defs : t list) : SmartPrint.t =
                    ^^ nest
                         (!^"Definition" ^^ final_item_name
                         ^^ (if is_functor then !^"`{FArgs}"
-                           else Pp.args with_args)
+                           else FArgs.to_coq fargs)
                         ^^ !^":=" ^^ Exp.to_coq false e ^-^ !^".")
                | None -> empty)
           ^^ newline ^^ !^"End" ^^ Name.to_coq name ^-^ !^"."
@@ -618,7 +617,7 @@ let rec to_coq (fargs : int option) (defs : t list) : SmartPrint.t =
           | Some (_, typ_annotation) ->
               newline
               ^^ nest
-                   (!^"Definition" ^^ Name.to_coq name ^^ Pp.args with_args
+                   (!^"Definition" ^^ Name.to_coq name ^^ FArgs.to_coq fargs
                    ^^ ModuleTyp.to_coq_functor_parameters_modules
                         free_vars_params params
                    ^^ (match typ_annotation with
@@ -638,7 +637,7 @@ let rec to_coq (fargs : int option) (defs : t list) : SmartPrint.t =
           | None -> empty)
     | ModuleExpression (name, typ, e) ->
         nest
-          (!^"Definition" ^^ Name.to_coq name ^^ Pp.args with_args
+          (!^"Definition" ^^ Name.to_coq name ^^ FArgs.to_coq fargs
           ^^ (match typ with
              | None -> empty
              | Some typ -> !^":" ^^ Type.to_coq None None typ)
@@ -647,7 +646,7 @@ let rec to_coq (fargs : int option) (defs : t list) : SmartPrint.t =
         nest (!^"Include" ^^ PathName.to_coq reference ^-^ !^".")
     | ModuleIncludeItem (name, typ_vars, mixed_path) ->
         nest
-          (!^"Definition" ^^ Name.to_coq name ^^ Pp.args with_args
+          (!^"Definition" ^^ Name.to_coq name ^^ FArgs.to_coq fargs
           ^^ Name.to_coq_list_or_empty typ_vars (fun typ_vars ->
                  nest (braces (typ_vars ^^ !^":" ^^ Pp.set)))
           ^^ !^":="

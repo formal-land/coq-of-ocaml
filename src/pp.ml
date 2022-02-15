@@ -32,9 +32,6 @@ let primitive_tuple_infer (n : int) : SmartPrint.t =
 
 let set : SmartPrint.t = !^"Set"
 
-let args (with_args : bool) : SmartPrint.t =
-  if with_args then !^"`{FArgs}" else empty
-
 let rec typ_arity (arity : int) : SmartPrint.t =
   match arity with 0 -> set | arity -> set ^^ !^"->" ^^ typ_arity (arity - 1)
 

@@ -171,3 +171,22 @@ Definition CastedLarge : Target (t := _) :=
   {|
     Target.y_value := functor_result.(LargeTarget.y_value)
   |}.
+
+Module FunctorWithInductive.
+  Class FArgs {X_t : Set} := {
+    X : Source (t := X_t);
+  }.
+  Arguments Build_FArgs {_}.
+  
+  Inductive foo `{FArgs} (a : Set) : Set :=
+  | Foo : a -> X.(Source.t) -> foo a.
+  
+  Arguments Foo {_ _ _}.
+  
+  Definition v_value `{FArgs} : foo bool := Foo true X.(Source.x_value).
+  
+  Inductive foo_int `{FArgs} : Set :=
+  | Foo_int : int -> X.(Source.t) -> foo_int.
+  
+  Definition v_int `{FArgs} : foo_int := Foo_int 12 X.(Source.x_value).
+End FunctorWithInductive.
