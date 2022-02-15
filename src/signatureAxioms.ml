@@ -325,7 +325,7 @@ let rec to_coq (signature : t) : SmartPrint.t =
                     ^-^ !^",")
                ^^ Pp.typ_arity arity ^-^ !^"."))
     | Signature (name, signature) -> Signature.to_coq_definition name signature
-    | TypDefinition typ_definition -> TypeDefinition.to_coq false typ_definition
+    | TypDefinition typ_definition -> TypeDefinition.to_coq None typ_definition
     | Value (name, typ_vars, typ) ->
         nest
           (!^"Parameter" ^^ Name.to_coq name ^^ !^":"

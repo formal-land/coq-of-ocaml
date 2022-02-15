@@ -73,12 +73,12 @@ module Inductive = struct
   let to_coq_record_skeletons (inductive : t) : SmartPrint.t list =
     inductive.records |> List.map AdtConstructors.RecordSkeleton.to_coq
 
-  let to_coq_typs (subst : Type.Subst.t) (is_first : bool) (name : Name.t)
-      (left_typ_args : Name.t list) (constructors : AdtConstructors.t) :
-      SmartPrint.t =
+  let to_coq_typs (fargs : FArgs.t) (subst : Type.Subst.t) (is_first : bool)
+      (name : Name.t) (left_typ_args : Name.t list)
+      (constructors : AdtConstructors.t) : SmartPrint.t =
     let keyword = if is_first then !^"Inductive" else !^"with" in
     nest
-      (keyword ^^ Name.to_coq name
+      (keyword ^^ Name.to_coq name ^^ FArgs.to_coq fargs
       ^^ (if left_typ_args = [] then empty
          else
            parens
@@ -249,7 +249,7 @@ module Inductive = struct
            to_coq_notations_definition name
              (Name.to_coq (Name.prefix_by_single_quote name)))
 
-  let to_coq_typs_implicits (left_typ_args : Name.t list)
+  let to_coq_typs_implicits (fargs : FArgs.t) (left_typ_args : Name.t list)
       (constructors : AdtConstructors.t) : SmartPrint.t list =
     match left_typ_args with
     | [] -> []
@@ -261,11 +261,12 @@ module Inductive = struct
                ^^ braces
                     (nest
                        (separate space
-                          ((left_typ_args |> List.map (fun _ -> !^"_"))
+                          (FArgs.to_coq_underscores fargs
+                          @ (left_typ_args |> List.map (fun _ -> !^"_"))
                           @ (typ_vars |> List.map (fun _ -> !^"_")))))
                ^-^ !^".")
 
-  let to_coq (inductive : t) : SmartPrint.t =
+  let to_coq (fargs : FArgs.t) (inductive : t) : SmartPrint.t =
     let subst =
       {
         Type.Subst.path_name =
@@ -312,7 +313,7 @@ module Inductive = struct
       List.concat
         (inductive.typs
         |> List.map (fun (_, left_typ_args, constructors) ->
-               to_coq_typs_implicits left_typ_args constructors))
+               to_coq_typs_implicits fargs left_typ_args constructors))
     in
     nest
       ((match constructor_records with
@@ -330,7 +331,8 @@ module Inductive = struct
            (inductive.typs
            |> List.mapi (fun index (name, left_typ_args, constructors) ->
                   let is_first = index = 0 in
-                  to_coq_typs subst is_first name left_typ_args constructors))
+                  to_coq_typs fargs subst is_first name left_typ_args
+                    constructors))
       ^-^ (match notations_wheres with
           | [] -> empty
           | _ :: _ ->
@@ -580,15 +582,15 @@ let of_ocaml (typs : type_declaration list) : t Monad.t =
              typs = List.rev typs;
            })
 
-let to_coq (with_args : bool) (def : t) : SmartPrint.t =
+let to_coq (fargs : FArgs.t) (def : t) : SmartPrint.t =
   match def with
-  | Inductive inductive -> Inductive.to_coq inductive
+  | Inductive inductive -> Inductive.to_coq fargs inductive
   | Record (name, typ_args, fields, with_with) ->
       AdtConstructors.RecordSkeleton.to_coq_record name name typ_args fields
         with_with
   | Synonym (name, typ_args, value) ->
       nest
-        (!^"Definition" ^^ Name.to_coq name ^^ Pp.args with_args
+        (!^"Definition" ^^ Name.to_coq name ^^ FArgs.to_coq fargs
         ^^ (match typ_args with
            | [] -> empty
            | _ ->
