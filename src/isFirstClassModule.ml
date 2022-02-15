@@ -42,15 +42,8 @@ let apply_idents_on_path (path : Path.t) (idents : Ident.t list) : Path.t =
 let merge_similar_paths (paths : Path.t list) : Path.t list Monad.t =
   paths |> Monad.List.sort_uniq PathName.compare_paths
 
-(** Find the [Path.t] of all the signature definitions which are found to be similar
-    to [signature]. If the signature is the one of a module used as a namespace there
-    should be none. If the signature is the one a first-class module there should be
-    exactly one. There may be more than one result if two signatures have the same
-    or similar definitions. In this case we will fail later with an explicit
-    error message. *)
-let find_similar_signatures (env : Env.t) (signature : Types.signature) :
-    (Path.t list * SignatureShape.t) Monad.t =
-  let shape = SignatureShape.of_signature None signature in
+let find_similar_signatures_with_shape (env : Env.t) (shape : SignatureShape.t)
+    : (Path.t list * SignatureShape.t) Monad.t =
   (* We explore signatures in the current namespace. *)
   let similar_signature_paths =
     Env.fold_modtypes
@@ -94,6 +87,18 @@ let find_similar_signatures (env : Env.t) (signature : Types.signature) :
            return (not is_in_black_list))
   in
   return (paths, shape)
+
+(** Find the [Path.t] of all the signature definitions which are found to be similar
+    to [signature]. If the signature is the one of a module used as a namespace there
+    should be none. If the signature is the one a first-class module there should be
+    exactly one. There may be more than one result if two signatures have the same
+    or similar definitions. In this case we will fail later with an explicit
+    error message. *)
+let find_similar_signatures (env : Env.t) (signature : Types.signature) :
+    (Path.t list * SignatureShape.t) Monad.t =
+  let shape = SignatureShape.of_signature None signature in
+  if SignatureShape.is_empty shape then return ([], shape)
+  else find_similar_signatures_with_shape env shape
 
 type maybe_found = Found of Path.t | Not_found of string
 

@@ -93,6 +93,8 @@ let are_equal (shape1 : t) (shape2 : t) : bool =
   | Some precise1, Some precise2 -> Name.Map.equal ( = ) precise1 precise2
   | _ -> true
 
+let is_empty (shape : t) : bool = Name.Set.is_empty shape.high_level
+
 let pretty_print (shape : t) : SmartPrint.t =
   shape.high_level |> Name.Set.elements
   (* We sort the elements of the shape to have a canonical representation. *)
