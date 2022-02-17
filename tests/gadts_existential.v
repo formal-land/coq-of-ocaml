@@ -79,3 +79,24 @@ Definition unwrap (w1 : wrapper) (w2 : wrapper) : int :=
   | (W_exp e1, W_term e2) => 2
   | _ => 4
   end.
+
+Inductive ty : Set :=
+| Ty_bool : ty
+| Ty_pair : ty -> ty -> ty.
+
+Fixpoint match_with_used_unused_existentials {a : Set}
+  (fuel : list int) (t_value : ty) (function_parameter : a -> a) : int :=
+  let '_ := function_parameter in
+  match fuel with
+  | [] => 0
+  | cons _ l_value =>
+    match t_value with
+    | Ty_bool => 12
+    | Ty_pair t1 t2 =>
+      let 'existT _ [__1, __0] [t2, t1] :=
+        cast_exists (Es := [Set ** Set]) (fun '[__1, __0] => [ty ** ty])
+          [t2, t1] in
+      match_with_used_unused_existentials l_value t1
+        (fun (x_value : __0) => x_value)
+    end
+  end.
