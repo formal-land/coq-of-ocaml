@@ -93,9 +93,8 @@ Fixpoint match_with_used_unused_existentials {a : Set}
     match t_value with
     | Ty_bool => 12
     | Ty_pair t1 t2 =>
-      let 'existT _ [__1, __0] [t2, t1] :=
-        cast_exists (Es := [Set ** Set]) (fun '[__1, __0] => [ty ** ty])
-          [t2, t1] in
+      let 'existT _ __0 [t2, t1] :=
+        cast_exists (Es := Set) (fun __0 => [ty ** ty]) [t2, t1] in
       match_with_used_unused_existentials l_value t1
         (fun (x_value : __0) => x_value)
     end

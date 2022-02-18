@@ -7,7 +7,7 @@ type t =
   | ForceGadt
   | GrabExistentials
   | TaggedGadt
-  | Implicit of string
+  | Implicit of string * string
   | MatchGadt
   | MatchGadtWithResult
   | MatchWithDefault
@@ -38,6 +38,43 @@ let of_payload_string (error_message : string) (id : string)
         ("Expected a single string parameter for this attribute.\n\n"
        ^ error_message)
 
+let of_payload_string_string (error_message : string) (id : string)
+    (payload : Parsetree.payload) : (string * string) Monad.t =
+  match payload with
+  | Parsetree.PStr
+      [
+        {
+          pstr_desc =
+            Pstr_eval
+              ( {
+                  pexp_desc =
+                    Pexp_apply
+                      ( {
+                          pexp_desc =
+                            Pexp_constant (Pconst_string (payload1, _, _));
+                          _;
+                        },
+                        [
+                          ( _,
+                            {
+                              pexp_desc =
+                                Pexp_constant (Pconst_string (payload2, _, _));
+                              _;
+                            } );
+                        ] );
+                  _;
+                },
+                _ );
+          _;
+        };
+      ] ->
+      return (payload1, payload2)
+  | _ ->
+      let message = "missing_string_string_for_attribute " ^ id in
+      raise (message, message) Unexpected
+        ("Expected two string parameters for this attribute.\n\n"
+       ^ error_message)
+
 let of_attributes (attributes : Typedtree.attributes) : t list Monad.t =
   attributes
   |> Monad.List.filter_map (fun { Parsetree.attr_name; attr_payload; _ } ->
@@ -57,13 +94,13 @@ let of_attributes (attributes : Typedtree.attributes) : t list Monad.t =
             | "coq_tag_gadt" -> return (Some TaggedGadt)
             | "coq_implicit" ->
                 let error_message =
-                  "Give a value such as \"(A := unit)\" to define an implicit \
-                   type"
+                  "Give two values such as \"A\" \"unit\" to define an \
+                   implicit type \"(A := unit)\""
                 in
-                let* payload =
-                  of_payload_string error_message id attr_payload
+                let* name, typ =
+                  of_payload_string_string error_message id attr_payload
                 in
-                return (Some (Implicit payload))
+                return (Some (Implicit (name, typ)))
             | "coq_match_gadt" -> return (Some MatchGadt)
             | "coq_match_gadt_with_result" -> return (Some MatchGadtWithResult)
             | "coq_match_with_default" -> return (Some MatchWithDefault)
@@ -97,9 +134,11 @@ let has_force_gadt (attributes : t list) : bool =
 let has_grab_existentials (attributes : t list) : bool =
   attributes |> List.exists (function GrabExistentials -> true | _ -> false)
 
-let get_implicits (attributes : t list) : string list =
+let get_implicits (attributes : t list) : (string * string) list =
   attributes
-  |> List.filter_map (function Implicit implicit -> Some implicit | _ -> None)
+  |> List.filter_map (function
+       | Implicit (name, typ) -> Some (name, typ)
+       | _ -> None)
 
 let has_match_gadt (attributes : t list) : bool =
   attributes |> List.exists (function MatchGadt -> true | _ -> false)
