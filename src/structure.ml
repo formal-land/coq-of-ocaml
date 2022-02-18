@@ -6,7 +6,10 @@ open Monad.Notations
 
 (** A value is a toplevel definition made with a "let". *)
 module Value = struct
-  type t = Exp.t option Exp.Definition.t
+  type t = {
+    use_unsafe_fixpoints : bool;
+    definition : Exp.t option Exp.Definition.t;
+  }
 
   let to_coq_typ_vars (header : Exp.Header.t) : SmartPrint.t =
     let { Exp.Header.typ_vars; _ } = header in
@@ -32,7 +35,8 @@ module Value = struct
 
   (** Pretty-print a value definition to Coq. *)
   let to_coq (fargs : FArgs.t) (value : t) : SmartPrint.t =
-    match value.Exp.Definition.cases with
+    let { use_unsafe_fixpoints; definition } = value in
+    match definition.Exp.Definition.cases with
     | [] -> empty
     | _ :: _ ->
         let axiom_cases, notation_cases, cases =
@@ -44,7 +48,7 @@ module Value = struct
                   if header.Exp.Header.is_notation then
                     (axiom_cases, (header, e) :: notation_cases, cases)
                   else (axiom_cases, notation_cases, (header, e) :: cases))
-            value.Exp.Definition.cases ([], [], [])
+            definition.Exp.Definition.cases ([], [], [])
         in
         separate (newline ^^ newline)
           ((axiom_cases
@@ -77,7 +81,11 @@ module Value = struct
                    in
                    nest
                      ((if first_case then
-                       if value.Exp.Definition.is_rec then !^"Fixpoint"
+                       (if use_unsafe_fixpoints then
+                        !^"#[bypass_check(guard)]" ^^ newline
+                       else empty)
+                       ^^
+                       if definition.Exp.Definition.is_rec then !^"Fixpoint"
                        else !^"Definition"
                       else !^"with")
                      ^^
@@ -205,7 +213,13 @@ let top_level_evaluation (e : expression) : t list Monad.t =
        [
          Documentation
            ( documentation,
-             [ Value { is_rec = false; cases = [ (header, Some e) ] } ] );
+             [
+               Value
+                 {
+                   use_unsafe_fixpoints = false;
+                   definition = { is_rec = false; cases = [ (header, Some e) ] };
+                 };
+             ] );
        ])
 
 let typ_definitions_of_typ_extension_raw (typ_extension : extension_constructor)
@@ -334,8 +348,11 @@ let rec of_structure (structure : structure) : t list Monad.t =
             | Tstr_eval (e, _) -> top_level_evaluation e
             | Tstr_value (is_rec, cases) ->
                 push_env
-                  ( Exp.import_let_fun Name.Map.empty true is_rec cases
-                  >>= fun def -> return [ Value def ] )
+                  (let* use_unsafe_fixpoints, definition =
+                     retrieve_unsafe_fixpoints
+                       (Exp.import_let_fun Name.Map.empty true is_rec cases)
+                   in
+                   return [ Value { use_unsafe_fixpoints; definition } ])
             | Tstr_type (_, typs) ->
                 (* Because types may be recursive, so we need the types to already be in
                    the environment. This is useful for example for the detection of

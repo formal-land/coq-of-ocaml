@@ -14,9 +14,15 @@ module Import = struct
 end
 
 module Result = struct
-  type 'a t = { errors : Error.t list; imports : Import.t list; value : 'a }
+  type 'a t = {
+    errors : Error.t list;
+    imports : Import.t list;
+    use_unsafe_fixpoints : bool;
+    value : 'a;
+  }
 
-  let success (value : 'a) : 'a t = { errors = []; imports = []; value }
+  let success (value : 'a) : 'a t =
+    { errors = []; imports = []; use_unsafe_fixpoints = false; value }
 end
 
 module EnvStack = struct
@@ -85,6 +91,9 @@ module Command = struct
         let result = Result.success () in
         let mli = Configuration.is_require_mli context.configuration name in
         { result with imports = [ { Import.base; import; mli; name } ] }
+    | UseUnsafeFixpoint ->
+        let result = Result.success () in
+        { result with use_unsafe_fixpoints = true }
 end
 
 module Wrapper = struct
@@ -102,17 +111,35 @@ let rec eval : type a. a Monad.t -> a Interpret.t =
  fun x context ->
   match x with
   | Monad.Bind (x, f) ->
-      let { Result.errors = errors_x; imports = imports_x; value = value_x } =
+      let {
+        Result.errors = errors_x;
+        imports = imports_x;
+        use_unsafe_fixpoints = use_unsafe_fixpoints_x;
+        value = value_x;
+      } =
         eval x context
       in
-      let { Result.errors = errors_y; imports = imports_y; value = value_y } =
+      let {
+        Result.errors = errors_y;
+        imports = imports_y;
+        use_unsafe_fixpoints = use_unsafe_fixpoints_y;
+        value = value_y;
+      } =
         eval (f value_x) context
       in
       {
         errors = errors_y @ errors_x;
         imports = Import.merge imports_x imports_y;
+        use_unsafe_fixpoints = use_unsafe_fixpoints_x || use_unsafe_fixpoints_y;
         value = value_y;
       }
-  | Monad.Command command -> Command.eval command context
-  | Monad.Return value -> Result.success value
-  | Monad.Wrapper (wrapper, x) -> Wrapper.eval wrapper (eval x) context
+  | Command command -> Command.eval command context
+  | RetrieveUnsafeFixpoints x ->
+      let result = eval x context in
+      {
+        result with
+        use_unsafe_fixpoints = false;
+        value = (result.use_unsafe_fixpoints, result.value);
+      }
+  | Return value -> Result.success value
+  | Wrapper (wrapper, x) -> Wrapper.eval wrapper (eval x) context

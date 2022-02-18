@@ -23,7 +23,7 @@ let exp (context : MonadEval.Context.t) (typedtree : Mtyper.typedtree)
     (typedtree_errors : exn list) (source_file_name : string)
     (source_file_content : string) (json_mode : bool) :
     Ast.t * MonadEval.Import.t list * string * bool =
-  let { MonadEval.Result.errors; imports; value } =
+  let { MonadEval.Result.errors; imports; value; _ } =
     MonadEval.eval (Ast.of_typedtree typedtree typedtree_errors) context
   in
   let error_message =

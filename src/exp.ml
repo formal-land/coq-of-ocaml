@@ -1065,6 +1065,9 @@ and import_let_fun (typ_vars : Name.t Name.Map.t) (at_top_level : bool)
          Attribute.of_attributes vb_attributes >>= fun attributes ->
          let is_axiom = Attribute.has_axiom_with_reason attributes in
          let structs = Attribute.get_structs attributes in
+         let* _ =
+           match structs with [] -> return () | _ :: _ -> use_unsafe_fixpoint
+         in
          set_env vb_expr.exp_env
            (set_loc p.pat_loc
               ( Pattern.of_pattern p >>= fun p ->

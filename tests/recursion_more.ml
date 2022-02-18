@@ -46,3 +46,9 @@ and[@coq_mutual_as_notation][@coq_struct "ts"] counts ts =
 
 and[@coq_mutual_as_notation] length l =
   List.length l
+
+let[@coq_struct "n_value"] rec factorial n =
+  if n = 0 then
+    1
+  else
+    n * factorial (n - 1)
