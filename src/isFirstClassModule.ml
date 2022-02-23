@@ -105,7 +105,7 @@ type maybe_found = Found of Path.t | Not_found of string
 (** Get the path of the signature definition of the [module_typ]
     if it is a first-class module, [None] otherwise. Optionally, when given the path of the module we want to check for its signature, to verify if it is not
     in a blacklist. *)
-let rec is_module_typ_first_class (module_typ : Types.module_type)
+let rec is_module_typ_first_class_aux (module_typ : Types.module_type)
     (module_path : Path.t option) : maybe_found Monad.t =
   let* env = get_env in
   let* configuration = get_configuration in
@@ -131,7 +131,8 @@ let rec is_module_typ_first_class (module_typ : Types.module_type)
     match Mtype.scrape env module_typ with
     | Mty_alias path | Mty_ident path -> (
         match Env.find_module path env with
-        | { Types.md_type; _ } -> is_module_typ_first_class md_type module_path
+        | { Types.md_type; _ } ->
+            is_module_typ_first_class_aux md_type module_path
         | exception Not_found ->
             let reason = "Module " ^ Path.name path ^ " not found" in
             return (Not_found reason))
@@ -165,3 +166,36 @@ let rec is_module_typ_first_class (module_typ : Types.module_type)
               ^ "We use the concept of shape to find the name of a signature \
                  for Coq."))
     | Mty_functor _ -> return (Not_found "This is a functor type")
+
+type hash_index = {
+  module_typ : Types.module_type;
+  module_path : Path.t option;
+}
+
+(** A hash to optimize the execution of the [is_module_typ_first_class]
+    function. *)
+module Hash = Hashtbl.Make (struct
+  type t = hash_index
+
+  let equal x y =
+    x.module_typ == y.module_typ
+    &&
+    match (x.module_path, y.module_path) with
+    | Some path1, Some path2 -> path1 == path2
+    | None, None -> true
+    | _, _ -> false
+
+  let hash = Hashtbl.hash
+end)
+
+let is_module_typ_first_class_hash : maybe_found Hash.t = Hash.create 12
+
+let is_module_typ_first_class (module_typ : Types.module_type)
+    (module_path : Path.t option) : maybe_found Monad.t =
+  let index = { module_typ; module_path } in
+  match Hash.find_opt is_module_typ_first_class_hash index with
+  | Some result -> return result
+  | None ->
+      let* result = is_module_typ_first_class_aux module_typ module_path in
+      Hash.add is_module_typ_first_class_hash index result;
+      return result
