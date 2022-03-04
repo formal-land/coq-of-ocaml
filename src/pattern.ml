@@ -53,7 +53,7 @@ let rec of_pattern :
         Constant.of_constant c >>= fun constant ->
         return (Some (Constant constant))
     | Tpat_variant (label, p, _) ->
-        PathName.constructor_of_variant label >>= fun path_name ->
+        let* path_name = PathName.constructor_of_variant_with_error label in
         (match p with
         | None -> return (Some [])
         | Some p ->

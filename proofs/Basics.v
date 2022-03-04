@@ -87,6 +87,14 @@ Arguments Build_extensible : clear implicits.
 (** For backward compatibility. *)
 Parameter extensible_type_value : extensible_type.
 
+(** Polymorphic variants. *)
+Module Variant.
+  Inductive t : Set :=
+  | Build : forall (A : Set), string -> A -> t.
+
+  Arguments Build : clear implicits.
+End Variant.
+
 Parameter Set_oracle : string -> Set.
 
 Axiom Set_oracle_invoke

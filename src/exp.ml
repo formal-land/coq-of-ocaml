@@ -51,6 +51,8 @@ type t =
       (** A constructor name, some implicits, and a list of arguments. *)
   | ConstructorExtensible of string * Type.t * t
       (** A constructor of an extensible type, with a tag and a payload. *)
+  | ConstructorVariant of string * (Type.t * t) option
+      (** A constructor of polymorphic variant, with a tag and a payload. *)
   | Apply of t * t option list  (** An application. *)
   | Return of string * t  (** Application specialized for a return operation. *)
   | InfixOperator of string * t * t
@@ -277,6 +279,13 @@ let rec free_existential_typs (e : t) : Name.Set.t =
       Name.Set.union
         (Type.local_typ_constructors_of_typ typ)
         (free_existential_typs e)
+  | ConstructorVariant (_, typ_e) -> (
+      match typ_e with
+      | None -> Name.Set.empty
+      | Some (typ, e) ->
+          Name.Set.union
+            (Type.local_typ_constructors_of_typ typ)
+            (free_existential_typs e))
   | Apply (e, es) ->
       let es = e :: List.filter_map (fun x -> x) es in
       of_list es
@@ -570,12 +579,28 @@ let rec of_expression (typ_vars : Name.t Name.Map.t) (e : expression) :
                   return (Constructor (x, implicits, es')))
           | Texp_variant (label, e) -> (
               let* path_name = PathName.constructor_of_variant label in
-              let constructor = Variable (MixedPath.PathName path_name, []) in
-              match e with
-              | None -> return constructor
-              | Some e ->
-                  let* e = of_expression typ_vars e in
-                  return (Apply (constructor, [ Some e ])))
+              match path_name with
+              | None ->
+                  let* typ_e =
+                    match e with
+                    | None -> return None
+                    | Some e ->
+                        let* typ =
+                          Type.of_type_expr_without_free_vars e.exp_type
+                        in
+                        let* e = of_expression typ_vars e in
+                        return (Some (typ, e))
+                  in
+                  return (ConstructorVariant (label, typ_e))
+              | Some path_name -> (
+                  let constructor =
+                    Variable (MixedPath.PathName path_name, [])
+                  in
+                  match e with
+                  | None -> return constructor
+                  | Some e ->
+                      let* e = of_expression typ_vars e in
+                      return (Apply (constructor, [ Some e ]))))
           | Texp_record { fields; extended_expression; _ } -> (
               Array.to_list fields
               |> Monad.List.filter_map (fun (label_description, definition) ->
@@ -1565,9 +1590,25 @@ let rec to_coq (paren : bool) (e : t) : SmartPrint.t =
            ^^ !^("\"" ^ tag ^ "\"")
            ^^ Type.to_coq None (Some Type.Context.Apply) typ
            ^^ to_coq true payload))
+  | ConstructorVariant (tag, typ_payload) ->
+      Pp.parens paren
+        (nest
+           (!^"Variant.Build"
+           ^^ !^("\"" ^ tag ^ "\"")
+           ^^
+           match typ_payload with
+           | None -> !^"unit"
+           | Some (typ, _) -> (
+               Type.to_coq None (Some Type.Context.Apply) typ
+               ^^
+               match typ_payload with
+               | None -> !^"tt"
+               | Some (_, payload) -> to_coq true payload)))
   | Apply (e_f, e_xs) -> (
       match e_f with
-      | Apply (e_f, e_xs') -> to_coq paren (Apply (e_f, e_xs' @ e_xs))
+      | Apply (e_f, e_xs')
+        when List.for_all (function None -> false | Some _ -> true) e_xs' ->
+          to_coq paren (Apply (e_f, e_xs' @ e_xs))
       | _ ->
           let missing_args, all_args, _ =
             List.fold_left
