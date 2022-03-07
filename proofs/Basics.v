@@ -90,7 +90,7 @@ Parameter extensible_type_value : extensible_type.
 (** Polymorphic variants. *)
 Module Variant.
   Inductive t : Set :=
-  | Build : forall (A : Set), string -> A -> t.
+  | Build : string -> forall (A : Set), A -> t.
 
   Arguments Build : clear implicits.
 End Variant.

@@ -262,21 +262,27 @@ let rec of_signature_items (prefix : string list) (let_in_type : let_in_type)
                       add_new_let_in_type prefix let_in_type typ_id
                     in
                     let* typ_args =
-                      type_params
-                      |> Monad.List.map (fun typ_param ->
-                             let* name = Type.of_type_expr_variable typ_param in
-                             return (name, 0))
+                      type_params |> Monad.List.map Type.of_type_expr_variable
                     in
                     let* typ = Type.of_type_expr_without_free_vars typ in
                     let typ_with_let_in_type =
                       apply_let_in_type let_in_type
-                        (Type.ForallTyps (typ_args, typ))
+                        (Type.FunTyps (typ_args, typ))
                     in
                     return
                       ([ TypSynonym (name, typ_with_let_in_type) ], let_in_type)
-                | _ ->
+                | typs ->
+                    let* rev_typs, let_in_type =
+                      Monad.List.fold_left
+                        (fun (rev_typs, let_in_type) typ ->
+                          let* name, let_in_type =
+                            add_new_let_in_type prefix let_in_type typ.typ_id
+                          in
+                          return (TypExistential name :: rev_typs, let_in_type))
+                        ([], let_in_type) typs
+                    in
                     raise
-                      ([ Error "mutual_type" ], let_in_type)
+                      (List.rev rev_typs, let_in_type)
                       NotSupported
                       "Mutual type definitions in signatures not handled.")
             | Tsig_typext _ -> return ([], let_in_type)

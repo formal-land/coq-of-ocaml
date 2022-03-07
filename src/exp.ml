@@ -1595,15 +1595,13 @@ let rec to_coq (paren : bool) (e : t) : SmartPrint.t =
         (nest
            (!^"Variant.Build"
            ^^ !^("\"" ^ tag ^ "\"")
+           ^^ (match typ_payload with
+              | None -> !^"unit"
+              | Some (typ, _) -> Type.to_coq None (Some Type.Context.Apply) typ)
            ^^
            match typ_payload with
-           | None -> !^"unit"
-           | Some (typ, _) -> (
-               Type.to_coq None (Some Type.Context.Apply) typ
-               ^^
-               match typ_payload with
-               | None -> !^"tt"
-               | Some (_, payload) -> to_coq true payload)))
+           | None -> !^"tt"
+           | Some (_, payload) -> to_coq true payload))
   | Apply (e_f, e_xs) -> (
       match e_f with
       | Apply (e_f, e_xs')

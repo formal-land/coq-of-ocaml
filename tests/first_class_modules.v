@@ -131,7 +131,7 @@ Module UsingTriple.
     T : Triple (a := T_a) (b := T_b) (c := T_c) (bar := T_bar);
     OPS' : S.SET (elt := OPS'_elt) (t := OPS'_t);
     OPS'' : S.SET (elt := elt') (t := list string);
-    table := forall {a : Set}, list a;
+    table := fun (a : Set) => list a;
   }.
 End UsingTriple.
 Definition UsingTriple := @UsingTriple.signature.
