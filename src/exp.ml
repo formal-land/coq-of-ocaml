@@ -779,19 +779,53 @@ let rec of_expression (typ_vars : Name.t Name.Map.t) (e : expression) :
               } -> (
               match ands with
               | [] -> (
-                  let let_symbol = Path.last bop_op_path in
+                  let* let_symbol_mixed_path =
+                    MixedPath.of_path true bop_op_path
+                  in
+                  let let_symbol = MixedPath.to_string let_symbol_mixed_path in
+                  let* configuration = get_configuration in
+                  let let_symbol =
+                    Configuration.is_monadic_let configuration let_symbol
+                  in
                   let* pattern = Pattern.of_pattern c_lhs in
                   let* e1 = of_expression typ_vars bop_exp in
                   let* e2 = of_expression typ_vars c_rhs in
-                  match pattern with
-                  | Some (Variable name) ->
+                  let cases =
+                    match pattern with
+                    | None -> []
+                    | Some pattern -> [ (pattern, None, e2) ]
+                  in
+                  match (let_symbol, pattern) with
+                  | None, Some (Variable name) ->
+                      return
+                        (Apply
+                           ( Variable (let_symbol_mixed_path, []),
+                             [ Some e1; Some (Function (name, None, e2)) ] ))
+                  | None, _ ->
+                      return
+                        (Apply
+                           ( Variable (let_symbol_mixed_path, []),
+                             [
+                               Some e1;
+                               Some
+                                 (Function
+                                    ( Name.FunctionParameter,
+                                      None,
+                                      Match
+                                        ( Variable
+                                            ( MixedPath.PathName
+                                                {
+                                                  PathName.path = [];
+                                                  base = Name.FunctionParameter;
+                                                },
+                                              [] ),
+                                          None,
+                                          cases,
+                                          false ) ));
+                             ] ))
+                  | Some let_symbol, Some (Variable name) ->
                       return (LetVar (Some let_symbol, name, [], e1, e2))
-                  | _ ->
-                      let cases =
-                        match pattern with
-                        | None -> []
-                        | Some pattern -> [ (pattern, None, e2) ]
-                      in
+                  | Some let_symbol, _ ->
                       return
                         (LetVar
                            ( Some let_symbol,

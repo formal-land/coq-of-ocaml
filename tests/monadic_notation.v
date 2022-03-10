@@ -17,16 +17,13 @@ Definition get_head {A : Set} (l_value : list A) : option A :=
   | cons x_value _ => Some x_value
   end.
 
-Notation "'let*' x ':=' X 'in' Y" :=
-  (op_letstar X (fun x => Y))
-  (at level 200, x ident, X at level 100, Y at level 200).
-
-Notation "'let*' ' x ':=' X 'in' Y" :=
-  (op_letstar X (fun x => Y))
-  (at level 200, x pattern, X at level 100, Y at level 200).
+Definition insert_monadic_notations_here : unit := tt.
 
 Definition sum_first_elements (l1 : list int) (l2 : list (int * int))
   : option int :=
-  let* x1 := get_head l1 in
-  let* '(x2, x3) := get_head l2 in
-  _return (Z.add (Z.add x1 x2) x3).
+  op_letstar (get_head l1)
+    (fun x1 =>
+      op_letstar (get_head l2)
+        (fun function_parameter =>
+          let '(x2, x3) := function_parameter in
+          _return (Z.add (Z.add x1 x2) x3))).
