@@ -269,10 +269,7 @@ let typ_of_variants (labels : string list) : t option Monad.t =
     ^ "variants in the configuration file."
   in
   match typs with
-  | [] ->
-      raise None NotSupported
-        ("No type known for the following variants: " ^ variants_message
-       ^ "\n\n" ^ variant_help_error_message)
+  | [] -> return None
   | [ typ ] -> return (Some typ)
   | typ :: _ :: _ ->
       raise (Some typ) NotSupported
