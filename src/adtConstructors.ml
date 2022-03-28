@@ -4,13 +4,13 @@ open Monad.Notations
 module RecordSkeleton = struct
   type t = { fields : Name.t list; module_name : Name.t; typ_name : Name.t }
 
-  let to_coq_record (module_name : Name.t) (typ_name : Name.t)
+  let to_coq_record (fargs : FArgs.t) (module_name : Name.t) (typ_name : Name.t)
       (typ_args : VarEnv.t) (fields : (Name.t * Type.t) list) (with_with : bool)
       : SmartPrint.t =
     nest
       (!^"Module" ^^ Name.to_coq module_name ^-^ !^"." ^^ newline
       ^^ indent
-           (!^"Record" ^^ !^"record"
+           (!^"Record" ^^ !^"record" ^^ FArgs.to_coq fargs
            ^^ Type.typ_vars_to_coq braces space space typ_args
            ^^ nest (!^":" ^^ Pp.set)
            ^^ !^":=" ^^ !^"Build" ^^ !^"{" ^^ newline
@@ -24,12 +24,20 @@ module RecordSkeleton = struct
            ^^ !^"}."
            ^^ (match typ_args with
               | [] -> empty
-              | _ :: _ ->
-                  newline ^^ !^"Arguments" ^^ !^"record" ^^ !^":" ^^ !^"clear"
-                  ^^ !^"implicits" ^-^ !^".")
+              | _ :: _ -> (
+                  match fargs with
+                  | None ->
+                      newline ^^ !^"Arguments" ^^ !^"record" ^^ !^":"
+                      ^^ !^"clear" ^^ !^"implicits" ^-^ !^"."
+                  | Some _ ->
+                      newline ^^ !^"Arguments" ^^ !^"record"
+                      ^^ braces
+                           (separate space (FArgs.to_coq_underscores fargs))
+                      ^-^ !^"."))
            ^^ newline
            ^^
-           if with_with then
+           (* We do not handle "with" functions for records in functors yet. *)
+           if with_with && fargs = None then
              separate newline
                (fields
                |> List.map (fun (name, _) ->
@@ -68,14 +76,14 @@ module RecordSkeleton = struct
            else empty)
       ^^ !^"End" ^^ Name.to_coq module_name ^-^ !^"." ^^ newline
       ^^ nest
-           (!^"Definition" ^^ Name.to_coq typ_name ^^ !^":="
-          ^^ Name.to_coq module_name ^-^ !^".record" ^-^ !^"."))
+           (!^"Definition" ^^ Name.to_coq typ_name ^^ FArgs.to_coq fargs
+          ^^ !^":=" ^^ Name.to_coq module_name ^-^ !^".record" ^-^ !^"."))
 
   let to_coq (record_skeleton : t) : SmartPrint.t =
     let { fields; module_name; typ_name } = record_skeleton in
     let typ_vars = List.map (fun field -> (field, Kind.Set)) fields in
     let body = fields |> List.map (fun field -> (field, Type.Variable field)) in
-    to_coq_record module_name typ_name typ_vars body true
+    to_coq_record None module_name typ_name typ_vars body true
 end
 
 type ret_typ = Variant of AdtParameters.t | Tagged of Type.t list

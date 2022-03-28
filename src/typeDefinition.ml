@@ -586,8 +586,8 @@ let to_coq (fargs : FArgs.t) (def : t) : SmartPrint.t =
   match def with
   | Inductive inductive -> Inductive.to_coq fargs inductive
   | Record (name, typ_args, fields, with_with) ->
-      AdtConstructors.RecordSkeleton.to_coq_record name name typ_args fields
-        with_with
+      AdtConstructors.RecordSkeleton.to_coq_record fargs name name typ_args
+        fields with_with
   | Synonym (name, typ_args, value) ->
       nest
         (!^"Definition" ^^ Name.to_coq name ^^ FArgs.to_coq fargs
