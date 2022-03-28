@@ -1460,6 +1460,9 @@ and of_structure (typ_vars : Name.t Name.Map.t) (signature_path : Path.t)
                        "Mutually recursive type definition not handled here")
              | Tstr_typext _ -> return e_next
              | Tstr_exception _ -> return e_next
+             | Tstr_module { mb_id = Some ident; _ }
+               when Ident.name ident = "Internal_for_tests" ->
+                 return e_next
              | Tstr_module { mb_id; mb_expr; _ } ->
                  let* name = Name.of_optional_ident false mb_id in
                  of_module_expr typ_vars mb_expr (Some mb_expr.mod_type)

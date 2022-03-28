@@ -211,6 +211,9 @@ let rec of_signature_items (prefix : string list) (let_in_type : let_in_type)
                 raise
                   ([ Error "module_type" ], let_in_type)
                   NotSupported "Signatures inside signatures are not handled."
+            | Tsig_module { md_id = Some ident; _ }
+              when Ident.name ident = "Internal_for_tests" ->
+                return ([], let_in_type)
             | Tsig_module { md_id; md_type; _ } -> (
                 let id =
                   match md_id with
