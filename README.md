@@ -84,7 +84,7 @@ coq-of-ocaml file.ml
 You can start to experiment with the test files in `tests/` or look at our [online examples](https://foobar-land.github.io/coq-of-ocaml/examples/). `coq-of-ocaml` compiles the `.ml` or `.mli` files using [Merlin](https://github.com/ocaml/merlin) to understand the dependencies of a project. One first needs to have a **compiled project** with a working configuration of Merlin. This is automatically the case if you use [dune](https://dune.build/) as a build system.
 
 ## Documentation
-You can read the documentation on the website of the project at [https://foobar-land.github.io/coq-of-ocaml/](https://foobar-land.github.io/coq-of-ocaml/).
+You can read the documentation on the website of the project at [https://formal.land/docs/coq-of-ocaml/introduction](https://formal.land/docs/coq-of-ocaml/introduction).
 
 ## Supported
 * the core of OCaml (functions, let bindings, pattern-matching,...) ✔️
