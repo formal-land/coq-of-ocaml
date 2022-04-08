@@ -1,4 +1,4 @@
-# ![Logo](https://foobar-land.github.io/coq-of-ocaml/img/rooster-48.png) coq-of-ocaml [![CI](https://github.com/clarus/coq-of-ocaml/workflows/CI/badge.svg?branch=master)](https://github.com/clarus/coq-of-ocaml/actions?query=workflow%3ACI)
+# 🐓🐫 coq-of-ocaml [![CI](https://github.com/clarus/coq-of-ocaml/workflows/CI/badge.svg?branch=master)](https://github.com/clarus/coq-of-ocaml/actions?query=workflow%3ACI)
 > Import OCaml programs to Coq for formal verification
 
 **Documentation on https://formal.land/docs/coq-of-ocaml/introduction**
