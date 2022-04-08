@@ -1,7 +1,7 @@
 # ![Logo](https://foobar-land.github.io/coq-of-ocaml/img/rooster-48.png) coq-of-ocaml [![CI](https://github.com/clarus/coq-of-ocaml/workflows/CI/badge.svg?branch=master)](https://github.com/clarus/coq-of-ocaml/actions?query=workflow%3ACI)
 > Import OCaml programs to Coq for formal verification
 
-**Documentation on https://foobar-land.github.io/coq-of-ocaml/**
+**Documentation on https://formal.land/docs/coq-of-ocaml/introduction**
 
 ## Aim
 `coq-of-ocaml` aims to enable formal verification of [OCaml](https://ocaml.org/) programs&nbsp;🦄. *The more you prove, the happier you are.* By transforming OCaml code into similar [Coq](https://coq.inria.fr/) programs, it is possible to prove arbitrarily complex properties using the existing power of Coq. The sweet spot of `coq-of-ocaml` is purely functional and monadic programs. Side-effects outside of a monad, like references, and advanced features like object-oriented programming, may never be supported. By sticking to the supported subset of OCaml, you should be able to import millions of lines of code to Coq and write proofs at large. Running `coq-of-ocaml` after each code change, you can make sure that your proofs are still valid. The generated Coq code is designed to be stable, with no generated variable names for example. We recommend organizing your proof files as you would organize your unit-test files.
