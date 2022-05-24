@@ -308,9 +308,32 @@ let rec free_existential_typs (e : t) : Name.Set.t =
            (Name.Set.of_list typ_vars))
         (Name.Set.remove name (free_existential_typs e))
   | LetModuleUnpack (_, _, e) -> free_existential_typs e
-  | Match (e1, _, cases, _) ->
-      let es = e1 :: List.map (fun (_, _, e) -> e) cases in
-      of_list es
+  | Match (e, _, cases, _) ->
+      let cast_typs =
+        cases
+        |> List.map (fun (_, cast, e) ->
+               let new_typ_vars =
+                 match cast with
+                 | Some { bound_vars; enable = true; _ } ->
+                     Name.Set.of_list (List.map fst bound_vars)
+                 | _ -> Name.Set.empty
+               in
+               let typ_vars_of_typs =
+                 match cast with
+                 | Some
+                     { bound_vars; return_typ; cast_result; enable = true; _ }
+                   ->
+                     Type.local_typ_constructors_of_typs
+                       ((if cast_result then [ return_typ ] else [])
+                       @ List.map snd bound_vars)
+                 | _ -> Name.Set.empty
+               in
+               Name.Set.diff
+                 (Name.Set.union typ_vars_of_typs (free_existential_typs e))
+                 new_typ_vars)
+      in
+      List.fold_left Name.Set.union Name.Set.empty
+        (free_existential_typs e :: cast_typs)
   | MatchExtensible (e1, cases) ->
       let es = e1 :: List.map snd cases in
       let typs =
