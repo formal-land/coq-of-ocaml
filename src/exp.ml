@@ -350,6 +350,92 @@ let rec free_existential_typs (e : t) : Name.Set.t =
   | ErrorMessage (e, _) -> free_existential_typs e
   | Ltac _ -> Name.Set.empty
 
+(** Get the free variables of an expression. This is useful to optimize the
+    translation of mutually recursive definitions implemented as notation,
+    by detecting which ones are used. *)
+let rec get_free_vars (e : t) : Name.Set.t =
+  let get_free_vars_of_list (es : t list) : Name.Set.t =
+    List.fold_left Name.Set.union Name.Set.empty (List.map get_free_vars es)
+  in
+  match e with
+  | Constant _ -> Name.Set.empty
+  | Variable (x, _) -> (
+      match x with
+      | MixedPath.PathName { path = []; base } -> Name.Set.singleton base
+      | _ -> Name.Set.empty)
+  | Tuple es -> get_free_vars_of_list es
+  | Constructor (_, _, es) -> get_free_vars_of_list es
+  | ConstructorExtensible (_, _, e) -> get_free_vars e
+  | ConstructorVariant (_, typ_e) -> (
+      match typ_e with None -> Name.Set.empty | Some (_, e) -> get_free_vars e)
+  | Apply (e, es) ->
+      let es = e :: List.filter_map (fun x -> x) es in
+      get_free_vars_of_list es
+  | Return (_, e) -> get_free_vars e
+  | InfixOperator (_, e1, e2) -> get_free_vars_of_list [ e1; e2 ]
+  | Function (x, _, e) -> Name.Set.remove x (get_free_vars e)
+  | Functions (names, e) ->
+      Name.Set.diff (get_free_vars e) (Name.Set.of_list names)
+  | LetVar (_, x, _, e1, e2) ->
+      Name.Set.union (get_free_vars e1) (Name.Set.remove x (get_free_vars e2))
+  | LetFun (definition, e) ->
+      let defined_names =
+        definition.cases |> List.map (fun ({ Header.name; _ }, _) -> name)
+      in
+      let is_rec = definition.is_rec in
+      let free_vars_of_bodies =
+        definition.cases
+        |> List.map (fun ({ Header.args; _ }, body) ->
+               match body with
+               | None -> Name.Set.empty
+               | Some body ->
+                   Name.Set.diff (get_free_vars body)
+                     (Name.Set.of_list (List.map fst args)))
+      in
+      let free_vars_of_definition =
+        Name.Set.diff
+          (List.fold_left Name.Set.union Name.Set.empty free_vars_of_bodies)
+          (if is_rec then Name.Set.of_list defined_names else Name.Set.empty)
+      in
+      Name.Set.union free_vars_of_definition
+        (Name.Set.diff (get_free_vars e) (Name.Set.of_list defined_names))
+  | LetTyp (_, _, _, e) -> get_free_vars e
+  | LetModuleUnpack (x, _, e) -> Name.Set.remove x (get_free_vars e)
+  | Match (e, _, entries, _) ->
+      Name.Set.union (get_free_vars e)
+        (List.fold_left Name.Set.union Name.Set.empty
+           (entries
+           |> List.map (fun (pattern, _, e) ->
+                  Name.Set.diff (get_free_vars e)
+                    (Pattern.get_free_vars pattern))))
+  | MatchExtensible (e, entries) ->
+      Name.Set.union (get_free_vars e)
+        (List.fold_left Name.Set.union Name.Set.empty
+           (entries
+           |> List.map (fun (pattern, e) ->
+                  let free_vars_of_pattern =
+                    match pattern with
+                    | Some (_, pattern, _) -> Pattern.get_free_vars pattern
+                    | None -> Name.Set.empty
+                  in
+                  Name.Set.diff (get_free_vars e) free_vars_of_pattern)))
+  | Record entries ->
+      get_free_vars_of_list (List.map (fun (_, _, e) -> e) entries)
+  | Field (e, _) -> get_free_vars e
+  | IfThenElse (e1, e2, e3) -> get_free_vars_of_list [ e1; e2; e3 ]
+  | Module entries ->
+      get_free_vars_of_list (List.map (fun (_, _, e) -> e) entries)
+  | ModulePack (_, e) -> get_free_vars e
+  | Functor (x, _, e) -> Name.Set.remove x (get_free_vars e)
+  | Cast (e, _) -> get_free_vars e
+  | TypAnnotation (e, _) -> get_free_vars e
+  | Assert (_, e) -> get_free_vars e
+  | Error _ -> Name.Set.empty
+  | ErrorArray es -> get_free_vars_of_list es
+  | ErrorTyp _ -> Name.Set.empty
+  | ErrorMessage (e, _) -> get_free_vars e
+  | Ltac _ -> Name.Set.empty
+
 (** Import an OCaml expression. *)
 let rec of_expression (typ_vars : Name.t Name.Map.t) (e : expression) :
     t Monad.t =

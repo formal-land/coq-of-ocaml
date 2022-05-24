@@ -51,13 +51,15 @@ module Value = struct
             definition.Exp.Definition.cases ([], [], [])
         in
         separate (newline ^^ newline)
-          ((axiom_cases
+          ((* The axiomatized definitions *)
+           (axiom_cases
            |> List.map (fun header ->
                   let { Exp.Header.name; typ_vars; typ; _ } = header in
                   nest
                     (!^"Axiom" ^^ Name.to_coq name ^^ !^":"
                     ^^ Type.typ_vars_to_coq braces !^"forall" !^"," typ_vars
                     ^^ Type.to_coq None None typ ^-^ !^".")))
+          (* Reserve the notation keywords *)
           @ (match notation_cases with
             | [] -> []
             | _ :: _ ->
@@ -71,6 +73,7 @@ module Value = struct
                              ^^ double_quotes (!^"'" ^-^ Name.to_coq name)
                              ^-^ !^".")));
                 ])
+          (* The definitions *)
           @ (cases
             |> List.mapi (fun index (header, e) ->
                    let first_case = index = 0 in
@@ -79,6 +82,7 @@ module Value = struct
                      | [] -> index = List.length cases - 1
                      | _ :: _ -> false
                    in
+                   let free_vars_of_e = Exp.get_free_vars e in
                    nest
                      ((if first_case then
                        (if use_unsafe_fixpoints then
@@ -101,9 +105,12 @@ module Value = struct
                                     let { Exp.Header.name; typ_vars; _ } =
                                       header
                                     in
-                                    to_coq_notation_synonym name typ_vars))
+                                    if Name.Set.mem name free_vars_of_e then
+                                      to_coq_notation_synonym name typ_vars
+                                    else empty))
                           ^^ Exp.to_coq false e)
                      ^-^ if last_case then !^"." else empty)))
+          (* Define the notations *)
           @ snd
               (List.fold_left
                  (fun ((index, previous_notations), definitions) (header, e) ->
@@ -112,6 +119,7 @@ module Value = struct
                    let { Exp.Header.name; typ_vars; structs; typ; _ } =
                      header
                    in
+                   let free_vars_of_e = Exp.get_free_vars e in
                    let definition =
                      nest
                        ((if first_case then !^"where" else !^"and")
@@ -136,8 +144,13 @@ module Value = struct
                                        (separate space
                                           (previous_notations
                                           |> List.map (fun (name, typ_vars) ->
-                                                 to_coq_notation_synonym name
-                                                   typ_vars))
+                                                 if
+                                                   Name.Set.mem name
+                                                     free_vars_of_e
+                                                 then
+                                                   to_coq_notation_synonym name
+                                                     typ_vars
+                                                 else empty))
                                        ^^ Exp.to_coq false e))))
                        ^-^ if last_case then !^"." else empty)
                    in
@@ -146,6 +159,7 @@ module Value = struct
                  ((0, []), [])
                  notation_cases)
           @
+          (* Wrap the notations into definitions *)
           match notation_cases with
           | [] -> []
           | _ :: _ ->

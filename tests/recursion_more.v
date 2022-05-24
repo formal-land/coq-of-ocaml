@@ -41,7 +41,6 @@ Reserved Notation "'sums".
 
 #[bypass_check(guard)]
 Fixpoint sum (t_value : tree int) : int :=
-  let zero := 'zero in
   let sums := 'sums in
   match t_value with
   | Leaf n_value => n_value
@@ -84,9 +83,7 @@ where "'counts" :=
     end)
 
 and "'length" :=
-  (fun (A : Set) => fun (l_value : list A) =>
-    let counts {A} := 'counts A in
-    CoqOfOCaml.List.length l_value).
+  (fun (A : Set) => fun (l_value : list A) => CoqOfOCaml.List.length l_value).
 
 Definition counts {A : Set} := 'counts A.
 Definition length {A : Set} := 'length A.
