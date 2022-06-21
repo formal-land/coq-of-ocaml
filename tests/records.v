@@ -6,7 +6,8 @@ Module SizedString.
   Module t.
     Record record : Set := Build {
       name : string;
-      size : int }.
+      size : int;
+    }.
     Definition with_name name (r : record) :=
       Build name r.(size).
     Definition with_size size (r : record) :=
@@ -16,10 +17,10 @@ Module SizedString.
 End SizedString.
 
 Definition r_value : SizedString.t :=
-  {| SizedString.t.name := "gre"; SizedString.t.size := 3 |}.
+  {| SizedString.t.name := "gre"; SizedString.t.size := 3; |}.
 
 Definition r' : SizedString.t :=
-  {| SizedString.t.name := "haha"; SizedString.t.size := 4 |}.
+  {| SizedString.t.name := "haha"; SizedString.t.size := 4; |}.
 
 Definition s_value : int :=
   Z.add r_value.(SizedString.t.size) r'.(SizedString.t.size).
@@ -39,7 +40,8 @@ Module Point.
     Record record : Set := Build {
       x : int;
       y : int;
-      z : int }.
+      z : int;
+    }.
     Definition with_x x (r : record) :=
       Build x r.(y) r.(z).
     Definition with_y y (r : record) :=
@@ -49,7 +51,7 @@ Module Point.
   End t.
   Definition t := t.record.
   
-  Definition p_value : t := {| t.x := 5; t.y := (-3); t.z := 1 |}.
+  Definition p_value : t := {| t.x := 5; t.y := (-3); t.z := 1; |}.
   
   Definition b_value : bool :=
     match p_value with
@@ -61,7 +63,8 @@ End Point.
 Module poly.
   Record record {first second : Set} : Set := Build {
     first : first;
-    second : second }.
+    second : second;
+  }.
   Arguments record : clear implicits.
   Definition with_first {t_first t_second} first
     (r : record t_first t_second) :=
@@ -73,7 +76,7 @@ End poly.
 Definition poly := poly.record.
 
 Definition p_value : poly int bool :=
-  {| poly.first := 12; poly.second := false |}.
+  {| poly.first := 12; poly.second := false; |}.
 
 Module ConstructorWithRecord.
   (** Records for the constructor parameters *)
@@ -82,7 +85,8 @@ Module ConstructorWithRecord.
       Module Foo.
         Record record {name size : Set} : Set := Build {
           name : name;
-          size : size }.
+          size : size;
+        }.
         Arguments record : clear implicits.
         Definition with_name {t_name t_size} name (r : record t_name t_size) :=
           Build t_name t_size name r.(size).
@@ -94,7 +98,8 @@ Module ConstructorWithRecord.
     Module exi.
       Module Ex.
         Record record {x : Set} : Set := Build {
-          x : x }.
+          x : x;
+        }.
         Arguments record : clear implicits.
         Definition with_x {t_x} x (r : record t_x) :=
           Build t_x x.
@@ -107,7 +112,8 @@ Module ConstructorWithRecord.
   Module loc.
     Record record {x y : Set} : Set := Build {
       x : x;
-      y : y }.
+      y : y;
+    }.
     Arguments record : clear implicits.
     Definition with_x {t_x t_y} x (r : record t_x t_y) :=
       Build t_x t_y x r.(y).
@@ -142,11 +148,11 @@ Module ConstructorWithRecord.
   
   Definition loc := 'loc.
   
-  Definition l_value : loc := {| loc.x := 12; loc.y := 23 |}.
+  Definition l_value : loc := {| loc.x := 12; loc.y := 23; |}.
   
   Definition l_with : loc := loc.with_x 41 l_value.
   
-  Definition foo : t := Foo {| t.Foo.name := "foo"; t.Foo.size := 12 |}.
+  Definition foo : t := Foo {| t.Foo.name := "foo"; t.Foo.size := 12; |}.
   
   Definition f_value (x_value : t) : int :=
     match x_value with
@@ -163,7 +169,8 @@ Module ConstructorWithPolymorphicRecord.
         Record record {location payload size : Set} : Set := Build {
           location : location;
           payload : payload;
-          size : size }.
+          size : size;
+        }.
         Arguments record : clear implicits.
         Definition with_location {t_location t_payload t_size} location
           (r : record t_location t_payload t_size) :=
@@ -195,13 +202,14 @@ Module ConstructorWithPolymorphicRecord.
   Arguments Foo {_ _}.
   
   Definition foo : t int string :=
-    Foo {| t.Foo.location := 12; t.Foo.payload := "hi"; t.Foo.size := 23 |}.
+    Foo {| t.Foo.location := 12; t.Foo.payload := "hi"; t.Foo.size := 23; |}.
 End ConstructorWithPolymorphicRecord.
 
 Module RecordWithInnerPolymorphism.
   Module t.
     Record record : Set := Build {
-      f : forall {a : Set}, list a -> list a }.
+      f : forall {a : Set}, list a -> list a;
+    }.
     Definition with_f f (r : record) :=
       Build f.
   End t.
@@ -213,13 +221,14 @@ Module RecordWithInnerPolymorphism.
     | cons _ l' => l'
     end.
   
-  Definition r_value : t := {| t.f _ := f_value |}.
+  Definition r_value : t := {| t.f _ := f_value; |}.
 End RecordWithInnerPolymorphism.
 
 Module RecordWithInnerAndOuterPolymorphism.
   Module t.
     Record record {a : Set} : Set := Build {
-      f : forall {b : Set}, b -> b -> a }.
+      f : forall {b : Set}, b -> b -> a;
+    }.
     Arguments record : clear implicits.
     Definition with_f {t_a} f (r : record t_a) :=
       Build t_a f.

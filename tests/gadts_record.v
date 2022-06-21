@@ -8,7 +8,8 @@ Module ConstructorRecords_term.
     Module T_Rec.
       Record record {x y : Set} : Set := Build {
         x : x;
-        y : y }.
+        y : y;
+      }.
       Arguments record : clear implicits.
       Definition with_x {t_x t_y} x (r : record t_x t_y) :=
         Build t_x t_y x r.(y).

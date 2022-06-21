@@ -15,12 +15,12 @@ module RecordSkeleton = struct
            ^^ nest (!^":" ^^ Pp.set)
            ^^ !^":=" ^^ !^"Build" ^^ !^"{" ^^ newline
            ^^ indent
-                (separate (!^";" ^^ newline)
+                (separate empty
                    (fields
                    |> List.map (fun (x, typ) ->
                           nest
-                            (Name.to_coq x ^^ !^":" ^^ Type.to_coq None None typ))
-                   ))
+                            (Name.to_coq x ^^ !^":" ^^ Type.to_coq None None typ)
+                          ^-^ !^";" ^^ newline)))
            ^^ !^"}."
            ^^ (match typ_args with
               | [] -> empty

@@ -8,7 +8,8 @@ Inductive exp : vtag -> Set :=
 Module my_record.
   Record record {a : vtag} : Set := Build {
     x : exp a;
-    y : int }.
+    y : int;
+  }.
   Arguments record : clear implicits.
   Definition with_x {t_a} x (r : record t_a) :=
     Build t_a x r.(y).

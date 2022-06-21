@@ -1960,9 +1960,15 @@ let rec to_coq (paren : bool) (e : t) : SmartPrint.t =
                                              | Pattern.Tuple [] -> empty
                                              | _ ->
                                                  nest
-                                                   (!^"let" ^^ !^"'"
-                                                  ^-^ Pattern.to_coq false p
-                                                  ^^ !^":=")
+                                                   (!^"let"
+                                                   ^^ (match p with
+                                                      | Pattern.Tuple
+                                                          [ Pattern.Variable _ ]
+                                                        ->
+                                                          empty
+                                                      | _ -> !^"'")
+                                                   ^-^ Pattern.to_coq false p
+                                                   ^^ !^":=")
                                                  ^^ nest
                                                       (!^"cast"
                                                       ^^ Type.to_coq None
@@ -1977,7 +1983,7 @@ let rec to_coq (paren : bool) (e : t) : SmartPrint.t =
   | Record fields ->
       nest
         (!^"{|"
-        ^^ separate (!^";" ^^ space)
+        ^^ separate space
              (fields
              |> List.map (fun (x, arity, e) ->
                     nest
@@ -1985,7 +1991,7 @@ let rec to_coq (paren : bool) (e : t) : SmartPrint.t =
                          (PathName.to_coq x
                          ^^ separate space (Pp.n_underscores arity)
                          ^^ !^":=")
-                      ^^ to_coq false e)))
+                      ^^ to_coq false e ^-^ !^";")))
         ^^ !^"|}")
   | Field (e, x) -> to_coq true e ^-^ !^".(" ^-^ PathName.to_coq x ^-^ !^")"
   | IfThenElse (e1, e2, e3) ->

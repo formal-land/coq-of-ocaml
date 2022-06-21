@@ -30,7 +30,8 @@ Arguments Unrelated {_}.
 
 Module re_bis.
   Record record {bis : Set} : Set := Build {
-    bis : bis }.
+    bis : bis;
+  }.
   Arguments record : clear implicits.
   Definition with_bis {t_bis} bis (r : record t_bis) :=
     Build t_bis bis.
@@ -40,7 +41,8 @@ Definition re_bis_skeleton := re_bis.record.
 Module re.
   Record record {payload message : Set} : Set := Build {
     payload : payload;
-    message : message }.
+    message : message;
+  }.
   Arguments record : clear implicits.
   Definition with_payload {t_payload t_message} payload
     (r : record t_payload t_message) :=

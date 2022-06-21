@@ -10,7 +10,8 @@ Module ConstructorRecords_term.
   Module term.
     Module T_constr.
       Record record {b : Set} : Set := Build {
-        b : b }.
+        b : b;
+      }.
       Arguments record : clear implicits.
       Definition with_b {t_b} b (r : record t_b) :=
         Build t_b b.
@@ -37,7 +38,8 @@ Module ConstructorRecords_wrapper.
   Module wrapper.
     Module W_exp.
       Record record {x : Set} : Set := Build {
-        x : x }.
+        x : x;
+      }.
       Arguments record : clear implicits.
       Definition with_x {t_x} x (r : record t_x) :=
         Build t_x x.
@@ -46,7 +48,8 @@ Module ConstructorRecords_wrapper.
     
     Module W_term.
       Record record {x : Set} : Set := Build {
-        x : x }.
+        x : x;
+      }.
       Arguments record : clear implicits.
       Definition with_x {t_x} x (r : record t_x) :=
         Build t_x x.

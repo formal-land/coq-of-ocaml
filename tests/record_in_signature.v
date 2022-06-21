@@ -16,7 +16,8 @@ Module M.
     Record record {a : Set} : Set := Build {
       x : int;
       y : int;
-      label : a }.
+      label : a;
+    }.
     Arguments record : clear implicits.
     Definition with_x {t_a} x (r : record t_a) :=
       Build t_a x r.(y) r.(label).
@@ -27,7 +28,7 @@ Module M.
   End t.
   Definition t := t.record.
   
-  Definition v_value : t string := {| t.x := 0; t.y := 1; t.label := "hi" |}.
+  Definition v_value : t string := {| t.x := 0; t.y := 1; t.label := "hi"; |}.
   
   Definition module :=
     {|
