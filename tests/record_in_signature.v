@@ -30,6 +30,7 @@ Module M.
   
   Definition v_value : t string := {| t.x := 0; t.y := 1; t.label := "hi"; |}.
   
+  (* M *)
   Definition module :=
     {|
       Sig.v_value := v_value

@@ -642,6 +642,8 @@ let rec to_coq (fargs : FArgs.t) (defs : t list) : SmartPrint.t =
                match e with
                | Some (e, _) ->
                    newline ^^ newline
+                   ^^ nest (!^"(*" ^^ Name.to_coq name ^^ !^"*)")
+                   ^^ newline
                    ^^ nest
                         (!^"Definition" ^^ final_item_name
                         ^^ (if is_functor then !^"`{FArgs}"

@@ -77,6 +77,7 @@ Module F.
   Definition bar `{FArgs} : string :=
     V.(Validator.Commitment_Foo).(WithBar.bar).
   
+  (* F *)
   Definition functor `{FArgs} :=
     {|
       WithBar.bar := bar
