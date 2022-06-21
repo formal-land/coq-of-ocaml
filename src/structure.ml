@@ -57,6 +57,9 @@ module Value = struct
                   let { Exp.Header.name; typ_vars; typ; _ } = header in
                   nest
                     (!^"Axiom" ^^ Name.to_coq name ^^ !^":"
+                    ^^ (match fargs with
+                       | Some _ -> !^"forall" ^^ FArgs.to_coq fargs ^-^ !^","
+                       | None -> empty)
                     ^^ Type.typ_vars_to_coq braces !^"forall" !^"," typ_vars
                     ^^ Type.to_coq None None typ ^-^ !^".")))
           (* Reserve the notation keywords *)
