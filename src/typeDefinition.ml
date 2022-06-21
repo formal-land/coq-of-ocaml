@@ -208,12 +208,14 @@ module Inductive = struct
                       typ_args typ))
       |> List.concat)
 
-  let to_coq_notations_definition (name : Name.t) (definition : SmartPrint.t) :
-      SmartPrint.t =
-    nest (!^"Definition" ^^ Name.to_coq name ^^ !^":=" ^^ definition ^-^ !^".")
+  let to_coq_notations_definition (fargs : FArgs.t) (name : Name.t)
+      (definition : SmartPrint.t) : SmartPrint.t =
+    nest
+      (!^"Definition" ^^ Name.to_coq name ^^ FArgs.to_coq fargs ^^ !^":="
+     ^^ definition ^-^ !^".")
 
-  let to_coq_notations_record_definitions (inductive : t) : SmartPrint.t option
-      =
+  let to_coq_notations_record_definitions (fargs : FArgs.t) (inductive : t) :
+      SmartPrint.t option =
     match inductive.constructor_records with
     | [] -> None
     | _ :: _ ->
@@ -238,15 +240,17 @@ module Inductive = struct
                                        _,
                                        _ )
                                    ->
-                                     to_coq_notations_definition module_name
+                                     to_coq_notations_definition fargs
+                                       module_name
                                        (!^"'" ^-^ Name.to_coq name ^-^ !^"."
                                       ^-^ Name.to_coq module_name))))
                     ^^ newline ^^ !^"End" ^^ Name.to_coq name ^-^ !^".")))
 
-  let to_coq_notations_definitions (inductive : t) : SmartPrint.t list =
+  let to_coq_notations_definitions (fargs : FArgs.t) (inductive : t) :
+      SmartPrint.t list =
     inductive.notations
     |> List.map (fun (name, _, _) ->
-           to_coq_notations_definition name
+           to_coq_notations_definition fargs name
              (Name.to_coq (Name.prefix_by_single_quote name)))
 
   let to_coq_typs_implicits (fargs : FArgs.t) (left_typ_args : Name.t list)
@@ -306,9 +310,9 @@ module Inductive = struct
     let reserved_notations = to_coq_notations_reserved inductive in
     let notations_wheres = to_coq_notations_wheres subst inductive in
     let notations_record_definitions =
-      to_coq_notations_record_definitions inductive
+      to_coq_notations_record_definitions fargs inductive
     in
-    let notations_definitions = to_coq_notations_definitions inductive in
+    let notations_definitions = to_coq_notations_definitions fargs inductive in
     let implicit_arguments =
       List.concat
         (inductive.typs

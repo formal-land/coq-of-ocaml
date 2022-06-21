@@ -36,8 +36,7 @@ module RecordSkeleton = struct
                       ^-^ !^"."))
            ^^ newline
            ^^
-           (* We do not handle "with" functions for records in functors yet. *)
-           if with_with && fargs = None then
+           if with_with then
              separate newline
                (fields
                |> List.map (fun (name, _) ->
@@ -52,6 +51,7 @@ module RecordSkeleton = struct
                       nest
                         (!^"Definition"
                         ^^ Name.to_coq (Name.prefix_by_with name)
+                        ^^ FArgs.to_coq fargs
                         ^^ (match typ_args with
                            | [] -> empty
                            | _ :: _ ->
@@ -61,6 +61,7 @@ module RecordSkeleton = struct
                         ^-^ !^" :=" ^^ newline ^^ indent
                         @@ nest
                              (!^"Build"
+                             ^^ separate space (FArgs.to_coq_underscores fargs)
                              ^^ separate space prefixed_typ_args
                              ^^ separate space
                                   (fields
