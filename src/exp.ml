@@ -130,6 +130,9 @@ module ModuleTypValues = struct
                    Type.of_typ_expr true typ_vars val_type
                    >>= fun (_, _, new_typ_vars) ->
                    return (Some (Value (ident, List.length new_typ_vars)))
+               | Sig_module (ident, _, _, _, _)
+                 when Ident.name ident = "Internal_for_tests" ->
+                   return None
                | Sig_module (ident, _, { Types.md_type; _ }, _, _) ->
                    let* name = Name.of_ident false ident in
                    let* arity =
