@@ -704,7 +704,8 @@ let rec to_coq (fargs : FArgs.t) (defs : t list) : SmartPrint.t =
         nest
           (!^"Module" ^^ Name.to_coq name ^^ !^":=" ^^ PathName.to_coq reference
          ^-^ !^".")
-    | Signature (name, signature) -> Signature.to_coq_definition name signature
+    | Signature (name, signature) ->
+        Signature.to_coq_definition fargs name signature
     | Documentation (message, defs) ->
         nest (!^("(** " ^ message ^ " *)") ^^ newline ^^ to_coq fargs defs)
     | Error message -> !^("(* " ^ message ^ " *)")

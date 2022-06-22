@@ -347,11 +347,12 @@ let rec to_coq_item (signature_item : item) : SmartPrint.t =
 and to_coq_items (items : item list) : SmartPrint.t list =
   List.map to_coq_item items
 
-let to_coq_definition (name : Name.t) (signature : t) : SmartPrint.t =
+let to_coq_definition (fargs : FArgs.t) (name : Name.t) (signature : t) :
+    SmartPrint.t =
   !^"Module" ^^ Name.to_coq name ^-^ !^"." ^^ newline
   ^^ indent
        (nest
-          (!^"Record" ^^ !^"signature"
+          (!^"Record" ^^ !^"signature" ^^ FArgs.to_coq fargs
           ^^ Type.to_coq_grouped_typ_params Type.Braces signature.typ_params
           ^^ nest (!^":" ^^ Pp.set)
           ^^ !^":=" ^^ !^"{" ^^ newline
@@ -372,5 +373,6 @@ let to_coq_definition (name : Name.t) (signature : t) : SmartPrint.t =
            ^^ nest
                 (braces
                    (separate space
-                      (Pp.n_underscores (List.length signature.typ_params))))
+                      (FArgs.to_coq_underscores fargs
+                      @ Pp.n_underscores (List.length signature.typ_params))))
            ^-^ !^".")
