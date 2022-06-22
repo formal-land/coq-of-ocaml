@@ -78,11 +78,11 @@ let rec to_coq_s (need_parens : bool) (xs : parsed_string list) : SmartPrint.t =
   | PChar c :: xs ->
       let res = npchar c ^^ nest @@ to_coq_s true xs in
       if need_parens then parens res else res
-  | PDQuote :: xs -> to_coq_s need_parens @@ PString "\"\"" :: xs
+  | PDQuote :: xs -> to_coq_s need_parens @@ (PString "\"\"" :: xs)
   | PString s :: PDQuote :: xs ->
-      to_coq_s need_parens @@ PString (s ^ "\"\"") :: xs
+      to_coq_s need_parens @@ (PString (s ^ "\"\"") :: xs)
   | PString s1 :: PString s2 :: xs ->
-      to_coq_s need_parens @@ PString (s1 ^ s2) :: xs
+      to_coq_s need_parens @@ (PString (s1 ^ s2) :: xs)
   | [ PString s ] -> double_quotes !^s
   | PString s :: xs -> double_quotes !^s ^^ !^"++" ^^ nest @@ to_coq_s false xs
 
