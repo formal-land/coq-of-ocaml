@@ -210,7 +210,7 @@ let wrap_documentation (items : t list Monad.t) : t list Monad.t =
   match documentation with
   | None -> items
   | Some documentation ->
-      let* items in
+      let* items = items in
       return [ Documentation (documentation, items) ]
 
 let top_level_evaluation (e : expression) : t list Monad.t =

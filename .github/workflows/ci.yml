@@ -33,7 +33,7 @@ jobs:
         with:
           ocaml-version: ${{ matrix.ocaml-version }}
 
-      - run: opam install ocamlformat.0.18.0
+      - run: opam install ocamlformat.0.22.4
       - run: opam exec -- make fmt-check
       - run: opam pin add coq ${{ matrix.coq-version }}
       - run: opam pin add coq-of-ocaml.dev . --no-action
