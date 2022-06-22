@@ -16,7 +16,7 @@ jobs:
         os:
           - ubuntu-latest
         ocaml-version:
-          - 4.13.1
+          - 4.14.0
         coq-version:
           - 8.14.1
 

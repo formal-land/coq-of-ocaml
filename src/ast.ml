@@ -14,7 +14,7 @@ type t = {
   without_positivity_checking : bool;
 }
 
-let get_initial_loc (typedtree : Mtyper.typedtree) : Location.t =
+let get_initial_loc (typedtree : Merlin_kernel.Mtyper.typedtree) : Location.t =
   match typedtree with
   | `Implementation structure -> (
       match structure.str_items with

@@ -376,8 +376,9 @@ let of_ocaml (typs : type_declaration list) : t Monad.t =
       let* name = Name.of_ident false typ_id in
       AdtParameters.of_ocaml type_params >>= fun ind_vars ->
       let typ_args = AdtParameters.get_parameters ind_vars in
-      match typ.Types.desc with
-      | Tvariant { row_fields; _ } ->
+      match Types.get_desc typ with
+      | Tvariant row_desc ->
+          let row_fields = Types.row_fields row_desc in
           Monad.List.map (AdtConstructors.of_ocaml_row ind_vars) row_fields
           >>= fun single_constructors ->
           AdtConstructors.of_ocaml ind_vars single_constructors
@@ -454,8 +455,9 @@ let of_ocaml (typs : type_declaration list) : t Monad.t =
                 >>= fun typ_args ->
                 match typ with
                 | { typ_type = { type_manifest = Some typ; _ }; _ } -> (
-                    match typ.Types.desc with
-                    | Tvariant { row_fields; _ } ->
+                    match Types.get_desc typ with
+                    | Tvariant row_desc ->
+                        let row_fields = Types.row_fields row_desc in
                         Monad.List.map
                           (AdtConstructors.of_ocaml_row typ_args)
                           row_fields

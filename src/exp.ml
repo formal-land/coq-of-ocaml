@@ -1262,7 +1262,7 @@ and import_let_fun (typ_vars : Name.t Name.Map.t) (at_top_level : bool)
                   (* Special case for functions whose type is given by a type
                      synonym at the end rather than with a type on each
                      parameter or an explicit arrow type. *)
-                  match (vb_expr.exp_desc, vb_expr.exp_type.desc) with
+                  match (vb_expr.exp_desc, Types.get_desc vb_expr.exp_type) with
                   | Texp_function _, Tconstr (path, _, _) -> (
                       match Env.find_type path vb_expr.exp_env with
                       | { type_manifest = Some ty; _ } -> ty
@@ -1312,18 +1312,11 @@ and of_let (typ_vars : Name.t Name.Map.t) (is_rec : Asttypes.rec_flag)
     (cases : Typedtree.value_binding list) (e2 : t) : t Monad.t =
   match cases with
   | [
-   {
-     vb_pat =
-       {
-         pat_desc =
-           Tpat_construct
-             (_, { cstr_res = { desc = Tconstr (path, _, _); _ }; _ }, _, _);
-         _;
-       };
-     _;
-   };
+   { vb_pat = { pat_desc = Tpat_construct (_, { cstr_res; _ }, _, _); _ }; _ };
   ]
-    when PathName.is_unit path ->
+    when match Types.get_desc cstr_res with
+         | Tconstr (path, _, _) -> PathName.is_unit path
+         | _ -> false ->
       raise
         (ErrorMessage (e2, "top_level_evaluation"))
         SideEffect "Top-level evaluations are ignored"

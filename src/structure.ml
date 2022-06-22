@@ -348,22 +348,16 @@ let rec of_structure (structure : structure) : t list Monad.t =
                       vb_attributes;
                       vb_pat =
                         {
-                          pat_desc =
-                            Tpat_construct
-                              ( _,
-                                {
-                                  cstr_res = { desc = Tconstr (path, _, _); _ };
-                                  _;
-                                },
-                                _,
-                                _ );
+                          pat_desc = Tpat_construct (_, { cstr_res; _ }, _, _);
                           _;
                         };
                       vb_expr;
                       _;
                     };
                   ] )
-              when PathName.is_unit path ->
+              when match Types.get_desc cstr_res with
+                   | Tconstr (path, _, _) -> PathName.is_unit path
+                   | _ -> false ->
                 let* attributes = Attribute.of_attributes vb_attributes in
                 if Attribute.has_axiom_with_reason attributes then return []
                 else top_level_evaluation vb_expr
