@@ -237,10 +237,7 @@ let rec of_signature_items (prefix : string list) (let_in_type : let_in_type)
                          ModuleTyp.to_typ [] prefixed_id false module_typ
                        in
                        return ([ Module (prefixed_name, typ) ], let_in_type)))
-            | Tsig_open _ ->
-                raise
-                  ([ Error "open" ], let_in_type)
-                  NotSupported "Signature item `open` not handled."
+            | Tsig_open _ -> return ([], let_in_type)
             | Tsig_recmodule _ ->
                 raise
                   ([ Error "recursive_module" ], let_in_type)
