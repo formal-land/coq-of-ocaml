@@ -16,9 +16,9 @@ jobs:
         os:
           - ubuntu-latest
         ocaml-version:
-          - 4.12.0
+          - 4.13.1
         coq-version:
-          - 8.13.1
+          - 8.14.1
 
     runs-on: ${{ matrix.os }}
 
