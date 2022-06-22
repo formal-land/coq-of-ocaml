@@ -26,6 +26,7 @@ Module M1.
   Definition f_value {A : Set} (n_value : t) (m_value : A) : t * A :=
     (n_value, m_value).
   
+  (* M1 *)
   Definition module :=
     {|
       Sig1.f_value := f_value
@@ -38,6 +39,7 @@ Module M2.
   
   Definition f_value {A : Set} (n_value : t) : list A := nil.
   
+  (* M2 *)
   Definition module :=
     {|
       Sig2.f_value := f_value

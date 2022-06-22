@@ -4,16 +4,21 @@ open Monad.Notations
 
 (** Recursively get all the module type declarations inside a module declaration.
     We retreive the path and definition of each. *)
-let get_modtype_declarations_of_module_declaration (env : Env.t)
+let rec get_modtype_declarations_of_module_declaration (env : Env.t)
     (module_declaration : Types.module_declaration) :
     (Ident.t list * Types.modtype_declaration) list =
   match Env.scrape_alias env module_declaration.md_type with
   | Mty_signature signature ->
       signature
-      |> List.filter_map (function
+      |> List.concat_map (function
            | Types.Sig_modtype (module_type_ident, module_type, _) ->
-               Some ([ module_type_ident ], module_type)
-           | _ -> None)
+               [ ([ module_type_ident ], module_type) ]
+           | Sig_module (ident, _, module_declaration, _, _) ->
+               get_modtype_declarations_of_module_declaration env
+                 module_declaration
+               |> List.map (fun (idents, declaration) ->
+                      (ident :: idents, declaration))
+           | _ -> [])
   | _ -> []
   | exception _ -> []
 
@@ -37,15 +42,8 @@ let apply_idents_on_path (path : Path.t) (idents : Ident.t list) : Path.t =
 let merge_similar_paths (paths : Path.t list) : Path.t list Monad.t =
   paths |> Monad.List.sort_uniq PathName.compare_paths
 
-(** Find the [Path.t] of all the signature definitions which are found to be similar
-    to [signature]. If the signature is the one of a module used as a namespace there
-    should be none. If the signature is the one a first-class module there should be
-    exactly one. There may be more than one result if two signatures have the same
-    or similar definitions. In this case we will fail later with an explicit
-    error message. *)
-let find_similar_signatures (env : Env.t) (signature : Types.signature) :
-    (Path.t list * SignatureShape.t) Monad.t =
-  let shape = SignatureShape.of_signature None signature in
+let find_similar_signatures_with_shape (env : Env.t) (shape : SignatureShape.t)
+    : (Path.t list * SignatureShape.t) Monad.t =
   (* We explore signatures in the current namespace. *)
   let similar_signature_paths =
     Env.fold_modtypes
@@ -90,12 +88,24 @@ let find_similar_signatures (env : Env.t) (signature : Types.signature) :
   in
   return (paths, shape)
 
+(** Find the [Path.t] of all the signature definitions which are found to be similar
+    to [signature]. If the signature is the one of a module used as a namespace there
+    should be none. If the signature is the one a first-class module there should be
+    exactly one. There may be more than one result if two signatures have the same
+    or similar definitions. In this case we will fail later with an explicit
+    error message. *)
+let find_similar_signatures (env : Env.t) (signature : Types.signature) :
+    (Path.t list * SignatureShape.t) Monad.t =
+  let shape = SignatureShape.of_signature None signature in
+  if SignatureShape.is_empty shape then return ([], shape)
+  else find_similar_signatures_with_shape env shape
+
 type maybe_found = Found of Path.t | Not_found of string
 
 (** Get the path of the signature definition of the [module_typ]
     if it is a first-class module, [None] otherwise. Optionally, when given the path of the module we want to check for its signature, to verify if it is not
     in a blacklist. *)
-let rec is_module_typ_first_class (module_typ : Types.module_type)
+let rec is_module_typ_first_class_aux (module_typ : Types.module_type)
     (module_path : Path.t option) : maybe_found Monad.t =
   let* env = get_env in
   let* configuration = get_configuration in
@@ -121,7 +131,8 @@ let rec is_module_typ_first_class (module_typ : Types.module_type)
     match Mtype.scrape env module_typ with
     | Mty_alias path | Mty_ident path -> (
         match Env.find_module path env with
-        | { Types.md_type; _ } -> is_module_typ_first_class md_type module_path
+        | { Types.md_type; _ } ->
+            is_module_typ_first_class_aux md_type module_path
         | exception Not_found ->
             let reason = "Module " ^ Path.name path ^ " not found" in
             return (Not_found reason))
@@ -155,3 +166,36 @@ let rec is_module_typ_first_class (module_typ : Types.module_type)
               ^ "We use the concept of shape to find the name of a signature \
                  for Coq."))
     | Mty_functor _ -> return (Not_found "This is a functor type")
+
+type hash_index = {
+  module_typ : Types.module_type;
+  module_path : Path.t option;
+}
+
+(** A hash to optimize the execution of the [is_module_typ_first_class]
+    function. *)
+module Hash = Hashtbl.Make (struct
+  type t = hash_index
+
+  let equal x y =
+    x.module_typ == y.module_typ
+    &&
+    match (x.module_path, y.module_path) with
+    | Some path1, Some path2 -> path1 == path2
+    | None, None -> true
+    | _, _ -> false
+
+  let hash = Hashtbl.hash
+end)
+
+let is_module_typ_first_class_hash : maybe_found Hash.t = Hash.create 12
+
+let is_module_typ_first_class (module_typ : Types.module_type)
+    (module_path : Path.t option) : maybe_found Monad.t =
+  let index = { module_typ; module_path } in
+  match Hash.find_opt is_module_typ_first_class_hash index with
+  | Some result -> return result
+  | None ->
+      let* result = is_module_typ_first_class_aux module_typ module_path in
+      Hash.add is_module_typ_first_class_hash index result;
+      return result

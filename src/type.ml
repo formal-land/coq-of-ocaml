@@ -9,7 +9,6 @@ type t =
   | Kind of Kind.t
   | Arrow of t * t
   | Eq of t * t
-  | Sum of (string * t) list
   | Tuple of t list
   (* Application holds the information of what are tags *)
   | Apply of MixedPath.t * (t * bool) list
@@ -29,7 +28,6 @@ let tag_constructor_of (typ : t) =
   | Variable a -> "var(" ^ Name.to_string a ^ ")"
   | Arrow _ -> "arrow"
   | Eq _ -> "eq"
-  | Sum _ -> "sum"
   | Tuple _ -> "tuple"
   | Apply (mpath, _) -> MixedPath.to_string mpath
   | Signature _ -> "signature"
@@ -266,7 +264,6 @@ let rec typ_args_of_typ (typ : t) : Name.Set.t =
   | Variable x -> Name.Set.singleton x
   | Arrow (typ1, typ2) | Eq (typ1, typ2) | Let (_, typ1, typ2) ->
       typ_args_of_typs [ typ1; typ2 ]
-  | Sum typs -> typ_args_of_typs (List.map snd typs)
   | Tuple typs -> typ_args_of_typs typs
   | Apply (_, typs) -> typs |> List.map (fun x -> fst x) |> typ_args_of_typs
   | Signature (_, typ_params) ->
@@ -307,8 +304,6 @@ let subst_name (source : Name.t) (target : Name.t) (typ : t) : t =
     match typ with
     | Variable name -> if Name.equal name source then Variable target else typ
     | Arrow (typ1, typ2) -> Arrow (subst typ1, subst typ2)
-    | Sum tagged_typs ->
-        Sum (tagged_typs |> List.map (fun (tag, typ) -> (tag, subst typ)))
     | Tuple typs -> Tuple (List.map subst typs)
     | Apply (constructor, typs) ->
         let constructor_with_subst =
@@ -642,25 +637,14 @@ let rec of_typ_expr ?(should_tag = false) (with_free_vars : bool)
       raise (Error "nil", typ_vars, []) NotSupported "Nil type is not handled"
   | Tlink typ | Tsubst typ ->
       of_typ_expr ~should_tag with_free_vars typ_vars typ
-  | Tvariant { row_fields; _ } -> (
-      PathName.typ_of_variants (List.map fst row_fields) >>= fun path_name ->
-      match path_name with
-      | Some path_name ->
-          return (Apply (MixedPath.PathName path_name, []), typ_vars, [])
-      | None ->
-          Monad.List.fold_left
-            (fun (fields, typ_vars, new_typ_vars) (name, row_field) ->
-              let typs = type_exprs_of_row_field row_field in
-              let tag_list = tag_args_with should_tag typs in
-              of_typs_exprs ~tag_list with_free_vars typs typ_vars
-              >>= fun (typs, typ_vars, new_typ_vars') ->
-              return
-                ( (name, Tuple typs) :: fields,
-                  typ_vars,
-                  VarEnv.union new_typ_vars new_typ_vars' ))
-            ([], typ_vars, []) row_fields
-          >>= fun (fields, typ_vars, new_typ_vars) ->
-          return (Sum (List.rev fields), typ_vars, new_typ_vars))
+  | Tvariant { row_fields; _ } ->
+      let* path_name = PathName.typ_of_variants (List.map fst row_fields) in
+      let typ =
+        match path_name with
+        | Some path_name -> Apply (MixedPath.PathName path_name, [])
+        | None -> Apply (MixedPath.of_name (Name.of_string_raw "Variant.t"), [])
+      in
+      return (typ, typ_vars, [])
   | Tpoly (typ, typ_args) ->
       let* typ_args = AdtParameters.typ_params_ghost_marked typ_args in
       let typ_args = typ_args |> AdtParameters.get_parameters in
@@ -1000,10 +984,6 @@ let rec decode_only_variables (new_typ_vars : VarEnv.t) (typ : t) : t =
       FunTyps (names, t)
   | Arrow (t1, t2) -> Arrow (dec t1, dec t2)
   | Tuple ts -> Tuple (List.map dec ts)
-  | Sum ts ->
-      let strs, ts = List.split ts in
-      let ts = List.map dec ts in
-      Sum (List.combine strs ts)
   | Signature (path, ts) ->
       let names, ts = List.split ts in
       let ts = ts |> List.map @@ Option.map dec in
@@ -1056,7 +1036,6 @@ let rec local_typ_constructors_of_typ (typ : t) : Name.Set.t =
   | Variable x -> Name.Set.singleton x
   | Arrow (typ1, typ2) | Eq (typ1, typ2) | Let (_, typ1, typ2) ->
       local_typ_constructors_of_typs [ typ1; typ2 ]
-  | Sum typs -> local_typ_constructors_of_typs (List.map snd typs)
   | Tuple typs -> local_typ_constructors_of_typs typs
   | Apply (mixed_path, ts) -> (
       let typs = List.map (fun x -> fst x) ts in
@@ -1207,24 +1186,6 @@ let rec to_coq (subst : Subst.t option) (context : Context.t option) (typ : t) :
       Context.parens context Context.Eq
       @@ group (to_coq subst (Some Context.Eq) lhs ^^ !^"=")
       ^^ to_coq subst (Some Context.Eq) rhs
-  | Sum typs -> (
-      let typs =
-        typs
-        |> List.map (fun (name, typ) ->
-               let context =
-                 if List.length typs = 1 then context else Some Sum
-               in
-               group
-                 (nest (!^"(*" ^^ !^("`" ^ name) ^^ !^"*)")
-                 ^^ to_coq subst context typ))
-      in
-      match typs with
-      | [] -> !^"Empty_set"
-      | [ typ ] -> typ
-      | _ ->
-          Context.parens context Context.Sum
-          @@ nest
-          @@ separate (space ^^ !^"+" ^^ space) typs)
   | Tuple typs -> (
       match typs with
       | [] -> !^"unit"

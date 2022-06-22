@@ -10,7 +10,8 @@ Module Test.
         Record record {x1 x2 x3 : Set} : Set := Build {
           x1 : x1;
           x2 : x2;
-          x3 : x3 }.
+          x3 : x3;
+        }.
         Arguments record : clear implicits.
         Definition with_x1 {t_x1 t_x2 t_x3} x1 (r : record t_x1 t_x2 t_x3) :=
           Build t_x1 t_x2 t_x3 x1 r.(x2) r.(x3).

@@ -4,29 +4,36 @@ open Monad.Notations
 module RecordSkeleton = struct
   type t = { fields : Name.t list; module_name : Name.t; typ_name : Name.t }
 
-  let to_coq_record (module_name : Name.t) (typ_name : Name.t)
+  let to_coq_record (fargs : FArgs.t) (module_name : Name.t) (typ_name : Name.t)
       (typ_args : VarEnv.t) (fields : (Name.t * Type.t) list) (with_with : bool)
       : SmartPrint.t =
     nest
       (!^"Module" ^^ Name.to_coq module_name ^-^ !^"." ^^ newline
       ^^ indent
-           (!^"Record" ^^ !^"record"
+           (!^"Record" ^^ !^"record" ^^ FArgs.to_coq fargs
            ^^ Type.typ_vars_to_coq braces space space typ_args
            ^^ nest (!^":" ^^ Pp.set)
            ^^ !^":=" ^^ !^"Build" ^^ !^"{" ^^ newline
            ^^ indent
-                (separate (!^";" ^^ newline)
+                (separate empty
                    (fields
                    |> List.map (fun (x, typ) ->
                           nest
-                            (Name.to_coq x ^^ !^":" ^^ Type.to_coq None None typ))
-                   ))
+                            (Name.to_coq x ^^ !^":" ^^ Type.to_coq None None typ)
+                          ^-^ !^";" ^^ newline)))
            ^^ !^"}."
            ^^ (match typ_args with
               | [] -> empty
-              | _ :: _ ->
-                  newline ^^ !^"Arguments" ^^ !^"record" ^^ !^":" ^^ !^"clear"
-                  ^^ !^"implicits" ^-^ !^".")
+              | _ :: _ -> (
+                  match fargs with
+                  | None ->
+                      newline ^^ !^"Arguments" ^^ !^"record" ^^ !^":"
+                      ^^ !^"clear" ^^ !^"implicits" ^-^ !^"."
+                  | Some _ ->
+                      newline ^^ !^"Arguments" ^^ !^"record"
+                      ^^ braces
+                           (separate space (FArgs.to_coq_underscores fargs))
+                      ^-^ !^"."))
            ^^ newline
            ^^
            if with_with then
@@ -44,6 +51,7 @@ module RecordSkeleton = struct
                       nest
                         (!^"Definition"
                         ^^ Name.to_coq (Name.prefix_by_with name)
+                        ^^ FArgs.to_coq fargs
                         ^^ (match typ_args with
                            | [] -> empty
                            | _ :: _ ->
@@ -53,6 +61,7 @@ module RecordSkeleton = struct
                         ^-^ !^" :=" ^^ newline ^^ indent
                         @@ nest
                              (!^"Build"
+                             ^^ separate space (FArgs.to_coq_underscores fargs)
                              ^^ separate space prefixed_typ_args
                              ^^ separate space
                                   (fields
@@ -68,14 +77,14 @@ module RecordSkeleton = struct
            else empty)
       ^^ !^"End" ^^ Name.to_coq module_name ^-^ !^"." ^^ newline
       ^^ nest
-           (!^"Definition" ^^ Name.to_coq typ_name ^^ !^":="
-          ^^ Name.to_coq module_name ^-^ !^".record" ^-^ !^"."))
+           (!^"Definition" ^^ Name.to_coq typ_name ^^ FArgs.to_coq fargs
+          ^^ !^":=" ^^ Name.to_coq module_name ^-^ !^".record" ^-^ !^"."))
 
   let to_coq (record_skeleton : t) : SmartPrint.t =
     let { fields; module_name; typ_name } = record_skeleton in
     let typ_vars = List.map (fun field -> (field, Kind.Set)) fields in
     let body = fields |> List.map (fun field -> (field, Type.Variable field)) in
-    to_coq_record module_name typ_name typ_vars body true
+    to_coq_record None module_name typ_name typ_vars body true
 end
 
 type ret_typ = Variant of AdtParameters.t | Tagged of Type.t list

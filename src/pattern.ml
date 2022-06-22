@@ -53,7 +53,7 @@ let rec of_pattern :
         Constant.of_constant c >>= fun constant ->
         return (Some (Constant constant))
     | Tpat_variant (label, p, _) ->
-        PathName.constructor_of_variant label >>= fun path_name ->
+        let* path_name = PathName.constructor_of_variant_with_error label in
         (match p with
         | None -> return (Some [])
         | Some p ->
@@ -135,6 +135,21 @@ let rec of_extensible_pattern :
   | Tpat_any -> return None
   | Tpat_value pat -> of_extensible_pattern (pat :> value general_pattern)
   | _ -> error
+
+(** Get the free variables appearing in a pattern. *)
+let rec get_free_vars (p : t) : Name.Set.t =
+  let get_free_vars_of_list (ps : t list) : Name.Set.t =
+    List.fold_left Name.Set.union Name.Set.empty (List.map get_free_vars ps)
+  in
+  match p with
+  | Any -> Name.Set.empty
+  | Constant _ -> Name.Set.empty
+  | Variable x -> Name.Set.singleton x
+  | Tuple es -> get_free_vars_of_list es
+  | Constructor (_, es) -> get_free_vars_of_list es
+  | Alias (e, _) -> get_free_vars e
+  | Record entries -> get_free_vars_of_list (List.map snd entries)
+  | Or (e1, e2) -> get_free_vars_of_list [ e1; e2 ]
 
 let rec has_or_patterns (p : t) : bool =
   match p with

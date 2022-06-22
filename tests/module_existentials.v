@@ -16,6 +16,7 @@ Module M_infer.
   
   Definition v_value : int := 12.
   
+  (* M_infer *)
   Definition module :=
     {|
       S.v_value := v_value
@@ -28,6 +29,7 @@ Module M_definition.
   
   Definition v_value : int := 12.
   
+  (* M_definition *)
   Definition module :=
     {|
       S.v_value := v_value
@@ -40,6 +42,7 @@ Module M_abstract.
   
   Definition v_value : int := 12.
   
+  (* M_abstract *)
   Definition module :=
     {|
       S.v_value := v_value
@@ -59,6 +62,7 @@ Module F_definition.
   Definition v_value `{FArgs} : M1.(S.t) * M2.(S.t) * string :=
     (M1.(S.v_value), M2.(S.v_value), "foo").
   
+  (* F_definition *)
   Definition functor `{FArgs} :=
     {|
       S.v_value := v_value
@@ -82,6 +86,7 @@ Module F_abstract.
   Definition v_value `{FArgs} : M1.(S.t) * M2.(S.t) * string :=
     (M1.(S.v_value), M2.(S.v_value), "foo").
   
+  (* F_abstract *)
   Definition functor `{FArgs} :=
     {|
       S.v_value := v_value
@@ -110,6 +115,7 @@ Module M_with_functor.
     
     Definition v_value `{FArgs} : M.(S.t) * int := (M.(S.v_value), 12).
     
+    (* F *)
     Definition functor `{FArgs} :=
       {|
         S.v_value := v_value
@@ -119,6 +125,7 @@ Module M_with_functor.
     let '_ := F.Build_FArgs M in
     F.functor.
   
+  (* M_with_functor *)
   Definition module :=
     {|
       S_with_functor.F _ := F
@@ -136,6 +143,7 @@ Definition S_without_abstract := S_without_abstract.signature.
 Module M_without_abstract.
   Definition s_value : string := "foo".
   
+  (* M_without_abstract *)
   Definition module :=
     {|
       S_without_abstract.s_value := s_value

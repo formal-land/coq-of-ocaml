@@ -6,7 +6,10 @@ open Monad.Notations
 
 (** A value is a toplevel definition made with a "let". *)
 module Value = struct
-  type t = Exp.t option Exp.Definition.t
+  type t = {
+    use_unsafe_fixpoints : bool;
+    definition : Exp.t option Exp.Definition.t;
+  }
 
   let to_coq_typ_vars (header : Exp.Header.t) : SmartPrint.t =
     let { Exp.Header.typ_vars; _ } = header in
@@ -32,7 +35,8 @@ module Value = struct
 
   (** Pretty-print a value definition to Coq. *)
   let to_coq (fargs : FArgs.t) (value : t) : SmartPrint.t =
-    match value.Exp.Definition.cases with
+    let { use_unsafe_fixpoints; definition } = value in
+    match definition.Exp.Definition.cases with
     | [] -> empty
     | _ :: _ ->
         let axiom_cases, notation_cases, cases =
@@ -44,16 +48,21 @@ module Value = struct
                   if header.Exp.Header.is_notation then
                     (axiom_cases, (header, e) :: notation_cases, cases)
                   else (axiom_cases, notation_cases, (header, e) :: cases))
-            value.Exp.Definition.cases ([], [], [])
+            definition.Exp.Definition.cases ([], [], [])
         in
         separate (newline ^^ newline)
-          ((axiom_cases
+          ((* The axiomatized definitions *)
+           (axiom_cases
            |> List.map (fun header ->
                   let { Exp.Header.name; typ_vars; typ; _ } = header in
                   nest
                     (!^"Axiom" ^^ Name.to_coq name ^^ !^":"
+                    ^^ (match fargs with
+                       | Some _ -> !^"forall" ^^ FArgs.to_coq fargs ^-^ !^","
+                       | None -> empty)
                     ^^ Type.typ_vars_to_coq braces !^"forall" !^"," typ_vars
                     ^^ Type.to_coq None None typ ^-^ !^".")))
+          (* Reserve the notation keywords *)
           @ (match notation_cases with
             | [] -> []
             | _ :: _ ->
@@ -67,6 +76,7 @@ module Value = struct
                              ^^ double_quotes (!^"'" ^-^ Name.to_coq name)
                              ^-^ !^".")));
                 ])
+          (* The definitions *)
           @ (cases
             |> List.mapi (fun index (header, e) ->
                    let first_case = index = 0 in
@@ -75,9 +85,14 @@ module Value = struct
                      | [] -> index = List.length cases - 1
                      | _ :: _ -> false
                    in
+                   let free_vars_of_e = Exp.get_free_vars e in
                    nest
                      ((if first_case then
-                       if value.Exp.Definition.is_rec then !^"Fixpoint"
+                       (if use_unsafe_fixpoints then
+                        !^"#[bypass_check(guard)]" ^^ newline
+                       else empty)
+                       ^^
+                       if definition.Exp.Definition.is_rec then !^"Fixpoint"
                        else !^"Definition"
                       else !^"with")
                      ^^
@@ -93,9 +108,12 @@ module Value = struct
                                     let { Exp.Header.name; typ_vars; _ } =
                                       header
                                     in
-                                    to_coq_notation_synonym name typ_vars))
+                                    if Name.Set.mem name free_vars_of_e then
+                                      to_coq_notation_synonym name typ_vars
+                                    else empty))
                           ^^ Exp.to_coq false e)
                      ^-^ if last_case then !^"." else empty)))
+          (* Define the notations *)
           @ snd
               (List.fold_left
                  (fun ((index, previous_notations), definitions) (header, e) ->
@@ -104,6 +122,7 @@ module Value = struct
                    let { Exp.Header.name; typ_vars; structs; typ; _ } =
                      header
                    in
+                   let free_vars_of_e = Exp.get_free_vars e in
                    let definition =
                      nest
                        ((if first_case then !^"where" else !^"and")
@@ -128,8 +147,13 @@ module Value = struct
                                        (separate space
                                           (previous_notations
                                           |> List.map (fun (name, typ_vars) ->
-                                                 to_coq_notation_synonym name
-                                                   typ_vars))
+                                                 if
+                                                   Name.Set.mem name
+                                                     free_vars_of_e
+                                                 then
+                                                   to_coq_notation_synonym name
+                                                     typ_vars
+                                                 else empty))
                                        ^^ Exp.to_coq false e))))
                        ^-^ if last_case then !^"." else empty)
                    in
@@ -138,6 +162,7 @@ module Value = struct
                  ((0, []), [])
                  notation_cases)
           @
+          (* Wrap the notations into definitions *)
           match notation_cases with
           | [] -> []
           | _ :: _ ->
@@ -205,7 +230,13 @@ let top_level_evaluation (e : expression) : t list Monad.t =
        [
          Documentation
            ( documentation,
-             [ Value { is_rec = false; cases = [ (header, Some e) ] } ] );
+             [
+               Value
+                 {
+                   use_unsafe_fixpoints = false;
+                   definition = { is_rec = false; cases = [ (header, Some e) ] };
+                 };
+             ] );
        ])
 
 let typ_definitions_of_typ_extension_raw (typ_extension : extension_constructor)
@@ -334,8 +365,11 @@ let rec of_structure (structure : structure) : t list Monad.t =
             | Tstr_eval (e, _) -> top_level_evaluation e
             | Tstr_value (is_rec, cases) ->
                 push_env
-                  ( Exp.import_let_fun Name.Map.empty true is_rec cases
-                  >>= fun def -> return [ Value def ] )
+                  (let* use_unsafe_fixpoints, definition =
+                     retrieve_unsafe_fixpoints
+                       (Exp.import_let_fun Name.Map.empty true is_rec cases)
+                   in
+                   return [ Value { use_unsafe_fixpoints; definition } ])
             | Tstr_type (_, typs) ->
                 (* Because types may be recursive, so we need the types to already be in
                    the environment. This is useful for example for the detection of
@@ -346,6 +380,9 @@ let rec of_structure (structure : structure) : t list Monad.t =
             | Tstr_exception { tyexn_constructor; _ } ->
                 typ_definitions_of_typ_extension tyexn_constructor
             | Tstr_open _ -> return []
+            | Tstr_module { mb_id = Some ident; _ }
+              when Ident.name ident = "Internal_for_tests" ->
+                return []
             | Tstr_module { mb_id; mb_expr; mb_attributes; _ } ->
                 let* name = Name.of_optional_ident false mb_id in
                 let* has_plain_module_attribute =
@@ -605,6 +642,8 @@ let rec to_coq (fargs : FArgs.t) (defs : t list) : SmartPrint.t =
                match e with
                | Some (e, _) ->
                    newline ^^ newline
+                   ^^ nest (!^"(*" ^^ Name.to_coq name ^^ !^"*)")
+                   ^^ newline
                    ^^ nest
                         (!^"Definition" ^^ final_item_name
                         ^^ (if is_functor then !^"`{FArgs}"
@@ -665,7 +704,8 @@ let rec to_coq (fargs : FArgs.t) (defs : t list) : SmartPrint.t =
         nest
           (!^"Module" ^^ Name.to_coq name ^^ !^":=" ^^ PathName.to_coq reference
          ^-^ !^".")
-    | Signature (name, signature) -> Signature.to_coq_definition name signature
+    | Signature (name, signature) ->
+        Signature.to_coq_definition fargs name signature
     | Documentation (message, defs) ->
         nest (!^("(** " ^ message ^ " *)") ^^ newline ^^ to_coq fargs defs)
     | Error message -> !^("(* " ^ message ^ " *)")

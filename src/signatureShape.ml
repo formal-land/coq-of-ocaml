@@ -39,7 +39,7 @@ type t = {
   precise : TypeShape.t option Name.Map.t option;
 }
 
-let of_signature_without_hash (attributes : Typedtree.attributes option)
+let of_signature (attributes : Typedtree.attributes option)
     (signature : Types.signature) : t =
   let shape_list =
     signature
@@ -66,32 +66,14 @@ let of_signature_without_hash (attributes : Typedtree.attributes option)
   in
   { high_level; precise }
 
-(** A hash to optimize the computation of shapes. *)
-module Hash = Hashtbl.Make (struct
-  type t = Types.signature
-
-  let equal = ( == )
-
-  let hash = Hashtbl.hash
-end)
-
-let signature_shape_hash : t Hash.t = Hash.create 12
-
-let of_signature (attributes : Parsetree.attributes option)
-    (signature : Types.signature) : t =
-  match Hash.find_opt signature_shape_hash signature with
-  | None ->
-      let shape = of_signature_without_hash attributes signature in
-      Hash.add signature_shape_hash signature shape;
-      shape
-  | Some shape -> shape
-
 let are_equal (shape1 : t) (shape2 : t) : bool =
   Name.Set.equal shape1.high_level shape2.high_level
   &&
   match (shape1.precise, shape2.precise) with
   | Some precise1, Some precise2 -> Name.Map.equal ( = ) precise1 precise2
   | _ -> true
+
+let is_empty (shape : t) : bool = Name.Set.is_empty shape.high_level
 
 let pretty_print (shape : t) : SmartPrint.t =
   shape.high_level |> Name.Set.elements

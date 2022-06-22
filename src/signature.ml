@@ -211,6 +211,9 @@ let rec of_signature_items (prefix : string list) (let_in_type : let_in_type)
                 raise
                   ([ Error "module_type" ], let_in_type)
                   NotSupported "Signatures inside signatures are not handled."
+            | Tsig_module { md_id = Some ident; _ }
+              when Ident.name ident = "Internal_for_tests" ->
+                return ([], let_in_type)
             | Tsig_module { md_id; md_type; _ } -> (
                 let id =
                   match md_id with
@@ -234,10 +237,7 @@ let rec of_signature_items (prefix : string list) (let_in_type : let_in_type)
                          ModuleTyp.to_typ [] prefixed_id false module_typ
                        in
                        return ([ Module (prefixed_name, typ) ], let_in_type)))
-            | Tsig_open _ ->
-                raise
-                  ([ Error "open" ], let_in_type)
-                  NotSupported "Signature item `open` not handled."
+            | Tsig_open _ -> return ([], let_in_type)
             | Tsig_recmodule _ ->
                 raise
                   ([ Error "recursive_module" ], let_in_type)
@@ -262,21 +262,27 @@ let rec of_signature_items (prefix : string list) (let_in_type : let_in_type)
                       add_new_let_in_type prefix let_in_type typ_id
                     in
                     let* typ_args =
-                      type_params
-                      |> Monad.List.map (fun typ_param ->
-                             let* name = Type.of_type_expr_variable typ_param in
-                             return (name, 0))
+                      type_params |> Monad.List.map Type.of_type_expr_variable
                     in
                     let* typ = Type.of_type_expr_without_free_vars typ in
                     let typ_with_let_in_type =
                       apply_let_in_type let_in_type
-                        (Type.ForallTyps (typ_args, typ))
+                        (Type.FunTyps (typ_args, typ))
                     in
                     return
                       ([ TypSynonym (name, typ_with_let_in_type) ], let_in_type)
-                | _ ->
+                | typs ->
+                    let* rev_typs, let_in_type =
+                      Monad.List.fold_left
+                        (fun (rev_typs, let_in_type) typ ->
+                          let* name, let_in_type =
+                            add_new_let_in_type prefix let_in_type typ.typ_id
+                          in
+                          return (TypExistential name :: rev_typs, let_in_type))
+                        ([], let_in_type) typs
+                    in
                     raise
-                      ([ Error "mutual_type" ], let_in_type)
+                      (List.rev rev_typs, let_in_type)
                       NotSupported
                       "Mutual type definitions in signatures not handled.")
             | Tsig_typext _ -> return ([], let_in_type)
@@ -341,11 +347,12 @@ let rec to_coq_item (signature_item : item) : SmartPrint.t =
 and to_coq_items (items : item list) : SmartPrint.t list =
   List.map to_coq_item items
 
-let to_coq_definition (name : Name.t) (signature : t) : SmartPrint.t =
+let to_coq_definition (fargs : FArgs.t) (name : Name.t) (signature : t) :
+    SmartPrint.t =
   !^"Module" ^^ Name.to_coq name ^-^ !^"." ^^ newline
   ^^ indent
        (nest
-          (!^"Record" ^^ !^"signature"
+          (!^"Record" ^^ !^"signature" ^^ FArgs.to_coq fargs
           ^^ Type.to_coq_grouped_typ_params Type.Braces signature.typ_params
           ^^ nest (!^":" ^^ Pp.set)
           ^^ !^":=" ^^ !^"{" ^^ newline
@@ -366,5 +373,6 @@ let to_coq_definition (name : Name.t) (signature : t) : SmartPrint.t =
            ^^ nest
                 (braces
                    (separate space
-                      (Pp.n_underscores (List.length signature.typ_params))))
+                      (FArgs.to_coq_underscores fargs
+                      @ Pp.n_underscores (List.length signature.typ_params))))
            ^-^ !^".")

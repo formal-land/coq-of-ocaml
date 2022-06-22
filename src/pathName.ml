@@ -199,14 +199,20 @@ let of_label_description (label_description : Types.label_description) :
       raise path Unexpected
         "Unexpected label description without a type constructor"
 
-let constructor_of_variant (label : string) : t Monad.t =
+let constructor_of_variant (label : string) : t option Monad.t =
   let* configuration = get_configuration in
   let constructor = Configuration.get_variant_constructor configuration label in
   match constructor with
   | Some constructor ->
-      return { path = []; base = Name.of_string_raw constructor }
+      return (Some { path = []; base = Name.of_string_raw constructor })
+  | None -> return None
+
+let constructor_of_variant_with_error (label : string) : t Monad.t =
+  let* path_name = constructor_of_variant label in
+  match path_name with
+  | Some path_name -> return path_name
   | None ->
-      Name.of_string false label >>= fun base ->
+      let* base = Name.of_string false label in
       raise { path = []; base } NotSupported
         ("Constructor of the variant `" ^ label ^ " unknown. Prefer to use\n"
        ^ "standard algebraic data types when possible.")
@@ -263,10 +269,7 @@ let typ_of_variants (labels : string list) : t option Monad.t =
     ^ "variants in the configuration file."
   in
   match typs with
-  | [] ->
-      raise None NotSupported
-        ("No type known for the following variants: " ^ variants_message
-       ^ "\n\n" ^ variant_help_error_message)
+  | [] -> return None
   | [ typ ] -> return (Some typ)
   | typ :: _ :: _ ->
       raise (Some typ) NotSupported

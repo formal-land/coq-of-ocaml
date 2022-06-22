@@ -39,8 +39,8 @@ Arguments Node {_}.
 Reserved Notation "'zero".
 Reserved Notation "'sums".
 
+#[bypass_check(guard)]
 Fixpoint sum (t_value : tree int) : int :=
-  let zero := 'zero in
   let sums := 'sums in
   match t_value with
   | Leaf n_value => n_value
@@ -66,6 +66,7 @@ Definition sums := 'sums.
 Reserved Notation "'counts".
 Reserved Notation "'length".
 
+#[bypass_check(guard)]
 Fixpoint count {A : Set} (t_value : tree (list A)) : int :=
   let counts {A} := 'counts A in
   let length {A} := 'length A in
@@ -82,9 +83,14 @@ where "'counts" :=
     end)
 
 and "'length" :=
-  (fun (A : Set) => fun (l_value : list A) =>
-    let counts {A} := 'counts A in
-    CoqOfOCaml.List.length l_value).
+  (fun (A : Set) => fun (l_value : list A) => CoqOfOCaml.List.length l_value).
 
 Definition counts {A : Set} := 'counts A.
 Definition length {A : Set} := 'length A.
+
+#[bypass_check(guard)]
+Fixpoint factorial (n_value : int) {struct n_value} : int :=
+  if equiv_decb n_value 0 then
+    1
+  else
+    Z.mul n_value (factorial (Z.sub n_value 1)).

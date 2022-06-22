@@ -7,7 +7,8 @@ Definition ex := extensible_type.
 Module Re.
   Record record : Set := Build {
     v : string;
-    n : int }.
+    n : int;
+  }.
   Definition with_v v (r : record) :=
     Build v r.(n).
   Definition with_n n (r : record) :=
@@ -22,11 +23,12 @@ Definition v1 : ex := Build_extensible "Int" int 12.
 Definition v2 : ex := Build_extensible "String" (string * bool) ("hi", true).
 
 Definition v3 : ex :=
-  Build_extensible "Re" Re {| Re.v := "message"; Re.n := 10 |}.
+  Build_extensible "Re" Re {| Re.v := "message"; Re.n := 10; |}.
 
 Module Bar.
   Record record : Set := Build {
-    message : string }.
+    message : string;
+  }.
   Definition with_message message (r : record) :=
     Build message.
 End Bar.
@@ -38,7 +40,7 @@ Definition match_ex (x_value : ex) : int :=
     if String.eqb tag "Empty" then
       0
     else if String.eqb tag "Int" then
-      let 'n_value := cast int payload in
+      let n_value := cast int payload in
       n_value
     else if String.eqb tag "String" then
       let '(m_value, b_value) := cast (string * bool) payload in

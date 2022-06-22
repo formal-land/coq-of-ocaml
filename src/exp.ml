@@ -45,12 +45,14 @@ type dependent_pattern_match = {
     simplify the importation in Coq. *)
 type t =
   | Constant of Constant.t
-  | Variable of MixedPath.t * string list
+  | Variable of MixedPath.t * (string * string) list
   | Tuple of t list  (** A tuple of expressions. *)
-  | Constructor of PathName.t * string list * t list
+  | Constructor of PathName.t * (string * string) list * t list
       (** A constructor name, some implicits, and a list of arguments. *)
   | ConstructorExtensible of string * Type.t * t
       (** A constructor of an extensible type, with a tag and a payload. *)
+  | ConstructorVariant of string * (Type.t * t) option
+      (** A constructor of polymorphic variant, with a tag and a payload. *)
   | Apply of t * t option list  (** An application. *)
   | Return of string * t  (** Application specialized for a return operation. *)
   | InfixOperator of string * t * t
@@ -128,6 +130,9 @@ module ModuleTypValues = struct
                    Type.of_typ_expr true typ_vars val_type
                    >>= fun (_, _, new_typ_vars) ->
                    return (Some (Value (ident, List.length new_typ_vars)))
+               | Sig_module (ident, _, _, _, _)
+                 when Ident.name ident = "Internal_for_tests" ->
+                   return None
                | Sig_module (ident, _, { Types.md_type; _ }, _, _) ->
                    let* name = Name.of_ident false ident in
                    let* arity =
@@ -239,6 +244,223 @@ let rec smart_return (operator : string) (e : t) : t Monad.t =
       in
       return (Match (e, dep_match, cases, is_with_default_case))
   | _ -> return (Return (operator, e))
+
+(** The free exitential type variables in an expression. This is useful to know
+    in the match which exitential types are actually used, so that unused
+    existential types are not printed. *)
+let rec free_existential_typs (e : t) : Name.Set.t =
+  let of_list (es : t list) : Name.Set.t =
+    List.fold_left Name.Set.union Name.Set.empty
+      (List.map free_existential_typs es)
+  in
+  let of_definition (definition : t option Definition.t) : Name.Set.t =
+    let { Definition.cases; _ } = definition in
+    let free_typs_list =
+      cases
+      |> List.map (fun ({ Header.typ_vars; args; typ; _ }, body) ->
+             let typs = List.map snd args in
+             let es = match body with None -> [] | Some body -> [ body ] in
+             Name.Set.diff
+               (Name.Set.union
+                  (Type.local_typ_constructors_of_typs (typ :: typs))
+                  (of_list es))
+               (Name.Set.of_list (List.map fst typ_vars)))
+    in
+    List.fold_left Name.Set.union Name.Set.empty free_typs_list
+  in
+  let of_implicits (implicits : (string * string) list) : Name.Set.t =
+    Name.Set.of_list
+      (List.map (fun (_, typ) -> Name.of_string_raw typ) implicits)
+  in
+  match e with
+  | Constant _ -> Name.Set.empty
+  | Variable (_, implicits) -> of_implicits implicits
+  | Tuple es -> of_list es
+  | Constructor (_, implicits, es) ->
+      Name.Set.union (of_implicits implicits) (of_list es)
+  | ConstructorExtensible (_, typ, e) ->
+      Name.Set.union
+        (Type.local_typ_constructors_of_typ typ)
+        (free_existential_typs e)
+  | ConstructorVariant (_, typ_e) -> (
+      match typ_e with
+      | None -> Name.Set.empty
+      | Some (typ, e) ->
+          Name.Set.union
+            (Type.local_typ_constructors_of_typ typ)
+            (free_existential_typs e))
+  | Apply (e, es) ->
+      let es = e :: List.filter_map (fun x -> x) es in
+      of_list es
+  | Return (_, e) -> free_existential_typs e
+  | InfixOperator (_, e1, e2) -> of_list [ e1; e2 ]
+  | Function (_, typ, e) ->
+      let typs = match typ with None -> [] | Some typ -> [ typ ] in
+      Name.Set.union
+        (Type.local_typ_constructors_of_typs typs)
+        (free_existential_typs e)
+  | Functions (_, e) -> free_existential_typs e
+  | LetVar (_, _, typ_vars, e1, e2) ->
+      Name.Set.diff (of_list [ e1; e2 ]) (Name.Set.of_list typ_vars)
+  | LetFun (definition, e) ->
+      Name.Set.union (of_definition definition) (free_existential_typs e)
+  | LetTyp (name, typ_vars, typ, e) ->
+      Name.Set.union
+        (Name.Set.diff
+           (Type.local_typ_constructors_of_typ typ)
+           (Name.Set.of_list typ_vars))
+        (Name.Set.remove name (free_existential_typs e))
+  | LetModuleUnpack (_, _, e) -> free_existential_typs e
+  | Match (e, _, cases, _) ->
+      let cast_typs =
+        cases
+        |> List.map (fun (_, cast, e) ->
+               let new_typ_vars =
+                 match cast with
+                 | Some { bound_vars; enable = true; _ } ->
+                     Name.Set.of_list (List.map fst bound_vars)
+                 | _ -> Name.Set.empty
+               in
+               let typ_vars_of_typs =
+                 match cast with
+                 | Some
+                     { bound_vars; return_typ; cast_result; enable = true; _ }
+                   ->
+                     Type.local_typ_constructors_of_typs
+                       ((if cast_result then [ return_typ ] else [])
+                       @ List.map snd bound_vars)
+                 | _ -> Name.Set.empty
+               in
+               Name.Set.diff
+                 (Name.Set.union typ_vars_of_typs (free_existential_typs e))
+                 new_typ_vars)
+      in
+      List.fold_left Name.Set.union Name.Set.empty
+        (free_existential_typs e :: cast_typs)
+  | MatchExtensible (e1, cases) ->
+      let es = e1 :: List.map snd cases in
+      let typs =
+        cases
+        |> List.filter_map (fun (pattern, _) ->
+               match pattern with None -> None | Some (_, _, typ) -> Some typ)
+      in
+      Name.Set.union (of_list es) (Type.local_typ_constructors_of_typs typs)
+  | Record items ->
+      let es = List.map (fun (_, _, e) -> e) items in
+      of_list es
+  | Field (e, _) -> free_existential_typs e
+  | IfThenElse (e1, e2, e3) -> of_list [ e1; e2; e3 ]
+  | Module items ->
+      let es = List.map (fun (_, _, e) -> e) items in
+      of_list es
+  | ModulePack (_, e) -> free_existential_typs e
+  | Functor (_, typ, e) ->
+      Name.Set.union
+        (Type.local_typ_constructors_of_typ typ)
+        (free_existential_typs e)
+  | Cast (e, typ) ->
+      Name.Set.union
+        (Type.local_typ_constructors_of_typ typ)
+        (free_existential_typs e)
+  | TypAnnotation (e, typ) ->
+      Name.Set.union
+        (Type.local_typ_constructors_of_typ typ)
+        (free_existential_typs e)
+  | Assert (typ, e) ->
+      Name.Set.union
+        (Type.local_typ_constructors_of_typ typ)
+        (free_existential_typs e)
+  | Error _ -> Name.Set.empty
+  | ErrorArray es -> of_list es
+  | ErrorTyp typ -> Type.local_typ_constructors_of_typ typ
+  | ErrorMessage (e, _) -> free_existential_typs e
+  | Ltac _ -> Name.Set.empty
+
+(** Get the free variables of an expression. This is useful to optimize the
+    translation of mutually recursive definitions implemented as notation,
+    by detecting which ones are used. *)
+let rec get_free_vars (e : t) : Name.Set.t =
+  let get_free_vars_of_list (es : t list) : Name.Set.t =
+    List.fold_left Name.Set.union Name.Set.empty (List.map get_free_vars es)
+  in
+  match e with
+  | Constant _ -> Name.Set.empty
+  | Variable (x, _) -> (
+      match x with
+      | MixedPath.PathName { path = []; base } -> Name.Set.singleton base
+      | _ -> Name.Set.empty)
+  | Tuple es -> get_free_vars_of_list es
+  | Constructor (_, _, es) -> get_free_vars_of_list es
+  | ConstructorExtensible (_, _, e) -> get_free_vars e
+  | ConstructorVariant (_, typ_e) -> (
+      match typ_e with None -> Name.Set.empty | Some (_, e) -> get_free_vars e)
+  | Apply (e, es) ->
+      let es = e :: List.filter_map (fun x -> x) es in
+      get_free_vars_of_list es
+  | Return (_, e) -> get_free_vars e
+  | InfixOperator (_, e1, e2) -> get_free_vars_of_list [ e1; e2 ]
+  | Function (x, _, e) -> Name.Set.remove x (get_free_vars e)
+  | Functions (names, e) ->
+      Name.Set.diff (get_free_vars e) (Name.Set.of_list names)
+  | LetVar (_, x, _, e1, e2) ->
+      Name.Set.union (get_free_vars e1) (Name.Set.remove x (get_free_vars e2))
+  | LetFun (definition, e) ->
+      let defined_names =
+        definition.cases |> List.map (fun ({ Header.name; _ }, _) -> name)
+      in
+      let is_rec = definition.is_rec in
+      let free_vars_of_bodies =
+        definition.cases
+        |> List.map (fun ({ Header.args; _ }, body) ->
+               match body with
+               | None -> Name.Set.empty
+               | Some body ->
+                   Name.Set.diff (get_free_vars body)
+                     (Name.Set.of_list (List.map fst args)))
+      in
+      let free_vars_of_definition =
+        Name.Set.diff
+          (List.fold_left Name.Set.union Name.Set.empty free_vars_of_bodies)
+          (if is_rec then Name.Set.of_list defined_names else Name.Set.empty)
+      in
+      Name.Set.union free_vars_of_definition
+        (Name.Set.diff (get_free_vars e) (Name.Set.of_list defined_names))
+  | LetTyp (_, _, _, e) -> get_free_vars e
+  | LetModuleUnpack (x, _, e) -> Name.Set.remove x (get_free_vars e)
+  | Match (e, _, entries, _) ->
+      Name.Set.union (get_free_vars e)
+        (List.fold_left Name.Set.union Name.Set.empty
+           (entries
+           |> List.map (fun (pattern, _, e) ->
+                  Name.Set.diff (get_free_vars e)
+                    (Pattern.get_free_vars pattern))))
+  | MatchExtensible (e, entries) ->
+      Name.Set.union (get_free_vars e)
+        (List.fold_left Name.Set.union Name.Set.empty
+           (entries
+           |> List.map (fun (pattern, e) ->
+                  let free_vars_of_pattern =
+                    match pattern with
+                    | Some (_, pattern, _) -> Pattern.get_free_vars pattern
+                    | None -> Name.Set.empty
+                  in
+                  Name.Set.diff (get_free_vars e) free_vars_of_pattern)))
+  | Record entries ->
+      get_free_vars_of_list (List.map (fun (_, _, e) -> e) entries)
+  | Field (e, _) -> get_free_vars e
+  | IfThenElse (e1, e2, e3) -> get_free_vars_of_list [ e1; e2; e3 ]
+  | Module entries ->
+      get_free_vars_of_list (List.map (fun (_, _, e) -> e) entries)
+  | ModulePack (_, e) -> get_free_vars e
+  | Functor (x, _, e) -> Name.Set.remove x (get_free_vars e)
+  | Cast (e, _) -> get_free_vars e
+  | TypAnnotation (e, _) -> get_free_vars e
+  | Assert (_, e) -> get_free_vars e
+  | Error _ -> Name.Set.empty
+  | ErrorArray es -> get_free_vars_of_list es
+  | ErrorTyp _ -> Name.Set.empty
+  | ErrorMessage (e, _) -> get_free_vars e
+  | Ltac _ -> Name.Set.empty
 
 (** Import an OCaml expression. *)
 let rec of_expression (typ_vars : Name.t Name.Map.t) (e : expression) :
@@ -469,12 +691,28 @@ let rec of_expression (typ_vars : Name.t Name.Map.t) (e : expression) :
                   return (Constructor (x, implicits, es')))
           | Texp_variant (label, e) -> (
               let* path_name = PathName.constructor_of_variant label in
-              let constructor = Variable (MixedPath.PathName path_name, []) in
-              match e with
-              | None -> return constructor
-              | Some e ->
-                  let* e = of_expression typ_vars e in
-                  return (Apply (constructor, [ Some e ])))
+              match path_name with
+              | None ->
+                  let* typ_e =
+                    match e with
+                    | None -> return None
+                    | Some e ->
+                        let* typ =
+                          Type.of_type_expr_without_free_vars e.exp_type
+                        in
+                        let* e = of_expression typ_vars e in
+                        return (Some (typ, e))
+                  in
+                  return (ConstructorVariant (label, typ_e))
+              | Some path_name -> (
+                  let constructor =
+                    Variable (MixedPath.PathName path_name, [])
+                  in
+                  match e with
+                  | None -> return constructor
+                  | Some e ->
+                      let* e = of_expression typ_vars e in
+                      return (Apply (constructor, [ Some e ]))))
           | Texp_record { fields; extended_expression; _ } -> (
               Array.to_list fields
               |> Monad.List.filter_map (fun (label_description, definition) ->
@@ -653,19 +891,53 @@ let rec of_expression (typ_vars : Name.t Name.Map.t) (e : expression) :
               } -> (
               match ands with
               | [] -> (
-                  let let_symbol = Path.last bop_op_path in
+                  let* let_symbol_mixed_path =
+                    MixedPath.of_path true bop_op_path
+                  in
+                  let let_symbol = MixedPath.to_string let_symbol_mixed_path in
+                  let* configuration = get_configuration in
+                  let let_symbol =
+                    Configuration.is_monadic_let configuration let_symbol
+                  in
                   let* pattern = Pattern.of_pattern c_lhs in
                   let* e1 = of_expression typ_vars bop_exp in
                   let* e2 = of_expression typ_vars c_rhs in
-                  match pattern with
-                  | Some (Variable name) ->
+                  let cases =
+                    match pattern with
+                    | None -> []
+                    | Some pattern -> [ (pattern, None, e2) ]
+                  in
+                  match (let_symbol, pattern) with
+                  | None, Some (Variable name) ->
+                      return
+                        (Apply
+                           ( Variable (let_symbol_mixed_path, []),
+                             [ Some e1; Some (Function (name, None, e2)) ] ))
+                  | None, _ ->
+                      return
+                        (Apply
+                           ( Variable (let_symbol_mixed_path, []),
+                             [
+                               Some e1;
+                               Some
+                                 (Function
+                                    ( Name.FunctionParameter,
+                                      None,
+                                      Match
+                                        ( Variable
+                                            ( MixedPath.PathName
+                                                {
+                                                  PathName.path = [];
+                                                  base = Name.FunctionParameter;
+                                                },
+                                              [] ),
+                                          None,
+                                          cases,
+                                          false ) ));
+                             ] ))
+                  | Some let_symbol, Some (Variable name) ->
                       return (LetVar (Some let_symbol, name, [], e1, e2))
-                  | _ ->
-                      let cases =
-                        match pattern with
-                        | None -> []
-                        | Some pattern -> [ (pattern, None, e2) ]
-                      in
+                  | Some let_symbol, _ ->
                       return
                         (LetVar
                            ( Some let_symbol,
@@ -880,6 +1152,34 @@ and of_match :
              in
              (p, existential_cast, rhs))
     in
+    (* We remove unused existential type variables *)
+    let cases =
+      cases
+      |> List.map (fun (p, existential_cast, rhs) ->
+             let existential_cast =
+               match existential_cast with
+               | None -> None
+               | Some existential_cast ->
+                   let { new_typ_vars; bound_vars; return_typ; _ } =
+                     existential_cast
+                   in
+                   let free_typ_vars =
+                     let typs = return_typ :: List.map snd bound_vars in
+                     Name.Set.union
+                       (Type.local_typ_constructors_of_typs typs)
+                       (free_existential_typs rhs)
+                   in
+                   Some
+                     {
+                       existential_cast with
+                       new_typ_vars =
+                         VarEnv.keep_only
+                           (Name.Set.elements free_typ_vars)
+                           new_typ_vars;
+                     }
+             in
+             (p, existential_cast, rhs))
+    in
     let t = Match (e, dep_match, cases, is_with_default_case) in
     (* If its a deppendent pattern matching then add eq_refl at the end of the match *)
     match dep_match with
@@ -936,6 +1236,9 @@ and import_let_fun (typ_vars : Name.t Name.Map.t) (at_top_level : bool)
          Attribute.of_attributes vb_attributes >>= fun attributes ->
          let is_axiom = Attribute.has_axiom_with_reason attributes in
          let structs = Attribute.get_structs attributes in
+         let* _ =
+           match structs with [] -> return () | _ :: _ -> use_unsafe_fixpoint
+         in
          set_env vb_expr.exp_env
            (set_loc p.pat_loc
               ( Pattern.of_pattern p >>= fun p ->
@@ -1269,6 +1572,9 @@ and of_structure (typ_vars : Name.t Name.Map.t) (signature_path : Path.t)
                        "Mutually recursive type definition not handled here")
              | Tstr_typext _ -> return e_next
              | Tstr_exception _ -> return e_next
+             | Tstr_module { mb_id = Some ident; _ }
+               when Ident.name ident = "Internal_for_tests" ->
+                 return e_next
              | Tstr_module { mb_id; mb_expr; _ } ->
                  let* name = Name.of_optional_ident false mb_id in
                  of_module_expr typ_vars mb_expr (Some mb_expr.mod_type)
@@ -1388,6 +1694,10 @@ let rec flatten_list (e : t) : t list option =
 let to_coq_let_symbol (let_symbol : string option) : SmartPrint.t =
   match let_symbol with None -> !^"let" | Some let_symbol -> !^let_symbol
 
+let to_coq_implicit (implicit : string * string) : SmartPrint.t =
+  let name, value = implicit in
+  nest (parens (!^name ^^ !^":=" ^^ !^value))
+
 (** Pretty-print an expression to Coq (inside parenthesis if the [paren] flag is
     set). *)
 let rec to_coq (paren : bool) (e : t) : SmartPrint.t =
@@ -1398,9 +1708,7 @@ let rec to_coq (paren : bool) (e : t) : SmartPrint.t =
       match implicits with
       | [] -> x
       | _ :: _ ->
-          parens
-            (separate space
-               (x :: List.map (fun implicit -> !^implicit) implicits)))
+          parens (separate space (x :: List.map to_coq_implicit implicits)))
   | Tuple es -> (
       match es with
       | [] -> !^"tt"
@@ -1409,7 +1717,7 @@ let rec to_coq (paren : bool) (e : t) : SmartPrint.t =
           parens @@ nest
           @@ separate (!^"," ^^ space) (List.map (to_coq true) es))
   | Constructor (x, implicits, es) -> (
-      let implicits = List.map (fun implicit -> !^implicit) implicits in
+      let implicits = List.map to_coq_implicit implicits in
       match flatten_list e with
       | Some [] -> (
           let nil = !^"nil" in
@@ -1431,9 +1739,23 @@ let rec to_coq (paren : bool) (e : t) : SmartPrint.t =
            ^^ !^("\"" ^ tag ^ "\"")
            ^^ Type.to_coq None (Some Type.Context.Apply) typ
            ^^ to_coq true payload))
+  | ConstructorVariant (tag, typ_payload) ->
+      Pp.parens paren
+        (nest
+           (!^"Variant.Build"
+           ^^ !^("\"" ^ tag ^ "\"")
+           ^^ (match typ_payload with
+              | None -> !^"unit"
+              | Some (typ, _) -> Type.to_coq None (Some Type.Context.Apply) typ)
+           ^^
+           match typ_payload with
+           | None -> !^"tt"
+           | Some (_, payload) -> to_coq true payload))
   | Apply (e_f, e_xs) -> (
       match e_f with
-      | Apply (e_f, e_xs') -> to_coq paren (Apply (e_f, e_xs' @ e_xs))
+      | Apply (e_f, e_xs')
+        when List.for_all (function None -> false | Some _ -> true) e_xs' ->
+          to_coq paren (Apply (e_f, e_xs' @ e_xs))
       | _ ->
           let missing_args, all_args, _ =
             List.fold_left
@@ -1638,9 +1960,15 @@ let rec to_coq (paren : bool) (e : t) : SmartPrint.t =
                                              | Pattern.Tuple [] -> empty
                                              | _ ->
                                                  nest
-                                                   (!^"let" ^^ !^"'"
-                                                  ^-^ Pattern.to_coq false p
-                                                  ^^ !^":=")
+                                                   (!^"let"
+                                                   ^^ (match p with
+                                                      | Pattern.Tuple
+                                                          [ Pattern.Variable _ ]
+                                                        ->
+                                                          empty
+                                                      | _ -> !^"'")
+                                                   ^-^ Pattern.to_coq false p
+                                                   ^^ !^":=")
                                                  ^^ nest
                                                       (!^"cast"
                                                       ^^ Type.to_coq None
@@ -1655,7 +1983,7 @@ let rec to_coq (paren : bool) (e : t) : SmartPrint.t =
   | Record fields ->
       nest
         (!^"{|"
-        ^^ separate (!^";" ^^ space)
+        ^^ separate space
              (fields
              |> List.map (fun (x, arity, e) ->
                     nest
@@ -1663,7 +1991,7 @@ let rec to_coq (paren : bool) (e : t) : SmartPrint.t =
                          (PathName.to_coq x
                          ^^ separate space (Pp.n_underscores arity)
                          ^^ !^":=")
-                      ^^ to_coq false e)))
+                      ^^ to_coq false e ^-^ !^";")))
         ^^ !^"|}")
   | Field (e, x) -> to_coq true e ^-^ !^".(" ^-^ PathName.to_coq x ^-^ !^")"
   | IfThenElse (e1, e2, e3) ->
@@ -1765,7 +2093,7 @@ and to_coq_cast_existentials (existential_cast : match_existential_cast option)
   in
   match existential_cast with
   | None -> e
-  | Some { new_typ_vars; bound_vars; use_axioms; return_typ; enable; _ } -> (
+  | Some { new_typ_vars; bound_vars; use_axioms; enable; _ } -> (
       let variable_names =
         Pp.primitive_tuple
           (bound_vars |> List.map (fun (name, _) -> Name.to_coq name))
@@ -1805,13 +2133,9 @@ and to_coq_cast_existentials (existential_cast : match_existential_cast option)
           let existential_names_pattern =
             Pp.primitive_tuple_pattern new_typ_vars_names
           in
-          let return_typ = Type.decode_only_variables new_typ_vars return_typ in
-          let return_typ =
-            build_existential_return (List.map fst new_typ_vars) return_typ
-          in
           nest
             (!^"let" ^^ !^"'existT" ^^ !^"_" ^^ existential_names
-           ^^ variable_names ^^ !^"as" ^^ !^"exi" ^^ !^":="
+           ^^ variable_names ^^ !^":="
             ^^ nest
                  (let operator, option =
                     if use_axioms then ("cast_exists", "Es") else ("existT", "A")
@@ -1828,9 +2152,6 @@ and to_coq_cast_existentials (existential_cast : match_existential_cast option)
                   ^^ (if use_axioms then empty
                      else Pp.primitive_tuple_infer (List.length new_typ_vars))
                   ^^ variable_names)
-            ^^ nest
-                 (!^"return"
-                 ^^ Type.to_coq None (Some Type.Context.Apply) return_typ)
             ^^ !^"in" ^^ newline ^^ e))
 
 and to_coq_exist_s (module_typ_params : int Tree.t) (e : SmartPrint.t) :

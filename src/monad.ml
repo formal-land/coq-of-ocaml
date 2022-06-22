@@ -14,6 +14,7 @@ module Command = struct
     | GetEnvStack : Env.t list t
     | Raise : 'a * Error.Category.t * string -> 'a t
     | Use : bool * string * string -> unit t
+    | UseUnsafeFixpoint : unit t
 end
 
 module Wrapper = struct
@@ -23,6 +24,7 @@ end
 type 'a t =
   | Bind : 'b t * ('b -> 'a t) -> 'a t
   | Command of 'a Command.t
+  | RetrieveUnsafeFixpoints : 'a t -> (bool * 'a) t
   | Return of 'a
   | Wrapper of Wrapper.t * 'a t
 
@@ -56,6 +58,11 @@ module Notations = struct
 
   let use (import : bool) (base : string) (name : string) : unit t =
     Command (Command.Use (import, base, name))
+
+  let use_unsafe_fixpoint : unit t = Command Command.UseUnsafeFixpoint
+
+  let retrieve_unsafe_fixpoints (x : 'a t) : (bool * 'a) t =
+    RetrieveUnsafeFixpoints x
 end
 
 module List = struct

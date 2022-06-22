@@ -30,6 +30,7 @@ Module M.
   
   Definition id {A : Set} (x_value : A) : A := x_value.
   
+  (* M *)
   Definition module :=
     {|
       Source.x_value := x_value;
@@ -48,6 +49,7 @@ Module F.
   
   Definition y_value `{FArgs} : X.(Source.t) := X.(Source.x_value).
   
+  (* F *)
   Definition functor `{FArgs} :=
     {|
       Target.y_value := y_value
@@ -67,6 +69,7 @@ Module FSubst.
   
   Definition y_value `{FArgs} : X.(Source.t) := X.(Source.x_value).
   
+  (* FSubst *)
   Definition functor `{FArgs} :=
     {|
       Target.y_value := y_value
@@ -88,6 +91,7 @@ Module Sum.
   Definition y_value `{FArgs} : int :=
     Z.add X.(Source.x_value) Y.(Source.x_value).
   
+  (* Sum *)
   Definition functor `{FArgs} :=
     {|
       Target.y_value := y_value
@@ -125,6 +129,7 @@ Module GenFun.
   
   Definition y_value : int := 23.
   
+  (* GenFun *)
   Definition module :=
     {|
       Target.y_value := y_value
@@ -156,6 +161,7 @@ Module LargeF.
   
   Definition z_value `{FArgs} : X.(Source.t) := y_value.
   
+  (* LargeF *)
   Definition functor `{FArgs} :=
     {|
       LargeTarget.y_value := y_value;
