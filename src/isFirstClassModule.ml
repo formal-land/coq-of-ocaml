@@ -22,10 +22,10 @@ let rec get_modtype_declarations_of_module_declaration (env : Env.t)
   | _ -> []
   | exception _ -> []
 
-let is_modtype_declaration_similar_to_shape
+let is_modtype_declaration_similar_to_shape (env : Env.t)
     (modtype_declaration : Types.modtype_declaration) (shape : SignatureShape.t)
     : bool =
-  match modtype_declaration.mtd_type with
+  match Option.map (Env.scrape_alias env) modtype_declaration.mtd_type with
   | Some (Mty_signature signature) ->
       let shape' =
         SignatureShape.of_signature (Some modtype_declaration.mtd_attributes)
@@ -48,7 +48,7 @@ let find_similar_signatures_with_shape (env : Env.t) (shape : SignatureShape.t)
   let similar_signature_paths =
     Env.fold_modtypes
       (fun _ signature_path modtype_declaration signature_paths ->
-        if is_modtype_declaration_similar_to_shape modtype_declaration shape
+        if is_modtype_declaration_similar_to_shape env modtype_declaration shape
         then signature_path :: signature_paths
         else signature_paths)
       None env []
@@ -65,8 +65,8 @@ let find_similar_signatures_with_shape (env : Env.t) (shape : SignatureShape.t)
               get_modtype_declarations_of_module_declaration env
                 module_declaration
               |> List.filter (fun (_, modtype_declaration) ->
-                     is_modtype_declaration_similar_to_shape modtype_declaration
-                       shape)
+                     is_modtype_declaration_similar_to_shape env
+                       modtype_declaration shape)
               |> List.map (fun (idents, _) ->
                      apply_idents_on_path module_path idents)
             in
