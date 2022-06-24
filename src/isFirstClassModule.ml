@@ -5,6 +5,7 @@ open Monad.Notations
 (** Recursively get all the module type declarations inside a module declaration.
     We retreive the path and definition of each. *)
 let rec get_modtype_declarations_of_module_declaration (env : Env.t)
+    module_path
     (module_declaration : Types.module_declaration) :
     (Ident.t list * Types.modtype_declaration) list =
   match Env.scrape_alias env module_declaration.md_type with
@@ -12,27 +13,33 @@ let rec get_modtype_declarations_of_module_declaration (env : Env.t)
       signature
       |> List.concat_map (function
            | Types.Sig_modtype (module_type_ident, module_type, _) ->
+            let module_type = Env.find_modtype (Pdot (module_path, Ident.name module_type_ident)) env in
+            print_endline (Ident.name module_type_ident);
+            (match module_type.mtd_type with
+            | Some _ -> print_endline "Some"
+            | None -> print_endline "None");
                [ ([ module_type_ident ], module_type) ]
-           | Sig_module (ident, _, module_declaration, _, _) ->
+           (* | Sig_module (ident, _, module_declaration, _, _) ->
                get_modtype_declarations_of_module_declaration env
                  module_declaration
                |> List.map (fun (idents, declaration) ->
-                      (ident :: idents, declaration))
+                      (ident :: idents, declaration)) *)
            | _ -> [])
   | _ -> []
   | exception _ -> []
 
-let is_modtype_declaration_similar_to_shape
+let is_modtype_declaration_similar_to_shape env
     (modtype_declaration : Types.modtype_declaration) (shape : SignatureShape.t)
     : bool =
-  match modtype_declaration.mtd_type with
+  match Option.map (Env.scrape_alias env) modtype_declaration.mtd_type with
   | Some (Mty_signature signature) ->
       let shape' =
         SignatureShape.of_signature (Some modtype_declaration.mtd_attributes)
           signature
       in
+      print_endline (Pp.to_string (SignatureShape.pretty_print shape'));
       SignatureShape.are_equal shape shape'
-  | _ -> false
+  | _ -> print_endline "fallllllllllllse"; false
 
 let apply_idents_on_path (path : Path.t) (idents : Ident.t list) : Path.t =
   List.fold_left
@@ -44,11 +51,13 @@ let merge_similar_paths (paths : Path.t list) : Path.t list Monad.t =
 
 let find_similar_signatures_with_shape (env : Env.t) (shape : SignatureShape.t)
     : (Path.t list * SignatureShape.t) Monad.t =
+  print_endline "**************** begin find similar ****************";
   (* We explore signatures in the current namespace. *)
   let similar_signature_paths =
     Env.fold_modtypes
       (fun _ signature_path modtype_declaration signature_paths ->
-        if is_modtype_declaration_similar_to_shape modtype_declaration shape
+        print_endline ("Signature path: " ^ Path.name signature_path);
+        if is_modtype_declaration_similar_to_shape env modtype_declaration shape
         then signature_path :: signature_paths
         else signature_paths)
       None env []
@@ -59,13 +68,47 @@ let find_similar_signatures_with_shape (env : Env.t) (shape : SignatureShape.t)
     match similar_signature_paths with
     | _ :: _ -> []
     | [] ->
-        Env.fold_modules
-          (fun _ module_path module_declaration signature_paths ->
+        (* Env.fold_modtypes
+          (fun _ modtyp_path modtyp_declaration signature_paths ->
+            print_endline ("Module type path: " ^ Path.name modtyp_path);
+            (* get_modtype_declarations_of_module_declaration env
+                module_declaration |> List.iter (fun (idents, modtype_declaration) ->
+              print_endline "idents:";
+              List.iter (fun ident -> print_endline (Ident.name ident)) idents;
+              if is_modtype_declaration_similar_to_shape env modtype_declaration shape then
+                print_endline "similar"
+              else
+                print_endline "not similar"
+            ); *)
             let similar_modtype_declarations =
-              get_modtype_declarations_of_module_declaration env
+              (* get_modtype_declarations_of_module_declaration env
                 module_declaration
               |> List.filter (fun (_, modtype_declaration) ->
-                     is_modtype_declaration_similar_to_shape modtype_declaration
+                     is_modtype_declaration_similar_to_shape env modtype_declaration
+                       shape)
+              |> List.map (fun (idents, _) ->
+                     apply_idents_on_path module_path idents)
+            in *)
+              [] in
+            similar_modtype_declarations @ signature_paths)
+          None env [] *)
+        Env.fold_modules
+          (fun _ module_path module_declaration signature_paths ->
+            print_endline ("Module path: " ^ Path.name module_path);
+            get_modtype_declarations_of_module_declaration env
+                module_path module_declaration |> List.iter (fun (idents, modtype_declaration) ->
+              print_endline "idents:";
+              List.iter (fun ident -> print_endline (Ident.name ident)) idents;
+              if is_modtype_declaration_similar_to_shape env modtype_declaration shape then
+                print_endline "similar"
+              else
+                print_endline "not similar"
+            );
+            let similar_modtype_declarations =
+              get_modtype_declarations_of_module_declaration env
+                module_path module_declaration
+              |> List.filter (fun (_, modtype_declaration) ->
+                     is_modtype_declaration_similar_to_shape env modtype_declaration
                        shape)
               |> List.map (fun (idents, _) ->
                      apply_idents_on_path module_path idents)
@@ -86,6 +129,7 @@ let find_similar_signatures_with_shape (env : Env.t) (shape : SignatureShape.t)
            in
            return (not is_in_black_list))
   in
+  print_endline "**************** end find similar ****************";
   return (paths, shape)
 
 (** Find the [Path.t] of all the signature definitions which are found to be similar
@@ -97,6 +141,7 @@ let find_similar_signatures_with_shape (env : Env.t) (shape : SignatureShape.t)
 let find_similar_signatures (env : Env.t) (signature : Types.signature) :
     (Path.t list * SignatureShape.t) Monad.t =
   let shape = SignatureShape.of_signature None signature in
+  print_endline (Pp.to_string (SignatureShape.pretty_print shape));
   if SignatureShape.is_empty shape then return ([], shape)
   else find_similar_signatures_with_shape env shape
 
@@ -109,7 +154,7 @@ let rec is_module_typ_first_class_aux (module_typ : Types.module_type)
     (module_path : Path.t option) : maybe_found Monad.t =
   let* env = get_env in
   let* configuration = get_configuration in
-  let* is_in_black_list =
+  (* let* is_in_black_list =
     match module_path with
     | None -> return false
     | Some module_path ->
@@ -127,7 +172,7 @@ let rec is_module_typ_first_class_aux (module_typ : Types.module_type)
         return (is_in_configuration_black_list || has_black_list_attribute)
   in
   if is_in_black_list then return (Not_found "In blacklist")
-  else
+  else *)
     match Mtype.scrape env module_typ with
     | Mty_alias path | Mty_ident path -> (
         match Env.find_module path env with
@@ -194,9 +239,9 @@ let is_module_typ_first_class_hash : maybe_found Hash.t = Hash.create 12
 let is_module_typ_first_class (module_typ : Types.module_type)
     (module_path : Path.t option) : maybe_found Monad.t =
   let index = { module_typ; module_path } in
-  match Hash.find_opt is_module_typ_first_class_hash index with
+  (* match Hash.find_opt is_module_typ_first_class_hash index with
   | Some result -> return result
-  | None ->
+  | None -> *)
       let* result = is_module_typ_first_class_aux module_typ module_path in
       Hash.add is_module_typ_first_class_hash index result;
       return result
