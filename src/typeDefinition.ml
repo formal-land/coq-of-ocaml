@@ -369,7 +369,32 @@ let filter_in_free_vars (typ_args : Name.t list) (free_vars : Name.Set.t) :
   |> List.filter_map (function typ_arg ->
          if Name.Set.mem typ_arg free_vars then Some typ_arg else None)
 
-let of_ocaml (typs : type_declaration list) : t Monad.t =
+let of_ocaml_abstract_typs (typs : type_declaration list) :
+    (t list * type_declaration list) Monad.t =
+  Monad.List.fold_right
+    (fun typ (defs, non_abstract_typs) ->
+      match typ with
+      | {
+       typ_id;
+       typ_type =
+         { type_kind = Type_abstract; type_manifest = None; type_params; _ };
+       typ_attributes;
+       _;
+      } ->
+          let* typ_attributes = Attribute.of_attributes typ_attributes in
+          let* name = Name.of_ident false typ_id in
+          let* typ_args = AdtParameters.of_ocaml type_params in
+          let typ_args_with_unknowns =
+            if not (Attribute.has_phantom typ_attributes) then
+              AdtParameters.get_parameters typ_args
+            else []
+          in
+          return
+            (Abstract (name, typ_args_with_unknowns) :: defs, non_abstract_typs)
+      | _ -> return (defs, typ :: non_abstract_typs))
+    typs ([], [])
+
+let of_ocaml_non_abstract_typs (typs : type_declaration list) : t Monad.t =
   match typs with
   | [ { typ_id; typ_type = { type_manifest = Some typ; type_params; _ }; _ } ]
     -> (
@@ -398,24 +423,6 @@ let of_ocaml (typs : type_declaration list) : t Monad.t =
           let free_vars = Type.typ_args_of_typ typ in
           let typ_args = filter_in_free_vars typ_args free_vars in
           return (Synonym (name, typ_args, typ)))
-  | [
-   {
-     typ_id;
-     typ_type =
-       { type_kind = Type_abstract; type_manifest = None; type_params; _ };
-     typ_attributes;
-     _;
-   };
-  ] ->
-      Attribute.of_attributes typ_attributes >>= fun typ_attributes ->
-      let* name = Name.of_ident false typ_id in
-      AdtParameters.of_ocaml type_params >>= fun typ_args ->
-      let typ_args_with_unknowns =
-        if not (Attribute.has_phantom typ_attributes) then
-          AdtParameters.get_parameters typ_args
-        else []
-      in
-      return (Abstract (name, typ_args_with_unknowns))
   | [
    {
      typ_id;
@@ -486,11 +493,7 @@ let of_ocaml (typs : type_declaration list) : t Monad.t =
                    { type_kind = Type_abstract; type_manifest = None; _ };
                  _;
                 } ->
-                    raise
-                      (constructor_records, notations, records, typs)
-                      NotSupported
-                      "Abstract types not supported in mutually recursive \
-                       definitions"
+                    return (constructor_records, notations, records, typs)
                 | {
                  typ_type =
                    {
@@ -587,6 +590,17 @@ let of_ocaml (typs : type_declaration list) : t Monad.t =
              records;
              typs = List.rev typs;
            })
+
+let of_ocaml (typs : type_declaration list) : t list Monad.t =
+  let* abstract_defs, non_abstract_typs = of_ocaml_abstract_typs typs in
+  let* defs =
+    match non_abstract_typs with
+    | [] -> return []
+    | _ :: _ ->
+        let* def = of_ocaml_non_abstract_typs non_abstract_typs in
+        return [ def ]
+  in
+  return (abstract_defs @ defs)
 
 let to_coq (fargs : FArgs.t) (def : t) : SmartPrint.t =
   match def with

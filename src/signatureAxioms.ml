@@ -254,8 +254,8 @@ let rec of_signature (signature : Typedtree.signature) : t Monad.t =
                 the environment. This is useful for example for the detection of
                 phantom types. *)
              set_env final_env
-               ( TypeDefinition.of_ocaml typs >>= fun typ_definition ->
-                 return [ TypDefinition typ_definition ] )
+               (let* defs = TypeDefinition.of_ocaml typs in
+                return (List.map (fun def -> TypDefinition def) defs))
          | Tsig_typext { tyext_constructors; _ } ->
              let* typ_defs =
                tyext_constructors

@@ -374,8 +374,8 @@ let rec of_structure (structure : structure) : t list Monad.t =
                    the environment. This is useful for example for the detection of
                    phantom types. *)
                 set_env final_env
-                  ( TypeDefinition.of_ocaml typs >>= fun def ->
-                    return [ TypeDefinition def ] )
+                  (let* defs = TypeDefinition.of_ocaml typs in
+                   return (List.map (fun def -> TypeDefinition def) defs))
             | Tstr_exception { tyexn_constructor; _ } ->
                 typ_definitions_of_typ_extension tyexn_constructor
             | Tstr_open _ -> return []
