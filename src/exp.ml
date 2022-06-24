@@ -166,14 +166,11 @@ let rec any_patterns_with_ith_true (is_guarded : bool) (i : int) (n : int) :
 
 let rec get_include_name (module_expr : module_expr) : Name.t Monad.t =
   match module_expr.mod_desc with
-  | Tmod_apply (applied_expr, _, _) -> (
-      match applied_expr.mod_desc with
-      | Tmod_ident (path, _)
-      | Tmod_constraint ({ mod_desc = Tmod_ident (path, _); _ }, _, _, _) ->
-          let* path_name = PathName.of_path_with_convert false path in
-          let* name = PathName.to_name false path_name in
-          return (Name.suffix_by_include name)
-      | _ -> get_include_name applied_expr)
+  | Tmod_ident (path, _) ->
+      let* path_name = PathName.of_path_with_convert false path in
+      let* name = PathName.to_name false path_name in
+      return (Name.suffix_by_include name)
+  | Tmod_apply (applied_expr, _, _) -> get_include_name applied_expr
   | Tmod_constraint (module_expr, _, _, _) -> get_include_name module_expr
   | _ ->
       raise
