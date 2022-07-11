@@ -169,7 +169,7 @@ let rec is_module_typ_first_class_aux (module_typ : Types.module_type)
     | Mty_for_hole -> return (Not_found "Module type hole")
 
 type hash_index = {
-  module_typ : Types.module_type;
+  module_typ_shape : SignatureShape.t;
   module_path : Path.t option;
 }
 
@@ -178,25 +178,32 @@ type hash_index = {
 module Hash = Hashtbl.Make (struct
   type t = hash_index
 
-  let equal x y =
-    x.module_typ == y.module_typ
-    &&
-    match (x.module_path, y.module_path) with
-    | Some path1, Some path2 -> path1 == path2
-    | None, None -> true
-    | _, _ -> false
-
+  let equal = ( = )
   let hash = Hashtbl.hash
 end)
 
-let is_module_typ_first_class_hash : maybe_found Hash.t = Hash.create 12
+(** Hash having modules types for which we are sure that they have no names. *)
+let not_module_typ_first_class_hash : string Hash.t = Hash.create 12
 
 let is_module_typ_first_class (module_typ : Types.module_type)
     (module_path : Path.t option) : maybe_found Monad.t =
-  let index = { module_typ; module_path } in
-  match Hash.find_opt is_module_typ_first_class_hash index with
-  | Some result -> return result
-  | None ->
-      let* result = is_module_typ_first_class_aux module_typ module_path in
-      Hash.add is_module_typ_first_class_hash index result;
-      return result
+  let* env = get_env in
+  let index =
+    match module_typ with
+    | Mty_signature signature ->
+        let module_typ_shape = SignatureShape.of_signature None signature in
+        Some { module_typ_shape; module_path }
+    | _ -> None
+  in
+  match index with
+  | Some index -> (
+      match Hash.find_opt not_module_typ_first_class_hash index with
+      | Some reason -> return (Not_found reason)
+      | None ->
+          let* result = is_module_typ_first_class_aux module_typ module_path in
+          (match result with
+          | Not_found reason ->
+              Hash.add not_module_typ_first_class_hash index reason
+          | Found _ -> ());
+          return result)
+  | _ -> is_module_typ_first_class_aux module_typ module_path
