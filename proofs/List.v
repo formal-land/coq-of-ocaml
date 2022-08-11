@@ -167,7 +167,7 @@ Fixpoint merge {A : Set} (cmp : A -> A -> Z) (l1 : list A) (l2 : list A)
     | ([], l2) => l2
     | (l1, []) => l1
     | (cons h1 t1, cons h2 t2) =>
-      if Stdlib.le (cmp h1 h2) 0 then
+      if cmp h1 h2 <=? 0 then
         cons h1 (merge cmp t1 l2)
       else
         cons h2 (merge_aux t2)

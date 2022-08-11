@@ -2,9 +2,11 @@
 -arg -impredicative-set
 
 Basics.v
+Char.v
 CoqOfOCaml.v
 Libraries.v
 List.v
 Settings.v
 Stdlib.v
+String.v
 Tags.v

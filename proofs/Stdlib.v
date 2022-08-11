@@ -478,3 +478,21 @@ Parameter exit : forall {a : Set}, int -> a.
 Parameter at_exit : (unit -> unit) -> unit.
 
 (** * Standard library modules  *)
+
+Require Export CoqOfOCaml.Char.
+
+Module Format.
+  Parameter formatter : Set.
+
+  Parameter pp_print_list : forall {a : Set},
+    option (formatter -> unit -> unit) -> (formatter -> a -> unit) ->
+    formatter -> list a -> unit.
+
+  Parameter fprintf : forall {a : Set},
+    formatter -> Stdlib.format a formatter unit -> a.
+
+  Parameter asprintf : forall {a : Set},
+    Stdlib.format4 a formatter unit string -> a.
+End Format.
+
+Require Export CoqOfOCaml.String.
