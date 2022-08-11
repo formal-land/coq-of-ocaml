@@ -20,6 +20,10 @@ Admitted.
 Lemma length_is_pos {A : Set} (l : list A) : 0 <= length l.
 Admitted.
 
+Parameter nth : forall {A : Set}, list A -> int -> A.
+
+Parameter nth_opt : forall {A : Set}, list A -> int -> option A.
+
 Definition append {A : Set} : (list A) -> (list A) -> list A :=
   List.app (A := A).
 

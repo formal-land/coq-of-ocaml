@@ -479,7 +479,8 @@ Parameter at_exit : (unit -> unit) -> unit.
 
 (** * Standard library modules  *)
 
-Require Export CoqOfOCaml.Char.
+Require CoqOfOCaml.Char.
+Module Char := Char.
 
 Module Format.
   Parameter formatter : Set.
@@ -495,4 +496,8 @@ Module Format.
     Stdlib.format4 a formatter unit string -> a.
 End Format.
 
-Require Export CoqOfOCaml.String.
+Require CoqOfOCaml.List.
+Module List := List.
+
+Require CoqOfOCaml.String.
+Module String := String.
