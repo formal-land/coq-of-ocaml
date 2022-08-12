@@ -17,7 +17,7 @@ let of_constant (c : constant) : t Monad.t =
   match c with
   | Const_int n -> return (Int n)
   | Const_char c -> return (Char c)
-  | Const_string (s, _, _) -> return (String (String.escaped s))
+  | Const_string (s, _, _) -> return (String (* (String.escaped *) s(* ) *))
   | Const_float s ->
       let n = int_of_float (float_of_string s) in
       let message =
@@ -48,8 +48,33 @@ let rec to_coq (c : t) : SmartPrint.t =
       nest (double_quotes !^s ^^ !^"%" ^^ !^"char")
   | String s ->
       let b = Buffer.create 0 in
-      s
-      |> String.iter (fun c ->
-             if c = '"' then Buffer.add_string b "\"\"" else Buffer.add_char b c);
-      double_quotes !^(Buffer.contents b)
+      let cn =
+        Seq.fold_left
+          (fun
+             (* Is the latest thing in buffer a constructor? By default yes. *)
+             cn c ->
+            let (s,
+                 (* is the thing which we've just added a constructor? *) ccn) =
+              if Char.code c < 10
+              then
+                ("String.String \"00" ^
+                   string_of_int (Char.code c) ^ "\"", true)
+              else
+                if Char.code c < 32
+                then
+                  ("String.String \"0" ^
+                     string_of_int (Char.code c) ^ "\"", true)
+                else
+                  if c = '"' then ("\"\"", false)
+                  else (String.make 1 c, false)
+            in
+            let acc =
+              if cn then if ccn then " " ^ s else " \"" ^ s
+              else if ccn then "\" ++ " ^ s else s
+            in Buffer.add_string b acc; ccn
+          ) true (String.to_seq s) in
+      let res =
+        Buffer.contents b ^
+          (if cn && Buffer.length b > 0 then " \"\"" else "\"") in
+      let res = "(" ^ res ^ ")" in !^res
   | Warn (c, message) -> group (Error.to_comment message ^^ newline ^^ to_coq c)
