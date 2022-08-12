@@ -2,10 +2,13 @@
 -arg -impredicative-set
 
 Basics.v
-Char.v
+CamlinternalFormatBasics.v
 CoqOfOCaml.v
+Format.v
 Libraries.v
 List.v
+Prelude.v
+Seq.v
 Settings.v
 Stdlib.v
 String.v
