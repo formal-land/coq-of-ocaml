@@ -101,7 +101,7 @@ let rec to_coq (c : t) : SmartPrint.t =
       match Angstrom.parse_string ~consume:All parse_string_for_coq s with
       | Result.Ok xs -> nest @@ to_coq_s true xs
       | Result.Error _ ->
-          (* this should mean it is an empty string or something else..
-             not sure, but hope it is a rare case *)
+          (* This should mean it is an empty string
+             (... or something else, but it should be a rare case). *)
           double_quotes !^"")
   | Warn (c, message) -> group (Error.to_comment message ^^ newline ^^ to_coq c)
