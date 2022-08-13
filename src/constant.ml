@@ -77,8 +77,6 @@ let rec to_coq_s (need_parens : bool) (xs : parsed_string list) : SmartPrint.t =
   | [] -> double_quotes !^""
   | PString s :: PDQuote :: xs ->
       to_coq_s need_parens @@ PString (s ^ "\"\"") :: xs
-  | PDQuote :: PString s :: xs ->
-      to_coq_s need_parens @@ PString ("\"\"" ^ s) :: xs
   | PDQuote :: xs -> to_coq_s need_parens @@ PString "\"\"" :: xs
   | PChar c :: xs ->
       let res = npchar c ^^ nest @@ to_coq_s true xs in
@@ -94,8 +92,7 @@ let rec to_coq (c : t) : SmartPrint.t =
   | Int n -> if n >= 0 then OCaml.int n else parens @@ OCaml.int n
   | Char c ->
       let s =
-        if Char.code c < 32 then
-          Printf.sprintf "%03d" (Char.code c)
+        if Char.code c < 32 then Printf.sprintf "%03d" (Char.code c)
         else if c = '"' then "\"\""
         else String.make 1 c
       in
