@@ -1,6 +1,8 @@
 open Asttypes
 (** Constants. *)
 
+open Angstrom
+
 open SmartPrint
 open Monad.Notations
 
@@ -34,6 +36,59 @@ let of_constant (c : constant) : t Monad.t =
       let message = "Constant of type nativeint is converted to int" in
       warn (Int (Nativeint.to_int n)) message
 
+(** Parsed string is
+    - either a usual ocaml string with printable characters
+    - or a non-printable character
+    - or double quotes (special case for coq)
+ *)
+type parsed_string =
+  | PString of string
+  | PChar of char
+  | PDQuote
+
+(** Kind of "good" printable characters
+    (according to the coq documentation). *)
+let is_printable_ascii = fun c ->
+  Char.code c >= 32 && Char.code c < 128 && c != '"'
+
+(** Characters which may need special representation
+    (according to the coq documentation), except double quotes. *)
+let non_printable_ascii = fun c ->
+  Char.code c < 32 || Char.code c >= 128
+
+(** Double qoutes char, special case for coq *)
+let dquote =
+  Angstrom.map (Angstrom.char '"') ~f:(fun _ -> PDQuote)
+
+let printable =
+  Angstrom.map
+    (Angstrom.take_while1 is_printable_ascii) ~f:(fun str -> PString str)
+
+let nonprintable =
+  Angstrom.map (Angstrom.satisfy non_printable_ascii) ~f:(fun c -> PChar c)
+
+let parse_string_for_coq = many (printable <|> nonprintable <|> dquote)
+
+let npchar c : SmartPrint.t =
+  !^"String.String" ^^ !^(Printf.sprintf "\"%03d\"" (Char.code c))
+
+(** Pretty-print [parsed_string] to Coq. *)
+let rec to_coq_s (xs : parsed_string list) : SmartPrint.t =
+  match xs with
+  | [] ->
+     double_quotes !^""
+  | [PChar c] ->
+     npchar c ^^ (double_quotes !^"")
+  | PChar c :: (_ :: [] as xs1) ->
+     npchar c ^^ to_coq_s xs1
+  | PChar c :: xs1 ->
+     (* 2 or more elements in the tail *)
+     npchar c ^^ parens (to_coq_s xs1)
+  | [PString s] ->
+     (double_quotes !^s)
+  | PString s :: xs1 ->
+     (double_quotes !^s) ^^ !^"++" ^^ to_coq_s xs1
+
 (** Pretty-print a constant to Coq. *)
 let rec to_coq (c : t) : SmartPrint.t =
   match c with
@@ -47,34 +102,10 @@ let rec to_coq (c : t) : SmartPrint.t =
       in
       nest (double_quotes !^s ^^ !^"%" ^^ !^"char")
   | String s ->
-      let b = Buffer.create 0 in
-      let cn =
-        Seq.fold_left
-          (fun
-             (* Is the latest thing in buffer a constructor? By default yes. *)
-             cn c ->
-            let (s,
-                 (* is the thing which we've just added a constructor? *) ccn) =
-              if Char.code c < 10
-              then
-                ("String.String \"00" ^
-                   string_of_int (Char.code c) ^ "\"", true)
-              else
-                if Char.code c < 32
-                then
-                  ("String.String \"0" ^
-                     string_of_int (Char.code c) ^ "\"", true)
-                else
-                  if c = '"' then ("\"\"", false)
-                  else (String.make 1 c, false)
-            in
-            let acc =
-              if cn then if ccn then " " ^ s else " \"" ^ s
-              else if ccn then "\" ++ " ^ s else s
-            in Buffer.add_string b acc; ccn
-          ) true (String.to_seq s) in
-      let res =
-        Buffer.contents b ^
-          (if cn && Buffer.length b > 0 then " \"\"" else "\"") in
-      let res = "(" ^ res ^ ")" in !^res
+     (match Angstrom.parse_string ~consume:All parse_string_for_coq s with
+     | Result.Ok ([PString _] as xs) -> to_coq_s xs
+     | Result.Ok xs -> parens (to_coq_s xs)
+     | Result.Error _ ->
+        (* this just means it is an empty string *)
+        !^"")
   | Warn (c, message) -> group (Error.to_comment message ^^ newline ^^ to_coq c)
