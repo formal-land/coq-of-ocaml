@@ -35,20 +35,21 @@ let of_constant (c : constant) : t Monad.t =
       let message = "Constant of type nativeint is converted to int" in
       warn (Int (Nativeint.to_int n)) message
 
-(** Parsed for string (for Coq) is
+(** Parsed string (for Coq) is
     - either a usual ocaml string with Coq printable characters
-    - or a non-printable Coq character
+    - or a Coq non-printable character
     - or double quotes (a special case for Coq)
+    https://coq.inria.fr/library/Coq.Strings.String.html
  *)
 type parsed_string = PString of string | PChar of char | PDQuote
 
 (** Kind of "good" printable characters
     (according to the coq documentation). *)
-let is_printable_ascii c = Char.code c >= 32 && Char.code c < 128 && c != '"'
+let is_printable_ascii c = Char.code c >= 32 && c != '"'
 
 (** Characters which may need special representation
     (according to the coq documentation), except double quotes. *)
-let non_printable_ascii c = Char.code c < 32 || Char.code c >= 128
+let non_printable_ascii c = Char.code c < 32
 
 (** Double qoutes char, special case for coq. *)
 let dquote = Angstrom.map ~f:(fun _ -> PDQuote) (Angstrom.char '"')
@@ -93,7 +94,7 @@ let rec to_coq (c : t) : SmartPrint.t =
   | Int n -> if n >= 0 then OCaml.int n else parens @@ OCaml.int n
   | Char c ->
       let s =
-        if Char.code c < 32 || Char.code c >= 128 then
+        if Char.code c < 32 then
           Printf.sprintf "%03d" (Char.code c)
         else if c = '"' then "\"\""
         else String.make 1 c
@@ -104,6 +105,6 @@ let rec to_coq (c : t) : SmartPrint.t =
       | Result.Ok xs -> nest @@ to_coq_s true xs
       | Result.Error _ ->
           (* this should mean it is an empty string or something else..
-             not sure, but hope it is rare case *)
+             not sure, but hope it is a rare case *)
           double_quotes !^"")
   | Warn (c, message) -> group (Error.to_comment message ^^ newline ^^ to_coq c)
