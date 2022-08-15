@@ -18,4 +18,4 @@ Definition c_value : ascii := "g" % char.
 
 Definition s1 : string := "bla".
 
-Definition s2 : string := "\""".
+Definition s2 : string := """".

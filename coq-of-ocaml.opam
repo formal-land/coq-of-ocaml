@@ -27,6 +27,7 @@ depends: [
   "result"
   "smart-print"
   "yojson" {>= "1.6.0"}
+  "angstrom"
 ]
 depopts: [
   "coq"

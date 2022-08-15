@@ -1,6 +1,7 @@
 open Asttypes
 (** Constants. *)
 
+open Angstrom
 open SmartPrint
 open Monad.Notations
 
@@ -17,7 +18,7 @@ let of_constant (c : constant) : t Monad.t =
   match c with
   | Const_int n -> return (Int n)
   | Const_char c -> return (Char c)
-  | Const_string (s, _, _) -> return (String (String.escaped s))
+  | Const_string (s, _, _) -> return (String s)
   | Const_float s ->
       let n = int_of_float (float_of_string s) in
       let message =
@@ -34,22 +35,73 @@ let of_constant (c : constant) : t Monad.t =
       let message = "Constant of type nativeint is converted to int" in
       warn (Int (Nativeint.to_int n)) message
 
+(** Parsed string (for Coq) is
+    - either a usual ocaml string with Coq printable characters
+    - or a Coq non-printable character
+    - or double quotes (a special case for Coq)
+    https://coq.inria.fr/library/Coq.Strings.String.html
+ *)
+type parsed_string = PString of string | PChar of char | PDQuote
+
+(** Kind of "good" printable characters
+    (according to the coq documentation). *)
+let is_printable_ascii c = Char.code c >= 32 && c != '"'
+
+(** Characters which may need special representation
+    (according to the coq documentation), except double quotes. *)
+let non_printable_ascii c = Char.code c < 32
+
+(** Double qoutes char, special case for coq. *)
+let dquote = Angstrom.map ~f:(fun _ -> PDQuote) (Angstrom.char '"')
+
+(** Parser for Coq printable chars. *)
+let printable =
+  Angstrom.map
+    ~f:(fun str -> PString str)
+    (Angstrom.take_while1 is_printable_ascii)
+
+(** Parser for Coq non-printable chars. *)
+let nonprintable =
+  Angstrom.map ~f:(fun c -> PChar c) (Angstrom.satisfy non_printable_ascii)
+
+(** Parser for Coq string. *)
+let parse_string_for_coq = many (printable <|> nonprintable <|> dquote)
+
+(** Just a wrapper. *)
+let npchar c : SmartPrint.t =
+  !^"String.String" ^^ !^(Printf.sprintf "\"%03d\"" (Char.code c))
+
+(** Pretty-print [parsed_string] to Coq. *)
+let rec to_coq_s (need_parens : bool) (xs : parsed_string list) : SmartPrint.t =
+  match xs with
+  | [] -> double_quotes !^""
+  | PChar c :: xs ->
+      let res = npchar c ^^ nest @@ to_coq_s true xs in
+      if need_parens then parens res else res
+  | PDQuote :: xs -> to_coq_s need_parens @@ PString "\"\"" :: xs
+  | PString s :: PDQuote :: xs ->
+      to_coq_s need_parens @@ PString (s ^ "\"\"") :: xs
+  | PString s1 :: PString s2 :: xs ->
+      to_coq_s need_parens @@ PString (s1 ^ s2) :: xs
+  | [ PString s ] -> double_quotes !^s
+  | PString s :: xs -> double_quotes !^s ^^ !^"++" ^^ nest @@ to_coq_s false xs
+
 (** Pretty-print a constant to Coq. *)
 let rec to_coq (c : t) : SmartPrint.t =
   match c with
   | Int n -> if n >= 0 then OCaml.int n else parens @@ OCaml.int n
   | Char c ->
       let s =
-        if Char.code c < 10 then "00" ^ string_of_int (Char.code c)
-        else if Char.code c < 32 then "0" ^ string_of_int (Char.code c)
+        if Char.code c < 32 then Printf.sprintf "%03d" (Char.code c)
         else if c = '"' then "\"\""
         else String.make 1 c
       in
       nest (double_quotes !^s ^^ !^"%" ^^ !^"char")
-  | String s ->
-      let b = Buffer.create 0 in
-      s
-      |> String.iter (fun c ->
-             if c = '"' then Buffer.add_string b "\"\"" else Buffer.add_char b c);
-      double_quotes !^(Buffer.contents b)
+  | String s -> (
+      match Angstrom.parse_string ~consume:All parse_string_for_coq s with
+      | Result.Ok xs -> nest @@ to_coq_s true xs
+      | Result.Error _ ->
+          (* This should mean it is an empty string
+             (... or something else, but it should be a rare case). *)
+          double_quotes !^"")
   | Warn (c, message) -> group (Error.to_comment message ^^ newline ^^ to_coq c)

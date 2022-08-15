@@ -12,7 +12,8 @@ Definition c3 : ascii := "009" % char.
 
 Definition c4 : ascii := """" % char.
 
-Definition s_value : string := "hi\n\t:)\""".
+Definition s_value : string :=
+  "hi" ++ String.String "010" (String.String "009" ":)""").
 
 Definition b1 : bool := false.
 
