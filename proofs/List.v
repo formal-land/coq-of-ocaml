@@ -53,7 +53,7 @@ Definition tl : forall {a : Set}, list a -> option (list a) :=
     | _x :: m => Some m
     end.
 
-Parameter nth : forall {A : Set}, list A -> int -> A.
+Parameter nth : forall {A  : Set}, list A -> int -> A.
 
 Parameter nth_opt : forall {A : Set}, list A -> int -> option A.
 
