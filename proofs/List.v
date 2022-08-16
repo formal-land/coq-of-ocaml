@@ -3,6 +3,7 @@ Require Import Basics.
 Require Import Program.Program.
 Require Import Coq.micromega.Lia.
 
+Require Import Seq.
 Local Open Scope Z_scope.
 Import ListNotations.
 
@@ -36,7 +37,7 @@ Parameter compare_lengths : forall {a b : Set}, list a -> list b-> int.
 
 Parameter compare_length_with : forall {a : Set}, list a -> int -> int.
 
-(*Parameter cons : forall {a : Set}, a -> list a -> list a.*)
+(* Parameter cons : forall {a : Set}, a -> list a -> list a. *)
 
 Definition hd : forall {a : Set}, list a -> option a :=
   fun _ l =>
@@ -228,16 +229,19 @@ Definition partition {A : Set} (p : A -> bool) (l : list A)
     end in
   part [] [] l.
 
-(* Parameter partition_map : forall {a b c: Set}, (a -> (b, c) Either.t) -> list a -> list b * list c. *)
+(*
+Parameter partition_map : 
+  forall {a b c: Set}, (a -> Either.t (b, c)) -> list a -> list b * list c.
+*)
 
 (** Association lists **)
-Parameter assoc : forall {a b : Set}, a -> (a * b) list -> b.
+Parameter assoc : forall {a b : Set}, a -> list (a * b) -> b.
 
-Parameter assoc_opt : a -> (a * b) list -> option b
+Parameter assoc_opt : forall {a b : Set}, a -> list (a * b) -> option b.
 
-Parameter assq : a -> (a * b) list -> b
+Parameter assq : forall {a b : Set}, a -> list (a * b) -> b.
 
-Parameter assq_opt : a -> (a * b) list -> option b
+Parameter assq_opt : forall {a b : Set}, a -> list (a * b) -> option b.
 
 Fixpoint mem_assoc {A B : Set} `{EqDec A} (x : A) (l : list (A * B)) : bool :=
   match l with
@@ -260,7 +264,7 @@ Fixpoint remove_assoc {A B : Set} `{EqDec A} (x : A) (l : list (A * B))
       remove_assoc x l
   end.
 
-Parameter remove_assq : a -> (a * b) list -> (a * b) list
+Parameter remove_assq : forall {a b : Set}, a -> list (a * b) -> list (a * b).
 
 (** Lists of pairs **)
 Fixpoint split {A B : Set} (x : list (A * B)) : (list A) * (list B) :=
@@ -272,16 +276,16 @@ Fixpoint split {A B : Set} (x : list (A * B)) : (list A) * (list B) :=
     end
   end.
 
-Parameter combine : list a -> list b -> (a * b) list
+Parameter combine : forall {a b : Set}, list a -> list b -> list (a * b).
 
 (** Sorting **)
-Parameter sort : (a -> a -> int) -> list a -> list a
+Parameter sort : forall {a : Set}, (a -> a -> int) -> list a -> list a.
 
-Parameter stable_sort : (a -> a -> int) -> list a -> list a
+Parameter stable_sort : forall {a : Set}, (a -> a -> int) -> list a -> list a.
 
-Parameter fast_sort : (a -> a -> int) -> list a -> list a
+Parameter fast_sort : forall {a : Set}, (a -> a -> int) -> list a -> list a.
 
-Parameter sort_uniq : (a -> a -> int) -> list a -> list a
+Parameter sort_uniq : forall {a : Set}, (a -> a -> int) -> list a -> list a.
 
 Fixpoint merge {A : Set} (cmp : A -> A -> Z) (l1 : list A) (l2 : list A)
   : list A :=
@@ -296,8 +300,9 @@ Fixpoint merge {A : Set} (cmp : A -> A -> Z) (l1 : list A) (l2 : list A)
         cons h2 (merge_aux t2)
     end in
   merge_aux l2.
+Search seq.
 
 (** Lists and Sequences **)
-Parameter to_seq : list a -> a Seq.t
+Parameter to_seq : forall {a : Set}, list a -> Seq.t a.
 
-Parameter of_seq : a Seq.t -> list a
+Parameter of_seq : forall {a : Set}, Seq.t a -> list a.
