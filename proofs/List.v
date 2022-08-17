@@ -2,8 +2,8 @@ Require Import Libraries.
 Require Import Basics.
 Require Import Program.Program.
 Require Import Coq.micromega.Lia.
-
-Require Import Seq.
+ 
+Require Seq.
 Local Open Scope Z_scope.
 Import ListNotations.
 
@@ -300,7 +300,6 @@ Fixpoint merge {A : Set} (cmp : A -> A -> Z) (l1 : list A) (l2 : list A)
         cons h2 (merge_aux t2)
     end in
   merge_aux l2.
-Search seq.
 
 (** Lists and Sequences **)
 Parameter to_seq : forall {a : Set}, list a -> Seq.t a.

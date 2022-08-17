@@ -1,9 +1,10 @@
 Require Import CoqOfOCaml.Libraries.
 Require Import CoqOfOCaml.Settings.
 Require Import CoqOfOCaml.Basics.
-
+Require CoqOfOCaml.Prelude.
+Require CoqOfOCaml.Uchar.
+Require CoqOfOCaml.Seq.
 Require Import Ascii.
-Require Import String.
 
 (* OCaml:
 type t =
@@ -23,7 +24,7 @@ Parameter nth : t -> int -> ascii.
 Parameter length : t -> int.
 Parameter clear : t -> unit.
 Parameter reset : t -> unit.
-(*Parameter output_buffer : out_channel -> t -> unit.*)
+Parameter output_buffer : Prelude.out_channel -> t -> unit.
 Parameter truncate : t -> int -> unit.
 Parameter add_char : t -> ascii -> unit.
 Parameter add_utf_8_uchar : t -> Uchar.t -> unit.
@@ -35,12 +36,12 @@ Parameter add_substring : t -> string -> int -> int -> unit.
 Parameter add_subbytes : t -> bytes -> int -> int -> unit.
 Parameter add_substitute : t -> (string -> string) -> string -> unit.
 Parameter add_buffer : t -> t -> unit.
-Parameter add_channel : t -> in_channel -> int -> unit.
+Parameter add_channel : t -> Prelude.in_channel -> int -> unit.
 (** Buffers and Sequences **)
-Parameter to_seq : t -> char Seq.t.
-Parameter to_seqi : t -> (int * char) Seq.t.
-Parameter add_seq : t -> char Seq.t -> unit.
-Parameter of_seq : char Seq.t -> t.
+Parameter to_seq : t -> Seq.t char.
+Parameter to_seqi : t -> Seq.t (int * char) .
+Parameter add_seq : t -> Seq.t char -> unit.
+Parameter of_seq : Seq.t char -> t.
 (** Binary encoding of integers **)
 Parameter add_uint8 : t -> int -> unit.
 Parameter add_int8 : t -> int -> unit.
