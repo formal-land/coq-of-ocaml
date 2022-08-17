@@ -9,12 +9,15 @@
 ./Buffer.v
 ./CamlinternalFormatBasics.v
 ./CoqOfOCaml.v
+./Either.v
 ./Format.v
 ./Hashtbl.v
 ./Int32.v
 ./Int64.v
+./Int.v
 ./Libraries.v
 ./List.v
+./Option.v
 ./Prelude.v
 ./Seq.v
 ./Settings.v

@@ -9,7 +9,6 @@ Inductive result (a b : Set) : Set :=
 | Ok : a -> result a b
 | Error : b -> result a b.
 
-
 Parameter none : forall {a : Set}, option a.
 
 Parameter some : forall {a : Set}, a -> option a.
