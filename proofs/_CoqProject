@@ -10,6 +10,7 @@
 ./CamlinternalFormatBasics.v
 ./CoqOfOCaml.v
 ./Format.v
+./Hashtbl.v
 ./Int32.v
 ./Int64.v
 ./Libraries.v
