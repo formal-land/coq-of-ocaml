@@ -1,30 +1,32 @@
-Require Import Libraries.
-Require Import Basics.
+Require Import CoqOfOCaml.Libraries.
+Require Import CoqOfOCaml.Settings.
+Require Import CoqOfOCaml.Basics.
 Require Import Program.Program.
 Require Import Coq.micromega.Lia.
- 
-Require Seq.
+Require Import CoqOfOCaml.Prelude.
+Require CoqOfOCaml.Either.
+Require CoqOfOCaml.Seq.
 Local Open Scope Z_scope.
 Import ListNotations.
 
-Definition t (A : Set) : Set := list A.
+Definition t (a : Set) : Set := list a.
 
-Definition nil : forall {A : Set}, list A :=
+Definition nil : forall {a : Set}, list a :=
   fun _ =>
   [].
 
-Fixpoint length_aux {A : Set} (len : Z) (x : list A) : Z :=
+Fixpoint length_aux {a : Set} (len : Z) (x : list a) : Z :=
   match x with
   | [] => len
   | cons a l => length_aux (Z.add len 1) l
   end.
 
-Definition length {A : Set} (l : list A) : Z := length_aux 0 l.
+Definition length {a : Set} (l : list a) : Z := length_aux 0 l.
 
-Axiom length_cons : forall {A : Set} (x : A) (l : list A),
+Axiom length_cons : forall {a : Set} (x : a) (l : list a),
    length (x :: l) = length l + 1.
 
-Lemma length_is_pos {A : Set} (l : list A) : 0 <= length l.
+Lemma length_is_pos {a : Set} (l : list a) : 0 <= length l.
 Proof.
   induction l.
   easy.
@@ -33,11 +35,22 @@ Proof.
   lia.
 Qed.
 
-Parameter compare_lengths : forall {a b : Set}, list a -> list b-> int.
+Fixpoint compare_lengths {a b : Set} (l1 : list a) (l2 : list b) : int :=
+  match l1, l2 with
+  | [], [] => 0
+  | [], _ => -1
+  | _::li1, [] => 1
+  | _::li1, _::li2 => (compare_lengths li1 li2)
+  end.
 
-Parameter compare_length_with : forall {a : Set}, list a -> int -> int.
+Fixpoint compare_length_with {a : Set} (l1 : list a) (n : int) : int :=
+  match l1 with
+  | [] => if n =? 0 then 0 else 
+            if n >? 0 then -1 else 1
+  | _::tail => if n <=? 0 then 1 else compare_length_with tail (n-1)
+  end.
 
-(* Parameter cons : forall {a : Set}, a -> list a -> list a. *)
+(* Definition cons {a : Set} (a_value : a) (l: list a) := a_value::l. *)
 
 Definition hd : forall {a : Set}, list a -> option a :=
   fun _ l =>
@@ -53,28 +66,35 @@ Definition tl : forall {a : Set}, list a -> option (list a) :=
     | _x :: m => Some m
     end.
 
-Parameter nth : forall {A  : Set}, list A -> int -> A.
-
-Parameter nth_opt : forall {A : Set}, list A -> int -> option A.
-
-Definition rev {A : Set} (l : list A) : list A := rev_append l [].
-
-Definition append {A : Set} : (list A) -> (list A) -> list A :=
-  List.app (A := A).
-
-Fixpoint rev_append {A : Set} (l1 : list A) (l2 : list A) : list A :=
-  match l1 with
-  | [] => l2
-  | cons a l => rev_append l (cons a l2)
+Fixpoint nth_aux {a : Set} (l : list a) (n : int) : option a :=
+  match l with 
+  | [] => None
+  | a :: l => if n =? 0 then Some a else nth_aux l (n-1)
   end.
 
-Fixpoint flatten {A : Set} (x : list (list A)) : list A :=
+(* require error handling https://github.com/ocaml/ocaml/blob/trunk/stdlib/list.ml#L41 *)
+Axiom nth : forall {a  : Set}, list a -> int -> a.
+(* require error handling https://github.com/ocaml/ocaml/blob/trunk/stdlib/list.ml#L46*)
+Parameter nth_opt : forall {a : Set}, list a -> int -> option a.
+
+Definition append {a : Set} : (list a) -> (list a) -> list a :=
+  List.app (A := a).
+
+Fixpoint rev_append {a : Set} (l1 : list a) (l2 : list a) : list a :=
+  match l1 with
+  | [] => l2
+  | Lists.List.cons a l => rev_append l (cons a l2)
+  end.
+
+Definition rev {a : Set} (l : list a) : list a := rev_append l [].
+
+Fixpoint flatten {a : Set} (x : list (list a)) : list a :=
   match x with
   | [] => []
   | cons l r => List.app l (flatten r)
-  end.  
+  end.
 
-Definition concat {A : Set} : (list (list A)) -> list A := flatten.
+Definition concat {a : Set} : (list (list a)) -> list a := flatten.
 
 (** Comparison **)
 Fixpoint equal {a : Set} (eqb : a -> a -> bool) (l1 l2 : list a) : bool :=
@@ -99,13 +119,19 @@ Fixpoint compare {a : Set} (cmp : a -> a -> int) (l1 l2 : list a)
   end.
 
 (** Iterators **)
-Definition iter : forall {a : Set},
-  (a -> unit) -> list a -> unit :=
-  fun a f l => tt.
+Fixpoint iter {a : Set} (f : a -> unit) (l : list a) : unit :=
+  match l with
+  | [] => ()
+  | a::tail => let _ := f a in (iter f tail)
+  end.
 
-Parameter iteri : forall {a : Set}, (int -> a -> unit) -> list a -> unit.
+Fixpoint iteri {a : Set} (i : int) (f :int -> a -> unit) (l : list a) : unit :=
+  match l with
+  | [] => ()
+  | a::tail => let _ := f i a in (iteri (i+1) f tail)
+  end. 
 
-Fixpoint map {A B : Set} (f : A -> B) (x : list A) : list B :=
+Fixpoint map {a B : Set} (f : a -> B) (x : list a) : list B :=
   match x with
   | [] => []
   | cons a l =>
@@ -113,7 +139,7 @@ Fixpoint map {A B : Set} (f : A -> B) (x : list A) : list B :=
     cons r (map f l)
   end.
 
-Fixpoint mapi_aux {A B : Set} (i : Z) (f : Z -> A -> B) (x : list A)
+Fixpoint mapi_aux {a B : Set} (i : Z) (f : Z -> a -> B) (x : list a)
   : list B :=
   match x with
   | [] => []
@@ -122,30 +148,57 @@ Fixpoint mapi_aux {A B : Set} (i : Z) (f : Z -> A -> B) (x : list A)
     cons r (mapi_aux (Z.add i 1) f l)
   end.
 
-Definition mapi {A B : Set} (f : Z -> A -> B) (l : list A) : list B :=
+Definition mapi {a B : Set} (f : Z -> a -> B) (l : list a) : list B :=
   mapi_aux 0 f l.
 
-Definition rev_map {A B : Set} (f : A -> B) (l : list A) : list B :=
-  let fix rmap_f (accu : list B) (x : list A) : list B :=
+Definition rev_map {a B : Set} (f : a -> B) (l : list a) : list B :=
+  let fix rmap_f (accu : list B) (x : list a) : list B :=
     match x with
     | [] => accu
     | cons a l => rmap_f (cons (f a) accu) l
     end in
   rmap_f [] l.
 
-Parameter filter_map : forall {a b : Set}, (a -> option b) -> list a -> list b.
+Fixpoint filter_map {a b : Set} (f : a -> option b) (l : list a): list b :=
+  match l with 
+  | [] => []
+  | x::xs =>
+    match f x with
+    | None => filter_map f xs
+    | Some v => v :: filter_map f xs
+    end
+  end.
 
-Parameter concat_map : forall {a b : Set}, (a -> list b) -> list a -> list b.
+Definition concat_map {a b : Set} (f : a -> list b) (l: list a) : list b :=
+  let fix concmap_f (accu : list b) (li : list a): list b :=
+    match li with
+    | [] => rev accu
+    | x::l => 
+      let xs := f x in 
+        concmap_f (rev_append xs accu) l
+    end in
+  concmap_f [] l.
 
-Parameter fold_left_map : forall {a b c : Set}, (a -> b -> a * c) -> a -> list b -> a * list c.
+(*
+Definition fold_left_map {a b c : Set} 
+  (f : a -> b -> a * c) (a_value : a) (l : list b) : a * list c :=
+  let fix fldleft_map (accu : a * list c) (l_accu : list b): a * list c :=
+    match l with
+    | [] => accu (rev l_accu)
+    | x :: l =>
+      let accu x := f accu x in
+        fldleft_map (x::l_accu) l
+    end in
+  fldleft_map [] l.
+  *)
 
-Fixpoint fold_left {A B : Set} (f : A -> B -> A) (accu : A) (l : list B) : A :=
+Fixpoint fold_left {a B : Set} (f : a -> B -> a) (accu : a) (l : list B) : a :=
   match l with
   | [] => accu
   | cons a l => fold_left f (f accu a) l
   end.
 
-Fixpoint fold_right {A B : Set} (f : A -> B -> B) (l : list A) (accu : B)
+Fixpoint fold_right {a B : Set} (f : a -> B -> B) (l : list a) (accu : B)
   : B :=
   match l with
   | [] => accu
@@ -153,34 +206,89 @@ Fixpoint fold_right {A B : Set} (f : A -> B -> B) (l : list A) (accu : B)
   end.
 
 (** Iterators on two lists **)
-Parameter iter2 : forall {a b : Set}, (a -> b -> unit) -> list a -> list b -> unit.
+Fixpoint iter2 {a b : Set} 
+  (f : a -> b -> unit) (l1 : list a) (l2 : list b): unit :=
+  match (l1, l2) with
+  | ([], []) => ()
+  | (a1::rest1, a2::rest2) => let _ := f a1 a2 in iter2 f rest1 rest2
+  | (_,_) => ()
+  (*| (_,_) => invalid_arg "List.iter2"*)
+  end.
 
-Parameter map2 : forall {a b c: Set}, (a -> b -> c) -> list a -> list b -> list c.
+Fixpoint map2 {a b c: Set} 
+  (f : a -> b -> c) (l1 : list a) (l2 : list b): list c :=
+  match (l1, l2) with
+  | ([], []) => []
+  | ([a1], [b1]) => let r1 := f a1 b1 in [r1]
+  | (a1::a2::l1, b1::b2::l2) => 
+      let r1 := f a1 b1 in
+      let r2 := f a2 b2 in
+      r1::r2::map2 f l1 l2
+  | (_, _) => []
+(*| (_, _) -> invalid_arg "List.map2"*)
+  end.
 
-Parameter rev_map2 : forall {a b c: Set}, (a -> b -> c) -> list a -> list b -> list c.
+Definition rev_map2 {a b c: Set} 
+  (f : a -> b -> c) (l1 : list a) (l2 : list b) :  list c :=
+  let fix rmap2_f (accu : list c) (l1 : list a) (l2 : list b) :=
+    match (l1, l2) with
+    | ([], []) => accu
+    | (a1::l1, a2::l2) => rmap2_f (f a1 a2 :: accu) l1 l2
+    | (_, _) => []
+    (*| (_, _) => Invalid_argument "List.rev_map2"*)
+    end in
+  rmap2_f [] l1 l2.
 
-Parameter fold_left2 : forall {a b c: Set}, (a -> b -> c -> a) -> a -> list b -> list c -> a.
+Fixpoint fold_left2 {a b c: Set} 
+  (f : a -> b -> c -> a) (accu : a) (l1 : list b) (l2 : list c): a :=
+  match (l1, l2) with
+  | ([], []) => accu
+  | (a1::l1, a2::l2) => fold_left2 f (f accu a1 a2) l1 l2
+  | (_, _) => accu
+  (*| (_, _) => invalid_arg "List.fold_left2"*)
+  end.
 
-Parameter fold_right2 : forall {a b c: Set}, (a -> b -> c -> c) -> list a -> list b -> c -> c.
+Fixpoint fold_right2 {a b c: Set} 
+  (f : a -> b -> c -> c) (l1 : list a) (l2 : list b) (accu : c) : c :=
+  match (l1, l2) with
+  | ([], []) => accu
+  | (a1::l1, a2::l2) => f a1 a2 (fold_right2 f l1 l2 accu)
+  | (_, _) => accu
+(*| (_, _) => invalid_arg "List.fold_right2"*)
+  end.
 
 (** List scanning **)
-Fixpoint for_all {A : Set} (p : A -> bool) (x : list A) : bool :=
+Fixpoint for_all {a : Set} (p : a -> bool) (x : list a) : bool :=
   match x with
   | [] => true
   | cons a l => andb (p a) (for_all p l)
   end.
 
-Fixpoint _exists {A : Set} (p : A -> bool) (x : list A) : bool :=
+Fixpoint _exists {a : Set} (p : a -> bool) (x : list a) : bool :=
   match x with
   | [] => false
   | cons a l => orb (p a) (_exists p l)
   end.
 
-Parameter for_all2 : forall {a b : Set}, (a -> b -> bool) -> list a -> list b -> bool.
+Fixpoint for_all2 {a b : Set} 
+  (p: a -> b -> bool) (l1 : list a) (l2 : list b) : bool :=
+  match (l1, l2) with
+  | ([], []) => true
+  | (a1::l1, a2::l2) => p a1 a2 && for_all2 p l1 l2
+  | (_, _) => false
+  (*| (_, _) => invalid_arg "List.for_all2"*)
+  end.
 
-Parameter _exists2 : forall {a b : Set}, (a -> b -> bool) -> list a -> list b -> bool.
+Fixpoint _exists2 {a b : Set} 
+  (p: a -> b -> bool) (l1 : list a) (l2 : list b) : bool :=
+  match (l1, l2) with
+  | ([], []) => false
+  | (a1::l1, a2::l2) => (p a1 a2) || (_exists2 p l1 l2)
+  | (_, _) => false
+  (*| (_, _) -> invalid_arg "List.exists2"*)
+  end.
 
-Fixpoint mem {A : Set} `{EqDec A} (x : A) (l : list A) : bool :=
+Fixpoint mem {a : Set} `{EqDec a} (x : a) (l : list a) : bool :=
   match l with
   | [] => false
   | y :: l =>
@@ -190,17 +298,41 @@ Fixpoint mem {A : Set} `{EqDec A} (x : A) (l : list A) : bool :=
       mem x l
   end.
 
-Parameter memq : forall {a : Set}, a -> list a -> bool.
+Fixpoint memq {a : Set} `{EqDec a} (x : a) (l : list a) : bool :=
+  match l with
+  | [] => false
+  | y::l => 
+    if equiv_decb x y then
+        true
+      else
+        memq x l
+  end.
 
 (** List searching **)
-Parameter find : forall {a : Set}, (a -> bool) -> list a -> a.
+Fixpoint find {a : Set} (p : a -> bool) (l : list a) : a :=
+  match l with
+  | [] => raise Not_found
+  | x :: l => if p x then x else find p l
+  end.
 
-Parameter find_opt : forall {a : Set}, (a -> bool) -> list a -> option a.
+Fixpoint find_opt {a : Set} (p : a -> bool) (l : list a): option a :=
+  match l with
+  | [] => None
+  | x::l => if p x then Some x else find_opt p l
+  end.
 
-Parameter find_map : forall {a b: Set}, (a -> option b) -> list a -> option b.
+Fixpoint find_map {a b: Set} (f : a -> option b) (l : list a): option b :=
+  match l with 
+  | [] => None
+  | x::l => 
+    match f x with
+    | Some _ as result => result
+    | None => find_map f l
+    end
+  end.
 
-Definition find_all {A : Set} (p : A -> bool) : (list A) -> list A :=
-  let fix find (accu : list A) (x : list A) : list A :=
+Definition find_all {a : Set} (p : a -> bool) : (list a) -> list a :=
+  let fix find (accu : list a) (x : list a) : list a :=
     match x with
     | [] => rev accu
     | cons x l =>
@@ -211,14 +343,22 @@ Definition find_all {A : Set} (p : A -> bool) : (list A) -> list A :=
     end in
   find [].
 
-Definition filter {A : Set} : (A -> bool) -> (list A) -> list A := find_all.
+Definition filter {a : Set} : (a -> bool) -> (list a) -> list a := find_all.
 
-Parameter filteri : forall {a : Set}, (int -> a -> bool) -> list a -> list a.
+Definition filteri {a : Set} (p : int -> a -> bool) (l : list a) : list a :=
+  let fix filteri_f (i : int) (l : list a):=
+    match l with
+    | [] => []
+    | x::l =>
+        let i := i + 1 in
+        if p i x then x :: filteri_f i l else filteri_f i l
+    end in
+  filteri_f 0 l.
 
-Definition partition {A : Set} (p : A -> bool) (l : list A)
-  : (list A) * (list A) :=
-  let fix part (yes : list A) (no : list A) (x : list A)
-    : (list A) * (list A) :=
+Definition partition {a : Set} (p : a -> bool) (l : list a)
+  : (list a) * (list a) :=
+  let fix part (yes : list a) (no : list a) (x : list a)
+    : (list a) * (list a) :=
     match x with
     | [] => ((rev yes), (rev no))
     | cons x l =>
@@ -229,13 +369,26 @@ Definition partition {A : Set} (p : A -> bool) (l : list A)
     end in
   part [] [] l.
 
-(*
-Parameter partition_map : 
-  forall {a b c: Set}, (a -> Either.t (b, c)) -> list a -> list b * list c.
-*)
+Fixpoint partition_map {a b c : Set}
+(f : a -> Either.t b c) (l : list a)
+: list b * list c :=
+match l with
+| [] => ([], [])
+| x :: l' =>
+  let '(l1, l2) := partition_map f l' in
+  match f x with
+  | Either.Left y => (y :: l1, l2)
+  | Either.Right y => (l1, y :: l2)
+  end
+end.
 
 (** Association lists **)
-Parameter assoc : forall {a b : Set}, a -> list (a * b) -> b.
+Fixpoint assoc {a b : Set} (x : a) (l : list (a * b)) : b :=
+  match l with
+  | [] => raise Not_found
+  | (a,b)::l => 
+    if compare x a = 0 then b else assoc x l
+  end.
 
 Parameter assoc_opt : forall {a b : Set}, a -> list (a * b) -> option b.
 
@@ -243,7 +396,7 @@ Parameter assq : forall {a b : Set}, a -> list (a * b) -> b.
 
 Parameter assq_opt : forall {a b : Set}, a -> list (a * b) -> option b.
 
-Fixpoint mem_assoc {A B : Set} `{EqDec A} (x : A) (l : list (A * B)) : bool :=
+Fixpoint mem_assoc {a B : Set} `{EqDec a} (x : a) (l : list (a * B)) : bool :=
   match l with
   | [] => false
   | (y, v) :: l =>
@@ -253,8 +406,8 @@ Fixpoint mem_assoc {A B : Set} `{EqDec A} (x : A) (l : list (A * B)) : bool :=
       mem_assoc x l
   end.
 
-Fixpoint remove_assoc {A B : Set} `{EqDec A} (x : A) (l : list (A * B))
-  : list (A * B) :=
+Fixpoint remove_assoc {a B : Set} `{EqDec a} (x : a) (l : list (a * B))
+  : list (a * B) :=
   match l with
   | [] => l
   | (y, v) :: l =>
@@ -267,7 +420,7 @@ Fixpoint remove_assoc {A B : Set} `{EqDec A} (x : A) (l : list (A * B))
 Parameter remove_assq : forall {a b : Set}, a -> list (a * b) -> list (a * b).
 
 (** Lists of pairs **)
-Fixpoint split {A B : Set} (x : list (A * B)) : (list A) * (list B) :=
+Fixpoint split {a B : Set} (x : list (a * B)) : (list a) * (list B) :=
   match x with
   | [] => ([], [])
   | cons (x, y) l =>
@@ -276,7 +429,13 @@ Fixpoint split {A B : Set} (x : list (A * B)) : (list A) * (list B) :=
     end
   end.
 
-Parameter combine : forall {a b : Set}, list a -> list b -> list (a * b).
+Fixpoint combine {a b : Set} (l1 : list a) (l2 : list b) : list (a * b) :=
+  match (l1, l2) with
+    ([], []) => []
+  | (a1::l1, a2::l2) => (a1, a2) :: combine l1 l2
+  | (_, _) =>  []
+  (*| (_, _) => invalid_arg "List.combine"*)
+  end.
 
 (** Sorting **)
 Parameter sort : forall {a : Set}, (a -> a -> int) -> list a -> list a.
@@ -287,9 +446,9 @@ Parameter fast_sort : forall {a : Set}, (a -> a -> int) -> list a -> list a.
 
 Parameter sort_uniq : forall {a : Set}, (a -> a -> int) -> list a -> list a.
 
-Fixpoint merge {A : Set} (cmp : A -> A -> Z) (l1 : list A) (l2 : list A)
-  : list A :=
-  let fix merge_aux (l2 : list A) : list A :=
+Fixpoint merge {a : Set} (cmp : a -> a -> Z) (l1 : list a) (l2 : list a)
+  : list a :=
+  let fix merge_aux (l2 : list a) : list a :=
     match (l1, l2) with
     | ([], l2) => l2
     | (l1, []) => l1
@@ -302,6 +461,21 @@ Fixpoint merge {A : Set} (cmp : A -> A -> Z) (l1 : list A) (l2 : list A)
   merge_aux l2.
 
 (** Lists and Sequences **)
-Parameter to_seq : forall {a : Set}, list a -> Seq.t a.
+Fixpoint to_seq_node {a : Set} (l : list a) : Seq.node a :=
+  match l with
+  | [] => Seq.Nil
+  | x :: l' => Seq.Cons x (fun _ => to_seq_node l')
+  end.
 
-Parameter of_seq : forall {a : Set}, Seq.t a -> list a.
+Definition to_seq : forall {a : Set}, list a -> Seq.t a :=
+  fun a l _ => to_seq_node l.
+
+Fixpoint of_seq_node {a : Set} (s : Seq.node a) : list a :=
+  match s with
+  | Seq.Nil => []
+  | Seq.Cons x f => x :: of_seq_node (f tt)
+  end.
+  
+Definition of_seq : forall {a : Set}, Seq.t a -> list a :=
+  fun a s => of_seq_node (s tt).
+  
