@@ -4,6 +4,7 @@ Require Import CoqOfOCaml.Basics.
 Require Import Program.Program.
 Require Import Coq.micromega.Lia.
 Require Import CoqOfOCaml.Prelude.
+Require Import CoqOfOCaml.Compare.
 Require CoqOfOCaml.Either.
 Require CoqOfOCaml.Seq.
 Local Open Scope Z_scope.
@@ -75,7 +76,7 @@ Fixpoint nth_aux {a : Set} (l : list a) (n : int) : option a :=
 (* require error handling https://github.com/ocaml/ocaml/blob/trunk/stdlib/list.ml#L41 *)
 Axiom nth : forall {a  : Set}, list a -> int -> a.
 (* require error handling https://github.com/ocaml/ocaml/blob/trunk/stdlib/list.ml#L46*)
-Parameter nth_opt : forall {a : Set}, list a -> int -> option a.
+Axiom nth_opt : forall {a : Set}, list a -> int -> option a.
 
 Definition append {a : Set} : (list a) -> (list a) -> list a :=
   List.app (A := a).
@@ -131,7 +132,7 @@ Fixpoint iteri {a : Set} (i : int) (f :int -> a -> unit) (l : list a) : unit :=
   | a::tail => let _ := f i a in (iteri (i+1) f tail)
   end. 
 
-Fixpoint map {a B : Set} (f : a -> B) (x : list a) : list B :=
+Fixpoint map {a b : Set} (f : a -> b) (x : list a) : list b :=
   match x with
   | [] => []
   | cons a l =>
@@ -139,8 +140,8 @@ Fixpoint map {a B : Set} (f : a -> B) (x : list a) : list B :=
     cons r (map f l)
   end.
 
-Fixpoint mapi_aux {a B : Set} (i : Z) (f : Z -> a -> B) (x : list a)
-  : list B :=
+Fixpoint mapi_aux {a b : Set} (i : Z) (f : Z -> a -> b) (x : list a)
+  : list b :=
   match x with
   | [] => []
   | cons a l =>
@@ -148,11 +149,11 @@ Fixpoint mapi_aux {a B : Set} (i : Z) (f : Z -> a -> B) (x : list a)
     cons r (mapi_aux (Z.add i 1) f l)
   end.
 
-Definition mapi {a B : Set} (f : Z -> a -> B) (l : list a) : list B :=
+Definition mapi {a b : Set} (f : Z -> a -> b) (l : list a) : list b :=
   mapi_aux 0 f l.
 
-Definition rev_map {a B : Set} (f : a -> B) (l : list a) : list B :=
-  let fix rmap_f (accu : list B) (x : list a) : list B :=
+Definition rev_map {a b : Set} (f : a -> b) (l : list a) : list b :=
+  let fix rmap_f (accu : list b) (x : list a) : list b :=
     match x with
     | [] => accu
     | cons a l => rmap_f (cons (f a) accu) l
@@ -179,27 +180,24 @@ Definition concat_map {a b : Set} (f : a -> list b) (l: list a) : list b :=
     end in
   concmap_f [] l.
 
-(*
-Definition fold_left_map {a b c : Set} 
-  (f : a -> b -> a * c) (a_value : a) (l : list b) : a * list c :=
-  let fix fldleft_map (accu : a * list c) (l_accu : list b): a * list c :=
-    match l with
-    | [] => accu (rev l_accu)
-    | x :: l =>
-      let accu x := f accu x in
-        fldleft_map (x::l_accu) l
-    end in
-  fldleft_map [] l.
-  *)
 
-Fixpoint fold_left {a B : Set} (f : a -> B -> a) (accu : a) (l : list B) : a :=
+Fixpoint fold_left_map {a b c : Set} (f : a -> b -> a * c)
+  (acc : a) (l : list b) : a * list c :=
+  match l with
+  | [] => (acc, [])
+  | x :: l' =>
+    let '(acc1, y) := f acc x in
+    let '(acc2, res) := fold_left_map f acc1 l' in (acc2, y :: res)
+  end.
+
+Fixpoint fold_left {a b : Set} (f : a -> b -> a) (accu : a) (l : list b) : a :=
   match l with
   | [] => accu
   | cons a l => fold_left f (f accu a) l
   end.
 
-Fixpoint fold_right {a B : Set} (f : a -> B -> B) (l : list a) (accu : B)
-  : B :=
+Fixpoint fold_right {a b : Set} (f : a -> b -> b) (l : list a) (accu : b)
+  : b :=
   match l with
   | [] => accu
   | cons a l => f a (fold_right f l accu)
@@ -387,16 +385,29 @@ Fixpoint assoc {a b : Set} (x : a) (l : list (a * b)) : b :=
   match l with
   | [] => raise Not_found
   | (a,b)::l => 
-    if compare x a = 0 then b else assoc x l
+    if polymorphic_compare a x =? 0 then b else assoc x l
   end.
 
-Parameter assoc_opt : forall {a b : Set}, a -> list (a * b) -> option b.
+Fixpoint assoc_opt {a b : Set} (x : a) (l : list (a * b)) : option b :=
+  match l with
+  | [] => None
+  | (a,b)::l => 
+    if polymorphic_compare a x =? 0 then Some b else assoc_opt x l
+  end.
 
-Parameter assq : forall {a b : Set}, a -> list (a * b) -> b.
+Fixpoint assq  {a b : Set} (x : a) (l : list (a * b)) : b :=
+  match l with
+  | [] => raise Not_found
+  | (a,b)::l => if polymorphic_eq a x then b else assq x l
+  end.
 
-Parameter assq_opt : forall {a b : Set}, a -> list (a * b) -> option b.
+Fixpoint assq_opt {a b : Set} (x : a) (l : list (a * b)) : option b :=
+  match l with
+  | [] => None
+  | (a,b)::l => if polymorphic_eq a x then Some b else assq_opt x l
+  end.
 
-Fixpoint mem_assoc {a B : Set} `{EqDec a} (x : a) (l : list (a * B)) : bool :=
+Fixpoint mem_assoc {a b : Set} `{EqDec a} (x : a) (l : list (a * b)) : bool :=
   match l with
   | [] => false
   | (y, v) :: l =>
@@ -406,8 +417,8 @@ Fixpoint mem_assoc {a B : Set} `{EqDec a} (x : a) (l : list (a * B)) : bool :=
       mem_assoc x l
   end.
 
-Fixpoint remove_assoc {a B : Set} `{EqDec a} (x : a) (l : list (a * B))
-  : list (a * B) :=
+Fixpoint remove_assoc {a b : Set} `{EqDec a} (x : a) (l : list (a * b))
+  : list (a * b) :=
   match l with
   | [] => l
   | (y, v) :: l =>
@@ -417,10 +428,10 @@ Fixpoint remove_assoc {a B : Set} `{EqDec a} (x : a) (l : list (a * B))
       remove_assoc x l
   end.
 
-Parameter remove_assq : forall {a b : Set}, a -> list (a * b) -> list (a * b).
+Axiom remove_assq : forall {a b : Set}, a -> list (a * b) -> list (a * b). 
 
 (** Lists of pairs **)
-Fixpoint split {a B : Set} (x : list (a * B)) : (list a) * (list B) :=
+Fixpoint split {a b : Set} (x : list (a * b)) : (list a) * (list b) :=
   match x with
   | [] => ([], [])
   | cons (x, y) l =>
@@ -478,4 +489,3 @@ Fixpoint of_seq_node {a : Set} (s : Seq.node a) : list a :=
   
 Definition of_seq : forall {a : Set}, Seq.t a -> list a :=
   fun a s => of_seq_node (s tt).
-  
