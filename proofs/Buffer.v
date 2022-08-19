@@ -14,7 +14,6 @@ type t =
   initial_buffer : bytes}
   *)
 Parameter t: Set.
-Print string.
 Parameter create : int -> t.
 Parameter contents : t -> string.
 Parameter to_bytes : t -> bytes.
