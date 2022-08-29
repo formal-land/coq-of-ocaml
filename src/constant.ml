@@ -43,13 +43,11 @@ let of_constant (c : constant) : t Monad.t =
  *)
 type parsed_string = PString of string | PChar of char | PDQuote
 
-(** Kind of "good" printable characters
-    (according to the coq documentation). *)
-let is_printable_ascii c = Char.code c >= 32 && c <> '"'
-
-(** Characters which may need special representation
-    (according to the coq documentation), except double quotes. *)
-let non_printable_ascii c = Char.code c < 32
+(** Kind of "good" printable characters (according to the coq documentation).
+    We do not assume the string to be in utf-8. *)
+let is_printable_ascii c =
+  let code = Char.code c in
+  32 <= code && code < 128 && code <> Char.code '\n' && c <> '"'
 
 (** Double qoutes char, special case for coq. *)
 let dquote = Angstrom.map ~f:(fun _ -> PDQuote) (Angstrom.char '"')
@@ -61,11 +59,10 @@ let printable =
     (Angstrom.take_while1 is_printable_ascii)
 
 (** Parser for Coq non-printable chars. *)
-let nonprintable =
-  Angstrom.map ~f:(fun c -> PChar c) (Angstrom.satisfy non_printable_ascii)
+let nonprintable = Angstrom.map ~f:(fun c -> PChar c) Angstrom.any_char
 
 (** Parser for Coq string. *)
-let parse_string_for_coq = many (printable <|> nonprintable <|> dquote)
+let parse_string_for_coq = many (dquote <|> printable <|> nonprintable)
 
 (** Just a wrapper. *)
 let npchar c : SmartPrint.t =
