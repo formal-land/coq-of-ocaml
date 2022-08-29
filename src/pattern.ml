@@ -169,7 +169,7 @@ let rec flatten_or (p : t) : t list =
 let rec to_coq (paren : bool) (p : t) : SmartPrint.t =
   match p with
   | Any -> !^"_"
-  | Constant c -> Constant.to_coq c
+  | Constant c -> Constant.to_coq paren c
   | Variable x -> Name.to_coq x
   | Tuple ps -> (
       match ps with

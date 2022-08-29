@@ -1700,7 +1700,7 @@ let to_coq_implicit (implicit : string * string) : SmartPrint.t =
     set). *)
 let rec to_coq (paren : bool) (e : t) : SmartPrint.t =
   match e with
-  | Constant c -> Constant.to_coq c
+  | Constant c -> Constant.to_coq paren c
   | Variable (x, implicits) -> (
       let x = MixedPath.to_coq x in
       match implicits with
