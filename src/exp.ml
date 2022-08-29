@@ -1844,7 +1844,9 @@ let rec to_coq (paren : bool) (e : t) : SmartPrint.t =
                      let first_case = index = 0 in
                      (if first_case then
                       !^"let"
-                      ^^ if def.Definition.is_rec then !^"fix" else empty
+                      ^^
+                      if def.Definition.is_rec && e <> None then !^"fix"
+                      else empty
                      else if def.Definition.is_rec then !^"with"
                      else !^"in" ^^ !^"let")
                      ^^ Name.to_coq header.Header.name
