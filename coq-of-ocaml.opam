@@ -17,6 +17,7 @@ install: [
   [make "-C" "proofs" "install"] {coq:installed}
 ]
 depends: [
+  "angstrom"
   "bisect_ppx" {dev & >= "2.5.0"}
   "conf-ruby" {with-test}
   "csexp"
@@ -27,7 +28,6 @@ depends: [
   "result"
   "smart-print"
   "yojson" {>= "1.6.0"}
-  "angstrom"
 ]
 depopts: [
   "coq"

@@ -45,7 +45,7 @@ type parsed_string = PString of string | PChar of char | PDQuote
 
 (** Kind of "good" printable characters
     (according to the coq documentation). *)
-let is_printable_ascii c = Char.code c >= 32 && c != '"'
+let is_printable_ascii c = Char.code c >= 32 && c <> '"'
 
 (** Characters which may need special representation
     (according to the coq documentation), except double quotes. *)
