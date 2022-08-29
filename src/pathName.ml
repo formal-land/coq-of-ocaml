@@ -17,18 +17,18 @@ let to_string (x : t) : string =
 
 let to_string_base (x : t) : string = Name.to_string x.base
 
-let try_to_use (head : string) (name : string) : bool option Monad.t =
+let try_to_use (head : string) (name : string) : bool Monad.t =
   let* configuration = get_configuration in
   let require = Configuration.should_require configuration head in
   let require_import = Configuration.should_require_import configuration head in
   match (require, require_import) with
   | _, Some require_import ->
-      let* () = use true require_import name in
-      return (Some true)
+      let* () = use (RequireImport require_import) in
+      return true
   | Some require, _ ->
-      let* () = use false require name in
-      return (Some false)
-  | None, None -> return None
+      let* () = use (Require (require, name)) in
+      return true
+  | None, None -> return false
 
 (* Convert an identifier from OCaml to its Coq's equivalent, or [None] if no
    conversion is needed. We consider all the paths in the standard library
@@ -41,15 +41,12 @@ let try_convert (path_name : t) : t option Monad.t =
   let base = Name.to_string base in
   let* renamed_path_name =
     match (path, base) with
-    | source :: name :: rest, _ -> (
+    | source :: name :: rest, _ ->
         let* is_import = try_to_use source name in
-        match is_import with
-        | None -> return None
-        | Some import ->
-            if import then make rest base else make (name :: rest) base)
-    | [ source ], name -> (
+        if is_import then make (name :: rest) base else return None
+    | [ source ], name ->
         let* is_import = try_to_use source name in
-        match is_import with None -> return None | Some _ -> make [] base)
+        if is_import then make [] base else return None
     | _ -> return None
   in
   let* configuration = get_configuration in
@@ -87,7 +84,7 @@ let of_long_ident (is_value : bool) (long_ident : Longident.t) : t Monad.t =
         in
         match require with
         | None -> return ()
-        | Some require -> use false require head)
+        | Some require -> use (Require (require, head)))
     | [] -> return ()
   in
   match List.rev (Longident.flatten long_ident) with

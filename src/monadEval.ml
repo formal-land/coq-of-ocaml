@@ -1,15 +1,16 @@
 type comments = (string * Location.t) list
 
 module Import = struct
-  type t = { base : string; import : bool; mli : bool; name : string }
+  type t = { import : Monad.import; mli : bool }
 
   let merge (imports1 : t list) (imports2 : t list) : t list =
     List.sort_uniq
-      (fun { base = base1; import = import1; mli = mli1; name = name1 }
-           { base = base2; import = import2; mli = mli2; name = name2 } ->
-        compare
-          (not import1, base1, name1, mli1)
-          (not import2, base2, name2, mli2))
+      (fun import1 import2 ->
+        match (import1.import, import2.import) with
+        | RequireImport _, Require _ -> -1
+        | Require _, RequireImport _ -> 1
+        | RequireImport _, RequireImport _ | Require _, Require _ ->
+            compare import1 import2)
       (imports1 @ imports2)
 end
 
@@ -87,10 +88,15 @@ module Command = struct
           else []
         in
         { result with errors }
-    | Use (import, base, name) ->
+    | Use import ->
         let result = Result.success () in
-        let mli = Configuration.is_require_mli context.configuration name in
-        { result with imports = [ { Import.base; import; mli; name } ] }
+        let mli =
+          match import with
+          | Require (_, name) ->
+              Configuration.is_require_mli context.configuration name
+          | RequireImport _ -> false
+        in
+        { result with imports = [ { import; mli } ] }
     | UseUnsafeFixpoint ->
         let result = Result.success () in
         { result with use_unsafe_fixpoints = true }

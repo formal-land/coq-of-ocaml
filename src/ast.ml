@@ -83,23 +83,24 @@ let to_coq (imports : MonadEval.Import.t list) (ast : t) : SmartPrint.t =
      | _ :: _ ->
          separate empty
            (imports
-           |> List.map (fun { MonadEval.Import.base; import; mli; name } ->
-                  let name_to_require = if mli then name ^ "_mli" else name in
-                  nest
-                    (!^"Require"
-                    ^^ (if import && not mli then !^"Import" else empty)
-                    ^^ !^base ^-^ !^"." ^-^ !^name_to_require ^-^ !^"."
-                    ^^
-                    if mli then
+           |> List.map (fun { MonadEval.Import.import; mli } ->
+                  (match import with
+                  | Require (base, name) ->
+                      let name_to_require =
+                        if mli then name ^ "_mli" else name
+                      in
                       nest
-                        (!^"Module" ^^ !^name ^^ !^":=" ^^ !^name_to_require
-                       ^-^ !^".")
-                    else empty)
-                  ^^ newline
-                  ^^
-                  if import && mli then
-                    nest (!^"Import" ^^ !^name ^-^ !^".") ^^ newline
-                  else empty))
+                        (!^"Require" ^^ !^base ^-^ !^"." ^-^ !^name_to_require
+                       ^-^ !^"."
+                        ^^
+                        if mli then
+                          nest
+                            (!^"Module" ^^ !^name ^^ !^":=" ^^ !^name_to_require
+                           ^-^ !^".")
+                        else empty)
+                  | RequireImport base ->
+                      nest (!^"Require Import" ^^ !^base ^-^ !^"."))
+                  ^^ newline))
          ^^ newline)
   ^^ (match ast.head_suffix with
      | "" -> empty
