@@ -6,8 +6,8 @@ type t =
   | Cast
   | ForceGadt
   | GrabExistentials
-  | TaggedGadt
   | Implicit of string * string
+  | IncludeWithout of string list
   | MatchGadt
   | MatchGadtWithResult
   | MatchWithDefault
@@ -15,6 +15,7 @@ type t =
   | Phantom
   | PlainModule
   | Struct of string
+  | TaggedGadt
   | TaggedMatch
   | TypAnnotation
 
@@ -75,6 +76,58 @@ let of_payload_string_string (error_message : string) (id : string)
         ("Expected two string parameters for this attribute.\n\n"
        ^ error_message)
 
+let of_payload_strings (error_message : string) (id : string)
+    (payload : Parsetree.payload) : string list Monad.t =
+  match payload with
+  | Parsetree.PStr
+      [
+        {
+          pstr_desc =
+            Pstr_eval
+              ( { pexp_desc = Pexp_constant (Pconst_string (payload, _, _)); _ },
+                _ );
+          _;
+        };
+      ] ->
+      return [ payload ]
+  | Parsetree.PStr
+      [
+        {
+          pstr_desc =
+            Pstr_eval
+              ( {
+                  pexp_desc =
+                    Pexp_apply
+                      ( {
+                          pexp_desc = Pexp_constant (Pconst_string (head, _, _));
+                          _;
+                        },
+                        arguments );
+                  _;
+                },
+                _ );
+          _;
+        };
+      ] ->
+      let* tail =
+        arguments
+        |> Monad.List.filter_map (fun argument ->
+               match argument with
+               | ( _,
+                   {
+                     Parsetree.pexp_desc =
+                       Pexp_constant (Pconst_string (payload, _, _));
+                     _;
+                   } ) ->
+                   return (Some payload)
+               | _ -> raise None Unexpected error_message)
+      in
+      return (head :: tail)
+  | _ ->
+      raise [] Unexpected
+        ("Expected at least one string parameter for this attribute.\n\n"
+       ^ error_message)
+
 let of_attributes (attributes : Typedtree.attributes) : t list Monad.t =
   attributes
   |> Monad.List.filter_map (fun { Parsetree.attr_name; attr_payload; _ } ->
@@ -101,6 +154,12 @@ let of_attributes (attributes : Typedtree.attributes) : t list Monad.t =
                   of_payload_string_string error_message id attr_payload
                 in
                 return (Some (Implicit (name, typ)))
+            | "coq_include_without" ->
+                let error_message =
+                  "Give a list of item names not to include"
+                in
+                let* names = of_payload_strings error_message id attr_payload in
+                return (Some (IncludeWithout names))
             | "coq_match_gadt" -> return (Some MatchGadt)
             | "coq_match_gadt_with_result" -> return (Some MatchGadtWithResult)
             | "coq_match_with_default" -> return (Some MatchWithDefault)
@@ -139,6 +198,13 @@ let get_implicits (attributes : t list) : (string * string) list =
   |> List.filter_map (function
        | Implicit (name, typ) -> Some (name, typ)
        | _ -> None)
+
+let get_include_without (attributes : t list) : string list =
+  attributes
+  |> List.filter_map (function
+       | IncludeWithout exclude_list -> Some exclude_list
+       | _ -> None)
+  |> List.concat
 
 let has_match_gadt (attributes : t list) : bool =
   attributes |> List.exists (function MatchGadt -> true | _ -> false)
