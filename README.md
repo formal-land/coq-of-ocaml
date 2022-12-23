@@ -1,9 +1,9 @@
 # 🐓🐫 coq-of-ocaml [![CI](https://github.com/clarus/coq-of-ocaml/workflows/CI/badge.svg?branch=master)](https://github.com/clarus/coq-of-ocaml/actions?query=workflow%3ACI)
 > Formal verification for OCaml programs
 
-Translate OCaml programs to **similar-looking code in Coq**, a formal language to express and formally verify **any properies**. We use `coq-of-ocaml` to formally verify the "protocol" (core part) of the crypto-currency [Tezos](https://tezos.com/), composed of **100,000 lines of OCaml**. We cover most of the code: **80% of files** have at least one formally verified property in the project [coq-tezos-of-ocaml](https://gitlab.com/formal-land/coq-tezos-of-ocaml). This is formal verification at a **large scale**.
+Translate OCaml programs to **similar-looking code in Coq**, an extremely expressive formal language to express and formally verify **any kinds of properties** (preservation of invariants, absence of assert failures, backward compatibility, ...). We use `coq-of-ocaml` to formally verify the "protocol" (core part) of the crypto-currency [Tezos](https://tezos.com/), composed of **100,000 lines of OCaml**. We cover most of the code: **80% of files** have at least one formally verified property in the project [coq-tezos-of-ocaml](https://gitlab.com/formal-land/coq-tezos-of-ocaml). This is formal verification at a **large scale**.
 
-| 🤙 Do not hesitate to schedule a quick meeting with us for more information by going on [https://koalendar.com/e/meet-with-guillaume-claret](https://koalendar.com/e/meet-with-guillaume-claret).<br /> We offer formal verification services and advices, and are always there for a quick chat 🌲. |
+| 🤙 Do not hesitate to schedule a quick meeting with us for more information by going on [https://koalendar.com/e/meet-with-guillaume-claret](https://koalendar.com/e/meet-with-guillaume-claret).<br /> We offer formal verification services and advices and are always there for a quick chat 🌲. |
 | --- |
 
 **📚 Documentation on https://formal.land/docs/coq-of-ocaml/introduction**
@@ -13,7 +13,7 @@ Translate OCaml programs to **similar-looking code in Coq**, a formal language t
 
 By transforming OCaml code into similar [Coq](https://coq.inria.fr/) programs, we can prove arbitrarily complex properties using the existing power of Coq. The sweet spot of `coq-of-ocaml` is purely functional and monadic programs. Side-effects outside of a monad, like references, and advanced features like object-oriented programming, may never be supported. By sticking to the supported subset of OCaml, you can import millions of lines of code to Coq and write proofs at large. By running `coq-of-ocaml` after each code change, you make sure that your proofs are still valid. The generated Coq code is designed to be stable, with no generated variable names. We recommend organizing your proof files as you would organize your tests, with one proof file per code file.
 
-The guiding idea of `coq-of-ocaml` is [TypeScript](https://www.typescriptlang.org/). Instead of bringing types to an untyped language, we bring proofs to a typed language. The approach is the same: finding the right sweet spot, using heuristics when needed, guiding the user with error messages. We use `coq-of-ocaml` for the crypto-currency Tezos in the hope to have near-zero bugs thanks to formal proofs. Tezos is currently one of the most advanced crypto-currencies, with smart contracts, proof-of-stake, encrypted transactions, and protocol upgrades. It aims to compete with Ethereum. Formal verification is key for crypto-currencies as there are no central authorities to forbid bug exploits and steal money.
+The guiding idea of `coq-of-ocaml` is [TypeScript](https://www.typescriptlang.org/). Instead of bringing types to an untyped language, we bring proofs to a typed language. The approach is the same: finding the right sweet spot, using heuristics when needed, guiding the user with error messages. We use `coq-of-ocaml` for the crypto-currency Tezos in the hope of having near-zero bugs thanks to formal proofs. Tezos is currently one of the most advanced crypto-currencies, with smart contracts, proof-of-stake, encrypted transactions, and protocol upgrades. It aims to compete with Ethereum. Formal verification is key for crypto-currencies as there are no central authorities to forbid bug exploits and stealing money.
 
 There are still some open problems with `coq-of-ocaml`, like the axiom-free compilation of [GADTs](https://blog.janestreet.com/why-gadts-matter-for-performance/) (an ongoing project). If you are willing to work on a particular project, you can contact us at [&#099;&#111;&#110;&#116;&#097;&#099;&#116;&#064;formal&#046;&#108;&#097;&#110;&#100;](mailto:&#099;&#111;&#110;&#116;&#097;&#099;&#116;&#064;formal&#046;&#108;&#097;&#110;&#100;).
 
@@ -55,7 +55,7 @@ Fixpoint sum (tree : tree int) : int :=
   | Node tree1 tree2 => Z.add (sum tree1) (sum tree2)
   end.
 ```
-You can now write proofs by induction over the `sum` function using Coq. To see how you can write proofs, you can simply look at the [Coq documentation](https://coq.inria.fr/documentation). Learning to write proofs is like learning a new programming paradigm. It can take time, but be worthwhile! Here is an example of proof:
+You can now write proofs by induction over the `sum` function using Coq. To see how you can write proofs, you can simply look at the [Coq documentation](https://coq.inria.fr/documentation). Learning to write proofs is like learning a new programming paradigm. It can take time, but it can be worthwhile! Here is an example of proof:
 ```coq
 (** Definition of a tree with only positive integers *)
 Inductive positive : tree int -> Prop :=
