@@ -119,7 +119,10 @@ let of_path_without_convert (is_value : bool) (path : Path.t) : t Monad.t =
         aux path >>= fun (path, base) ->
         Name.of_string is_value field >>= fun field ->
         return (base :: path, field)
-    | Path.Papply _ -> failwith "Unexpected functor path application"
+    | Path.Papply _ ->
+        let name = Path.name path in
+        raise ([], Name.Make name) Unexpected
+          ("Unexpected functor path application " ^ Path.name path)
   in
   aux path >>= fun (path, base) -> return (of_name (List.rev path) base)
 
@@ -127,15 +130,18 @@ let of_path_with_convert (is_value : bool) (path : Path.t) : t Monad.t =
   of_path_without_convert is_value path >>= fun path -> convert path
 
 let of_path_and_name_with_convert (path : Path.t) (name : Name.t) : t Monad.t =
-  let rec aux p : (Name.t list * Name.t) Monad.t =
-    match p with
+  let rec aux path : (Name.t list * Name.t) Monad.t =
+    match path with
     | Path.Pident x ->
         let* path, base = split_ident false x in
         return (path @ [ base ], name)
-    | Path.Pdot (p, s) ->
-        aux p >>= fun (path, base) ->
+    | Path.Pdot (path, s) ->
+        aux path >>= fun (path, base) ->
         Name.of_string false s >>= fun s -> return (path @ [ s ], base)
-    | Path.Papply _ -> failwith "Unexpected functor path application"
+    | Path.Papply _ ->
+        let name = Path.name path in
+        raise ([], Name.Make name) Unexpected
+          ("Unexpected functor path application " ^ Path.name path)
   in
   aux path >>= fun (path, base) -> convert (of_name path base)
 
