@@ -3,7 +3,7 @@
 
 Translate OCaml programs to **similar-looking code in Coq**, an extremely expressive formal language to express and formally verify **any kinds of properties** (preservation of invariants, absence of assert failures, backward compatibility, ...). We use `coq-of-ocaml` to formally verify the "protocol" (core part) of the crypto-currency [Tezos](https://tezos.com/), composed of **100,000 lines of OCaml**. We cover most of the code: **80% of files** have at least one formally verified property in the project [coq-tezos-of-ocaml](https://gitlab.com/formal-land/coq-tezos-of-ocaml). This is formal verification at a **large scale**.
 
-| 🤙 Do not hesitate to schedule a quick meeting with us for more information by going on [https://koalendar.com/e/meet-with-formal-land](https://koalendar.com/e/meet-with-guillaume-claret).<br /> We offer formal verification services and advices and are always there for a quick chat 🌲. |
+| 🤙 Do not hesitate to schedule a quick meeting with us for more information by going on [https://koalendar.com/e/meet-with-formal-land](https://koalendar.com/e/meet-with-formal-land).<br /> We offer formal verification services and advices and are always there for a quick chat 🌲. |
 | --- |
 
 **📚 Documentation on https://formal.land/docs/coq-of-ocaml/introduction**
