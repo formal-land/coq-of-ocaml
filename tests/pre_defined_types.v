@@ -14,7 +14,7 @@ Definition o1 {A : Set} : option A := None.
 
 Definition o2 : option int := Some 12.
 
-Definition c_value : ascii := "g" % char.
+Definition c : char := "g" % char.
 
 Definition s1 : string := "bla".
 

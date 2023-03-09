@@ -161,6 +161,6 @@ let main () =
           in
           Output.write !json_mode output;
           exit context output)
-
 ;;
+
 main ()

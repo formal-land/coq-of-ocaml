@@ -537,7 +537,7 @@ let of_ocaml (typs : type_declaration list) : t Monad.t =
                         :: records,
                         typs )
                 | {
-                 typ_type = { type_kind = Type_variant cases; _ };
+                 typ_type = { type_kind = Type_variant (cases, _); _ };
                  typ_attributes;
                  _;
                 } ->

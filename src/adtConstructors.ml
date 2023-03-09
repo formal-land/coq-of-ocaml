@@ -176,9 +176,8 @@ let of_ocaml_case (typ_name : Name.t) (attributes : Attribute.t list)
                let typs = List.map (fun t -> fst t) typs in
                return (typs, new_typ_vars)
            | _ ->
-               raise
-                 ([ ty ], new_typ_vars)
-                 Error.Category.Unexpected "Unexpected Type of Constructor")
+               raise ([ ty ], new_typ_vars) Error.Category.Unexpected
+                 "Unexpected Type of Constructor")
        | None ->
            let kind = if is_tagged then Kind.Tag else Kind.Set in
            let typ_args = AdtParameters.get_parameters defined_typ_params in

@@ -20,9 +20,9 @@ depends: [
   "bisect_ppx" {dev & >= "2.5.0"}
   "conf-ruby" {with-test}
   "csexp"
-  "dune" {>= "2.8"}
+  "dune" {>= "2.9"}
   "menhir" {dev}
-  "ocaml" {>= "4.12" & < "4.13"}
+  "ocaml" {>= "4.13" & < "4.14"}
   "ocamlfind" {>= "1.5.2"}
   "result"
   "smart-print"

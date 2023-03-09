@@ -4,7 +4,7 @@ Require Import CoqOfOCaml.Settings.
 
 Definition t0 : unit := tt.
 
-Definition t1 : ascii * string := ("c" % char, "one").
+Definition t1 : char * string := ("c" % char, "one").
 
 Definition t2 : int * int * int * bool * bool := (1, 2, 3, false, true).
 

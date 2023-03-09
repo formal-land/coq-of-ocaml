@@ -177,7 +177,8 @@ module Value = struct
                            ^^ !^":="
                            ^^ separate space
                                 ((!^"'" ^-^ Name.to_coq name)
-                                 :: List.map Name.to_coq (List.map fst typ_vars))
+                                :: List.map Name.to_coq (List.map fst typ_vars)
+                                )
                            ^-^ !^".")));
               ])
 end
@@ -328,7 +329,10 @@ let rec of_structure (structure : structure) : t list Monad.t =
             return [ Documentation (documentation, items) ]
         | Mty_functor _ ->
             error_message (Error "include_functor") Unexpected
-              "Unexpected include of functor.")
+              "Unexpected include of functor."
+        | Mty_for_hole ->
+            error_message (Error "module_hole") Unexpected
+              "Unexpected module hole.")
     | _ -> return [ ModuleInclude reference ]
   in
   let of_structure_item (item : structure_item) (final_env : Env.t) :
@@ -351,6 +355,7 @@ let rec of_structure (structure : structure) : t list Monad.t =
                                   cstr_res = { desc = Tconstr (path, _, _); _ };
                                   _;
                                 },
+                                _,
                                 _ );
                           _;
                         };
@@ -575,6 +580,7 @@ and of_module_expr (name : Name.t) (functor_parameters : functor_parameters)
         (Error
            "Cannot unpack first-class modules at top-level due to a universe \
             inconsistency")
+  | Tmod_hole -> return (Error "Unexpected module hole")
 
 (** Pretty-print a structure to Coq. *)
 let rec to_coq (fargs : FArgs.t) (defs : t list) : SmartPrint.t =
@@ -692,13 +698,12 @@ let rec to_coq (fargs : FArgs.t) (defs : t list) : SmartPrint.t =
           ^^ nest
                (separate space
                   (MixedPath.to_coq mixed_path
-                   ::
-                   (typ_vars
-                   |> List.map (fun typ_var ->
-                          nest
-                            (parens
-                               (Name.to_coq typ_var ^^ !^":="
-                              ^^ Name.to_coq typ_var))))))
+                  :: (typ_vars
+                     |> List.map (fun typ_var ->
+                            nest
+                              (parens
+                                 (Name.to_coq typ_var ^^ !^":="
+                                ^^ Name.to_coq typ_var))))))
           ^-^ !^".")
     | ModuleSynonym (name, reference) ->
         nest

@@ -30,21 +30,13 @@ type 'a t =
 
 module Notations = struct
   let return (x : 'a) : 'a t = Return x
-
   let ( let* ) (x : 'a t) (f : 'a -> 'b t) : 'b t = Bind (x, f)
-
   let ( >>= ) (x : 'a t) (f : 'a -> 'b t) : 'b t = Bind (x, f)
-
   let ( >> ) (x : 'a t) (y : 'b t) : 'b t = Bind (x, fun () -> y)
-
   let get_configuration : Configuration.t t = Command Command.GetConfiguration
-
   let get_documentation : string option t = Command Command.GetDocumentation
-
   let get_env : Env.t t = Command Command.GetEnv
-
   let get_env_stack : Env.t list t = Command Command.GetEnvStack
-
   let set_env (env : Env.t) (x : 'a t) : 'a t = Wrapper (Wrapper.EnvSet env, x)
 
   let set_loc (loc : Location.t) (x : 'a t) : 'a t =

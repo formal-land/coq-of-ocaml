@@ -1,11 +1,11 @@
-Require Import String.
-Require Import Basics.
+Require Import CoqOfOCaml.Libraries.
+Require Import CoqOfOCaml.Settings.
+Require Import CoqOfOCaml.Basics.
 
 Inductive vtag : Type :=
 | constr_tag : string -> Set -> vtag
 | arrow_tag : vtag -> vtag -> vtag
-| tuple_tag : vtag -> vtag -> vtag
-.
+| tuple_tag : vtag -> vtag -> vtag.
 
 Fixpoint decode_vtag (tag : vtag) {struct tag}: Set :=
   match tag with

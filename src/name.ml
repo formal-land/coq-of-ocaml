@@ -68,7 +68,6 @@ let reserved_names : string list =
   ]
 
 let native_type_constructors = [ "list"; "option" ]
-
 let native_types = [ "int"; "string"; "bool"; "float"; "ascii"; "unit" ]
 
 (** We only escape these names if they are used as values, as they may collide
@@ -148,21 +147,13 @@ let to_string (name : t) : string =
   | Nameless -> "_"
 
 let prefix_by_single_quote (name : t) : t = Make ("'" ^ to_string name)
-
 let prefix_by_t (name : t) : t = Make ("t_" ^ to_string name)
-
 let prefix_by_with (name : t) : t = Make ("with_" ^ to_string name)
-
 let suffix_by_include (name : t) : t = Make (to_string name ^ "_include")
-
 let suffix_by_skeleton (name : t) : t = Make (to_string name ^ "_skeleton")
-
 let arrow_tag = of_string_raw "arrow_tag"
-
 let tuple_tag = of_string_raw "tuple_tag"
-
 let constr_tag = of_string_raw "constr_tag"
-
 let decode_vtag = of_string_raw "decode_vtag"
 
 (** Pretty-print a name to Coq. *)
