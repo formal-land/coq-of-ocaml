@@ -122,7 +122,7 @@ Definition try_with {A : Set} (e : unit -> A) (_with : extensible_type -> A)
 Module Unit.
   Definition lt (x y : unit) : Prop := False.
 
-  Instance strict_order : StrictOrder lt.
+  Global Instance strict_order : StrictOrder lt.
     refine {|
       StrictOrder_Irreflexive := _;
       StrictOrder_Transitive := _ |}.
@@ -133,7 +133,7 @@ Module Unit.
       exact Rxy.
   Qed.
 
-  Instance order_dec : OrderDec strict_order.
+  Global Instance order_dec : OrderDec strict_order.
     refine {|
       compare := fun x y => Eq;
       compare_is_sound := fun x y => CompEq _ _ _ |}.
@@ -145,7 +145,7 @@ Module Bool.
   Inductive lt : bool -> bool -> Prop :=
   | lt_intro : lt false true.
 
-  Instance strict_order : StrictOrder lt.
+  Global Instance strict_order : StrictOrder lt.
     refine {|
       StrictOrder_Irreflexive := _;
       StrictOrder_Transitive := _ |}.
@@ -156,7 +156,7 @@ Module Bool.
       constructor.
   Qed.
 
-  Instance order_dec : OrderDec strict_order.
+  Global Instance order_dec : OrderDec strict_order.
     refine {|
       compare := fun x y =>
         match (x, y) with
@@ -172,9 +172,9 @@ Module Bool.
 End Bool.
 
 Module Z.
-  Instance eq_dec : EqDec (eq_setoid Z) := Z.eq_dec.
+  Global Instance eq_dec : EqDec (eq_setoid Z) := Z.eq_dec.
 
-  Instance order_dec : OrderDec Z.lt_strorder := {|
+  Global Instance order_dec : OrderDec Z.lt_strorder := {|
     compare := Z.compare;
     compare_is_sound := Z.compare_spec |}.
 End Z.
@@ -307,13 +307,13 @@ Module Char.
     Qed.
   End Lt.
 
-  Instance strict_order : StrictOrder Lt.t :=
+  Global Instance strict_order : StrictOrder Lt.t :=
     {|
       StrictOrder_Irreflexive := Lt.irreflexivity;
       StrictOrder_Transitive := Lt.transitivity;
     |}.
 
-  Instance order_dec : OrderDec strict_order.
+  Global Instance order_dec : OrderDec strict_order.
     refine {|
       compare := fun c1 c2 => (N_of_ascii c1 ?= N_of_ascii c2) % N;
       compare_is_sound := fun c1 c2 => _;
@@ -480,12 +480,12 @@ Module String.
       now rewrite (proj2 (N.ltb_lt _ _) H_gt_c1c2).
   Qed.
 
-  Instance strict_order : StrictOrder Lt.t := {|
+  Global Instance strict_order : StrictOrder Lt.t := {|
       StrictOrder_Irreflexive := Lt.irreflexivity;
       StrictOrder_Transitive := Lt.transitivity;
     |}.
 
-  Instance order_dec : OrderDec strict_order.
+  Global Instance order_dec : OrderDec strict_order.
     refine {|
       compare := fun s1 s2 =>
         if String.eqb s1 s2 then
