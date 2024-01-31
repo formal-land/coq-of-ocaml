@@ -22,10 +22,10 @@ let rec get_modtype_declarations_of_module_declaration (env : Env.t)
   | _ -> []
   | exception _ -> []
 
-let is_modtype_declaration_similar_to_shape
+let is_modtype_declaration_similar_to_shape (env : Env.t)
     (modtype_declaration : Types.modtype_declaration) (shape : SignatureShape.t)
     : bool =
-  match modtype_declaration.mtd_type with
+  match Option.map (Env.scrape_alias env) modtype_declaration.mtd_type with
   | Some (Mty_signature signature) ->
       let shape' =
         SignatureShape.of_signature (Some modtype_declaration.mtd_attributes)
@@ -48,7 +48,7 @@ let find_similar_signatures_with_shape (env : Env.t) (shape : SignatureShape.t)
   let similar_signature_paths =
     Env.fold_modtypes
       (fun _ signature_path modtype_declaration signature_paths ->
-        if is_modtype_declaration_similar_to_shape modtype_declaration shape
+        if is_modtype_declaration_similar_to_shape env modtype_declaration shape
         then signature_path :: signature_paths
         else signature_paths)
       None env []
@@ -65,8 +65,8 @@ let find_similar_signatures_with_shape (env : Env.t) (shape : SignatureShape.t)
               get_modtype_declarations_of_module_declaration env
                 module_declaration
               |> List.filter (fun (_, modtype_declaration) ->
-                     is_modtype_declaration_similar_to_shape modtype_declaration
-                       shape)
+                     is_modtype_declaration_similar_to_shape env
+                       modtype_declaration shape)
               |> List.map (fun (idents, _) ->
                      apply_idents_on_path module_path idents)
             in
@@ -169,7 +169,7 @@ let rec is_module_typ_first_class_aux (module_typ : Types.module_type)
     | Mty_for_hole -> return (Not_found "Module type hole")
 
 type hash_index = {
-  module_typ : Types.module_type;
+  module_typ_shape : SignatureShape.t;
   module_path : Path.t option;
 }
 
@@ -178,25 +178,32 @@ type hash_index = {
 module Hash = Hashtbl.Make (struct
   type t = hash_index
 
-  let equal x y =
-    x.module_typ == y.module_typ
-    &&
-    match (x.module_path, y.module_path) with
-    | Some path1, Some path2 -> path1 == path2
-    | None, None -> true
-    | _, _ -> false
-
+  let equal = ( = )
   let hash = Hashtbl.hash
 end)
 
-let is_module_typ_first_class_hash : maybe_found Hash.t = Hash.create 12
+(** Hash having modules types for which we are sure that they have no names. *)
+let not_module_typ_first_class_hash : string Hash.t = Hash.create 12
 
 let is_module_typ_first_class (module_typ : Types.module_type)
     (module_path : Path.t option) : maybe_found Monad.t =
-  let index = { module_typ; module_path } in
-  match Hash.find_opt is_module_typ_first_class_hash index with
-  | Some result -> return result
-  | None ->
-      let* result = is_module_typ_first_class_aux module_typ module_path in
-      Hash.add is_module_typ_first_class_hash index result;
-      return result
+  let* env = get_env in
+  let index =
+    match module_typ with
+    | Mty_signature signature ->
+        let module_typ_shape = SignatureShape.of_signature None signature in
+        Some { module_typ_shape; module_path }
+    | _ -> None
+  in
+  match index with
+  | Some index -> (
+      match Hash.find_opt not_module_typ_first_class_hash index with
+      | Some reason -> return (Not_found reason)
+      | None ->
+          let* result = is_module_typ_first_class_aux module_typ module_path in
+          (match result with
+          | Not_found reason ->
+              Hash.add not_module_typ_first_class_hash index reason
+          | Found _ -> ());
+          return result)
+  | _ -> is_module_typ_first_class_aux module_typ module_path

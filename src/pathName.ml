@@ -17,18 +17,18 @@ let to_string (x : t) : string =
 
 let to_string_base (x : t) : string = Name.to_string x.base
 
-let try_to_use (head : string) (name : string) : bool option Monad.t =
+let try_to_use (head : string) (name : string) : bool Monad.t =
   let* configuration = get_configuration in
   let require = Configuration.should_require configuration head in
   let require_import = Configuration.should_require_import configuration head in
   match (require, require_import) with
   | _, Some require_import ->
-      let* () = use true require_import name in
-      return (Some true)
+      let* () = use (RequireImport require_import) in
+      return true
   | Some require, _ ->
-      let* () = use false require name in
-      return (Some false)
-  | None, None -> return None
+      let* () = use (Require (require, name)) in
+      return true
+  | None, None -> return false
 
 (* Convert an identifier from OCaml to its Coq's equivalent, or [None] if no
    conversion is needed. We consider all the paths in the standard library
@@ -41,15 +41,12 @@ let try_convert (path_name : t) : t option Monad.t =
   let base = Name.to_string base in
   let* renamed_path_name =
     match (path, base) with
-    | source :: name :: rest, _ -> (
+    | source :: name :: rest, _ ->
         let* is_import = try_to_use source name in
-        match is_import with
-        | None -> return None
-        | Some import ->
-            if import then make rest base else make (name :: rest) base)
-    | [ source ], name -> (
+        if is_import then make (name :: rest) base else return None
+    | [ source ], name ->
         let* is_import = try_to_use source name in
-        match is_import with None -> return None | Some _ -> make [] base)
+        if is_import then make [] base else return None
     | _ -> return None
   in
   let* configuration = get_configuration in
@@ -87,7 +84,7 @@ let of_long_ident (is_value : bool) (long_ident : Longident.t) : t Monad.t =
         in
         match require with
         | None -> return ()
-        | Some require -> use false require head)
+        | Some require -> use (Require (require, head)))
     | [] -> return ()
   in
   match List.rev (Longident.flatten long_ident) with
@@ -122,7 +119,10 @@ let of_path_without_convert (is_value : bool) (path : Path.t) : t Monad.t =
         aux path >>= fun (path, base) ->
         Name.of_string is_value field >>= fun field ->
         return (base :: path, field)
-    | Path.Papply _ -> failwith "Unexpected functor path application"
+    | Path.Papply _ ->
+        let name = Path.name path in
+        raise ([], Name.Make name) Unexpected
+          ("Unexpected functor path application " ^ Path.name path)
   in
   aux path >>= fun (path, base) -> return (of_name (List.rev path) base)
 
@@ -130,15 +130,18 @@ let of_path_with_convert (is_value : bool) (path : Path.t) : t Monad.t =
   of_path_without_convert is_value path >>= fun path -> convert path
 
 let of_path_and_name_with_convert (path : Path.t) (name : Name.t) : t Monad.t =
-  let rec aux p : (Name.t list * Name.t) Monad.t =
-    match p with
+  let rec aux path : (Name.t list * Name.t) Monad.t =
+    match path with
     | Path.Pident x ->
         let* path, base = split_ident false x in
         return (path @ [ base ], name)
-    | Path.Pdot (p, s) ->
-        aux p >>= fun (path, base) ->
+    | Path.Pdot (path, s) ->
+        aux path >>= fun (path, base) ->
         Name.of_string false s >>= fun s -> return (path @ [ s ], base)
-    | Path.Papply _ -> failwith "Unexpected functor path application"
+    | Path.Papply _ ->
+        let name = Path.name path in
+        raise ([], Name.Make name) Unexpected
+          ("Unexpected functor path application " ^ Path.name path)
   in
   aux path >>= fun (path, base) -> convert (of_name path base)
 
@@ -162,39 +165,45 @@ let rec iterate_in_aliases (path : Path.t) (nb_args : int) : Path.t Monad.t =
   in
   let* env = get_env in
   match Env.find_type path env with
-  | { type_manifest = Some { desc = Tconstr (path', args, _); _ }; _ }
-    when List.length args = nb_args ->
-      if is_in_barrier_module path && not (is_in_barrier_module path') then
-        return path
-      else iterate_in_aliases path' nb_args
+  | { type_manifest = Some typ } -> (
+      match Types.get_desc typ with
+      | Tconstr (path', args, _) when List.length args = nb_args ->
+          if is_in_barrier_module path && not (is_in_barrier_module path') then
+            return path
+          else iterate_in_aliases path' nb_args
+      | _ -> return path)
   | _ -> return path
 
 let of_constructor_description
     (constructor_description : Types.constructor_description) : t Monad.t =
-  match constructor_description with
-  | { cstr_name; cstr_res = { desc = Tconstr (path, args, _); _ }; _ } ->
+  match Types.get_desc constructor_description.cstr_res with
+  | Tconstr (path, args, _) ->
       let* path = iterate_in_aliases path (List.length args) in
       let typ_ident = Path.head path in
       of_path_without_convert false path >>= fun { path; _ } ->
-      let* cstr_name = map_constructor_name cstr_name (Ident.name typ_ident) in
+      let* cstr_name =
+        map_constructor_name constructor_description.cstr_name
+          (Ident.name typ_ident)
+      in
       Name.of_string false cstr_name >>= fun base -> convert { path; base }
-  | { cstr_name; _ } ->
-      Name.of_string false cstr_name >>= fun cstr_name ->
+  | _ ->
+      Name.of_string false constructor_description.cstr_name
+      >>= fun cstr_name ->
       let path = of_name [] cstr_name in
       raise path Unexpected
         "Unexpected constructor description without a type constructor"
 
 let of_label_description (label_description : Types.label_description) :
     t Monad.t =
-  match label_description with
-  | { lbl_name; lbl_res = { desc = Tconstr (path, args, _); _ }; _ } ->
+  match Types.get_desc label_description.lbl_res with
+  | Tconstr (path, args, _) ->
       let* path = iterate_in_aliases path (List.length args) in
       of_path_without_convert false path >>= fun { path; base } ->
-      Name.of_string false lbl_name >>= fun lbl_name ->
+      Name.of_string false label_description.lbl_name >>= fun lbl_name ->
       let path_name = { path = path @ [ base ]; base = lbl_name } in
       convert path_name
-  | { lbl_name; _ } ->
-      Name.of_string false lbl_name >>= fun lbl_name ->
+  | _ ->
+      Name.of_string false label_description.lbl_name >>= fun lbl_name ->
       let path = of_name [] lbl_name in
       raise path Unexpected
         "Unexpected label description without a type constructor"

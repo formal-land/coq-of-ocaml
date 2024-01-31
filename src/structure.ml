@@ -275,7 +275,8 @@ let rec kind_of_signature (module_typ : Typedtree.module_type) : string =
 (** Import an OCaml structure. *)
 let rec of_structure (structure : structure) : t list Monad.t =
   let get_include_items (module_path : Path.t option) (reference : PathName.t)
-      (mod_type : Types.module_type) : t list Monad.t =
+      (mod_type : Types.module_type) (exclude_list : string list) :
+      t list Monad.t =
     let* is_first_class =
       IsFirstClassModule.is_module_typ_first_class mod_type module_path
     in
@@ -295,32 +296,35 @@ let rec of_structure (structure : structure) : t list Monad.t =
                      match signature_item with
                      | Types.Sig_value (ident, _, _) | Sig_type (ident, _, _, _)
                        ->
-                         let is_value =
-                           match signature_item with
-                           | Types.Sig_value _ -> true
-                           | _ -> false
-                         in
-                         let* name = Name.of_ident is_value ident in
-                         let* field =
-                           PathName.of_path_and_name_with_convert mod_type_path
-                             name
-                         in
-                         let* typ_vars =
-                           match signature_item with
-                           | Types.Sig_value (_, { val_type; _ }, _) ->
-                               let typ_vars = Name.Map.empty in
-                               let* _, _, new_typ_vars =
-                                 Type.of_typ_expr true typ_vars val_type
-                               in
-                               return (List.map fst new_typ_vars)
-                           | _ -> return []
-                         in
-                         return
-                           (Some
-                              (ModuleIncludeItem
-                                 ( name,
-                                   typ_vars,
-                                   MixedPath.Access (reference, [ field ]) )))
+                         if List.mem (Ident.name ident) exclude_list then
+                           return None
+                         else
+                           let is_value =
+                             match signature_item with
+                             | Types.Sig_value _ -> true
+                             | _ -> false
+                           in
+                           let* name = Name.of_ident is_value ident in
+                           let* field =
+                             PathName.of_path_and_name_with_convert
+                               mod_type_path name
+                           in
+                           let* typ_vars =
+                             match signature_item with
+                             | Types.Sig_value (_, { val_type; _ }, _) ->
+                                 let typ_vars = Name.Map.empty in
+                                 let* _, _, new_typ_vars =
+                                   Type.of_typ_expr true typ_vars val_type
+                                 in
+                                 return (List.map fst new_typ_vars)
+                             | _ -> return []
+                           in
+                           return
+                             (Some
+                                (ModuleIncludeItem
+                                   ( name,
+                                     typ_vars,
+                                     MixedPath.Access (reference, [ field ]) )))
                      | _ -> return None)
             in
             let documentation =
@@ -348,22 +352,16 @@ let rec of_structure (structure : structure) : t list Monad.t =
                       vb_attributes;
                       vb_pat =
                         {
-                          pat_desc =
-                            Tpat_construct
-                              ( _,
-                                {
-                                  cstr_res = { desc = Tconstr (path, _, _); _ };
-                                  _;
-                                },
-                                _,
-                                _ );
+                          pat_desc = Tpat_construct (_, { cstr_res; _ }, _, _);
                           _;
                         };
                       vb_expr;
                       _;
                     };
                   ] )
-              when PathName.is_unit path ->
+              when match Types.get_desc cstr_res with
+                   | Tconstr (path, _, _) -> PathName.is_unit path
+                   | _ -> false ->
                 let* attributes = Attribute.of_attributes vb_attributes in
                 if Attribute.has_axiom_with_reason attributes then return []
                 else top_level_evaluation vb_expr
@@ -380,8 +378,8 @@ let rec of_structure (structure : structure) : t list Monad.t =
                    the environment. This is useful for example for the detection of
                    phantom types. *)
                 set_env final_env
-                  ( TypeDefinition.of_ocaml typs >>= fun def ->
-                    return [ TypeDefinition def ] )
+                  (let* defs = TypeDefinition.of_ocaml typs in
+                   return (List.map (fun def -> TypeDefinition def) defs))
             | Tstr_exception { tyexn_constructor; _ } ->
                 typ_definitions_of_typ_extension tyexn_constructor
             | Tstr_open _ -> return []
@@ -431,11 +429,13 @@ let rec of_structure (structure : structure) : t list Monad.t =
                   "Structure item `class_type` not handled."
             | Tstr_include
                 {
+                  incl_attributes;
                   incl_mod = { mod_desc = Tmod_ident (path, _); mod_type; _ };
                   _;
                 }
             | Tstr_include
                 {
+                  incl_attributes;
                   incl_mod =
                     {
                       mod_desc =
@@ -447,15 +447,20 @@ let rec of_structure (structure : structure) : t list Monad.t =
                   _;
                 } ->
                 let* reference = PathName.of_path_with_convert false path in
-                get_include_items (Some path) reference mod_type
-            | Tstr_include { incl_mod; _ } ->
+                let* attributes = Attribute.of_attributes incl_attributes in
+                let exclude_list = Attribute.get_include_without attributes in
+                get_include_items (Some path) reference mod_type exclude_list
+            | Tstr_include { incl_attributes; incl_mod; _ } ->
                 let* include_name = Exp.get_include_name incl_mod in
                 let* module_definition =
                   of_module include_name ([], []) incl_mod false
                 in
                 let reference = PathName.of_name [] include_name in
+                let* attributes = Attribute.of_attributes incl_attributes in
+                let exclude_list = Attribute.get_include_without attributes in
                 let* include_items =
                   get_include_items None reference incl_mod.mod_type
+                    exclude_list
                 in
                 return (module_definition :: include_items)
             (* We ignore attribute fields. *)

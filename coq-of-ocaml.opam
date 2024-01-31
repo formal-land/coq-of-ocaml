@@ -17,17 +17,17 @@ install: [
   [make "-C" "proofs" "install"] {coq:installed}
 ]
 depends: [
+  "angstrom"
   "bisect_ppx" {dev & >= "2.5.0"}
   "conf-ruby" {with-test}
   "csexp"
   "dune" {>= "2.9"}
   "menhir" {dev}
-  "ocaml" {>= "4.13" & < "4.14"}
+  "ocaml" {>= "4.14" & < "4.15"}
   "ocamlfind" {>= "1.5.2"}
   "result"
   "smart-print"
   "yojson" {>= "1.6.0"}
-  "angstrom"
 ]
 depopts: [
   "coq"

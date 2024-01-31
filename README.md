@@ -120,12 +120,7 @@ opam pin add https://github.com/clarus/coq-of-ocaml.git#master
 ```
 
 ### Build manually
-Clone the Git submodule for [Merlin](https://github.com/ocaml/merlin):
-```
-git submodule init
-git submodule update
-```
-Then read the `coq-of-ocaml.opam` file at the root of the project to know the dependencies to install and get the list of commands to build the project.
+Read the `coq-of-ocaml.opam` file at the root of the project to know the dependencies to install and get the list of commands to build the project.
 
 ## License
 MIT (open-source software)

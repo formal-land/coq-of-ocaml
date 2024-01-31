@@ -13,7 +13,7 @@ module TypeShape = struct
 
   let rec get_nb_function_parameters (typ : Types.type_expr) :
       int * Types.type_expr =
-    match typ.desc with
+    match Types.get_desc typ with
     | Tarrow (_, _, typ2, _) ->
         let nb_function_parameters, result_typ =
           get_nb_function_parameters typ2
@@ -22,7 +22,7 @@ module TypeShape = struct
     | _ -> (0, typ)
 
   let rec get_nb_type_applications (typ : Types.type_expr) : int =
-    match typ.desc with
+    match Types.get_desc typ with
     | Tconstr (_, [ typ ], _) -> 1 + get_nb_type_applications typ
     | _ -> 0
 

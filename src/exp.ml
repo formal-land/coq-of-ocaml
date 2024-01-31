@@ -166,14 +166,11 @@ let rec any_patterns_with_ith_true (is_guarded : bool) (i : int) (n : int) :
 
 let rec get_include_name (module_expr : module_expr) : Name.t Monad.t =
   match module_expr.mod_desc with
-  | Tmod_apply (applied_expr, _, _) -> (
-      match applied_expr.mod_desc with
-      | Tmod_ident (path, _)
-      | Tmod_constraint ({ mod_desc = Tmod_ident (path, _); _ }, _, _, _) ->
-          let* path_name = PathName.of_path_with_convert false path in
-          let* name = PathName.to_name false path_name in
-          return (Name.suffix_by_include name)
-      | _ -> get_include_name applied_expr)
+  | Tmod_ident (path, _) ->
+      let* path_name = PathName.of_path_with_convert false path in
+      let* name = PathName.to_name false path_name in
+      return (Name.suffix_by_include name)
+  | Tmod_apply (applied_expr, _, _) -> get_include_name applied_expr
   | Tmod_constraint (module_expr, _, _, _) -> get_include_name module_expr
   | _ ->
       raise
@@ -1262,7 +1259,7 @@ and import_let_fun (typ_vars : Name.t Name.Map.t) (at_top_level : bool)
                   (* Special case for functions whose type is given by a type
                      synonym at the end rather than with a type on each
                      parameter or an explicit arrow type. *)
-                  match (vb_expr.exp_desc, vb_expr.exp_type.desc) with
+                  match (vb_expr.exp_desc, Types.get_desc vb_expr.exp_type) with
                   | Texp_function _, Tconstr (path, _, _) -> (
                       match Env.find_type path vb_expr.exp_env with
                       | { type_manifest = Some ty; _ } -> ty
@@ -1312,18 +1309,11 @@ and of_let (typ_vars : Name.t Name.Map.t) (is_rec : Asttypes.rec_flag)
     (cases : Typedtree.value_binding list) (e2 : t) : t Monad.t =
   match cases with
   | [
-   {
-     vb_pat =
-       {
-         pat_desc =
-           Tpat_construct
-             (_, { cstr_res = { desc = Tconstr (path, _, _); _ }; _ }, _, _);
-         _;
-       };
-     _;
-   };
+   { vb_pat = { pat_desc = Tpat_construct (_, { cstr_res; _ }, _, _); _ }; _ };
   ]
-    when PathName.is_unit path ->
+    when match Types.get_desc cstr_res with
+         | Tconstr (path, _, _) -> PathName.is_unit path
+         | _ -> false ->
       raise
         (ErrorMessage (e2, "top_level_evaluation"))
         SideEffect "Top-level evaluations are ignored"
@@ -1710,7 +1700,7 @@ let to_coq_implicit (implicit : string * string) : SmartPrint.t =
     set). *)
 let rec to_coq (paren : bool) (e : t) : SmartPrint.t =
   match e with
-  | Constant c -> Constant.to_coq c
+  | Constant c -> Constant.to_coq paren c
   | Variable (x, implicits) -> (
       let x = MixedPath.to_coq x in
       match implicits with
@@ -1854,7 +1844,9 @@ let rec to_coq (paren : bool) (e : t) : SmartPrint.t =
                      let first_case = index = 0 in
                      (if first_case then
                       !^"let"
-                      ^^ if def.Definition.is_rec then !^"fix" else empty
+                      ^^
+                      if def.Definition.is_rec && e <> None then !^"fix"
+                      else empty
                      else if def.Definition.is_rec then !^"with"
                      else !^"in" ^^ !^"let")
                      ^^ Name.to_coq header.Header.name
