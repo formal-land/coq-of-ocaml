@@ -19,11 +19,8 @@ type t = Access of PathName.t * PathName.t list | PathName of PathName.t
 let of_name (name : Name.t) : t = PathName (PathName.of_name [] name)
 
 let dec_name : t = PathName (Name.decode_vtag |> PathName.of_name [])
-
 let projT1 : t = of_name (Name.of_string_raw "projT1")
-
 let prim_proj_fst : t = PathName PathName.prim_proj_fst
-
 let prim_proj_snd : t = PathName PathName.prim_proj_snd
 
 let is_constr_tag : t -> bool = function

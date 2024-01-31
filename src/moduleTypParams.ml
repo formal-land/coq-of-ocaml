@@ -4,7 +4,7 @@ type 'a mapper =
   Ident.t -> Types.type_declaration -> 'a Tree.item option Monad.t
 
 (* We do not report user errors in this code as this would create duplicates
-  with errors generated during the translation of the signatures themselves. *)
+   with errors generated during the translation of the signatures themselves. *)
 let rec get_signature_typ_params (mapper : 'a mapper)
     (signature : Types.signature) : 'a Tree.t Monad.t =
   let get_signature_item_typ_params (signature_item : Types.signature_item) :
@@ -31,6 +31,7 @@ and get_module_typ_typ_params (mapper : 'a mapper)
       | module_typ -> get_module_typ_declaration_typ_params mapper module_typ
       | exception Not_found -> return [])
   | Mty_functor _ -> return []
+  | Mty_for_hole -> return []
 
 and get_module_typ_declaration_typ_params (mapper : 'a mapper)
     (module_typ_declaration : Types.modtype_declaration) : 'a Tree.t Monad.t =
@@ -47,7 +48,6 @@ let mapper_get_arity (ident : Ident.t)
   | Some _ -> return None
 
 let get_signature_typ_params_arity = get_signature_typ_params mapper_get_arity
-
 let get_module_typ_typ_params_arity = get_module_typ_typ_params mapper_get_arity
 
 let get_module_typ_declaration_typ_params_arity =

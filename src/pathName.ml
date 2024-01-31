@@ -227,11 +227,8 @@ let is_tt (path_name : t) : bool =
   | _ -> false
 
 let is_unit (path : Path.t) : bool = Path.name path = "unit"
-
 let false_value : t = { path = []; base = Name.Make "false" }
-
 let true_value : t = { path = []; base = Name.Make "true" }
-
 let unit_value : t = { path = []; base = Name.Make "tt" }
 
 let prefix_by_with (path_name : t) : t =
@@ -282,7 +279,7 @@ let is_variant_declaration (path : Path.t) :
     (Types.constructor_declaration list * Types.type_expr list) option Monad.t =
   let* env = get_env in
   match Env.find_type path env with
-  | { type_kind = Type_variant constructors; type_params = params; _ } ->
+  | { type_kind = Type_variant (constructors, _); type_params = params; _ } ->
       return @@ Some (constructors, params)
   | _ | (exception _) -> return None
 

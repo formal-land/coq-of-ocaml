@@ -14,7 +14,6 @@ type item =
   | Value of Name.t * Type.t
 
 type t = { items : item list; typ_params : (Name.t * int) list }
-
 type let_in_type = (Name.t * Name.t) list
 
 let add_new_let_in_type (prefix : string list) (let_in_type : let_in_type)
@@ -207,7 +206,7 @@ let rec of_signature_items (prefix : string list) (let_in_type : let_in_type)
                 raise
                   ([ Error "module_substitution" ], let_in_type)
                   NotSupported "We do not handle module substitutions"
-            | Tsig_modtype _ ->
+            | Tsig_modtype _ | Tsig_modtypesubst _ ->
                 raise
                   ([ Error "module_type" ], let_in_type)
                   NotSupported "Signatures inside signatures are not handled."

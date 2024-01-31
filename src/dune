@@ -1,6 +1,9 @@
 (executable
   (name coqOfOCaml)
   (package coq-of-ocaml)
+  (flags
+    -open Ocaml_parsing
+    -open Ocaml_typing)
   (public_name coq-of-ocaml)
   (libraries merlin.analysis merlin.kernel smart_print angstrom)
   (instrumentation (backend bisect_ppx)))

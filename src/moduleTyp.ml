@@ -2,7 +2,6 @@ open SmartPrint
 open Monad.Notations
 
 type free_var = { name : Name.t; arity : int; source_name : Name.t }
-
 type free_vars = free_var list
 
 let to_coq_grouped_free_vars (free_vars : free_vars) : SmartPrint.t =
